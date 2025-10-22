@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>POS Payment Panel</title>
+<style>
+  body { background-color: #ffe8cc; font-family: Arial, sans-serif; }
+
+  .payment-panel { border: 3px solid #333; border-radius: 10px; padding: 20px; width: fit-content; margin: 30px auto; background-color: #ffe8cc; }
+  h2 { text-align: center; margin-bottom: 10px; }
+
+  /* Payment fields with aligned columns and extra spacing */
+  .payment-methods { display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px; }
+  .method { display: grid; grid-template-columns: 160px 220px 40px 32px; column-gap: 24px; align-items: center; }
+
+  .method button.paybtn { min-width: 160px; padding: 12px 16px; font-size: 1.1em; border-radius: 8px; border: none; color: #fff; cursor: pointer; white-space: nowrap; }
+  .method input { width: 100%; padding: 10px; font-size: 1.1em; text-align: right; border-radius: 6px; border: 1px solid #aaa; }
+
+  .method button.tick { background-color: #2e7d32; color: #fff; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.1em; cursor: pointer; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+  .method button.clearX { background-color: red; color: #fff; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 0.95em; cursor: pointer; font-weight: bold; line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+
+  .cash { background-color: #2e7d32; }
+  .nets { background-color: #0a3d91; }
+  .paynow { background-color: #6a1b9a; }
+  .voucher { background-color: #d4af37; color: #000; }
+
+  hr { border: 0; height: 2px; background: #333; opacity: 0.5; margin: 16px 0; }
+
+  /* Keypad grid with fixed key size and 10% larger physical size, 10% smaller font */
+  .keypad { --key: 95px; --gap: 10px; display: grid; grid-template-columns: repeat(4, var(--key)); gap: var(--gap); justify-content: center; }
+  .keypad button { width: var(--key); height: var(--key); font-size: 1.38em; /* reduced by ~10% */ border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .keypad button.numeric { background: #d3d3d3; }
+  .keypad button.cash-quick { background: #8c8c8c; color: #fff; }
+
+  /* Backspace spans two columns, same height as other keys */
+  .keypad button.backspace { background: #f59e0b; color: #fff; }
+
+  /* Refund section */
+  .refund-section { margin-top: 15px; display: flex; align-items: flex-start; gap: 15px; }
+  .refund-btn { background-color: #d32f2f; color: #fff; border: none; border-radius: 10px; width: 140px; height: 115px; font-size: 1.1em; font-weight: bold; cursor: pointer; }
+  .refund-fields { display: flex; flex-direction: column; gap: 10px; }
+  .refund-fields label { font-weight: bold; }
+  .refund-fields input[type="text"] { width: 220px; padding: 10px; font-size: 1.1em; border-radius: 6px; border: 1px solid #aaa; }
+  .refund-amount { font-weight: bold; }
+</style>
+</head>
+<body>
+  <div class="payment-panel">
+    <h2>Payment</h2>
+
+    <div class="payment-methods">
+      <div class="method">
+        <button class="paybtn cash">CASH</button>
+        <input type="text" id="cashInput" placeholder="0.00" />
+        <button class="tick" onclick="confirmAmount('cashInput')">✔</button>
+        <button class="clearX" onclick="clearField('cashInput')">X</button>
+      </div>
+      <div class="method">
+        <button class="paybtn nets">NETS</button>
+        <input type="text" id="netsInput" placeholder="0.00" />
+        <button class="tick" onclick="confirmAmount('netsInput')">✔</button>
+        <button class="clearX" onclick="clearField('netsInput')">X</button>
+      </div>
+      <div class="method">
+        <button class="paybtn paynow">PAYNOW</button>
+        <input type="text" id="paynowInput" placeholder="0.00" />
+        <button class="tick" onclick="confirmAmount('paynowInput')">✔</button>
+        <button class="clearX" onclick="clearField('paynowInput')">X</button>
+      </div>
+      <div class="method">
+        <button class="paybtn voucher">VOUCHER</button>
+        <input type="text" id="voucherInput" placeholder="0.00" />
+        <button class="tick" onclick="confirmAmount('voucherInput')">✔</button>
+        <button class="clearX" onclick="clearField('voucherInput')">X</button>
+      </div>
+    </div>
+
+    <hr />
+
+    <div class="amount-summary" style="margin-top:10px; font-weight:bold;">
+      <p>Amount Tendered: <span id="amountPaid">$0.00</span></p>
+      <p>Change Due: <span id="changeDue">$0.00</span></p>
+    </div>
+
+    <hr />
+
+    <div class="keypad">
+      <!-- Row 1 -->
+      <button class="numeric">7</button>
+      <button class="numeric">8</button>
+      <button class="numeric">9</button>
+      <button class="cash-quick">$10</button>
+      <!-- Row 2 -->
+      <button class="numeric">4</button>
+      <button class="numeric">5</button>
+      <button class="numeric">6</button>
+      <button class="cash-quick">$50</button>
+      <!-- Row 3 -->
+      <button class="numeric">1</button>
+      <button class="numeric">2</button>
+      <button class="numeric">3</button>
+      <button class="cash-quick">$100</button>
+      <!-- Row 4 -->
+      <button class="numeric">00</button>
+      <button class="numeric">0</button>
+      <button class="numeric">.</button>
+      <button class="backspace">⌫ Bksp</button>
+    </div>
+
+    <hr />
+
+    <div class="refund-section">
+      <button class="refund-btn">REFUND</button>
+      <div class="refund-fields">
+        <div>
+          <label for="scan">Scan Barcode:</label><br />
+          <input id="scan" type="text" placeholder="Awaiting scan..." />
+        </div>
+        <div class="refund-amount">Refund Amount: <span class="amount">$0.00</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function clearField(id) { document.getElementById(id).value = ''; }
+    function confirmAmount(id) { const el = document.getElementById(id); if (el.value.trim() !== '') { alert(`Amount confirmed: $${el.value}`); } }
+  </script>
+</body>
+</html>
+
+
+

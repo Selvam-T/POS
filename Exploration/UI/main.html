@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>POS — Panels Side by Side</title>
+<style>
+  :root{
+    --gap: 36px;
+    --table-h: 22em;     /* both tables same fixed height */
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #f0f0f0;
+    font-family: Arial, sans-serif;
+  }
+
+  /* Layout: two columns */
+  .layout{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap);
+    padding: 28px;
+    align-items: stretch; /* equal heights */
+  }
+
+  /* Panels share common baseline */
+  .panel{
+    border: 3px solid #333;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;      /* internal areas manage their own scroll */
+    height: auto; /* let height grow naturally */
+  }
+  .panel h2{ text-align:center; margin: 0 0 12px; }
+
+  /* ---------- Panel 1 (Transaction) ---------- */
+  .panel1{ background: lightblue;}
+
+  .table-wrap {
+    height: var(--table-h);
+    overflow-y: auto;                 /* scroll only when rows exceed height */
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+  }
+
+  table{ border-collapse: collapse; width: 100%; table-layout: auto; }
+  thead th, tbody td{
+    border:1px solid rgba(0,0,0,0.2);
+    padding:6px;
+    text-align:center;
+  }
+  thead th{
+    background:#4682b4; color:#fff; position: sticky; top: 0;
+  }
+  tbody tr:nth-child(odd){ background:#c8e0ff; }
+  tbody tr:nth-child(even){ background:#f9f9f9; }
+
+  td.qty-cell{ background:#fffbe6; border:1px dashed #aaa; }
+  .qty-input{
+    width:60px; text-align:center; border:2px solid #4682b4; border-radius:5px; padding:3px;
+  }
+
+  button{ padding:6px 10px; border:none; border-radius:6px; cursor:pointer; }
+  .X{ background:#e02424; color:#fff; }
+
+  .category-buttons{
+    display:flex; gap:20px; margin:16px 0 12px;
+  }
+  .category-buttons button{
+    flex:1; padding:14px 20px; border-radius:18px; color:#fff; font-size:1.05em;
+  }
+  .category-buttons button:nth-child(1){ background:green; }
+  .category-buttons button:nth-child(2){ background:purple; }
+
+  .total-inline{
+    display:flex; justify-content:center; align-items:center; gap:12px; font-size:1.4em; margin-top:auto;
+  }
+  .total-value{
+    background:#fff; border:2px solid #333; border-radius:6px; padding:6px 14px; white-space:nowrap;
+  }
+
+  .bottom-buttons{
+    margin-top: auto;               /* push to bottom */
+    display:flex; gap:18px;
+  }
+  .bottom-buttons button{
+    flex:1; color:#fff; padding:12px 20px; border-radius:8px; font-size:1.05em;
+  }
+  .cancel{ background:#660600; }
+  .onhold{ background:#998900; }
+  .viewhold{ background:#006699; }
+
+  /* ---------- Panel 2 (Payment) ---------- */
+  .panel2{ background:#ffe8cc; width: 70%;}
+
+  .payment-methods{
+    display:flex; flex-direction:column; gap:12px; margin: 8px 0 10px;
+  }
+  /*.method{
+    display:grid; grid-template-columns: 150px 1fr 40px 32px;
+    gap:10px; align-items:center;
+  }*/
+  .method {
+    display: grid;
+    grid-template-columns: 160px 140px 40px 32px;  /* narrower input */
+    column-gap: 18px;
+    align-items: center;
+  }
+  .paybtn{
+    min-width:150px; padding:12px 16px; font-size:1.05em;
+    border-radius:8px; border:none; color:#fff; cursor:pointer;
+  }
+  .cash{ background:#2e7d32; }
+  .nets{ background:#0a3d91; }
+  .paynow{ background:#6a1b9a; }
+  .voucher{ background:#d4af37; color:#000; }
+
+  input[type="text"]{
+    width:100%; padding:10px; font-size:1.05em; text-align:right;
+    border-radius:6px; border:1px solid #aaa;
+  }
+  .tick, .clearX{
+    border:none; border-radius:50%; width:36px; height:36px;
+    font-size:1em; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .tick{ background:#2e7d32; color:#fff; }
+  .clearX{ background:red; color:#fff; }
+
+  hr{ border:0; height:2px; background:#333; opacity:0.5; margin: 12px 0; }
+
+  .amount-summary{
+    font-weight:bold; margin: 6px 0 10px; display:grid; row-gap:6px;
+  }
+
+  .keypad{
+    --key: 74px;
+    display:grid; grid-template-columns: repeat(4, var(--key)); gap:10px; justify-content:left;
+  }
+  .keypad button{
+    width: var(--key); height: var(--key);
+    border:none; border-radius:10px; font-size:1.1em; cursor:pointer;
+  }
+  .numeric{ background:#d3d3d3; }
+  .cash-quick{ background:#8c8c8c; color:#fff; }
+  .backspace, .enter{ background:#f59e0b; color:#fff; }
+
+  .refund-section{
+    margin-top:12px; display:flex; align-items:flex-start; gap:12px;
+  }
+  .refund-btn{
+    background:#d32f2f; color:#fff; border:none; border-radius:10px;
+    width:120px; height:110px; font-size:1.05em; font-weight:bold;
+  }
+  .refund-fields{ display:flex; flex-direction:column; gap:10px; }
+  .refund-fields label{ font-weight:bold; }
+  .refund-fields input[type="text"]{
+    width:200px; padding:8px; font-size:1em; border-radius:6px; border:1px solid #aaa;
+  }
+  .refund-amount{ font-weight:bold; }
+
+  /* Responsive fallback: stack vertically on narrow screens */
+  @media (max-width: 1100px){
+    .layout{ grid-template-columns: 1fr; }
+    .panel{ height: auto; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="layout">
+    <!-- ================= Panel 1 ================= -->
+    <div class="panel panel1">
+      <h2>Transaction</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th></th><th>Name</th><th>Qty</th><th>Unit price</th><th>Total</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><button class="X">X</button></td><td>Apple</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="2" /></td><td>1.50</td><td>3.00</td></tr>
+            <tr><td><button class="X">X</button></td><td>Banana</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="5" /></td><td>0.80</td><td>4.00</td></tr>
+            <tr><td><button class="X">X</button></td><td>Milk</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="1" /></td><td>2.20</td><td>2.20</td></tr>
+            <tr><td><button class="X">X</button></td><td>Tomato</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="4" /></td><td>0.90</td><td>3.60</td></tr>
+            <tr><td><button class="X">X</button></td><td>Whiskey</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="1" /></td><td>25.00</td><td>25.00</td></tr>
+            <tr><td><button class="X">X</button></td><td>Brandy</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="5" /></td><td>30.00</td><td>150.00</td></tr>
+            <tr><td><button class="X">X</button></td><td>Vodka</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="1" /></td><td>22</td><td>22</td></tr>
+            <tr><td><button class="X">X</button></td><td>Ginger</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="3" /></td><td>1.90</td><td>5.70</td></tr>
+            <tr><td><button class="X">X</button></td><td>Mop</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="3" /></td><td>5.00</td><td>15.00</td></tr>
+            <tr><td><button class="X">X</button></td><td>Milo</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="5" /></td><td>5.80</td><td>39.00</td></tr>
+            <tr><td><button class="X">X</button></td><td>Pepsi</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="1" /></td><td>2.20</td><td>2.20</td></tr>
+            <tr><td><button class="X">X</button></td><td>Soap</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="1" /></td><td>3.90</td><td>3.90</td></tr>
+            <tr><td><button class="X">X</button></td><td>Pen</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="10" /></td><td>1.00</td><td>10.00</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="category-buttons">
+        <button>Add Vegetable</button>
+        <button>Add Miscellaneous</button>
+      </div>
+
+      <div class="total-inline">
+        <span>Total:</span>
+        <span class="total-value">$ 100.99</span>
+      </div>
+
+      <div class="bottom-buttons">
+        <button class="cancel">CANCEL</button>
+        <button class="onhold">ON HOLD</button>
+        <button class="viewhold">VIEW HOLDS</button>
+      </div>
+    </div>
+
+    <!-- ================= Panel 2 ================= -->
+    <div class="panel panel2">
+      <h2>Payment</h2>
+      <div class="payment-methods">
+        <div class="method">
+          <button class="paybtn cash">CASH</button>
+          <input type="text" placeholder="0.00" />
+          <button class="tick">✔</button>
+          <button class="clearX">X</button>
+        </div>
+        <div class="method">
+          <button class="paybtn nets">NETS</button>
+          <input type="text" placeholder="0.00" />
+          <button class="tick">✔</button>
+          <button class="clearX">X</button>
+        </div>
+        <div class="method">
+          <button class="paybtn paynow">PAYNOW</button>
+          <input type="text" placeholder="0.00" />
+          <button class="tick">✔</button>
+          <button class="clearX">X</button>
+        </div>
+        <div class="method">
+          <button class="paybtn voucher">VOUCHER</button>
+          <input type="text" placeholder="0.00" />
+          <button class="tick">✔</button>
+          <button class="clearX">X</button>
+        </div>
+      </div>
+
+      <hr />
+
+      <div class="amount-summary">
+        <div>Amount Tendered: <span id="amountPaid">$0.00</span></div>
+        <div>Change Due: <span id="changeDue">$0.00</span></div>
+      </div>
+
+      <hr />
+
+      <div class="keypad">
+        <button class="numeric">7</button><button class="numeric">8</button><button class="numeric">9</button><button class="cash-quick">$10</button>
+        <button class="numeric">4</button><button class="numeric">5</button><button class="numeric">6</button><button class="cash-quick">$50</button>
+        <button class="numeric">1</button><button class="numeric">2</button><button class="numeric">3</button><button class="cash-quick">$100</button>
+        <button class="numeric">0</button><button class="numeric">.</button><button class="backspace">⌫ Bksp</button></button><button class="enter">↵ Enter</button>
+      </div>
+
+      <hr />
+
+      <div class="refund-section">
+        <button class="refund-btn">REFUND</button>
+        <div class="refund-fields">
+          <div>
+            <label for="scan">Scan Barcode:</label><br/>
+            <input id="scan" type="text" placeholder="Awaiting scan..." />
+          </div>
+          <div class="refund-amount">Refund Amount: <span class="amount">$0.00</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
+

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>POS Dual Panel Prototype</title>
+<style>
+  body {
+    background: #f0f0f0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 40px;               /* spacing between panels */
+  }
+
+  /* Shared frame style */
+  .panel {
+    border: 3px solid #333;
+    border-radius: 10px;
+    padding: 20px;
+    background: #e0f0ff;
+    display: flex;
+    flex-direction: column;
+    height: 800px;           /* panel2 reference height */
+    box-sizing: border-box;
+  }
+
+  /* ---------- PANEL 1 ---------- */
+  .panel1 { background: lightblue; width: 55%; }
+
+  h2 { text-align: center; margin-bottom: 10px; }
+
+  .table-wrap {
+    flex: 1;
+    overflow-y: auto;
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  thead th, tbody td {
+    border: 1px solid rgba(0,0,0,0.2);
+    text-align: center;
+    padding: 6px;
+    box-sizing: border-box;
+  }
+
+  thead th {
+    background: #4682b4;
+    color: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  tbody tr:nth-child(odd) { background: #c8e0ff; }
+  tbody tr:nth-child(even) { background: #f9f9f9; }
+
+  td.qty-cell {
+    background: #fffbe6;
+    border: 1px dashed #aaa;
+    cursor: text;
+  }
+
+  td.qty-cell:hover { background: #fff2b3; }
+
+  .qty-input {
+    width: 50px;
+    text-align: center;
+    border: 2px solid #4682b4;
+    border-radius: 5px;
+    font-size: 1em;
+    padding: 2px;
+  }
+
+  .category-buttons,
+  .bottom-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    margin: 15px auto 0;
+    width: 90%;
+  }
+
+  .category-buttons button,
+  .bottom-buttons button {
+    flex: 1;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 1.1em;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .category-buttons button:nth-child(1) { background: green; }
+  .category-buttons button:nth-child(2) { background: purple; }
+
+  .bottom-buttons .cancel { background: #660600; }
+  .bottom-buttons .onhold { background: #998900; }
+  .bottom-buttons .viewhold { background: #006699; }
+
+  .total-inline {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    font-size: 1.6em;
+  }
+
+  .total-value {
+    background: #fff;
+    border: 2px solid #333;
+    border-radius: 6px;
+    padding: 6px 14px;
+    white-space: nowrap;
+  }
+
+  /* ---------- PANEL 2 ---------- */
+  .panel2 { background: #ffe8cc; width: 40%; }
+
+  .payment-methods { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+  .method { display: grid; grid-template-columns: 160px 1fr 40px 32px; column-gap: 18px; align-items: center; }
+
+  .method button.paybtn {
+    padding: 12px;
+    font-size: 1em;
+    border-radius: 8px;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .cash { background: #2e7d32; }
+  .nets { background: #0a3d91; }
+  .paynow { background: #6a1b9a; }
+  .voucher { background: #d4af37; color: #000; }
+
+  .method input {
+    padding: 8px;
+    font-size: 1em;
+    text-align: right;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+  }
+
+  .tick, .clearX {
+    border: none; border-radius: 50%;
+    width: 32px; height: 32px;
+    font-weight: bold;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tick { background: #2e7d32; color: #fff; }
+  .clearX { background: red; color: #fff; }
+
+  hr { border: 0; height: 2px; background: #333; opacity: 0.4; margin: 16px 0; }
+
+  .amount-summary { font-weight: bold; margin-top: 10px; }
+
+  .keypad {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .keypad button {
+    height: 75px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  .numeric { background: #d3d3d3; }
+  .cash-quick { background: #8c8c8c; color: #fff; }
+  .backspace { background: #f59e0b; color: #fff; grid-column: span 1; }
+
+  .refund-section { margin-top: 15px; display: flex; gap: 15px; align-items: flex-start; }
+  .refund-btn {
+    background: #d32f2f; color: #fff;
+    border: none; border-radius: 10px;
+    width: 140px; height: 115px;
+    font-size: 1.1em; font-weight: bold; cursor: pointer;
+  }
+  .refund-fields { display: flex; flex-direction: column; gap: 10px; }
+  .refund-fields input { padding: 8px; font-size: 1em; border: 1px solid #aaa; border-radius: 6px; }
+</style>
+</head>
+<body>
+  <!-- PANEL 1 -->
+  <div class="panel panel1">
+    <h2>Transaction</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th></th><th>Name</th><th>Qty</th><th>Unit price</th><th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><button>X</button></td><td>Apple</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="2"></td><td>1.50</td><td>3.00</td></tr>
+          <tr><td><button>X</button></td><td>Banana</td><td class="qty-cell"><input type="number" class="qty-input" placeholder="5"></td><td>0.80</td><td>4.00</td></tr>
+          <!-- add or remove rows; scroll appears when exceeding frame -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="category-buttons">
+      <button>Add Vegetable</button>
+      <button>Add Miscellaneous</button>
+    </div>
+
+    <div class="total-inline">
+      <span>Total:</span>
+      <span class="total-value">$ 100.99</span>
+    </div>
+
+    <div class="bottom-buttons">
+      <button class="cancel">CANCEL</button>
+      <button class="onhold">ON HOLD</button>
+      <button class="viewhold">VIEW HOLDS</button>
+    </div>
+  </div>
+
+  <!-- PANEL 2 -->
+  <div class="panel panel2">
+    <h2>Payment</h2>
+    <div class="payment-methods">
+      <div class="method">
+        <button class="paybtn cash">CASH</button>
+        <input type="text" placeholder="0.00">
+        <button class="tick">✔</button>
+        <button class="clearX">X</button>
+      </div>
+      <div class="method">
+        <button class="paybtn nets">NETS</button>
+        <input type="text" placeholder="0.00">
+        <button class="tick">✔</button>
+        <button class="clearX">X</button>
+      </div>
+      <div class="method">
+        <button class="paybtn paynow">PAYNOW</button>
+        <input type="text" placeholder="0.00">
+        <button class="tick">✔</button>
+        <button class="clearX">X</button>
+      </div>
+      <div class="method">
+        <button class="paybtn voucher">VOUCHER</button>
+        <input type="text" placeholder="0.00">
+        <button class="tick">✔</button>
+        <button class="clearX">X</button>
+      </div>
+    </div>
+
+    <hr>
+    <div class="amount-summary">
+      <p>Amount Tendered: <span>$0.00</span></p>
+      <p>Change Due: <span>$0.00</span></p>
+    </div>
+
+    <hr>
+    <div class="keypad">
+      <button class="numeric">7</button><button class="numeric">8</button><button class="numeric">9</button><button class="cash-quick">$10</button>
+      <button class="numeric">4</button><button class="numeric">5</button><button class="numeric">6</button><button class="cash-quick">$50</button>
+      <button class="numeric">1</button><button class="numeric">2</button><button class="numeric">3</button><button class="cash-quick">$100</button>
+      <button class="numeric">00</button><button class="numeric">0</button><button class="numeric">.</button><button class="backspace">⌫</button>
+    </div>
+
+    <hr>
+    <div class="refund-section">
+      <button class="refund-btn">REFUND</button>
+      <div class="refund-fields">
+        <label>Scan Barcode:</label>
+        <input type="text" placeholder="Awaiting scan...">
+        <div><strong>Refund Amount:</strong> <span>$0.00</span></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
