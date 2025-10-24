@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Minimal Qt Designer .ui XML for Payment panel (separate file) -->
+<ui version="4.0">
+ <class>PaymentPanel</class>
+ <widget class="QWidget" name="PaymentPanel">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="paymentLabel">
+     <property name="text">
+      <string>Payment</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="paymentMethodsLayout">
+     <item>
+      <layout class="QHBoxLayout" name="methodRow1">
+       <item>
+        <widget class="QPushButton" name="cashBtn">
+         <property name="text">
+          <string>CASH</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="cashInput"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="cashTick">
+         <property name="text"><string>✔</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="cashClear">
+         <property name="text"><string>X</string></property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="methodRow2">
+       <item>
+        <widget class="QPushButton" name="netsBtn">
+         <property name="text"><string>NETS</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="netsInput"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="netsTick">
+         <property name="text"><string>✔</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="netsClear">
+         <property name="text"><string>X</string></property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="methodRow3">
+       <item>
+        <widget class="QPushButton" name="paynowBtn">
+         <property name="text"><string>PAYNOW</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="paynowInput"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="paynowTick">
+         <property name="text"><string>✔</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="paynowClear">
+         <property name="text"><string>X</string></property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="methodRow4">
+       <item>
+        <widget class="QPushButton" name="voucherBtn">
+         <property name="text"><string>VOUCHER</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="voucherInput"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="voucherTick">
+         <property name="text"><string>✔</string></property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="voucherClear">
+         <property name="text"><string>X</string></property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QFrame" name="line1"/>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="summaryLayout">
+     <item>
+      <widget class="QLabel" name="amountTenderedLabel">
+       <property name="text"><string>Amount Tendered: $0.00</string></property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="changeDueLabel">
+       <property name="text"><string>Change Due: $0.00</string></property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QFrame" name="line2"/>
+   </item>
+   <item>
+    <widget class="QWidget" name="keypadPlaceholder"/>
+   </item>
+   <item>
+    <widget class="QFrame" name="line3"/>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="refundLayout">
+     <item>
+      <widget class="QPushButton" name="refundBtn"><property name="text"><string>REFUND</string></property></widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="refundFields">
+       <item>
+        <widget class="QLabel" name="scanLabel"><property name="text"><string>Scan Barcode:</string></property></widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="scanInput"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="refundAmountLabel"><property name="text"><string>Refund Amount: $0.00</string></property></widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

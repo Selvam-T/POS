@@ -129,7 +129,7 @@
 *   **Weighing Machine**: Use Python `pyserial` to read COM port values.
     *   Example: scale outputs "WT: 2.345 kg".
     *   POS parses numeric value, converts to grams, and multiplies by price.
-*   **Customer Display**: Run second window (Tkinter, PyQt, or Pygame) in fullscreen mode showing product list + total.
+*   **Customer Display**: Run second window (PyQt5) in fullscreen mode showing product list + total.
 
 ---
 
@@ -153,7 +153,7 @@
 ## 7. Deployment Notes
 
 *   **OS**: Windows 10/11 Pro (embedded PC).
-*   **Dependencies**: Python 3.x, SQLite, `pyserial`, `python-escpos`, GUI toolkit (Tkinter/PyQt).
+*   **Dependencies**: Python 3.x, SQLite, `pyserial`, `python-escpos`, GUI toolkit (PyQt5).
 *   **Installation**:
     *   Install Python + dependencies.
     *   Install Epson printer driver.
