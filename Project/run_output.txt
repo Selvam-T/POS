@@ -1,0 +1,46 @@
+C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py:29: DeprecationWarning: sipPyTypeDict() is deprecated, the extension module should use sipPyTypeDictRef() instead
+  class MainLoader(QMainWindow):
+Applied QSS from C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\style.qss
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 68, in <module>
+    main()
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 62, in main
+    window = MainLoader()
+             ^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 33, in __init__
+    uic.loadUi(main_ui, self)
+  File "C:\Users\SELVAM\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\uic\__init__.py", line 241, in loadUi
+    return DynamicUILoader(package).loadUi(uifile, baseinstance, resource_suffix)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\uic\Loader\loader.py", line 66, in loadUi
+    return self.parse(filename, resource_suffix)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\uic\uiparser.py", line 1037, in parse
+    actor(elem)
+  File "C:\Users\SELVAM\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\uic\uiparser.py", line 828, in createUserInterface
+    self.traverseWidgetTree(elem)
+  File "C:\Users\SELVAM\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\uic\uiparser.py", line 806, in traverseWidgetTree
+    handler(self, child)
+  File "C:\Users\SELVAM\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\uic\uiparser.py", line 273, in createWidget
+    self.traverseWidgetTree(elem)
+  File "C:\Users\SELVAM\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\uic\uiparser.py", line 806, in traverseWidgetTree
+    handler(self, child)
+  File "C:\Users\SELVAM\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\uic\uiparser.py", line 502, in createLayout
+    self.stack.push(self.setupObject(classname, parent, elem))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\uic\uiparser.py", line 230, in setupObject
+    self.wprops.setProperties(obj, branch)
+  File "C:\Users\SELVAM\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\uic\properties.py", line 415, in setProperties
+    prop_value = self.convert(prop, widget)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\uic\properties.py", line 378, in convert
+    return func(prop[0], **args)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\uic\properties.py", line 120, in _set
+    expr = [self._pyEnumMember(v) for v in prop.text.split('|')]
+            ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\AppData\Local\Programs\Python\Python312\Lib\site-packages\PyQt5\uic\properties.py", line 111, in _pyEnumMember
+    return getattr(QtCore.Qt, membername)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'Qt' has no attribute '
+            '

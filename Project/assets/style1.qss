@@ -1,0 +1,52 @@
+/* Basic QSS for the POS app. You can expand and refine this file. */
+
+QMainWindow {
+    background: #C8E6C9;
+}
+
+QLabel#labelCompany {
+    font-size: 18pt;
+    font-weight: bold;
+}
+/*
+QFrame#salesFrame, QWidget#SalesFrame {
+    background:  #BBDEFB;
+    border: 3px solid #333;
+    border-radius: 12px;
+}*/
+
+QFrame#salesFrame {
+    background:  #BBDEFB;
+    border: 3px solid #333;
+    border-radius: 5px;
+}
+
+QWidget#SalesFrame {
+    background:  #BBDEFB;
+}
+
+/*
+QFrame#paymentFrame, QWidget#PaymentPanel {
+    background:  #FFECB3;
+    border: 3px solid #333;
+    border-radius: 12px;
+}*/
+
+QFrame#paymentFrame {
+    background:  #FFECB3;
+    border: 3px solid #333;
+    border-radius: 5px;
+}
+
+QWidget#PaymentPanel {
+    background:  #FFECB3;
+}
+
+QPushButton {
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+QTableWidget {
+    background: white;
+}
