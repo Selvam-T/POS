@@ -31,7 +31,7 @@ Convert .ui to .py (optional, for production):
 
 Notes:
 - By default `main.py` loads .ui at runtime. You can import the compiled modules instead for a slightly faster startup.
-- Object names in the .ui files match the names you requested (labelCompany, labelDate, labelDay, labelTime, saleTable, vegBtn, miscBtn, totalTitle, totalValue, cancelsaleBtn, onholdBtn, viewholdBtn, burgerBtn).
+- Object names in the .ui files match the names you requested (labelCompany, labelDate, labelDay, labelTime, salesTable, vegBtn, manualBtn, totalTitle, totalValue, cancelsaleBtn, onholdBtn, viewholdBtn, burgerBtn).
 - Next step: add signals/slots and a mediator in `main.py` to route events between frames without tight coupling.
 
 If you'd like, I can now:

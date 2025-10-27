@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- MainWindow UI — corrected structure -->
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
@@ -7,76 +6,115 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>900</width>
-    <height>600</height>
+    <width>929</width>
+    <height>795</height>
    </rect>
   </property>
-    <widget class="QWidget" name="centralwidget">
-        <layout class="QVBoxLayout" name="mainLayout">
-         <item>
-            <layout class="QHBoxLayout" name="header">
-             <item>
-                <layout class="QVBoxLayout" name="companyDate">
-                 <item>
-                    <widget class="QLabel" name="labelCompany">
-                     <property name="text">
-                      <string>Company Name</string>
-                     </property>
-                     <property name="alignment">
-                      <set>Qt::AlignLeft</set>
-                     </property>
-                    </widget>
-                 </item>
-                 <item>
-                    <layout class="QHBoxLayout" name="dateRow">
-                     <item>
-                        <widget class="QLabel" name="labelDate">
-                         <property name="text">
-                          <string>2025-10-23</string>
-                         </property>
-                        </widget>
-                     </item>
-                     <item>
-                        <widget class="QLabel" name="labelDay">
-                         <property name="text">
-                          <string>Thursday</string>
-                         </property>
-                        </widget>
-                     </item>
-                     <item>
-                        <widget class="QLabel" name="labelTime">
-                         <property name="text">
-                          <string>12:00</string>
-                         </property>
-                        </widget>
-                     </item>
-                    </layout>
-                 </item>
-                </layout>
-             </item>
-             <item>
-              <widget class="QPushButton" name="burgerBtn">
-                <property name="text">
-                 <string>☰</string>
-                </property>
-              </widget>
-             </item>
-            </layout>
-         </item>
-         <item>
-          <layout class="QHBoxLayout" name="workRow">
-            <item>
-                <widget class="QFrame" name="salesFrame"/>
-            </item>
-            <item>
-                <widget class="QFrame" name="paymentFrame"/>
-            </item>
-          </layout>
-         </item>
-        </layout>
-    </widget>
-    <widget class="QStatusBar" name="statusbar"/>
-    </widget>
+  <widget class="QWidget" name="contentWidget">
+   <layout class="QVBoxLayout" name="mainWindowLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>10</number>
+    </property>
+    <item>
+     <layout class="QHBoxLayout" name="titleBar">
+      <property name="spacing">
+       <number>10</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
+      <property name="bottomMargin">
+       <number>10</number>
+      </property>
+      <item>
+       <layout class="QVBoxLayout" name="infoSection">
+        <property name="spacing">
+         <number>10</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="labelCompany">
+          <property name="text">
+           <string>Company Name</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="dateArea">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="labelDate">
+            <property name="text">
+             <string>2025-10-23</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelDay">
+            <property name="text">
+             <string>Thursday</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="labelTime">
+            <property name="text">
+             <string>12:00</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QPushButton" name="burgerBtn">
+        <property name="text">
+         <string>☰</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="workArea">
+      <property name="spacing">
+       <number>5</number>
+      </property>
+      <item>
+       <widget class="QFrame" name="salesFrame"/>
+      </item>
+      <item>
+       <widget class="QFrame" name="paymentFrame"/>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
  <resources/>
  <connections/>
 </ui>
