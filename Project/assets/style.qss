@@ -118,8 +118,12 @@ QPushButton#viewholdBtn:pressed { background-color: #004d73; }
 QPushButton#removeBtn {
     background-color: #e02424;
     color: white;
-    border-radius: 0px; /* square corners */
-    padding: 0px;       /* size controlled in code to be square */
+    border-radius: 8px;
+    border: 2px solid #4682b4;
+    padding: 0px;
+    font-size: 12pt;
+    min-width: 32px; min-height: 32px;
+    max-width: 32px; max-height: 32px;
 }
 QPushButton#removeBtn:hover { background-color: #b71c1c; }
 QPushButton#removeBtn:pressed { background-color: #7f1313; }
@@ -241,20 +245,32 @@ QFrame#salesFrame {
 
 QTableWidget#salesTable {
     border: 2px solid #4317ab; 
+    font-size: 10pt;
+    font-weight: bold;
+    background-color: #e4e4e4;
 }
 
 /* Table header and alternating rows */
 QHeaderView::section {
     background-color: #4682b4;
     color: white;
-    border: 1px solid rgba(0,0,0,0.2);
+    border: 1px solid rgba(0,0,0,0.2); 
+    font-size: 10pt;
+    font-weight: bold;  
 }
+
 QTableWidget {
-    alternate-background-color: #c8e0ff;
     gridline-color: rgba(0,0,0,0.2);
 }
+
+/* Keep default selection for all tables */
 QTableWidget::item:selected {
     background-color: #99ccff;
+}
+
+/* Neutralize selection highlight for the Sales table only */
+QTableWidget#salesTable::item:selected {
+    background-color: transparent;
 }
 
 /* Quantity Input Field */
@@ -263,6 +279,14 @@ QLineEdit#qtyInput {
     border-radius: 5px;
     text-align: center;
     background-color: #fffbe6;
+    font-size: 10pt;
+    font-weight: bold;
+}
+
+/* When the qty input is focused, highlight just the cell */
+QLineEdit#qtyInput:focus {
+    background-color: orange;
+    border: 2px solid red;
 }
 
 /* Total Display */

@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>VegetablePanel</class>
+ <widget class="QWidget" name="VegetablePanel">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1065</width>
+    <height>816</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="mainVegetableLayout">
+   <property name="spacing">
+    <number>10</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+
+   <!-- 1) Title Label -->
+   <item>
+    <widget class="QLabel" name="vegetableLabel">
+     <property name="text">
+      <string>Add Vegetable</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+
+    <!-- 2) Table similar to Sales with headers: No., Item, Weight (kg), Total -->
+    <item>
+    <widget class="QTableWidget" name="vegetableTable">
+     <property name="rowCount">
+      <number>0</number>
+     </property>
+     <property name="columnCount">
+      <number>4</number>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="showGrid">
+      <bool>true</bool>
+     </property>
+     <column>
+      <property name="text">
+       <string>No.</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Item</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Weight (kg)</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Total</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+
+    <!-- 3) 4x4 keypad: 14 vegetables + OK (r4c3) and CANCEL (r4c4) -->
+    <item>
+    <widget class="QFrame" name="keypadFrame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QGridLayout" name="keypadGrid">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <property name="horizontalSpacing">
+       <number>5</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>5</number>
+      </property>
+
+      <!-- Row 1 -->
+      <item row="0" column="0">
+       <widget class="QPushButton" name="btnVegTomato">
+        <property name="text">
+         <string>Tomato</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="btnVegPotato">
+        <property name="text">
+         <string>Potato</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="btnVegOnion">
+        <property name="text">
+         <string>Onion</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="btnVegCarrot">
+        <property name="text">
+         <string>Carrot</string>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Row 2 -->
+      <item row="1" column="0">
+       <widget class="QPushButton" name="btnVegCabbage">
+        <property name="text">
+         <string>Cabbage</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="btnVegSpinach">
+        <property name="text">
+         <string>Spinach</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="btnVegCucumber">
+        <property name="text">
+         <string>Cucumber</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="btnVegPumpkin">
+        <property name="text">
+         <string>Pumpkin</string>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Row 3 -->
+      <item row="2" column="0">
+       <widget class="QPushButton" name="btnVegCapsicum">
+        <property name="text">
+         <string>Capsicum</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="btnVegBeetroot">
+        <property name="text">
+         <string>Beetroot</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QPushButton" name="btnVegRadish">
+        <property name="text">
+         <string>Radish</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QPushButton" name="btnVegPeas">
+        <property name="text">
+         <string>Peas</string>
+        </property>
+       </widget>
+      </item>
+
+      <!-- Row 4: last two are OK and CANCEL -->
+      <item row="3" column="0">
+       <widget class="QPushButton" name="btnVegOkra">
+        <property name="text">
+         <string>Okra</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QPushButton" name="btnVegCauliflower">
+        <property name="text">
+         <string>Cauliflower</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QPushButton" name="btnOK">
+        <property name="text">
+         <string>OK</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="3">
+       <widget class="QPushButton" name="btnCancel">
+        <property name="text">
+         <string>CANCEL</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+
+   <!-- 4) Message label -->
+   <item>
+    <widget class="QLabel" name="messageLabel">
+     <property name="text">
+      <string>Select a vegetable.</string>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+ </ui>

@@ -22,7 +22,7 @@ Quick start (Windows, cmd.exe):
      py main.py
    - To run the .ui-loading variant, replace `main.py` with a loader that uses `PyQt5.uic.loadUi` or run the earlier scaffolded loader we provided.
 
-   Note: The current `main.py` now composes `ui/main_window.ui`, `ui/sales_frame.ui`, and `ui/payment.ui` at runtime and will apply `assets/style.qss` if present.
+   Note: The current `main.py` now composes `ui/main_window.ui`, `ui/sales_frame.ui`, and `ui/payment_frame.ui` at runtime and will apply `assets/style.qss` if present.
 
 Convert .ui to .py (optional, for production):
 - Use pyuic5 to convert:

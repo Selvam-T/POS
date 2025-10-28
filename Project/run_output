@@ -1,0 +1,32 @@
+C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py:46: DeprecationWarning: sipPyTypeDict() is deprecated, the extension module should use sipPyTypeDictRef() instead
+  class MainLoader(QMainWindow):
+Applied QSS from C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\style.qss
+[salesTable] _refresh_row_backgrounds: begin
+[salesTable] _is_data_row: row=0 product non-empty -> True
+[salesTable]   row 0: DATA row_index=1
+[salesTable] _apply_row_background: row=0, one_based_index=1, color=#f9f9f9
+[salesTable] row 0 items bg: {0: '#f9f9f9', 1: '#f9f9f9', 3: '#f9f9f9', 4: '#f9f9f9'}
+[salesTable] row 0 qtyInput: palette Base=#e4e4e4, sample=n/a (not visible), ss=<inherit>
+[salesTable] row 0 removeBtn: palette Button=#e4e4e4, sample=n/a (not visible), ss=<inherit>
+[salesTable] _is_data_row: row=1 product non-empty -> True
+[salesTable]   row 1: DATA row_index=2
+[salesTable] _apply_row_background: row=1, one_based_index=2, color=#c8e0ff
+[salesTable] row 1 items bg: {0: '#c8e0ff', 1: '#c8e0ff', 3: '#c8e0ff', 4: '#c8e0ff'}
+[salesTable] row 1 qtyInput: palette Base=#e4e4e4, sample=n/a (not visible), ss=<inherit>
+[salesTable] row 1 removeBtn: palette Button=#e4e4e4, sample=n/a (not visible), ss=<inherit>
+[salesTable] _is_data_row: row=2 product non-empty -> True
+[salesTable]   row 2: DATA row_index=3
+[salesTable] _apply_row_background: row=2, one_based_index=3, color=#f9f9f9
+[salesTable] row 2 items bg: {0: '#f9f9f9', 1: '#f9f9f9', 3: '#f9f9f9', 4: '#f9f9f9'}
+[salesTable] row 2 qtyInput: palette Base=#e4e4e4, sample=n/a (not visible), ss=<inherit>
+[salesTable] row 2 removeBtn: palette Button=#e4e4e4, sample=n/a (not visible), ss=<inherit>
+[salesTable] _refresh_row_backgrounds: end
+[salesTable] row 0 items bg: {0: '#f9f9f9', 1: '#f9f9f9', 3: '#f9f9f9', 4: '#f9f9f9'}
+[salesTable] row 0 qtyInput: palette Base=#f9f9f9, sample=#b26400, ss=<inherit>
+[salesTable] row 0 removeBtn: palette Button=#f9f9f9, sample=#fffffe, ss=<inherit>
+[salesTable] row 1 items bg: {0: '#c8e0ff', 1: '#c8e0ff', 3: '#c8e0ff', 4: '#c8e0ff'}
+[salesTable] row 1 qtyInput: palette Base=#c8e0ff, sample=#c8e0db, ss=<inherit>
+[salesTable] row 1 removeBtn: palette Button=#c8e0ff, sample=#ffffff, ss=<inherit>
+[salesTable] row 2 items bg: {0: '#f9f9f9', 1: '#f9f9f9', 3: '#f9f9f9', 4: '#f9f9f9'}
+[salesTable] row 2 qtyInput: palette Base=#f9f9f9, sample=#f9f9f9, ss=<inherit>
+[salesTable] row 2 removeBtn: palette Button=#f9f9f9, sample=#fffffe, ss=<inherit>
