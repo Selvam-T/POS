@@ -27,6 +27,7 @@ from PyQt5.QtGui import QFontMetrics
 from logic.salesTable import setup_sales_table
 
 
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
@@ -156,9 +157,11 @@ class MainLoader(QMainWindow):
                 pass
             layout.addWidget(sales_widget)
 
-            # Configure the Sales table headers and insert a placeholder row
+            # Configure the Sales table headers
             try:
-                setup_sales_table(sales_widget)
+                sale_table = sales_widget.findChild(QTableWidget, 'salesTable')
+                if sale_table:
+                    setup_sales_table(sale_table)
             except Exception as e:
                 print('Sales table setup failed:', e)
 
@@ -184,8 +187,6 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
             layout.addWidget(payment_widget)
-
-    # ----------------- Vegetable panel wiring -----------------
 
     # ----------------- Vegetable panel wiring -----------------
     def open_vegetable_panel(self):

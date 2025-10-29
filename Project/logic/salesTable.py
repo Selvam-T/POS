@@ -1,7 +1,7 @@
 """
 Sales table setup and helper functions
 Provides:
-- setup_sales_table(sales_widget): configure headers, widths, and insert a placeholder row
+- setup_sales_table(table): configure headers, widths, and insert a placeholder row
 - set_sales_rows(table, rows): populate rows with qty input, unit price, totals, and a delete button
 - remove_table_row(table, row): delete a row and renumber the first column
 - recalc_row_total(table, row): recompute total from qty x unit price
@@ -21,7 +21,7 @@ from PyQt5.QtGui import QColor, QBrush, QPalette
 from functools import partial
 
 
-def setup_sales_table(sales_widget: QWidget) -> None:
+def setup_sales_table(table: QTableWidget) -> None:
     """Configure headers and add a sample placeholder row. Rows can be
     regenerated dynamically by calling set_sales_rows(table, rows).
 
@@ -33,7 +33,6 @@ def setup_sales_table(sales_widget: QWidget) -> None:
                 4 Total (calculated/non-editable)
                 5 Del (Remove button X)
     """
-    table: QTableWidget = sales_widget.findChild(QTableWidget, 'salesTable')
     if table is None:
         return
 
@@ -73,6 +72,9 @@ def setup_sales_table(sales_widget: QWidget) -> None:
 
     # Disable alternating row colors to use uniform background
     table.setAlternatingRowColors(False)
+    
+    # Disable item selection to prevent row highlighting on click
+    table.setSelectionMode(QTableWidget.NoSelection)
 
     # Add one placeholder row (values are placeholders; real code should call set_sales_rows)
     placeholder = [{
@@ -89,7 +91,83 @@ def setup_sales_table(sales_widget: QWidget) -> None:
         'product': 'Cherry',
         'quantity': 32,
         'unit_price': 8.20,
+    },
+    {
+        'product': 'One',
+        'quantity': 2,
+        'unit_price': 1.50,
+    },
+    {
+        'product': 'two',
+        'quantity': 9,
+        'unit_price': 3.50,
+    },
+    {
+        'product': 'three',
+        'quantity': 32,
+        'unit_price': 8.20,
+    },
+    {
+        'product': 'four',
+        'quantity': 2,
+        'unit_price': 1.50,
+    },
+    {
+        'product': 'five',
+        'quantity': 9,
+        'unit_price': 3.50,
+    },
+    {
+        'product': 'six',
+        'quantity': 32,
+        'unit_price': 8.20,
+    },
+    {
+        'product': 'seven',
+        'quantity': 2,
+        'unit_price': 1.50,
+    },
+    {
+        'product': 'eight',
+        'quantity': 9,
+        'unit_price': 3.50,
+    },
+    {
+        'product': 'nine',
+        'quantity': 32,
+        'unit_price': 8.20,
+    },
+    {
+        'product': 'ten',
+        'quantity': 2,
+        'unit_price': 1.50,
+    },
+    {
+        'product': 'eleven',
+        'quantity': 9,
+        'unit_price': 3.50,
+    },
+    {
+        'product': 'twelve',
+        'quantity': 32,
+        'unit_price': 8.20,
+    },
+    {
+        'product': 'thirteen',
+        'quantity': 2,
+        'unit_price': 1.50,
+    },
+    {
+        'product': 'fourteen',
+        'quantity': 9,
+        'unit_price': 3.50,
+    },
+    {
+        'product': 'final',
+        'quantity': 32,
+        'unit_price': 8.20,
     }]
+
     set_sales_rows(table, placeholder)
 
 
@@ -101,15 +179,23 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
     for r, data in enumerate(rows):
         table.insertRow(r)
 
+        # Determine row background color (odd=yellow, even=blue)
+        if r % 2 == 0:  # even rows (0, 2, 4...)
+            row_color = QColor('#add8e6')  # light blue
+        else:  # odd rows (1, 3, 5...)
+            row_color = QColor('#ffffe0')  # light yellow
+
         # Col 0: Row number (non-editable)
         item_no = QTableWidgetItem(str(r + 1))
         item_no.setTextAlignment(Qt.AlignCenter)
         item_no.setFlags(item_no.flags() & ~Qt.ItemIsEditable)
+        item_no.setBackground(QBrush(row_color))
         table.setItem(r, 0, item_no)
 
         # Col 1: Product name (non-editable item)
         item_product = QTableWidgetItem(str(data.get('product', '')))
         item_product.setFlags(item_product.flags() & ~Qt.ItemIsEditable)
+        item_product.setBackground(QBrush(row_color))
         table.setItem(r, 1, item_product)
 
         # Col 2: Quantity (QLineEdit to match QSS qtyInput styling) inside a tintable container
@@ -131,6 +217,7 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
         # Select the row when the qty input gains focus; clear selection when editing finishes
         _install_row_focus_behavior(qty_edit, table, r)
         qty_container = QWidget()
+        qty_container.setStyleSheet(f"background-color: {row_color.name()};")  # Apply row color to container (is overriding widget background color in cells 2 and 5)
         qty_layout = QHBoxLayout(qty_container)
         qty_layout.setContentsMargins(0, 0, 0, 0)
         qty_layout.setSpacing(0)
@@ -142,6 +229,7 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
         item_price = QTableWidgetItem(f"{price_val:.2f}")
         item_price.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         item_price.setFlags(item_price.flags() & ~Qt.ItemIsEditable)
+        item_price.setBackground(QBrush(row_color))
         table.setItem(r, 3, item_price)
 
         # Col 4: Total (non-editable item)
@@ -149,6 +237,7 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
         item_total = QTableWidgetItem(f"{total:.2f}")
         item_total.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         item_total.setFlags(item_total.flags() & ~Qt.ItemIsEditable)
+        item_total.setBackground(QBrush(row_color))
         table.setItem(r, 4, item_total)
 
     # Backgrounds for rows will be applied after all rows are created
@@ -165,9 +254,12 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
         except Exception:
             pass
         # Size and look via QSS (QPushButton#removeBtn)
+        # Highlight row when button is clicked (before removal)
+        btn.pressed.connect(partial(_highlight_row_by_button, table, btn))
         btn.clicked.connect(partial(_remove_by_button, table, btn))
         # Center in cell via container layout
         container = QWidget()
+        container.setStyleSheet(f"background-color: {row_color.name()};")  # Apply row color to container
         lay = QHBoxLayout(container)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(0)
@@ -222,6 +314,8 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
             empty_btn.setAutoFillBackground(False)  # Allow QSS to control background instead of palette
         except Exception:
             pass
+        # Highlight row when button is pressed (before removal)
+        empty_btn.pressed.connect(partial(_highlight_row_by_button, table, empty_btn))
         empty_btn.clicked.connect(partial(_remove_by_button, table, empty_btn))
         c = QWidget()
         l = QHBoxLayout(c)
@@ -239,14 +333,34 @@ def remove_table_row(table: QTableWidget, row: int) -> None:
             table.clearSelection()
         except Exception:
             pass
-        # Renumber the No. column after removal
+        # Renumber the No. column and reapply alternating colors after removal
         for r in range(table.rowCount()):
+            # Determine new row color
+            if r % 2 == 0:  # even rows (0, 2, 4...)
+                row_color = QColor('#add8e6')  # light blue
+            else:  # odd rows (1, 3, 5...)
+                row_color = QColor('#ffffe0')  # light yellow
+            
+            # Update row number
             num_item = table.item(r, 0)
             if num_item is None:
                 num_item = QTableWidgetItem()
                 num_item.setFlags(num_item.flags() & ~Qt.ItemIsEditable)
                 table.setItem(r, 0, num_item)
             num_item.setText(str(r + 1))
+            num_item.setBackground(QBrush(row_color))
+            
+            # Update colors for other item-based cells
+            for col in [1, 3, 4]:  # Product, Unit Price, Total
+                item = table.item(r, col)
+                if item is not None:
+                    item.setBackground(QBrush(row_color))
+            
+            # Update container background for columns 2 and 5 (widgets)
+            for col in [2, 5]:  # Quantity, Remove button
+                container = table.cellWidget(r, col)
+                if container is not None:
+                    container.setStyleSheet(f"background-color: {row_color.name()};")
 
 
 def recalc_row_total(table: QTableWidget, row: int) -> None:
@@ -300,6 +414,43 @@ def _remove_by_button(table: QTableWidget, btn: QPushButton) -> None:
         child = cell.findChild(QPushButton, 'removeBtn')
         if child is btn:
             remove_table_row(table, r)
+            return
+
+
+def _highlight_row_for_deletion(table: QTableWidget, row: int) -> None:
+    """Highlight the row (columns 0-4) when the remove button is pressed.
+    Column 5 (the remove button itself) is excluded from highlighting.
+    """
+    if row < 0 or row >= table.rowCount():
+        return
+    
+    # Define highlight color (e.g., light red/salmon to indicate deletion)
+    highlight_color = QColor('#ff6b6b')  # light red
+    
+    # Apply highlight to item-based cells (columns 0, 1, 3, 4)
+    for col in [0, 1, 3, 4]:
+        item = table.item(row, col)
+        if item is not None:
+            item.setBackground(QBrush(highlight_color))
+    
+    # Apply highlight to the container of column 2 (quantity input)
+    qty_container = table.cellWidget(row, 2)
+    if qty_container is not None:
+        qty_container.setStyleSheet(f"background-color: {highlight_color.name()};")
+
+
+def _highlight_row_by_button(table: QTableWidget, btn: QPushButton) -> None:
+    """Find the row containing the button and highlight it.
+    This dynamically looks up the row index to handle post-deletion shifts.
+    """
+    # Find the row whose column 5 cell contains this button instance
+    for r in range(table.rowCount()):
+        cell = table.cellWidget(r, 5)
+        if cell is None:
+            continue
+        child = cell.findChild(QPushButton, 'removeBtn')
+        if child is btn:
+            _highlight_row_for_deletion(table, r)
             return
 
 

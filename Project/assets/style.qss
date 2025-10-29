@@ -1,9 +1,7 @@
-/* =============================================================
-   POS System Style Sheet (Qt QSS)
-   Based on main_mockup.html — with hover and pressed effects
-   ============================================================= */
 
-/* ------------------ Base Application ------------------ */
+/* =============================================================
+   BASE APPLICATION
+   ============================================================= */
 QMainWindow {
     background-color: #d0dad7;
     font-family: Arial, sans-serif;
@@ -20,32 +18,11 @@ QWidget {
     border: 3px solid #700808;
 }*/
 
-/* ------------------ Header section ------------------ */
-QLabel#labelCompany {
-    font-size: 12pt;
-    qproperty-alignment: 'AlignCenter';
-}
+/* =============================================================
+   HEADER AND ITS CHILDREN
+   ============================================================= */
 
-QLabel#labelDate,
-QLabel#labelDay,
-QLabel#labelTime {
-    font-size: 12pt;
-    qproperty-alignment: 'AlignCenter';
-}
-
-/* Panel Labels (Payment and Sales) */
-QLabel#paymentLabel,
-QLabel#salesLabel {
-    font-size: 14pt;
-    qproperty-alignment: 'AlignCenter';
-    min-height: 30px;
-    max-height: 30px;
-    padding: 0px;
-}
-
-/* ==================== BUTTON CATEGORIES ==================== */
-
-/* --- CATEGORY A: Burger Button (Own Category) --- */
+/* --- Burger Button --- */
 QPushButton#burgerBtn {
     font-size: 16pt;
     background-color: #d0dad7;
@@ -59,13 +36,124 @@ QPushButton#burgerBtn {
 QPushButton#burgerBtn:hover {
     border: 1px solid  #2f222a;
     border-radius: 21px; /* half of 38px to make it circular on hover */
+    background-color: #d9e1df;
+}
+QPushButton#burgerBtn:pressed { 
+    background-color: #bbc4c1; 
 }
 
-QPushButton#burgerBtn:hover { background-color: #d9e1df ; }
-QPushButton#burgerBtn:pressed { background-color: #bbc4c1; }
+/* --- Header Labels --- */
+QLabel#labelCompany {
+    font-size: 12pt;
+    qproperty-alignment: 'AlignCenter';
+}
 
-/* --- CATEGORY B: Actionable Buttons (Shared Font) --- */
-/* Sub-group B1: vegBtn & manualBtn (Same Size, Unique Colors) */
+QLabel#labelDate,
+QLabel#labelDay,
+QLabel#labelTime {
+    font-size: 12pt;
+    qproperty-alignment: 'AlignCenter';
+}
+
+/* =============================================================
+   SALES FRAME AND ITS CHILDREN
+   ============================================================= */
+
+/* --- Sales Frame Container --- */
+QFrame#salesFrame {
+    background-color: lightblue;
+    border: 1px solid #333333;
+    border-radius: 0.5em;
+}
+
+/* --- Sales Label --- */
+QLabel#salesLabel {
+    font-size: 14pt;
+    qproperty-alignment: 'AlignCenter';
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0px;
+}
+
+/* --- Sales Table --- */
+QTableWidget#salesTable {
+    border: 2px solid #4317ab; 
+    font-size: 10pt;
+    font-weight: bold;
+    background-color: #e4e4e4;
+    gridline-color: rgba(0,0,0,0.2);
+}
+
+QTableWidget#salesTable QHeaderView::section {
+    background-color: #4682b4;
+    color: white;
+    border: 1px solid rgba(0,0,0,0.2); 
+    font-size: 10pt;
+    font-weight: bold;  
+}
+
+QTableWidget#salesTable::item:selected {
+    background-color: transparent;
+}
+
+/* --- Quantity Input Field --- */
+QLineEdit#qtyInput {
+    font-size: 10pt;
+    font-weight: bold;
+    text-align: center;
+    background-color: #fffbe6;
+    border: 2px solid #4682b4;
+    border-radius: 5px;
+}
+
+QLineEdit#qtyInput:focus {
+    background-color: orange;
+    border: 2px solid red;
+}
+
+/* --- Remove Button --- */
+QPushButton#removeBtn {
+    font-size: 12pt;
+    font-weight: bold;
+    color: red;
+    background-color: green; /*for testing, currently problem applying */
+    border: 2px solid red;
+    border-radius: 8px;
+    min-width: 28px; 
+    min-height: 28px;
+    max-width: 28px; 
+    max-height: 28px;
+    padding: 0px;
+}
+QPushButton#removeBtn:hover { 
+    background-color: blue; /*for testing, currently problem applying */
+    border: 2px solid green;
+    color: green;
+}
+QPushButton#removeBtn:pressed { 
+    background-color: purple; /*for testing, currently problem applying */
+    border: 2px solid orange;
+    color: orange;
+}
+
+/* --- Total Display Container --- */
+QFrame#totalContainer {
+    min-height: 26px;
+    padding: 0px;
+    border: 2px solid #4317ab;
+    border-radius: 5px;
+    background: transparent;
+}
+
+QLabel#totalTitle,
+QLabel#totalValue {
+    font-size: 32px; 
+    border: none;  
+    background: white;
+    qproperty-alignment: 'AlignCenter';
+}
+
+/* --- Add Buttons (vegBtn, manualBtn) --- */
 QPushButton#vegBtn,
 QPushButton#manualBtn {
     border-radius: 18px;
@@ -77,16 +165,24 @@ QPushButton#manualBtn {
 QPushButton#vegBtn {
     background-color: green;
 }
-QPushButton#vegBtn:hover { background-color: #006400; }
-QPushButton#vegBtn:pressed { background-color: #004d00; }
+QPushButton#vegBtn:hover { 
+    background-color: #006400; 
+}
+QPushButton#vegBtn:pressed { 
+    background-color: #004d00; 
+}
 
 QPushButton#manualBtn {
     background-color: purple;
 }
-QPushButton#manualBtn:hover { background-color: #5e0e5e; }
-QPushButton#manualBtn:pressed { background-color: #3c003c; }
+QPushButton#manualBtn:hover { 
+    background-color: #5e0e5e; 
+}
+QPushButton#manualBtn:pressed { 
+    background-color: #3c003c; 
+}
 
-/* Sub-group B2: cancelsaleBtn, onholdBtn, viewholdBtn (Same Size, Unique Colors) */
+/* --- Receipt Action Buttons (cancelsaleBtn, onholdBtn, viewholdBtn) --- */
 QPushButton#cancelsaleBtn,
 QPushButton#onholdBtn,
 QPushButton#viewholdBtn {
@@ -99,36 +195,54 @@ QPushButton#viewholdBtn {
 QPushButton#cancelsaleBtn {
     background-color: #660600;
 }
-QPushButton#cancelsaleBtn:hover { background-color: #7a0800; }
-QPushButton#cancelsaleBtn:pressed { background-color: #4b0400; }
+QPushButton#cancelsaleBtn:hover { 
+    background-color: #7a0800; 
+}
+QPushButton#cancelsaleBtn:pressed { 
+    background-color: #4b0400; 
+}
 
 QPushButton#onholdBtn {
     background-color: #998900;
 }
-QPushButton#onholdBtn:hover { background-color: #b3a300; }
-QPushButton#onholdBtn:pressed { background-color: #7a6f00; }
+QPushButton#onholdBtn:hover { 
+    background-color: #b3a300; 
+}
+QPushButton#onholdBtn:pressed { 
+    background-color: #7a6f00; 
+}
 
 QPushButton#viewholdBtn {
     background-color: #006699;
 }
-QPushButton#viewholdBtn:hover { background-color: #0077b3; }
-QPushButton#viewholdBtn:pressed { background-color: #004d73; }
-
-/* --- CATEGORY C: Remove Button (Table) --- */
-QPushButton#removeBtn {
-    background-color: #e02424;
-    color: white;
-    border-radius: 8px;
-    border: 2px solid #4682b4;
-    padding: 0px;
-    font-size: 12pt;
-    min-width: 32px; min-height: 32px;
-    max-width: 32px; max-height: 32px;
+QPushButton#viewholdBtn:hover { 
+    background-color: #0077b3; 
 }
-QPushButton#removeBtn:hover { background-color: #b71c1c; }
-QPushButton#removeBtn:pressed { background-color: #7f1313; }
+QPushButton#viewholdBtn:pressed { 
+    background-color: #004d73; 
+}
 
-/* --- CATEGORY D: Payment Method Buttons (Same Size, Font, Unique Colors) --- */
+/* =============================================================
+   PAYMENT FRAME AND ITS CHILDREN
+   ============================================================= */
+
+/* --- Payment Frame Container --- */
+QFrame#paymentFrame {
+    background-color: #ffe8cc;
+    border: 1px solid #333333;
+    border-radius: 0.5em;
+}
+
+/* --- Payment Label --- */
+QLabel#paymentLabel {
+    font-size: 14pt;
+    qproperty-alignment: 'AlignCenter';
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0px;
+}
+
+/* --- Payment Method Buttons --- */
 QPushButton#cashBtn,
 QPushButton#netsBtn,
 QPushButton#paynowBtn,
@@ -141,29 +255,45 @@ QPushButton#voucherBtn {
 QPushButton#cashBtn {
     background-color: #2e7d32;
 }
-QPushButton#cashBtn:hover { background-color: #256528; }
-QPushButton#cashBtn:pressed { background-color: #1b4d1e; }
+QPushButton#cashBtn:hover { 
+    background-color: #256528; 
+}
+QPushButton#cashBtn:pressed { 
+    background-color: #1b4d1e; 
+}
 
 QPushButton#netsBtn {
     background-color: #0a3d91;
 }
-QPushButton#netsBtn:hover { background-color: #0d4fab; }
-QPushButton#netsBtn:pressed { background-color: #08326d; }
+QPushButton#netsBtn:hover { 
+    background-color: #0d4fab; 
+}
+QPushButton#netsBtn:pressed { 
+    background-color: #08326d; 
+}
 
 QPushButton#paynowBtn {
     background-color: #6a1b9a;
 }
-QPushButton#paynowBtn:hover { background-color: #8320c0; }
-QPushButton#paynowBtn:pressed { background-color: #4d1373; }
+QPushButton#paynowBtn:hover { 
+    background-color: #8320c0; 
+}
+QPushButton#paynowBtn:pressed { 
+    background-color: #4d1373; 
+}
 
 QPushButton#voucherBtn {
     background-color: #d4af37;
     color: black;
 }
-QPushButton#voucherBtn:hover { background-color: #e0c04a; }
-QPushButton#voucherBtn:pressed { background-color: #b89628; }
+QPushButton#voucherBtn:hover { 
+    background-color: #e0c04a; 
+}
+QPushButton#voucherBtn:pressed { 
+    background-color: #b89628; 
+}
 
-/* --- CATEGORY E: Tick Button --- */
+/* --- Tick Button --- */
 QPushButton#tickBtn {
     background-color: #2e7d32;
     color: white;
@@ -171,10 +301,14 @@ QPushButton#tickBtn {
     width: 36px;
     height: 36px;
 }
-QPushButton#tickBtn:hover { background-color: #256528; }
-QPushButton#tickBtn:pressed { background-color: #1b4d1e; }
+QPushButton#tickBtn:hover { 
+    background-color: #256528; 
+}
+QPushButton#tickBtn:pressed { 
+    background-color: #1b4d1e; 
+}
 
-/* --- CATEGORY F: Clear Button --- */
+/* --- Clear Button --- */
 QPushButton#clearBtn {
     background-color: red;
     color: white;
@@ -182,29 +316,38 @@ QPushButton#clearBtn {
     width: 36px;
     height: 36px;
 }
-QPushButton#clearBtn:hover { background-color: #cc0000; }
-QPushButton#clearBtn:pressed { background-color: #990000; }
+QPushButton#clearBtn:hover { 
+    background-color: #cc0000; 
+}
+QPushButton#clearBtn:pressed { 
+    background-color: #990000; 
+}
 
-/* --- CATEGORY G: Keypad Buttons --- */
-/* Sub-group G1: Numeric Buttons */
+/* --- Keypad Buttons --- */
 QPushButton.numeric {
     background-color: #d3d3d3;
     border-radius: 10px;
     font-size: 1.1em;
 }
-QPushButton.numeric:hover { background-color: #bfbfbf; }
-QPushButton.numeric:pressed { background-color: #a6a6a6; }
+QPushButton.numeric:hover { 
+    background-color: #bfbfbf; 
+}
+QPushButton.numeric:pressed { 
+    background-color: #a6a6a6; 
+}
 
-/* Sub-group G2: Quick Cash Buttons */
 QPushButton.cashQuick {
     background-color: #8c8c8c;
     color: white;
     border-radius: 10px;
 }
-QPushButton.cashQuick:hover { background-color: #757575; }
-QPushButton.cashQuick:pressed { background-color: #5f5f5f; }
+QPushButton.cashQuick:hover { 
+    background-color: #757575; 
+}
+QPushButton.cashQuick:pressed { 
+    background-color: #5f5f5f; 
+}
 
-/* Sub-group G3: Backspace & Enter Buttons */
 QPushButton#backspaceBtn,
 QPushButton#enterBtn {
     background-color: #f59e0b;
@@ -212,11 +355,15 @@ QPushButton#enterBtn {
     border-radius: 10px;
 }
 QPushButton#backspaceBtn:hover,
-QPushButton#enterBtn:hover { background-color: #d98500; }
+QPushButton#enterBtn:hover { 
+    background-color: #d98500; 
+}
 QPushButton#backspaceBtn:pressed,
-QPushButton#enterBtn:pressed { background-color: #b86e00; }
+QPushButton#enterBtn:pressed { 
+    background-color: #b86e00; 
+}
 
-/* --- CATEGORY H: Refund Button (Own Properties) --- */
+/* --- Refund Button --- */
 QPushButton#refundBtn {
     background-color: #d32f2f;
     color: white;
@@ -225,99 +372,16 @@ QPushButton#refundBtn {
     width: 120px;
     height: 110px;
 }
-QPushButton#refundBtn:hover { background-color: #b71c1c; }
-QPushButton#refundBtn:pressed { background-color: #8c1616; }
-
-/* ==================== END BUTTON CATEGORIES ==================== */
-
-/* ------------------ workArea ------------------ */
-
-QFrame#salesFrame,
-QFrame#paymentFrame {
-    border: 1px solid #333333;
-    border-radius: 0.5em;
+QPushButton#refundBtn:hover { 
+    background-color: #b71c1c; 
+}
+QPushButton#refundBtn:pressed { 
+    background-color: #8c1616; 
 }
 
-/* ------------------ Sales Panel ------------------ */
-QFrame#salesFrame {
-    background-color: lightblue;  
-}
-
-QTableWidget#salesTable {
-    border: 2px solid #4317ab; 
-    font-size: 10pt;
-    font-weight: bold;
-    background-color: #e4e4e4;
-}
-
-/* Table header and alternating rows */
-QHeaderView::section {
-    background-color: #4682b4;
-    color: white;
-    border: 1px solid rgba(0,0,0,0.2); 
-    font-size: 10pt;
-    font-weight: bold;  
-}
-
-QTableWidget {
-    gridline-color: rgba(0,0,0,0.2);
-}
-
-/* Keep default selection for all tables */
-QTableWidget::item:selected {
-    background-color: #99ccff;
-}
-
-/* Neutralize selection highlight for the Sales table only */
-QTableWidget#salesTable::item:selected {
-    background-color: transparent;
-}
-
-/* Quantity Input Field */
-QLineEdit#qtyInput {
-    border: 2px solid #4682b4;
-    border-radius: 5px;
-    text-align: center;
-    background-color: #fffbe6;
-    font-size: 10pt;
-    font-weight: bold;
-}
-
-/* When the qty input is focused, highlight just the cell */
-QLineEdit#qtyInput:focus {
-    background-color: orange;
-    border: 2px solid red;
-}
-
-/* Total Display */
-
-/* Layouts are not widgets; apply border to a container widget instead */
-QFrame#totalContainer {
-    min-height: 26px; /* keep larger row height */
-    padding: 0px;     /* no extra box padding */
-    border: 2px solid #4317ab;
-    border-radius: 5px;
-    background: transparent;
-}
-
-/* Totals display: visual styling and alignment via QSS */
-QLabel#totalTitle,
-QLabel#totalValue {
-    font-size: 32px; 
-    border: none;  
-    background: white; 
-}
-
-/* Center text within each expanding label */
-QLabel#totalTitle,
-QLabel#totalValue {
-    qproperty-alignment: 'AlignCenter';
-}
-
-/* ==================== OTHER ELEMENTS ==================== */
-
-/* Refund Input Fields */
-QLineEdit#refundInput, QLineEdit#scanInput {
+/* --- Refund Input Fields --- */
+QLineEdit#refundInput, 
+QLineEdit#scanInput {
     border: 1px solid #aaaaaa;
     border-radius: 6px;
     padding: 8px;
@@ -328,20 +392,62 @@ QLabel#refundAmountLabel {
     font-weight: bold;
 }
 
-/* Scrollbars (for tables) */
-QScrollBar:vertical {
-    background: #e0e0e0;
-    width: 12px;
-}
-QScrollBar::handle:vertical {
-    background: #a0a0a0;
-    border-radius: 6px;
-}
-QScrollBar::handle:vertical:hover {
-    background: #808080;
+/* =============================================================
+   COMMON ELEMENTS
+   ============================================================= */
+
+/* --- Generic Table Widgets --- */
+QTableWidget {
+    gridline-color: rgba(0,0,0,0.2);
 }
 
-/* Payment Panel Background */
-QFrame#paymentFrame {
-    background-color: #ffe8cc;
+QTableWidget::item:selected {
+    background-color: #99ccff;
+}
+
+QHeaderView::section {
+    background-color: #4682b4;
+    color: white;
+    border: 1px solid rgba(0,0,0,0.2); 
+    font-size: 10pt;
+    font-weight: bold;  
+}
+
+/* --- Scrollbars --- */
+QScrollBar:vertical {
+    background: #a8d5e2;
+    width: 14px;
+    margin: 0px;
+    border-radius: 12px;
+}
+QScrollBar::handle:vertical {
+    background: #4682b4;
+    min-height: 30px;
+    border-radius: 12px;
+    margin: 2px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #5a9fd4;
+}
+QScrollBar::handle:vertical:pressed {
+    background: #3a6a94;
+}
+
+QScrollBar:horizontal {
+    background: #a8d5e2;
+    height: 14px;
+    margin: 0px;
+    border-radius: 12px;
+}
+QScrollBar::handle:horizontal {
+    background: #4682b4;
+    min-width: 30px;
+    border-radius: 12px;
+    margin: 2px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #5a9fd4;
+}
+QScrollBar::handle:horizontal:pressed {
+    background: #3a6a94;
 }
