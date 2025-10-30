@@ -1,0 +1,14 @@
+# Database Administration Requirements
+# No external dependencies - uses Python standard library only
+
+# Python standard library modules used:
+# - sqlite3 (built-in)
+# - csv (built-in)
+# - pathlib (built-in)
+# - datetime (built-in)
+# - os (built-in)
+# - sys (built-in)
+
+# Optional (for Excel import if needed in future):
+# pandas>=2.0.0
+# openpyxl>=3.0.0
