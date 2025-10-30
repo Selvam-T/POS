@@ -76,6 +76,11 @@ QLabel#salesLabel {
 }
 
 /* --- Sales Table --- */
+/* NOTE: Alternating row colors are NOT defined here in QSS.
+   They are programmatically set in Python (see config.py) because
+   we have embedded widgets (QLineEdit, QPushButton) in the table
+   that require manual background color assignment.
+   Row colors: even=#add8e6 (light blue), odd=#ffffe0 (light yellow) */
 QTableWidget#salesTable {
     border: 2px solid #4317ab; 
     font-size: 10pt;
@@ -108,7 +113,7 @@ QLineEdit#qtyInput {
 
 QLineEdit#qtyInput:focus {
     background-color: orange;
-    border: 2px solid red;
+    border: 3px solid orange;
 }
 
 /* --- Remove Button --- */

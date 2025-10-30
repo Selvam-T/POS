@@ -19,6 +19,19 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QColor, QBrush, QPalette
 from functools import partial
+from config import ROW_COLOR_EVEN, ROW_COLOR_ODD, ROW_COLOR_DELETE_HIGHLIGHT
+
+
+def get_row_color(row: int) -> QColor:
+    """Get the alternating row color for the given row index.
+    
+    Args:
+        row: The row index (0-based)
+    
+    Returns:
+        QColor object for the row background
+    """
+    return QColor(ROW_COLOR_EVEN if row % 2 == 0 else ROW_COLOR_ODD)
 
 
 def setup_sales_table(table: QTableWidget) -> None:
@@ -179,11 +192,8 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
     for r, data in enumerate(rows):
         table.insertRow(r)
 
-        # Determine row background color (odd=yellow, even=blue)
-        if r % 2 == 0:  # even rows (0, 2, 4...)
-            row_color = QColor('#add8e6')  # light blue
-        else:  # odd rows (1, 3, 5...)
-            row_color = QColor('#ffffe0')  # light yellow
+        # Get alternating row color
+        row_color = get_row_color(r)
 
         # Col 0: Row number (non-editable)
         item_no = QTableWidgetItem(str(r + 1))
@@ -212,8 +222,8 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
         except Exception:
             pass
         qty_edit.setAlignment(Qt.AlignCenter)
-        # Recalculate total when quantity changes
-        qty_edit.textChanged.connect(lambda _t, row=r, t=table: recalc_row_total(t, row))
+        # Recalculate total when quantity changes - use dynamic row lookup
+        qty_edit.textChanged.connect(lambda _t, e=qty_edit, t=table: _recalc_from_editor(e, t))
         # Select the row when the qty input gains focus; clear selection when editing finishes
         _install_row_focus_behavior(qty_edit, table, r)
         qty_container = QWidget()
@@ -288,7 +298,7 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
         except Exception:
             pass
         qty_edit.setAlignment(Qt.AlignCenter)
-        qty_edit.textChanged.connect(lambda _t, t=table: recalc_row_total(t, 0))
+        qty_edit.textChanged.connect(lambda _t, e=qty_edit, t=table: _recalc_from_editor(e, t))
         _install_row_focus_behavior(qty_edit, table, 0)
         qty_container = QWidget()
         qty_layout = QHBoxLayout(qty_container)
@@ -335,11 +345,8 @@ def remove_table_row(table: QTableWidget, row: int) -> None:
             pass
         # Renumber the No. column and reapply alternating colors after removal
         for r in range(table.rowCount()):
-            # Determine new row color
-            if r % 2 == 0:  # even rows (0, 2, 4...)
-                row_color = QColor('#add8e6')  # light blue
-            else:  # odd rows (1, 3, 5...)
-                row_color = QColor('#ffffe0')  # light yellow
+            # Get alternating row color
+            row_color = get_row_color(r)
             
             # Update row number
             num_item = table.item(r, 0)
@@ -361,6 +368,22 @@ def remove_table_row(table: QTableWidget, row: int) -> None:
                 container = table.cellWidget(r, col)
                 if container is not None:
                     container.setStyleSheet(f"background-color: {row_color.name()};")
+
+
+def _recalc_from_editor(editor: QLineEdit, table: QTableWidget) -> None:
+    """Find the row containing the editor and recalculate its total.
+    This dynamically looks up the current row to handle post-deletion shifts.
+    """
+    # Find which row contains this editor widget
+    for r in range(table.rowCount()):
+        qty_container = table.cellWidget(r, 2)
+        if qty_container is None:
+            continue
+        # Check if this container contains our editor
+        child_editor = qty_container if isinstance(qty_container, QLineEdit) else qty_container.findChild(QLineEdit, 'qtyInput')
+        if child_editor is editor:
+            recalc_row_total(table, r)
+            return
 
 
 def recalc_row_total(table: QTableWidget, row: int) -> None:
@@ -395,9 +418,14 @@ def recalc_row_total(table: QTableWidget, row: int) -> None:
     except (ValueError, AttributeError):
         price = 0.0
     total = qty * price
+    
+    # Get alternating row color
+    row_color = get_row_color(row)
+    
     total_item = QTableWidgetItem(f"{total:.2f}")
     total_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
     total_item.setFlags(total_item.flags() & ~Qt.ItemIsEditable)
+    total_item.setBackground(QBrush(row_color))  # Apply alternating row color
     table.setItem(row, 4, total_item)
 
 
@@ -424,8 +452,8 @@ def _highlight_row_for_deletion(table: QTableWidget, row: int) -> None:
     if row < 0 or row >= table.rowCount():
         return
     
-    # Define highlight color (e.g., light red/salmon to indicate deletion)
-    highlight_color = QColor('#ff6b6b')  # light red
+    # Get highlight color from config
+    highlight_color = QColor(ROW_COLOR_DELETE_HIGHLIGHT)
     
     # Apply highlight to item-based cells (columns 0, 1, 3, 4)
     for col in [0, 1, 3, 4]:
