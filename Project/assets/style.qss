@@ -118,27 +118,25 @@ QLineEdit#qtyInput:focus {
 
 /* --- Remove Button --- */
 QPushButton#removeBtn {
-    font-size: 12pt;
+    /*font-size: 12pt;
     font-weight: bold;
-    color: red;
-    background-color: green; /*for testing, currently problem applying */
-    border: 2px solid red;
-    border-radius: 8px;
-    min-width: 28px; 
+    color: red;*/
+    background-color: transparent;  /* Transparent to show row color */
+    border: 5px solid #d33f12;
+    border-radius: 2px;
+    min-width: 30px; 
     min-height: 28px;
-    max-width: 28px; 
+    max-width: 30px; 
     max-height: 28px;
     padding: 0px;
 }
 QPushButton#removeBtn:hover { 
-    background-color: blue; /*for testing, currently problem applying */
-    border: 2px solid green;
-    color: green;
+    background-color: rgba(255, 0, 0, 0.15);  /* Light red tint on hover */
+    border: 5px solid red;
 }
 QPushButton#removeBtn:pressed { 
-    background-color: purple; /*for testing, currently problem applying */
-    border: 2px solid orange;
-    color: orange;
+    background-color: rgba(255, 0, 0, 0.3);  /* Darker red tint when pressed */
+    border: 5px solid #990000;
 }
 
 /* --- Total Display Container --- */

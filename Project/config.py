@@ -33,3 +33,9 @@ ROW_COLOR_ODD = '#ffffe0'   # Light yellow for odd rows (1, 3, 5, ...)
 
 # Highlight color for row deletion preview
 ROW_COLOR_DELETE_HIGHLIGHT = '#ff6b6b'  # Light red/salmon
+
+# =============================================================================
+# ICONS
+# =============================================================================
+# Icon file paths
+ICON_DELETE = 'assets/icons/delete.svg'  # Delete/remove button icon

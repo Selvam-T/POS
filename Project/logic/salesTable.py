@@ -17,9 +17,10 @@ from PyQt5.QtWidgets import (
     QLineEdit,
 )
 from PyQt5.QtWidgets import QHeaderView
-from PyQt5.QtGui import QColor, QBrush, QPalette
+from PyQt5.QtGui import QColor, QBrush, QPalette, QIcon
+from PyQt5.QtCore import QSize
 from functools import partial
-from config import ROW_COLOR_EVEN, ROW_COLOR_ODD, ROW_COLOR_DELETE_HIGHLIGHT
+from config import ROW_COLOR_EVEN, ROW_COLOR_ODD, ROW_COLOR_DELETE_HIGHLIGHT, ICON_DELETE
 
 
 def get_row_color(row: int) -> QColor:
@@ -253,8 +254,10 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
     # Backgrounds for rows will be applied after all rows are created
 
         # Col 5: Remove button (centered, circular X)
-        btn = QPushButton('X')
+        btn = QPushButton()
         btn.setObjectName('removeBtn')  # styled via QSS
+        btn.setIcon(QIcon(ICON_DELETE))
+        btn.setIconSize(QSize(20, 20))
         try:
             btn.setAttribute(Qt.WA_StyledBackground, True)
         except Exception:
@@ -269,7 +272,7 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
         btn.clicked.connect(partial(_remove_by_button, table, btn))
         # Center in cell via container layout
         container = QWidget()
-        container.setStyleSheet(f"background-color: {row_color.name()};")  # Apply row color to container
+        container.setStyleSheet("background-color: transparent;")  # Transparent to show row color and allow button states
         lay = QHBoxLayout(container)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(0)
@@ -314,8 +317,10 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
         # Total
         table.setItem(0, 4, QTableWidgetItem(''))
         # Remove (centered button)
-        empty_btn = QPushButton('X')
+        empty_btn = QPushButton()
         empty_btn.setObjectName('removeBtn')
+        empty_btn.setIcon(QIcon(ICON_DELETE))
+        empty_btn.setIconSize(QSize(20, 20))
         try:
             empty_btn.setAttribute(Qt.WA_StyledBackground, True)
         except Exception:
@@ -328,6 +333,7 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
         empty_btn.pressed.connect(partial(_highlight_row_by_button, table, empty_btn))
         empty_btn.clicked.connect(partial(_remove_by_button, table, empty_btn))
         c = QWidget()
+        c.setStyleSheet("background-color: transparent;")  # Transparent to show row color
         l = QHBoxLayout(c)
         l.setContentsMargins(0, 0, 0, 0)
         l.setSpacing(0)
@@ -367,7 +373,11 @@ def remove_table_row(table: QTableWidget, row: int) -> None:
             for col in [2, 5]:  # Quantity, Remove button
                 container = table.cellWidget(r, col)
                 if container is not None:
-                    container.setStyleSheet(f"background-color: {row_color.name()};")
+                    # Column 2 (quantity) keeps row color, column 5 (delete button) stays transparent
+                    if col == 2:
+                        container.setStyleSheet(f"background-color: {row_color.name()};")
+                    else:  # col == 5
+                        container.setStyleSheet("background-color: transparent;")
 
 
 def _recalc_from_editor(editor: QLineEdit, table: QTableWidget) -> None:
