@@ -24,7 +24,8 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QFontMetrics
-from modules.sales.salesTable import setup_sales_table
+from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned
+from modules.devices import BarcodeScanner
 
 
 
@@ -49,6 +50,18 @@ class MainLoader(QMainWindow):
         super().__init__()
         main_ui = os.path.join(UI_DIR, 'main_window.ui')
         uic.loadUi(main_ui, self)
+        
+        # Initialize barcode scanner
+        print("[MainWindow] Creating BarcodeScanner instance...")
+        self.scanner = BarcodeScanner()
+        print("[MainWindow] Connecting barcode_scanned signal...")
+        self.scanner.barcode_scanned.connect(self.on_barcode_scanned)
+        print("[MainWindow] Starting scanner...")
+        self.scanner.start()
+        print("[MainWindow] Scanner initialization complete")
+        
+        # Store reference to sales table for barcode handling
+        self.sales_table = None
 
         # Ensure horizontal spacing between the window and central content
         # (set here rather than in the .ui to avoid XML type issues)
@@ -162,6 +175,8 @@ class MainLoader(QMainWindow):
                 sale_table = sales_widget.findChild(QTableWidget, 'salesTable')
                 if sale_table:
                     setup_sales_table(sale_table)
+                    # Store reference for barcode handling
+                    self.sales_table = sale_table
             except Exception as e:
                 print('Sales table setup failed:', e)
 
@@ -313,6 +328,31 @@ class MainLoader(QMainWindow):
 
         # Execute modally
         dlg.exec_()
+
+    # ----------------- Barcode scanner handling -----------------
+    def on_barcode_scanned(self, barcode: str):
+        """
+        Handle barcode scanned event.
+        Routes barcode to appropriate handler based on current context.
+        
+        Args:
+            barcode: The scanned barcode string
+        """
+        print(f"[MainWindow] on_barcode_scanned called with: {barcode}")
+        
+        # Get status bar reference
+        status_bar = getattr(self, 'statusbar', None)
+        print(f"[MainWindow] status_bar={status_bar}, sales_table={self.sales_table}")
+        
+        # For now, always route to sales table
+        if self.sales_table is not None:
+            print(f"[MainWindow] Calling handle_barcode_scanned...")
+            handle_barcode_scanned(self.sales_table, barcode, status_bar)
+        else:
+            # Fallback: just display in status bar
+            print(f"[MainWindow] No sales_table, using fallback")
+            if status_bar:
+                status_bar.showMessage(f"📷 Scanned: {barcode}", 3000)
 
 
 def main():

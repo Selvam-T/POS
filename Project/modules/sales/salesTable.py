@@ -499,3 +499,174 @@ def _on_qty_commit(editor: QLineEdit, table: QTableWidget) -> None:
         editor.clearFocus()
     except Exception:
         pass
+
+
+def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Optional[QStatusBar] = None) -> None:
+    """
+    Process barcode scanned for sales table.
+    
+    Args:
+        table: QTableWidget to update
+        barcode: Scanned barcode/product code
+        status_bar: Optional QStatusBar to show messages
+        
+    Logic:
+        1. Look up product from barcode in cache
+        2. Check if product already exists in table
+           - If exists: increment quantity by 1
+           - If new: add new row with quantity 1
+        3. Recalculate totals
+        4. Show status message (success/not found)
+    """
+    print(f"[handle_barcode_scanned] Called with barcode='{barcode}'")
+    
+    if not barcode:
+        print(f"[handle_barcode_scanned] Empty barcode, returning")
+        return
+        
+    # Debug: show barcode in status bar
+    if status_bar:
+        show_temp_status(status_bar, f"📷 Scanned: {barcode}", 3000)
+    
+    # Look up product in cache
+    print(f"[handle_barcode_scanned] Looking up product...")
+    found, product_name, unit_price = get_product_info(barcode)
+    print(f"[handle_barcode_scanned] Lookup result: found={found}, name='{product_name}', price={unit_price}")
+    
+    if not found:
+        # Product not found in database
+        print(f"[handle_barcode_scanned] Product not found")
+        if status_bar:
+            show_temp_status(status_bar, f"⚠ Product '{barcode}' not found in database", 5000)
+        return
+    
+    # Check if product already exists in table
+    print(f"[handle_barcode_scanned] Checking if product exists in table...")
+    existing_row = _find_product_in_table(table, barcode)
+    print(f"[handle_barcode_scanned] existing_row={existing_row}")
+    
+    if existing_row is not None:
+        # Product exists → increment quantity
+        print(f"[handle_barcode_scanned] Product exists at row {existing_row}, incrementing quantity")
+        _increment_row_quantity(table, existing_row)
+        if status_bar:
+            show_temp_status(status_bar, f"✓ Added {product_name} (quantity updated)", 3000)
+    else:
+        # New product → add row
+        print(f"[handle_barcode_scanned] New product, adding row")
+        _add_product_row(table, barcode, product_name, unit_price, status_bar)
+        if status_bar:
+            show_temp_status(status_bar, f"✓ Added {product_name}", 3000)
+
+
+def _find_product_in_table(table: QTableWidget, product_code: str) -> Optional[int]:
+    """
+    Search table for existing product by code.
+    
+    Args:
+        table: QTableWidget to search
+        product_code: Product code to find
+        
+    Returns:
+        Row index if found, None otherwise
+    """
+    for row in range(table.rowCount()):
+        # Get product name from column 1
+        item = table.item(row, 1)
+        if item is None:
+            continue
+            
+        # Check if this row contains the product
+        # Since we store product name, we need to look it up
+        product_text = item.text()
+        
+        # Try to match by getting product info
+        found, name, _ = get_product_info(product_code)
+        if found and product_text == name:
+            return row
+            
+    return None
+
+
+def _increment_row_quantity(table: QTableWidget, row: int) -> None:
+    """
+    Increment quantity in specified row by 1.
+    
+    Args:
+        table: QTableWidget containing the row
+        row: Row index to update
+    """
+    # Get current quantity from column 2 (QLineEdit in container)
+    qty_container = table.cellWidget(row, 2)
+    if qty_container is None:
+        return
+        
+    editor = qty_container.findChild(QLineEdit, 'qtyInput')
+    if editor is None:
+        return
+        
+    try:
+        current_qty = float(editor.text()) if editor.text() else 0.0
+        new_qty = current_qty + 1
+        editor.setText(str(int(new_qty)))
+        # recalc_row_total will be triggered by textChanged signal
+    except ValueError:
+        # If text is invalid, reset to 1
+        editor.setText('1')
+
+
+def _add_product_row(table: QTableWidget, product_code: str, product_name: str, 
+                     unit_price: float, status_bar: Optional[QStatusBar] = None) -> None:
+    """
+    Add a new product row to the table.
+    
+    Args:
+        table: QTableWidget to update
+        product_code: Product barcode/code
+        product_name: Product display name
+        unit_price: Product unit price
+        status_bar: Optional QStatusBar for error messages
+    """
+    # Get current rows data
+    current_rows = []
+    for r in range(table.rowCount()):
+        # Extract product code from row
+        product_item = table.item(r, 1)
+        if product_item is None:
+            continue
+            
+        # Get quantity
+        qty_container = table.cellWidget(r, 2)
+        qty = 1
+        if qty_container is not None:
+            editor = qty_container.findChild(QLineEdit, 'qtyInput')
+            if editor is not None:
+                try:
+                    qty = float(editor.text()) if editor.text() else 1
+                except ValueError:
+                    qty = 1
+        
+        # Get unit price
+        price_item = table.item(r, 3)
+        price = 0.0
+        if price_item is not None:
+            try:
+                price = float(price_item.text())
+            except ValueError:
+                price = 0.0
+        
+        current_rows.append({
+            'product': product_item.text(),  # Store name for now
+            'quantity': qty,
+            'unit_price': price
+        })
+    
+    # Add new product
+    current_rows.append({
+        'product': product_name,
+        'quantity': 1,
+        'unit_price': unit_price
+    })
+    
+    # Rebuild table with new data
+    set_sales_rows(table, current_rows, status_bar)

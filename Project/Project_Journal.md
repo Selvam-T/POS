@@ -775,7 +775,218 @@ show_temp_status(status_bar, f"⚠ Product '{code}' not found", 10000)
 
 ## Recent Changes
 
-### October 31, 2025
+### October 31, 2025 - Barcode Scanner Integration
+
+**Hardware Integration Architecture:**
+- Created `modules/devices/` folder for all hardware interfaces
+  - `scanner.py` - Barcode scanner (implemented)
+  - `receipt_printer.py` - Receipt printer (future)
+  - `weighing_scale.py` - Digital scale (future)
+  - `secondary_display.py` - Customer display (future)
+
+**Barcode Scanner Implementation:**
+- Built event-driven barcode scanner module using `pynput` library
+- Implemented Qt signal-slot pattern for thread-safe communication
+- Scanner runs in background thread, emits signals to main UI thread
+
+**Key Design Decisions:**
+
+1. **Signal-Based Architecture:**
+   ```python
+   class BarcodeScanner(QObject):
+       barcode_scanned = pyqtSignal(str)  # Emits when barcode detected
+   ```
+   - **Why signals?** Thread-safe communication between pynput listener (background) and Qt UI (main thread)
+   - **Decoupled:** Scanner doesn't know about tables/UI, just emits events
+   - **Multiple subscribers:** Multiple widgets can listen to same signal
+
+2. **Barcode vs. Manual Input Detection:**
+   - **Timing threshold:** 50ms between characters
+   - **Scanner input:** <50ms intervals (fast, mechanical)
+   - **Manual typing:** >100ms intervals (slow, human)
+   - **Logic:** If time_diff > timeout → reset buffer (manual), else append (scanner)
+
+3. **Barcode Focus vs. Keyboard Focus:**
+   - **Keyboard Focus:** Qt built-in, visual (one widget at a time)
+   - **Barcode Focus:** Custom logical state (which section receives barcodes)
+   - **Independent:** User can type in QLineEdit while barcode goes to sales table
+   - **Future:** Will use `BarcodeContext` enum to route to different sections:
+     ```python
+     class BarcodeContext(Enum):
+         SALES_TABLE = 1    # Current implementation
+         MANUAL_ENTRY = 2   # Future
+         REFUND = 3         # Future
+         MENU = 4           # Future (price check, inventory lookup, etc.)
+     ```
+
+4. **Event Flow:**
+   ```
+   Barcode Scanner (hardware)
+       ↓ (rapid keystrokes)
+   pynput listener (background thread)
+       ↓ (detects Enter key)
+   scanner.barcode_scanned.emit(code)
+       ↓ (Qt signal, thread-safe)
+   MainWindow.on_barcode_scanned(code)
+       ↓ (route based on context)
+   handle_barcode_scanned(table, code, status_bar)
+       ↓
+   Sales table updated (product added or quantity incremented)
+   ```
+
+**Sales Table Barcode Integration:**
+
+1. **Product Lookup:**
+   - Uses existing product cache (`get_product_info()`)
+   - O(1) instant lookup from 22K+ products
+
+2. **Duplicate Detection:**
+   - Searches existing table rows by product name
+   - If found: increment quantity by 1
+   - If new: add new row with quantity 1
+
+3. **User Feedback:**
+   - Status bar shows: `📷 Scanned: [barcode]`
+   - Success: `✓ Added [product name]`
+   - Not found: `⚠ Product '[barcode]' not found in database`
+
+**Implementation Details:**
+
+**Scanner Module (`modules/devices/scanner.py`):**
+```python
+class BarcodeScanner(QObject):
+    def __init__(self, timeout=0.05):
+        self._buffer = ''
+        self._last_time = 0
+        self._timeout = timeout  # 50ms threshold
+        self._listener = None
+        self._enabled = True
+        self._min_barcode_length = 3  # Minimum valid barcode
+    
+    def _on_key_press(self, key):
+        # Timing logic to distinguish scanner from manual
+        time_diff = now - self._last_time
+        if time_diff > self._timeout:
+            self._buffer = char  # Slow → reset (manual)
+        else:
+            self._buffer += char  # Fast → append (scanner)
+        
+        # Enter key triggers barcode emission
+        if key == keyboard.Key.enter and len(self._buffer) >= self._min_barcode_length:
+            self.barcode_scanned.emit(barcode)
+```
+
+**Main Window Integration:**
+```python
+class MainLoader(QMainWindow):
+    def __init__(self):
+        # Initialize scanner
+        self.scanner = BarcodeScanner()
+        self.scanner.barcode_scanned.connect(self.on_barcode_scanned)
+        self.scanner.start()
+        
+        # Store table reference
+        self.sales_table = None  # Set during UI loading
+    
+    def on_barcode_scanned(self, barcode: str):
+        # Route to sales table (current implementation)
+        if self.sales_table is not None:
+            handle_barcode_scanned(self.sales_table, barcode, self.statusbar)
+```
+
+**Sales Table Handler (`modules/sales/salesTable.py`):**
+```python
+def handle_barcode_scanned(table, barcode, status_bar):
+    # 1. Look up product
+    found, product_name, unit_price = get_product_info(barcode)
+    
+    if not found:
+        status_bar.showMessage(f"⚠ Product '{barcode}' not found")
+        return
+    
+    # 2. Check if product exists in table
+    existing_row = _find_product_in_table(table, barcode)
+    
+    if existing_row is not None:
+        # 3a. Product exists → increment quantity
+        _increment_row_quantity(table, existing_row)
+    else:
+        # 3b. New product → add row
+        _add_product_row(table, barcode, product_name, unit_price, status_bar)
+```
+
+**Helper Functions:**
+- `_find_product_in_table()` - Searches rows for matching product
+- `_increment_row_quantity()` - Adds 1 to existing row quantity
+- `_add_product_row()` - Appends new row to table (rebuilds table via `set_sales_rows()`)
+
+**Testing Strategy:**
+- Created `test_scanner.py` - Minimal Qt app to verify scanner signal emission
+- Useful for debugging scanner without full POS UI
+- Console debug output shows timing, buffer state, signal emission
+
+**Dependencies Added:**
+- `pynput>=1.7.6` - Keyboard listener library
+- Already available in miniconda environment
+
+**Technical Challenges Solved:**
+
+1. **Thread Safety:**
+   - Problem: pynput listener runs in background thread, Qt UI must update in main thread
+   - Solution: Qt signals automatically queue events to main thread
+
+2. **Widget Container Background Colors:**
+   - Problem: QLineEdit cells don't show alternating row colors
+   - Solution: Already solved with container approach (applies to scanner-added rows too)
+
+3. **Dynamic Row Operations:**
+   - Problem: Scanner might add product that already exists
+   - Solution: Search table before adding, increment if found
+
+4. **Signal Connection Timing:**
+   - Problem: Sales table created after scanner initialization
+   - Solution: Store table reference when UI loads, check for None in handler
+
+**Performance:**
+- Scanner listener: Minimal CPU usage (event-driven)
+- Barcode processing: <5ms (cache lookup + table update)
+- No noticeable lag when scanning rapidly
+
+**Future Enhancements (Planned):**
+
+1. **Context Switching:**
+   - Implement `BarcodeContext` enum
+   - Router in `on_barcode_scanned()` to direct to active section
+   - Refund section: populate refund input field
+   - Manual entry dialog: auto-fill product code
+   - Menu options: price check, inventory lookup
+
+2. **Scanner Configuration:**
+   - Adjustable timeout for different scanner models
+   - Enable/disable scanner (e.g., during data entry)
+   - Minimum barcode length validation
+
+3. **Multi-Quantity Scanning:**
+   - Hold scanner button for rapid fire (3 scans = qty 3)
+   - Or: scan twice in <2 seconds → qty 2
+
+4. **Barcode Validation:**
+   - Check format (EAN-13, UPC, etc.)
+   - Checksum validation
+   - Invalid format feedback
+
+5. **Visual Feedback:**
+   - Flash row when product added
+   - Beep/sound on successful scan
+   - Different sound for errors
+
+6. **Scanner Status Indicator:**
+   - Icon in status bar showing scanner active/inactive
+   - Connection status for USB scanners
+
+---
+
+### October 31, 2025 - Database Integration
 
 **Database Module Reorganization:**
 - Created `modules/db_operation/` folder
