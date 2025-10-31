@@ -33,8 +33,6 @@ def load_product_cache(db_path: str = DB_PATH) -> bool:
     try:
         if not os.path.exists(db_path):
             print(f"✗ Database not found at: {db_path}")
-            print(f"  Using sample data instead")
-            _init_sample_cache()
             return False
             
         conn = sqlite3.connect(db_path)
@@ -61,13 +59,9 @@ def load_product_cache(db_path: str = DB_PATH) -> bool:
         
     except sqlite3.Error as e:
         print(f"✗ Database error loading products: {e}")
-        print(f"  Using sample data instead")
-        _init_sample_cache()
         return False
     except Exception as e:
         print(f"✗ Error loading product cache: {e}")
-        print(f"  Using sample data instead")
-        _init_sample_cache()
         return False
 
 
@@ -121,21 +115,6 @@ def show_temp_status(status_bar: Optional[QStatusBar], message: str, duration_ms
         QTimer.singleShot(duration_ms, status_bar.clearMessage)
     except Exception as e:
         print(f"Error showing status message: {e}")
-
-
-def _init_sample_cache():
-    """Initialize cache with sample products for testing.
-    Used as fallback when database is not available.
-    """
-    global PRODUCT_CACHE
-    PRODUCT_CACHE = {
-        '8888200708009': {'name': 'Sample Product A', 'price': 12.50},
-        '8888200708214': {'name': 'Sample Product B', 'price': 8.99},
-        '8888200708122': {'name': 'Sample Product C', 'price': 15.75},
-        '8888200708115': {'name': 'Sample Product D', 'price': 6.25},
-        '8888200801229': {'name': 'Sample Product E', 'price': 22.00},
-    }
-    print(f"✓ Initialized sample product cache with {len(PRODUCT_CACHE)} products")
 
 
 # Auto-load cache on module import
