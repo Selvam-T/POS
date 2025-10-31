@@ -467,3 +467,23 @@ QScrollBar::handle:horizontal:hover {
 QScrollBar::handle:horizontal:pressed {
     background: #3a6a94;
 }
+
+/* =============================================================
+   MANUAL PRODUCT ENTRY DIALOG
+   ============================================================= */
+
+/* --- Manual Frame Container --- */
+QFrame#manualFrame {
+     background: #daf197;
+}
+
+QLabel#manualLabel1,
+QLabel#manualLabel2 {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+QTextEdit#manualText {
+    font-size: 18px;
+    font-weight: bold;
+}

@@ -188,6 +188,14 @@ class MainLoader(QMainWindow):
             except Exception as e:
                 print('Failed to wire vegBtn:', e)
 
+            # Wire up the "Add Manual" button to open the manual entry panel
+            try:
+                manual_btn = sales_widget.findChild(QPushButton, 'manualBtn')
+                if manual_btn is not None:
+                    manual_btn.clicked.connect(lambda: self.open_manual_panel("You Clicked Add Manual Button"))
+            except Exception as e:
+                print('Failed to wire manualBtn:', e)
+
         # Insert payment_frame.ui into placeholder named 'paymentFrame' if present
         payment_placeholder = getattr(self, 'paymentFrame', None)
         payment_ui = os.path.join(UI_DIR, 'payment_frame.ui')
@@ -329,6 +337,97 @@ class MainLoader(QMainWindow):
         # Execute modally
         dlg.exec_()
 
+    # ----------------- Manual product entry panel wiring -----------------
+    def open_manual_panel(self, message="Manual Product Entry"):
+        """Open the Manual Product Entry panel as a modal dialog:
+        - Size = 60% of main window, centered
+        - Dim the main window background while open
+        - Only Close (X) button shown (no minimize/maximize)
+        - Close on X or when finished
+        
+        Args:
+            message: Message to display in the QTextEdit widget
+        """
+        manual_ui = os.path.join(UI_DIR, 'manual.ui')
+        if not os.path.exists(manual_ui):
+            print('manual.ui not found at', manual_ui)
+            return
+
+        # Create dimming overlay over the main window (reuse same overlay as vegetable panel)
+        try:
+            if not hasattr(self, '_dimOverlay') or self._dimOverlay is None:
+                self._dimOverlay = QWidget(self)
+                self._dimOverlay.setObjectName('dimOverlay')
+                self._dimOverlay.setStyleSheet('#dimOverlay { background-color: rgba(0, 0, 0, 110); }')
+                self._dimOverlay.setAttribute(Qt.WA_TransparentForMouseEvents, False)
+            self._dimOverlay.setGeometry(self.rect())
+            self._dimOverlay.show()
+            self._dimOverlay.raise_()
+        except Exception:
+            pass
+
+        # Build a modal dialog and embed the loaded UI inside
+        try:
+            content = uic.loadUi(manual_ui)
+        except Exception as e:
+            print('Failed to load manual.ui:', e)
+            try:
+                self._dimOverlay.hide()
+            except Exception:
+                pass
+            return
+
+        dlg = QDialog(self)
+        dlg.setModal(True)
+        dlg.setWindowTitle('Add Manual Product')
+        # Window flags: remove min/max, keep title + close
+        dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        # Fixed size at 60% of main window, centered
+        try:
+            mw = self.frameGeometry().width()
+            mh = self.frameGeometry().height()
+            dw = max(400, int(mw * 0.6))
+            dh = max(300, int(mh * 0.6))
+            dlg.setFixedSize(dw, dh)
+            # Center relative to main window
+            mx = self.frameGeometry().x()
+            my = self.frameGeometry().y()
+            dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
+        except Exception:
+            pass
+
+        # Install content into dialog
+        layout = QVBoxLayout(dlg)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(content)
+
+        # Set the message in the QTextEdit widget
+        try:
+            text_edit = content.findChild(QWidget, 'manualText')
+            if text_edit is not None:
+                text_edit.setPlainText(message)
+        except Exception as e:
+            print('Failed to set manual text:', e)
+
+        # Ensure overlay hides and focus returns when dialog closes
+        def _cleanup_overlay(_code):
+            try:
+                if hasattr(self, '_dimOverlay') and self._dimOverlay is not None:
+                    self._dimOverlay.hide()
+            except Exception:
+                pass
+            # Bring main window back to front
+            try:
+                self.raise_()
+                self.activateWindow()
+            except Exception:
+                pass
+
+        dlg.finished.connect(_cleanup_overlay)
+
+        # Execute modally
+        dlg.exec_()
+
     # ----------------- Barcode scanner handling -----------------
     def on_barcode_scanned(self, barcode: str):
         """
@@ -344,7 +443,21 @@ class MainLoader(QMainWindow):
         status_bar = getattr(self, 'statusbar', None)
         print(f"[MainWindow] status_bar={status_bar}, sales_table={self.sales_table}")
         
-        # For now, always route to sales table
+        # Import here to avoid circular dependency
+        from modules.db_operation import get_product_info
+        
+        # Check if product exists in database
+        found, product_name, unit_price = get_product_info(barcode)
+        
+        if not found:
+            # Product not found - open manual entry dialog with barcode
+            print(f"[MainWindow] Product not found, opening manual entry dialog")
+            if status_bar:
+                status_bar.showMessage(f"⚠ Product '{barcode}' not found - Opening manual entry", 3000)
+            self.open_manual_panel(f"Invalid Barcode # {barcode}")
+            return
+        
+        # Product found - add to sales table
         if self.sales_table is not None:
             print(f"[MainWindow] Calling handle_barcode_scanned...")
             handle_barcode_scanned(self.sales_table, barcode, status_bar)

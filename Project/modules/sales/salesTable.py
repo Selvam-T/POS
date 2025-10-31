@@ -92,29 +92,8 @@ def setup_sales_table(table: QTableWidget) -> None:
     # Disable item selection to prevent row highlighting on click
     table.setSelectionMode(QTableWidget.NoSelection)
 
-    # Add one placeholder row (values are placeholders; real code should call set_sales_rows)
-    placeholder = [{
-        'product': '8888200708009',
-        'quantity': 2,
-    },
-    {
-        'product': '8888200708214',
-        'quantity': 9,
-    },
-    {
-        'product': '8888200708122',
-        'quantity': 32,
-    },
-    {
-        'product': '8888200708115',
-        'quantity': 2,
-    },
-    {
-        'product': '8888200801229',
-        'quantity': 9,
-    }]
-
-    set_sales_rows(table, placeholder)
+    # Start with empty table - products will be added via barcode scanner
+    set_sales_rows(table, [])
 
 
 def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: Optional[QStatusBar] = None) -> None:
@@ -235,66 +214,7 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         lay.addWidget(btn, 0, Qt.AlignCenter)
         table.setCellWidget(r, 5, container)
 
-    # After rows are created, ensure at least one empty row exists when no data provided (placeholder)
-    if not rows:
-        table.setRowCount(1)
-        # No.
-        item_no = QTableWidgetItem('1')
-        item_no.setTextAlignment(Qt.AlignCenter)
-        item_no.setFlags(item_no.flags() & ~Qt.ItemIsEditable)
-        table.setItem(0, 0, item_no)
-        # Product
-        table.setItem(0, 1, QTableWidgetItem(''))
-        # Quantity
-        qty_edit = QLineEdit('')
-        qty_edit.setObjectName('qtyInput')
-        try:
-            qty_edit.setAttribute(Qt.WA_StyledBackground, True)
-        except Exception:
-            pass
-        try:
-            qty_edit.setAutoFillBackground(False)  # Allow QSS to control background instead of palette
-        except Exception:
-            pass
-        qty_edit.setAlignment(Qt.AlignCenter)
-        qty_edit.textChanged.connect(lambda _t, e=qty_edit, t=table: _recalc_from_editor(e, t))
-        _install_row_focus_behavior(qty_edit, table, 0)
-        qty_container = QWidget()
-        qty_layout = QHBoxLayout(qty_container)
-        qty_layout.setContentsMargins(0, 0, 0, 0)
-        qty_layout.setSpacing(0)
-        qty_layout.addWidget(qty_edit)
-        table.setCellWidget(0, 2, qty_container)
-        # Unit Price
-        item_price = QTableWidgetItem('0.00')
-        item_price.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        item_price.setFlags(item_price.flags() & ~Qt.ItemIsEditable)
-        table.setItem(0, 3, item_price)
-        # Total
-        table.setItem(0, 4, QTableWidgetItem(''))
-        # Remove (centered button)
-        empty_btn = QPushButton()
-        empty_btn.setObjectName('removeBtn')
-        empty_btn.setIcon(QIcon(ICON_DELETE))
-        empty_btn.setIconSize(QSize(20, 20))
-        try:
-            empty_btn.setAttribute(Qt.WA_StyledBackground, True)
-        except Exception:
-            pass
-        try:
-            empty_btn.setAutoFillBackground(False)  # Allow QSS to control background instead of palette
-        except Exception:
-            pass
-        # Highlight row when button is pressed (before removal)
-        empty_btn.pressed.connect(partial(_highlight_row_by_button, table, empty_btn))
-        empty_btn.clicked.connect(partial(_remove_by_button, table, empty_btn))
-        c = QWidget()
-        c.setStyleSheet("background-color: transparent;")  # Transparent to show row color
-        l = QHBoxLayout(c)
-        l.setContentsMargins(0, 0, 0, 0)
-        l.setSpacing(0)
-        l.addWidget(empty_btn, 0, Qt.AlignCenter)
-        table.setCellWidget(0, 5, c)
+    # Table remains empty if no rows provided (clean state for barcode scanner)
 
 
 def remove_table_row(table: QTableWidget, row: int) -> None:
