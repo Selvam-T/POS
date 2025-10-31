@@ -24,7 +24,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QFontMetrics
-from logic.salesTable import setup_sales_table
+from modules.sales.salesTable import setup_sales_table
 
 
 

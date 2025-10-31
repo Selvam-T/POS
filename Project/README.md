@@ -6,9 +6,14 @@ Files and folders:
 - main.py - entry point. (Two variants available)
    - `main.py` (programmatic UI) now builds the UI directly in code (converted from your HTML mockup).
    - Alternatively you can use the `.ui` files in `ui/` and load them with `PyQt5.uic` or compile them into `ui_compiled/`.
-- ui/ - Qt Designer .ui files (`main_window.ui`, `sales_frame.ui`). Open these in Qt Designer to edit visually.
+- ui/ - Qt Designer .ui files (`main_window.ui`, `sales_frame.ui`, `payment_frame.ui`, `vegetable.ui`). Open these in Qt Designer to edit visually.
 - ui_compiled/ - place for generated Python UI modules (optional).
-- logic/, db/, hardware/, assets/, config/ - empty folders for future implementation.
+- modules/ - business logic modules organized by category:
+  - modules/sales/ - sales-related functionality (salesTable.py)
+  - (future: payment, transaction, refund, menu operations, input validation)
+- database/ - database connection, models, and CRUD operations.
+- assets/ - stylesheets (style.qss) and icons.
+- config.py - configuration constants.
 - requirements.txt - Python dependencies.
 
 Quick start (Windows, cmd.exe):

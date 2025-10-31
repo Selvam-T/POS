@@ -374,7 +374,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="scanInput"/>
+        <widget class="QLineEdit" name="refundInput"/>
        </item>
        <item>
         <widget class="QLabel" name="refundAmountLabel">

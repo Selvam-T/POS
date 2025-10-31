@@ -6,7 +6,7 @@ Provides:
 - remove_table_row(table, row): delete a row and renumber the first column
 - recalc_row_total(table, row): recompute total from qty x unit price
 """
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from PyQt5.QtCore import Qt, QEvent, QObject, QTimer
 from PyQt5.QtWidgets import (
     QWidget,
@@ -15,12 +15,14 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QPushButton,
     QLineEdit,
+    QStatusBar,
 )
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QColor, QBrush, QPalette, QIcon
 from PyQt5.QtCore import QSize
 from functools import partial
 from config import ROW_COLOR_EVEN, ROW_COLOR_ODD, ROW_COLOR_DELETE_HIGHLIGHT, ICON_DELETE
+from modules.db_operation import get_product_info, show_temp_status
 
 
 def get_row_color(row: int) -> QColor:
@@ -92,102 +94,37 @@ def setup_sales_table(table: QTableWidget) -> None:
 
     # Add one placeholder row (values are placeholders; real code should call set_sales_rows)
     placeholder = [{
-        'product': 'Apple',
+        'product': '8888200708009',
         'quantity': 2,
-        'unit_price': 1.50,
     },
     {
-        'product': 'PineApple',
+        'product': '8888200708214',
         'quantity': 9,
-        'unit_price': 3.50,
     },
     {
-        'product': 'Cherry',
+        'product': '8888200708122',
         'quantity': 32,
-        'unit_price': 8.20,
     },
     {
-        'product': 'One',
+        'product': '8888200708115',
         'quantity': 2,
-        'unit_price': 1.50,
     },
     {
-        'product': 'two',
+        'product': '8888200801229',
         'quantity': 9,
-        'unit_price': 3.50,
-    },
-    {
-        'product': 'three',
-        'quantity': 32,
-        'unit_price': 8.20,
-    },
-    {
-        'product': 'four',
-        'quantity': 2,
-        'unit_price': 1.50,
-    },
-    {
-        'product': 'five',
-        'quantity': 9,
-        'unit_price': 3.50,
-    },
-    {
-        'product': 'six',
-        'quantity': 32,
-        'unit_price': 8.20,
-    },
-    {
-        'product': 'seven',
-        'quantity': 2,
-        'unit_price': 1.50,
-    },
-    {
-        'product': 'eight',
-        'quantity': 9,
-        'unit_price': 3.50,
-    },
-    {
-        'product': 'nine',
-        'quantity': 32,
-        'unit_price': 8.20,
-    },
-    {
-        'product': 'ten',
-        'quantity': 2,
-        'unit_price': 1.50,
-    },
-    {
-        'product': 'eleven',
-        'quantity': 9,
-        'unit_price': 3.50,
-    },
-    {
-        'product': 'twelve',
-        'quantity': 32,
-        'unit_price': 8.20,
-    },
-    {
-        'product': 'thirteen',
-        'quantity': 2,
-        'unit_price': 1.50,
-    },
-    {
-        'product': 'fourteen',
-        'quantity': 9,
-        'unit_price': 3.50,
-    },
-    {
-        'product': 'final',
-        'quantity': 32,
-        'unit_price': 8.20,
     }]
 
     set_sales_rows(table, placeholder)
 
 
-def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
+def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: Optional[QStatusBar] = None) -> None:
     """Replace table rows with provided data.
-    rows: list of dicts with keys: product (str), quantity (int/float), unit_price (float)
+    Fetches product info from cache if unit_price not provided.
+    
+    Args:
+        table: QTableWidget to populate
+        rows: list of dicts with keys: product (str), quantity (int/float), unit_price (float, optional)
+        status_bar: Optional QStatusBar to show error messages for invalid products
     """
     table.setRowCount(0)
     for r, data in enumerate(rows):
@@ -203,8 +140,28 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
         item_no.setBackground(QBrush(row_color))
         table.setItem(r, 0, item_no)
 
+        # Fetch product info from cache if unit_price not in data
+        product_code = str(data.get('product', ''))
+        product_name = product_code  # Default to code
+        unit_price = data.get('unit_price', None)
+        
+        if unit_price is None:
+            # Query product cache
+            found, name, price = get_product_info(product_code)
+            if found:
+                product_name = name
+                unit_price = price
+            else:
+                # Product not found - show in status bar
+                unit_price = 0.0
+                if status_bar:
+                    show_temp_status(status_bar, f"⚠ Product '{product_code}' not found in database", 10000)
+        else:
+            # unit_price provided, just use product code as name
+            unit_price = float(unit_price)
+
         # Col 1: Product name (non-editable item)
-        item_product = QTableWidgetItem(str(data.get('product', '')))
+        item_product = QTableWidgetItem(product_name)
         item_product.setFlags(item_product.flags() & ~Qt.ItemIsEditable)
         item_product.setBackground(QBrush(row_color))
         table.setItem(r, 1, item_product)
@@ -235,16 +192,15 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
         qty_layout.addWidget(qty_edit)
         table.setCellWidget(r, 2, qty_container)
 
-        # Col 3: Unit Price (non-editable item)
-        price_val = float(data.get('unit_price', 0.0))
-        item_price = QTableWidgetItem(f"{price_val:.2f}")
+        # Col 3: Unit Price (non-editable item) - use fetched price
+        item_price = QTableWidgetItem(f"{unit_price:.2f}")
         item_price.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         item_price.setFlags(item_price.flags() & ~Qt.ItemIsEditable)
         item_price.setBackground(QBrush(row_color))
         table.setItem(r, 3, item_price)
 
-        # Col 4: Total (non-editable item)
-        total = float(qty_val) * float(price_val)
+        # Col 4: Total (non-editable item) - calculate from qty and fetched price
+        total = float(qty_val) * float(unit_price)
         item_total = QTableWidgetItem(f"{total:.2f}")
         item_total.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         item_total.setFlags(item_total.flags() & ~Qt.ItemIsEditable)
@@ -257,7 +213,7 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]]) -> None:
         btn = QPushButton()
         btn.setObjectName('removeBtn')  # styled via QSS
         btn.setIcon(QIcon(ICON_DELETE))
-        btn.setIconSize(QSize(20, 20))
+        btn.setIconSize(QSize(36, 36))
         try:
             btn.setAttribute(Qt.WA_StyledBackground, True)
         except Exception:

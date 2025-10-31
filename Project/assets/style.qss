@@ -113,7 +113,12 @@ QLineEdit#qtyInput {
 
 QLineEdit#qtyInput:focus {
     background-color: orange;
-    border: 3px solid orange;
+    border: 3px solid green;
+}
+
+QLineEdit#qtyInput[error="true"] {
+    border: 3px solid red;
+    background-color: #ffcccc;
 }
 
 /* --- Remove Button --- */
@@ -383,12 +388,20 @@ QPushButton#refundBtn:pressed {
 }
 
 /* --- Refund Input Fields --- */
-QLineEdit#refundInput, 
-QLineEdit#scanInput {
+QLineEdit#refundInput {
     border: 1px solid #aaaaaa;
     border-radius: 6px;
     padding: 8px;
     background-color: white;
+}
+
+/* --- Payment Input Fields Error State --- */
+QLineEdit#cashInput[error="true"],
+QLineEdit#netsInput[error="true"],
+QLineEdit#paynowInput[error="true"],
+QLineEdit#voucherInput[error="true"] {
+    border: 3px solid red;
+    background-color: #ffcccc;
 }
 
 QLabel#refundAmountLabel {
