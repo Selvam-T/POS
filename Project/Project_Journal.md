@@ -111,9 +111,9 @@ salesFrame (QFrame)
     │
     ├── addContainer (QWidget) - [stretch=2]
     │   └── addBtnLayout (QHBoxLayout)
-    │       ├── vegBtn (QPushButton) - "Add Vegetables"
+    │       ├── vegBtn (QPushButton) - "Vegetable Entry"
     │       │   └── Opens vegetable.ui dialog
-    │       └── manualBtn (QPushButton) - "Add Manually"
+    │       └── manualBtn (QPushButton) - "Manual Entry"
     │           └── Manual product entry
     │   └── Height: 4.0em, buttons expand vertically
     │

@@ -122,7 +122,7 @@ CREATE TABLE Product_list (
 
 ### Adding Products to Sale
 
-1. Use existing placeholder rows or add new rows via "Add Vegetables" or "Add Manually" buttons
+1. Use existing placeholder rows or add new rows via "Vegetable Entry" or "Manual Entry" buttons
 2. Enter product code (barcode)
 3. Product name and price are automatically fetched from database
 4. Edit quantity as needed

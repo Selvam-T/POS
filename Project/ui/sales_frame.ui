@@ -138,14 +138,14 @@
         <item>
          <widget class="QPushButton" name="vegBtn">
           <property name="text">
-            <string>Add Vegetables</string>
+            <string>Vegetable Entry</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="manualBtn">
           <property name="text">
-            <string>Add Manual</string>
+            <string>Manual Entry</string>
           </property>
          </widget>
         </item>

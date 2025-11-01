@@ -113,10 +113,10 @@ class BarcodeScanner(QObject):
         if time_diff > self._timeout:
             # Slow typing → likely manual input, start new buffer
             self._buffer = char
-            print(f"[Scanner] Slow input (manual), buffer reset to: '{char}'")
+            """print(f"[Scanner] Slow input (manual), buffer reset to: '{char}'")"""
         else:
             # Fast input → likely scanner, append to buffer
             self._buffer += char
-            print(f"[Scanner] Fast input (scanner), buffer now: '{self._buffer}'")
+            """print(f"[Scanner] Fast input (scanner), buffer now: '{self._buffer}'")"""
             
         self._last_time = now

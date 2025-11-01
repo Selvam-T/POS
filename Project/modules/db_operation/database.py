@@ -12,12 +12,7 @@ from PyQt5.QtCore import QTimer
 # Global product cache: {product_code: {'name': str, 'price': float}}
 PRODUCT_CACHE: Dict[str, Dict[str, any]] = {}
 
-# Temporary barcode mapping for testing (maps scanned codes to actual product codes)
-# TODO: Remove when product barcodes are updated in database
-BARCODE_TEST_MAP: Dict[str, str] = {
-    '3499320013482': '8888200708009',  # Test barcode 1 → Product 1
-    '8885005273114': '9555870400074',  # Test barcode 2 → Product 2
-}
+# Note: All barcode validations must use in-memory PRODUCT_CACHE only.
 
 # Database path: ../db/Anumani.db relative to Project folder
 # Since this file is now in modules/db_operation/, we need to go up 2 levels to Project, then 1 more to POS
@@ -84,12 +79,6 @@ def get_product_info(product_code: str) -> Tuple[bool, str, float]:
         - name: Product name (or product_code if not found)
         - price: Selling price (or 0.0 if not found)
     """
-    # Check if this is a test barcode that needs mapping
-    if product_code in BARCODE_TEST_MAP:
-        mapped_code = BARCODE_TEST_MAP[product_code]
-        print(f"[TEST MAPPING] Barcode {product_code} → {mapped_code}")
-        product_code = mapped_code
-    
     if product_code in PRODUCT_CACHE:
         product = PRODUCT_CACHE[product_code]
         return True, product['name'], product['price']

@@ -26,27 +26,20 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-
-   <!-- 1) Title Label -->
    <item>
     <widget class="QLabel" name="vegetableLabel">
      <property name="text">
-      <string>Add Vegetable</string>
+      <string>Vegetable Entry</string>
      </property>
      <property name="alignment">
-      <set>Qt::AlignCenter|Qt::AlignVCenter</set>
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>
-
-    <!-- 2) Table similar to Sales with headers: No., Item, Weight (kg), Total -->
-    <item>
+   <item>
     <widget class="QTableWidget" name="vegetableTable">
-     <property name="rowCount">
-      <number>0</number>
-     </property>
-     <property name="columnCount">
-      <number>4</number>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
      </property>
      <property name="alternatingRowColors">
       <bool>true</bool>
@@ -54,11 +47,14 @@
      <property name="selectionBehavior">
       <enum>QAbstractItemView::SelectRows</enum>
      </property>
-     <property name="editTriggers">
-      <set>QAbstractItemView::NoEditTriggers</set>
-     </property>
      <property name="showGrid">
       <bool>true</bool>
+     </property>
+     <property name="rowCount">
+      <number>0</number>
+     </property>
+     <property name="columnCount">
+      <number>4</number>
      </property>
      <column>
       <property name="text">
@@ -82,9 +78,7 @@
      </column>
     </widget>
    </item>
-
-    <!-- 3) 4x4 keypad: 14 vegetables + OK (r4c3) and CANCEL (r4c4) -->
-    <item>
+   <item>
     <widget class="QFrame" name="keypadFrame">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -92,7 +86,7 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QGridLayout" name="keypadGrid">
+     <layout class="QGridLayout" name="vegOptionGrid">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -105,14 +99,9 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <property name="horizontalSpacing">
+      <property name="spacing">
        <number>5</number>
       </property>
-      <property name="verticalSpacing">
-       <number>5</number>
-      </property>
-
-      <!-- Row 1 -->
       <item row="0" column="0">
        <widget class="QPushButton" name="btnVegTomato">
         <property name="text">
@@ -141,8 +130,6 @@
         </property>
        </widget>
       </item>
-
-      <!-- Row 2 -->
       <item row="1" column="0">
        <widget class="QPushButton" name="btnVegCabbage">
         <property name="text">
@@ -171,8 +158,6 @@
         </property>
        </widget>
       </item>
-
-      <!-- Row 3 -->
       <item row="2" column="0">
        <widget class="QPushButton" name="btnVegCapsicum">
         <property name="text">
@@ -201,8 +186,6 @@
         </property>
        </widget>
       </item>
-
-      <!-- Row 4: last two are OK and CANCEL -->
       <item row="3" column="0">
        <widget class="QPushButton" name="btnVegOkra">
         <property name="text">
@@ -234,8 +217,6 @@
      </layout>
     </widget>
    </item>
-
-   <!-- 4) Message label -->
    <item>
     <widget class="QLabel" name="messageLabel">
      <property name="text">
@@ -250,4 +231,4 @@
  </widget>
  <resources/>
  <connections/>
- </ui>
+</ui>

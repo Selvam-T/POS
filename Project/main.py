@@ -180,7 +180,7 @@ class MainLoader(QMainWindow):
             except Exception as e:
                 print('Sales table setup failed:', e)
 
-            # Wire up the "Add Vegetables" button to open the vegetable panel
+            # Wire up the "Vegetable Entry" button to open the vegetable panel
             try:
                 veg_btn = sales_widget.findChild(QPushButton, 'vegBtn')
                 if veg_btn is not None:
@@ -188,7 +188,7 @@ class MainLoader(QMainWindow):
             except Exception as e:
                 print('Failed to wire vegBtn:', e)
 
-            # Wire up the "Add Manual" button to open the manual entry panel
+            # Wire up the "Manual Entry" button to open the manual entry panel
             try:
                 manual_btn = sales_widget.findChild(QPushButton, 'manualBtn')
                 if manual_btn is not None:
@@ -379,7 +379,7 @@ class MainLoader(QMainWindow):
 
         dlg = QDialog(self)
         dlg.setModal(True)
-        dlg.setWindowTitle('Add Manual Product')
+        dlg.setWindowTitle('Manual Entry of Product')
         # Window flags: remove min/max, keep title + close
         dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
         # Fixed size at 60% of main window, centered
