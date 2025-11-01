@@ -46,7 +46,7 @@ class BarcodeScanner(QObject):
     def start(self):
         """Start listening for barcode scanner input."""
         if self._listener is not None:
-            print("⚠ Scanner already running")
+            print("[Scanner] Scanner already running")
             return
             
         # Create keyboard listener
@@ -54,7 +54,7 @@ class BarcodeScanner(QObject):
         
         # Start listener in background thread
         self._listener.start()
-        print("✓ Barcode scanner started")
+        print("[Scanner] Barcode scanner started")
         
     def stop(self):
         """Stop listening for barcode scanner input."""
@@ -62,7 +62,7 @@ class BarcodeScanner(QObject):
             self._listener.stop()
             self._listener = None
             self._buffer = ''
-            print("✓ Barcode scanner stopped")
+            print("[Scanner] Barcode scanner stopped")
             
     def set_enabled(self, enabled: bool):
         """

@@ -39,8 +39,8 @@ class ScannerTest(QMainWindow):
         
     def on_barcode(self, barcode):
         """Called when barcode is scanned"""
-        print(f"✓ BARCODE RECEIVED: {barcode}")
-        self.label.setText(f"Last scanned barcode:")
+        print(f"BARCODE RECEIVED: {barcode}")
+        self.label.setText("Last scanned barcode:")
         self.result.setText(barcode)
         self.result.setStyleSheet("font-size: 20pt; color: green; padding: 10px; font-weight: bold;")
 

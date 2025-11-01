@@ -13,7 +13,7 @@
   <widget class="QWidget" name="contentWidget">
    <layout class="QVBoxLayout" name="mainWindowLayout">
     <property name="spacing">
-     <number>0</number>
+     <number>12</number>
     </property>
     <property name="leftMargin">
      <number>0</number>
@@ -27,77 +27,51 @@
     <property name="bottomMargin">
      <number>10</number>
     </property>
-    <item>
-     <layout class="QHBoxLayout" name="titleBar">
-      <property name="spacing">
-       <number>10</number>
-      </property>
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>10</number>
-      </property>
-      <property name="bottomMargin">
-       <number>10</number>
-      </property>
-      <item>
-       <layout class="QVBoxLayout" name="infoSection">
-        <property name="spacing">
-         <number>10</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
         <item>
-         <widget class="QLabel" name="labelCompany">
-          <property name="text">
-           <string>Company Name</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="dateArea">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="labelDate">
-            <property name="text">
-             <string>2025-10-23</string>
+         <layout class="QVBoxLayout" name="infoSection">
+            <property name="spacing">
+             <number>10</number>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="labelDay">
-            <property name="text">
-             <string>Thursday</string>
+            <property name="bottomMargin">
+             <number>0</number>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="labelTime">
-            <property name="text">
-             <string>12:00</string>
-            </property>
-           </widget>
-          </item>
+            <item>
+             <widget class="QLabel" name="labelCompany">
+                <property name="text">
+                 <string>Company Name</string>
+                </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="dateArea">
+                <property name="spacing">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="labelDate">
+                    <property name="text">
+                     <string>2025-10-23</string>
+                    </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="labelDay">
+                    <property name="text">
+                     <string>Thursday</string>
+                    </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="labelTime">
+                    <property name="text">
+                     <string>12:00</string>
+                    </property>
+                 </widget>
+                </item>
+             </layout>
+            </item>
          </layout>
         </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QPushButton" name="burgerBtn">
-        <property name="text">
-         <string>☰</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
     <item>
      <layout class="QHBoxLayout" name="workArea">
       <property name="spacing">
@@ -109,6 +83,19 @@
       <item>
        <widget class="QFrame" name="paymentFrame"/>
       </item>
+            <item>
+             <widget class="QFrame" name="menuFrame">
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="minimumWidth">
+                 <number>80</number>
+                </property>
+                <property name="maximumWidth">
+                 <number>100</number>
+                </property>
+             </widget>
+            </item>
      </layout>
     </item>
    </layout>

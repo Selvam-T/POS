@@ -1,6 +1,6 @@
 # ANUMANI POS System
 
-A Point of Sale (POS) application built with PyQt5 and SQLite, featuring a product cache system for fast lookups and a modern UI design.
+A Point of Sale (POS) application built with PyQt5 and SQLite. It features a preloaded product cache for instant lookups, a modular UI composed from .ui files, a compact icon-only right-side menu, and barcode scanner integration.
 
 ## Features
 
@@ -8,6 +8,7 @@ A Point of Sale (POS) application built with PyQt5 and SQLite, featuring a produ
 - Connected to SQLite database (`Anumani.db`) with 22,337+ products
 - Preloaded product cache for instant O(1) lookups
 - Automatic product name and price fetching from database
+ - Strict validation: lookups are performed against the in-memory cache only
 
 ✅ **Sales Management**
 - Dynamic sales table with real-time calculations
@@ -21,36 +22,48 @@ A Point of Sale (POS) application built with PyQt5 and SQLite, featuring a produ
 - Global QSS stylesheet for consistent theming
 - Responsive em-based sizing
 - Modal vegetable weight input dialog
+ - Manual entry dialog for unknown products
+ - Right-side icon-only menu with tooltips and modal placeholders
+
+✅ **Barcode Scanner**
+- Event-driven scanner integration using `pynput`
+- Distinguishes scanner input from manual typing by timing
+- On scan: adds to sales table if found; otherwise opens Manual Entry dialog
 
 ✅ **Error Handling**
 - Status bar notifications for invalid products
 - Graceful fallback when database unavailable
+ - Windows-console-safe logging (ASCII only)
 
 ## Project Structure
 
 ```
 Project/
-├── main.py                      # Application entry point
-├── config.py                    # Configuration constants (colors, icons)
+├── main.py                      # Application entry point & UI composer
+├── config.py                    # Configuration constants (colors, etc.)
 ├── requirements.txt             # Python dependencies
-├── README.md                    # This file
+├── README.md                    # Setup and usage
 ├── Project_Journal.md           # Detailed development documentation
+├── test_scanner.py              # Minimal scanner verification app
 ├── assets/
-│   ├── style.qss               # Global stylesheet
-│   └── icons/
-│       └── delete.svg          # Delete button icon
+│   ├── style.qss               # Global stylesheet (QSS)
+│   └── icons/                   # SVG/PNG icons (menu, delete, etc.)
 ├── ui/
-│   ├── main_window.ui          # Main application window
+│   ├── main_window.ui          # Main application window (info header + work area)
 │   ├── sales_frame.ui          # Sales section UI
 │   ├── payment_frame.ui        # Payment section UI
-│   └── vegetable.ui            # Digital weight input dialog
+│   ├── menu_frame.ui           # Right-side menu (7 icon-only buttons)
+│   └── manual.ui               # Manual entry dialog content
 └── modules/
-    ├── db_operation/
-    │   ├── __init__.py
-    │   └── database.py         # Database connection & product cache
-    └── sales/
-        ├── __init__.py
-        └── salesTable.py       # Sales table logic & row management
+   ├── db_operation/
+   │   ├── __init__.py
+   │   └── database.py         # Database connection & product cache
+   ├── devices/
+   │   ├── __init__.py         # Exports BarcodeScanner
+   │   └── scanner.py          # Barcode scanner integration (pynput)
+   └── sales/
+      ├── __init__.py
+      └── salesTable.py       # Sales table logic & row management
 ```
 
 ## Database Setup
@@ -100,6 +113,12 @@ CREATE TABLE Product_list (
    python main.py
    ```
 
+Optional: verify the barcode scanner with the minimal test app:
+
+```cmd
+python test_scanner.py
+```
+
 ### Installation (Linux/macOS)
 
 1. **Create and activate a virtual environment:**
@@ -128,6 +147,12 @@ CREATE TABLE Product_list (
 4. Edit quantity as needed
 5. Total calculates automatically
 
+### Scanning Barcodes
+
+- Scan a product barcode with the scanner connected to the POS machine.
+- If found in the cache: the product is added to the sales table (or quantity increments).
+- If not found: a modal Manual Entry dialog opens pre-filled with a message like "Invalid Barcode # <code>".
+
 ### Sales Table Operations
 
 - **Edit Quantity:** Click quantity field, type number, press Enter
@@ -138,6 +163,15 @@ CREATE TABLE Product_list (
 
 - Invalid product codes show warning in status bar for 10 seconds
 - Missing database loads with error message (check console output)
+
+### Right-side Menu
+
+The compact icon-only menu lives on the right side and contains seven buttons:
+
+- Admin, Reports, Vegetable, Product, Greeting, Device, Logout
+- Buttons show their label on hover via tooltips.
+- Clicking any button currently opens a modal with a placeholder message and dims the background.
+- Buttons are square (64x64) with gray borders and large icons; menu width is constrained to stay narrow.
 
 ## Configuration
 
@@ -162,7 +196,7 @@ Open `.ui` files in Qt Designer:
 designer ui\main_window.ui
 ```
 
-Changes are loaded automatically at runtime - no compilation needed.
+Changes are loaded automatically at runtime—no compilation needed.
 
 ### Refreshing Product Cache
 
@@ -205,6 +239,7 @@ See `Project_Journal.md` for detailed architecture documentation, design decisio
 See `requirements.txt` for full list. Main dependencies:
 - PyQt5 - GUI framework
 - sqlite3 - Database (built-in with Python)
+- pynput - Barcode scanner keyboard listener
 
 ## License
 
@@ -216,4 +251,4 @@ See `requirements.txt` for full list. Main dependencies:
 
 ---
 
-**Last Updated:** October 31, 2025
+**Last Updated:** November 1, 2025

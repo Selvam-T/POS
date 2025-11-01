@@ -21,9 +21,9 @@ from PyQt5.QtWidgets import (
     QLabel,
     QDialog,
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtWidgets import QHeaderView
-from PyQt5.QtGui import QFontMetrics
+from PyQt5.QtGui import QFontMetrics, QIcon
 from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned
 from modules.devices import BarcodeScanner
 
@@ -89,6 +89,18 @@ class MainLoader(QMainWindow):
                 burger.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
             except Exception:
                 pass
+
+        # Set desired stretch factors for workArea (sales, payment, menu)
+        work_area = getattr(self, 'workArea', None)
+        if work_area is not None:
+            try:
+                work_area.setStretch(0, 2)  # salesFrame wider
+                work_area.setStretch(1, 1)  # paymentFrame medium
+                work_area.setStretch(2, 0)  # menuFrame fixed/narrow
+            except Exception:
+                pass
+
+        # Note: Removed user info panel; no user label to populate.
 
         # Insert sales_frame.ui into placeholder named 'salesFrame' if present
         sales_placeholder = getattr(self, 'salesFrame', None)
@@ -210,6 +222,86 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
             layout.addWidget(payment_widget)
+
+        # Insert menu_frame.ui into placeholder named 'menuFrame'
+        menu_placeholder = getattr(self, 'menuFrame', None)
+        menu_ui = os.path.join(UI_DIR, 'menu_frame.ui')
+        if menu_placeholder is not None and os.path.exists(menu_ui):
+            menu_widget = uic.loadUi(menu_ui)
+            menu_layout = menu_placeholder.layout()
+            if menu_layout is None:
+                menu_layout = QVBoxLayout(menu_placeholder)
+                menu_placeholder.setLayout(menu_layout)
+            try:
+                menu_layout.setContentsMargins(8, 8, 8, 8)
+            except Exception:
+                pass
+            menu_layout.addWidget(menu_widget)
+
+        # ----------------- Menu buttons wiring and icons -----------------
+        try:
+            icon_dir = os.path.join(ASSETS_DIR, 'icons')
+
+            def set_btn_icon(btn: QPushButton, name: str, size: int = 32):
+                try:
+                    icon_path_svg = os.path.join(icon_dir, f"{name.lower()}.svg")
+                    icon_path_png = os.path.join(icon_dir, f"{name.lower()}.png")
+                    icon_path = icon_path_svg if os.path.exists(icon_path_svg) else icon_path_png
+                    if os.path.exists(icon_path):
+                        btn.setIcon(QIcon(icon_path))
+                        btn.setIconSize(QSize(size, size))
+                except Exception:
+                    pass
+
+            menu_buttons = {
+                'adminBtn': ('Admin', (
+                    "Permission: Admin\n"
+                    "- login\n- password\n- profile picture\n- Cashier role: Admin vs Staff"
+                )),
+                'reportsBtn': ('Reports', (
+                    "Permission: Admin\n"
+                    "- Sales report\n- report 2\n- report 3"
+                )),
+                'vegetableBtn': ('Vegetable', (
+                    "Permission: Admin\n"
+                    "- Rename Vegetable button\n"
+                    "  States: name or Unused (Unused = gray, disabled)"
+                )),
+                'productBtn': ('Product', (
+                    "Permission: Admin\n"
+                    "- ADD, REMOVE, UPDATE product"
+                )),
+                'greetingBtn': ('Greeting', (
+                    "Permission: Admin\n"
+                    "- Custom vs default\n"
+                    "  custom: Happy Christmas, Happy New Year\n"
+                    "  default: Thank you."
+                )),
+                'deviceBtn': ('Device', (
+                    "Permission: Admin\n"
+                    "- Barcode baud rate\n- Weighing scale"
+                )),
+                'logoutBtn': ('Logout', (
+                    "Permission: Admin\n- Confirm logout?"
+                )),
+            }
+
+            for obj_name, (title, msg) in menu_buttons.items():
+                btn = self.findChild(QPushButton, obj_name)
+                if btn is None:
+                    continue
+                # Set icon if available
+                set_btn_icon(btn, title)
+                # Icon-only: clear text and set tooltip with the title
+                try:
+                    btn.setText('')
+                    btn.setToolTip(title)
+                except Exception:
+                    pass
+                # Wire click to modal info dialog
+                btn.clicked.connect(lambda _, t=title, m=msg: self.open_menu_dialog(t, m))
+        except Exception as e:
+            print('Failed to wire menu buttons:', e)
 
     # ----------------- Vegetable panel wiring -----------------
     def open_vegetable_panel(self):
@@ -335,6 +427,56 @@ class MainLoader(QMainWindow):
         dlg.finished.connect(_cleanup_overlay)
 
         # Execute modally
+        dlg.exec_()
+
+    def open_menu_dialog(self, title: str, message: str):
+        """Open a generic modal dialog for menu actions with a temporary message."""
+        # Create dimming overlay over the main window (reuse same overlay)
+        try:
+            if not hasattr(self, '_dimOverlay') or self._dimOverlay is None:
+                self._dimOverlay = QWidget(self)
+                self._dimOverlay.setObjectName('dimOverlay')
+                self._dimOverlay.setStyleSheet('#dimOverlay { background-color: rgba(0, 0, 0, 110); }')
+                self._dimOverlay.setAttribute(Qt.WA_TransparentForMouseEvents, False)
+            self._dimOverlay.setGeometry(self.rect())
+            self._dimOverlay.show()
+            self._dimOverlay.raise_()
+        except Exception:
+            pass
+
+        dlg = QDialog(self)
+        dlg.setModal(True)
+        dlg.setWindowTitle(title)
+        dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        try:
+            mw = self.frameGeometry().width()
+            mh = self.frameGeometry().height()
+            dw = max(360, int(mw * 0.45))
+            dh = max(220, int(mh * 0.4))
+            dlg.setFixedSize(dw, dh)
+            mx = self.frameGeometry().x()
+            my = self.frameGeometry().y()
+            dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
+        except Exception:
+            pass
+
+        v = QVBoxLayout(dlg)
+        v.setContentsMargins(16, 16, 16, 16)
+        info = QLabel(message)
+        info.setWordWrap(True)
+        v.addWidget(info)
+        ok = QPushButton('OK')
+        ok.clicked.connect(dlg.accept)
+        v.addWidget(ok, alignment=Qt.AlignRight)
+
+        def _cleanup(_code):
+            try:
+                if hasattr(self, '_dimOverlay') and self._dimOverlay is not None:
+                    self._dimOverlay.hide()
+            except Exception:
+                pass
+
+        dlg.finished.connect(_cleanup)
         dlg.exec_()
 
     # ----------------- Manual product entry panel wiring -----------------

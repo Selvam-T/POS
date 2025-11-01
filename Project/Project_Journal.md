@@ -6,6 +6,21 @@
 **Database:** Anumani.db (22,337 products)
 
 ---
+ 
+## Update Summary (November 1, 2025)
+
+This session introduced a compact right-side icon-only menu and finalized the main window structure:
+
+- Replaced the legacy title bar with an `infoSection` header (company/date/day/time).
+- Added `ui/menu_frame.ui` loaded into `menuFrame` with seven icon-only buttons (Admin, Reports, Vegetable, Product, Greeting, Device, Logout). Buttons show labels via tooltips and open modal placeholders.
+- Constrained the menu width (min 80, max 100) and increased spacing between header and content.
+- Updated `manual.ui` to expose `QTextEdit#manualText` for message injection; unknown barcodes open this dialog.
+- Strict product validation now uses `PRODUCT_CACHE` only (all test remapping removed).
+- Scanner logs changed to ASCII-only to avoid Windows console Unicode errors. `test_scanner.py` updated accordingly.
+
+For a concise overview and updated project structure, see `README.md`.
+
+---
 
 ## Table of Contents
 1. [Application Architecture](#application-architecture)
@@ -22,13 +37,12 @@
 ### Entry Point: `main.py`
 - **Purpose:** Application loader and UI composer
 - **Framework:** PyQt5 with .ui file loading via `uic`
-- **Structure:** Composes multiple UI frames into a single main window
+# Project Journal - POS System Development
 - **Styling:** Loads global QSS from `assets/style.qss`
 
 ### Directory Structure
 ```
 Project/
-├── main.py                 # Application entry point
 ├── config.py              # Configuration and constants
 ├── requirements.txt       # Python dependencies
 ├── Project_Journal.md     # This document
@@ -37,16 +51,12 @@ Project/
 │   └── icons/
 │       └── delete.svg    # Delete button icon
 ├── ui/
+3. [Right-side Menu](#right-side-menu)
 │   ├── main_window.ui    # Main application window
-│   ├── sales_frame.ui    # Sales section
 │   ├── payment_frame.ui  # Payment section
 │   └── vegetable.ui      # Digital weight input dialog
 └── modules/
     ├── db_operation/
-    │   ├── __init__.py
-    │   └── database.py   # Database utilities & product cache
-    └── sales/
-        ├── __init__.py
         └── salesTable.py # Sales table logic
 ```
 
@@ -55,6 +65,7 @@ Project/
 ## Main Window Structure
 
 ### Hierarchy: `main_window.ui`
+├── test_scanner.py         # Minimal scanner verification app
 
 ```
 QMainWindow (MainLoader)
@@ -74,7 +85,6 @@ QMainWindow (MainLoader)
 ```
 
 ### Title Bar Implementation
-
 **Components:**
 1. **App Name Label:** "ANUMANI POS" - identifies the application
 2. **State Label:** Displays current mode/state (e.g., "Sale Mode", "Hold", etc.)
@@ -98,25 +108,16 @@ QMainWindow (MainLoader)
 ```
 salesFrame (QFrame)
 └── mainSalesLayout (QVBoxLayout) - spacing: 10px
-    ├── salesLabel (QLabel) - "Sales" - [stretch=0]
-    │   └── Fixed height, doesn't consume extra space
-    │
     ├── salesTable (QTableWidget) - [stretch=7]
     │   └── Minimum height: 10em
     │   └── Expands to fill available vertical space
     │
     ├── totalContainer (QWidget) - [stretch=2]
-    │   └── Height: ~3.6em
     │   └── Displays subtotal, tax, total
-    │
-    ├── addContainer (QWidget) - [stretch=2]
-    │   └── addBtnLayout (QHBoxLayout)
     │       ├── vegBtn (QPushButton) - "Vegetable Entry"
     │       │   └── Opens vegetable.ui dialog
     │       └── manualBtn (QPushButton) - "Manual Entry"
     │           └── Manual product entry
-    │   └── Height: 4.0em, buttons expand vertically
-    │
     └── receiptContainer (QWidget) - [stretch=2]
         └── receiptLayout (QHBoxLayout)
             ├── cancelsaleBtn (QPushButton) - "Cancel Sale"
@@ -149,40 +150,22 @@ def em_px(widget: QWidget, units: float) -> int:
 - `addContainer`: 4.0em
 - `receiptContainer`: 4.0em
 - `salesTable` minimum: 10em
-
-**Why em instead of fixed pixels?**
 - Responsive to user's font size settings
 - Better accessibility
-- Consistent visual proportions across different displays
 
 ---
 
-## Sales Table Design
-
-### Table Structure: `salesTable (QTableWidget)`
 
 **Columns (6 total):**
 
 | Col | Name       | Type          | Width      | Resize Mode | Editable | Purpose                    |
-|-----|------------|---------------|------------|-------------|----------|----------------------------|
-| 0   | No.        | QTableWidgetItem | 48px    | Fixed       | No       | Row number (1, 2, 3...)   |
-| 1   | Product    | QTableWidgetItem | Stretch | Stretch     | No       | Product name              |
-| 2   | Quantity   | QLineEdit     | 80px       | Fixed       | Yes      | Quantity input            |
-| 3   | Unit Price | QTableWidgetItem | 100px   | Fixed       | No       | Price per unit            |
-| 4   | Total      | QTableWidgetItem | 110px   | Fixed       | No       | Qty × Unit Price          |
 | 5   | Del        | QPushButton   | 48px       | Fixed       | N/A      | Remove row button         |
-
-### Table Configuration
 
 **Settings:**
 ```python
-table.setAlternatingRowColors(False)  # Manual color control
-table.setSelectionMode(QTableWidget.NoSelection)  # No row selection
 table.viewport().setStyleSheet("background-color: #e4e4e4;")  # Default bg
 ```
-
 **Rationale for Manual Row Colors:**
-- Qt's built-in alternating colors don't propagate to cell widgets (QLineEdit, QPushButton)
 - Cell widgets are inside container QWidgets - need programmatic styling
 - Solution: Manual color assignment to both items AND container widgets
 
@@ -1064,5 +1047,5 @@ def handle_barcode_scanned(table, barcode, status_bar):
 ---
 
 **Document maintained by:** Development team  
-**Last updated:** October 31, 2025  
+**Last updated:** November 1, 2025  
 **Update frequency:** End of each development session / before each commit
