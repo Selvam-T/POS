@@ -10,6 +10,9 @@
     <height>795</height>
    </rect>
   </property>
+  <property name="windowTitle">
+   <string>Selvam POS Application</string>
+  </property>
   <widget class="QWidget" name="contentWidget">
    <layout class="QVBoxLayout" name="mainWindowLayout">
     <property name="spacing">
@@ -51,7 +54,7 @@
       <item>
        <widget class="QLabel" name="labelCompany">
         <property name="text">
-         <string>""</string>
+         <string>&quot;&quot;</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -76,7 +79,7 @@
     <item>
      <layout class="QHBoxLayout" name="workArea">
       <property name="spacing">
-       <number>5</number>
+       <number>15</number>
       </property>
       <item>
        <widget class="QFrame" name="salesFrame"/>

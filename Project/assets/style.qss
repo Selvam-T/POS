@@ -3,8 +3,16 @@
    BASE APPLICATION
    ============================================================= */
 QMainWindow {
-    background-color: #d0dad7;
-    font-family: Arial, sans-serif;
+    background-color: #F0F0F0;
+    font-family: Dubai, Helvetica, sans-serif;
+}
+
+/* =============================================================
+   COMMON BUTTON FONT
+   Apply a unified font to all QPushButtons
+   ============================================================= */
+QPushButton {
+    font-family: Segoe UI, Tahoma, sans-serif;
 }
 
 QHBoxLayout#titleBar,
@@ -21,8 +29,6 @@ QWidget {
 /* =============================================================
    HEADER AND ITS CHILDREN
    ============================================================= */
-
-/* --- Burger Button removed --- */
 
 /* --- Header Labels --- */
 QLabel#labelCompany {
@@ -50,6 +56,7 @@ QLabel#labelDayTime {
 
 /* --- Sales Frame Container --- */
 QFrame#salesFrame {
+    font-family: Tahoma, verdana;
     background-color: lightblue;
     border: 1px solid #333333;
     border-radius: 0.5em;
@@ -401,7 +408,7 @@ QLabel#refundAmountLabel {
    MENU FRAME (RIGHT SIDEBAR)
    ============================================================= */
 QFrame#menuFrame {
-    background-color: yellow; /* temporary for layout validation */
+    background-color: #b0c4de;   
     border: 1px solid #333333;
     border-radius: 0.5em;
 }
