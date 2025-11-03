@@ -22,25 +22,7 @@ QWidget {
    HEADER AND ITS CHILDREN
    ============================================================= */
 
-/* --- Burger Button --- */
-QPushButton#burgerBtn {
-    font-size: 16pt;
-    background-color: #d0dad7;
-    padding: 0;
-    min-width: 42px;
-    min-height: 42px;
-    max-width: 42px;
-    max-height: 42px;
-    border: none; /* no border when not hovered */
-}
-QPushButton#burgerBtn:hover {
-    border: 1px solid  #2f222a;
-    border-radius: 21px; /* half of 38px to make it circular on hover */
-    background-color: #d9e1df;
-}
-QPushButton#burgerBtn:pressed { 
-    background-color: #bbc4c1; 
-}
+/* --- Burger Button removed --- */
 
 /* --- Header Labels --- */
 QLabel#labelCompany {
@@ -49,10 +31,17 @@ QLabel#labelCompany {
 }
 
 QLabel#labelDate,
-QLabel#labelDay,
-QLabel#labelTime {
+QLabel#labelDayTime {
     font-size: 12pt;
-    qproperty-alignment: 'AlignCenter';
+}
+
+/* Explicit padding so header text offsets are visible regardless of widget margins */
+QLabel#labelDate {
+    padding-left: 20px;   /* adjust as needed */
+}
+
+QLabel#labelDayTime {
+    padding-right: 20px;  /* adjust as needed */
 }
 
 /* =============================================================
@@ -437,6 +426,32 @@ QFrame#menuFrame QPushButton:hover {
 QFrame#menuFrame QPushButton:pressed {
     border-color: #444444;
     background: #e9e9e9;
+}
+
+/* Fallback: show text if icon couldn't be loaded (set via iconFallback property) */
+QFrame#menuFrame QPushButton[iconFallback="true"] {
+    /* Fallback text style: black background, bold white text, white border */
+    background-color: #4a1717ff;
+    color: #ffffff;
+    font-weight: bold;
+    border: 1px solid #ffffff;
+
+    /* Size adjustments for text buttons */
+    min-width: 120px;
+    max-width: 220px;
+    min-height: 40px;
+    max-height: 64px;
+    qproperty-iconSize: 0px 0px;
+}
+
+/* Keep consistent look on hover/pressed for fallback buttons */
+QFrame#menuFrame QPushButton[iconFallback="true"]:hover {
+    background-color: #111111;
+    border-color: #ffffff;
+}
+QFrame#menuFrame QPushButton[iconFallback="true"]:pressed {
+    background-color: #222222;
+    border-color: #dddddd;
 }
 
 

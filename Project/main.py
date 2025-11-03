@@ -21,11 +21,24 @@ from PyQt5.QtWidgets import (
     QLabel,
     QDialog,
 )
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import Qt, QSize, QTimer, QDateTime, QLocale
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QFontMetrics, QIcon
 from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned
 from modules.devices import BarcodeScanner
+from config import (
+    DATE_FMT,
+    DAY_FMT,
+    TIME_FMT,
+    COMPANY_NAME,
+    ICON_ADMIN,
+    ICON_REPORTS,
+    ICON_VEGETABLE,
+    ICON_PRODUCT,
+    ICON_GREETING,
+    ICON_DEVICE,
+    ICON_LOGOUT,
+)
 
 
 
@@ -50,6 +63,52 @@ class MainLoader(QMainWindow):
         super().__init__()
         main_ui = os.path.join(UI_DIR, 'main_window.ui')
         uic.loadUi(main_ui, self)
+        # Ensure header layout stretches keep center truly centered
+        try:
+            info_layout = self.findChild(QHBoxLayout, 'infoSection')
+            if info_layout is not None:
+                info_layout.setStretch(0, 1)  # left section
+                info_layout.setStretch(1, 0)  # center label
+                info_layout.setStretch(2, 1)  # right section
+                # New combined Day/Time label on the right
+                try:
+                    day_time_label = self.findChild(QLabel, 'labelDayTime')
+                    if day_time_label is not None:
+                        # Ensure it hugs the right edge of its section
+                        day_time_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+                        day_time_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+                    # Ensure labelDate is left-aligned and expands to fill its section
+                    date_label = self.findChild(QLabel, 'labelDate')
+                    if date_label is not None:
+                        date_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+                        date_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+                    # Set company name text (baked-in)
+                    company_label = self.findChild(QLabel, 'labelCompany')
+                    if company_label is not None:
+                        company_label.setText(COMPANY_NAME)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+        
+        # ----------------- Real-time Date / Day / Time Setup -----------------
+        try:
+            # Optionally force English locale for month/day abbreviations
+            # Comment this line if you prefer system locale.
+            self._clockLocale = QLocale(QLocale.English)
+
+            # Cache label references
+            self._dateLabel: QLabel = self.findChild(QLabel, 'labelDate')
+            self._dayTimeLabel: QLabel = self.findChild(QLabel, 'labelDayTime')
+
+            # Start a 1-second timer to update the clock
+            self._clockTimer = QTimer(self)
+            self._clockTimer.timeout.connect(self._update_clock)
+            self._clockTimer.start(1000)
+            # Initial paint
+            self._update_clock()
+        except Exception as e:
+            print('Clock setup failed:', e)
         
         # Initialize barcode scanner
         print("[MainWindow] Creating BarcodeScanner instance...")
@@ -73,20 +132,12 @@ class MainLoader(QMainWindow):
                 # Fail silently; margins are not critical
                 pass
 
-        # Make titleBar behave: left column takes available space, burgerBtn takes only needed size
+        # Make titleBar behave: left column takes available space
         titleBar = getattr(self, 'titleBar', None)
-        burger = getattr(self, 'burgerBtn', None)
         # Prefer titleBar stretch so the left section expands
         if titleBar is not None:
             try:
                 titleBar.setStretch(0, 1)
-            except Exception:
-                pass
-
-        if burger is not None:
-            try:
-                # Let QSS control button sizing via min/max constraints
-                burger.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
             except Exception:
                 pass
 
@@ -240,18 +291,21 @@ class MainLoader(QMainWindow):
 
         # ----------------- Menu buttons wiring and icons -----------------
         try:
-            icon_dir = os.path.join(ASSETS_DIR, 'icons')
-
-            def set_btn_icon(btn: QPushButton, name: str, size: int = 32):
+            def set_btn_icon_path(btn: QPushButton, rel_path: str, size: int = 32) -> bool:
+                """Set a button icon from a config-defined relative path.
+                Returns True on success, False if file missing or error.
+                """
                 try:
-                    icon_path_svg = os.path.join(icon_dir, f"{name.lower()}.svg")
-                    icon_path_png = os.path.join(icon_dir, f"{name.lower()}.png")
-                    icon_path = icon_path_svg if os.path.exists(icon_path_svg) else icon_path_png
-                    if os.path.exists(icon_path):
-                        btn.setIcon(QIcon(icon_path))
+                    abs_path = os.path.join(BASE_DIR, rel_path)
+                    if os.path.exists(abs_path):
+                        btn.setIcon(QIcon(abs_path))
                         btn.setIconSize(QSize(size, size))
-                except Exception:
-                    pass
+                        return True
+                    print(f"[MenuIcons] Icon not found: {abs_path}")
+                    return False
+                except Exception as _e:
+                    print(f"[MenuIcons] Failed to set icon for {btn.objectName()}: {_e}")
+                    return False
 
             menu_buttons = {
                 'adminBtn': ('Admin', (
@@ -286,15 +340,37 @@ class MainLoader(QMainWindow):
                 )),
             }
 
+            # Map buttons to config-defined icons
+            button_icons = {
+                'adminBtn': ICON_ADMIN,
+                'reportsBtn': ICON_REPORTS,
+                'vegetableBtn': ICON_VEGETABLE,
+                'productBtn': ICON_PRODUCT,
+                'greetingBtn': ICON_GREETING,
+                'deviceBtn': ICON_DEVICE,
+                'logoutBtn': ICON_LOGOUT,
+            }
+
             for obj_name, (title, msg) in menu_buttons.items():
                 btn = self.findChild(QPushButton, obj_name)
                 if btn is None:
                     continue
                 # Set icon if available
-                set_btn_icon(btn, title)
-                # Icon-only: clear text and set tooltip with the title
+                icon_rel = button_icons.get(obj_name)
+                success = False
+                if icon_rel:
+                    success = set_btn_icon_path(btn, icon_rel)
+                # If icon loaded, keep icon-only; else show text fallback
                 try:
-                    btn.setText('')
+                    if success:
+                        btn.setProperty('iconFallback', False)
+                        btn.setText('')
+                    else:
+                        btn.setProperty('iconFallback', True)
+                        btn.setText(title)
+                    # Refresh QSS to apply property changes
+                    btn.style().unpolish(btn)
+                    btn.style().polish(btn)
                     btn.setToolTip(title)
                 except Exception:
                     pass
@@ -609,12 +685,38 @@ class MainLoader(QMainWindow):
             if status_bar:
                 status_bar.showMessage(f"📷 Scanned: {barcode}", 3000)
 
+    # ----------------- Clock update handler -----------------
+    def _update_clock(self):
+        try:
+            now = QDateTime.currentDateTime()
+
+            # Date text (e.g., 3 Nov 2025)
+            if self._dateLabel is not None:
+                # Use locale formatting for month/day names
+                date_text = self._clockLocale.toString(now.date(), DATE_FMT)
+                self._dateLabel.setText(date_text)
+
+            # Day + Time (e.g., FRI 12:22 am)
+            if self._dayTimeLabel is not None:
+                day_text = self._clockLocale.toString(now.date(), DAY_FMT)
+                time_text = now.toString(TIME_FMT)  # am/pm lower via 'ap'
+                self._dayTimeLabel.setText(f"{day_text}   {time_text}")
+        except Exception as e:
+            # Non-fatal; avoid crashing timer
+            print('Clock update failed:', e)
+
 
 def main():
     app = QApplication(sys.argv)
     load_qss(app)
     window = MainLoader()
     window.show()
+    try:
+        # Bring window to front in case it opens behind other windows
+        window.raise_()
+        window.activateWindow()
+    except Exception:
+        pass
     sys.exit(app.exec_())
 
 

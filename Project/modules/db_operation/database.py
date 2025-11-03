@@ -34,7 +34,8 @@ def load_product_cache(db_path: str = DB_PATH) -> bool:
     
     try:
         if not os.path.exists(db_path):
-            print(f"✗ Database not found at: {db_path}")
+            # Avoid non-ASCII symbols for Windows console compatibility
+            print(f"[WARN] Database not found at: {db_path}")
             return False
             
         conn = sqlite3.connect(db_path)
@@ -56,14 +57,15 @@ def load_product_cache(db_path: str = DB_PATH) -> bool:
             }
         
         conn.close()
-        print(f"✓ Loaded {len(PRODUCT_CACHE)} products into cache from {db_path}")
+        # Use ASCII-only output to prevent UnicodeEncodeError on Windows consoles
+        print(f"[OK] Loaded {len(PRODUCT_CACHE)} products into cache from {db_path}")
         return True
         
     except sqlite3.Error as e:
-        print(f"✗ Database error loading products: {e}")
+        print(f"[DB ERROR] Database error loading products: {e}")
         return False
     except Exception as e:
-        print(f"✗ Error loading product cache: {e}")
+        print(f"[ERROR] Error loading product cache: {e}")
         return False
 
 

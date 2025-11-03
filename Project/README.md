@@ -24,6 +24,7 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - Modal vegetable weight input dialog
  - Manual entry dialog for unknown products
  - Right-side icon-only menu with tooltips and modal placeholders
+ - Header layout: Date (left), Company (center), Day+Time (right as a single label)
 
 ✅ **Barcode Scanner**
 - Event-driven scanner integration using `pynput`
@@ -138,6 +139,23 @@ python test_scanner.py
    ```
 
 ## Usage
+### Header layout (infoSection)
+
+The header at the top of `main_window.ui` is a three-part `QHBoxLayout` named `infoSection`:
+
+- `labelDate` (QLabel) — left aligned
+- `labelCompany` (QLabel) — centered
+- `labelDayTime` (QLabel) — right aligned, shows combined text like "Thursday 12:00"
+
+Implementation details:
+
+- The old `dayTimeArea` sub-layout and `labelDay`/`labelTime` were removed; `labelDayTime` replaces them.
+- Stretch is set programmatically to `1,0,1` so the center stays truly centered.
+- QSS no longer forces header label alignment; we use padding for consistent spacing:
+   - `QLabel#labelDate { padding-left: 30px; }`
+   - `QLabel#labelDayTime { padding-right: 30px; }`
+   - You can adjust padding in `assets/style.qss`.
+
 
 ### Adding Products to Sale
 

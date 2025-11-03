@@ -39,3 +39,32 @@ ROW_COLOR_DELETE_HIGHLIGHT = '#ff6b6b'  # Light red/salmon
 # =============================================================================
 # Icon file paths
 ICON_DELETE = 'assets/icons/delete.svg'  # Delete/remove button icon
+
+# Menu and toolbar icons
+ICON_ADMIN = 'assets/icons/admin.svg'
+ICON_REPORTS = 'assets/icons/reports.svg'
+ICON_VEGETABLE = 'assets/icons/vegetable.svg'
+ICON_PRODUCT = 'assets/icons/product.svg'
+ICON_GREETING = 'assets/icons/greeting.svg'
+ICON_DEVICE = 'assets/icons/device.svg'
+ICON_LOGOUT = 'assets/icons/logout.svg'
+
+# =============================================================================
+# DATE / TIME FORMATS (UI DISPLAY)
+# =============================================================================
+
+# Example output: 3 Nov 2025
+DATE_FMT = 'd MMM yyyy'
+
+# Example output: Fri
+DAY_FMT = 'ddd'
+
+# Example output: 12:22 am
+TIME_FMT = 'hh : mm ap'
+
+# =============================================================================
+# APP TEXT: COMPANY NAME (baked-in)
+# =============================================================================
+# Company name shown in the header label 'labelCompany'. This is baked into the
+# build and does not change per machine.
+COMPANY_NAME = 'Anumani Trading Pte Ltd'

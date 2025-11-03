@@ -7,6 +7,23 @@
 
 ---
  
+## Update Summary (November 3, 2025)
+
+Header refactor and alignment fixes:
+
+- Replaced the right-header sublayout (`dayTimeArea` with `labelDay` and `labelTime`) with a single `QLabel` named `labelDayTime`.
+- `infoSection` now contains exactly three widgets: `labelDate` (left), `labelCompany` (center), `labelDayTime` (right).
+- Programmatic stretch remains `1,0,1` so the center stays truly centered on resize.
+- Removed QSS `qproperty-alignment` overrides for header labels to avoid Designer/runtime mismatches.
+- Added explicit padding in QSS for visible edge offsets:
+    - `QLabel#labelDate { padding-left: 30px; }`
+    - `QLabel#labelDayTime { padding-right: 30px; }`
+- Updated references in code and styles; removed all usages of `labelDay`, `labelTime`, and `dayTimeArea`.
+
+See README “Header layout (infoSection)” for the concise how-to.
+
+---
+
 ## Update Summary (November 1, 2025)
 
 This session introduced a compact right-side icon-only menu and finalized the main window structure:
@@ -75,7 +92,7 @@ QMainWindow (MainLoader)
         │   ├── Left Section (QHBoxLayout) - [stretch=1]
         │   │   ├── appNameLabel (QLabel) - "ANUMANI POS"
         │   │   └── stateLabel (QLabel) - Current state/mode
-        │   └── burgerBtn (QPushButton) - Menu button
+    │   
         │       └── Icon: Three horizontal lines (☰)
         │       └── Size: Fixed, controlled by QSS
         │
@@ -84,7 +101,23 @@ QMainWindow (MainLoader)
         │   └── paymentFrame (QFrame) - Payment section placeholder
 ```
 
-### Title Bar Implementation
+### Header (infoSection) – Current Implementation
+
+`infoSection` is a `QHBoxLayout` with three labels:
+
+1. `labelDate` — AlignLeft | AlignVCenter
+2. `labelCompany` — AlignHCenter | AlignVCenter
+3. `labelDayTime` — AlignRight | AlignVCenter (combined day and time text)
+
+Behavior:
+- Stretch factors are set in `main.py` to `(1, 0, 1)` so the center label remains centered as the window resizes.
+- Alignment is applied in code and not overridden by QSS (we removed previous `qproperty-alignment` centers for these labels).
+- Edge spacing uses QSS padding rather than label margins to ensure consistent rendering across styles.
+
+Historical note:
+- Earlier versions used a nested layout with `labelDay` and `labelTime`. This was simplified to a single `labelDayTime` to avoid alignment confusion and easier styling.
+
+### Title Bar Implementation (Historic)
 **Components:**
 1. **App Name Label:** "ANUMANI POS" - identifies the application
 2. **State Label:** Displays current mode/state (e.g., "Sale Mode", "Hold", etc.)
