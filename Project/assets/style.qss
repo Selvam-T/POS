@@ -126,8 +126,8 @@ QPushButton#removeBtn {
     border: 5px solid #d33f12;
     border-radius: 2px;
     min-width: 30px; 
-    min-height: 28px;
     max-width: 30px; 
+    min-height: 28px;
     max-height: 28px;
     padding: 0px;
 }

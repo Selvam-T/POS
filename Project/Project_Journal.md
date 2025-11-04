@@ -24,6 +24,31 @@ See README “Header layout (infoSection)” for the concise how-to.
 
 ---
 
+## Update Summary (November 3, 2025, later)
+
+Product Management and scanner flow integration:
+
+- Added a full Product Management dialog (`ui/product.ui`) and wired it to the Product menu. Removed placeholder actions.
+- Mode-driven behavior with buttons for ADD, UPDATE, REMOVE:
+    - Starts with the form hidden until a mode is chosen; focuses Product Code on mode select.
+    - ADD: requires all fields; includes Unit dropdown (PIECES, GRAMS); shows live duplicate check on Product Code and disables ADD if duplicate.
+    - UPDATE/REMOVE: Product Code enabled; other fields disabled until a successful lookup; populates fields after lookup.
+    - Status label at the bottom shows success/errors; on success, dialog auto-closes after a short delay.
+- Implemented full CRUD to SQLite and a slim in-memory cache:
+    - Cache keys normalized (uppercase + trimmed) for consistent lookups; immediate cache updates on ADD/UPDATE/DELETE.
+    - Centralized `DB_PATH` in `config.py` to point to `../db/Anumani.db` and used across modules.
+- Scanner routing improvements:
+    - While Product dialog is open, all scans fill the Product Code field in the dialog (no Manual Entry auto-open).
+    - In Sales frame, if a scanned code isn’t found: opens Product Management in ADD mode with the code prefilled.
+    - After a successful ADD from that flow, the new item is automatically inserted into the sales table as if it were scanned again.
+- Cleanup: Removed noisy debug prints across scanner, sales table, and main window. Retired unused helpers.
+
+Docs: Created `Documentation/product_management.md`; updated `README.md` to reflect new flows and link to the doc.
+
+Quality gates: No code errors reported post-change; behavior validated via manual flows (scan-found, scan-not-found → add → auto-insert).
+
+---
+
 ## Update Summary (November 1, 2025)
 
 This session introduced a compact right-side icon-only menu and finalized the main window structure:
@@ -1080,5 +1105,5 @@ def handle_barcode_scanned(table, barcode, status_bar):
 ---
 
 **Document maintained by:** Development team  
-**Last updated:** November 1, 2025  
+**Last updated:** November 3, 2025  
 **Update frequency:** End of each development session / before each commit

@@ -4,20 +4,48 @@ Provides product cache management and database operations.
 """
 import sqlite3
 import os
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional, Any
 from PyQt5.QtWidgets import QStatusBar
 from PyQt5.QtCore import QTimer
 
 
-# Global product cache: {product_code: {'name': str, 'price': float}}
-PRODUCT_CACHE: Dict[str, Dict[str, any]] = {}
+# Global product cache (SLIM): {product_code: (name, selling_price)}
+# Keep cache small and focused for fast name/price lookups during scans and sales table display.
+PRODUCT_CACHE: Dict[str, Tuple[str, float]] = {}
 
 # Note: All barcode validations must use in-memory PRODUCT_CACHE only.
 
-# Database path: ../db/Anumani.db relative to Project folder
-# Since this file is now in modules/db_operation/, we need to go up 2 levels to Project, then 1 more to POS
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DB_PATH = os.path.join(os.path.dirname(BASE_DIR), 'db', 'Anumani.db')
+# Database path: Prefer config.DB_PATH; fallback to derived path if config not importable
+try:
+    from config import DB_PATH as CONFIG_DB_PATH
+except Exception:
+    CONFIG_DB_PATH = None
+
+# Derived fallback (../db/Anumani.db relative to Project folder)
+_DERIVED_BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_DERIVED_DB_PATH = os.path.join(os.path.dirname(_DERIVED_BASE_DIR), 'db', 'Anumani.db')
+
+DB_PATH = CONFIG_DB_PATH or _DERIVED_DB_PATH
+
+
+def _norm(code: Optional[str]) -> str:
+    """Normalize product codes for consistent cache keys (uppercase, trimmed)."""
+    try:
+        return str(code).strip().upper()
+    except Exception:
+        return ''
+
+def _remove_cache_variants(code: str) -> None:
+    """Remove any cache entries that match the code case-insensitively."""
+    try:
+        target = _norm(code)
+        if not target:
+            return
+        to_delete = [k for k in list(PRODUCT_CACHE.keys()) if _norm(k) == target]
+        for k in to_delete:
+            PRODUCT_CACHE.pop(k, None)
+    except Exception:
+        pass
 
 
 def load_product_cache(db_path: str = DB_PATH) -> bool:
@@ -42,25 +70,20 @@ def load_product_cache(db_path: str = DB_PATH) -> bool:
         cursor = conn.cursor()
         
         # Query all products from Product_list table
-        cursor.execute("""
-            SELECT product_code, name, selling_price 
-            FROM Product_list
-        """)
-        
+        cursor.execute("SELECT product_code, name, selling_price FROM Product_list")
         rows = cursor.fetchall()
         
         for row in rows:
-            product_code, name, price = row
-            PRODUCT_CACHE[str(product_code)] = {
-                'name': str(name),
-                'price': float(price)
-            }
+            product_code, name, selling_price = row
+            PRODUCT_CACHE[_norm(product_code)] = (
+                str(name) if name is not None else '',
+                float(selling_price) if selling_price is not None else 0.0,
+            )
         
         conn.close()
-        # Use ASCII-only output to prevent UnicodeEncodeError on Windows consoles
-        print(f"[OK] Loaded {len(PRODUCT_CACHE)} products into cache from {db_path}")
+        # Cache loaded
         return True
-        
+
     except sqlite3.Error as e:
         print(f"[DB ERROR] Database error loading products: {e}")
         return False
@@ -81,11 +104,67 @@ def get_product_info(product_code: str) -> Tuple[bool, str, float]:
         - name: Product name (or product_code if not found)
         - price: Selling price (or 0.0 if not found)
     """
-    if product_code in PRODUCT_CACHE:
-        product = PRODUCT_CACHE[product_code]
-        return True, product['name'], product['price']
-    else:
-        return False, product_code, 0.0
+    key_norm = _norm(product_code)
+    if key_norm in PRODUCT_CACHE:
+        name, price = PRODUCT_CACHE[key_norm]
+        return True, (name if name else product_code), float(price)
+    # Backward compatibility: try raw and lower/upper variants
+    raw = str(product_code) if product_code is not None else ''
+    if raw in PRODUCT_CACHE:
+        name, price = PRODUCT_CACHE[raw]
+        return True, (name if name else product_code), float(price)
+    low = raw.lower()
+    if low in PRODUCT_CACHE:
+        name, price = PRODUCT_CACHE[low]
+        return True, (name if name else product_code), float(price)
+    up = raw.upper()
+    if up in PRODUCT_CACHE:
+        name, price = PRODUCT_CACHE[up]
+        return True, (name if name else product_code), float(price)
+    return False, product_code, 0.0
+
+
+def get_product_full(product_code: str) -> Tuple[bool, Dict[str, Any]]:
+    """Get full product information directly from DB."""
+    try:
+        if not os.path.exists(DB_PATH):
+            return False, {}
+        conn = sqlite3.connect(DB_PATH)
+        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT product_code, name, category, supplier, selling_price, cost_price, unit, last_updated
+            FROM Product_list WHERE product_code = ?
+            """,
+            (product_code,),
+        )
+        row = cur.fetchone()
+        conn.close()
+        if not row:
+            return False, {}
+        (
+            code,
+            name,
+            category,
+            supplier,
+            selling_price,
+            cost_price,
+            unit,
+            last_updated,
+        ) = row
+        return True, {
+            'code': str(code),
+            'name': str(name) if name is not None else '',
+            'price': float(selling_price) if selling_price is not None else 0.0,
+            'category': str(category) if category is not None else '',
+            'supplier': str(supplier) if supplier is not None else '',
+            'cost_price': float(cost_price) if cost_price is not None else 0.0,
+            'unit': str(unit) if unit is not None else '',
+            'last_updated': str(last_updated) if last_updated is not None else '',
+        }
+    except Exception as e:
+        print(f"get_product_full error: {e}")
+        return False, {}
 
 
 def refresh_product_cache(db_path: str = DB_PATH) -> bool:
@@ -121,6 +200,159 @@ def show_temp_status(status_bar: Optional[QStatusBar], message: str, duration_ms
         print(f"Error showing status message: {e}")
 
 
-# Auto-load cache on module import
-print(f"Database path: {DB_PATH}")
+# Auto-load cache on module import (silent success)
 load_product_cache()
+
+
+def add_product(
+    product_code: str,
+    name: str,
+    selling_price: float,
+    category: Optional[str] = None,
+    supplier: Optional[str] = None,
+    cost_price: Optional[float] = None,
+    unit: Optional[str] = None,
+    last_updated: Optional[str] = None,
+    db_path: str = DB_PATH,
+) -> Tuple[bool, str]:
+    """Add a new product to Product_list with full schema fields. Returns (success, message)."""
+    try:
+        if not os.path.exists(db_path):
+            return False, f"Database not found at: {db_path}"
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        # Default timestamp if not provided
+        if last_updated is None:
+            last_updated = _now_str()
+        cur.execute(
+            """
+            INSERT INTO Product_list
+                (product_code, name, category, supplier, selling_price, cost_price, unit, last_updated)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                product_code,
+                name,
+                category,
+                supplier,
+                float(selling_price) if selling_price is not None else 0.0,
+                float(cost_price) if cost_price is not None else None,
+                unit,
+                last_updated,
+            ),
+        )
+        conn.commit()
+        conn.close()
+        # Update slim cache with name and price
+        # Ensure only normalized key exists in cache
+        _remove_cache_variants(product_code)
+        PRODUCT_CACHE[_norm(product_code)] = (
+            str(name) if name is not None else '',
+            float(selling_price) if selling_price is not None else 0.0,
+        )
+        return True, "Product added"
+    except sqlite3.IntegrityError:
+        return False, "Product already exists"
+    except sqlite3.Error as e:
+        return False, f"DB error: {e}"
+    except Exception as e:
+        return False, f"Error: {e}"
+
+
+def update_product(
+    product_code: str,
+    name: Optional[str] = None,
+    selling_price: Optional[float] = None,
+    category: Optional[str] = None,
+    supplier: Optional[str] = None,
+    cost_price: Optional[float] = None,
+    unit: Optional[str] = None,
+    db_path: str = DB_PATH,
+) -> Tuple[bool, str]:
+    """Update an existing product. Only updates provided fields; always updates last_updated."""
+    try:
+        if not os.path.exists(db_path):
+            return False, f"Database not found at: {db_path}"
+        if not product_code:
+            return False, "Product code required"
+        sets = []
+        params = []
+        if name is not None:
+            sets.append("name = ?")
+            params.append(name)
+        if selling_price is not None:
+            sets.append("selling_price = ?")
+            params.append(float(selling_price))
+        if category is not None:
+            sets.append("category = ?")
+            params.append(category)
+        if supplier is not None:
+            sets.append("supplier = ?")
+            params.append(supplier)
+        if cost_price is not None:
+            sets.append("cost_price = ?")
+            params.append(float(cost_price))
+        if unit is not None:
+            sets.append("unit = ?")
+            params.append(unit)
+        if not sets:
+            return False, "No fields to update"
+        # Always update last_updated
+        sets.append("last_updated = ?")
+        params.append(_now_str())
+        params.append(product_code)
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        cur.execute(f"UPDATE Product_list SET {', '.join(sets)} WHERE product_code = ?", params)
+        if cur.rowcount == 0:
+            conn.close()
+            return False, "Product not found"
+        conn.commit()
+        conn.close()
+        # Update slim cache with provided name/price (keep existing if not provided)
+        key = _norm(product_code)
+        curr_name, curr_price = PRODUCT_CACHE.get(key, ('', 0.0))
+        new_name = curr_name if name is None or str(name) == '' else str(name)
+        new_price = curr_price if selling_price is None else float(selling_price)
+        _remove_cache_variants(product_code)
+        PRODUCT_CACHE[key] = (new_name, new_price)
+        return True, "Product updated"
+    except sqlite3.Error as e:
+        return False, f"DB error: {e}"
+    except Exception as e:
+        return False, f"Error: {e}"
+
+
+def delete_product(product_code: str, db_path: str = DB_PATH) -> Tuple[bool, str]:
+    """Delete a product by code. Returns (success, message)."""
+    try:
+        if not os.path.exists(db_path):
+            return False, f"Database not found at: {db_path}"
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        cur.execute("DELETE FROM Product_list WHERE product_code = ?", (product_code,))
+        if cur.rowcount == 0:
+            conn.close()
+            return False, "Product not found"
+        conn.commit()
+        conn.close()
+        # Remove from slim cache (all variants)
+        _remove_cache_variants(product_code)
+        return True, "Product deleted"
+    except sqlite3.Error as e:
+        return False, f"DB error: {e}"
+    except Exception as e:
+        return False, f"Error: {e}"
+
+
+def _now_str() -> str:
+    """Return current local datetime as yyyy-MM-dd HH:mm:ss string without requiring PyQt in DB module."""
+    try:
+        # Basic portable timestamp using time module
+        import time
+        return time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    except Exception:
+        return ""
+
+
+# Note: legacy helper _get_name_from_db removed as cache now contains names.

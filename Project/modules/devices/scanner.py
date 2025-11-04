@@ -46,7 +46,6 @@ class BarcodeScanner(QObject):
     def start(self):
         """Start listening for barcode scanner input."""
         if self._listener is not None:
-            print("[Scanner] Scanner already running")
             return
             
         # Create keyboard listener
@@ -54,7 +53,6 @@ class BarcodeScanner(QObject):
         
         # Start listener in background thread
         self._listener.start()
-        print("[Scanner] Barcode scanner started")
         
     def stop(self):
         """Stop listening for barcode scanner input."""
@@ -62,7 +60,6 @@ class BarcodeScanner(QObject):
             self._listener.stop()
             self._listener = None
             self._buffer = ''
-            print("[Scanner] Barcode scanner stopped")
             
     def set_enabled(self, enabled: bool):
         """
@@ -94,18 +91,14 @@ class BarcodeScanner(QObject):
         except AttributeError:
             # Handle special keys (Enter, Shift, etc.)
             if key == keyboard.Key.enter:
-                print(f"[Scanner] Enter pressed, buffer='{self._buffer}', length={len(self._buffer)}")
                 if self._buffer and len(self._buffer) >= self._min_barcode_length:
                     # Enter key pressed with data in buffer → barcode complete
                     barcode = self._buffer.strip()
-                    print(f"[Scanner] Valid barcode detected: '{barcode}'")
                     if barcode:
                         # Emit Qt signal (thread-safe)
-                        print(f"[Scanner] Emitting signal with barcode: {barcode}")
                         self.barcode_scanned.emit(barcode)
                     self._buffer = ''
                 else:
-                    print(f"[Scanner] Enter pressed but buffer too short or empty, ignoring")
                     self._buffer = ''
             return
         
@@ -113,10 +106,10 @@ class BarcodeScanner(QObject):
         if time_diff > self._timeout:
             # Slow typing → likely manual input, start new buffer
             self._buffer = char
-            """print(f"[Scanner] Slow input (manual), buffer reset to: '{char}'")"""
+            
         else:
             # Fast input → likely scanner, append to buffer
             self._buffer += char
-            """print(f"[Scanner] Fast input (scanner), buffer now: '{self._buffer}'")"""
+            
             
         self._last_time = now

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Selvam POS Application</string>
+   <string>Selvam POS</string>
   </property>
   <widget class="QWidget" name="contentWidget">
    <layout class="QVBoxLayout" name="mainWindowLayout">

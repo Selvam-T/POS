@@ -22,14 +22,16 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - Global QSS stylesheet for consistent theming
 - Responsive em-based sizing
 - Modal vegetable weight input dialog
- - Manual entry dialog for unknown products
+ - Manual entry dialog (opened only from its button)
  - Right-side icon-only menu with tooltips and modal placeholders
  - Header layout: Date (left), Company (center), Day+Time (right as a single label)
 
 ✅ **Barcode Scanner**
 - Event-driven scanner integration using `pynput`
 - Distinguishes scanner input from manual typing by timing
-- On scan: adds to sales table if found; otherwise opens Manual Entry dialog
+- On scan: adds to sales table if found
+- If not found while in Sales frame: opens Product Management in ADD mode with the scanned code prefilled
+- If Product Management dialog is open: scans fill the Product Code field (no Manual Entry)
 
 ✅ **Error Handling**
 - Status bar notifications for invalid products
@@ -69,7 +71,7 @@ Project/
 
 ## Database Setup
 
-The application expects a SQLite database at `../db/Anumani.db` (one level above the Project folder).
+The application expects a SQLite database at `../db/Anumani.db` (one level above the Project folder). The path is centralized in `config.py` as `DB_PATH` and used across the app.
 
 **Required table schema:**
 ```sql
@@ -86,9 +88,10 @@ CREATE TABLE Product_list (
 ```
 
 **Product Cache:**
-- Loads all products into memory on startup (~2-3 MB for 22K products)
-- Provides instant lookups without repeated database queries
-- Automatically refreshes when needed
+- Loads all products into memory on startup
+- Keys are normalized (uppercase + trimmed) to avoid case/whitespace mismatches
+- Cache updates immediately on ADD/UPDATE/DELETE
+- Automatically refreshed after a Product dialog ADD/UPDATE/DELETE to guarantee consistency
 
 ## Quick Start
 
@@ -169,7 +172,8 @@ Implementation details:
 
 - Scan a product barcode with the scanner connected to the POS machine.
 - If found in the cache: the product is added to the sales table (or quantity increments).
-- If not found: a modal Manual Entry dialog opens pre-filled with a message like "Invalid Barcode # <code>".
+- If not found (and you are in Sales frame): Product Management opens in ADD mode with the code prefilled. After you save, the new item is automatically added to the sales table.
+- If the Product Management dialog is already open: scans populate the dialog’s Product Code; no other UI opens.
 
 ### Sales Table Operations
 
@@ -200,10 +204,8 @@ ROW_COLOR_ODD = '#ffffe0'   # Light yellow (odd rows)
 ROW_COLOR_DELETE_HIGHLIGHT = '#ff6b6b'  # Salmon red (deletion preview)
 ```
 
-### Database Path (`modules/db_operation/database.py`)
-```python
-DB_PATH = os.path.join(os.path.dirname(BASE_DIR), 'db', 'Anumani.db')
-```
+### Database Path (`config.py`)
+`DB_PATH` is defined in `config.py` and points to `../db/Anumani.db` relative to the Project folder.
 
 ## Development
 
@@ -216,13 +218,9 @@ designer ui\main_window.ui
 
 Changes are loaded automatically at runtime—no compilation needed.
 
-### Refreshing Product Cache
+### Product Management Documentation
 
-To reload products after database changes:
-```python
-from modules.db_operation import refresh_product_cache
-refresh_product_cache()
-```
+See `Documentation/product_management.md` for in-depth behavior, rationale, and integration details.
 
 ### Adding New Features
 
@@ -269,4 +267,4 @@ See `requirements.txt` for full list. Main dependencies:
 
 ---
 
-**Last Updated:** November 1, 2025
+**Last Updated:** November 3, 2025

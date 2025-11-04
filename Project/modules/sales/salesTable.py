@@ -438,42 +438,31 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
         3. Recalculate totals
         4. Show status message (success/not found)
     """
-    print(f"[handle_barcode_scanned] Called with barcode='{barcode}'")
-    
     if not barcode:
-        print(f"[handle_barcode_scanned] Empty barcode, returning")
         return
         
-    # Debug: show barcode in status bar
     if status_bar:
         show_temp_status(status_bar, f"📷 Scanned: {barcode}", 3000)
     
     # Look up product in cache
-    print(f"[handle_barcode_scanned] Looking up product...")
     found, product_name, unit_price = get_product_info(barcode)
-    print(f"[handle_barcode_scanned] Lookup result: found={found}, name='{product_name}', price={unit_price}")
     
     if not found:
         # Product not found in database
-        print(f"[handle_barcode_scanned] Product not found")
         if status_bar:
             show_temp_status(status_bar, f"⚠ Product '{barcode}' not found in database", 5000)
         return
     
     # Check if product already exists in table
-    print(f"[handle_barcode_scanned] Checking if product exists in table...")
     existing_row = _find_product_in_table(table, barcode)
-    print(f"[handle_barcode_scanned] existing_row={existing_row}")
     
     if existing_row is not None:
         # Product exists → increment quantity
-        print(f"[handle_barcode_scanned] Product exists at row {existing_row}, incrementing quantity")
         _increment_row_quantity(table, existing_row)
         if status_bar:
             show_temp_status(status_bar, f"✓ Added {product_name} (quantity updated)", 3000)
     else:
         # New product → add row
-        print(f"[handle_barcode_scanned] New product, adding row")
         _add_product_row(table, barcode, product_name, unit_price, status_bar)
         if status_bar:
             show_temp_status(status_bar, f"✓ Added {product_name}", 3000)

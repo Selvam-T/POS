@@ -3,7 +3,12 @@ Configuration file for POS application.
 
 This file centralizes color definitions and other configuration values
 that need to be shared across multiple modules.
+
+Also defines the SQLite database path (DB_PATH) so it's easy to locate
+and override from a single place if needed.
 """
+
+import os
 
 # =============================================================================
 # TABLE ROW COLORS
@@ -68,3 +73,16 @@ TIME_FMT = 'hh : mm ap'
 # Company name shown in the header label 'labelCompany'. This is baked into the
 # build and does not change per machine.
 COMPANY_NAME = 'Anumani Trading Pte Ltd'
+
+# =============================================================================
+# DATABASE PATH
+# =============================================================================
+# Resolved relative to the repository layout:
+#   Project/config.py           (this file)
+#   POS/db/Anumani.db           (database lives one level above Project in db/)
+#
+# Final absolute path example:
+#   C:\Users\<USER>\OneDrive\Desktop\POS\db\Anumani.db
+
+_BASE_DIR = os.path.abspath(os.path.dirname(__file__))  # .../POS/Project
+DB_PATH = os.path.join(os.path.dirname(_BASE_DIR), 'db', 'Anumani.db')

@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ProductManagement</class>
+ <widget class="QDialog" name="ProductManagement">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>500</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Product Management</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_buttons">
+     <item>
+      <widget class="QPushButton" name="addButton">
+       <property name="text">
+        <string>ADD</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="removeButton">
+       <property name="text">
+        <string>REMOVE</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="updateButton">
+       <property name="text">
+        <string>UPDATE / VIEW</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="subHeaderLabel">
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Add New Product</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="productCodeLabel">
+       <property name="text">
+        <string>Product Code*</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="productCodeLineEdit"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="productNameLabel">
+       <property name="text">
+        <string>Product Name*</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="productNameLineEdit"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="categoryLabel">
+       <property name="text">
+        <string>Category*</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="categoryComboBox">
+       
+       <item>
+        <property name="text">
+         <string>Other</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Electronics</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Food</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Apparel</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="costPriceLabel">
+       <property name="text">
+        <string>Cost Price</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="costPriceLineEdit"/>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="sellingPriceLabel">
+       <property name="text">
+        <string>Selling Price*</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLineEdit" name="sellingPriceLineEdit"/>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="unitLabel">
+       <property name="text">
+        <string>Unit</string>
+       </property>
+      </widget>
+     </item>
+    <item row="5" column="1">
+     <widget class="QComboBox" name="unitComboBox">
+      <item>
+       <property name="text">
+        <string>PIECES</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>GRAMS</string>
+       </property>
+      </item>
+     </widget>
+    </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="supplierLabel">
+       <property name="text">
+        <string>Supplier</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QLineEdit" name="supplierLineEdit"/>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="lastUpdatedLabel">
+       <property name="text">
+        <string>Last updated</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QLineEdit" name="lastUpdatedLineEdit"/>
+     </item>
+    </layout>
+   </item>
+    <item>
+     <widget class="QLabel" name="statusLabel">
+      <property name="text">
+        <string/>
+      </property>
+      <property name="alignment">
+        <set>Qt::AlignHCenter|Qt::AlignVCenter</set>
+      </property>
+      <property name="wordWrap">
+        <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_actionButtons">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="okButton">
+       <property name="text">
+        <string>ADD</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="cancelButton">
+       <property name="text">
+        <string>CANCEL</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+ </ui>
