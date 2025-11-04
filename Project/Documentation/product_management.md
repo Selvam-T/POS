@@ -77,7 +77,7 @@ This document summarizes the Product Management feature (Product.ui / open_produ
 - For the full cross-application routing rules and protections (modal block, overlay, Enter suppression), see Documentation/scanner_input_infocus.md.
 
 ## Manual Entry Dialog Policy
-- Manual Entry (`ui/manual.ui`) is only opened by its explicit button in the Sales frame.
+- Manual Entry (`ui/manual_entry.ui`) is only opened by its explicit button in the Sales frame.
 - We intentionally removed auto-opening Manual Entry on unknown scans to simplify the flow and avoid conflicting contexts.
 
 ## Why this design

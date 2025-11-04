@@ -48,6 +48,8 @@ Project/
 ├── README.md                    # Setup and usage
 ├── Project_Journal.md           # Detailed development documentation
 ├── test_scanner.py              # Minimal scanner verification app
+├── tools/
+│   └── format_assets.py         # Formatter for .ui (lxml) and .qss (jsbeautifier)
 ├── assets/
 │   ├── style.qss               # Global stylesheet (QSS)
 │   └── icons/                   # SVG/PNG icons (menu, delete, etc.)
@@ -56,7 +58,9 @@ Project/
 │   ├── sales_frame.ui          # Sales section UI
 │   ├── payment_frame.ui        # Payment section UI
 │   ├── menu_frame.ui           # Right-side menu (7 icon-only buttons)
-│   └── manual.ui               # Manual entry dialog content
+│   ├── product.ui              # Product Management dialog content
+│   ├── vegetable_entry.ui      # Vegetable (weight) dialog content
+│   └── manual_entry.ui         # Manual entry dialog content
 └── modules/
    ├── db_operation/
    │   ├── __init__.py
@@ -230,6 +234,24 @@ designer ui\main_window.ui
 ```
 
 Changes are loaded automatically at runtime—no compilation needed.
+
+### Formatting UI (.ui) and styles (.qss)
+
+A small formatter script keeps Qt Designer XML and stylesheets tidy:
+
+- .ui files: formatted with lxml (pretty-printed, normalized whitespace)
+- .qss files: formatted with jsbeautifier (CSS-style formatter)
+
+Run from the project root:
+
+```cmd
+pip install -r requirements.txt
+python tools\format_assets.py
+```
+
+Notes:
+- XML attribute order may change on first run (semantically safe).
+- QSS is CSS-like; most files format well—quick review recommended for Qt-specific selectors.
 
 ### Product Management Documentation
 

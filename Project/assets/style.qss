@@ -1,10 +1,9 @@
-
 /* =============================================================
    BASE APPLICATION
    ============================================================= */
 QMainWindow {
-    background-color: #F0F0F0;
-    font-family: Dubai, Helvetica, sans-serif;
+  background - color: #F0F0F0;
+  font - family: Dubai, Helvetica, sans - serif;
 }
 
 /* =============================================================
@@ -12,12 +11,12 @@ QMainWindow {
    Apply a unified font to all QPushButtons
    ============================================================= */
 QPushButton {
-    font-family: Segoe UI, Tahoma, sans-serif;
+  font - family: Segoe UI, Tahoma, sans - serif;
 }
 
-QHBoxLayout#titleBar,
-QHBoxLayout#workArea {
-    margin-left: 15px;
+QHBoxLayout #titleBar,
+QHBoxLayout #workArea {
+  margin - left: 15 px;
 }
 
 /* QWidget selector is for designing purpose only */
@@ -31,23 +30,23 @@ QWidget {
    ============================================================= */
 
 /* --- Header Labels --- */
-QLabel#labelCompany {
-    font-size: 12pt;
-    qproperty-alignment: 'AlignCenter';
+QLabel #labelCompany {
+  font - size: 12 pt;
+  qproperty - alignment: 'AlignCenter';
 }
 
-QLabel#labelDate,
-QLabel#labelDayTime {
-    font-size: 12pt;
+QLabel #labelDate,
+QLabel #labelDayTime {
+  font - size: 12 pt;
 }
 
 /* Explicit padding so header text offsets are visible regardless of widget margins */
-QLabel#labelDate {
-    padding-left: 20px;   /* adjust as needed */
+QLabel #labelDate {
+  padding - left: 20 px; /* adjust as needed */
 }
 
-QLabel#labelDayTime {
-    padding-right: 20px;  /* adjust as needed */
+QLabel #labelDayTime {
+  padding - right: 20 px; /* adjust as needed */
 }
 
 /* =============================================================
@@ -55,489 +54,489 @@ QLabel#labelDayTime {
    ============================================================= */
 
 /* --- Sales Frame Container --- */
-QFrame#salesFrame {
-    font-family: Tahoma, verdana;
-    background-color: lightblue;
-    border: 1px solid #333333;
+QFrame #salesFrame {
+  font - family: Tahoma, verdana;
+  background - color: lightblue;
+  border: 1 px solid #333333;
     border-radius: 0.5em;
 }
 
 /* --- Sales Label --- */
-QLabel#salesLabel {
-    font-size: 14pt;
-    qproperty-alignment: 'AlignCenter';
-    min-height: 30px;
-    max-height: 30px;
-    padding: 0px;
-}
+QLabel# salesLabel {
+    font - size: 14 pt;
+    qproperty - alignment: 'AlignCenter';
+    min - height: 30 px;
+    max - height: 30 px;
+    padding: 0 px;
+  }
 
-/* --- Sales Table --- */
-/* NOTE: Alternating row colors are NOT defined here in QSS.
-   They are programmatically set in Python (see config.py) because
-   we have embedded widgets (QLineEdit, QPushButton) in the table
-   that require manual background color assignment.
-   Row colors: even=#add8e6 (light blue), odd=#ffffe0 (light yellow) */
-QTableWidget#salesTable {
-    border: 1px solid #4317ab; 
+  /* --- Sales Table --- */
+  /* NOTE: Alternating row colors are NOT defined here in QSS.
+     They are programmatically set in Python (see config.py) because
+     we have embedded widgets (QLineEdit, QPushButton) in the table
+     that require manual background color assignment.
+     Row colors: even=#add8e6 (light blue), odd=#ffffe0 (light yellow) */
+  QTableWidget #salesTable {
+    border: 1 px solid #4317ab; 
     font-size: 10pt;
     font-weight: bold;
-    background-color: #e4e4e4;
-    gridline-color: rgba(0,0,0,0.2);
-}
+    background-color: # e4e4e4;
+    gridline - color: rgba(0, 0, 0, 0.2);
+  }
 
-QTableWidget#salesTable QHeaderView::section {
-    background-color: #4682b4;
+  QTableWidget #salesTable QHeaderView::section {
+      background - color: #4682b4;
     color: white;
     border: 1px solid rgba(0,0,0,0.2); 
     font-size: 10pt;
     font-weight: bold;  
 }
 
-QTableWidget#salesTable::item:selected {
-    background-color: transparent;
-}
+QTableWidget# salesTable::item: selected {
+        background - color: transparent;
+      }
 
-/* --- Quantity Input Field --- */
-QLineEdit#qtyInput {
-    font-size: 10pt;
-    font-weight: bold;
-    text-align: center;
-    background-color: #fffbe6;
-    border: 2px solid #4682b4;
+      /* --- Quantity Input Field --- */
+      QLineEdit #qtyInput {
+        font - size: 10 pt;
+        font - weight: bold;
+        text - align: center;
+        background - color: #fffbe6;
+        border: 2 px solid #4682b4;
     border-radius: 5px;
 }
 
-QLineEdit#qtyInput:focus {
-    background-color: orange;
-    border: 3px solid green;
-}
+QLineEdit# qtyInput: focus {
+          background - color: orange;
+          border: 3 px solid green;
+        }
 
-QLineEdit#qtyInput[error="true"] {
-    border: 3px solid red;
-    background-color: #ffcccc;
-}
+        QLineEdit #qtyInput[error = "true"] {
+          border: 3 px solid red;
+          background - color: #ffcccc;
+        }
 
-/* --- Remove Button --- */
-QPushButton#removeBtn {
-    /*font-size: 12pt;
-    font-weight: bold;
-    color: red;*/
-    background-color: transparent;  /* Transparent to show row color */
-    border: 5px solid #d33f12;
-    border-radius: 2px;
-    min-width: 30px; 
-    max-width: 30px; 
-    min-height: 28px;
-    max-height: 28px;
-    padding: 0px;
-}
-QPushButton#removeBtn:hover { 
-    background-color: rgba(255, 0, 0, 0.15);  /* Light red tint on hover */
-    border: 5px solid red;
-}
-QPushButton#removeBtn:pressed { 
-    background-color: rgba(255, 0, 0, 0.3);  /* Darker red tint when pressed */
-    border: 5px solid #990000;
+        /* --- Remove Button --- */
+        QPushButton #removeBtn {
+          /*font-size: 12pt;
+          font-weight: bold;
+          color: red;*/
+          background - color: transparent; /* Transparent to show row color */
+          border: 5 px solid #d33f12;
+          border - radius: 2 px;
+          min - width: 30 px;
+          max - width: 30 px;
+          min - height: 28 px;
+          max - height: 28 px;
+          padding: 0 px;
+        }
+        QPushButton #removeBtn: hover {
+          background - color: rgba(255, 0, 0, 0.15); /* Light red tint on hover */
+          border: 5 px solid red;
+        }
+        QPushButton #removeBtn: pressed {
+            background - color: rgba(255, 0, 0, 0.3); /* Darker red tint when pressed */
+            border: 5 px solid #990000;
 }
 
 /* --- Total Display Container --- */
-QFrame#totalContainer {
-    min-height: 26px;
-    padding: 0px;
-    border: 1px solid #4317ab;
+QFrame# totalContainer {
+                min - height: 26 px;
+                padding: 0 px;
+                border: 1 px solid #4317ab;
     border-radius: 2px;
     background: transparent;
 }
 
-QLabel#totalTitle,
-QLabel#totalValue {
-    font-size: 32px; 
-    border: none;  
-    background: white;
-    qproperty-alignment: 'AlignCenter';
+QLabel# totalTitle,
+                  QLabel #totalValue {
+                    font - size: 32 px;
+                    border: none;
+                    background: white;
+                    qproperty - alignment: 'AlignCenter';
+                  }
+
+                /* --- Add Buttons (vegBtn, manualBtn) --- */
+                QPushButton #vegBtn,
+                QPushButton #manualBtn {
+                  border - radius: 18 px;
+                  padding: 8 px 10 px;
+                  color: white;
+                  font - size: 14 pt;
+                }
+
+                QPushButton #vegBtn {
+                  background - color: green;
+                }
+                QPushButton #vegBtn: hover {
+                    background - color: #006400; 
+}
+QPushButton# vegBtn: pressed {
+                        background - color: #004d00; 
 }
 
-/* --- Add Buttons (vegBtn, manualBtn) --- */
-QPushButton#vegBtn,
-QPushButton#manualBtn {
-    border-radius: 18px;
-    padding: 8px 10px;
-    color: white;
-    font-size: 14pt;
+QPushButton# manualBtn {
+                          background - color: purple;
+                        }
+                        QPushButton #manualBtn: hover {
+                            background - color: #5e0e5e; 
 }
-
-QPushButton#vegBtn {
-    background-color: green;
-}
-QPushButton#vegBtn:hover { 
-    background-color: #006400; 
-}
-QPushButton#vegBtn:pressed { 
-    background-color: #004d00; 
-}
-
-QPushButton#manualBtn {
-    background-color: purple;
-}
-QPushButton#manualBtn:hover { 
-    background-color: #5e0e5e; 
-}
-QPushButton#manualBtn:pressed { 
-    background-color: #3c003c; 
+QPushButton# manualBtn: pressed {
+                                background - color: #3c003c; 
 }
 
 /* --- Receipt Action Buttons (cancelsaleBtn, onholdBtn, viewholdBtn) --- */
-QPushButton#cancelsaleBtn,
-QPushButton#onholdBtn,
-QPushButton#viewholdBtn {
-    border-radius: 18px;
-    padding: 12px 20px;
-    color: white;
-    font-size: 14pt;
+QPushButton# cancelsaleBtn,
+                                  QPushButton #onholdBtn,
+                                  QPushButton #viewholdBtn {
+                                    border - radius: 18 px;
+                                    padding: 12 px 20 px;
+                                    color: white;
+                                    font - size: 14 pt;
+                                  }
+
+                                QPushButton #cancelsaleBtn {
+                                  background - color: #660600;
+}
+QPushButton# cancelsaleBtn: hover {
+                                      background - color: #7a0800; 
+}
+QPushButton# cancelsaleBtn: pressed {
+                                          background - color: #4b0400; 
 }
 
-QPushButton#cancelsaleBtn {
-    background-color: #660600;
+QPushButton# onholdBtn {
+                                              background - color: #998900;
 }
-QPushButton#cancelsaleBtn:hover { 
-    background-color: #7a0800; 
-}
-QPushButton#cancelsaleBtn:pressed { 
-    background-color: #4b0400; 
-}
-
-QPushButton#onholdBtn {
-    background-color: #998900;
-}
-QPushButton#onholdBtn:hover { 
-    background-color: #b3a300; 
-}
-QPushButton#onholdBtn:pressed { 
-    background-color: #7a6f00; 
+QPushButton# onholdBtn: hover {
+                                                background - color: #b3a300;
+                                              }
+                                              QPushButton #onholdBtn: pressed {
+                                                  background - color: #7a6f00; 
 }
 
-QPushButton#viewholdBtn {
-    background-color: #006699;
+QPushButton# viewholdBtn {
+                                                      background - color: #006699;
 }
-QPushButton#viewholdBtn:hover { 
-    background-color: #0077b3; 
+QPushButton# viewholdBtn: hover {
+                                                          background - color: #0077b3; 
 }
-QPushButton#viewholdBtn:pressed { 
-    background-color: #004d73; 
+QPushButton# viewholdBtn: pressed {
+                                                              background - color: #004d73; 
 }
 
-/* =============================================================
-   PAYMENT FRAME AND ITS CHILDREN
-   ============================================================= */
+/* = === === === === === === === === === === === === === === === === === === === ===
+                                                                PAYMENT FRAME AND ITS CHILDREN ===
+                                                                === === === === === === === === === === === === === === === === === === === = * /
 
-/* --- Payment Frame Container --- */
-QFrame#paymentFrame {
-    background-color: #ffe8cc;
-    border: 1px solid #333333;
+                                                              /* --- Payment Frame Container --- */
+                                                              QFrame #paymentFrame {
+                                                                background - color: #ffe8cc;
+                                                                border: 1 px solid #333333;
     border-radius: 0.5em;
 }
 
 /* --- Payment Label --- */
-QLabel#paymentLabel {
-    font-size: 14pt;
-    qproperty-alignment: 'AlignCenter';
-    min-height: 30px;
-    max-height: 30px;
-    padding: 0px;
+QLabel# paymentLabel {
+                                                                  font - size: 14 pt;
+                                                                  qproperty - alignment: 'AlignCenter';
+                                                                  min - height: 30 px;
+                                                                  max - height: 30 px;
+                                                                  padding: 0 px;
+                                                                }
+
+                                                                /* --- Payment Method Buttons --- */
+                                                                QPushButton #cashBtn,
+                                                                QPushButton #netsBtn,
+                                                                QPushButton #paynowBtn,
+                                                                QPushButton #voucherBtn {
+                                                                  border - radius: 8 px;
+                                                                  padding: 12 px 16 px;
+                                                                  color: white;
+                                                                }
+
+                                                                QPushButton #cashBtn {
+                                                                  background - color: #2e7d32;
+}
+QPushButton# cashBtn: hover {
+                                                                      background - color: #256528; 
+}
+QPushButton# cashBtn: pressed {
+                                                                          background - color: #1b4d1e; 
 }
 
-/* --- Payment Method Buttons --- */
-QPushButton#cashBtn,
-QPushButton#netsBtn,
-QPushButton#paynowBtn,
-QPushButton#voucherBtn {
-    border-radius: 8px;
-    padding: 12px 16px;
-    color: white;
+QPushButton# netsBtn {
+                                                                              background - color: #0a3d91;
+}
+QPushButton# netsBtn: hover {
+                                                                                  background - color: #0d4fab; 
+}
+QPushButton# netsBtn: pressed {
+                                                                                      background - color: #08326d; 
 }
 
-QPushButton#cashBtn {
-    background-color: #2e7d32;
+QPushButton# paynowBtn {
+                                                                                          background - color: #6a1b9a;
 }
-QPushButton#cashBtn:hover { 
-    background-color: #256528; 
+QPushButton# paynowBtn: hover {
+                                                                                              background - color: #8320c0; 
 }
-QPushButton#cashBtn:pressed { 
-    background-color: #1b4d1e; 
-}
-
-QPushButton#netsBtn {
-    background-color: #0a3d91;
-}
-QPushButton#netsBtn:hover { 
-    background-color: #0d4fab; 
-}
-QPushButton#netsBtn:pressed { 
-    background-color: #08326d; 
+QPushButton# paynowBtn: pressed {
+                                                                                                  background - color: #4d1373; 
 }
 
-QPushButton#paynowBtn {
-    background-color: #6a1b9a;
-}
-QPushButton#paynowBtn:hover { 
-    background-color: #8320c0; 
-}
-QPushButton#paynowBtn:pressed { 
-    background-color: #4d1373; 
-}
+QPushButton# voucherBtn {
+                                                                                                    background - color: #d4af37;
+                                                                                                    color: black;
+                                                                                                  }
+                                                                                                  QPushButton #voucherBtn: hover {
+                                                                                                    background - color: #e0c04a;
+                                                                                                  }
+                                                                                                  QPushButton #voucherBtn: pressed {
+                                                                                                    background - color: #b89628;
+                                                                                                  }
 
-QPushButton#voucherBtn {
-    background-color: #d4af37;
-    color: black;
-}
-QPushButton#voucherBtn:hover { 
-    background-color: #e0c04a; 
-}
-QPushButton#voucherBtn:pressed { 
-    background-color: #b89628; 
-}
-
-/* --- Tick Button --- */
-QPushButton#tickBtn {
-    background-color: #2e7d32;
+                                                                                                  /* --- Tick Button --- */
+                                                                                                  QPushButton #tickBtn {
+                                                                                                    background - color: #2e7d32;
     color: white;
     border-radius: 18px;
     width: 36px;
     height: 36px;
 }
-QPushButton#tickBtn:hover { 
-    background-color: #256528; 
+QPushButton# tickBtn: hover {
+                                                                                                        background - color: #256528; 
 }
-QPushButton#tickBtn:pressed { 
-    background-color: #1b4d1e; 
+QPushButton# tickBtn: pressed {
+                                                                                                            background - color: #1b4d1e; 
 }
 
 /* --- Clear Button --- */
-QPushButton#clearBtn {
-    background-color: red;
-    color: white;
-    border-radius: 18px;
-    width: 36px;
-    height: 36px;
-}
-QPushButton#clearBtn:hover { 
-    background-color: #cc0000; 
-}
-QPushButton#clearBtn:pressed { 
-    background-color: #990000; 
+QPushButton# clearBtn {
+                                                                                                              background - color: red;
+                                                                                                              color: white;
+                                                                                                              border - radius: 18 px;
+                                                                                                              width: 36 px;
+                                                                                                              height: 36 px;
+                                                                                                            }
+                                                                                                            QPushButton #clearBtn: hover {
+                                                                                                              background - color: #cc0000;
+                                                                                                            }
+                                                                                                            QPushButton #clearBtn: pressed {
+                                                                                                              background - color: #990000; 
 }
 
 /* --- Keypad Buttons --- */
 QPushButton.numeric {
-    background-color: #d3d3d3;
-    border-radius: 10px;
-    font-size: 1.1em;
-}
-QPushButton.numeric:hover { 
-    background-color: #bfbfbf; 
-}
-QPushButton.numeric:pressed { 
-    background-color: #a6a6a6; 
-}
+    background-color: # d3d3d3;
+                                                                                                              border - radius: 10 px;
+                                                                                                              font - size: 1.1 em;
+                                                                                                            }
+                                                                                                            QPushButton.numeric: hover {
+                                                                                                              background - color: #bfbfbf;
+                                                                                                            }
+                                                                                                            QPushButton.numeric: pressed {
+                                                                                                              background - color: #a6a6a6;
+                                                                                                            }
 
-QPushButton.cashQuick {
-    background-color: #8c8c8c;
+                                                                                                            QPushButton.cashQuick {
+                                                                                                              background - color: #8c8c8c;
     color: white;
     border-radius: 10px;
 }
 QPushButton.cashQuick:hover { 
-    background-color: #757575; 
-}
-QPushButton.cashQuick:pressed { 
-    background-color: #5f5f5f; 
-}
-
-QPushButton#backspaceBtn,
-QPushButton#enterBtn {
-    background-color: #f59e0b;
-    color: white;
-    border-radius: 10px;
-}
-QPushButton#backspaceBtn:hover,
-QPushButton#enterBtn:hover { 
-    background-color: #d98500; 
-}
-QPushButton#backspaceBtn:pressed,
-QPushButton#enterBtn:pressed { 
-    background-color: #b86e00; 
+    background-color: # 757575;
+                                                                                                            }
+                                                                                                            QPushButton.cashQuick: pressed {
+                                                                                                                background - color: #5f5f5f; 
 }
 
-/* --- Refund Button --- */
-QPushButton#refundBtn {
-    background-color: #d32f2f;
-    color: white;
-    border-radius: 10px;
-    font-weight: bold;
-    width: 120px;
-    height: 110px;
-}
-QPushButton#refundBtn:hover { 
-    background-color: #b71c1c; 
-}
-QPushButton#refundBtn:pressed { 
-    background-color: #8c1616; 
+QPushButton# backspaceBtn,
+                                                                                                                  QPushButton #enterBtn {
+                                                                                                                    background - color: #f59e0b;
+                                                                                                                    color: white;
+                                                                                                                    border - radius: 10 px;
+                                                                                                                  }
+                                                                                                                QPushButton #backspaceBtn: hover,
+                                                                                                                  QPushButton #enterBtn: hover {
+                                                                                                                    background - color: #d98500;
+                                                                                                                  }
+                                                                                                                QPushButton #backspaceBtn: pressed,
+                                                                                                                  QPushButton #enterBtn: pressed {
+                                                                                                                    background - color: #b86e00;
+                                                                                                                  }
+
+                                                                                                                /* --- Refund Button --- */
+                                                                                                                QPushButton #refundBtn {
+                                                                                                                  background - color: #d32f2f;
+                                                                                                                  color: white;
+                                                                                                                  border - radius: 10 px;
+                                                                                                                  font - weight: bold;
+                                                                                                                  width: 120 px;
+                                                                                                                  height: 110 px;
+                                                                                                                }
+                                                                                                                QPushButton #refundBtn: hover {
+                                                                                                                  background - color: #b71c1c;
+                                                                                                                }
+                                                                                                                QPushButton #refundBtn: pressed {
+                                                                                                                    background - color: #8c1616; 
 }
 
 /* --- Refund Input Fields --- */
-QLineEdit#refundInput {
-    border: 1px solid #aaaaaa;
-    border-radius: 6px;
-    padding: 8px;
-    background-color: white;
-}
+QLineEdit# refundInput {
+                                                                                                                      border: 1 px solid #aaaaaa;
+                                                                                                                      border - radius: 6 px;
+                                                                                                                      padding: 8 px;
+                                                                                                                      background - color: white;
+                                                                                                                    }
 
-/* --- Payment Input Fields Error State --- */
-QLineEdit#cashInput[error="true"],
-QLineEdit#netsInput[error="true"],
-QLineEdit#paynowInput[error="true"],
-QLineEdit#voucherInput[error="true"] {
-    border: 3px solid red;
-    background-color: #ffcccc;
-}
+                                                                                                                    /* --- Payment Input Fields Error State --- */
+                                                                                                                    QLineEdit #cashInput[error = "true"],
+                                                                                                                      QLineEdit #netsInput[error = "true"],
+                                                                                                                      QLineEdit #paynowInput[error = "true"],
+                                                                                                                      QLineEdit #voucherInput[error = "true"] {
+                                                                                                                        border: 3 px solid red;
+                                                                                                                        background - color: #ffcccc;
+                                                                                                                      }
 
-QLabel#refundAmountLabel {
-    font-weight: bold;
-}
+                                                                                                                    QLabel #refundAmountLabel {
+                                                                                                                      font - weight: bold;
+                                                                                                                    }
 
-/* =============================================================
-   MENU FRAME (RIGHT SIDEBAR)
-   ============================================================= */
-QFrame#menuFrame {
-    background-color: #b0c4de;   
-    border: 1px solid #333333;
+                                                                                                                    /* =============================================================
+                                                                                                                       MENU FRAME (RIGHT SIDEBAR)
+                                                                                                                       ============================================================= */
+                                                                                                                    QFrame #menuFrame {
+                                                                                                                      background - color: #b0c4de;
+                                                                                                                      border: 1 px solid #333333;
     border-radius: 0.5em;
 }
 
-QFrame#menuFrame QPushButton {
-    /* Square icon-only buttons, centered visually */
-    min-width: 64px;
-    max-width: 64px;
-    min-height: 64px;
-    max-height: 64px;
-    padding: 0;                  /* let icon fill */
-    border: 1px solid #999999;   /* gray border */
+QFrame# menuFrame QPushButton {
+                                                                                                                        /* Square icon-only buttons, centered visually */
+                                                                                                                        min - width: 64 px;
+                                                                                                                        max - width: 64 px;
+                                                                                                                        min - height: 64 px;
+                                                                                                                        max - height: 64 px;
+                                                                                                                        padding: 0; /* let icon fill */
+                                                                                                                        border: 1 px solid #999999;   /* gray border */
     border-radius: 8px;
-    background: #ffffff;         /* neutral background */
-    color: transparent;          /* always hide text */
-    qproperty-iconSize: 56px 56px; /* fill nearly entire button */
-}
-QFrame#menuFrame QPushButton:hover {
-    border-color: #666666;
-    background: #f5f5f5;
-}
-QFrame#menuFrame QPushButton:pressed {
-    border-color: #444444;
-    background: #e9e9e9;
-}
+    background: # ffffff; /* neutral background */
+                                                                                                                        color: transparent; /* always hide text */
+                                                                                                                        qproperty - iconSize: 56 px 56 px; /* fill nearly entire button */
+                                                                                                                      }
+                                                                                                                      QFrame #menuFrame QPushButton: hover {
+                                                                                                                        border - color: #666666;
+    background: # f5f5f5;
+                                                                                                                      }
+                                                                                                                      QFrame #menuFrame QPushButton: pressed {
+                                                                                                                        border - color: #444444;
+    background: # e9e9e9;
+                                                                                                                      }
 
-/* Fallback: show text if icon couldn't be loaded (set via iconFallback property) */
-QFrame#menuFrame QPushButton[iconFallback="true"] {
-    /* Fallback text style: black background, bold white text, white border */
-    background-color: #4a1717ff;
-    color: #ffffff;
-    font-weight: bold;
-    border: 1px solid #ffffff;
+                                                                                                                      /* Fallback: show text if icon couldn't be loaded (set via iconFallback property) */
+                                                                                                                      QFrame #menuFrame QPushButton[iconFallback = "true"] {
+                                                                                                                        /* Fallback text style: black background, bold white text, white border */
+                                                                                                                        background - color: #4a1717ff;
+    color: # ffffff;
+                                                                                                                        font - weight: bold;
+                                                                                                                        border: 1 px solid #ffffff;
 
-    /* Size adjustments for text buttons */
-    min-width: 120px;
-    max-width: 220px;
-    min-height: 40px;
-    max-height: 64px;
-    qproperty-iconSize: 0px 0px;
-}
+                                                                                                                        /* Size adjustments for text buttons */
+                                                                                                                        min - width: 120 px;
+                                                                                                                        max - width: 220 px;
+                                                                                                                        min - height: 40 px;
+                                                                                                                        max - height: 64 px;
+                                                                                                                        qproperty - iconSize: 0 px 0 px;
+                                                                                                                      }
 
-/* Keep consistent look on hover/pressed for fallback buttons */
-QFrame#menuFrame QPushButton[iconFallback="true"]:hover {
-    background-color: #111111;
-    border-color: #ffffff;
-}
-QFrame#menuFrame QPushButton[iconFallback="true"]:pressed {
-    background-color: #222222;
-    border-color: #dddddd;
-}
+                                                                                                                      /* Keep consistent look on hover/pressed for fallback buttons */
+                                                                                                                      QFrame #menuFrame QPushButton[iconFallback = "true"]: hover {
+                                                                                                                        background - color: #111111;
+    border-color: # ffffff;
+                                                                                                                      }
+                                                                                                                      QFrame #menuFrame QPushButton[iconFallback = "true"]: pressed {
+                                                                                                                        background - color: #222222;
+    border-color: # dddddd;
+                                                                                                                      }
 
 
-/* =============================================================
-   COMMON ELEMENTS
-   ============================================================= */
+                                                                                                                      /* =============================================================
+                                                                                                                         COMMON ELEMENTS
+                                                                                                                         ============================================================= */
 
-/* --- Generic Table Widgets --- */
-QTableWidget {
-    gridline-color: rgba(0,0,0,0.2);
-}
+                                                                                                                      /* --- Generic Table Widgets --- */
+                                                                                                                      QTableWidget {
+                                                                                                                        gridline - color: rgba(0, 0, 0, 0.2);
+                                                                                                                      }
 
-QTableWidget::item:selected {
-    background-color: #99ccff;
+                                                                                                                      QTableWidget::item: selected {
+                                                                                                                        background - color: #99ccff;
 }
 
 QHeaderView::section {
-    background-color: #4682b4;
-    color: white;
-    border: 1px solid rgba(0,0,0,0.2); 
-    font-size: 10pt;
-    font-weight: bold;  
-}
+    background-color: # 4682 b4;
+                                                                                                                        color: white;
+                                                                                                                        border: 1 px solid rgba(0, 0, 0, 0.2);
+                                                                                                                        font - size: 10 pt;
+                                                                                                                        font - weight: bold;
+                                                                                                                      }
 
-/* --- Scrollbars --- */
-QScrollBar:vertical {
-    background: #a8d5e2;
-    width: 14px;
-    margin: 0px;
-    border-radius: 12px;
-}
-QScrollBar::handle:vertical {
-    background: #4682b4;
+                                                                                                                      /* --- Scrollbars --- */
+                                                                                                                      QScrollBar: vertical {
+                                                                                                                        background: #a8d5e2;
+                                                                                                                        width: 14 px;
+                                                                                                                        margin: 0 px;
+                                                                                                                        border - radius: 12 px;
+                                                                                                                      }
+                                                                                                                      QScrollBar::handle: vertical {
+                                                                                                                        background: #4682b4;
     min-height: 30px;
     border-radius: 12px;
     margin: 2px;
 }
 QScrollBar::handle:vertical:hover {
-    background: #5a9fd4;
-}
-QScrollBar::handle:vertical:pressed {
-    background: #3a6a94;
+    background: # 5 a9fd4;
+                                                                                                                      }
+                                                                                                                      QScrollBar::handle: vertical: pressed {
+                                                                                                                        background: #3a6a94;
 }
 
 QScrollBar:horizontal {
-    background: #a8d5e2;
-    height: 14px;
-    margin: 0px;
-    border-radius: 12px;
-}
-QScrollBar::handle:horizontal {
-    background: #4682b4;
+    background: # a8d5e2;
+                                                                                                                        height: 14 px;
+                                                                                                                        margin: 0 px;
+                                                                                                                        border - radius: 12 px;
+                                                                                                                      }
+                                                                                                                      QScrollBar::handle: horizontal {
+                                                                                                                        background: #4682b4;
     min-width: 30px;
     border-radius: 12px;
     margin: 2px;
 }
 QScrollBar::handle:horizontal:hover {
-    background: #5a9fd4;
-}
-QScrollBar::handle:horizontal:pressed {
-    background: #3a6a94;
-}
-
-/* =============================================================
-   MANUAL PRODUCT ENTRY DIALOG
-   ============================================================= */
-
-/* --- Manual Frame Container --- */
-QFrame#manualFrame {
-     background: #daf197;
+    background: # 5 a9fd4;
+                                                                                                                      }
+                                                                                                                      QScrollBar::handle: horizontal: pressed {
+                                                                                                                          background: #3a6a94;
 }
 
-QLabel#manualLabel1,
-QLabel#manualLabel2 {
-    font-size: 18px;
-    font-weight: bold;
-}
+/* = === === === === === === === === === === === === === === === === === === === ===
+                                                                                                                            MANUAL PRODUCT ENTRY DIALOG ===
+                                                                                                                            === === === === === === === === === === === === === === === === === === === = * /
 
-QTextEdit#manualText {
-    font-size: 18px;
-    font-weight: bold;
-}
+                                                                                                                          /* --- Manual Frame Container --- */
+                                                                                                                          QFrame #manualFrame {
+                                                                                                                            background: #daf197;
+                                                                                                                          }
+
+                                                                                                                          QLabel #manualLabel1,
+                                                                                                                          QLabel #manualLabel2 {
+                                                                                                                            font - size: 18 px;
+                                                                                                                            font - weight: bold;
+                                                                                                                          }
+
+                                                                                                                          QTextEdit #manualText {
+                                                                                                                            font - size: 18 px;
+                                                                                                                            font - weight: bold;
+                                                                                                                          }

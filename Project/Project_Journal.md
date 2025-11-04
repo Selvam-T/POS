@@ -54,6 +54,27 @@ Product dialog safety rule: ADD-only while a sale has items.
 
 ---
  
+## Update Summary (November 4, 2025, formatter)
+
+Repository formatting utility for UI and styles:
+
+- Added `tools/format_assets.py` to pretty-print `.ui` (via lxml) and `.qss` (via jsbeautifier).
+- Updated `requirements.txt` to include `lxml` and `jsbeautifier`.
+- Ran the formatter: output summary `UI: 7/7 formatted | QSS: 1/1 formatted`.
+
+Developer usage:
+```cmd
+pip install -r requirements.txt
+python tools\format_assets.py
+```
+
+Notes:
+- XML attribute ordering in `.ui` files may change when reserialized (no semantic change).
+- QSS formatting treats QSS as CSS; quick review recommended for Qt-only selectors/pseudo-states.
+
+Quality gates: PASS (formatting only). No functional changes.
+
+---
 ## Update Summary (November 3, 2025)
 
 Header refactor and alignment fixes:
@@ -103,7 +124,7 @@ This session introduced a compact right-side icon-only menu and finalized the ma
 - Replaced the legacy title bar with an `infoSection` header (company/date/day/time).
 - Added `ui/menu_frame.ui` loaded into `menuFrame` with seven icon-only buttons (Admin, Reports, Vegetable, Product, Greeting, Device, Logout). Buttons show labels via tooltips and open modal placeholders.
 - Constrained the menu width (min 80, max 100) and increased spacing between header and content.
-- Updated `manual.ui` to expose `QTextEdit#manualText` for message injection; unknown barcodes open this dialog.
+- Updated `manual_entry.ui` to expose `QTextEdit#manualText` for message injection; unknown barcodes open this dialog.
 - Strict product validation now uses `PRODUCT_CACHE` only (all test remapping removed).
 - Scanner logs changed to ASCII-only to avoid Windows console Unicode errors. `test_scanner.py` updated accordingly.
 
@@ -143,7 +164,7 @@ Project/
 3. [Right-side Menu](#right-side-menu)
 │   ├── main_window.ui    # Main application window
 │   ├── payment_frame.ui  # Payment section
-│   └── vegetable.ui      # Digital weight input dialog
+│   └── vegetable_entry.ui      # Digital weight input dialog
 └── modules/
     ├── db_operation/
         └── salesTable.py # Sales table logic
@@ -220,7 +241,7 @@ salesFrame (QFrame)
     ├── totalContainer (QWidget) - [stretch=2]
     │   └── Displays subtotal, tax, total
     │       ├── vegBtn (QPushButton) - "Vegetable Entry"
-    │       │   └── Opens vegetable.ui dialog
+    │       │   └── Opens vegetable_entry.ui dialog
     │       └── manualBtn (QPushButton) - "Manual Entry"
     │           └── Manual product entry
     └── receiptContainer (QWidget) - [stretch=2]

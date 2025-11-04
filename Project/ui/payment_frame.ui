@@ -1,394 +1,394 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <ui version="4.0">
- <class>PaymentPanel</class>
- <widget class="QWidget" name="PaymentPanel">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>1065</width>
-    <height>816</height>
-   </rect>
-  </property>
-  <layout class="QVBoxLayout" name="mainPaymentLayout">
-   <property name="spacing">
-    <number>10</number>
-   </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
-    <item>
-    <widget class="QLabel" name="paymentLabel">
-     <property name="text">
-      <string>Payment</string>
-     </property>
-    </widget>
-   </item>
-   <item stretch="3">
-    <layout class="QVBoxLayout" name="paymentMethodsLayout">
-     <property name="spacing">
-      <number>10</number>
-     </property>
-     <item>
-      <layout class="QHBoxLayout" name="cashRow">
-       <property name="spacing">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QPushButton" name="cashBtn">
-         <property name="text">
-          <string>CASH</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="cashInput"/>
-       </item>
-       <item>
-        <widget class="QPushButton" name="cashTick">
-         <property name="text">
-          <string>✔</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="cashClear">
-         <property name="text">
-          <string>X</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="netsRow">
-       <property name="spacing">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QPushButton" name="netsBtn">
-         <property name="text">
-          <string>NETS</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="netsInput"/>
-       </item>
-       <item>
-        <widget class="QPushButton" name="netsTick">
-         <property name="text">
-          <string>✔</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="netsClear">
-         <property name="text">
-          <string>X</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="paynowRow">
-       <property name="spacing">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QPushButton" name="paynowBtn">
-         <property name="text">
-          <string>PAYNOW</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="paynowInput"/>
-       </item>
-       <item>
-        <widget class="QPushButton" name="paynowTick">
-         <property name="text">
-          <string>✔</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="paynowClear">
-         <property name="text">
-          <string>X</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="voucherRow">
-       <property name="spacing">
-        <number>10</number>
-       </property>
-       <item>
-        <widget class="QPushButton" name="voucherBtn">
-         <property name="text">
-          <string>VOUCHER</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="voucherInput"/>
-       </item>
-       <item>
-        <widget class="QPushButton" name="voucherTick">
-         <property name="text">
-          <string>✔</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="voucherClear">
-         <property name="text">
-          <string>X</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </item>
-    </layout>
-   </item>
-   <item stretch="1">
-    <layout class="QVBoxLayout" name="summaryLayout">
-     <property name="spacing">
-      <number>10</number>
-     </property>
-     <item>
-      <widget class="QLabel" name="amountTenderedLabel">
-       <property name="text">
-        <string>Amount Tendered: $0.00</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="changeDueLabel">
-       <property name="text">
-        <string>Change Due: $0.00</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item stretch="3">
-    <widget class="QFrame" name="keypadFrame">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-     <layout class="QVBoxLayout" name="keypadLayout">
+  <class>PaymentPanel</class>
+  <widget class="QWidget" name="PaymentPanel">
+    <property name="geometry">
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>1065</width>
+        <height>816</height>
+      </rect>
+    </property>
+    <layout class="QVBoxLayout" name="mainPaymentLayout">
       <property name="spacing">
-       <number>10</number>
+        <number>10</number>
       </property>
       <property name="leftMargin">
-       <number>0</number>
+        <number>0</number>
       </property>
       <property name="topMargin">
-       <number>0</number>
+        <number>0</number>
       </property>
       <property name="rightMargin">
-       <number>0</number>
+        <number>0</number>
       </property>
       <property name="bottomMargin">
-       <number>0</number>
+        <number>0</number>
       </property>
       <item>
-       <layout class="QHBoxLayout" name="keypadRow1">
-        <property name="spacing">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QPushButton" name="btn7">
+        <widget class="QLabel" name="paymentLabel">
           <property name="text">
-           <string>7</string>
+            <string>Payment</string>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn8">
-          <property name="text">
-           <string>8</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn9">
-          <property name="text">
-           <string>9</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnDivide">
-          <property name="text">
-           <string>/</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="keypadRow2">
-        <property name="spacing">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QPushButton" name="btn4">
-          <property name="text">
-           <string>4</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn5">
-          <property name="text">
-           <string>5</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn6">
-          <property name="text">
-           <string>6</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnMultiply">
-          <property name="text">
-           <string>*</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="keypadRow3">
-        <property name="spacing">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QPushButton" name="btn1">
-          <property name="text">
-           <string>1</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn2">
-          <property name="text">
-           <string>2</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btn3">
-          <property name="text">
-           <string>3</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnMinus">
-          <property name="text">
-           <string>-</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="keypadRow4">
-        <property name="spacing">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QPushButton" name="btn0">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnDecimal">
-          <property name="text">
-           <string>.</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnEquals">
-          <property name="text">
-           <string>=</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnPlus">
-          <property name="text">
-           <string>+</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item stretch="1">
-    <layout class="QHBoxLayout" name="refundLayout">
-     <property name="spacing">
-      <number>10</number>
-     </property>
-     <item>
-      <widget class="QPushButton" name="refundBtn">
-       <property name="text">
-        <string>REFUND</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="refundFields">
-       <item>
-        <widget class="QLabel" name="scanLabel">
-         <property name="text">
-          <string>Scan Barcode:</string>
-         </property>
         </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="refundInput"/>
-       </item>
-       <item>
-        <widget class="QLabel" name="refundAmountLabel">
-         <property name="text">
-          <string>Refund Amount: $0.00</string>
-         </property>
+      </item>
+      <item stretch="3">
+        <layout class="QVBoxLayout" name="paymentMethodsLayout">
+          <property name="spacing">
+            <number>10</number>
+          </property>
+          <item>
+            <layout class="QHBoxLayout" name="cashRow">
+              <property name="spacing">
+                <number>10</number>
+              </property>
+              <item>
+                <widget class="QPushButton" name="cashBtn">
+                  <property name="text">
+                    <string>CASH</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QLineEdit" name="cashInput"/>
+              </item>
+              <item>
+                <widget class="QPushButton" name="cashTick">
+                  <property name="text">
+                    <string>✔</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QPushButton" name="cashClear">
+                  <property name="text">
+                    <string>X</string>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </item>
+          <item>
+            <layout class="QHBoxLayout" name="netsRow">
+              <property name="spacing">
+                <number>10</number>
+              </property>
+              <item>
+                <widget class="QPushButton" name="netsBtn">
+                  <property name="text">
+                    <string>NETS</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QLineEdit" name="netsInput"/>
+              </item>
+              <item>
+                <widget class="QPushButton" name="netsTick">
+                  <property name="text">
+                    <string>✔</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QPushButton" name="netsClear">
+                  <property name="text">
+                    <string>X</string>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </item>
+          <item>
+            <layout class="QHBoxLayout" name="paynowRow">
+              <property name="spacing">
+                <number>10</number>
+              </property>
+              <item>
+                <widget class="QPushButton" name="paynowBtn">
+                  <property name="text">
+                    <string>PAYNOW</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QLineEdit" name="paynowInput"/>
+              </item>
+              <item>
+                <widget class="QPushButton" name="paynowTick">
+                  <property name="text">
+                    <string>✔</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QPushButton" name="paynowClear">
+                  <property name="text">
+                    <string>X</string>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </item>
+          <item>
+            <layout class="QHBoxLayout" name="voucherRow">
+              <property name="spacing">
+                <number>10</number>
+              </property>
+              <item>
+                <widget class="QPushButton" name="voucherBtn">
+                  <property name="text">
+                    <string>VOUCHER</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QLineEdit" name="voucherInput"/>
+              </item>
+              <item>
+                <widget class="QPushButton" name="voucherTick">
+                  <property name="text">
+                    <string>✔</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QPushButton" name="voucherClear">
+                  <property name="text">
+                    <string>X</string>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </item>
+        </layout>
+      </item>
+      <item stretch="1">
+        <layout class="QVBoxLayout" name="summaryLayout">
+          <property name="spacing">
+            <number>10</number>
+          </property>
+          <item>
+            <widget class="QLabel" name="amountTenderedLabel">
+              <property name="text">
+                <string>Amount Tendered: $0.00</string>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <widget class="QLabel" name="changeDueLabel">
+              <property name="text">
+                <string>Change Due: $0.00</string>
+              </property>
+            </widget>
+          </item>
+        </layout>
+      </item>
+      <item stretch="3">
+        <widget class="QFrame" name="keypadFrame">
+          <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QVBoxLayout" name="keypadLayout">
+            <property name="spacing">
+              <number>10</number>
+            </property>
+            <property name="leftMargin">
+              <number>0</number>
+            </property>
+            <property name="topMargin">
+              <number>0</number>
+            </property>
+            <property name="rightMargin">
+              <number>0</number>
+            </property>
+            <property name="bottomMargin">
+              <number>0</number>
+            </property>
+            <item>
+              <layout class="QHBoxLayout" name="keypadRow1">
+                <property name="spacing">
+                  <number>5</number>
+                </property>
+                <item>
+                  <widget class="QPushButton" name="btn7">
+                    <property name="text">
+                      <string>7</string>
+                    </property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QPushButton" name="btn8">
+                    <property name="text">
+                      <string>8</string>
+                    </property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QPushButton" name="btn9">
+                    <property name="text">
+                      <string>9</string>
+                    </property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QPushButton" name="btnDivide">
+                    <property name="text">
+                      <string>/</string>
+                    </property>
+                  </widget>
+                </item>
+              </layout>
+            </item>
+            <item>
+              <layout class="QHBoxLayout" name="keypadRow2">
+                <property name="spacing">
+                  <number>5</number>
+                </property>
+                <item>
+                  <widget class="QPushButton" name="btn4">
+                    <property name="text">
+                      <string>4</string>
+                    </property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QPushButton" name="btn5">
+                    <property name="text">
+                      <string>5</string>
+                    </property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QPushButton" name="btn6">
+                    <property name="text">
+                      <string>6</string>
+                    </property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QPushButton" name="btnMultiply">
+                    <property name="text">
+                      <string>*</string>
+                    </property>
+                  </widget>
+                </item>
+              </layout>
+            </item>
+            <item>
+              <layout class="QHBoxLayout" name="keypadRow3">
+                <property name="spacing">
+                  <number>5</number>
+                </property>
+                <item>
+                  <widget class="QPushButton" name="btn1">
+                    <property name="text">
+                      <string>1</string>
+                    </property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QPushButton" name="btn2">
+                    <property name="text">
+                      <string>2</string>
+                    </property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QPushButton" name="btn3">
+                    <property name="text">
+                      <string>3</string>
+                    </property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QPushButton" name="btnMinus">
+                    <property name="text">
+                      <string>-</string>
+                    </property>
+                  </widget>
+                </item>
+              </layout>
+            </item>
+            <item>
+              <layout class="QHBoxLayout" name="keypadRow4">
+                <property name="spacing">
+                  <number>5</number>
+                </property>
+                <item>
+                  <widget class="QPushButton" name="btn0">
+                    <property name="text">
+                      <string>0</string>
+                    </property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QPushButton" name="btnDecimal">
+                    <property name="text">
+                      <string>.</string>
+                    </property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QPushButton" name="btnEquals">
+                    <property name="text">
+                      <string>=</string>
+                    </property>
+                  </widget>
+                </item>
+                <item>
+                  <widget class="QPushButton" name="btnPlus">
+                    <property name="text">
+                      <string>+</string>
+                    </property>
+                  </widget>
+                </item>
+              </layout>
+            </item>
+          </layout>
         </widget>
-       </item>
-      </layout>
-     </item>
+      </item>
+      <item stretch="1">
+        <layout class="QHBoxLayout" name="refundLayout">
+          <property name="spacing">
+            <number>10</number>
+          </property>
+          <item>
+            <widget class="QPushButton" name="refundBtn">
+              <property name="text">
+                <string>REFUND</string>
+              </property>
+            </widget>
+          </item>
+          <item>
+            <layout class="QVBoxLayout" name="refundFields">
+              <item>
+                <widget class="QLabel" name="scanLabel">
+                  <property name="text">
+                    <string>Scan Barcode:</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QLineEdit" name="refundInput"/>
+              </item>
+              <item>
+                <widget class="QLabel" name="refundAmountLabel">
+                  <property name="text">
+                    <string>Refund Amount: $0.00</string>
+                  </property>
+                </widget>
+              </item>
+            </layout>
+          </item>
+        </layout>
+      </item>
     </layout>
-   </item>
-  </layout>
- </widget>
- <resources/>
- <connections/>
+  </widget>
+  <resources/>
+  <connections/>
 </ui>

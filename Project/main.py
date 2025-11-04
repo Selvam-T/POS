@@ -416,9 +416,9 @@ class MainLoader(QMainWindow):
         - Only Close (X) button shown (no minimize/maximize)
         - Close on X, OK, or CANCEL; restore brightness on close
         """
-        veg_ui = os.path.join(UI_DIR, 'vegetable.ui')
+        veg_ui = os.path.join(UI_DIR, 'vegetable_entry.ui')
         if not os.path.exists(veg_ui):
-            print('vegetable.ui not found at', veg_ui)
+            print('vegetable_entry.ui not found at', veg_ui)
             return
 
         # Create dimming overlay over the main window
@@ -431,7 +431,7 @@ class MainLoader(QMainWindow):
         try:
             content = uic.loadUi(veg_ui)
         except Exception as e:
-            print('Failed to load vegetable.ui:', e)
+            print('Failed to load vegetable_entry.ui:', e)
             try:
                 self._hide_dim_overlay()
             except Exception:
@@ -1293,9 +1293,9 @@ class MainLoader(QMainWindow):
         Args:
             message: Message to display in the QTextEdit widget
         """
-        manual_ui = os.path.join(UI_DIR, 'manual.ui')
+        manual_ui = os.path.join(UI_DIR, 'manual_entry.ui')
         if not os.path.exists(manual_ui):
-            print('manual.ui not found at', manual_ui)
+            print('manual_entry.ui not found at', manual_ui)
             return
 
         # Create dimming overlay over the main window (reuse same overlay as vegetable panel)
@@ -1308,7 +1308,7 @@ class MainLoader(QMainWindow):
         try:
             content = uic.loadUi(manual_ui)
         except Exception as e:
-            print('Failed to load manual.ui:', e)
+            print('Failed to load manual_entry.ui:', e)
             try:
                 self._hide_dim_overlay()
             except Exception:
