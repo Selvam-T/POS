@@ -78,7 +78,7 @@ Product Management and scanner flow integration:
 - Added a full Product Management dialog (`ui/product.ui`) and wired it to the Product menu. Removed placeholder actions.
 - Mode-driven behavior with buttons for ADD, UPDATE, REMOVE:
     - Starts with the form hidden until a mode is chosen; focuses Product Code on mode select.
-    - ADD: requires all fields; includes Unit dropdown (PIECES, GRAMS); shows live duplicate check on Product Code and disables ADD if duplicate.
+    - ADD: requires all fields; includes Unit dropdown (pcs, kg); shows live duplicate check on Product Code and disables ADD if duplicate.
     - UPDATE/REMOVE: Product Code enabled; other fields disabled until a successful lookup; populates fields after lookup.
     - Status label at the bottom shows success/errors; on success, dialog auto-closes after a short delay.
 - Implemented full CRUD to SQLite and a slim in-memory cache:

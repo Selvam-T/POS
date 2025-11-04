@@ -22,7 +22,7 @@ This document summarizes the Product Management feature (Product.ui / open_produ
 - In ADD:
   - All fields are enabled.
   - Required fields: Product Code, Product Name, Selling Price.
-  - Unit is a dropdown with: PIECES, GRAMS.
+  - Unit is a dropdown with: pcs, kg.
 
 ### Mode locking
 - Once a mode is selected, the mode buttons are disabled (locked) so the user completes or cancels.

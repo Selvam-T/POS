@@ -575,15 +575,28 @@ class MainLoader(QMainWindow):
         dlg.setModal(True)
         dlg.setWindowTitle('Product Management')
         dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+        # Compute full and collapsed sizes and a helper to center the dialog
         try:
             mw = self.frameGeometry().width()
             mh = self.frameGeometry().height()
-            dw = max(400, int(mw * 0.6))
-            dh = max(300, int(mh * 0.6))
-            dlg.setFixedSize(dw, dh)
-            mx = self.frameGeometry().x()
-            my = self.frameGeometry().y()
-            dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
+            dw_full = max(400, int(mw * 0.6))
+            dh_full = max(300, int(mh * 0.6))
+
+            def _center_dialog(w: int, h: int) -> None:
+                try:
+                    mx = self.frameGeometry().x()
+                    my = self.frameGeometry().y()
+                    dlg.setFixedSize(w, h)
+                    dlg.move(mx + (mw - w) // 2, my + (mh - h) // 2)
+                except Exception:
+                    try:
+                        dlg.setFixedSize(w, h)
+                    except Exception:
+                        pass
+
+            # Initial collapsed state: show only mode buttons (form hidden later) at half height
+            dh_collapsed = max(200, int(dh_full * 0.5))
+            _center_dialog(dw_full, dh_collapsed)
         except Exception:
             pass
 
@@ -622,6 +635,7 @@ class MainLoader(QMainWindow):
             status_lbl: QLabel = content.findChild(QLabel, 'statusLabel')
 
             current_mode = {'mode': 'none'}
+            expanded_to_full = {'value': False}
             # Business rule: If Sales table already has items, prevent REMOVE/UPDATE to avoid inconsistency
             sale_active = False
             try:
@@ -813,6 +827,13 @@ class MainLoader(QMainWindow):
                 if not mode_locked['locked']:
                     mode_locked['locked'] = True
                     set_mode_buttons_enabled(False)
+                # Expand dialog to full size on first mode selection
+                try:
+                    if not expanded_to_full['value']:
+                        _center_dialog(dw_full, dh_full)
+                        expanded_to_full['value'] = True
+                except Exception:
+                    pass
                 enter_mode(mode)
                 # Always focus Product Code field on entering any mode
                 if code_edit is not None:
@@ -914,7 +935,7 @@ class MainLoader(QMainWindow):
                     # Unit combo match with simple normalization
                     if unit_combo is not None:
                         val = str(pdata.get('unit', '')).strip().lower()
-                        norm = 'pieces' if val in ('piece', 'pieces', 'pcs', 'pc') else ('grams' if val in ('g', 'gram', 'grams') else val)
+                        norm = 'pcs' if val in ('piece', 'pieces', 'pcs', 'pc') else ('kg' if val in ('kg', 'kilogram', 'kilograms') else val)
                         matched = False
                         for i in range(unit_combo.count()):
                             if unit_combo.itemText(i).strip().lower() == norm:
@@ -1149,6 +1170,13 @@ class MainLoader(QMainWindow):
                     start_mode = initial_mode.lower()
                     if sale_active and start_mode in ('remove', 'update'):
                         start_mode = 'add'
+                    # If starting with a mode programmatically, expand to full immediately
+                    try:
+                        if not expanded_to_full['value']:
+                            _center_dialog(dw_full, dh_full)
+                            expanded_to_full['value'] = True
+                    except Exception:
+                        pass
                     on_mode_button_clicked(start_mode)
                     if initial_code and code_edit is not None:
                         code_edit.setText(str(initial_code))

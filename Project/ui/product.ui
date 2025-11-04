@@ -138,12 +138,12 @@
      <widget class="QComboBox" name="unitComboBox">
       <item>
        <property name="text">
-        <string>PIECES</string>
+        <string>pcs</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>GRAMS</string>
+        <string>kg</string>
        </property>
       </item>
      </widget>
