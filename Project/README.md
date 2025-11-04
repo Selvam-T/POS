@@ -27,11 +27,11 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
  - Header layout: Date (left), Company (center), Day+Time (right as a single label)
 
 ✅ **Barcode Scanner**
-- Event-driven scanner integration using `pynput`
-- Distinguishes scanner input from manual typing by timing
-- On scan: adds to sales table if found
-- If not found while in Sales frame: opens Product Management in ADD mode with the scanned code prefilled
-- If Product Management dialog is open: scans fill the Product Code field (no Manual Entry)
+- Global event filtering with timing-based scan-burst detection
+- Focus-based routing: default to Sales table; accept only in `refundInput` when focused; in Product dialog only when `productCodeLineEdit` is focused
+- Modal scanner block + dim overlay during dialogs (Manual/Vegetable/etc.) to prevent stray input and clicks
+- Enter suppression during bursts and Enter-as-Tab in Product dialog; action buttons are non-default
+- Always-on cache diagnostics per scan; optional debug toggles to log focus path and cache lookups
 
 ✅ **Error Handling**
 - Status bar notifications for invalid products
@@ -171,9 +171,14 @@ Implementation details:
 ### Scanning Barcodes
 
 - Scan a product barcode with the scanner connected to the POS machine.
-- If found in the cache: the product is added to the sales table (or quantity increments).
-- If not found (and you are in Sales frame): Product Management opens in ADD mode with the code prefilled. After you save, the new item is automatically added to the sales table.
-- If the Product Management dialog is already open: scans populate the dialog’s Product Code; no other UI opens.
+- Default behavior: if found in the cache, the product is added to the sales table (or quantity increments).
+- Not found (in Sales frame): Product Management opens in ADD mode with the code prefilled. After you save, the new item is automatically added to the sales table.
+- Product dialog open: scans are accepted only when the `productCodeLineEdit` is focused; Enter behaves like Tab; buttons are non-default to avoid accidental clicks.
+- Payment frame: if `refundInput` is focused, the scan is applied to that field; otherwise the scan routes to the sales table.
+- Quantity input (`qtyInput`) is protected: scans are ignored and any stray character is cleaned up.
+- Manual and Vegetable dialogs: a modal scanner block is active and the background is dimmed; scans and Enter are swallowed until the dialog closes.
+
+For a deep dive into the exact routing rules, protections, and debug options, see Documentation/scanner_input_infocus.md.
 
 ### Sales Table Operations
 
@@ -235,6 +240,7 @@ See `Project_Journal.md` for detailed architecture documentation, design decisio
   - Implementation details
   - Code examples and technical explanations
   - Development history
+ - Scanner input architecture: see Documentation/scanner_input_infocus.md for focus-first routing, modal block, and debug guidance.
 
 ## Troubleshooting
 
@@ -249,6 +255,14 @@ See `Project_Journal.md` for detailed architecture documentation, design decisio
 
 ### QSS Not Loading
 **Solution:** Verify `assets/style.qss` exists. Check console for error messages.
+
+### Scanner types characters into the wrong field
+This can happen with HID “keyboard wedge” scanners before the app detects the scan burst (first-character leak). The app:
+- Blocks scans during modal dialogs and dims the background
+- Ignores scans in `qtyInput` and cleans stray characters
+- Suppresses Enter during scan bursts to avoid clicking default buttons
+
+See Documentation/scanner_input_infocus.md for details, debug flags, and optional hardware-level fixes (prefix/suffix or serial mode).
 
 ## Dependencies
 
@@ -266,5 +280,4 @@ See `requirements.txt` for full list. Main dependencies:
 [Add contact information here]
 
 ---
-
-**Last Updated:** November 3, 2025
+**Last Updated:** November 4, 2025

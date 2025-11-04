@@ -7,6 +7,30 @@
 
 ---
  
+## Update Summary (November 4, 2025)
+
+Scanner input in-focus routing, protection, and diagnostics:
+
+- App-wide event filter with scan-burst detection (timing-based) to distinguish scanner keystrokes and suppress Enter during bursts.
+- Modal scanner block flag when dialogs (Manual, Vegetable, Product, etc.) are opened; combined with a dim overlay to block clicks. Focus is restored to the sales table on close.
+- Focus-based routing rules:
+    - Default destination: Sales table handler.
+    - Payment frame: accept only when `refundInput` is focused.
+    - Product dialog: accept only when `productCodeLineEdit` is focused; otherwise ignore and clean leaks.
+    - Quantity editor (`qtyInput`) is always ignored and cleaned.
+- Enter-as-Tab in Product dialog inputs; action buttons are explicitly non-default to avoid accidental activation.
+- Centralized helpers: `_ignore_scan`, `_cleanup_scanner_leak`, `_show_dim_overlay`/`_hide_dim_overlay`, `_start_scanner_modal_block`/`_end_scanner_modal_block`, `_refocus_sales_table`, `_clear_barcode_override`.
+- Diagnostics:
+    - Always-on cache lookup logging per scan (found/missed, name, price, cache size).
+    - Optional toggles: `DEBUG_SCANNER_FOCUS`, `DEBUG_FOCUS_CHANGES`, `DEBUG_CACHE_LOOKUP`.
+- Known limitation (HID wedge): rare first-character leak into disallowed fields; mitigated via cleanup and global suppression windows. Hardware-level fixes (prefix/suffix or serial mode) are documented but deferred.
+
+Docs: Added `Documentation/scanner_input_infocus.md` detailing routing rules, protections, known limitations, and developer guidance. Updated `README.md` to summarize behavior and link to the doc.
+
+Quality gates: PASS (build/import); manual verification confirms no unintended sales increments in Manual/Vegetable dialogs, Product dialog accepts scans only at the code field, `qtyInput` stays clean, and Enter no longer triggers default buttons during scans.
+
+---
+ 
 ## Update Summary (November 3, 2025)
 
 Header refactor and alignment fixes:

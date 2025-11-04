@@ -86,3 +86,16 @@ COMPANY_NAME = 'Anumani Trading Pte Ltd'
 
 _BASE_DIR = os.path.abspath(os.path.dirname(__file__))  # .../POS/Project
 DB_PATH = os.path.join(os.path.dirname(_BASE_DIR), 'db', 'Anumani.db')
+
+# =============================================================================
+# DEBUG FLAGS
+# =============================================================================
+# Enable to print where the keyboard/scanner focus is when a barcode is handled
+# in the UI. Helpful to understand which widget is active during scans.
+DEBUG_SCANNER_FOCUS = True
+
+# Enable to log every Qt focus change (very verbose).
+DEBUG_FOCUS_CHANGES = False
+
+# Enable to log cache lookup result for every scanned code
+DEBUG_CACHE_LOOKUP = True

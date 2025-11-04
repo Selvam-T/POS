@@ -9,7 +9,7 @@ Usage:
     scanner.start()
 """
 
-from PyQt5.QtCore import QObject, pyqtSignal, QThread
+from PyQt5.QtCore import QObject, pyqtSignal
 from pynput import keyboard
 import time
 
@@ -24,6 +24,8 @@ class BarcodeScanner(QObject):
     
     # Qt Signal: emitted when barcode is scanned
     barcode_scanned = pyqtSignal(str)
+    # Activity signal: emitted on every key press with event timestamp
+    scanner_activity = pyqtSignal(float)
     
     def __init__(self, timeout=0.05):
         """
@@ -81,8 +83,13 @@ class BarcodeScanner(QObject):
         """
         if not self._enabled:
             return
-            
+
         now = time.time()
+        try:
+            # Emit activity first so UI can prepare to swallow Enter if needed
+            self.scanner_activity.emit(now)
+        except Exception:
+            pass
         time_diff = now - self._last_time
         
         try:

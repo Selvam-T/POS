@@ -6,6 +6,7 @@ Loads a QSS file from `assets/style.qss` when present.
 
 import sys
 import os
+import time
 from PyQt5 import uic
 from PyQt5.QtWidgets import (
     QApplication,
@@ -15,14 +16,13 @@ from PyQt5.QtWidgets import (
     QHBoxLayout,
     QSizePolicy,
     QTableWidget,
-    QTableWidgetItem,
     QPushButton,
     QLineEdit,
     QLabel,
     QDialog,
     QComboBox,
 )
-from PyQt5.QtCore import Qt, QSize, QTimer, QDateTime, QLocale
+from PyQt5.QtCore import Qt, QSize, QTimer, QDateTime, QLocale, QEvent
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QFontMetrics, QIcon
 from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned
@@ -39,6 +39,9 @@ from config import (
     ICON_GREETING,
     ICON_DEVICE,
     ICON_LOGOUT,
+    DEBUG_SCANNER_FOCUS,
+    DEBUG_FOCUS_CHANGES,
+    DEBUG_CACHE_LOOKUP,
 )
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -249,6 +252,11 @@ class MainLoader(QMainWindow):
             try:
                 manual_btn = sales_widget.findChild(QPushButton, 'manualBtn')
                 if manual_btn is not None:
+                    try:
+                        manual_btn.setAutoDefault(False)
+                        manual_btn.setDefault(False)
+                    except Exception:
+                        pass
                     manual_btn.clicked.connect(lambda: self.open_manual_panel("You Clicked Add Manual Button"))
             except Exception as e:
                 print('Failed to wire manualBtn:', e)
@@ -303,34 +311,28 @@ class MainLoader(QMainWindow):
 
             menu_buttons = {
                 'adminBtn': ('Admin', (
-                    "Permission: Admin\n"
-                    "- login\n- password\n- profile picture\n- Cashier role: Admin vs Staff"
+                    "- logged in\n- change admin pass\n- change pass\n- only admin can access admin menu."
                 )),
                 'reportsBtn': ('Reports', (
-                    "Permission: Admin\n"
-                    "- Sales report\n- report 2\n- report 3"
+                    "- Sales report\n- daily\n- monthly\n- charts\n"
                 )),
                 'vegetableBtn': ('Vegetable', (
-                    "Permission: Admin\n"
                     "- Rename Vegetable button\n"
                     "  States: name or Unused (Unused = gray, disabled)"
                 )),
                 'productBtn': ('Product', (
-                    "Permission: Admin\n"
-                    "- ADD, REMOVE, UPDATE product"
+                    "- ADD, REMOVE, UPDATE product\n REMOVE dropdown menu for product name to select product"
                 )),
                 'greetingBtn': ('Greeting', (
-                    "Permission: Admin\n"
                     "- Custom vs default\n"
                     "  custom: Happy Christmas, Happy New Year\n"
                     "  default: Thank you."
                 )),
                 'deviceBtn': ('Device', (
-                    "Permission: Admin\n"
                     "- Barcode baud rate\n- Weighing scale"
                 )),
                 'logoutBtn': ('Logout', (
-                    "Permission: Admin\n- Confirm logout?"
+                    "Confirm logout?"
                 )),
             }
 
@@ -376,6 +378,36 @@ class MainLoader(QMainWindow):
         except Exception as e:
             print('Failed to wire menu buttons:', e)
 
+        
+
+        # Install a global event filter to control key delivery during scanner sequences
+        try:
+            self._suppressEnterUntil = 0.0
+            self._scannerPrevTs = 0.0
+            self._scannerActiveUntil = 0.0
+            # Install at application level so we see events for all widgets
+            try:
+                QApplication.instance().installEventFilter(self)
+            except Exception:
+                # Fallback to filtering only within this window hierarchy
+                self.installEventFilter(self)
+            try:
+                # Extend suppression window on each scanner key press
+                self.scanner.scanner_activity.connect(self._on_scanner_activity)
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+        # Optional: verbose focus change logging
+        try:
+            if DEBUG_FOCUS_CHANGES:
+                app = QApplication.instance()
+                if app is not None:
+                    app.focusChanged.connect(self._on_focus_changed)
+        except Exception:
+            pass
+
     # ----------------- Vegetable panel wiring -----------------
     def open_vegetable_panel(self):
         """Open the Add Vegetable panel as a modal dialog:
@@ -391,14 +423,7 @@ class MainLoader(QMainWindow):
 
         # Create dimming overlay over the main window
         try:
-            if not hasattr(self, '_dimOverlay') or self._dimOverlay is None:
-                self._dimOverlay = QWidget(self)
-                self._dimOverlay.setObjectName('dimOverlay')
-                self._dimOverlay.setStyleSheet('#dimOverlay { background-color: rgba(0, 0, 0, 110); }')
-                self._dimOverlay.setAttribute(Qt.WA_TransparentForMouseEvents, False)
-            self._dimOverlay.setGeometry(self.rect())
-            self._dimOverlay.show()
-            self._dimOverlay.raise_()
+            self._show_dim_overlay()
         except Exception:
             pass
 
@@ -408,7 +433,7 @@ class MainLoader(QMainWindow):
         except Exception as e:
             print('Failed to load vegetable.ui:', e)
             try:
-                self._dimOverlay.hide()
+                self._hide_dim_overlay()
             except Exception:
                 pass
             return
@@ -486,8 +511,7 @@ class MainLoader(QMainWindow):
         # Ensure overlay hides and focus returns when dialog closes
         def _cleanup_overlay(_code):
             try:
-                if hasattr(self, '_dimOverlay') and self._dimOverlay is not None:
-                    self._dimOverlay.hide()
+                self._hide_dim_overlay()
             except Exception:
                 pass
             # Bring main window back to front
@@ -498,15 +522,24 @@ class MainLoader(QMainWindow):
                 pass
             # Remove barcode override when dialog closes
             try:
-                if hasattr(self, '_barcodeOverride'):
-                    self._barcodeOverride = None
+                self._clear_barcode_override()
             except Exception:
                 pass
 
         dlg.finished.connect(_cleanup_overlay)
 
+        # Block scanner while this dialog is open
+        try:
+            self._start_scanner_modal_block()
+        except Exception:
+            pass
+
         # Execute modally
         dlg.exec_()
+        try:
+            self._end_scanner_modal_block()
+        except Exception:
+            pass
 
     def open_product_panel(self, initial_mode: str = None, initial_code: str = None):
         """Open the Product Management dialog from ui/product.ui as a modal dialog.
@@ -522,14 +555,7 @@ class MainLoader(QMainWindow):
 
         # Create dimming overlay over the main window (reuse same overlay)
         try:
-            if not hasattr(self, '_dimOverlay') or self._dimOverlay is None:
-                self._dimOverlay = QWidget(self)
-                self._dimOverlay.setObjectName('dimOverlay')
-                self._dimOverlay.setStyleSheet('#dimOverlay { background-color: rgba(0, 0, 0, 110); }')
-                self._dimOverlay.setAttribute(Qt.WA_TransparentForMouseEvents, False)
-            self._dimOverlay.setGeometry(self.rect())
-            self._dimOverlay.show()
-            self._dimOverlay.raise_()
+            self._show_dim_overlay()
         except Exception:
             pass
 
@@ -539,7 +565,7 @@ class MainLoader(QMainWindow):
         except Exception as e:
             print('Failed to load product.ui:', e)
             try:
-                self._dimOverlay.hide()
+                self._hide_dim_overlay()
             except Exception:
                 pass
             return
@@ -1112,8 +1138,7 @@ class MainLoader(QMainWindow):
         # Cleanup overlay on close and restore focus
         def _cleanup_overlay(_code):
             try:
-                if hasattr(self, '_dimOverlay') and self._dimOverlay is not None:
-                    self._dimOverlay.hide()
+                self._hide_dim_overlay()
             except Exception:
                 pass
             try:
@@ -1121,17 +1146,31 @@ class MainLoader(QMainWindow):
                 self.activateWindow()
             except Exception:
                 pass
+            # Clear scanner override and return focus to sales table
+            try:
+                self._clear_barcode_override()
+            except Exception:
+                pass
+            try:
+                self._refocus_sales_table()
+            except Exception:
+                pass
 
         dlg.finished.connect(_cleanup_overlay)
         # While this dialog is open, route scanner input into Product Code and suppress Manual Entry
         try:
             def _barcode_to_product_code(code: str) -> bool:
+                """Accept barcode only if productCodeLineEdit has focus; otherwise ignore.
+                Returns True if consumed and applied; False if not handled.
+                """
                 try:
                     if not code:
                         return False
-                    if code_edit is not None:
-                        code_edit.setText(code)
-                        code_edit.setFocus()
+                    app = QApplication.instance()
+                    fw = app.focusWidget() if app else None
+                    if code_edit is None or fw is not code_edit:
+                        return False
+                    code_edit.setText(code)
                     # For remove/update, trigger lookup to populate fields
                     try:
                         if current_mode['mode'] in ('remove', 'update'):
@@ -1151,14 +1190,7 @@ class MainLoader(QMainWindow):
         """Open a generic modal dialog for menu actions with a temporary message."""
         # Create dimming overlay over the main window (reuse same overlay)
         try:
-            if not hasattr(self, '_dimOverlay') or self._dimOverlay is None:
-                self._dimOverlay = QWidget(self)
-                self._dimOverlay.setObjectName('dimOverlay')
-                self._dimOverlay.setStyleSheet('#dimOverlay { background-color: rgba(0, 0, 0, 110); }')
-                self._dimOverlay.setAttribute(Qt.WA_TransparentForMouseEvents, False)
-            self._dimOverlay.setGeometry(self.rect())
-            self._dimOverlay.show()
-            self._dimOverlay.raise_()
+            self._show_dim_overlay()
         except Exception:
             pass
 
@@ -1189,8 +1221,7 @@ class MainLoader(QMainWindow):
 
         def _cleanup(_code):
             try:
-                if hasattr(self, '_dimOverlay') and self._dimOverlay is not None:
-                    self._dimOverlay.hide()
+                self._hide_dim_overlay()
             except Exception:
                 pass
 
@@ -1215,14 +1246,7 @@ class MainLoader(QMainWindow):
 
         # Create dimming overlay over the main window (reuse same overlay as vegetable panel)
         try:
-            if not hasattr(self, '_dimOverlay') or self._dimOverlay is None:
-                self._dimOverlay = QWidget(self)
-                self._dimOverlay.setObjectName('dimOverlay')
-                self._dimOverlay.setStyleSheet('#dimOverlay { background-color: rgba(0, 0, 0, 110); }')
-                self._dimOverlay.setAttribute(Qt.WA_TransparentForMouseEvents, False)
-            self._dimOverlay.setGeometry(self.rect())
-            self._dimOverlay.show()
-            self._dimOverlay.raise_()
+            self._show_dim_overlay()
         except Exception:
             pass
 
@@ -1232,7 +1256,7 @@ class MainLoader(QMainWindow):
         except Exception as e:
             print('Failed to load manual.ui:', e)
             try:
-                self._dimOverlay.hide()
+                self._hide_dim_overlay()
             except Exception:
                 pass
             return
@@ -1266,20 +1290,39 @@ class MainLoader(QMainWindow):
             text_edit = content.findChild(QWidget, 'manualText')
             if text_edit is not None:
                 text_edit.setPlainText(message)
+                try:
+                    # Make it read-only to prevent any visual key leaks
+                    text_edit.setReadOnly(True)
+                except Exception:
+                    pass
         except Exception as e:
             print('Failed to set manual text:', e)
+
+        # Mark that a generic modal is open to block scanner routing
+        try:
+            self._start_scanner_modal_block()
+        except Exception:
+            pass
 
         # Ensure overlay hides and focus returns when dialog closes
         def _cleanup_overlay(_code):
             try:
-                if hasattr(self, '_dimOverlay') and self._dimOverlay is not None:
-                    self._dimOverlay.hide()
+                self._hide_dim_overlay()
             except Exception:
                 pass
             # Bring main window back to front
             try:
                 self.raise_()
                 self.activateWindow()
+            except Exception:
+                pass
+            # Unblock scanner and restore focus to sales table
+            try:
+                self._end_scanner_modal_block()
+            except Exception:
+                pass
+            try:
+                self._refocus_sales_table()
             except Exception:
                 pass
 
@@ -1297,10 +1340,37 @@ class MainLoader(QMainWindow):
         Args:
             barcode: The scanned barcode string
         """
+        # Debug: print where the focus is when a scan is received
+        try:
+            if DEBUG_SCANNER_FOCUS:
+                self._debug_print_focus(context='on_barcode_scanned', barcode=barcode)
+        except Exception:
+            pass
         # Normalize input once
         barcode = (barcode or '').strip()
 
-        # If a modal has installed a barcode override, let it handle and short-circuit
+        # Early cache lookup and debug so it always prints, even if later ignored/overridden
+        from modules.db_operation import get_product_info, PRODUCT_CACHE
+        found, product_name, unit_price = get_product_info(barcode)
+        try:
+            if DEBUG_CACHE_LOOKUP:
+                raw = barcode
+                norm = (raw or '').strip().upper()
+                found_key = None
+                if norm in PRODUCT_CACHE:
+                    found_key = norm
+                elif raw in PRODUCT_CACHE:
+                    found_key = raw
+                elif (raw or '').lower() in PRODUCT_CACHE:
+                    found_key = (raw or '').lower()
+                elif (raw or '').upper() in PRODUCT_CACHE:
+                    found_key = (raw or '').upper()
+                cache_size = len(PRODUCT_CACHE)
+                print('[Scanner][Cache]', f"code='{raw}'", f"norm='{norm}'", f"found={'yes' if found else 'no'}", f"key='{found_key}'", f"name='{product_name}'", f"price={unit_price:.2f}", f"cacheSize={cache_size}")
+        except Exception as _e:
+            print('[Scanner][Cache] debug failed:', _e)
+
+        # If a modal has installed a barcode override, handle it focus-safely
         try:
             override = getattr(self, '_barcodeOverride', None)
             if callable(override):
@@ -1310,18 +1380,51 @@ class MainLoader(QMainWindow):
                 except Exception:
                     handled = False
                 if handled:
+                    return  # accepted by dialog
+                else:
+                    # dialog open but not focused on code field → ignore, cleanup any leak
+                    try:
+                        self._ignore_scan(barcode, reason='override-not-focused')
+                    except Exception:
+                        pass
                     return
         except Exception:
             pass
-        
+
         # Get status bar reference
         status_bar = getattr(self, 'statusbar', None)
-        
-        # Import here to avoid circular dependency
-        from modules.db_operation import get_product_info
-        
-        # Check if product exists in database
-        found, product_name, unit_price = get_product_info(barcode)
+
+        # If a generic modal (e.g., manual entry) is open, ignore scan and cleanup any leaked char
+        try:
+            if getattr(self, '_modalBlockScanner', False):
+                self._ignore_scan(barcode, reason='modal-block-open')
+                return
+        except Exception:
+            pass
+
+        # If focus is in salesTable quantity editor, ignore scan
+        try:
+            fw = QApplication.instance().focusWidget() if QApplication.instance() else None
+            if fw is not None and getattr(fw, 'objectName', lambda: '')() == 'qtyInput':
+                # Remove any stray first character leaked into qty input
+                try:
+                    self._ignore_scan(barcode, reason='qtyInput-focused')
+                except Exception:
+                    pass
+                return
+        except Exception:
+            pass
+
+        # If focus is in payment refund input, route code there
+        try:
+            if fw is not None and getattr(fw, 'objectName', lambda: '')() == 'refundInput':
+                try:
+                    fw.setText(barcode)
+                except Exception:
+                    pass
+                return
+        except Exception:
+            pass
         
         if not found:
             # Product not found - open Product Management in ADD mode with code prefilled
@@ -1357,6 +1460,222 @@ class MainLoader(QMainWindow):
         except Exception as e:
             # Non-fatal; avoid crashing timer
             print('Clock update failed:', e)
+
+    # ----------------- Focus debug helpers -----------------
+    def _describe_widget(self, w: QWidget) -> str:
+        try:
+            if w is None:
+                return 'None'
+            name = w.objectName() or ''
+            cls = w.metaObject().className() if hasattr(w, 'metaObject') else w.__class__.__name__
+            if name:
+                return f"{cls}(objectName='{name}')"
+            return cls
+        except Exception:
+            return '<unknown>'
+
+    def _debug_print_focus(self, context: str, barcode: str = ''):
+        try:
+            app = QApplication.instance()
+            aw = app.activeWindow() if app else None
+            fw = app.focusWidget() if app else None
+            # Build parent chain from focus widget up to window
+            chain = []
+            cur = fw
+            seen = 0
+            while cur is not None and seen < 10:  # limit to avoid accidental loops
+                chain.append(self._describe_widget(cur))
+                cur = cur.parent()
+                seen += 1
+            chain_str = ' -> '.join(reversed(chain)) if chain else 'None'
+            win_title = ''
+            try:
+                if aw and hasattr(aw, 'windowTitle'):
+                    win_title = aw.windowTitle()
+            except Exception:
+                pass
+            override = getattr(self, '_barcodeOverride', None)
+            print('[Scanner][Focus]',
+                  f"context={context}",
+                  f"barcode='{barcode}'",
+                  f"activeWindow={self._describe_widget(aw)}",
+                  f"windowTitle='{win_title}'",
+                  f"focusPath={chain_str}",
+                  f"override={'yes' if callable(override) else 'no'}")
+        except Exception as _e:
+            print('[Scanner][Focus] debug failed:', _e)
+
+    def _on_focus_changed(self, old: QWidget, new: QWidget):
+        try:
+            print('[FocusChanged]', self._describe_widget(old), '->', self._describe_widget(new))
+        except Exception:
+            pass
+
+    # Swallow Enter/Return keys briefly during scanner activity to avoid triggering default buttons
+    def _on_scanner_activity(self, when_ts: float):
+        try:
+            now = time.time()
+            prev = getattr(self, '_scannerPrevTs', 0.0) or 0.0
+            dt = when_ts - prev if prev > 0 else None
+            # Consider it scanner-like if two consecutive keys are very fast
+            if dt is not None and dt <= 0.08:
+                # Activate a short window during which we will swallow keys to non-whitelisted fields
+                self._scannerActiveUntil = max(getattr(self, '_scannerActiveUntil', 0.0), now + 0.25)
+                # Also suppress Enter slightly to avoid button activation
+                self._suppressEnterUntil = max(getattr(self, '_suppressEnterUntil', 0.0), now + 0.15)
+            # Remember timestamp for next delta computation
+            self._scannerPrevTs = when_ts
+        except Exception:
+            pass
+
+    def eventFilter(self, obj, event):
+        try:
+            if event.type() == QEvent.KeyPress:
+                k = event.key()
+                now = time.time()
+                # If a generic modal is blocking the scanner, swallow printable keys and Enter immediately
+                try:
+                    if getattr(self, '_modalBlockScanner', False):
+                        text = ''
+                        try:
+                            text = event.text() or ''
+                        except Exception:
+                            text = ''
+                        is_printable = len(text) == 1 and (31 < ord(text) < 127)
+                        if is_printable or k in (Qt.Key_Return, Qt.Key_Enter):
+                            return True
+                except Exception:
+                    pass
+                # Swallow Enter during suppression window
+                if k in (Qt.Key_Return, Qt.Key_Enter) and now <= getattr(self, '_suppressEnterUntil', 0.0):
+                    return True
+                # If scanner is active, block character keys to disallowed widgets
+                if now <= getattr(self, '_scannerActiveUntil', 0.0):
+                    # Determine current focus
+                    app = QApplication.instance()
+                    fw = app.focusWidget() if app else None
+                    # Identify allowed targets
+                    obj_name = ''
+                    try:
+                        obj_name = fw.objectName() if fw is not None else ''
+                    except Exception:
+                        obj_name = ''
+                    # Allowed only in product code field and refund input; disallow qtyInput
+                    is_qty = (obj_name == 'qtyInput')
+                    is_allowed = (obj_name in ('productCodeLineEdit', 'refundInput')) and not is_qty
+                    # Printable char? If so, swallow unless allowed
+                    text = ''
+                    try:
+                        text = event.text() or ''
+                    except Exception:
+                        text = ''
+                    is_printable = len(text) == 1 and (31 < ord(text) < 127)
+                    if is_printable and not is_allowed:
+                        return True
+        except Exception:
+            pass
+        return super().eventFilter(obj, event)
+
+    # Best-effort cleanup for a stray first character leaked into disallowed inputs during a scan
+    def _cleanup_scanner_leak(self, fw: QWidget, barcode: str) -> None:
+        try:
+            if fw is None or not barcode:
+                return
+            ch = barcode[0]
+            name = getattr(fw, 'objectName', lambda: '')()
+            # Handle QLineEdit-like widgets
+            try:
+                from PyQt5.QtWidgets import QLineEdit
+                if isinstance(fw, QLineEdit):
+                    txt = fw.text() or ''
+                    if txt.endswith(ch) and len(txt) <= 3:
+                        fw.setText(txt[:-1])
+                    return
+            except Exception:
+                pass
+            # Handle QTextEdit/QPlainTextEdit
+            try:
+                from PyQt5.QtWidgets import QTextEdit, QPlainTextEdit
+                from PyQt5.QtGui import QTextCursor
+                if isinstance(fw, (QTextEdit, QPlainTextEdit)):
+                    # Remove the last character if it matches first barcode char
+                    t = fw.toPlainText()
+                    if t.endswith(ch) and len(t) <= 3:
+                        if isinstance(fw, QTextEdit):
+                            cur = fw.textCursor()
+                            cur.movePosition(QTextCursor.End)
+                            cur.deletePreviousChar()
+                            fw.setTextCursor(cur)
+                        else:
+                            # QPlainTextEdit: simpler reset of last char
+                            fw.setPlainText(t[:-1])
+                            fw.moveCursor(QTextCursor.End)
+                    return
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+    # Centralized helper to ignore a scan and clean any leaked first character in the current focus widget
+    def _ignore_scan(self, barcode: str, reason: str = '') -> None:
+        try:
+            app = QApplication.instance()
+            fw = app.focusWidget() if app else None
+            self._cleanup_scanner_leak(fw, barcode)
+            if DEBUG_SCANNER_FOCUS:
+                try:
+                    print('[Scanner][Ignore]', f"reason='{reason}'", 'focus=', self._describe_widget(fw))
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+    # ------- Tiny helpers: overlay + scanner modal block + focus/override -------
+    def _show_dim_overlay(self) -> None:
+        try:
+            if not hasattr(self, '_dimOverlay') or self._dimOverlay is None:
+                self._dimOverlay = QWidget(self)
+                self._dimOverlay.setObjectName('dimOverlay')
+                self._dimOverlay.setStyleSheet('#dimOverlay { background-color: rgba(0, 0, 0, 110); }')
+                self._dimOverlay.setAttribute(Qt.WA_TransparentForMouseEvents, False)
+            self._dimOverlay.setGeometry(self.rect())
+            self._dimOverlay.show()
+            self._dimOverlay.raise_()
+        except Exception:
+            pass
+
+    def _hide_dim_overlay(self) -> None:
+        try:
+            if hasattr(self, '_dimOverlay') and self._dimOverlay is not None:
+                self._dimOverlay.hide()
+        except Exception:
+            pass
+
+    def _start_scanner_modal_block(self) -> None:
+        try:
+            self._modalBlockScanner = True
+        except Exception:
+            pass
+
+    def _end_scanner_modal_block(self) -> None:
+        try:
+            self._modalBlockScanner = False
+        except Exception:
+            pass
+
+    def _refocus_sales_table(self) -> None:
+        try:
+            if getattr(self, 'sales_table', None) is not None:
+                self.sales_table.setFocus(Qt.OtherFocusReason)
+        except Exception:
+            pass
+
+    def _clear_barcode_override(self) -> None:
+        try:
+            if hasattr(self, '_barcodeOverride'):
+                self._barcodeOverride = None
+        except Exception:
+            pass
 
 
 def main():
