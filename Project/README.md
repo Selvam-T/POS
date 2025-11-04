@@ -180,6 +180,14 @@ Implementation details:
 
 For a deep dive into the exact routing rules, protections, and debug options, see Documentation/scanner_input_infocus.md.
 
+### Sales-in-progress restrictions
+
+To prevent inconsistencies between items already listed in the current sale and the master product data:
+
+- When the Sales table contains one or more items, the Product Management dialog allows only ADD.
+- REMOVE and UPDATE/View are disabled while a sale is in progress.
+- Finish or cancel the current sale (clear the Sales table) to re-enable REMOVE/UPDATE/View.
+
 ### Sales Table Operations
 
 - **Edit Quantity:** Click quantity field, type number, press Enter

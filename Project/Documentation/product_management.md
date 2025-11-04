@@ -28,6 +28,12 @@ This document summarizes the Product Management feature (Product.ui / open_produ
 - Once a mode is selected, the mode buttons are disabled (locked) so the user completes or cancels.
 - Modes unlock after OK (ADD/DELETE/UPDATE) or CANCEL.
 
+### Sales-in-progress restrictions
+- When the Sales table has one or more items listed, the Product dialog restricts actions to ADD only.
+- REMOVE and UPDATE/View buttons are disabled to prevent changing or deleting products that are already listed in the current sale.
+- Finish or cancel the ongoing sale to enable REMOVE/UPDATE/View again.
+  - If the dialog is opened programmatically with an initial mode of REMOVE/UPDATE while a sale is active, it automatically starts in ADD mode.
+
 ### Enter key behavior
 - Pressing Enter in Product Code during REMOVE/UPDATE:
   - Performs lookup, locks the mode (if not already), then advances focus like Tab on the next event loop tick (prevents accidental submit on the same Enter).

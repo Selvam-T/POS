@@ -31,6 +31,29 @@ Quality gates: PASS (build/import); manual verification confirms no unintended s
 
 ---
  
+## Update Summary (November 4, 2025, later)
+
+Product dialog safety rule: ADD-only while a sale has items.
+
+- Rationale: Prevent inconsistencies between items already listed in the current Sales table and any mid-transaction product changes (price edits or deletions) in the master database.
+- Behavior:
+    - If the Sales table has one or more rows, Product Management opens with only ADD enabled.
+    - REMOVE and UPDATE/View are disabled and show tooltips explaining why.
+    - If a caller tries to open the dialog with `initial_mode` of REMOVE/UPDATE during an active sale, it is forced to ADD.
+- Implementation (main.py → `open_product_panel`):
+    - Compute `sale_active = (self.sales_table and self.sales_table.rowCount() > 0)`.
+    - `set_mode_buttons_enabled` respects `sale_active` and keeps REMOVE/UPDATE disabled.
+    - Initial wiring disables REMOVE/UPDATE immediately and assigns explanatory tooltips.
+    - Guard click handlers and coerce `initial_mode` to `add` when `sale_active`.
+- Documentation:
+    - Updated `Documentation/product_management.md` with a new “Sales-in-progress restrictions” subsection.
+    - Updated `README.md` Usage with a concise “Sales-in-progress restrictions” section.
+- Validation:
+    - Quality gates: PASS (quick import/syntax check).
+    - Manual tests: With rows present, Product dialog shows ADD enabled and REMOVE/UPDATE disabled; clearing the Sales table re-enables them.
+
+---
+ 
 ## Update Summary (November 3, 2025)
 
 Header refactor and alignment fixes:
@@ -1129,5 +1152,5 @@ def handle_barcode_scanned(table, barcode, status_bar):
 ---
 
 **Document maintained by:** Development team  
-**Last updated:** November 3, 2025  
+**Last updated:** November 4, 2025  
 **Update frequency:** End of each development session / before each commit

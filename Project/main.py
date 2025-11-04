@@ -622,16 +622,24 @@ class MainLoader(QMainWindow):
             status_lbl: QLabel = content.findChild(QLabel, 'statusLabel')
 
             current_mode = {'mode': 'none'}
+            # Business rule: If Sales table already has items, prevent REMOVE/UPDATE to avoid inconsistency
+            sale_active = False
+            try:
+                st = getattr(self, 'sales_table', None)
+                sale_active = (st is not None and st.rowCount() > 0)
+            except Exception:
+                sale_active = False
             mode_locked = {'locked': False}
 
             def set_mode_buttons_enabled(enabled: bool):
                 try:
                     if btn_add is not None:
                         btn_add.setEnabled(enabled)
+                    # Keep REMOVE/UPDATE disabled when a sale is in progress
                     if btn_remove is not None:
-                        btn_remove.setEnabled(enabled)
+                        btn_remove.setEnabled(False if sale_active else enabled)
                     if btn_update is not None:
-                        btn_update.setEnabled(enabled)
+                        btn_update.setEnabled(False if sale_active else enabled)
                 except Exception as _e:
                     pass
 
@@ -1057,13 +1065,27 @@ class MainLoader(QMainWindow):
                 except Exception:
                     pass
 
+            # Apply sale_active rule immediately (disable Remove/Update + explain via tooltip)
+            try:
+                if sale_active:
+                    if btn_remove is not None:
+                        btn_remove.setEnabled(False)
+                        btn_remove.setToolTip('Disabled while items are present in Sales to prevent data inconsistencies.')
+                    if btn_update is not None:
+                        btn_update.setEnabled(False)
+                        btn_update.setToolTip('Disabled while items are present in Sales to prevent data inconsistencies.')
+            except Exception:
+                pass
+
             # Wire buttons and signals
             if btn_add is not None:
                 btn_add.clicked.connect(lambda: on_mode_button_clicked('add'))
             if btn_remove is not None:
-                btn_remove.clicked.connect(lambda: on_mode_button_clicked('remove'))
+                # Guard: ignore clicks when disabled by active sale
+                btn_remove.clicked.connect(lambda: on_mode_button_clicked('remove') if (btn_remove.isEnabled()) else None)
             if btn_update is not None:
-                btn_update.clicked.connect(lambda: on_mode_button_clicked('update'))
+                # Guard: ignore clicks when disabled by active sale
+                btn_update.clicked.connect(lambda: on_mode_button_clicked('update') if (btn_update.isEnabled()) else None)
             if ok_btn is not None:
                 try:
                     ok_btn.clicked.disconnect()
@@ -1123,7 +1145,11 @@ class MainLoader(QMainWindow):
             # If caller requested a starting mode/code (e.g., from scanner when not found)
             try:
                 if isinstance(initial_mode, str) and initial_mode.lower() in ('add', 'remove', 'update'):
-                    on_mode_button_clicked(initial_mode.lower())
+                    # Force to ADD when a sale is active to maintain consistency
+                    start_mode = initial_mode.lower()
+                    if sale_active and start_mode in ('remove', 'update'):
+                        start_mode = 'add'
+                    on_mode_button_clicked(start_mode)
                     if initial_code and code_edit is not None:
                         code_edit.setText(str(initial_code))
                         code_edit.setFocus()
