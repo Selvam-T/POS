@@ -103,112 +103,112 @@
               <number>5</number>
             </property>
             <item row="0" column="0">
-              <widget class="QPushButton" name="btnVegTomato">
+              <widget class="QPushButton" name="btnVeg1">
                 <property name="text">
-                  <string>Tomato</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="0" column="1">
-              <widget class="QPushButton" name="btnVegPotato">
+              <widget class="QPushButton" name="btnVeg2">
                 <property name="text">
-                  <string>Potato</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="0" column="2">
-              <widget class="QPushButton" name="btnVegOnion">
+              <widget class="QPushButton" name="btnVeg3">
                 <property name="text">
-                  <string>Onion</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="0" column="3">
-              <widget class="QPushButton" name="btnVegCarrot">
+              <widget class="QPushButton" name="btnVeg4">
                 <property name="text">
-                  <string>Carrot</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="1" column="0">
-              <widget class="QPushButton" name="btnVegCabbage">
+              <widget class="QPushButton" name="btnVeg5">
                 <property name="text">
-                  <string>Cabbage</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="1" column="1">
-              <widget class="QPushButton" name="btnVegSpinach">
+              <widget class="QPushButton" name="btnVeg6">
                 <property name="text">
-                  <string>Spinach</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="1" column="2">
-              <widget class="QPushButton" name="btnVegCucumber">
+              <widget class="QPushButton" name="btnVeg7">
                 <property name="text">
-                  <string>Cucumber</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="1" column="3">
-              <widget class="QPushButton" name="btnVegPumpkin">
+              <widget class="QPushButton" name="btnVeg8">
                 <property name="text">
-                  <string>Pumpkin</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="2" column="0">
-              <widget class="QPushButton" name="btnVegCapsicum">
+              <widget class="QPushButton" name="btnVeg9">
                 <property name="text">
-                  <string>Capsicum</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="2" column="1">
-              <widget class="QPushButton" name="btnVegBeetroot">
+              <widget class="QPushButton" name="btnVeg10">
                 <property name="text">
-                  <string>Beetroot</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="2" column="2">
-              <widget class="QPushButton" name="btnVegRadish">
+              <widget class="QPushButton" name="btnVeg11">
                 <property name="text">
-                  <string>Radish</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="2" column="3">
-              <widget class="QPushButton" name="btnVegPeas">
+              <widget class="QPushButton" name="btnVeg12">
                 <property name="text">
-                  <string>Peas</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="3" column="0">
-              <widget class="QPushButton" name="btnVegOkra">
+              <widget class="QPushButton" name="btnVeg13">
                 <property name="text">
-                  <string>Okra</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="3" column="1">
-              <widget class="QPushButton" name="btnVegCauliflower">
+              <widget class="QPushButton" name="btnVeg14">
                 <property name="text">
-                  <string>Cauliflower</string>
+                  <string>Not Used</string>
                 </property>
               </widget>
             </item>
             <item row="3" column="2">
-              <widget class="QPushButton" name="btnOK">
+              <widget class="QPushButton" name="btnVegOk">
                 <property name="text">
                   <string>OK</string>
                 </property>
               </widget>
             </item>
             <item row="3" column="3">
-              <widget class="QPushButton" name="btnCancel">
+              <widget class="QPushButton" name="btnVegCancel">
                 <property name="text">
                   <string>CANCEL</string>
                 </property>

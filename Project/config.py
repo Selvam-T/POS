@@ -99,3 +99,15 @@ DEBUG_FOCUS_CHANGES = False
 
 # Enable to log cache lookup result for every scanned code
 DEBUG_CACHE_LOOKUP = True
+
+# =============================================================================
+# APPDATA / FEATURE CONSTANTS
+# =============================================================================
+# Writable folder for JSON-based settings (e.g., vegetables.json). Not an asset.
+# Created at runtime if missing. Keep user-specific data out of version control
+# by adding AppData/*.json to .gitignore if desired.
+APPDATA_DIR = os.path.join(_BASE_DIR, 'AppData')
+
+# Number of vegetable buttons to manage (veg1..vegN). The vegetable entry UI
+# currently provides 14 slots.
+VEG_SLOTS = 14

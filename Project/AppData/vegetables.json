@@ -1,0 +1,58 @@
+{
+  "veg1": {
+    "state": "custom",
+    "label": "Orange"
+  },
+  "veg2": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg3": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg4": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg5": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg6": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg7": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg8": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg9": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg10": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg11": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg12": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg13": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg14": {
+    "state": "unused",
+    "label": "unused"
+  }
+}

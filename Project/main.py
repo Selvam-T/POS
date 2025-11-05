@@ -28,6 +28,7 @@ from PyQt5.QtGui import QFontMetrics, QIcon
 from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned, bind_total_label
 from modules.devices import BarcodeScanner
 from modules.menu.logout_menu import open_logout_dialog as open_logout_dialog_menu
+from modules.menu.vegetable_menu import VegetableMenuDialog
 from config import (
     DATE_FMT,
     DAY_FMT,
@@ -394,6 +395,9 @@ class MainLoader(QMainWindow):
                     btn.clicked.connect(self.open_product_panel)
                 elif obj_name == 'logoutBtn':
                     btn.clicked.connect(lambda: open_logout_dialog_menu(self))
+                elif obj_name == 'vegetableBtn':
+                    # Open the Vegetable Label Edit dialog (ui/vegetable_menu.ui)
+                    btn.clicked.connect(self.open_vegetable_label_menu)
                 else:
                     btn.clicked.connect(lambda _, t=title, m=msg: self.open_menu_dialog(t, m))
         except Exception as e:
@@ -507,21 +511,21 @@ class MainLoader(QMainWindow):
         except Exception as e:
             print('Vegetable table setup failed:', e)
 
-        # Wire keypad buttons to update message label and close on OK/CANCEL
+        # Wire keypad buttons to update message label and close on OK/CANCEL (updated to btnVeg1..btnVeg14)
         try:
             msg: QLabel = content.findChild(QLabel, 'messageLabel')
             for name in (
-                'btnVegTomato','btnVegPotato','btnVegOnion','btnVegCarrot',
-                'btnVegCabbage','btnVegSpinach','btnVegCucumber','btnVegPumpkin',
-                'btnVegCapsicum','btnVegBeetroot','btnVegRadish','btnVegPeas',
-                'btnVegOkra','btnVegCauliflower',
+                'btnVeg1','btnVeg2','btnVeg3','btnVeg4',
+                'btnVeg5','btnVeg6','btnVeg7','btnVeg8',
+                'btnVeg9','btnVeg10','btnVeg11','btnVeg12',
+                'btnVeg13','btnVeg14',
             ):
                 btn = content.findChild(QPushButton, name)
                 if btn is not None and msg is not None:
                     btn.clicked.connect(lambda _, b=btn: msg.setText(f"Selected: {b.text()}"))
 
-            ok_btn = content.findChild(QPushButton, 'btnOK')
-            cancel_btn = content.findChild(QPushButton, 'btnCancel')
+            ok_btn = content.findChild(QPushButton, 'btnVegOk')
+            cancel_btn = content.findChild(QPushButton, 'btnVegCancel')
             if ok_btn is not None:
                 ok_btn.clicked.connect(lambda: dlg.accept())
             if cancel_btn is not None:
@@ -1301,6 +1305,55 @@ class MainLoader(QMainWindow):
                 pass
 
         dlg.finished.connect(_cleanup)
+        dlg.exec_()
+
+    def open_vegetable_label_menu(self):
+        """Open the Vegetable Label Edit dialog from ui/vegetable_menu.ui as a modal dialog.
+        Uses the same dim-overlay behavior as other panels.
+        """
+        # Show overlay
+        try:
+            self._show_dim_overlay()
+        except Exception:
+            pass
+        try:
+            dlg = VegetableMenuDialog(self)
+            # Hide native title bar; use custom top bar inside the UI
+            dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
+        except Exception as e:
+            print('Failed to build VegetableMenuDialog:', e)
+            try:
+                self._hide_dim_overlay()
+            except Exception:
+                pass
+            return
+
+        # Frameless-style UI comes from the .ui; we just size/center the dialog
+        try:
+            mw = self.frameGeometry().width()
+            mh = self.frameGeometry().height()
+            dw = max(420, int(mw * 0.52))
+            dh = max(360, int(mh * 0.62))
+            dlg.setFixedSize(dw, dh)
+            mx = self.frameGeometry().x()
+            my = self.frameGeometry().y()
+            dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
+        except Exception:
+            pass
+
+        # Cleanup overlay when closed
+        def _cleanup_overlay(_code):
+            try:
+                self._hide_dim_overlay()
+            except Exception:
+                pass
+            try:
+                self.raise_()
+                self.activateWindow()
+            except Exception:
+                pass
+
+        dlg.finished.connect(_cleanup_overlay)
         dlg.exec_()
 
     # (Logout dialog logic moved to modules.menu.logout_menu.open_logout_dialog)

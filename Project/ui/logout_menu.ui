@@ -123,7 +123,7 @@
                 </font>
               </property>
               <property name="text">
-                <string>Yes, Logout !</string>
+                <string>Yes, Logout</string>
               </property>
             </widget>
           </item>
