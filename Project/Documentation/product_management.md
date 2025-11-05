@@ -1,6 +1,6 @@
 # Product Management: Design, Behavior, and Integration
 
-This document summarizes the Product Management feature (Product.ui / open_product_panel) and how it integrates with Sales scanning, the in-memory cache, and the database.
+This document summarizes the Product Management feature (product_menu.ui / open_product_panel) and how it integrates with Sales scanning, the in-memory cache, and the database.
 
 ## Goals
 - Provide a focused UI to ADD, REMOVE, and UPDATE products.
@@ -8,7 +8,7 @@ This document summarizes the Product Management feature (Product.ui / open_produ
 - Ensure newly added/updated products are immediately usable by the Sales flow (scanner and sales table) without restarting the app.
 
 ## UI and Modes
-- Dialog: `ui/product.ui` loaded by `MainLoader.open_product_panel`.
+- Dialog: `ui/product_menu.ui` loaded by `MainLoader.open_product_panel`.
 - Mode buttons: ADD, REMOVE, UPDATE.
 - The dialog starts hidden (neutral state). The form and sub-header become visible only after a mode is chosen.
 - Sub-header reflects the selected mode (Add New Product / Remove Product / Update Product).
@@ -91,6 +91,6 @@ This document summarizes the Product Management feature (Product.ui / open_produ
   - `main.py` – dialog wiring, scan routing, cache refresh, and sales table integration.
   - `modules/db_operation/database.py` – DB access and product cache management.
   - `modules/sales/salesTable.py` – sales table row add/increment logic.
-  - `ui/product.ui` – dialog layout.
+  - `ui/product_menu.ui` – dialog layout.
   - `config.py` – `DB_PATH`, formats, icons.
 - Error prints are minimized in production; most user feedback goes through the status bar or dialog status label.

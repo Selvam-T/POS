@@ -359,7 +359,8 @@ QTextEdit#manualText { font-size: 18px; font-weight: bold; }
 /* =============================================================
    LOGOUT DIALOG
    ============================================================= */
-QDialog#LogoutDialog {
+QDialog#LogoutDialog,
+QDialog#LogoutDialogContainer {
   background: #ffffff;
 }
 QFrame#customTitleBar {
@@ -367,7 +368,7 @@ QFrame#customTitleBar {
 }
 
 QPushButton#customCloseBtn {
-  color: #310761; /* X color (opaque; avoid ARGB 8-digit form) */
+  color: #310761;
   /*background: transparent;*/
   border: none;
   font-size: 40px;
@@ -377,7 +378,7 @@ QPushButton#customCloseBtn {
   max-height: 44px;
 }
 QPushButton#customCloseBtn:hover {
-  color: #137008;;
+  color: #eb8a0b;;
 }
 QPushButton#customCloseBtn:pressed {
   color: #18042f;;
@@ -386,10 +387,7 @@ QLabel#label_title {
   font-size: 20pt;
   font-weight: 700;
 }
-QLabel#label_message {
-  font-size: 12pt;
-  color: #333333;
-}
+
 QPushButton#pushButton_cancel,
 QPushButton#pushButton_logout {
   color: #ffffff;

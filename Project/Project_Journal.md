@@ -27,17 +27,24 @@ Quality gates: PASS (syntax/import). Manual validation: scanning adds rows incre
 
 ---
  
+## Update Summary (November 5, 2025, later)
+
+Logout flow and custom title bar:
+
+    - `QFrame#customTitleBar` for the title area background
+    - `QPushButton#customCloseBtn` for the big X (font size, hover/pressed)
+
+Docs: Updated README (features, usage, project structure) and added `Documentation/logout_and_titlebar.md` explaining the frameless rationale, styling selectors, alpha color formats, and how to apply the pattern to other dialogs.
+
+Quality gates: PASS (quick syntax check). Manual verification: Logout opens centered with dim overlay; Cancel returns; Yes, Logout stops scanner and quits; main window X/Alt+F4 ignored unless allowed by logout.
+
+ 
 ## Update Summary (November 4, 2025)
 
 Scanner input in-focus routing, protection, and diagnostics:
 
-- App-wide event filter with scan-burst detection (timing-based) to distinguish scanner keystrokes and suppress Enter during bursts.
-- Modal scanner block flag when dialogs (Manual, Vegetable, Product, etc.) are opened; combined with a dim overlay to block clicks. Focus is restored to the sales table on close.
-- Focus-based routing rules:
     - Default destination: Sales table handler.
     - Payment frame: accept only when `refundInput` is focused.
-    - Product dialog: accept only when `productCodeLineEdit` is focused; otherwise ignore and clean leaks.
-    - Quantity editor (`qtyInput`) is always ignored and cleaned.
 - Enter-as-Tab in Product dialog inputs; action buttons are explicitly non-default to avoid accidental activation.
 - Centralized helpers: `_ignore_scan`, `_cleanup_scanner_leak`, `_show_dim_overlay`/`_hide_dim_overlay`, `_start_scanner_modal_block`/`_end_scanner_modal_block`, `_refocus_sales_table`, `_clear_barcode_override`.
 - Diagnostics:
@@ -116,7 +123,7 @@ See README “Header layout (infoSection)” for the concise how-to.
 
 Product Management and scanner flow integration:
 
-- Added a full Product Management dialog (`ui/product.ui`) and wired it to the Product menu. Removed placeholder actions.
+- Added a full Product Management dialog (`ui/product_menu.ui`) and wired it to the Product menu. Removed placeholder actions.
 - Mode-driven behavior with buttons for ADD, UPDATE, REMOVE:
     - Starts with the form hidden until a mode is chosen; focuses Product Code on mode select.
     - ADD: requires all fields; includes Unit dropdown (pcs, kg); shows live duplicate check on Product Code and disables ADD if duplicate.
@@ -1193,5 +1200,5 @@ def handle_barcode_scanned(table, barcode, status_bar):
 ---
 
 **Document maintained by:** Development team  
-**Last updated:** November 4, 2025  
+**Last updated:** November 5, 2025  
 **Update frequency:** End of each development session / before each commit

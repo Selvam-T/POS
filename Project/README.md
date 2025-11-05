@@ -25,6 +25,8 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
  - Manual entry dialog (opened only from its button)
  - Right-side icon-only menu with tooltips and modal placeholders
  - Header layout: Date (left), Company (center), Day+Time (right as a single label)
+ - Logout flow: dedicated logout dialog with dimmed background; main window Close (X) disabled to enforce proper logout
+ - Custom, frameless logout dialog with a stylable title bar and large Close (X) button
 
 ✅ **Barcode Scanner**
 - Global event filtering with timing-based scan-burst detection
@@ -58,9 +60,10 @@ Project/
 │   ├── sales_frame.ui          # Sales section UI
 │   ├── payment_frame.ui        # Payment section UI
 │   ├── menu_frame.ui           # Right-side menu (7 icon-only buttons)
-│   ├── product.ui              # Product Management dialog content
+│   ├── product_menu.ui         # Product Management dialog content
 │   ├── vegetable_entry.ui      # Vegetable (weight) dialog content
-│   └── manual_entry.ui         # Manual entry dialog content
+│   ├── manual_entry.ui         # Manual entry dialog content
+│   └── logout_menu.ui          # Logout confirmation dialog (frameless, custom title bar)
 └── modules/
    ├── db_operation/
    │   ├── __init__.py
@@ -68,6 +71,9 @@ Project/
    ├── devices/
    │   ├── __init__.py         # Exports BarcodeScanner
    │   └── scanner.py          # Barcode scanner integration (pynput)
+   ├── menu/
+   │   ├── __init__.py         # Exports open_logout_dialog
+   │   └── logout_menu.py      # Logout dialog controller (frameless, dim overlay, wiring)
    └── sales/
       ├── __init__.py
       └── salesTable.py       # Sales table logic & row management
@@ -184,6 +190,20 @@ Implementation details:
 
 For a deep dive into the exact routing rules, protections, and debug options, see Documentation/scanner_input_infocus.md.
 
+### Logout and window close behavior
+
+- The main window's Close (X) and Alt+F4 are disabled and ignored. Use the Logout button in the right menu to exit.
+- Clicking Logout opens a modal confirmation dialog (frameless) and dims the background.
+- Yes, Logout: stops the scanner and exits the app. Cancel returns to the app.
+- Styling the logout dialog:
+   - Title bar background: `QFrame#customTitleBar` in `assets/style.qss`
+   - Close (X) button: `QPushButton#customCloseBtn` (font size, colors, hover/pressed)
+   - Tip: Use 6‑digit hex `#RRGGBB` (or 8-digit `#ffRRGGBB`) for opaque colors. `#AARRGGBB` with a low AA will appear washed out.
+
+Controller location and wiring:
+- Controller function: `modules/menu/logout_menu.py` → `open_logout_dialog(host_window)`
+- The menu button in `main.py` calls `open_logout_dialog(self)` when `logoutBtn` is clicked.
+
 ### Sales-in-progress restrictions
 
 To prevent inconsistencies between items already listed in the current sale and the master product data:
@@ -223,6 +243,8 @@ The compact icon-only menu lives on the right side and contains seven buttons:
 - Buttons show their label on hover via tooltips.
 - Clicking any button currently opens a modal with a placeholder message and dims the background.
 - Buttons are square (64x64) with gray borders and large icons; menu width is constrained to stay narrow.
+
+Logout button opens the dedicated Logout dialog described above.
 
 ## Configuration
 
@@ -283,6 +305,7 @@ See `Project_Journal.md` for detailed architecture documentation, design decisio
   - Code examples and technical explanations
   - Development history
  - Scanner input architecture: see Documentation/scanner_input_infocus.md for focus-first routing, modal block, and debug guidance.
+ - Logout dialog and custom title bar: see Documentation/logout_and_titlebar.md for styling and behavior details.
 
 ## Troubleshooting
 
@@ -322,4 +345,4 @@ See `requirements.txt` for full list. Main dependencies:
 [Add contact information here]
 
 ---
-**Last Updated:** November 4, 2025
+**Last Updated:** November 5, 2025
