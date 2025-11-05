@@ -64,6 +64,17 @@ class MainLoader(QMainWindow):
         super().__init__()
         main_ui = os.path.join(UI_DIR, 'main_window.ui')
         uic.loadUi(main_ui, self)
+        # Remove the window close button (X) to force using Logout
+        try:
+            flags = self.windowFlags()
+            flags |= Qt.CustomizeWindowHint | Qt.WindowTitleHint
+            flags &= ~Qt.WindowCloseButtonHint
+            self.setWindowFlags(flags)
+            # Gate programmatic close; only allow via logout
+            self._allow_close = False
+        except Exception:
+            # If flags not applied, we'll still guard via closeEvent below
+            self._allow_close = False
         # Ensure header layout stretches keep center truly centered
         try:
             info_layout = self.findChild(QHBoxLayout, 'infoSection')
@@ -377,9 +388,11 @@ class MainLoader(QMainWindow):
                     btn.setToolTip(title)
                 except Exception:
                     pass
-                # Wire click handlers: Product opens product panel; others show info dialog
+                # Wire click handlers per button
                 if obj_name == 'productBtn':
                     btn.clicked.connect(self.open_product_panel)
+                elif obj_name == 'logoutBtn':
+                    btn.clicked.connect(self.open_logout_dialog)
                 else:
                     btn.clicked.connect(lambda _, t=title, m=msg: self.open_menu_dialog(t, m))
         except Exception as e:
@@ -1289,6 +1302,151 @@ class MainLoader(QMainWindow):
         dlg.finished.connect(_cleanup)
         dlg.exec_()
 
+    # ----------------- Logout dialog wiring -----------------
+    def open_logout_dialog(self):
+        """Open the Logout confirmation dialog as a modal.
+        - Centered relative to main window
+        - Dim background
+        - Buttons: Cancel, Yes Logout
+        """
+        logout_ui = os.path.join(UI_DIR, 'logout.ui')
+        if not os.path.exists(logout_ui):
+            # Fallback to a generic dialog if UI missing
+            return self.open_menu_dialog('Logout', 'Are you sure you want to logout?')
+
+        # Dim background
+        try:
+            self._show_dim_overlay()
+        except Exception:
+            pass
+
+        try:
+            content = uic.loadUi(logout_ui)
+        except Exception as e:
+            print('Failed to load logout.ui:', e)
+            try:
+                self._hide_dim_overlay()
+            except Exception:
+                pass
+            return
+
+        dlg = QDialog(self)
+        dlg.setModal(True)
+        dlg.setObjectName('LogoutDialogContainer')
+        dlg.setWindowTitle('Logout')
+        # Frameless to allow custom title bar styling
+        dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
+
+        # Size and center
+        try:
+            mw = self.frameGeometry().width()
+            mh = self.frameGeometry().height()
+            dw = max(360, int(mw * 0.4))
+            dh = max(300, int(mh * 0.45))
+            dlg.setFixedSize(dw, dh)
+            mx = self.frameGeometry().x()
+            my = self.frameGeometry().y()
+            dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
+        except Exception:
+            pass
+
+        layout = QVBoxLayout(dlg)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(content)
+
+        # Wire buttons
+        try:
+            btn_cancel: QPushButton = content.findChild(QPushButton, 'pushButton_cancel')
+            btn_ok: QPushButton = content.findChild(QPushButton, 'pushButton_logout')
+            btn_x: QPushButton = content.findChild(QPushButton, 'customCloseBtn')
+            if btn_cancel is not None:
+                btn_cancel.clicked.connect(dlg.reject)
+            if btn_ok is not None:
+                btn_ok.clicked.connect(lambda: (dlg.accept(), self._perform_logout()))
+            if btn_x is not None:
+                btn_x.clicked.connect(dlg.reject)
+        except Exception as e:
+            print('Failed wiring logout buttons:', e)
+
+        # Hide the dialog title text label if present (show only big X)
+        try:
+            title_lbl = content.findChild(QLabel, 'customTitle')
+            if title_lbl is not None:
+                title_lbl.setVisible(False)
+        except Exception:
+            pass
+
+        # Enable dragging the frameless dialog via custom title bar
+        try:
+            title_bar = content.findChild(QWidget, 'customTitleBar')
+            if title_bar is not None:
+                dlg._drag_pos = None
+
+                def _mousePress(ev):
+                    try:
+                        if ev.button() == Qt.LeftButton:
+                            dlg._drag_pos = ev.globalPos() - dlg.frameGeometry().topLeft()
+                            ev.accept()
+                    except Exception:
+                        pass
+
+                def _mouseMove(ev):
+                    try:
+                        if dlg._drag_pos is not None and ev.buttons() & Qt.LeftButton:
+                            dlg.move(ev.globalPos() - dlg._drag_pos)
+                            ev.accept()
+                    except Exception:
+                        pass
+
+                def _mouseRelease(_ev):
+                    dlg._drag_pos = None
+
+                title_bar.mousePressEvent = _mousePress
+                title_bar.mouseMoveEvent = _mouseMove
+                title_bar.mouseReleaseEvent = _mouseRelease
+                # Set the title text to match window title
+                lbl = content.findChild(QLabel, 'customTitle')
+                if lbl is not None:
+                    lbl.setText('Logout')
+        except Exception:
+            pass
+
+        def _cleanup(_result):
+            try:
+                self._hide_dim_overlay()
+            except Exception:
+                pass
+            try:
+                self.raise_()
+                self.activateWindow()
+            except Exception:
+                pass
+
+        dlg.finished.connect(_cleanup)
+        dlg.exec_()
+
+    def _perform_logout(self):
+        """Perform logout action: stop devices and close app."""
+        # Stop scanner if running
+        try:
+            if getattr(self, 'scanner', None) is not None:
+                self.scanner.stop()
+        except Exception:
+            pass
+        # Allow closing and quit
+        try:
+            self._allow_close = True
+        except Exception:
+            pass
+        try:
+            # Prefer closing the main window; app will quit due to no top-level windows
+            self.close()
+        except Exception:
+            try:
+                QApplication.instance().quit()
+            except Exception:
+                pass
+
     # ----------------- Manual product entry panel wiring -----------------
     def open_manual_panel(self, message="Manual Product Entry"):
         """Open the Manual Product Entry panel as a modal dialog:
@@ -1737,6 +1895,23 @@ class MainLoader(QMainWindow):
                 self._barcodeOverride = None
         except Exception:
             pass
+
+    # Block closing via X/Alt+F4 unless allowed by logout
+    def closeEvent(self, event):
+        try:
+            if not getattr(self, '_allow_close', False):
+                # Show hint in status bar
+                try:
+                    sb = getattr(self, 'statusbar', None)
+                    if sb is not None:
+                        sb.showMessage('Use the Logout button in the menu to exit.', 3000)
+                except Exception:
+                    pass
+                event.ignore()
+                return
+        except Exception:
+            pass
+        super().closeEvent(event)
 
 
 def main():
