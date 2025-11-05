@@ -198,6 +198,18 @@ To prevent inconsistencies between items already listed in the current sale and 
 - **Delete Row:** Click red X button (row highlights before deletion)
 - **View Total:** Calculated as Quantity × Unit Price
 
+#### Grand total (totalValue)
+
+- The `QLabel#totalValue` in `sales_frame.ui` is bound at runtime and always shows the sum of all row totals (column 4).
+- It updates immediately when rows are added, quantities change, prices change, or rows are deleted.
+- Scanner “leak” and reversal: if a transient character briefly changes a quantity and is then cleaned, the grand total is recomputed and returns to the correct value.
+- Developer helpers (in `modules/sales/salesTable.py`):
+   - `bind_total_label(table, label)` — attach the label to a sales table instance (called in `main.py`).
+   - `recompute_total(table) -> float` — recompute from column 4 and refresh the label.
+   - `get_total(table) -> float` — read the last computed total (e.g., for Payment frame).
+  
+Note: The static text in the `.ui` file remains `$ 0.00`; the value is updated at runtime.
+
 ### Error Handling
 
 - Invalid product codes show warning in status bar for 10 seconds

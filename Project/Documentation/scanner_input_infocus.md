@@ -79,6 +79,11 @@ This document explains how barcode scanner input is handled across the POS UI to
 - Focus on `refundInput`: scan is accepted and applied to the field.
 - Product not found: Product dialog opens in ADD mode with code prefilled; override active only on `productCodeLineEdit`.
 
+### Effect on totals (salesFrame totalValue)
+
+- Row totals and the grand total are updated together. If a scan leak briefly alters a quantity and is then cleaned, the two quick recalculations cancel out and the grand total returns to the correct value.
+- The aggregate total is derived from the visible row totals (column 4) to avoid rounding drift and ensure UI consistency.
+
 ## Developer notes
 
 - Key helpers in `main.py`:

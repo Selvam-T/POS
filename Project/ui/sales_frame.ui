@@ -1,198 +1,191 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-  <class>SalesFrame</class>
-  <widget class="QWidget" name="SalesFrame">
-    <property name="geometry">
-      <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>1078</width>
-        <height>745</height>
-      </rect>
-    </property>
-    <layout class="QVBoxLayout" name="mainSalesLayout">
+ <class>SalesFrame</class>
+ <widget class="QWidget" name="SalesFrame">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1078</width>
+    <height>745</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="mainSalesLayout">
+   <property name="spacing">
+    <number>10</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="salesLabel">
+     <property name="text">
+      <string>Sales</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QTableWidget" name="salesTable">
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SingleSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectRows</enum>
+     </property>
+     <property name="rowCount">
+      <number>0</number>
+     </property>
+     <property name="columnCount">
+      <number>6</number>
+     </property>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+     <column/>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="totalContainer">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <layout class="QHBoxLayout" name="totalLayout">
       <property name="spacing">
-        <number>10</number>
+       <number>10</number>
       </property>
       <property name="leftMargin">
-        <number>0</number>
+       <number>0</number>
       </property>
       <property name="topMargin">
-        <number>0</number>
+       <number>0</number>
       </property>
       <property name="rightMargin">
-        <number>0</number>
+       <number>0</number>
       </property>
       <property name="bottomMargin">
-        <number>0</number>
+       <number>0</number>
       </property>
       <item>
-        <widget class="QLabel" name="salesLabel">
-          <property name="text">
-            <string>Sales</string>
-          </property>
-        </widget>
+       <widget class="QLabel" name="totalValue">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
+        <property name="text">
+         <string>Total : $ 0.00</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="margin">
+         <number>10</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="addContainer">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <layout class="QHBoxLayout" name="addBtnLayout">
+      <property name="spacing">
+       <number>20</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="vegBtn">
+        <property name="text">
+         <string>Vegetable Entry</string>
+        </property>
+       </widget>
       </item>
       <item>
-        <widget class="QTableWidget" name="salesTable">
-          <property name="rowCount">
-            <number>0</number>
-          </property>
-          <property name="columnCount">
-            <number>6</number>
-          </property>
-          <property name="alternatingRowColors">
-            <bool>true</bool>
-          </property>
-          <property name="editTriggers">
-            <set>QAbstractItemView::NoEditTriggers</set>
-          </property>
-          <property name="selectionBehavior">
-            <enum>QAbstractItemView::SelectRows</enum>
-          </property>
-          <property name="selectionMode">
-            <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
-          <attribute name="verticalHeaderVisible">
-            <bool>false</bool>
-          </attribute>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-          <column/>
-        </widget>
+       <widget class="QPushButton" name="manualBtn">
+        <property name="text">
+         <string>Manual Entry</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="receiptContainer">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <layout class="QHBoxLayout" name="receiptLayout">
+      <property name="spacing">
+       <number>10</number>
+      </property>
+      <property name="topMargin">
+       <number>10</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="cancelsaleBtn">
+        <property name="text">
+         <string>Cancel All</string>
+        </property>
+       </widget>
       </item>
       <item>
-        <widget class="QFrame" name="totalContainer">
-          <property name="frameShape">
-            <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="frameShadow">
-            <enum>QFrame::Plain</enum>
-          </property>
-          <layout class="QHBoxLayout" name="totalLayout">
-            <property name="spacing">
-              <number>0</number>
-            </property>
-            <property name="leftMargin">
-              <number>0</number>
-            </property>
-            <property name="topMargin">
-              <number>0</number>
-            </property>
-            <property name="rightMargin">
-              <number>0</number>
-            </property>
-            <property name="bottomMargin">
-              <number>0</number>
-            </property>
-            <item>
-              <widget class="QLabel" name="totalTitle">
-                <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                  </sizepolicy>
-                </property>
-                <property name="text">
-                  <string>Total:</string>
-                </property>
-                <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                </property>
-              </widget>
-            </item>
-            <item>
-              <widget class="QLabel" name="totalValue">
-                <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                  </sizepolicy>
-                </property>
-                <property name="text">
-                  <string>0.00</string>
-                </property>
-                <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                </property>
-              </widget>
-            </item>
-          </layout>
-        </widget>
+       <widget class="QPushButton" name="onholdBtn">
+        <property name="text">
+         <string>On Hold</string>
+        </property>
+       </widget>
       </item>
       <item>
-        <widget class="QFrame" name="addContainer">
-          <property name="frameShape">
-            <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="frameShadow">
-            <enum>QFrame::Plain</enum>
-          </property>
-          <layout class="QHBoxLayout" name="addBtnLayout">
-            <property name="spacing">
-              <number>20</number>
-            </property>
-            <item>
-              <widget class="QPushButton" name="vegBtn">
-                <property name="text">
-                  <string>Vegetable Entry</string>
-                </property>
-              </widget>
-            </item>
-            <item>
-              <widget class="QPushButton" name="manualBtn">
-                <property name="text">
-                  <string>Manual Entry</string>
-                </property>
-              </widget>
-            </item>
-          </layout>
-        </widget>
+       <widget class="QPushButton" name="viewholdBtn">
+        <property name="text">
+         <string>View Holds</string>
+        </property>
+       </widget>
       </item>
-      <item>
-        <widget class="QFrame" name="receiptContainer">
-          <property name="frameShape">
-            <enum>QFrame::NoFrame</enum>
-          </property>
-          <property name="frameShadow">
-            <enum>QFrame::Plain</enum>
-          </property>
-          <layout class="QHBoxLayout" name="receiptLayout">
-            <property name="spacing">
-              <number>10</number>
-            </property>
-            <property name="topMargin">
-              <number>10</number>
-            </property>
-            <item>
-              <widget class="QPushButton" name="cancelsaleBtn">
-                <property name="text">
-                  <string>Cancel All</string>
-                </property>
-              </widget>
-            </item>
-            <item>
-              <widget class="QPushButton" name="onholdBtn">
-                <property name="text">
-                  <string>On Hold</string>
-                </property>
-              </widget>
-            </item>
-            <item>
-              <widget class="QPushButton" name="viewholdBtn">
-                <property name="text">
-                  <string>View Holds</string>
-                </property>
-              </widget>
-            </item>
-          </layout>
-        </widget>
-      </item>
-    </layout>
-  </widget>
-  <resources/>
-  <connections/>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
 </ui>

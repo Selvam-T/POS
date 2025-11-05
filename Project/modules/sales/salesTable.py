@@ -5,6 +5,9 @@ Provides:
 - set_sales_rows(table, rows): populate rows with qty input, unit price, totals, and a delete button
 - remove_table_row(table, row): delete a row and renumber the first column
 - recalc_row_total(table, row): recompute total from qty x unit price
+- bind_total_label(table, label): bind the Sales totalValue label and keep it updated
+- recompute_total(table): recompute and return grand total from all row totals
+- get_total(table): return last computed grand total
 """
 from typing import List, Dict, Any, Optional
 from PyQt5.QtCore import Qt, QEvent, QObject, QTimer
@@ -16,6 +19,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QLineEdit,
     QStatusBar,
+    QLabel,
 )
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QColor, QBrush, QPalette, QIcon
@@ -214,6 +218,12 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         lay.addWidget(btn, 0, Qt.AlignCenter)
         table.setCellWidget(r, 5, container)
 
+    # After building all rows, update the aggregated total if bound
+    try:
+        _update_total_value(table)
+    except Exception:
+        pass
+
     # Table remains empty if no rows provided (clean state for barcode scanner)
 
 
@@ -254,6 +264,11 @@ def remove_table_row(table: QTableWidget, row: int) -> None:
                         container.setStyleSheet(f"background-color: {row_color.name()};")
                     else:  # col == 5
                         container.setStyleSheet("background-color: transparent;")
+        # Update the aggregated total if bound
+        try:
+            _update_total_value(table)
+        except Exception:
+            pass
 
 
 def _recalc_from_editor(editor: QLineEdit, table: QTableWidget) -> None:
@@ -313,6 +328,11 @@ def recalc_row_total(table: QTableWidget, row: int) -> None:
     total_item.setFlags(total_item.flags() & ~Qt.ItemIsEditable)
     total_item.setBackground(QBrush(row_color))  # Apply alternating row color
     table.setItem(row, 4, total_item)
+    # Update the aggregated total on every row total change
+    try:
+        _update_total_value(table)
+    except Exception:
+        pass
 
 
 def _remove_by_button(table: QTableWidget, btn: QPushButton) -> None:
@@ -419,6 +439,90 @@ def _on_qty_commit(editor: QLineEdit, table: QTableWidget) -> None:
         editor.clearFocus()
     except Exception:
         pass
+
+
+# ----------------- Grand total helpers -----------------
+def bind_total_label(table: QTableWidget, label: QLabel) -> None:
+    """Bind a QLabel (ui/sales_frame.ui: QLabel#totalValue) to display grand total.
+
+    Stores the label on the table object and computes the initial total.
+    Subsequent row edits/add/remove will auto-update via internal calls.
+    """
+    try:
+        # Attach dynamically; PyQt widgets allow Python attributes
+        table._total_label = label  # type: ignore[attr-defined]
+    except Exception:
+        # Fallback via Qt dynamic property (not used by QSS here)
+        try:
+            table.setProperty('_total_label', label)
+        except Exception:
+            pass
+    # Initialize current total cache
+    try:
+        table._current_total = 0.0  # type: ignore[attr-defined]
+    except Exception:
+        pass
+    # Compute once now
+    recompute_total(table)
+
+
+def _format_currency(val: float) -> str:
+    """Format currency for totalValue label. UI uses a single label with prefix.
+
+    Example: 'Total : $ 0.00'
+    """
+    try:
+        return f"Total : $ {val:.2f}"
+    except Exception:
+        return "Total : $ 0.00"
+
+
+def recompute_total(table: QTableWidget) -> float:
+    """Recompute the grand total from the 'Total' column (col 4) and update label if bound.
+
+    Returns the computed total.
+    """
+    total = 0.0
+    try:
+        for r in range(table.rowCount()):
+            item = table.item(r, 4)
+            if item is None:
+                continue
+            try:
+                total += float(item.text())
+            except (ValueError, TypeError):
+                continue
+    except Exception:
+        total = 0.0
+    # Cache on table for external reads (e.g., payment frame)
+    try:
+        table._current_total = float(f"{total:.2f}")  # type: ignore[attr-defined]
+    except Exception:
+        pass
+    # Update bound label if present
+    try:
+        label = getattr(table, '_total_label', None)
+        if isinstance(label, QLabel):
+            label.setText(_format_currency(total))
+    except Exception:
+        pass
+    return total
+
+
+def _update_total_value(table: QTableWidget) -> None:
+    """Internal helper to refresh total on any row change."""
+    try:
+        recompute_total(table)
+    except Exception:
+        pass
+
+
+def get_total(table: QTableWidget) -> float:
+    """Return last computed grand total for the given sales table."""
+    try:
+        return float(getattr(table, '_current_total', 0.0))
+    except Exception:
+        return 0.0
 
 
 def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Optional[QStatusBar] = None) -> None:

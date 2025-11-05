@@ -6,7 +6,10 @@ from .salesTable import (
     set_sales_rows,
     remove_table_row,
     recalc_row_total,
-    get_row_color
+    get_row_color,
+    bind_total_label,
+    recompute_total,
+    get_total,
 )
 
 __all__ = [
@@ -14,5 +17,8 @@ __all__ = [
     'set_sales_rows',
     'remove_table_row',
     'recalc_row_total',
-    'get_row_color'
+    'get_row_color',
+    'bind_total_label',
+    'recompute_total',
+    'get_total',
 ]

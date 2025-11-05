@@ -115,17 +115,15 @@ QPushButton#removeBtn:pressed {
 /* --- Total Display Container --- */
 QFrame#totalContainer {
   min-height: 26px;
-  padding: 0px;
-  border: 1px solid #4317ab;
   border-radius: 2px;
   background: transparent;
 }
-QLabel#totalTitle,
+
 QLabel#totalValue {
-  font-size: 32px;
-  border: none;
-  background: white;
-  qproperty-alignment: 'AlignCenter';
+  font-size: 28px;
+  /*border: none;*/
+  background: beige;
+  border: 1px solid #4317ab;
 }
 
 /* --- Add Buttons (vegBtn, manualBtn) --- */

@@ -7,6 +7,26 @@
 
 ---
  
+## Update Summary (November 5, 2025)
+
+Sales totals integration (grand total in Sales frame):
+
+- Implemented grand total logic inside `modules/sales/salesTable.py`.
+    - `bind_total_label(table, label)`: binds `QLabel#totalValue` to the sales table and initializes it.
+    - `recompute_total(table) -> float`: recomputes from column 4 and updates the label.
+    - `get_total(table) -> float`: returns the last computed total for other frames (e.g., Payment).
+- Hooked total refresh on all table mutations:
+    - After `set_sales_rows`, after each `recalc_row_total`, and after `remove_table_row`.
+- Wired binding in `main.py` right after `setup_sales_table(...)` by locating `QLabel#totalValue` and calling `bind_total_label(...)`.
+- Scan leak reversals: totals remain correct because aggregate is recomputed after each row total update; transient changes and their cleanup cancel out.
+- Policy: recompute from column 4 (already-rounded row totals) to keep UI and aggregate consistent.
+
+Docs: README gains a concise “Grand total (totalValue)” subsection; scanner doc notes how scan leaks affect totals.
+
+Quality gates: PASS (syntax/import). Manual validation: scanning adds rows increments total; editing qty recalculates; deleting rows decrements; transient leak-and-clean returns total to expected value.
+
+---
+ 
 ## Update Summary (November 4, 2025)
 
 Scanner input in-focus routing, protection, and diagnostics:

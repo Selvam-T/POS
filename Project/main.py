@@ -25,7 +25,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QSize, QTimer, QDateTime, QLocale, QEvent
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QFontMetrics, QIcon
-from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned
+from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned, bind_total_label
 from modules.devices import BarcodeScanner
 from config import (
     DATE_FMT,
@@ -237,6 +237,13 @@ class MainLoader(QMainWindow):
                     setup_sales_table(sale_table)
                     # Store reference for barcode handling
                     self.sales_table = sale_table
+                    # Bind the totalValue label to auto-update on table changes
+                    try:
+                        total_label = sales_widget.findChild(QLabel, 'totalValue')
+                        if total_label is not None:
+                            bind_total_label(sale_table, total_label)
+                    except Exception:
+                        pass
             except Exception as e:
                 print('Sales table setup failed:', e)
 
