@@ -313,7 +313,7 @@ class MainLoader(QMainWindow):
 
         # ----------------- Menu buttons wiring and icons -----------------
         try:
-            def set_btn_icon_path(btn: QPushButton, rel_path: str, size: int = 32) -> bool:
+            def set_btn_icon_path(btn: QPushButton, rel_path: str, size: int = 60) -> bool:
                 """Set a button icon from a config-defined relative path.
                 Returns True on success, False if file missing or error.
                 """
