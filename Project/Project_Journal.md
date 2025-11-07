@@ -145,6 +145,34 @@ Quality gates: No code errors reported post-change; behavior validated via manua
 ---
 
 ## Update Summary (November 1, 2025)
+## Update Summary (November 7, 2025)
+
+Admin Settings dialog added and wired:
+
+- Created `ui/admin_menu.ui` providing a frameless settings dialog with three tabs: ADMIN, STAFF, EMAIL.
+    - Admin/Staff tabs each show current + new password fields with eye toggle buttons.
+    - Email tab shows current (read-only) recovery email and a field for a new email.
+    - Footer info label clarifies permission: only Admin can modify settings.
+- Implemented controller `modules/menu/admin_menu.py`:
+    - Function `open_admin_dialog(host_window, current_user='Admin', is_admin=True)` loads the UI, applies frameless flags, centers the dialog, wires close buttons, password reveal toggles, and stub save actions.
+    - Supports a read-only mode (`is_admin=False`) disabling modification controls.
+    - Reuses dim overlay and drag-to-move pattern established for logout dialog.
+- Updated `main.py` wiring so `adminBtn` now opens the Admin Settings dialog instead of a placeholder message.
+- Added documentation file: `Documentation/admin_settings.md` covering UI structure, object names, behavior, QSS hooks, and future work (secure persistence, validation feedback, integration with BaseMenuDialog).
+- README updated: new feature bullet, project structure entries for `admin_menu.ui` and `admin_menu.py`, and link to the new documentation.
+
+Rationale:
+- Centralizes credential management in a dedicated dialog instead of temporary placeholder content.
+- Establishes a pattern for future role-based settings and consistency across menu dialogs.
+
+Next steps (not yet implemented):
+- Migrate Admin dialog to use `BaseMenuDialog` for consistent title bar layout (currently custom title replicated).
+- Add QSS styling (primary Save button, tab highlight, password field states).
+- Implement secure password hashing and storage in AppData; add email validation and persistence.
+- Introduce a user role state (Admin vs Staff) in the main window to control button enablement before opening the dialog.
+
+Quality gates: PASS (no syntax errors after integration; application runs with new wiring). Manual launch shows dialog centered and functional.
+
 
 This session introduced a compact right-side icon-only menu and finalized the main window structure:
 

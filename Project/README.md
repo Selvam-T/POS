@@ -27,6 +27,7 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
  - Header layout: Date (left), Company (center), Day+Time (right as a single label)
  - Logout flow: dedicated logout dialog with dimmed background; main window Close (X) disabled to enforce proper logout
  - Custom, frameless logout dialog with a stylable title bar and large Close (X) button
+ - Admin Settings dialog (Admin/Staff/Email tabs) with masked fields and eye toggles; wired to Admin menu button
 
 ✅ **Barcode Scanner**
 - Global event filtering with timing-based scan-burst detection
@@ -63,7 +64,8 @@ Project/
 │   ├── product_menu.ui         # Product Management dialog content
 │   ├── vegetable_entry.ui      # Vegetable (weight) dialog content
 │   ├── manual_entry.ui         # Manual entry dialog content
-│   └── logout_menu.ui          # Logout confirmation dialog (frameless, custom title bar)
+│   ├── logout_menu.ui          # Logout confirmation dialog (frameless, custom title bar)
+│   └── admin_menu.ui           # Admin Settings dialog (Admin/Staff/Email tabs)
 └── modules/
    ├── db_operation/
    │   ├── __init__.py
@@ -72,8 +74,9 @@ Project/
    │   ├── __init__.py         # Exports BarcodeScanner
    │   └── scanner.py          # Barcode scanner integration (pynput)
    ├── menu/
-   │   ├── __init__.py         # Exports open_logout_dialog
-   │   └── logout_menu.py      # Logout dialog controller (frameless, dim overlay, wiring)
+   │   ├── __init__.py         # Menu exports
+   │   ├── logout_menu.py      # Logout dialog controller (frameless, dim overlay, wiring)
+   │   └── admin_menu.py       # Admin Settings dialog controller (loads ui/admin_menu.ui)
    └── sales/
       ├── __init__.py
       └── salesTable.py       # Sales table logic & row management
@@ -306,6 +309,7 @@ See `Project_Journal.md` for detailed architecture documentation, design decisio
   - Development history
  - Scanner input architecture: see Documentation/scanner_input_infocus.md for focus-first routing, modal block, and debug guidance.
  - Logout dialog and custom title bar: see Documentation/logout_and_titlebar.md for styling and behavior details.
+ - Admin Settings dialog: see Documentation/admin_settings.md for structure, wiring, and QSS hooks.
 
 ## Troubleshooting
 

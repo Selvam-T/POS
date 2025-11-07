@@ -30,6 +30,7 @@ from PyQt5.QtGui import QFontMetrics, QIcon
 from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned, bind_total_label
 from modules.devices import BarcodeScanner
 from modules.menu.logout_menu import open_logout_dialog as open_logout_dialog_menu
+from modules.menu.admin_menu import open_admin_dialog as open_admin_dialog_menu
 from modules.menu.vegetable_menu import VegetableMenuDialog
 from modules.menu.base_dialog import BaseMenuDialog
 from config import (
@@ -401,6 +402,9 @@ class MainLoader(QMainWindow):
                 elif obj_name == 'vegetableBtn':
                     # Open the Vegetable Label Edit dialog (ui/vegetable_menu.ui)
                     btn.clicked.connect(self.open_vegetable_label_menu)
+                elif obj_name == 'adminBtn':
+                    # Open Admin Settings dialog
+                    btn.clicked.connect(lambda: open_admin_dialog_menu(self, current_user='Admin', is_admin=True))
                 else:
                     btn.clicked.connect(lambda _, t=title, m=msg: self.open_menu_dialog(t, m))
         except Exception as e:
