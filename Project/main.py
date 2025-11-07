@@ -21,6 +21,8 @@ from PyQt5.QtWidgets import (
     QLabel,
     QDialog,
     QComboBox,
+    QSlider,
+    QCompleter,
 )
 from PyQt5.QtCore import Qt, QSize, QTimer, QDateTime, QLocale, QEvent
 from PyQt5.QtWidgets import QHeaderView
@@ -29,6 +31,7 @@ from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned, 
 from modules.devices import BarcodeScanner
 from modules.menu.logout_menu import open_logout_dialog as open_logout_dialog_menu
 from modules.menu.vegetable_menu import VegetableMenuDialog
+from modules.menu.base_dialog import BaseMenuDialog
 from config import (
     DATE_FMT,
     DAY_FMT,
@@ -659,6 +662,12 @@ class MainLoader(QMainWindow):
             last_updated_edit: QLineEdit = content.findChild(QLineEdit, 'lastUpdatedLineEdit')
             status_lbl: QLabel = content.findChild(QLabel, 'statusLabel')
 
+            # Search row controls
+            search_row = content.findChild(QWidget, 'searchRowWidget')
+            search_code: QLineEdit = content.findChild(QLineEdit, 'searchCodeLineEdit')
+            search_name_combo: QComboBox = content.findChild(QComboBox, 'searchNameComboBox')
+            search_slider: QSlider = content.findChild(QSlider, 'searchModeSlider')
+
             current_mode = {'mode': 'none'}
             expanded_to_full = {'value': False}
             # Business rule: If Sales table already has items, prevent REMOVE/UPDATE to avoid inconsistency
@@ -764,6 +773,52 @@ class MainLoader(QMainWindow):
                 except Exception:
                     pass
 
+            def _populate_search_name_combo():
+                """Fill the name combo with all product names from cache and attach a completer."""
+                try:
+                    if search_name_combo is None:
+                        return
+                    # Collect unique names from slim cache
+                    from modules.db_operation import PRODUCT_CACHE
+                    names = []
+                    seen = set()
+                    for _code, (_name, _price) in PRODUCT_CACHE.items():
+                        n = (_name or '').strip()
+                        if not n:
+                            continue
+                        key = n.lower()
+                        if key in seen:
+                            continue
+                        seen.add(key)
+                        names.append(n)
+                    # Sort case-insensitively
+                    names.sort(key=lambda s: s.lower())
+                    # Configure combo
+                    try:
+                        search_name_combo.blockSignals(True)
+                        search_name_combo.clear()
+                        for n in names:
+                            search_name_combo.addItem(n)
+                        # Ensure editable and placeholder visible in line edit
+                        try:
+                            search_name_combo.setEditable(True)
+                            le = search_name_combo.lineEdit()
+                            if le is not None:
+                                le.setPlaceholderText('Enter Product Name')
+                        except Exception:
+                            pass
+                    finally:
+                        search_name_combo.blockSignals(False)
+                    # Attach completer
+                    try:
+                        comp = QCompleter(names, search_name_combo)
+                        comp.setCaseSensitivity(Qt.CaseInsensitive)
+                        search_name_combo.setCompleter(comp)
+                    except Exception:
+                        pass
+                except Exception as _e:
+                    pass
+
             def clear_fields(except_code: bool = True):
                 try:
                     if not except_code and code_edit is not None:
@@ -801,6 +856,12 @@ class MainLoader(QMainWindow):
                         code_edit.setPlaceholderText('')
                     if ok_btn is not None:
                         ok_btn.setText('ADD')
+                    # Hide search row in ADD
+                    try:
+                        if search_row is not None:
+                            search_row.hide()
+                    except Exception:
+                        pass
                 elif mode == 'remove':
                     if sub_hdr is not None:
                         sub_hdr.setText('Remove Product')
@@ -816,6 +877,25 @@ class MainLoader(QMainWindow):
                         code_edit.setPlaceholderText('Provide Product Code')
                     if ok_btn is not None:
                         ok_btn.setText('DELETE')
+                    # Show/prepare search row
+                    try:
+                        if search_row is not None:
+                            search_row.show()
+                        if search_slider is not None:
+                            search_slider.setValue(0)  # default Code
+                        if search_code is not None:
+                            search_code.clear()
+                            search_code.setFocus()
+                        if search_name_combo is not None:
+                            _populate_search_name_combo()
+                            # no selection by default
+                            try:
+                                search_name_combo.setCurrentIndex(-1)
+                                search_name_combo.setEditText('')
+                            except Exception:
+                                pass
+                    except Exception:
+                        pass
                 elif mode == 'update':
                     if sub_hdr is not None:
                         sub_hdr.setText('Update / View Product')
@@ -831,6 +911,24 @@ class MainLoader(QMainWindow):
                         code_edit.setPlaceholderText('Provide Product Code')
                     if ok_btn is not None:
                         ok_btn.setText('UPDATE')
+                    # Show/prepare search row
+                    try:
+                        if search_row is not None:
+                            search_row.show()
+                        if search_slider is not None:
+                            search_slider.setValue(0)  # default Code
+                        if search_code is not None:
+                            search_code.clear()
+                            search_code.setFocus()
+                        if search_name_combo is not None:
+                            _populate_search_name_combo()
+                            try:
+                                search_name_combo.setCurrentIndex(-1)
+                                search_name_combo.setEditText('')
+                            except Exception:
+                                pass
+                    except Exception:
+                        pass
 
             def enter_mode(mode: str):
                 current_mode['mode'] = mode
@@ -860,9 +958,16 @@ class MainLoader(QMainWindow):
                 except Exception:
                     pass
                 enter_mode(mode)
-                # Always focus Product Code field on entering any mode
-                if code_edit is not None:
-                    code_edit.setFocus()
+                # Focus search Code field for remove/update; form code for add
+                try:
+                    if mode in ('remove', 'update'):
+                        if search_code is not None:
+                            search_code.setFocus()
+                    else:
+                        if code_edit is not None:
+                            code_edit.setFocus()
+                except Exception:
+                    pass
 
             def on_code_changed(text: str):
                 mode = current_mode['mode']
@@ -1170,6 +1275,45 @@ class MainLoader(QMainWindow):
                 except Exception:
                     pass
                 code_edit.returnPressed.connect(on_code_return_pressed)
+            # Wire search inputs
+            if search_code is not None:
+                try:
+                    search_code.returnPressed.disconnect()
+                except Exception:
+                    pass
+                def _on_search_code_return():
+                    try:
+                        t = search_code.text().strip()
+                        if code_edit is not None:
+                            code_edit.setText(t)
+                        on_code_changed(t)
+                    except Exception:
+                        pass
+                search_code.returnPressed.connect(_on_search_code_return)
+            if search_name_combo is not None:
+                try:
+                    search_name_combo.activated[str].disconnect()
+                except Exception:
+                    pass
+                def _on_name_selected(name_text: str):
+                    try:
+                        if not name_text:
+                            return
+                        from modules.db_operation import PRODUCT_CACHE
+                        code_found = None
+                        for k, (nm, _pr) in PRODUCT_CACHE.items():
+                            if (nm or '').strip().lower() == name_text.strip().lower():
+                                code_found = k
+                                break
+                        if code_found is None:
+                            return
+                        # Mirror into form code and trigger population
+                        if code_edit is not None:
+                            code_edit.setText(code_found)
+                        on_code_changed(code_found)
+                    except Exception:
+                        pass
+                search_name_combo.activated[str].connect(_on_name_selected)
             # Make Enter behave like Tab on other line edits as well
             def _wire_lineedit_return_as_tab(le: QLineEdit):
                 if le is None:
@@ -1247,16 +1391,30 @@ class MainLoader(QMainWindow):
                         return False
                     app = QApplication.instance()
                     fw = app.focusWidget() if app else None
-                    if code_edit is None or fw is not code_edit:
-                        return False
-                    code_edit.setText(code)
-                    # For remove/update, trigger lookup to populate fields
-                    try:
-                        if current_mode['mode'] in ('remove', 'update'):
-                            on_code_changed(code)
-                    except Exception:
-                        pass
-                    return True
+                    # Allow scan in search code field (preferred) or form code field
+                    if fw is search_code and search_code is not None:
+                        search_code.setText(code)
+                        # also mirror into form code so OK works
+                        try:
+                            if code_edit is not None:
+                                code_edit.setText(code)
+                        except Exception:
+                            pass
+                        try:
+                            if current_mode['mode'] in ('remove', 'update'):
+                                on_code_changed(code)
+                        except Exception:
+                            pass
+                        return True
+                    if fw is code_edit and code_edit is not None:
+                        code_edit.setText(code)
+                        try:
+                            if current_mode['mode'] in ('remove', 'update'):
+                                on_code_changed(code)
+                        except Exception:
+                            pass
+                        return True
+                    return False
                 except Exception:
                     return False
             self._barcodeOverride = _barcode_to_product_code
@@ -1309,39 +1467,58 @@ class MainLoader(QMainWindow):
 
     def open_vegetable_label_menu(self):
         """Open the Vegetable Label Edit dialog from ui/vegetable_menu.ui as a modal dialog.
-        Uses the same dim-overlay behavior as other panels.
+        Uses BaseMenuDialog for consistent frameless title bar and margins.
         """
         # Show overlay
         try:
             self._show_dim_overlay()
         except Exception:
             pass
+
+        # Build BaseMenuDialog container and embed the existing VegetableMenuDialog as content
         try:
-            dlg = VegetableMenuDialog(self)
-            # Hide native title bar; use custom top bar inside the UI
-            dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
+            base = BaseMenuDialog(self, title='Edit Vegetable Label')
+            # Instantiate content controller as a child widget (not a top-level dialog)
+            content = VegetableMenuDialog(base)
+            # Hide the inner custom title bar to avoid duplication; the Base dialog provides it
+            try:
+                inner_title = getattr(content, 'customTitleBar', None)
+                if inner_title is not None:
+                    inner_title.hide()
+                inner_close = getattr(content, 'customCloseBtn', None)
+                if inner_close is not None:
+                    inner_close.hide()
+            except Exception:
+                pass
+            # When inner dialog accepts/rejects, close the base shell as well
+            try:
+                content.accepted.connect(base.accept)
+                content.rejected.connect(base.reject)
+            except Exception:
+                pass
+            base.set_content(content)
         except Exception as e:
-            print('Failed to build VegetableMenuDialog:', e)
+            print('Failed to build BaseMenuDialog for Vegetable:', e)
             try:
                 self._hide_dim_overlay()
             except Exception:
                 pass
             return
 
-        # Frameless-style UI comes from the .ui; we just size/center the dialog
+        # Size and center the base dialog
         try:
             mw = self.frameGeometry().width()
             mh = self.frameGeometry().height()
             dw = max(420, int(mw * 0.52))
             dh = max(360, int(mh * 0.62))
-            dlg.setFixedSize(dw, dh)
+            base.setFixedSize(dw, dh)
             mx = self.frameGeometry().x()
             my = self.frameGeometry().y()
-            dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
+            base.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
         except Exception:
             pass
 
-        # Cleanup overlay when closed
+        # Cleanup overlay when the base closes
         def _cleanup_overlay(_code):
             try:
                 self._hide_dim_overlay()
@@ -1353,8 +1530,8 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
 
-        dlg.finished.connect(_cleanup_overlay)
-        dlg.exec_()
+        base.finished.connect(_cleanup_overlay)
+        base.exec_()
 
     # (Logout dialog logic moved to modules.menu.logout_menu.open_logout_dialog)
 

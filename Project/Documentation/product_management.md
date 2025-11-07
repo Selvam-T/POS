@@ -13,6 +13,23 @@ This document summarizes the Product Management feature (product_menu.ui / open_
 - The dialog starts hidden (neutral state). The form and sub-header become visible only after a mode is chosen.
 - Sub-header reflects the selected mode (Add New Product / Remove Product / Update Product).
 
+### Search row (Remove / Update)
+- In REMOVE and UPDATE / VIEW, a "Search by:" row appears between the sub-header and the form.
+- Left: `searchCodeLineEdit` (Enter Product Code) — scanner focus defaults here.
+- Middle: segmented toggle implemented via `QSlider#searchModeSlider` (0 = Code, 1 = Name).
+- Right: `searchNameComboBox` (editable, lists all products with `QCompleter`).
+- Behavior: Only one input is active at a time; default is Code. Selecting a Name populates the form by resolving its unique product code. Pressing Enter in the Code field triggers a lookup and populates details.
+
+### Frameless base dialog and shared styling
+- We are migrating menu dialogs to a shared frameless wrapper: `BaseMenuDialog`.
+- Base files:
+  - UI shell: `ui/base_menu_dialog.ui` (contains `#customTitleBar`, `#customCloseBtn`, `#customTitle`, and `contentContainer`).
+  - Class: `modules/menu/base_dialog.py` (frameless flags, drag-to-move, `set_title()`, `set_content(widget)`).
+- Current status:
+  - Vegetable dialog already uses `BaseMenuDialog` (proof-of-concept).
+  - Product dialog will be migrated next to ensure consistent title bar, margins, and spacing across all menus.
+- Global QSS: `assets/style.qss` already provides rules for `#customTitleBar` and `#customCloseBtn`; these apply uniformly to all dialogs using the base.
+
 ### Field enablement and behavior
 - Last updated is always read-only/disabled; it’s set automatically on ADD/UPDATE.
 - In REMOVE and UPDATE:
@@ -72,7 +89,9 @@ This document summarizes the Product Management feature (product_menu.ui / open_
   - The product is added to the sales table automatically (as if it was scanned again).
 
 ### Scanner input behavior and focus rules
-- While the Product dialog is open, scans are accepted only when `productCodeLineEdit` is focused; otherwise scans are ignored and any stray character is cleaned up.
+- While the Product dialog is open:
+  - In REMOVE/UPDATE, scans are accepted in `searchCodeLineEdit` (and mirrored to `productCodeLineEdit`) or directly in `productCodeLineEdit` if it has focus; otherwise scans are ignored and any stray character is cleaned up.
+  - The scanner never types into the Name field; when Name mode is selected, the Code input is disabled by design (or can be kept enabled for scanner-only if needed).
 - Enter on line edits behaves like Tab to advance focus; action buttons are not default unless focused.
 - For the full cross-application routing rules and protections (modal block, overlay, Enter suppression), see Documentation/scanner_input_infocus.md.
 
@@ -89,8 +108,18 @@ This document summarizes the Product Management feature (product_menu.ui / open_
 ## Developer Notes
 - Files of interest:
   - `main.py` – dialog wiring, scan routing, cache refresh, and sales table integration.
+  - `modules/menu/base_dialog.py` – reusable frameless shell (`BaseMenuDialog`).
   - `modules/db_operation/database.py` – DB access and product cache management.
   - `modules/sales/salesTable.py` – sales table row add/increment logic.
   - `ui/product_menu.ui` – dialog layout.
+  - `ui/base_menu_dialog.ui` – shared title bar and content container for all menu dialogs.
   - `config.py` – `DB_PATH`, formats, icons.
 - Error prints are minimized in production; most user feedback goes through the status bar or dialog status label.
+
+## Styling (QSS)
+- Global stylesheet: `assets/style.qss`.
+- Common selectors used by menu dialogs:
+  - `QFrame#customTitleBar` – title bar background.
+  - `QPushButton#customCloseBtn` – the big close (×) button.
+  - Optional per-control styles (e.g., a pill-style segmented toggle for `QSlider#searchModeSlider`).
+- Note: Layout margins/spacing are not controlled by QSS; they are defined in the base UI (`base_menu_dialog.ui`) so all dialogs inherit consistent padding.

@@ -48,6 +48,36 @@ def _remove_cache_variants(code: str) -> None:
         pass
 
 
+def _to_camel_case(text: Optional[str]) -> str:
+    """Convert string to CamelCase (title case) while preserving non-alphanumerics.
+    - Splits on whitespace, hyphen, underscore
+    - Trims leading/trailing spaces
+    - Keeps internal separators as single spaces when used for names
+    Note: For product codes, this will title-case alphabetic sequences (e.g., abc123 -> Abc123).
+    """
+    if text is None:
+        return ''
+    try:
+        s = str(text).strip()
+        if not s:
+            return ''
+        # Replace common separators with space for word detection
+        for sep in ['\t', '\n', '_', '-']:
+            s = s.replace(sep, ' ')
+        # Collapse multiple spaces
+        parts = [p for p in s.split(' ') if p]
+        return ' '.join(w[:1].upper() + w[1:].lower() if w else '' for w in parts)
+    except Exception:
+        return str(text).strip()
+
+
+def _normalize_for_compare(text: Optional[str]) -> str:
+    """Normalize for comparisons: trim + lower (case-insensitive, ignore outer spaces)."""
+    if text is None:
+        return ''
+    return str(text).strip().lower()
+
+
 def load_product_cache(db_path: str = DB_PATH) -> bool:
     """Load all products from database into memory cache.
     
@@ -134,7 +164,7 @@ def get_product_full(product_code: str) -> Tuple[bool, Dict[str, Any]]:
         cur.execute(
             """
             SELECT product_code, name, category, supplier, selling_price, cost_price, unit, last_updated
-            FROM Product_list WHERE product_code = ?
+            FROM Product_list WHERE product_code = ? COLLATE NOCASE
             """,
             (product_code,),
         )
@@ -219,8 +249,19 @@ def add_product(
     try:
         if not os.path.exists(db_path):
             return False, f"Database not found at: {db_path}"
+        # Normalize values for storage
+        name_norm = _to_camel_case(name)
+        code_norm = _to_camel_case(product_code)
+        category_norm = _to_camel_case(category) if category is not None else None
+        supplier_norm = _to_camel_case(supplier) if supplier is not None else None
+
         conn = sqlite3.connect(db_path)
         cur = conn.cursor()
+        # Enforce unique name at app level (case-insensitive, trimmed)
+        cur.execute("SELECT 1 FROM Product_list WHERE TRIM(name)=TRIM(?) COLLATE NOCASE", (name_norm,))
+        if cur.fetchone():
+            conn.close()
+            return False, "Product name must be unique"
         # Default timestamp if not provided
         if last_updated is None:
             last_updated = _now_str()
@@ -231,10 +272,10 @@ def add_product(
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                product_code,
-                name,
-                category,
-                supplier,
+                code_norm,
+                name_norm,
+                category_norm,
+                supplier_norm,
                 float(selling_price) if selling_price is not None else 0.0,
                 float(cost_price) if cost_price is not None else None,
                 unit,
@@ -245,9 +286,9 @@ def add_product(
         conn.close()
         # Update slim cache with name and price
         # Ensure only normalized key exists in cache
-        _remove_cache_variants(product_code)
-        PRODUCT_CACHE[_norm(product_code)] = (
-            str(name) if name is not None else '',
+        _remove_cache_variants(code_norm)
+        PRODUCT_CACHE[_norm(code_norm)] = (
+            str(name_norm) if name_norm is not None else '',
             float(selling_price) if selling_price is not None else 0.0,
         )
         return True, "Product added"
@@ -278,17 +319,29 @@ def update_product(
         sets = []
         params = []
         if name is not None:
+            name_norm = _to_camel_case(name)
+            # Enforce unique name excluding current product
+            conn_chk = sqlite3.connect(db_path)
+            cur_chk = conn_chk.cursor()
+            cur_chk.execute(
+                "SELECT 1 FROM Product_list WHERE TRIM(name)=TRIM(?) COLLATE NOCASE AND product_code <> ?",
+                (name_norm, product_code),
+            )
+            exists = cur_chk.fetchone()
+            conn_chk.close()
+            if exists:
+                return False, "Product name must be unique"
             sets.append("name = ?")
-            params.append(name)
+            params.append(name_norm)
         if selling_price is not None:
             sets.append("selling_price = ?")
             params.append(float(selling_price))
         if category is not None:
             sets.append("category = ?")
-            params.append(category)
+            params.append(_to_camel_case(category))
         if supplier is not None:
             sets.append("supplier = ?")
-            params.append(supplier)
+            params.append(_to_camel_case(supplier))
         if cost_price is not None:
             sets.append("cost_price = ?")
             params.append(float(cost_price))
@@ -312,7 +365,7 @@ def update_product(
         # Update slim cache with provided name/price (keep existing if not provided)
         key = _norm(product_code)
         curr_name, curr_price = PRODUCT_CACHE.get(key, ('', 0.0))
-        new_name = curr_name if name is None or str(name) == '' else str(name)
+        new_name = curr_name if name is None or str(name) == '' else _to_camel_case(name)
         new_price = curr_price if selling_price is None else float(selling_price)
         _remove_cache_variants(product_code)
         PRODUCT_CACHE[key] = (new_name, new_price)
