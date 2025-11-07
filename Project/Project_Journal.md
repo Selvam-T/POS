@@ -173,6 +173,29 @@ Next steps (not yet implemented):
 
 Quality gates: PASS (no syntax errors after integration; application runs with new wiring). Manual launch shows dialog centered and functional.
 
+---
+
+### Placeholder Reports / Devices / Greeting dialogs (November 7, 2025, later)
+
+- Added standalone .ui files earlier (now updated) with an `underConstructionLabel` centered beneath the header.
+- Created `modules/menu/placeholder_menus.py` providing:
+    - `open_reports_dialog(host_window)`
+    - `open_devices_dialog(host_window)`
+    - `open_greeting_dialog(host_window)`
+    Each loads its corresponding `.ui` as a frameless modal, applies dim overlay, centers, and wires Close buttons + drag move on the custom title bar.
+- Updated `main.py` menu button wiring:
+    - `reportsBtn` → `open_reports_dialog`
+    - `deviceBtn` → `open_devices_dialog`
+    - `greetingBtn` → `open_greeting_dialog`
+    Removed prior generic hardwired fallback dialog for these buttons (no more temporary message-based dialogs). Unknown buttons (none expected) are now disabled instead of spawning a generic dialog.
+- Ensures consistent migration path: every right-side menu button now opens a .ui-based dialog (Admin, Reports, Vegetable, Product, Greeting, Device, Logout).
+
+Rationale:
+- Eliminates placeholder generic text dialogs so styling/theming can be unified via QSS.
+- Makes future feature implementation a matter of enhancing each .ui/controller rather than replacing ad‑hoc code.
+
+Quality gates: PASS (syntax check of new `placeholder_menus.py` and modified `main.py`).
+
 
 This session introduced a compact right-side icon-only menu and finalized the main window structure:
 

@@ -32,6 +32,11 @@ from modules.devices import BarcodeScanner
 from modules.menu.logout_menu import open_logout_dialog as open_logout_dialog_menu
 from modules.menu.admin_menu import open_admin_dialog as open_admin_dialog_menu
 from modules.menu.vegetable_menu import VegetableMenuDialog
+from modules.menu.placeholder_menus import (
+    open_reports_dialog as open_reports_dialog_menu,
+    open_devices_dialog as open_devices_dialog_menu,
+    open_greeting_dialog as open_greeting_dialog_menu,
+)
 from modules.menu.base_dialog import BaseMenuDialog
 from config import (
     DATE_FMT,
@@ -405,8 +410,22 @@ class MainLoader(QMainWindow):
                 elif obj_name == 'adminBtn':
                     # Open Admin Settings dialog
                     btn.clicked.connect(lambda: open_admin_dialog_menu(self, current_user='Admin', is_admin=True))
+                elif obj_name == 'reportsBtn':
+                    # Open Reports placeholder UI
+                    btn.clicked.connect(lambda: open_reports_dialog_menu(self))
+                elif obj_name == 'greetingBtn':
+                    # Open Greeting placeholder UI
+                    btn.clicked.connect(lambda: open_greeting_dialog_menu(self))
+                elif obj_name == 'deviceBtn':
+                    # Open Devices placeholder UI
+                    btn.clicked.connect(lambda: open_devices_dialog_menu(self))
                 else:
-                    btn.clicked.connect(lambda _, t=title, m=msg: self.open_menu_dialog(t, m))
+                    # No fallback to generic hardwired dialog; all known buttons use .ui-based dialogs
+                    try:
+                        btn.setEnabled(False)
+                        btn.setToolTip(title)
+                    except Exception:
+                        pass
         except Exception as e:
             print('Failed to wire menu buttons:', e)
 
