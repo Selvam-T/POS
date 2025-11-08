@@ -91,28 +91,48 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <item>
-       <widget class="QLabel" name="totalValue">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="layoutDirection">
-         <enum>Qt::RightToLeft</enum>
-        </property>
-        <property name="text">
-         <string>Total : $ 0.00</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-        </property>
-        <property name="margin">
-         <number>10</number>
-        </property>
-       </widget>
-      </item>
+    <item>
+     <spacer name="totalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QLabel" name="totalTitle">
+      <property name="text">
+       <string>Total :</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignVCenter</set>
+      </property>
+      <property name="margin">
+       <number>10</number>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="totalValue">
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>$ 0.00</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="margin">
+       <number>10</number>
+      </property>
+     </widget>
+    </item>
      </layout>
     </widget>
    </item>

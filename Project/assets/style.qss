@@ -119,9 +119,15 @@ QFrame#totalContainer {
   background: transparent;
 }
 
-QLabel#totalValue {
+QLabel#totalTitle {
   font-size: 28px;
-  /*border: none;*/
+  border: none;
+}
+
+QLabel#totalValue {
+  font-size: 28px;;
+  min-width: 84px;   /* 28px * 3 */
+  max-width: 336px;   /* 28px * 12 */
   background: beige;
   border: 1px solid #4317ab;
 }

@@ -469,12 +469,12 @@ def bind_total_label(table: QTableWidget, label: QLabel) -> None:
 def _format_currency(val: float) -> str:
     """Format currency for totalValue label. UI uses a single label with prefix.
 
-    Example: 'Total : $ 0.00'
+    Example: '$ 0.00'
     """
     try:
-        return f"Total : $ {val:.2f}"
+        return f"$ {val:.2f}"
     except Exception:
-        return "Total : $ 0.00"
+        return "$ 0.00"
 
 
 def recompute_total(table: QTableWidget) -> float:
