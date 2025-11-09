@@ -18,9 +18,10 @@ from typing import Optional
 import os
 from PyQt5 import uic
 from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QWidget, QLabel, QPushButton, QLineEdit, QComboBox, QSlider, QTabWidget,
+    QVBoxLayout, QWidget, QLabel, QPushButton, QLineEdit, QComboBox, QSlider, QTabWidget,
     QCompleter
 )
+from modules.menu.base_dialog import BaseMenuDialog
 from PyQt5.QtCore import Qt, QDateTime, QTimer
 
 from modules.db_operation import (
@@ -50,13 +51,10 @@ def _load_stylesheet() -> str:
 
 
 def open_product_panel(main_window, initial_mode: Optional[str] = None, initial_code: Optional[str] = None):
-    try:
-        print('[ProductPanel] start open_product_panel')
-    except Exception:
-        pass
+    # Debug print removed
     product_ui = os.path.join(UI_DIR, 'product_menu.ui')
     if not os.path.exists(product_ui):
-        print('product_menu.ui not found at', product_ui)
+        # Debug print removed
         return
 
     # Show dim overlay
@@ -68,7 +66,7 @@ def open_product_panel(main_window, initial_mode: Optional[str] = None, initial_
     try:
         content = uic.loadUi(product_ui)
     except Exception as e:
-        print('Failed to load product_menu.ui:', e)
+        # Debug print removed
         try: main_window._hide_dim_overlay()
         except Exception: pass
         return
@@ -81,27 +79,32 @@ def open_product_panel(main_window, initial_mode: Optional[str] = None, initial_
     except Exception:
         pass
 
-    dlg = QDialog(main_window)
-    dlg.setModal(True)
-    dlg.setWindowTitle('Product Management')
-    dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
-
-    # Size and center
+    # Use BaseMenuDialog for standardized dialog features
     try:
         mw = main_window.frameGeometry().width()
         mh = main_window.frameGeometry().height()
         dw_full = max(400, int(mw * 0.6))
         dh_full = max(300, int(mh * 0.6))
-        mx = main_window.frameGeometry().x()
-        my = main_window.frameGeometry().y()
-        dlg.setFixedSize(dw_full, dh_full)
-        dlg.move(mx + (mw - dw_full) // 2, my + (mh - dh_full) // 2)
+    except Exception:
+        dw_full, dh_full = 600, 400
+    dlg = BaseMenuDialog(
+        parent=main_window,
+        title='Product Management'
+    )
+    dlg.setModal(True)
+    dlg.setFixedSize(dw_full, dh_full)
+    # Add the loaded UI as the content widget
+    dlg.set_content(content)
+    # Set button labels if accessible
+    try:
+        ok_btn = getattr(dlg, 'okButton', None)
+        if ok_btn:
+            ok_btn.setText('ADD')
+        cancel_btn = getattr(dlg, 'cancelButton', None)
+        if cancel_btn:
+            cancel_btn.setText('CANCEL')
     except Exception:
         pass
-
-    lay = QVBoxLayout(dlg)
-    lay.setContentsMargins(0, 0, 0, 0)
-    lay.addWidget(content)
 
     tab_widget: QTabWidget = content.findChild(QTabWidget, 'tabWidget')
 
@@ -711,12 +714,6 @@ def open_product_panel(main_window, initial_mode: Optional[str] = None, initial_
     except Exception:
         pass
 
-    try:
-        print('[ProductPanel] exec dialog...')
-    except Exception:
-        pass
+    # Debug print removed
     dlg.exec_()
-    try:
-        print('[ProductPanel] dialog finished')
-    except Exception:
-        pass
+    # Debug print removed

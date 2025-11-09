@@ -1,7 +1,8 @@
 import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QPushButton, QLabel
+from PyQt5.QtWidgets import QVBoxLayout, QWidget, QPushButton, QLabel, QDialog
+## BaseMenuDialog import removed
 
 
 # Compute project root and UI directory relative to this file
@@ -37,7 +38,7 @@ def open_logout_dialog(host_window) -> None:
     except Exception:
         pass
 
-    # Load UI content; use it directly if it's a QDialog, else embed in a wrapper dialog
+    # Load UI content
     content = None
     if os.path.exists(logout_ui):
         try:
@@ -45,81 +46,49 @@ def open_logout_dialog(host_window) -> None:
         except Exception:
             content = None
 
-    if isinstance(content, QDialog):
-        dlg = content
+    # Use QDialog as the dialog container
+    dlg = QDialog(host_window)
+    dlg.setModal(True)
+    dlg.setObjectName('LogoutDialogContainer')
+    dlg.setWindowTitle('Logout')
+    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
+    # Set dialog size and embed content
+    layout = QVBoxLayout(dlg)
+    layout.setContentsMargins(0, 0, 0, 0)
+    if content is not None:
+        layout.addWidget(content)
         try:
-            dlg.setParent(host_window)
-        except Exception:
-            pass
-        try:
-            dlg.setModal(True)
-            dlg.setWindowModality(Qt.ApplicationModal)
-        except Exception:
-            pass
-        try:
-            dlg.setObjectName('LogoutDialogContainer')
-            dlg.setWindowTitle('Logout')
-            dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-        except Exception:
-            pass
-        # Size to content
-        try:
-            dlg.adjustSize()
-            sh = dlg.sizeHint()
+            content.adjustSize()
+            sh = content.sizeHint()
             dw = max(360, sh.width() + 24)
             dh = max(140, sh.height() + 24)
             dlg.setFixedSize(dw, dh)
         except Exception:
-            pass
+            dlg.setFixedSize(420, 180)
     else:
-        dlg = QDialog(host_window)
+        # Simple fallback content
+        info = QLabel('Are you sure you want to logout?')
+        info.setWordWrap(True)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.addWidget(info)
+        row = QWidget()
+        from PyQt5.QtWidgets import QHBoxLayout
+        hl = QHBoxLayout(row)
+        hl.addStretch(1)
+        btn_cancel = QPushButton('Cancel')
+        btn_ok = QPushButton('Yes, Logout !')
+        hl.addWidget(btn_cancel)
+        hl.addWidget(btn_ok)
+        layout.addWidget(row)
+        dlg.setFixedSize(420, 180)
         try:
-            dlg.setModal(True)
-            dlg.setWindowModality(Qt.ApplicationModal)
+            btn_cancel.clicked.connect(dlg.reject)
+            btn_ok.clicked.connect(lambda: (dlg.accept(), host_window._perform_logout()))
         except Exception:
             pass
-        dlg.setObjectName('LogoutDialogContainer')
-        dlg.setWindowTitle('Logout')
-        dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-
-        layout = QVBoxLayout(dlg)
-        layout.setContentsMargins(0, 0, 0, 0)
-
-        if content is not None:
-            layout.addWidget(content)
-            try:
-                content.adjustSize()
-                sh = content.sizeHint()
-                dw = max(360, sh.width() + 24)
-                dh = max(140, sh.height() + 24)
-                dlg.setFixedSize(dw, dh)
-            except Exception:
-                pass
-        else:
-            # Simple fallback content
-            info = QLabel('Are you sure you want to logout?')
-            info.setWordWrap(True)
-            layout.setContentsMargins(16, 16, 16, 16)
-            layout.addWidget(info)
-            row = QWidget()
-            from PyQt5.QtWidgets import QHBoxLayout
-            hl = QHBoxLayout(row)
-            hl.addStretch(1)
-            btn_cancel = QPushButton('Cancel')
-            btn_ok = QPushButton('Yes, Logout !')
-            hl.addWidget(btn_cancel)
-            hl.addWidget(btn_ok)
-            layout.addWidget(row)
-            dlg.setFixedSize(420, 180)
-            try:
-                btn_cancel.clicked.connect(dlg.reject)
-                btn_ok.clicked.connect(lambda: (dlg.accept(), host_window._perform_logout()))
-            except Exception:
-                pass
 
     # Center relative to host
     _center_dialog_relative_to(dlg, host_window)
-
     # Wire buttons and behavior when using full UI content
     if content is not None:
         try:
@@ -133,49 +102,6 @@ def open_logout_dialog(host_window) -> None:
                 btn_ok.clicked.connect(lambda: (dlg.accept(), host_window._perform_logout()))
             if btn_x is not None:
                 btn_x.clicked.connect(dlg.reject)
-        except Exception:
-            pass
-
-        # Hide the dialog title text label if present (show only big X)
-        try:
-            title_lbl = content.findChild(QLabel, 'customTitle')
-            if title_lbl is not None:
-                title_lbl.setVisible(False)
-        except Exception:
-            pass
-
-        # Enable dragging the frameless dialog via custom title bar
-        try:
-            title_bar = content.findChild(QWidget, 'customTitleBar')
-            if title_bar is not None:
-                dlg._drag_pos = None
-
-                def _mousePress(ev):
-                    try:
-                        if ev.button() == Qt.LeftButton:
-                            dlg._drag_pos = ev.globalPos() - dlg.frameGeometry().topLeft()
-                            ev.accept()
-                    except Exception:
-                        pass
-
-                def _mouseMove(ev):
-                    try:
-                        if dlg._drag_pos is not None and ev.buttons() & Qt.LeftButton:
-                            dlg.move(ev.globalPos() - dlg._drag_pos)
-                            ev.accept()
-                    except Exception:
-                        pass
-
-                def _mouseRelease(_ev):
-                    dlg._drag_pos = None
-
-                title_bar.mousePressEvent = _mousePress
-                title_bar.mouseMoveEvent = _mouseMove
-                title_bar.mouseReleaseEvent = _mouseRelease
-                # Set the title text to match window title
-                lbl = content.findChild(QLabel, 'customTitle')
-                if lbl is not None:
-                    lbl.setText('Logout')
         except Exception:
             pass
 
