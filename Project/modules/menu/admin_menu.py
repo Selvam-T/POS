@@ -53,7 +53,6 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
         dlg.setWindowModality(Qt.ApplicationModal)
         dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
         dlg.setObjectName('AdminDialogContainer')
-        dlg.setWindowTitle('Admin Settings')
     except Exception:
         pass
 

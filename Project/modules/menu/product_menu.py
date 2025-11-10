@@ -21,7 +21,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QWidget, QLabel, QPushButton, QLineEdit, QComboBox, QSlider, QTabWidget,
     QCompleter
 )
-from modules.menu.base_dialog import BaseMenuDialog
+## BaseMenuDialog import removed
 from PyQt5.QtCore import Qt, QDateTime, QTimer
 
 from modules.db_operation import (
@@ -79,7 +79,7 @@ def open_product_panel(main_window, initial_mode: Optional[str] = None, initial_
     except Exception:
         pass
 
-    # Use BaseMenuDialog for standardized dialog features
+    # Use QDialog for the dialog container
     try:
         mw = main_window.frameGeometry().width()
         mh = main_window.frameGeometry().height()
@@ -87,24 +87,14 @@ def open_product_panel(main_window, initial_mode: Optional[str] = None, initial_
         dh_full = max(300, int(mh * 0.6))
     except Exception:
         dw_full, dh_full = 600, 400
-    dlg = BaseMenuDialog(
-        parent=main_window,
-        title='Product Management'
-    )
+    from PyQt5.QtWidgets import QDialog, QVBoxLayout
+    dlg = QDialog(main_window)
     dlg.setModal(True)
+    dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
     dlg.setFixedSize(dw_full, dh_full)
-    # Add the loaded UI as the content widget
-    dlg.set_content(content)
-    # Set button labels if accessible
-    try:
-        ok_btn = getattr(dlg, 'okButton', None)
-        if ok_btn:
-            ok_btn.setText('ADD')
-        cancel_btn = getattr(dlg, 'cancelButton', None)
-        if cancel_btn:
-            cancel_btn.setText('CANCEL')
-    except Exception:
-        pass
+    lay = QVBoxLayout(dlg)
+    lay.setContentsMargins(0, 0, 0, 0)
+    lay.addWidget(content)
 
     tab_widget: QTabWidget = content.findChild(QTabWidget, 'tabWidget')
 

@@ -2,8 +2,6 @@ import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QPushButton, QLabel, QDialog
-## BaseMenuDialog import removed
-
 
 # Compute project root and UI directory relative to this file
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -50,7 +48,6 @@ def open_logout_dialog(host_window) -> None:
     dlg = QDialog(host_window)
     dlg.setModal(True)
     dlg.setObjectName('LogoutDialogContainer')
-    dlg.setWindowTitle('Logout')
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
     # Set dialog size and embed content
     layout = QVBoxLayout(dlg)

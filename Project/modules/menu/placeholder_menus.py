@@ -61,7 +61,6 @@ def _open_placeholder(host_window: QWidget, ui_name: str, title: str, min_w: int
         dlg.setWindowModality(Qt.ApplicationModal)
         dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
         dlg.setObjectName(f"{title.replace(' ', '')}DialogContainer")
-        dlg.setWindowTitle(title)
     except Exception:
         pass
 

@@ -38,7 +38,7 @@ from modules.menu.placeholder_menus import (
     open_devices_dialog as open_devices_dialog_menu,
     open_greeting_dialog as open_greeting_dialog_menu,
 )
-from modules.menu.base_dialog import BaseMenuDialog
+
 from config import (
     DATE_FMT,
     DAY_FMT,
@@ -653,59 +653,30 @@ class MainLoader(QMainWindow):
         dlg.exec_()
 
     def open_vegetable_label_menu(self):
-        """Open the Vegetable Label Edit dialog from ui/vegetable_menu.ui as a modal dialog.
-        Uses BaseMenuDialog for consistent frameless title bar and margins.
-        """
-        # Show overlay
+        """Open the Vegetable Label Edit dialog from ui/vegetable_menu.ui as a modal dialog."""
         try:
             self._show_dim_overlay()
         except Exception:
             pass
-
-        # Build BaseMenuDialog container and embed the existing VegetableMenuDialog as content
         try:
-            base = BaseMenuDialog(self, title='Edit Vegetable Label')
-            # Instantiate content controller as a child widget (not a top-level dialog)
-            content = VegetableMenuDialog(base)
-            # Hide the inner custom title bar to avoid duplication; the Base dialog provides it
-            try:
-                inner_title = getattr(content, 'customTitleBar', None)
-                if inner_title is not None:
-                    inner_title.hide()
-                inner_close = getattr(content, 'customCloseBtn', None)
-                if inner_close is not None:
-                    inner_close.hide()
-            except Exception:
-                pass
-            # When inner dialog accepts/rejects, close the base shell as well
-            try:
-                content.accepted.connect(base.accept)
-                content.rejected.connect(base.reject)
-            except Exception:
-                pass
-            base.set_content(content)
+            dlg = VegetableMenuDialog(self)
+            dlg.setModal(True)
+            dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+            mw = self.frameGeometry().width()
+            mh = self.frameGeometry().height()
+            dw = max(420, int(mw * 0.52))
+            dh = max(360, int(mh * 0.62))
+            dlg.setFixedSize(dw, dh)
+            mx = self.frameGeometry().x()
+            my = self.frameGeometry().y()
+            dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
         except Exception as e:
-            print('Failed to build BaseMenuDialog for Vegetable:', e)
+            print('Failed to open Vegetable Label dialog:', e)
             try:
                 self._hide_dim_overlay()
             except Exception:
                 pass
             return
-
-        # Size and center the base dialog
-        try:
-            mw = self.frameGeometry().width()
-            mh = self.frameGeometry().height()
-            dw = max(420, int(mw * 0.52))
-            dh = max(360, int(mh * 0.62))
-            base.setFixedSize(dw, dh)
-            mx = self.frameGeometry().x()
-            my = self.frameGeometry().y()
-            base.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
-        except Exception:
-            pass
-
-        # Cleanup overlay when the base closes
         def _cleanup_overlay(_code):
             try:
                 self._hide_dim_overlay()
@@ -716,9 +687,8 @@ class MainLoader(QMainWindow):
                 self.activateWindow()
             except Exception:
                 pass
-
-        base.finished.connect(_cleanup_overlay)
-        base.exec_()
+        dlg.finished.connect(_cleanup_overlay)
+        dlg.exec_()
 
     # (Logout dialog logic moved to modules.menu.logout_menu.open_logout_dialog)
 

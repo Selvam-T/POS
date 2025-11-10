@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-  <class>GreetingDialog</class>
-  <widget class="QDialog" name="GreetingDialog">
+  <class>GreetingMenuDialog</class>
+  <widget class="QDialog" name="GreetingMenuDialog">
     <property name="geometry">
       <rect><x>0</x><y>0</y><width>420</width><height>300</height></rect>
     </property>
@@ -20,7 +20,7 @@
             <property name="bottomMargin"><number>10</number></property>
             <item>
               <widget class="QLabel" name="customTitle">
-                <property name="text"><string>Greeting</string></property>
+                <property name="text"><string>Receipt and POS Greeting</string></property>
               </widget>
             </item>
             <item>
