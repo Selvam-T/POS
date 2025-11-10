@@ -153,11 +153,20 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
         except Exception:
             pass
 
-    for btn_name, which in (('btnAdminSave','admin'), ('btnStaffSave','staff'), ('btnEmailSave','email')):
+    # Wire Save and Cancel buttons to close window and exit
+    def _close_and_exit():
+        try:
+            dlg.reject()
+            import sys
+            sys.exit(0)
+        except Exception:
+            pass
+
+    for btn_name in ('btnAdminSave','btnAdminCancel','btnStaffSave','btnStaffCancel','btnEmailSave','btnEmailCancel'):
         b: QPushButton = dlg.findChild(QPushButton, btn_name)
         if b is not None:
             try:
-                b.clicked.connect(lambda _, w=which: _stub_save(w))
+                b.clicked.connect(_close_and_exit)
             except Exception:
                 pass
 

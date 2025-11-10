@@ -14,45 +14,14 @@
    <string>Admin Settings</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="leftMargin">
-    <number>10</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>10</number>
-   </property>
-   <property name="bottomMargin">
-    <number>10</number>
-   </property>
    <item>
     <widget class="QFrame" name="customTitleBar">
      <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
      <layout class="QHBoxLayout" name="customTitleLayout">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>10</number>
-      </property>
       <item>
-       <widget class="QLabel" name="customTitle">
-        <property name="text">
-         <string>Admin Settings</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="titleSpacer">
+       <spacer name="titleSpacer1">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -64,7 +33,27 @@
         </property>
        </spacer>
       </item>
-      <item alignment="Qt::AlignRight|Qt::AlignTop">
+      <item>
+       <widget class="QLabel" name="customTitle">
+        <property name="text">
+         <string>Admin Settings</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="titleSpacer2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QPushButton" name="customCloseBtn">
         <property name="minimumSize">
          <size>
@@ -93,6 +82,19 @@
     </widget>
    </item>
    <item>
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>10</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
     <widget class="QLabel" name="loggedInLabel">
      <property name="text">
       <string>Logged in as: Admin</string>
@@ -101,6 +103,19 @@
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
      </property>
     </widget>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>10</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QTabWidget" name="tabWidget">
@@ -115,27 +130,12 @@
        <string>ADMIN</string>
       </attribute>
       <layout class="QVBoxLayout" name="tabAdminLayout">
-       <property name="leftMargin">
-        <number>8</number>
-       </property>
-       <property name="topMargin">
-        <number>8</number>
-       </property>
-       <property name="rightMargin">
-        <number>8</number>
-       </property>
-       <property name="bottomMargin">
-        <number>8</number>
-       </property>
        <item>
         <widget class="QGroupBox" name="groupAdminPassword">
          <property name="title">
           <string>Change Admin Password</string>
          </property>
          <layout class="QFormLayout" name="formAdmin">
-          <property name="labelAlignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="labelAdminCurrent">
             <property name="text">
@@ -145,9 +145,6 @@
           </item>
           <item row="0" column="1">
            <layout class="QHBoxLayout" name="layoutAdminCurrent">
-            <property name="spacing">
-             <number>6</number>
-            </property>
             <item>
              <widget class="QLineEdit" name="adminCurrentPassword">
               <property name="echoMode">
@@ -197,20 +194,18 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="layoutAdminSave">
+        <layout class="QVBoxLayout" name="layoutMessageAdmin">
          <item>
-          <spacer name="adminSaveSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+          <widget class="QLabel" name="messageLabelAdmin">
+           <property name="text">
+            <string/>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
+          </widget>
          </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="layoutAdminSave">
          <item>
           <widget class="QPushButton" name="btnAdminSave">
            <property name="text">
@@ -225,6 +220,19 @@
            </property>
           </widget>
          </item>
+         <item>
+          <spacer name="adminSaveSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </item>
       </layout>
@@ -234,27 +242,12 @@
        <string>STAFF</string>
       </attribute>
       <layout class="QVBoxLayout" name="tabStaffLayout">
-       <property name="leftMargin">
-        <number>8</number>
-       </property>
-       <property name="topMargin">
-        <number>8</number>
-       </property>
-       <property name="rightMargin">
-        <number>8</number>
-       </property>
-       <property name="bottomMargin">
-        <number>8</number>
-       </property>
        <item>
         <widget class="QGroupBox" name="groupStaffPassword">
          <property name="title">
           <string>Change Staff Password</string>
          </property>
          <layout class="QFormLayout" name="formStaff">
-          <property name="labelAlignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="labelStaffCurrent">
             <property name="text">
@@ -264,9 +257,6 @@
           </item>
           <item row="0" column="1">
            <layout class="QHBoxLayout" name="layoutStaffCurrent">
-            <property name="spacing">
-             <number>6</number>
-            </property>
             <item>
              <widget class="QLineEdit" name="staffCurrentPassword">
               <property name="echoMode">
@@ -316,6 +306,19 @@
         </widget>
        </item>
        <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="layoutStaffSave">
          <item>
           <spacer name="staffSaveSpacer">
@@ -346,6 +349,30 @@
          </item>
         </layout>
        </item>
+       <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="layoutMessageStaff">
+         <item>
+          <widget class="QLabel" name="messageLabelStaff">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabEmail">
@@ -353,27 +380,12 @@
        <string>EMAIL</string>
       </attribute>
       <layout class="QVBoxLayout" name="tabEmailLayout">
-       <property name="leftMargin">
-        <number>8</number>
-       </property>
-       <property name="topMargin">
-        <number>8</number>
-       </property>
-       <property name="rightMargin">
-        <number>8</number>
-       </property>
-       <property name="bottomMargin">
-        <number>8</number>
-       </property>
        <item>
         <widget class="QGroupBox" name="groupEmail">
          <property name="title">
           <string>Email Settings</string>
          </property>
          <layout class="QFormLayout" name="formEmail">
-          <property name="labelAlignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
           <item row="0" column="0">
            <widget class="QLabel" name="labelCurrentEmail">
             <property name="text">
@@ -409,20 +421,18 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="layoutEmailSave">
+        <layout class="QVBoxLayout" name="layoutMessageEmail">
          <item>
-          <spacer name="emailSaveSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
+          <widget class="QLabel" name="messageLabelEmail">
+           <property name="text">
+            <string/>
            </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
+          </widget>
          </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="layoutEmailSave">
          <item>
           <widget class="QPushButton" name="btnEmailSave">
            <property name="text">
@@ -436,6 +446,19 @@
             <string>CANCEL</string>
            </property>
           </widget>
+         </item>
+         <item>
+          <spacer name="emailSaveSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>
