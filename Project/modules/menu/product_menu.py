@@ -37,7 +37,7 @@ from modules.sales.salesTable import handle_barcode_scanned
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-QSS_PATH = os.path.join(ASSETS_DIR, 'product_menu.qss')
+QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
 
 
 def _load_stylesheet() -> str:
@@ -90,11 +90,16 @@ def open_product_panel(main_window, initial_mode: Optional[str] = None, initial_
     from PyQt5.QtWidgets import QDialog, QVBoxLayout
     dlg = QDialog(main_window)
     dlg.setModal(True)
-    dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
     dlg.setFixedSize(dw_full, dh_full)
     lay = QVBoxLayout(dlg)
     lay.setContentsMargins(0, 0, 0, 0)
     lay.addWidget(content)
+
+    # Wire custom window titlebar X button to close dialog
+    custom_close_btn = content.findChild(QPushButton, 'customCloseBtn')
+    if custom_close_btn is not None:
+        custom_close_btn.clicked.connect(dlg.reject)
 
     tab_widget: QTabWidget = content.findChild(QTabWidget, 'tabWidget')
 

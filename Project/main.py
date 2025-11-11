@@ -3,7 +3,8 @@
 POS System - UI loader that composes `main_window.ui`, `sales_frame.ui`, and `payment_frame.ui`.
 Loads a QSS file from `assets/style.qss` when present.
 """
-
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 import sys
 import os
 import time
@@ -661,7 +662,7 @@ class MainLoader(QMainWindow):
         try:
             dlg = VegetableMenuDialog(self)
             dlg.setModal(True)
-            dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
+            """dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)"""
             mw = self.frameGeometry().width()
             mh = self.frameGeometry().height()
             dw = max(420, int(mw * 0.52))

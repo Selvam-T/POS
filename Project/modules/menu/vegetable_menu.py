@@ -14,16 +14,21 @@ class VegetableMenuDialog(QtWidgets.QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        # Load .ui
+        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.FramelessWindowHint | QtCore.Qt.CustomizeWindowHint)
+        # Load .ui as a child widget, not as the dialog itself
         self._base_dir = Path(__file__).resolve().parents[2]  # .../POS/Project
         ui_path = self._base_dir / 'ui' / 'vegetable_menu.ui'
-        uic.loadUi(str(ui_path), self)
-
+        uic.loadUi(str(ui_path), self) # Pass 'self' as the second argument
+        # Wire custom window titlebar X button to close dialog
+        custom_close_btn = self.findChild(QtWidgets.QPushButton, 'customCloseBtn')
+        if custom_close_btn is not None:
+            custom_close_btn.clicked.connect(self.reject)
+        # Find all required widgets from content
         self._rows = []  # list of tuples (lineEdit, slider, not_used_label)
         for i in range(1, app_settings.veg_slots() + 1):
-            le = getattr(self, f"lineEdit_value_{i}", None)
-            sl = getattr(self, f"slider_toggle_{i}", None)
-            nu = getattr(self, f"label_not_used_{i}", None)
+            le = self.findChild(QtWidgets.QLineEdit, f"lineEdit_value_{i}")
+            sl = self.findChild(QtWidgets.QSlider, f"slider_toggle_{i}")
+            nu = self.findChild(QtWidgets.QLabel, f"label_not_used_{i}")
             if not (isinstance(le, QtWidgets.QLineEdit) and isinstance(sl, QtWidgets.QSlider) and isinstance(nu, QtWidgets.QLabel)):
                 continue
             self._rows.append((le, sl, nu))
@@ -58,15 +63,13 @@ class VegetableMenuDialog(QtWidgets.QDialog):
                 le.textChanged.connect(self._clear_message)
             except Exception:
                 pass
-
         # Wire buttons
-        if hasattr(self, 'pushButton_ok'):
-            self.pushButton_ok.clicked.connect(self._on_ok)
-        if hasattr(self, 'pushButton_cancel'):
-            self.pushButton_cancel.clicked.connect(self.reject)
-        if hasattr(self, 'customCloseBtn'):
-            self.customCloseBtn.clicked.connect(self.reject)
-
+        pushButton_ok = self.findChild(QtWidgets.QPushButton, 'pushButton_ok')
+        if pushButton_ok is not None:
+            pushButton_ok.clicked.connect(self._on_ok)
+        pushButton_cancel = self.findChild(QtWidgets.QPushButton, 'pushButton_cancel')
+        if pushButton_cancel is not None:
+            pushButton_cancel.clicked.connect(self.reject)
         # Load existing mapping and populate
         self._load_and_populate()
 
@@ -171,7 +174,7 @@ class VegetableMenuDialog(QtWidgets.QDialog):
 
         # Load dialog-specific stylesheet if available
         try:
-            qss_path = self._base_dir / 'assets' / 'vegetable_menu.qss'
+            qss_path = self._base_dir / 'assets' / 'menu.qss'
             if qss_path.exists():
                 with open(qss_path, 'r', encoding='utf-8') as f:
                     self.setStyleSheet(f.read())

@@ -47,14 +47,15 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
         lay.addWidget(content)
 
     # Basic window flags (frameless like logout) + modality
-    try:
-        dlg.setParent(host_window)
-        dlg.setModal(True)
-        dlg.setWindowModality(Qt.ApplicationModal)
-        dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-        dlg.setObjectName('AdminDialogContainer')
-    except Exception:
-        pass
+    dlg.setParent(host_window)
+    dlg.setModal(True)
+    dlg.setWindowModality(Qt.ApplicationModal)
+    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
+    dlg.setObjectName('AdminDialogContainer')
+    # Wire custom window titlebar X button to close dialog
+    custom_close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
+    if custom_close_btn is not None:
+        custom_close_btn.clicked.connect(dlg.reject)
 
     # Center relative to main window & size to hint
     try:

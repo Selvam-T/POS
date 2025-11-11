@@ -1,18 +1,15 @@
-/* Dedicated stylesheet for Product Management dialog */
+
+/* --------- Product Menu Styles --------- */
 
 QDialog {
   background: #ffffff;
 }
-
-/* Sub header label */
 QLabel#subHeaderLabel {
   color: #222;
   font-size: 17px;
   font-weight: 600;
   padding: 4px 2px 6px 2px;
 }
-
-/* Field labels */
 QLabel#productCodeLabel, QLabel#productNameLabel, QLabel#categoryLabel,
 QLabel#sellingPriceLabel, QLabel#costPriceLabel, QLabel#unitLabel,
 QLabel#supplierLabel, QLabel#lastUpdatedLabel {
@@ -20,8 +17,6 @@ QLabel#supplierLabel, QLabel#lastUpdatedLabel {
   font-size: 13px;
   font-weight: 500;
 }
-
-/* Display-only labels in REMOVE tab */
 QLabel#productCodeDisplayLabel, QLabel#productNameDisplayLabel, QLabel#categoryDisplayLabel,
 QLabel#sellingPriceDisplayLabel, QLabel#costPriceDisplayLabel, QLabel#unitDisplayLabel,
 QLabel#supplierDisplayLabel, QLabel#lastUpdatedDisplayLabel {
@@ -32,8 +27,6 @@ QLabel#supplierDisplayLabel, QLabel#lastUpdatedDisplayLabel {
   padding: 4px 8px;
   min-height: 26px;
 }
-
-/* Inputs */
 QLineEdit#productCodeLineEdit, QLineEdit#productNameLineEdit, QLineEdit#sellingPriceLineEdit,
 QLineEdit#costPriceLineEdit, QLineEdit#supplierLineEdit, QLineEdit#lastUpdatedLineEdit,
 QLineEdit#searchCodeLineEdit {
@@ -51,7 +44,6 @@ QLineEdit:read-only {
   background: #f5f5f5;
   color: #555;
 }
-
 QComboBox#categoryComboBox, QComboBox#unitComboBox, QComboBox#searchNameComboBox {
   min-height: 28px;
   padding: 2px 6px;
@@ -68,8 +60,6 @@ QComboBox QAbstractItemView {
   selection-background-color: #2684ff;
   selection-color: #ffffff;
 }
-
-/* Search row slider (if used) */
 QSlider#searchModeSlider::groove:horizontal {
   height: 12px;
   background: #e0e4e9;
@@ -80,7 +70,7 @@ QSlider#searchModeSlider::handle:horizontal {
   border: 1px solid #cfd4dc;
   width: 18px;
   height: 18px;
-  margin: -4px 0; /* center handle */
+  margin: -4px 0;
   border-radius: 9px;
 }
 QSlider#searchModeSlider::handle:horizontal:hover {
@@ -94,15 +84,11 @@ QSlider#searchModeSlider::add-page:horizontal {
   background: #e0e4e9;
   border-radius: 6px;
 }
-
-/* Status label */
 QLabel#statusLabel {
   min-height: 20px;
   font-size: 12px;
   padding: 2px 4px;
 }
-
-/* Action buttons */
 QPushButton#okButton {
   background: #2563eb;
   color: #ffffff;
@@ -115,7 +101,6 @@ QPushButton#okButton {
 QPushButton#okButton:hover { background: #1d4ed8; }
 QPushButton#okButton:pressed { background: #1e40af; }
 QPushButton#okButton:disabled { background: #94a3b8; border-color: #94a3b8; color: #fff; }
-
 QPushButton#cancelButton {
   background: #e2e8f0;
   color: #1e293b;
@@ -127,8 +112,6 @@ QPushButton#cancelButton {
 }
 QPushButton#cancelButton:hover { background: #cbd5e1; }
 QPushButton#cancelButton:pressed { background: #94a3b8; }
-
-/* Tabs */
 QTabWidget::pane {
   border: 1px solid #d0d7de;
   border-radius: 6px;
@@ -152,8 +135,6 @@ QTabBar::tab:selected {
 }
 QTabBar::tab:hover { background: #e2e8f0; }
 QTabBar::tab:!selected { margin-top: 2px; }
-
-/* Scrollbars (if any inside forms) */
 QScrollBar:vertical {
   background: transparent;
   width: 10px;
@@ -168,3 +149,171 @@ QScrollBar::handle:vertical:hover { background: #94a3b8; }
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
 QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: transparent; }
 
+/* --------- Vegetable Menu Styles --------- */
+
+QDialog#VegetableMenuDialog {
+  background: #ffffff;
+}
+QFrame#customTitleBar {
+  background: transparent;
+  border-bottom: 1px solid #e6e6e6;
+}
+QLabel#customTitle {
+  color: #222;
+  font-size: 18px;
+  font-weight: 700;
+}
+QPushButton#customCloseBtn {
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: #333;
+  padding: 0px;
+}
+QPushButton#customCloseBtn:hover {
+  background: #ffe5e5;
+  border-color: #ffc2c2;
+}
+QPushButton#customCloseBtn:pressed {
+  background: #ffc9c9;
+}
+QLabel#label_title {
+  color: #222;
+  font-size: 18px;
+  font-weight: 700;
+}
+QLabel {
+  color: #222;
+}
+QLabel#label_not_used_1, QLabel#label_not_used_2, QLabel#label_not_used_3,
+QLabel#label_not_used_4, QLabel#label_not_used_5, QLabel#label_not_used_6,
+QLabel#label_not_used_7, QLabel#label_not_used_8, QLabel#label_not_used_9,
+QLabel#label_not_used_10, QLabel#label_not_used_11, QLabel#label_not_used_12,
+QLabel#label_not_used_13, QLabel#label_not_used_14 {
+  color: #888;
+}
+QLabel[rightIndicator="true"][active="true"] {
+  color: #222;
+  font-weight: 600;
+}
+QLabel[rightIndicator="true"][active="false"] {
+  color: #888;
+  font-weight: 500;
+}
+QLineEdit {
+  min-height: 28px;
+  padding: 4px 8px;
+  border: 1px solid #cfcfcf;
+  border-radius: 6px;
+  background: #ffffff;
+}
+QLineEdit[active="true"] {
+  border-color: #2684ff;
+}
+QLineEdit:read-only {
+  background: #f5f5f5;
+  color: #555;
+}
+QLineEdit[active="true"] {
+  color: #222;
+}
+QLineEdit[active="false"] {
+  color: #888;
+}
+QLineEdit[active="false"]:read-only {
+  color: #888;
+}
+QSlider::groove:horizontal {
+  border: none;
+  height: 20px;
+  background: #d0d5dd;
+  border-radius: 10px;
+  margin: 0px;
+}
+QSlider::handle:horizontal {
+  background: #ffffff;
+  border: 1px solid #cfd8e3;
+  width: 20px;
+  height: 20px;
+  margin: 0px -1px;
+  border-radius: 10px;
+}
+QSlider::handle:horizontal:hover {
+  border-color: #95a3b8;
+}
+QSlider::sub-page:horizontal, QSlider::add-page:horizontal {
+  background: #d0d5dd;
+  border: none;
+  height: 20px;
+  margin: 0px;
+  border-radius: 10px;
+}
+QSlider[active="true"]::groove:horizontal {
+  background: #22c55e;
+}
+QSlider[active="true"]::sub-page:horizontal,
+QSlider[active="true"]::add-page:horizontal {
+  background: #22c55e;
+}
+QScrollArea {
+  background: transparent;
+  border: none;
+}
+QScrollBar:vertical {
+  background: transparent;
+  width: 10px;
+  margin: 0px;
+}
+QScrollBar::handle:vertical {
+  background: #d7dde5;
+  border-radius: 5px;
+  min-height: 24px;
+}
+QScrollBar::handle:vertical:hover {
+  background: #c7cfda;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+  background: transparent;
+  height: 0px;
+}
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+  background: transparent;
+}
+QFrame#messageArea {
+  background: transparent;
+}
+QLabel#messageLabel[kind="error"] {
+  color: #b91c1c;
+}
+QLabel#messageLabel[kind="info"] {
+  color: #0c4a6e;
+}
+QLabel#messageLabel[kind="success"] {
+  color: #166534;
+}
+QPushButton#pushButton_ok {
+  background: #22c55e;
+  color: #fff;
+  border: 1px solid #1e9f4c;
+  border-radius: 8px;
+}
+QPushButton#pushButton_ok:hover {
+  background: #1fb156;
+}
+QPushButton#pushButton_ok:pressed {
+  background: #19924a;
+}
+QPushButton#pushButton_cancel {
+  background: #e9edf2;
+  color: #222;
+  border: 1px solid #d5dbe3;
+  border-radius: 8px;
+}
+QPushButton#pushButton_cancel:hover {
+  background: #dde3eb;
+}
+QPushButton#pushButton_cancel:pressed {
+  background: #cfd6df;
+}
+
+/* --------- Add other menu button styles here as needed --------- */

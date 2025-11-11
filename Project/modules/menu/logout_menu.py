@@ -49,6 +49,11 @@ def open_logout_dialog(host_window) -> None:
     dlg.setModal(True)
     dlg.setObjectName('LogoutDialogContainer')
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
+    # Wire custom window titlebar X button to close dialog
+    if content is not None:
+        custom_close_btn = content.findChild(QPushButton, 'customCloseBtn')
+        if custom_close_btn is not None:
+            custom_close_btn.clicked.connect(dlg.reject)
     # Set dialog size and embed content
     layout = QVBoxLayout(dlg)
     layout.setContentsMargins(0, 0, 0, 0)
