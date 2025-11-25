@@ -3,9 +3,11 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QPushButton, QLineEdit, QToolButton, QLabel
 
-_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-_PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))  # .../Project
-_UI_DIR = os.path.join(_PROJECT_DIR, 'ui')
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
+UI_DIR = os.path.join(BASE_DIR, 'ui')
+ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
+QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
 
 
 def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool = True) -> None:
@@ -16,7 +18,7 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
         current_user: Display name for "Logged in as:" label.
         is_admin: If False, the dialog will open read-only (no password/email changes allowed).
     """
-    ui_path = os.path.join(_UI_DIR, 'admin_menu.ui')
+    ui_path = os.path.join(UI_DIR, 'admin_menu.ui')
     if not os.path.exists(ui_path):
         print('admin_menu.ui missing at', ui_path)
         return

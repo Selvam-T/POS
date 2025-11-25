@@ -1,3 +1,14 @@
+"""
+Why is VegetableMenuDialog implemented as a class?
+
+Unlike other menu button dialogs (admin_menu, logout_menu, etc.) which use simple functions for modal dialogs, vegetable_menu.py uses a class because:
+- The dialog manages complex, stateful UI with 14 label/slider/indicator rows.
+- It needs to track and update multiple widgets and their states.
+- It emits signals (configChanged) to notify other parts of the app when the configuration changes.
+- It encapsulates UI logic, validation, and state management for the dialog instance.
+
+For simple dialogs, a function is sufficient. For complex, stateful dialogs, a class is preferred for maintainability and clarity.
+"""
 import os
 from pathlib import Path
 from typing import List

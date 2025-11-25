@@ -1,1577 +1,1590 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-   <class>VegetableMenuDialog</class>
-   <widget class="QDialog" name="VegetableMenuDialog">
-      <property name="geometry">
-         <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>520</width>
-            <height>680</height>
-         </rect>
+ <class>VegetableMenuDialog</class>
+ <widget class="QDialog" name="VegetableMenuDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>520</width>
+    <height>680</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>10</number>
+   </property>
+   <property name="leftMargin">
+    <number>10</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>10</number>
+   </property>
+   <property name="bottomMargin">
+    <number>10</number>
+   </property>
+   <item>
+    <widget class="QFrame" name="customTitleBar">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <layout class="QHBoxLayout" name="customTitleLayout">
+      <property name="leftMargin">
+       <number>0</number>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-            <widget class="QFrame" name="customTitleBar">
-               <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
-               </property>
-               <layout class="QHBoxLayout" name="customTitleLayout">
-                  <property name="leftMargin">
-                     <number>0</number>
-                  </property>
-                  <property name="topMargin">
-                     <number>0</number>
-                  </property>
-                  <property name="rightMargin">
-                     <number>0</number>
-                  </property>
-                  <property name="bottomMargin">
-                     <number>10</number>
-                  </property>
-                  <item>
-                     <widget class="QLabel" name="customTitle">
-                        <property name="text">
-                           <string>Edit Vegetable Labels</string>
-                        </property>
-                     </widget>
-                  </item>
-                  <item>
-                     <spacer name="titleSpacer">
-                        <property name="orientation">
-                           <enum>Qt::Horizontal</enum>
-                        </property>
-                        <property name="sizeHint" stdset="0">
-                           <size>
-                              <width>40</width>
-                              <height>20</height>
-                           </size>
-                        </property>
-                     </spacer>
-                  </item>
-                  <item alignment="Qt::AlignRight|Qt::AlignTop">
-                     <widget class="QPushButton" name="customCloseBtn">
-                        <property name="text">
-                           <string>×</string>
-                        </property>
-                        <property name="minimumSize">
-                           <size>
-                              <width>28</width>
-                              <height>28</height>
-                           </size>
-                        </property>
-                        <property name="maximumSize">
-                           <size>
-                              <width>28</width>
-                              <height>28</height>
-                           </size>
-                        </property>
-                        <property name="flat">
-                           <bool>true</bool>
-                        </property>
-                        <property name="toolTip">
-                           <string>Close</string>
-                        </property>
-                     </widget>
-                  </item>
-               </layout>
-            </widget>
-         </item>
-         <property name="spacing">
-            <number>10</number>
-         </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>10</number>
+      </property>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="customTitle">
+        <property name="text">
+         <string>Edit Vegetable Labels</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="titleSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item alignment="Qt::AlignRight|Qt::AlignTop">
+       <widget class="QPushButton" name="customCloseBtn">
+        <property name="minimumSize">
+         <size>
+          <width>28</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>28</width>
+          <height>28</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Close</string>
+        </property>
+        <property name="text">
+         <string>×</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="widgetResizable">
+      <bool>false</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>480</width>
+        <height>480</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_rows">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="row_1">
          <property name="leftMargin">
-            <number>10</number>
-         </property>
-         <property name="topMargin">
-            <number>0</number>
+          <number>0</number>
          </property>
          <property name="rightMargin">
-            <number>10</number>
-         </property>
-         <property name="bottomMargin">
-            <number>10</number>
+          <number>0</number>
          </property>
          <item>
-            <widget class="QScrollArea" name="scrollArea">
-               <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
-               </property>
-               <property name="widgetResizable">
-                  <bool>false</bool>
-               </property>
-               <widget class="QWidget" name="scrollAreaWidgetContents">
-                  <property name="geometry">
-                     <rect>
-                        <x>0</x>
-                        <y>0</y>
-                        <width>480</width>
-                        <height>480</height>
-                     </rect>
-                  </property>
-                  <property name="sizePolicy">
-                     <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                     </sizepolicy>
-                  </property>
-                  <layout class="QVBoxLayout" name="verticalLayout_rows">
-                     <property name="spacing">
-                        <number>10</number>
-                     </property>
-                     <property name="leftMargin">
-                        <number>0</number>
-                     </property>
-                     <property name="topMargin">
-                        <number>0</number>
-                     </property>
-                     <property name="rightMargin">
-                        <number>0</number>
-                     </property>
-                     <property name="bottomMargin">
-                        <number>0</number>
-                     </property>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_1">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_1">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 1:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_1">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_1">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_1">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_2">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_2">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 2:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_2">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_2">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_2">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_3">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_3">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 3:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_3">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_3">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_3">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_4">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_4">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 4:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_4">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_4">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_4">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_5">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_5">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 5:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_5">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_5">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_5">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_6">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_6">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 6:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_6">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_6">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_6">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_7">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_7">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 7:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_7">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_7">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_7">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_8">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_8">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 8:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_8">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_8">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_8">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_9">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_9">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 9:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_9">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_9">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_9">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_10">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_10">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 10:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_10">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_10">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_10">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_11">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_11">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 11:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_11">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_11">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_11">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_12">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_12">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 12:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_12">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_12">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_12">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_13">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_13">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 13:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_13">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_13">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_13">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                     <item>
-                        <layout class="QHBoxLayout" name="row_14">
-                           <property name="leftMargin">
-                              <number>0</number>
-                           </property>
-                           <property name="rightMargin">
-                              <number>0</number>
-                           </property>
-                           <item>
-                              <widget class="QLabel" name="label_id_14">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>70</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>Vegetable 14:</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLineEdit" name="lineEdit_value_14">
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>180</width>
-                                       <height>16777215</height>
-                                    </size>
-                                 </property>
-                                 <property name="maxLength">
-                                    <number>15</number>
-                                 </property>
-                                 <property name="placeholderText">
-                                    <string>Enter Vegetable</string>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QSlider" name="slider_toggle_14">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="maximumSize">
-                                    <size>
-                                       <width>52</width>
-                                       <height>20</height>
-                                    </size>
-                                 </property>
-                                 <property name="toolTip">
-                                    <string>Toggle NOT USED</string>
-                                 </property>
-                                 <property name="minimum">
-                                    <number>0</number>
-                                 </property>
-                                 <property name="maximum">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="singleStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="pageStep">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="value">
-                                    <number>1</number>
-                                 </property>
-                                 <property name="tracking">
-                                    <bool>false</bool>
-                                 </property>
-                                 <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                 </property>
-                              </widget>
-                           </item>
-                           <item>
-                              <widget class="QLabel" name="label_not_used_14">
-                                 <property name="minimumSize">
-                                    <size>
-                                       <width>80</width>
-                                       <height>0</height>
-                                    </size>
-                                 </property>
-                                 <property name="text">
-                                    <string>NOT USED</string>
-                                 </property>
-                                 <property name="alignment">
-                                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                                 </property>
-                              </widget>
-                           </item>
-                        </layout>
-                     </item>
-                  </layout>
-               </widget>
-            </widget>
+          <widget class="QLabel" name="label_id_1">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 1:</string>
+           </property>
+          </widget>
          </item>
          <item>
-            <widget class="QFrame" name="messageArea">
-               <property name="minimumSize">
-                  <size>
-                     <width>0</width>
-                     <height>28</height>
-                  </size>
-               </property>
-               <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
-               </property>
-               <layout class="QHBoxLayout" name="horizontalLayout_message">
-                  <property name="leftMargin">
-                     <number>0</number>
-                  </property>
-                  <property name="topMargin">
-                     <number>6</number>
-                  </property>
-                  <property name="rightMargin">
-                     <number>0</number>
-                  </property>
-                  <property name="bottomMargin">
-                     <number>0</number>
-                  </property>
-                  <item>
-                     <widget class="QLabel" name="messageLabel">
-                        <property name="text">
-                           <string/>
-                        </property>
-                        <property name="alignment">
-                           <set>Qt::AlignCenter</set>
-                        </property>
-                        <property name="wordWrap">
-                           <bool>true</bool>
-                        </property>
-                     </widget>
-                  </item>
-               </layout>
-            </widget>
+          <widget class="QLineEdit" name="lineEdit_value_1">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
          </item>
          <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_buttons">
-               <item>
-                  <spacer name="vegetableOkSpacer">
-                     <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                     </property>
-                     <property name="sizeHint" stdset="0">
-                        <size>
-                           <width>40</width>
-                           <height>20</height>
-                        </size>
-                     </property>
-                  </spacer>
-               </item>
-               <item>
-                  <widget class="QPushButton" name="btnVegetableCancel">
-                     <property name="sizePolicy">
-                        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                        </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                        <size>
-                           <width>0</width>
-                           <height>50</height>
-                        </size>
-                     </property>
-                     <property name="font">
-                        <font>
-                           <pointsize>12</pointsize>
-                        </font>
-                     </property>
-                     <property name="text">
-                        <string>Cancel</string>
-                     </property>
-                  </widget>
-               </item>
-               <item>
-                  <widget class="QPushButton" name="btnVegetableOk">
-                     <property name="sizePolicy">
-                        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-                           <horstretch>0</horstretch>
-                           <verstretch>0</verstretch>
-                        </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                        <size>
-                           <width>0</width>
-                           <height>50</height>
-                        </size>
-                     </property>
-                     <property name="font">
-                        <font>
-                           <pointsize>12</pointsize>
-                        </font>
-                     </property>
-                     <property name="text">
-                        <string>OK</string>
-                     </property>
-                  </widget>
-               </item>
-            </layout>
+          <widget class="QSlider" name="slider_toggle_1">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
          </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_1">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="row_2">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_id_2">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 2:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_value_2">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_toggle_2">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_2">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="row_3">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_id_3">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 3:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_value_3">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_toggle_3">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_3">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="row_4">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_id_4">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 4:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_value_4">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_toggle_4">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_4">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="row_5">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_id_5">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 5:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_value_5">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_toggle_5">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_5">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="row_6">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_id_6">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 6:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_value_6">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_toggle_6">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_6">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="row_7">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_id_7">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 7:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_value_7">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_toggle_7">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_7">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="row_8">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_id_8">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 8:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_value_8">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_toggle_8">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_8">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="row_9">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_id_9">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 9:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_value_9">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_toggle_9">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_9">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="row_10">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_id_10">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 10:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_value_10">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_toggle_10">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_10">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="row_11">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_id_11">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 11:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_value_11">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_toggle_11">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_11">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="row_12">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_id_12">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 12:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_value_12">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_toggle_12">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_12">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="row_13">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_id_13">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 13:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_value_13">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_toggle_13">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_13">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="row_14">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_id_14">
+           <property name="minimumSize">
+            <size>
+             <width>70</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Vegetable 14:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lineEdit_value_14">
+           <property name="maximumSize">
+            <size>
+             <width>180</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="maxLength">
+            <number>15</number>
+           </property>
+           <property name="placeholderText">
+            <string>Enter Vegetable</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSlider" name="slider_toggle_14">
+           <property name="minimumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>52</width>
+             <height>20</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Toggle NOT USED</string>
+           </property>
+           <property name="minimum">
+            <number>0</number>
+           </property>
+           <property name="maximum">
+            <number>1</number>
+           </property>
+           <property name="singleStep">
+            <number>1</number>
+           </property>
+           <property name="pageStep">
+            <number>1</number>
+           </property>
+           <property name="value">
+            <number>1</number>
+           </property>
+           <property name="tracking">
+            <bool>false</bool>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_not_used_14">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>NOT USED</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
       </layout>
-   </widget>
-   <resources/>
-   <connections/>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QFrame" name="messageArea">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>28</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_message">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>6</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="messageLabel">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_buttons">
+     <item>
+      <spacer name="vegetableOkSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnVegetableCancel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnVegetableOk">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>OK</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
 </ui>

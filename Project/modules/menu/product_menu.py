@@ -71,6 +71,13 @@ def open_product_panel(main_window, initial_mode: Optional[str] = None, initial_
         except Exception: pass
         return
 
+    # Add predefined items to category combo box
+    category_combo = content.findChild(QComboBox, 'categoryComboBox')
+    if category_combo is not None:
+        category_combo.clear()
+        for txt in ['Other', 'Electronics', 'Food', 'Apparel']:
+            category_combo.addItem(txt)
+
     # Apply dedicated stylesheet if present
     try:
         css = _load_stylesheet()
@@ -87,14 +94,23 @@ def open_product_panel(main_window, initial_mode: Optional[str] = None, initial_
         dh_full = max(300, int(mh * 0.6))
     except Exception:
         dw_full, dh_full = 600, 400
-    from PyQt5.QtWidgets import QDialog, QVBoxLayout
-    dlg = QDialog(main_window)
-    dlg.setModal(True)
-    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-    dlg.setFixedSize(dw_full, dh_full)
-    lay = QVBoxLayout(dlg)
-    lay.setContentsMargins(0, 0, 0, 0)
-    lay.addWidget(content)
+    # Set frameless window flags directly on loaded content if it's a QDialog
+    try:
+        content.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
+        content.setModal(True)
+        content.setFixedSize(dw_full, dh_full)
+        content.setWindowTitle('')
+        dlg = content
+    except Exception:
+        # Fallback to embedding in a QDialog if content is not a QDialog
+        from PyQt5.QtWidgets import QDialog, QVBoxLayout
+        dlg = QDialog(main_window)
+        dlg.setModal(True)
+        dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
+        dlg.setFixedSize(dw_full, dh_full)
+        lay = QVBoxLayout(dlg)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(content)
 
     # Wire custom window titlebar X button to close dialog
     custom_close_btn = content.findChild(QPushButton, 'customCloseBtn')

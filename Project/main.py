@@ -34,11 +34,7 @@ from modules.devices import BarcodeScanner
 from modules.menu.logout_menu import open_logout_dialog as open_logout_dialog_menu
 from modules.menu.admin_menu import open_admin_dialog as open_admin_dialog_menu
 from modules.menu.vegetable_menu import VegetableMenuDialog
-from modules.menu.placeholder_menus import (
-    open_reports_dialog as open_reports_dialog_menu,
-    open_devices_dialog as open_devices_dialog_menu,
-    open_greeting_dialog as open_greeting_dialog_menu,
-)
+## Removed placeholder_menus imports: now handled by custom dialogs
 
 from config import (
     DATE_FMT,
@@ -73,6 +69,26 @@ def load_qss(app):
 
 
 class MainLoader(QMainWindow):
+    def open_product_menu_dialog(self):
+        """Open the Product Management panel via standardized method."""
+        self.open_product_panel()
+
+    def open_logout_menu_dialog(self):
+        """Open the Logout dialog via standardized method."""
+        open_logout_dialog_menu(self)
+
+    def open_vegetable_menu_dialog(self):
+        """Open the Vegetable Label Edit dialog via standardized method."""
+        self.open_vegetable_label_menu()
+
+    def open_greeting_menu_dialog(self):
+        """Open the Greeting dialog via standardized method."""
+        try:
+            from modules.menu.greeting_menu import open_greeting_dialog
+            open_greeting_dialog(self)
+        except Exception as e:
+            print('Failed to open greeting dialog:', e)
+            self.open_menu_dialog('Error', 'Unable to open Greeting dialog.')
     def __init__(self):
         super().__init__()
         main_ui = os.path.join(UI_DIR, 'main_window.ui')
@@ -403,26 +419,22 @@ class MainLoader(QMainWindow):
                     pass
                 # Wire click handlers per button
                 if obj_name == 'productBtn':
-                    btn.clicked.connect(self.open_product_panel)
+                    btn.clicked.connect(self.open_product_menu_dialog)
                 elif obj_name == 'logoutBtn':
-                    btn.clicked.connect(lambda: open_logout_dialog_menu(self))
+                    btn.clicked.connect(self.open_logout_menu_dialog)
                 elif obj_name == 'vegetableBtn':
-                    # Open the Vegetable Label Edit dialog (ui/vegetable_menu.ui)
-                    btn.clicked.connect(self.open_vegetable_label_menu)
+                    btn.clicked.connect(self.open_vegetable_menu_dialog)
+                elif obj_name == 'greetingBtn':
+                    btn.clicked.connect(self.open_greeting_menu_dialog)
                 elif obj_name == 'adminBtn':
-                    # Open Admin Settings dialog
                     btn.clicked.connect(lambda: open_admin_dialog_menu(self, current_user='Admin', is_admin=True))
                 elif obj_name == 'reportsBtn':
-                    # Open Reports placeholder UI
-                    btn.clicked.connect(lambda: open_reports_dialog_menu(self))
-                elif obj_name == 'greetingBtn':
-                    # Open Greeting placeholder UI
-                    btn.clicked.connect(lambda: open_greeting_dialog_menu(self))
+                    btn.setEnabled(False)
+                    btn.setToolTip('Reports dialog not implemented')
                 elif obj_name == 'deviceBtn':
-                    # Open Devices placeholder UI
-                    btn.clicked.connect(lambda: open_devices_dialog_menu(self))
+                    btn.setEnabled(False)
+                    btn.setToolTip('Devices dialog not implemented')
                 else:
-                    # No fallback to generic hardwired dialog; all known buttons use .ui-based dialogs
                     try:
                         btn.setEnabled(False)
                         btn.setToolTip(title)
@@ -1124,7 +1136,8 @@ class MainLoader(QMainWindow):
                 self._dimOverlay = QWidget(self)
                 self._dimOverlay.setObjectName('dimOverlay')
                 self._dimOverlay.setStyleSheet('#dimOverlay { background-color: rgba(0, 0, 0, 110); }')
-                self._dimOverlay.setAttribute(Qt.WA_TransparentForMouseEvents, False)
+            # Set overlay to block mouse events (modal dimmer)
+            self._dimOverlay.setAttribute(Qt.WA_TransparentForMouseEvents, False)
             self._dimOverlay.setGeometry(self.rect())
             self._dimOverlay.show()
             self._dimOverlay.raise_()
