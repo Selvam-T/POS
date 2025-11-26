@@ -101,8 +101,8 @@ class MainLoader(QMainWindow):
         self.open_menu_dialog_wrapper(open_reports_dialog_menu)
 
     def open_vegetable_menu_dialog(self):
-        """Open the Vegetable Label Edit dialog via standardized method."""
-        self.open_vegetable_dialog_menu()
+        """Open the Vegetable Label Edit dialog via standardized method using the common wrapper."""
+        self.open_menu_dialog_wrapper(VegetableMenuDialog)
 
     # open_logout_menu_dialog now uses the common wrapper; no separate logic needed
     def open_menu_dialog_wrapper(self, dialog_func, width_ratio=0.45, height_ratio=0.4, *args, **kwargs):
@@ -694,43 +694,6 @@ class MainLoader(QMainWindow):
         dlg.finished.connect(_cleanup)
         dlg.exec_()
 
-    def open_vegetable_dialog_menu(self):
-        """Open the Vegetable Label Edit dialog from ui/vegetable_menu.ui as a modal dialog."""
-        try:
-            self._show_dim_overlay()
-        except Exception:
-            pass
-        try:
-            dlg = VegetableMenuDialog(self)
-            dlg.setModal(True)
-            """dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)"""
-            mw = self.frameGeometry().width()
-            mh = self.frameGeometry().height()
-            dw = max(420, int(mw * 0.52))
-            dh = max(360, int(mh * 0.62))
-            dlg.setFixedSize(dw, dh)
-            mx = self.frameGeometry().x()
-            my = self.frameGeometry().y()
-            dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
-        except Exception as e:
-            print('Failed to open Vegetable Label dialog:', e)
-            try:
-                self._hide_dim_overlay()
-            except Exception:
-                pass
-            return
-        def _cleanup_overlay(_code):
-            try:
-                self._hide_dim_overlay()
-            except Exception:
-                pass
-            try:
-                self.raise_()
-                self.activateWindow()
-            except Exception:
-                pass
-        dlg.finished.connect(_cleanup_overlay)
-        dlg.exec_()
 
     # (Logout dialog logic moved to modules.menu.logout_menu.open_logout_dialog)
 

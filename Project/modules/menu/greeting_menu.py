@@ -9,17 +9,17 @@ ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
 
 GREETING_STRINGS = [
-    "Thanks for shopping with us!",
-    "Selamat Hari Raya Haji !",
-    "Selamat Hari Raya !",
-    "Merry Christmas !",
-    "Majulah Singapura !",
-    "Happy Vesak Day !",
+    "Happy Deepavali !",
     "Happy New Year !!!",
+    "Merry Christmas !",
+    "Gōng xǐ fā cái !",
+    "Selamat Hari Raya !",
+    "Happy Vesak Day !",
+    "Selamat Hari Raya Haji !",
+    "Majulah Singapura !",
     "Happy Labor Day !",
     "Happy Good Friday !",
-    "Happy Deepavali !",
-    "Gōng xǐ fā cái !"
+    "Thanks for shopping with us!"
 ]
 
 def open_greeting_dialog(parent=None):
@@ -33,12 +33,13 @@ def open_greeting_dialog(parent=None):
     dlg.setWindowTitle('Customer Greeting Message')
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
     dlg.setFixedSize(420, 300)
-    # Wire up combo box
-    combo: QComboBox = dlg.findChild(QComboBox, 'greetingComboBox')
-    if combo:
+    all_widgets = dlg.findChildren(QComboBox)
+    combo = all_widgets[0] if all_widgets else None
+    if combo is not None:
         combo.clear()
         combo.addItems(GREETING_STRINGS)
-        combo.setCurrentIndex(0)
+        default_index = GREETING_STRINGS.index('Thanks for shopping with us!')
+        combo.setCurrentIndex(default_index)
     # Wire up close button
     close_btn: QPushButton = dlg.findChild(QPushButton, 'customCloseBtn')
     if close_btn:

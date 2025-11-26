@@ -2,6 +2,7 @@ import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QPushButton, QLabel, QDialog
+from modules.menu.dialog_utils import center_dialog_relative_to
 
 # Compute project root and UI directory relative to this file
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -9,17 +10,6 @@ _PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))  # .../Project
 _UI_DIR = os.path.join(_PROJECT_DIR, 'ui')
 
 
-def _center_dialog_relative_to(dlg: QDialog, host) -> None:
-    try:
-        mw = host.frameGeometry().width()
-        mh = host.frameGeometry().height()
-        mx = host.frameGeometry().x()
-        my = host.frameGeometry().y()
-        dw = dlg.width()
-        dh = dlg.height()
-        dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
-    except Exception:
-        pass
 
 
 def open_logout_dialog(host_window) -> None:
@@ -90,7 +80,7 @@ def open_logout_dialog(host_window) -> None:
             pass
 
     # Center relative to host
-    _center_dialog_relative_to(dlg, host_window)
+    center_dialog_relative_to(dlg, host_window)
     # Wire buttons and behavior when using full UI content
     if content is not None:
         try:

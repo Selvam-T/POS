@@ -1,8 +1,10 @@
 # modules/menu/reports_menu.py
+
 import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QPushButton, QDateEdit, QComboBox, QLabel
+from modules.menu.dialog_utils import center_dialog_relative_to
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
@@ -24,22 +26,16 @@ def open_reports_dialog(host_window):
     if not os.path.exists(ui_path):
         return None
 
+
     # Best-effort dim overlay
     try:
         host_window._show_dim_overlay()
     except Exception:
         pass
 
-    # Load UI
-    try:
-        content = uic.loadUi(ui_path)
-    except Exception:
-        try:
-            host_window._hide_dim_overlay()
-        except Exception:
-            pass
-        return None
 
+    # Load the UI file as a QWidget
+    content = uic.loadUi(ui_path)
     # Wrap in QDialog if needed
     if isinstance(content, QDialog):
         dlg = content

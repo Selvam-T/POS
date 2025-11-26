@@ -3,20 +3,13 @@ import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QPushButton, QComboBox, QLineEdit, QLabel, QWidget
+from modules.menu.dialog_utils import center_dialog_relative_to
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
 
-def _center_dialog_relative_to(dlg: QDialog, host) -> None:
-    try:
-        mw = host.frameGeometry().width(); mh = host.frameGeometry().height()
-        mx = host.frameGeometry().x();     my = host.frameGeometry().y()
-        dw = dlg.width();                  dh = dlg.height()
-        dlg.move(mx + (mw - dw)//2, my + (mh - dh)//2)
-    except Exception:
-        pass
 
 def open_devices_dialog(host_window, *args, **kwargs):
     """Open Devices dialog (ui/devices_menu.ui) as a modal frameless panel, standardized for menu dialogs."""
@@ -62,7 +55,7 @@ def open_devices_dialog(host_window, *args, **kwargs):
         dlg.setFixedSize(max(500, int(host_w * 0.55)), max(360, int(host_h * 0.52)))
     except Exception:
         dlg.setFixedSize(640, 440)
-    _center_dialog_relative_to(dlg, host_window)
+    center_dialog_relative_to(dlg, host_window)
 
     # Titlebar close (optional)
     try:

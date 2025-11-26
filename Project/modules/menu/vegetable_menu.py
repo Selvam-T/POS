@@ -263,3 +263,4 @@ class VegetableMenuDialog(QtWidgets.QDialog):
                 lbl.update()
             except Exception:
                 pass
+
