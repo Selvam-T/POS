@@ -37,6 +37,7 @@ from modules.menu.vegetable_menu import VegetableMenuDialog
 from modules.menu.devices_menu import open_devices_dialog as open_devices_dialog_menu
 from modules.menu.reports_menu import open_reports_dialog as open_reports_dialog_menu
 from modules.menu.greeting_menu import open_greeting_dialog as open_greeting_dialog_menu
+from modules.menu.product_menu import open_product_dialog as open_product_dialog_menu
 
 ## Removed placeholder_menus imports: now handled by custom dialogs
 
@@ -73,30 +74,67 @@ def load_qss(app):
 
 
 class MainLoader(QMainWindow):
-    def open_product_menu_dialog(self):
-        """Open the Product Management panel via standardized method."""
-        self.open_product_panel()
-
     def open_logout_menu_dialog(self):
-        """Open the Logout dialog via standardized method."""
-        open_logout_dialog_menu(self)
+        """Open the Logout dialog via standardized method using the common wrapper."""
+        self.open_menu_dialog_wrapper(open_logout_dialog_menu)
+
+    def open_product_menu_dialog(self, **kwargs):
+        """Open the Product Management panel via standardized method using the common wrapper.
+        Accepts kwargs for context (e.g., initial_mode, initial_code) to control tab and prefill logic.
+        """
+        self.open_menu_dialog_wrapper(open_product_dialog_menu, **kwargs)
+
+    def open_admin_menu_dialog(self):
+        """Open the Admin dialog via standardized method using the common wrapper."""
+        self.open_menu_dialog_wrapper(open_admin_dialog_menu, current_user='Admin', is_admin=True)
+
+    def open_greeting_menu_dialog(self):
+        """Open the Greeting dialog via standardized method using the common wrapper."""
+        self.open_menu_dialog_wrapper(open_greeting_dialog_menu)
+
+    def open_devices_menu_dialog(self):
+        """Open the Devices dialog via standardized method using the common wrapper."""
+        self.open_menu_dialog_wrapper(open_devices_dialog_menu)
+
+    def open_reports_menu_dialog(self):
+        """Open the Reports dialog via standardized method using the common wrapper."""
+        self.open_menu_dialog_wrapper(open_reports_dialog_menu)
 
     def open_vegetable_menu_dialog(self):
         """Open the Vegetable Label Edit dialog via standardized method."""
         self.open_vegetable_dialog_menu()
 
-    def open_greeting_menu_dialog(self):
-        """Open the Greeting dialog via standardized method."""
-        open_greeting_dialog_menu(self)
+    # open_logout_menu_dialog now uses the common wrapper; no separate logic needed
+    def open_menu_dialog_wrapper(self, dialog_func, width_ratio=0.45, height_ratio=0.4, *args, **kwargs):
+        """Common wrapper for opening menu dialogs with overlay, sizing, and cleanup."""
+    # ...
+        self._show_dim_overlay()
+        try:
+            dlg = dialog_func(self, *args, **kwargs)
+            # ...
+            # If the dialog function returns a QDialog, set size/position; else assume it handles itself
+            if isinstance(dlg, QDialog):
+                mw, mh = self.frameGeometry().width(), self.frameGeometry().height()
+                dw, dh = max(360, int(mw * width_ratio)), max(220, int(mh * height_ratio))
+                dlg.setFixedSize(dw, dh)
+                mx, my = self.frameGeometry().x(), self.frameGeometry().y()
+                dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
+                def _cleanup(_):
+                    self._hide_dim_overlay()
+                    self.raise_()
+                    self.activateWindow()
+                dlg.finished.connect(_cleanup)
+                # ...
+                dlg.exec_()
+                # ...
+            else:
+                # ...
+                self._hide_dim_overlay()
+        except Exception as e:
+            self._hide_dim_overlay()
+            print('Dialog failed:', e)
 
-    def open_devices_menu_dialog(self):
-        """Open the Devices dialog via standardized method."""
-        open_devices_dialog_menu(self)
-
-    def open_reports_menu_dialog(self):
-        """Open the Reports dialog via standardized method."""
-        open_reports_dialog_menu(self)
-
+    
     def __init__(self):
         super().__init__()
         main_ui = os.path.join(UI_DIR, 'main_window.ui')
@@ -435,7 +473,7 @@ class MainLoader(QMainWindow):
                 elif obj_name == 'greetingBtn':
                     btn.clicked.connect(self.open_greeting_menu_dialog)
                 elif obj_name == 'adminBtn':
-                    btn.clicked.connect(lambda: open_admin_dialog_menu(self, current_user='Admin', is_admin=True))
+                    btn.clicked.connect(self.open_admin_menu_dialog)
                 elif obj_name == 'reportsBtn':
                     btn.clicked.connect(self.open_reports_menu_dialog)
                 elif obj_name == 'deviceBtn':
@@ -612,22 +650,7 @@ class MainLoader(QMainWindow):
         except Exception:
             pass
 
-    def open_product_panel(self, initial_mode: str = None, initial_code: str = None):
-        """Thin wrapper: delegate product panel to modules.menu.product_menu.open_product_panel"""
-        try:
-            print('[UI] Opening Product Management panel...')
-            from modules.menu.product_menu import open_product_panel as _open_product_panel
-            res = _open_product_panel(self, initial_mode=initial_mode, initial_code=initial_code)
-            print('[UI] Product Management panel closed.')
-            return res
-        except Exception as e:
-            print('Failed to open product panel via module:', e)
-            # Fallback: show an error dialog
-            try:
-                self.open_menu_dialog('Error', 'Unable to open Product Management panel.')
-            except Exception:
-                pass
-            return
+    # open_product_panel removed; now handled via open_product_menu_dialog and open_menu_dialog_wrapper
 
     def open_menu_dialog(self, title: str, message: str):
         """Open a generic modal dialog for menu actions with a temporary message."""
@@ -935,7 +958,7 @@ class MainLoader(QMainWindow):
             # Product not found - open Product Management in ADD mode with code prefilled
             if status_bar:
                 status_bar.showMessage(f"⚠ Product '{barcode}' not found - Opening Product Management (ADD)", 3000)
-            self.open_product_panel(initial_mode='add', initial_code=barcode)
+            self.open_product_menu_dialog(initial_mode='add', initial_code=barcode)
             return
         
         # Product found - add to sales table
