@@ -34,6 +34,10 @@ from modules.devices import BarcodeScanner
 from modules.menu.logout_menu import open_logout_dialog as open_logout_dialog_menu
 from modules.menu.admin_menu import open_admin_dialog as open_admin_dialog_menu
 from modules.menu.vegetable_menu import VegetableMenuDialog
+from modules.menu.devices_menu import open_devices_dialog as open_devices_dialog_menu
+from modules.menu.reports_menu import open_reports_dialog as open_reports_dialog_menu
+from modules.menu.greeting_menu import open_greeting_dialog as open_greeting_dialog_menu
+
 ## Removed placeholder_menus imports: now handled by custom dialogs
 
 from config import (
@@ -79,16 +83,20 @@ class MainLoader(QMainWindow):
 
     def open_vegetable_menu_dialog(self):
         """Open the Vegetable Label Edit dialog via standardized method."""
-        self.open_vegetable_label_menu()
+        self.open_vegetable_dialog_menu()
 
     def open_greeting_menu_dialog(self):
         """Open the Greeting dialog via standardized method."""
-        try:
-            from modules.menu.greeting_menu import open_greeting_dialog
-            open_greeting_dialog(self)
-        except Exception as e:
-            print('Failed to open greeting dialog:', e)
-            self.open_menu_dialog('Error', 'Unable to open Greeting dialog.')
+        open_greeting_dialog_menu(self)
+
+    def open_devices_menu_dialog(self):
+        """Open the Devices dialog via standardized method."""
+        open_devices_dialog_menu(self)
+
+    def open_reports_menu_dialog(self):
+        """Open the Reports dialog via standardized method."""
+        open_reports_dialog_menu(self)
+
     def __init__(self):
         super().__init__()
         main_ui = os.path.join(UI_DIR, 'main_window.ui')
@@ -353,7 +361,7 @@ class MainLoader(QMainWindow):
                     # Icon file missing; fall back to text label
                     return False
                 except Exception as _e:
-                    # Ignore icon errors and fall back to text label
+                    # Ignore icon errors and fall back to text label                    
                     return False
 
             menu_buttons = {
@@ -429,11 +437,9 @@ class MainLoader(QMainWindow):
                 elif obj_name == 'adminBtn':
                     btn.clicked.connect(lambda: open_admin_dialog_menu(self, current_user='Admin', is_admin=True))
                 elif obj_name == 'reportsBtn':
-                    btn.setEnabled(False)
-                    btn.setToolTip('Reports dialog not implemented')
+                    btn.clicked.connect(self.open_reports_menu_dialog)
                 elif obj_name == 'deviceBtn':
-                    btn.setEnabled(False)
-                    btn.setToolTip('Devices dialog not implemented')
+                    btn.clicked.connect(self.open_devices_menu_dialog)
                 else:
                     try:
                         btn.setEnabled(False)
@@ -665,7 +671,7 @@ class MainLoader(QMainWindow):
         dlg.finished.connect(_cleanup)
         dlg.exec_()
 
-    def open_vegetable_label_menu(self):
+    def open_vegetable_dialog_menu(self):
         """Open the Vegetable Label Edit dialog from ui/vegetable_menu.ui as a modal dialog."""
         try:
             self._show_dim_overlay()
