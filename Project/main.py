@@ -26,7 +26,7 @@ from PyQt5.QtWidgets import (
     QCompleter,
     QTabWidget,
 )
-from PyQt5.QtCore import Qt, QSize, QTimer, QDateTime, QLocale, QEvent
+from PyQt5.QtCore import Qt, QSize, QEvent
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QFontMetrics, QIcon
 from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned, bind_total_label
@@ -40,10 +40,6 @@ from modules.menu.product_menu import open_product_dialog as open_product_dialog
 from modules.menu.vegetable_menu import VegetableMenuDialog
 
 from config import (
-    DATE_FMT,
-    DAY_FMT,
-    TIME_FMT,
-    COMPANY_NAME,
     ICON_ADMIN,
     ICON_REPORTS,
     ICON_VEGETABLE,
@@ -55,6 +51,7 @@ from config import (
     DEBUG_FOCUS_CHANGES,
     DEBUG_CACHE_LOOKUP,
 )
+from modules.date_time.info_section import InfoSectionController
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
@@ -143,57 +140,21 @@ class MainLoader(QMainWindow):
             flags |= Qt.CustomizeWindowHint | Qt.WindowTitleHint
             flags &= ~Qt.WindowCloseButtonHint
             self.setWindowFlags(flags)
-            # Gate programmatic close; only allow via logout
             self._allow_close = False
         except Exception:
-            # If flags not applied, we'll still guard via closeEvent below
             self._allow_close = False
         # Ensure header layout stretches keep center truly centered
         try:
             info_layout = self.findChild(QHBoxLayout, 'infoSection')
             if info_layout is not None:
-                info_layout.setStretch(0, 1)  # left section
-                info_layout.setStretch(1, 0)  # center label
-                info_layout.setStretch(2, 1)  # right section
-                # New combined Day/Time label on the right
-                try:
-                    day_time_label = self.findChild(QLabel, 'labelDayTime')
-                    if day_time_label is not None:
-                        # Ensure it hugs the right edge of its section
-                        day_time_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-                        day_time_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-                    # Ensure labelDate is left-aligned and expands to fill its section
-                    date_label = self.findChild(QLabel, 'labelDate')
-                    if date_label is not None:
-                        date_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-                        date_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-                    # Set company name text (baked-in)
-                    company_label = self.findChild(QLabel, 'labelCompany')
-                    if company_label is not None:
-                        company_label.setText(COMPANY_NAME)
-                except Exception:
-                    pass
+                info_layout.setStretch(0, 1)
+                info_layout.setStretch(1, 0)
+                info_layout.setStretch(2, 1)
         except Exception:
             pass
-        
-        # ----------------- Real-time Date / Day / Time Setup -----------------
-        try:
-            # Optionally force English locale for month/day abbreviations
-            # Comment this line if you prefer system locale.
-            self._clockLocale = QLocale(QLocale.English)
 
-            # Cache label references
-            self._dateLabel: QLabel = self.findChild(QLabel, 'labelDate')
-            self._dayTimeLabel: QLabel = self.findChild(QLabel, 'labelDayTime')
-
-            # Start a 1-second timer to update the clock
-            self._clockTimer = QTimer(self)
-            self._clockTimer.timeout.connect(self._update_clock)
-            self._clockTimer.start(1000)
-            # Initial paint
-            self._update_clock()
-        except Exception as e:
-            print('Clock setup failed:', e)
+        # Use InfoSectionController for header info section
+        self.info = InfoSectionController().bind(self).start_clock()
         
     # Initialize barcode scanner
         self.scanner = BarcodeScanner()
@@ -782,25 +743,7 @@ class MainLoader(QMainWindow):
             if status_bar:
                 status_bar.showMessage(f"📷 Scanned: {barcode}", 3000)
 
-    # ----------------- Clock update handler -----------------
-    def _update_clock(self):
-        try:
-            now = QDateTime.currentDateTime()
-
-            # Date text (e.g., 3 Nov 2025)
-            if self._dateLabel is not None:
-                # Use locale formatting for month/day names
-                date_text = self._clockLocale.toString(now.date(), DATE_FMT)
-                self._dateLabel.setText(date_text)
-
-            # Day + Time (e.g., FRI 12:22 am)
-            if self._dayTimeLabel is not None:
-                day_text = self._clockLocale.toString(now.date(), DAY_FMT)
-                time_text = now.toString(TIME_FMT).upper()  # am/pm lower via 'ap'
-                self._dayTimeLabel.setText(f"{day_text}   {time_text}")
-        except Exception as e:
-            # Non-fatal; avoid crashing timer
-            print('Clock update failed:', e)
+    # ...existing code...
 
     # ----------------- Focus debug helpers -----------------
     def _describe_widget(self, w: QWidget) -> str:
