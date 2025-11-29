@@ -99,6 +99,7 @@ class MainLoader(QMainWindow):
         """Open the Vegetable Label Edit dialog via standardized method using the common wrapper."""
         self.open_menu_dialog_wrapper(VegetableMenuDialog)
 
+
     # open_logout_menu_dialog now uses the common wrapper; no separate logic needed
     def open_menu_dialog_wrapper(self, dialog_func, width_ratio=0.45, height_ratio=0.4, *args, **kwargs):
         """Common wrapper for opening menu dialogs with overlay, sizing, and cleanup."""
@@ -155,10 +156,12 @@ class MainLoader(QMainWindow):
 
         # Use InfoSectionController for header info section
         self.info = InfoSectionController().bind(self).start_clock()
-        
-    # Initialize barcode scanner
+
+        # Initialize barcode scanner
         self.scanner = BarcodeScanner()
         self.scanner.barcode_scanned.connect(self.on_barcode_scanned)
+        self.scanner.start()
+
         # Insert sales_frame.ui into placeholder named 'salesFrame'
         sales_placeholder = getattr(self, 'salesFrame', None)
         sales_ui = os.path.join(UI_DIR, 'sales_frame.ui')
@@ -340,8 +343,6 @@ class MainLoader(QMainWindow):
                         pass
         except Exception as e:
             print('Failed to wire menu buttons:', e)
-
-        
 
         # Install a global event filter to control key delivery during scanner sequences
         try:
