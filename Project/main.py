@@ -1,3 +1,4 @@
+from modules.ui_utils.overlay_manager import OverlayManager
 #!/usr/bin/env python3
 """
 POS System - UI loader that composes `main_window.ui`, `sales_frame.ui`, and `payment_frame.ui`.
@@ -103,8 +104,7 @@ class MainLoader(QMainWindow):
     # open_logout_menu_dialog now uses the common wrapper; no separate logic needed
     def open_menu_dialog_wrapper(self, dialog_func, width_ratio=0.45, height_ratio=0.4, *args, **kwargs):
         """Common wrapper for opening menu dialogs with overlay, sizing, and cleanup."""
-    # ...
-        self._show_dim_overlay()
+        self.overlay_manager.toggle_dim_overlay(True)
         try:
             dlg = dialog_func(self, *args, **kwargs)
             # ...
@@ -116,7 +116,7 @@ class MainLoader(QMainWindow):
                 mx, my = self.frameGeometry().x(), self.frameGeometry().y()
                 dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
                 def _cleanup(_):
-                    self._hide_dim_overlay()
+                    self.overlay_manager.toggle_dim_overlay(False)
                     self.raise_()
                     self.activateWindow()
                 dlg.finished.connect(_cleanup)
@@ -125,14 +125,15 @@ class MainLoader(QMainWindow):
                 # ...
             else:
                 # ...
-                self._hide_dim_overlay()
+                self.overlay_manager.toggle_dim_overlay(False)
         except Exception as e:
-            self._hide_dim_overlay()
+            self.overlay_manager.toggle_dim_overlay(False)
             print('Dialog failed:', e)
 
     
     def __init__(self):
         super().__init__()
+        self.overlay_manager = OverlayManager(self)
         main_ui = os.path.join(UI_DIR, 'main_window.ui')
         uic.loadUi(main_ui, self)
         # Remove the window close button (X) to force using Logout
@@ -208,6 +209,10 @@ class MainLoader(QMainWindow):
                         btn = sales_widget.findChild(QPushButton, btn_name)
                         if btn is not None:
                             btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+                            if btn_name == 'vegBtn':
+                                btn.clicked.connect(self.open_vegetable_panel)
+                            elif btn_name == 'manualBtn':
+                                btn.clicked.connect(self.open_manual_panel)
 
                 receipt_container = sales_widget.findChild(QWidget, 'receiptContainer')
                 if receipt_container is not None:
@@ -386,20 +391,14 @@ class MainLoader(QMainWindow):
             return
 
         # Create dimming overlay over the main window
-        try:
-            self._show_dim_overlay()
-        except Exception:
-            pass
+        self.overlay_manager.toggle_dim_overlay(True)
 
         # Build a modal dialog and embed the loaded UI inside
         try:
             content = uic.loadUi(veg_ui)
         except Exception as e:
             print('Failed to load vegetable_entry.ui:', e)
-            try:
-                self._hide_dim_overlay()
-            except Exception:
-                pass
+            self.overlay_manager.toggle_dim_overlay(False)
             return
 
         dlg = QDialog(self)
@@ -474,10 +473,7 @@ class MainLoader(QMainWindow):
 
         # Ensure overlay hides and focus returns when dialog closes
         def _cleanup_overlay(_code):
-            try:
-                self._hide_dim_overlay()
-            except Exception:
-                pass
+            self.overlay_manager.toggle_dim_overlay(False)
             # Bring main window back to front
             try:
                 self.raise_()
@@ -548,20 +544,14 @@ class MainLoader(QMainWindow):
             return
 
         # Create dimming overlay over the main window (reuse same overlay as vegetable panel)
-        try:
-            self._show_dim_overlay()
-        except Exception:
-            pass
+        self.overlay_manager.toggle_dim_overlay(True)
 
         # Build a modal dialog and embed the loaded UI inside
         try:
             content = uic.loadUi(manual_ui)
         except Exception as e:
             print('Failed to load manual_entry.ui:', e)
-            try:
-                self._hide_dim_overlay()
-            except Exception:
-                pass
+            self.overlay_manager.toggle_dim_overlay(False)
             return
 
         dlg = QDialog(self)
@@ -591,7 +581,8 @@ class MainLoader(QMainWindow):
         # Set the message in the QTextEdit widget
         try:
             text_edit = content.findChild(QWidget, 'manualText')
-            if text_edit is not None:
+            from PyQt5.QtWidgets import QTextEdit, QPlainTextEdit
+            if isinstance(text_edit, (QTextEdit, QPlainTextEdit)):
                 text_edit.setPlainText(message)
                 try:
                     # Make it read-only to prevent any visual key leaks
@@ -609,10 +600,7 @@ class MainLoader(QMainWindow):
 
         # Ensure overlay hides and focus returns when dialog closes
         def _cleanup_overlay(_code):
-            try:
-                self._hide_dim_overlay()
-            except Exception:
-                pass
+            self.overlay_manager.toggle_dim_overlay(False)
             # Bring main window back to front
             try:
                 self.raise_()
@@ -916,26 +904,6 @@ class MainLoader(QMainWindow):
             pass
 
     # ------- Tiny helpers: overlay + scanner modal block + focus/override -------
-    def _show_dim_overlay(self) -> None:
-        try:
-            if not hasattr(self, '_dimOverlay') or self._dimOverlay is None:
-                self._dimOverlay = QWidget(self)
-                self._dimOverlay.setObjectName('dimOverlay')
-                self._dimOverlay.setStyleSheet('#dimOverlay { background-color: rgba(0, 0, 0, 110); }')
-            # Set overlay to block mouse events (modal dimmer)
-            self._dimOverlay.setAttribute(Qt.WA_TransparentForMouseEvents, False)
-            self._dimOverlay.setGeometry(self.rect())
-            self._dimOverlay.show()
-            self._dimOverlay.raise_()
-        except Exception:
-            pass
-
-    def _hide_dim_overlay(self) -> None:
-        try:
-            if hasattr(self, '_dimOverlay') and self._dimOverlay is not None:
-                self._dimOverlay.hide()
-        except Exception:
-            pass
 
     def _start_scanner_modal_block(self) -> None:
         try:
