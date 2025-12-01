@@ -1,8 +1,15 @@
 from modules.ui_utils.overlay_manager import OverlayManager
 #!/usr/bin/env python3
 """
-POS System - UI loader that composes `main_window.ui`, `sales_frame.ui`, and `payment_frame.ui`.
+POS System - Main UI Loader
+
+This module composes `main_window.ui`, `sales_frame.ui`, and `payment_frame.ui`.
 Loads a QSS file from `assets/style.qss` when present.
+
+Barcode scanner logic, event filtering, modal blocking, and override handling are now fully managed by
+`modules/devices/barcode_manager.py` (BarcodeManager). All redundant scanner code has been removed from main.py.
+Dialogs and panels interact with the scanner only via BarcodeManager's modal block and override helpers.
+
 """
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -31,7 +38,7 @@ from PyQt5.QtCore import Qt, QSize, QEvent
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QFontMetrics, QIcon
 from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned, bind_total_label
-from modules.devices import BarcodeScanner
+from modules.devices.barcode_manager import BarcodeManager
 from modules.menu.logout_menu import open_logout_dialog as open_logout_dialog_menu
 from modules.menu.admin_menu import open_admin_dialog as open_admin_dialog_menu
 from modules.menu.devices_menu import open_devices_dialog as open_devices_dialog_menu
@@ -103,8 +110,17 @@ class MainLoader(QMainWindow):
 
     # open_logout_menu_dialog now uses the common wrapper; no separate logic needed
     def open_menu_dialog_wrapper(self, dialog_func, width_ratio=0.45, height_ratio=0.4, *args, **kwargs):
-        """Common wrapper for opening menu dialogs with overlay, sizing, and cleanup."""
+        """Common wrapper for opening menu dialogs with overlay, sizing, and cleanup. Also blocks barcode scanner while dialog is open."""
         self.overlay_manager.toggle_dim_overlay(True)
+        # Block scanner for all dialogs except product menu
+        from modules.menu.product_menu import open_product_dialog
+        is_product_menu = dialog_func is open_product_dialog
+        if not is_product_menu:
+            try:
+                if hasattr(self, 'barcode_manager'):
+                    self.barcode_manager._start_scanner_modal_block()
+            except Exception:
+                pass
         try:
             dlg = dialog_func(self, *args, **kwargs)
             # ...
@@ -119,6 +135,12 @@ class MainLoader(QMainWindow):
                     self.overlay_manager.toggle_dim_overlay(False)
                     self.raise_()
                     self.activateWindow()
+                    # Unblock scanner modal block
+                    try:
+                        if hasattr(self, 'barcode_manager'):
+                            self.barcode_manager._end_scanner_modal_block()
+                    except Exception:
+                        pass
                 dlg.finished.connect(_cleanup)
                 # ...
                 dlg.exec_()
@@ -126,8 +148,20 @@ class MainLoader(QMainWindow):
             else:
                 # ...
                 self.overlay_manager.toggle_dim_overlay(False)
+                # Unblock scanner modal block
+                try:
+                    if hasattr(self, 'barcode_manager'):
+                        self.barcode_manager._end_scanner_modal_block()
+                except Exception:
+                    pass
         except Exception as e:
             self.overlay_manager.toggle_dim_overlay(False)
+            # Unblock scanner modal block
+            try:
+                if hasattr(self, 'barcode_manager'):
+                    self.barcode_manager._end_scanner_modal_block()
+            except Exception:
+                pass
             print('Dialog failed:', e)
 
     
@@ -158,10 +192,17 @@ class MainLoader(QMainWindow):
         # Use InfoSectionController for header info section
         self.info = InfoSectionController().bind(self).start_clock()
 
-        # Initialize barcode scanner
-        self.scanner = BarcodeScanner()
-        self.scanner.barcode_scanned.connect(self.on_barcode_scanned)
-        self.scanner.start()
+        # Initialize barcode manager
+        self.barcode_manager = BarcodeManager(self)
+        # Install barcode manager as event filter for scanner key suppression
+        try:
+            app = QApplication.instance()
+            if app is not None:
+                self.barcode_manager.install_event_filter(app)
+            else:
+                self.barcode_manager.install_event_filter(self)
+        except Exception:
+            pass
 
         # Insert sales_frame.ui into placeholder named 'salesFrame'
         sales_placeholder = getattr(self, 'salesFrame', None)
@@ -349,24 +390,7 @@ class MainLoader(QMainWindow):
         except Exception as e:
             print('Failed to wire menu buttons:', e)
 
-        # Install a global event filter to control key delivery during scanner sequences
-        try:
-            self._suppressEnterUntil = 0.0
-            self._scannerPrevTs = 0.0
-            self._scannerActiveUntil = 0.0
-            # Install at application level so we see events for all widgets
-            try:
-                QApplication.instance().installEventFilter(self)
-            except Exception:
-                # Fallback to filtering only within this window hierarchy
-                self.installEventFilter(self)
-            try:
-                # Extend suppression window on each scanner key press
-                self.scanner.scanner_activity.connect(self._on_scanner_activity)
-            except Exception:
-                pass
-        except Exception:
-            pass
+        # BarcodeManager installs its own event filter and handles scanner activity
 
         # Optional: verbose focus change logging
         try:
@@ -482,7 +506,14 @@ class MainLoader(QMainWindow):
                 pass
             # Remove barcode override when dialog closes
             try:
-                self._clear_barcode_override()
+                if hasattr(self, 'barcode_manager'):
+                    self.barcode_manager.clear_barcode_override()
+            except Exception:
+                pass
+            # Unblock scanner modal block
+            try:
+                if hasattr(self, 'barcode_manager'):
+                    self.barcode_manager._end_scanner_modal_block()
             except Exception:
                 pass
 
@@ -490,16 +521,13 @@ class MainLoader(QMainWindow):
 
         # Block scanner while this dialog is open
         try:
-            self._start_scanner_modal_block()
+            if hasattr(self, 'barcode_manager'):
+                self.barcode_manager._start_scanner_modal_block()
         except Exception:
             pass
 
         # Execute modally
         dlg.exec_()
-        try:
-            self._end_scanner_modal_block()
-        except Exception:
-            pass
 
 
 
@@ -594,7 +622,8 @@ class MainLoader(QMainWindow):
 
         # Mark that a generic modal is open to block scanner routing
         try:
-            self._start_scanner_modal_block()
+            if hasattr(self, 'barcode_manager'):
+                self.barcode_manager._start_scanner_modal_block()
         except Exception:
             pass
 
@@ -609,7 +638,8 @@ class MainLoader(QMainWindow):
                 pass
             # Unblock scanner and restore focus to sales table
             try:
-                self._end_scanner_modal_block()
+                if hasattr(self, 'barcode_manager'):
+                    self.barcode_manager._end_scanner_modal_block()
             except Exception:
                 pass
             try:
@@ -623,114 +653,7 @@ class MainLoader(QMainWindow):
         dlg.exec_()
 
     # ----------------- Barcode scanner handling -----------------
-    def on_barcode_scanned(self, barcode: str):
-        """
-        Handle barcode scanned event.
-        Routes barcode to appropriate handler based on current context.
-        
-        Args:
-            barcode: The scanned barcode string
-        """
-        # Debug: print where the focus is when a scan is received
-        try:
-            if DEBUG_SCANNER_FOCUS:
-                self._debug_print_focus(context='on_barcode_scanned', barcode=barcode)
-        except Exception:
-            pass
-        # Normalize input once
-        barcode = (barcode or '').strip()
-
-        # Early cache lookup and debug so it always prints, even if later ignored/overridden
-        from modules.db_operation import get_product_info, PRODUCT_CACHE
-        found, product_name, unit_price = get_product_info(barcode)
-        try:
-            if DEBUG_CACHE_LOOKUP:
-                raw = barcode
-                norm = (raw or '').strip().upper()
-                found_key = None
-                if norm in PRODUCT_CACHE:
-                    found_key = norm
-                elif raw in PRODUCT_CACHE:
-                    found_key = raw
-                elif (raw or '').lower() in PRODUCT_CACHE:
-                    found_key = (raw or '').lower()
-                elif (raw or '').upper() in PRODUCT_CACHE:
-                    found_key = (raw or '').upper()
-                cache_size = len(PRODUCT_CACHE)
-                print('[Scanner][Cache]', f"code='{raw}'", f"norm='{norm}'", f"found={'yes' if found else 'no'}", f"key='{found_key}'", f"name='{product_name}'", f"price={unit_price:.2f}", f"cacheSize={cache_size}")
-        except Exception as _e:
-            print('[Scanner][Cache] debug failed:', _e)
-
-        # If a modal has installed a barcode override, handle it focus-safely
-        try:
-            override = getattr(self, '_barcodeOverride', None)
-            if callable(override):
-                handled = False
-                try:
-                    handled = override(barcode)
-                except Exception:
-                    handled = False
-                if handled:
-                    return  # accepted by dialog
-                else:
-                    # dialog open but not focused on code field → ignore, cleanup any leak
-                    try:
-                        self._ignore_scan(barcode, reason='override-not-focused')
-                    except Exception:
-                        pass
-                    return
-        except Exception:
-            pass
-
-        # Get status bar reference
-        status_bar = getattr(self, 'statusbar', None)
-
-        # If a generic modal (e.g., manual entry) is open, ignore scan and cleanup any leaked char
-        try:
-            if getattr(self, '_modalBlockScanner', False):
-                self._ignore_scan(barcode, reason='modal-block-open')
-                return
-        except Exception:
-            pass
-
-        # If focus is in salesTable quantity editor, ignore scan
-        try:
-            fw = QApplication.instance().focusWidget() if QApplication.instance() else None
-            if fw is not None and getattr(fw, 'objectName', lambda: '')() == 'qtyInput':
-                # Remove any stray first character leaked into qty input
-                try:
-                    self._ignore_scan(barcode, reason='qtyInput-focused')
-                except Exception:
-                    pass
-                return
-        except Exception:
-            pass
-
-        # If focus is in payment refund input, route code there
-        try:
-            if fw is not None and getattr(fw, 'objectName', lambda: '')() == 'refundInput':
-                try:
-                    fw.setText(barcode)
-                except Exception:
-                    pass
-                return
-        except Exception:
-            pass
-        
-        if not found:
-            # Product not found - open Product Management in ADD mode with code prefilled
-            if status_bar:
-                status_bar.showMessage(f"⚠ Product '{barcode}' not found - Opening Product Management (ADD)", 3000)
-            self.open_product_menu_dialog(initial_mode='add', initial_code=barcode)
-            return
-        
-        # Product found - add to sales table
-        if self.sales_table is not None:
-            handle_barcode_scanned(self.sales_table, barcode, status_bar)
-        else:
-            # Fallback: just display in status bar
-            if status_bar:
-                status_bar.showMessage(f"📷 Scanned: {barcode}", 3000)
+    # Barcode handling is now managed by BarcodeManager
 
     # ...existing code...
 
@@ -785,137 +708,19 @@ class MainLoader(QMainWindow):
             pass
 
     # Swallow Enter/Return keys briefly during scanner activity to avoid triggering default buttons
-    def _on_scanner_activity(self, when_ts: float):
-        try:
-            now = time.time()
-            prev = getattr(self, '_scannerPrevTs', 0.0) or 0.0
-            dt = when_ts - prev if prev > 0 else None
-            # Consider it scanner-like if two consecutive keys are very fast
-            if dt is not None and dt <= 0.08:
-                # Activate a short window during which we will swallow keys to non-whitelisted fields
-                self._scannerActiveUntil = max(getattr(self, '_scannerActiveUntil', 0.0), now + 0.25)
-                # Also suppress Enter slightly to avoid button activation
-                self._suppressEnterUntil = max(getattr(self, '_suppressEnterUntil', 0.0), now + 0.15)
-            # Remember timestamp for next delta computation
-            self._scannerPrevTs = when_ts
-        except Exception:
-            pass
+    # Scanner activity is now managed by BarcodeManager
 
-    def eventFilter(self, obj, event):
-        try:
-            if event.type() == QEvent.KeyPress:
-                k = event.key()
-                now = time.time()
-                # If a generic modal is blocking the scanner, swallow printable keys and Enter immediately
-                try:
-                    if getattr(self, '_modalBlockScanner', False):
-                        text = ''
-                        try:
-                            text = event.text() or ''
-                        except Exception:
-                            text = ''
-                        is_printable = len(text) == 1 and (31 < ord(text) < 127)
-                        if is_printable or k in (Qt.Key_Return, Qt.Key_Enter):
-                            return True
-                except Exception:
-                    pass
-                # Swallow Enter during suppression window
-                if k in (Qt.Key_Return, Qt.Key_Enter) and now <= getattr(self, '_suppressEnterUntil', 0.0):
-                    return True
-                # If scanner is active, block character keys to disallowed widgets
-                if now <= getattr(self, '_scannerActiveUntil', 0.0):
-                    # Determine current focus
-                    app = QApplication.instance()
-                    fw = app.focusWidget() if app else None
-                    # Identify allowed targets
-                    obj_name = ''
-                    try:
-                        obj_name = fw.objectName() if fw is not None else ''
-                    except Exception:
-                        obj_name = ''
-                    # Allowed only in product code field and refund input; disallow qtyInput
-                    is_qty = (obj_name == 'qtyInput')
-                    is_allowed = (obj_name in ('productCodeLineEdit', 'refundInput')) and not is_qty
-                    # Printable char? If so, swallow unless allowed
-                    text = ''
-                    try:
-                        text = event.text() or ''
-                    except Exception:
-                        text = ''
-                    is_printable = len(text) == 1 and (31 < ord(text) < 127)
-                    if is_printable and not is_allowed:
-                        return True
-        except Exception:
-            pass
-        return super().eventFilter(obj, event)
+    # Event filter for scanner key suppression is now managed by BarcodeManager
 
     # Best-effort cleanup for a stray first character leaked into disallowed inputs during a scan
-    def _cleanup_scanner_leak(self, fw: QWidget, barcode: str) -> None:
-        try:
-            if fw is None or not barcode:
-                return
-            ch = barcode[0]
-            name = getattr(fw, 'objectName', lambda: '')()
-            # Handle QLineEdit-like widgets
-            try:
-                from PyQt5.QtWidgets import QLineEdit
-                if isinstance(fw, QLineEdit):
-                    txt = fw.text() or ''
-                    if txt.endswith(ch) and len(txt) <= 3:
-                        fw.setText(txt[:-1])
-                    return
-            except Exception:
-                pass
-            # Handle QTextEdit/QPlainTextEdit
-            try:
-                from PyQt5.QtWidgets import QTextEdit, QPlainTextEdit
-                from PyQt5.QtGui import QTextCursor
-                if isinstance(fw, (QTextEdit, QPlainTextEdit)):
-                    # Remove the last character if it matches first barcode char
-                    t = fw.toPlainText()
-                    if t.endswith(ch) and len(t) <= 3:
-                        if isinstance(fw, QTextEdit):
-                            cur = fw.textCursor()
-                            cur.movePosition(QTextCursor.End)
-                            cur.deletePreviousChar()
-                            fw.setTextCursor(cur)
-                        else:
-                            # QPlainTextEdit: simpler reset of last char
-                            fw.setPlainText(t[:-1])
-                            fw.moveCursor(QTextCursor.End)
-                    return
-            except Exception:
-                pass
-        except Exception:
-            pass
+    # Scanner leak cleanup is now managed by BarcodeManager
 
     # Centralized helper to ignore a scan and clean any leaked first character in the current focus widget
-    def _ignore_scan(self, barcode: str, reason: str = '') -> None:
-        try:
-            app = QApplication.instance()
-            fw = app.focusWidget() if app else None
-            self._cleanup_scanner_leak(fw, barcode)
-            if DEBUG_SCANNER_FOCUS:
-                try:
-                    print('[Scanner][Ignore]', f"reason='{reason}'", 'focus=', self._describe_widget(fw))
-                except Exception:
-                    pass
-        except Exception:
-            pass
+    # Ignore scan logic is now managed by BarcodeManager
 
     # ------- Tiny helpers: overlay + scanner modal block + focus/override -------
 
-    def _start_scanner_modal_block(self) -> None:
-        try:
-            self._modalBlockScanner = True
-        except Exception:
-            pass
-
-    def _end_scanner_modal_block(self) -> None:
-        try:
-            self._modalBlockScanner = False
-        except Exception:
-            pass
+    # Scanner modal block is now managed by BarcodeManager
 
     def _refocus_sales_table(self) -> None:
         try:
@@ -924,12 +729,7 @@ class MainLoader(QMainWindow):
         except Exception:
             pass
 
-    def _clear_barcode_override(self) -> None:
-        try:
-            if hasattr(self, '_barcodeOverride'):
-                self._barcodeOverride = None
-        except Exception:
-            pass
+    # Barcode override is now managed by BarcodeManager
 
     # Block closing via X/Alt+F4 unless allowed by logout
     def closeEvent(self, event):

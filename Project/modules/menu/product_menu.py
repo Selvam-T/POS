@@ -706,8 +706,26 @@ def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial
                     return False
                 inst = QApplication.instance()
                 fw = inst.focusWidget() if inst else None
+                # Accept barcode in REMOVE tab search field
                 if fw is search_code and search_code is not None:
                     search_code.setText(code)
+                    if code_edit:
+                        code_edit.setText(code)
+                    if current_mode['mode'] in ('remove','update'):
+                        on_code_changed(code)
+                    return True
+                # Accept barcode in UPDATE tab search field (searchCodeLineEdit1)
+                search_code_update = None
+                try:
+                    # Try to find the update tab's search code field if not already referenced
+                    if tab_widget is not None:
+                        update_tab = tab_widget.widget(2) if tab_widget.count() > 2 else None
+                        if update_tab is not None:
+                            search_code_update = update_tab.findChild(QLineEdit, 'searchCodeLineEdit1')
+                except Exception:
+                    pass
+                if fw is search_code_update and search_code_update is not None:
+                    search_code_update.setText(code)
                     if code_edit:
                         code_edit.setText(code)
                     if current_mode['mode'] in ('remove','update'):
@@ -721,7 +739,10 @@ def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial
                 return False
             except Exception:
                 return False
+        # Set override on both main_window and barcode_manager
         main_window._barcodeOverride = _barcode_to_product_code
+        if hasattr(main_window, 'barcode_manager'):
+            main_window.barcode_manager._barcodeOverride = _barcode_to_product_code
     except Exception:
         pass
 
