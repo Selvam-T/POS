@@ -164,7 +164,38 @@ class MainLoader(QMainWindow):
                 pass
             print('Dialog failed:', e)
 
-    
+    def _open_sales_dialog(self, dialog_func):
+        self.overlay_manager.toggle_dim_overlay(True)
+        try:
+            if hasattr(self, 'barcode_manager'):
+                self.barcode_manager._start_scanner_modal_block()
+        except Exception:
+            pass
+        try:
+            dlg = dialog_func(self)
+            def _cleanup(_):
+                self.overlay_manager.toggle_dim_overlay(False)
+                try:
+                    self.raise_()
+                    self.activateWindow()
+                except Exception:
+                    pass
+                try:
+                    if hasattr(self, 'barcode_manager'):
+                        self.barcode_manager._end_scanner_modal_block()
+                except Exception:
+                    pass
+            dlg.finished.connect(_cleanup)
+            dlg.exec_()
+        except Exception as e:
+            self.overlay_manager.toggle_dim_overlay(False)
+            try:
+                if hasattr(self, 'barcode_manager'):
+                    self.barcode_manager._end_scanner_modal_block()
+            except Exception:
+                pass
+            print('Dialog failed:', e)
+
     def __init__(self):
         super().__init__()
         self.overlay_manager = OverlayManager(self)
@@ -265,7 +296,16 @@ class MainLoader(QMainWindow):
                         btn = sales_widget.findChild(QPushButton, btn_name)
                         if btn is not None:
                             btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-
+                            if btn_name == 'cancelsaleBtn':
+                                from modules.sales.cancel_sale import open_cancel_sale_dialog
+                                btn.clicked.connect(lambda _, b=btn: self._open_sales_dialog(open_cancel_sale_dialog))                       
+                            elif btn_name == 'onholdBtn':
+                                from modules.sales.on_hold import open_on_hold_dialog
+                                btn.clicked.connect(lambda _, b=btn: self._open_sales_dialog(open_on_hold_dialog))
+                            elif btn_name == 'viewholdBtn':
+                                from modules.sales.view_hold import open_view_hold_dialog
+                                btn.clicked.connect(lambda _, b=btn: self._open_sales_dialog(open_view_hold_dialog))
+                                
                 sale_table = sales_widget.findChild(QTableWidget, 'salesTable')
                 if sale_table is not None:
                     sale_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -403,131 +443,9 @@ class MainLoader(QMainWindow):
 
     # ----------------- Vegetable panel wiring -----------------
     def open_vegetable_panel(self):
-        """Open the Add Vegetable panel as a modal dialog:
-        - Size = 60% of main window, centered
-        - Dim the main window background while open
-        - Only Close (X) button shown (no minimize/maximize)
-        - Close on X, OK, or CANCEL; restore brightness on close
-        """
-        veg_ui = os.path.join(UI_DIR, 'vegetable_entry.ui')
-        if not os.path.exists(veg_ui):
-            print('vegetable_entry.ui not found at', veg_ui)
-            return
-
-        # Create dimming overlay over the main window
-        self.overlay_manager.toggle_dim_overlay(True)
-
-        # Build a modal dialog and embed the loaded UI inside
-        try:
-            content = uic.loadUi(veg_ui)
-        except Exception as e:
-            print('Failed to load vegetable_entry.ui:', e)
-            self.overlay_manager.toggle_dim_overlay(False)
-            return
-
-        dlg = QDialog(self)
-        dlg.setModal(True)
-        dlg.setWindowTitle('Digital Weight Input')
-        # Window flags: remove min/max, keep title + close
-        dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
-        # Fixed size at 60% of main window, centered
-        try:
-            mw = self.frameGeometry().width()
-            mh = self.frameGeometry().height()
-            dw = max(400, int(mw * 0.6))
-            dh = max(300, int(mh * 0.6))
-            dlg.setFixedSize(dw, dh)
-            # Center relative to main window
-            mx = self.frameGeometry().x()
-            my = self.frameGeometry().y()
-            dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
-        except Exception:
-            pass
-
-        # Install content into dialog
-        layout = QVBoxLayout(dlg)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(content)
-
-        # Configure the vegetable table headers and behavior
-        try:
-            vtable: QTableWidget = content.findChild(QTableWidget, 'vegetableTable')
-            if vtable is not None:
-                vtable.setColumnCount(4)
-                vtable.setHorizontalHeaderLabels(['No.', 'Item', 'Weight (kg)', 'Total'])
-
-                header: QHeaderView = vtable.horizontalHeader()
-                header.setStretchLastSection(False)
-                header.setSectionResizeMode(0, QHeaderView.Fixed)   # No.
-                header.setSectionResizeMode(1, QHeaderView.Stretch) # Item grows
-                header.setSectionResizeMode(2, QHeaderView.Fixed)   # Weight
-                header.setSectionResizeMode(3, QHeaderView.Fixed)   # Total
-                header.resizeSection(0, 48)
-                header.resizeSection(2, 120)
-                header.resizeSection(3, 110)
-
-                vtable.setAlternatingRowColors(True)
-                vtable.setEditTriggers(QTableWidget.NoEditTriggers)
-                vtable.setSelectionBehavior(QTableWidget.SelectRows)
-                vtable.setSelectionMode(QTableWidget.SingleSelection)
-        except Exception as e:
-            print('Vegetable table setup failed:', e)
-
-        # Wire keypad buttons to update message label and close on OK/CANCEL (updated to btnVeg1..btnVeg14)
-        try:
-            msg: QLabel = content.findChild(QLabel, 'messageLabel')
-            for name in (
-                'btnVeg1','btnVeg2','btnVeg3','btnVeg4',
-                'btnVeg5','btnVeg6','btnVeg7','btnVeg8',
-                'btnVeg9','btnVeg10','btnVeg11','btnVeg12',
-                'btnVeg13','btnVeg14',
-            ):
-                btn = content.findChild(QPushButton, name)
-                if btn is not None and msg is not None:
-                    btn.clicked.connect(lambda _, b=btn: msg.setText(f"Selected: {b.text()}"))
-
-            ok_btn = content.findChild(QPushButton, 'btnVegOk')
-            cancel_btn = content.findChild(QPushButton, 'btnVegCancel')
-            if ok_btn is not None:
-                ok_btn.clicked.connect(lambda: dlg.accept())
-            if cancel_btn is not None:
-                cancel_btn.clicked.connect(lambda: dlg.reject())
-        except Exception as e:
-            print('Vegetable keypad wiring failed:', e)
-
-        # Ensure overlay hides and focus returns when dialog closes
-        def _cleanup_overlay(_code):
-            self.overlay_manager.toggle_dim_overlay(False)
-            # Bring main window back to front
-            try:
-                self.raise_()
-                self.activateWindow()
-            except Exception:
-                pass
-            # Remove barcode override when dialog closes
-            try:
-                if hasattr(self, 'barcode_manager'):
-                    self.barcode_manager.clear_barcode_override()
-            except Exception:
-                pass
-            # Unblock scanner modal block
-            try:
-                if hasattr(self, 'barcode_manager'):
-                    self.barcode_manager._end_scanner_modal_block()
-            except Exception:
-                pass
-
-        dlg.finished.connect(_cleanup_overlay)
-
-        # Block scanner while this dialog is open
-        try:
-            if hasattr(self, 'barcode_manager'):
-                self.barcode_manager._start_scanner_modal_block()
-        except Exception:
-            pass
-
-        # Execute modally
-        dlg.exec_()
+        """Launcher for Add Vegetable panel (delegates to controller)."""
+        from modules.sales.vegetable_entry import open_vegetable_panel
+        open_vegetable_panel(self)
 
 
 
@@ -557,100 +475,9 @@ class MainLoader(QMainWindow):
 
     # ----------------- Manual product entry panel wiring -----------------
     def open_manual_panel(self, message="Manual Product Entry"):
-        """Open the Manual Product Entry panel as a modal dialog:
-        - Size = 60% of main window, centered
-        - Dim the main window background while open
-        - Only Close (X) button shown (no minimize/maximize)
-        - Close on X or when finished
-        
-        Args:
-            message: Message to display in the QTextEdit widget
-        """
-        manual_ui = os.path.join(UI_DIR, 'manual_entry.ui')
-        if not os.path.exists(manual_ui):
-            print('manual_entry.ui not found at', manual_ui)
-            return
-
-        # Create dimming overlay over the main window (reuse same overlay as vegetable panel)
-        self.overlay_manager.toggle_dim_overlay(True)
-
-        # Build a modal dialog and embed the loaded UI inside
-        try:
-            content = uic.loadUi(manual_ui)
-        except Exception as e:
-            print('Failed to load manual_entry.ui:', e)
-            self.overlay_manager.toggle_dim_overlay(False)
-            return
-
-        dlg = QDialog(self)
-        dlg.setModal(True)
-        dlg.setWindowTitle('Manual Entry of Product')
-        # Window flags: remove min/max, keep title + close
-        dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
-        # Fixed size at 60% of main window, centered
-        try:
-            mw = self.frameGeometry().width()
-            mh = self.frameGeometry().height()
-            dw = max(400, int(mw * 0.6))
-            dh = max(300, int(mh * 0.6))
-            dlg.setFixedSize(dw, dh)
-            # Center relative to main window
-            mx = self.frameGeometry().x()
-            my = self.frameGeometry().y()
-            dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
-        except Exception:
-            pass
-
-        # Install content into dialog
-        layout = QVBoxLayout(dlg)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(content)
-
-        # Set the message in the QTextEdit widget
-        try:
-            text_edit = content.findChild(QWidget, 'manualText')
-            from PyQt5.QtWidgets import QTextEdit, QPlainTextEdit
-            if isinstance(text_edit, (QTextEdit, QPlainTextEdit)):
-                text_edit.setPlainText(message)
-                try:
-                    # Make it read-only to prevent any visual key leaks
-                    text_edit.setReadOnly(True)
-                except Exception:
-                    pass
-        except Exception as e:
-            print('Failed to set manual text:', e)
-
-        # Mark that a generic modal is open to block scanner routing
-        try:
-            if hasattr(self, 'barcode_manager'):
-                self.barcode_manager._start_scanner_modal_block()
-        except Exception:
-            pass
-
-        # Ensure overlay hides and focus returns when dialog closes
-        def _cleanup_overlay(_code):
-            self.overlay_manager.toggle_dim_overlay(False)
-            # Bring main window back to front
-            try:
-                self.raise_()
-                self.activateWindow()
-            except Exception:
-                pass
-            # Unblock scanner and restore focus to sales table
-            try:
-                if hasattr(self, 'barcode_manager'):
-                    self.barcode_manager._end_scanner_modal_block()
-            except Exception:
-                pass
-            try:
-                self._refocus_sales_table()
-            except Exception:
-                pass
-
-        dlg.finished.connect(_cleanup_overlay)
-
-        # Execute modally
-        dlg.exec_()
+        """Launcher for Manual Product Entry panel (delegates to controller)."""
+        from modules.sales.manual_entry import open_manual_entry_panel
+        open_manual_entry_panel(self, message=message)
 
     # ----------------- Barcode scanner handling -----------------
     # Barcode handling is now managed by BarcodeManager

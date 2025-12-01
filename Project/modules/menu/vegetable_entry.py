@@ -4,7 +4,6 @@ from PyQt5 import QtWidgets
 from modules.wrappers import settings as app_settings
 
 
-# Button object names in ui/vegetable_entry.ui, in left-to-right, top-to-bottom order
 VEG_BUTTON_NAMES: List[str] = [
     'btnVeg1', 'btnVeg2', 'btnVeg3', 'btnVeg4',
     'btnVeg5', 'btnVeg6', 'btnVeg7', 'btnVeg8',
