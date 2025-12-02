@@ -1,3 +1,24 @@
+## Why _perform_logout Should Remain in main.py
+
+The `_perform_logout(self)` method is responsible for handling the core application-level logout logic, including:
+
+- Stopping hardware devices (such as the scanner)
+- Setting internal flags to allow the main window to close
+- Closing the main application window and quitting the app
+
+**Reason for Placement:**
+
+This logic is tightly coupled to the main application window (`MainLoader`) and its lifecycle. Placing `_perform_logout` in `main.py` ensures that only the main window manages application shutdown and device cleanup, maintaining a clear separation of concerns. The logout dialog (in `logout_menu`) is responsible only for user interaction (confirmation, etc.), not for controlling the main window or device state.
+
+**How _perform_logout is Accessed:**
+
+The only intended way to trigger `_perform_logout` is via the Logout menu option:
+
+1. The user clicks the Logout button in the menu frame.
+2. This opens the logout dialog (from `logout_menu`).
+3. Upon user confirmation, the dialog calls back to `MainLoader._perform_logout()` to perform the actual logout and application exit.
+
+There are no other direct calls to `_perform_logout` in the codebase, ensuring that logout and shutdown are always user-confirmed and managed by the main window.
 # Main Window Loader (`main.py`) — Documentation
 
 ## Overview

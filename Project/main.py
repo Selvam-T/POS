@@ -58,6 +58,7 @@ from config import (
     DEBUG_CACHE_LOOKUP,
 )
 from modules.date_time.info_section import InfoSectionController
+# from modules.debug.debug_utils import describe_widget, debug_print_focus  # Uncomment for focus debugging
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
@@ -450,49 +451,12 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
 
-    # Focus debug helpers
-    def _describe_widget(self, w: QWidget) -> str:
-        try:
-            if w is None:
-                return 'None'
-            name = w.objectName() or ''
-            cls = w.metaObject().className() if hasattr(w, 'metaObject') else w.__class__.__name__
-            if name:
-                return f"{cls}(objectName='{name}')"
-            return cls
-        except Exception:
-            return '<unknown>'
 
-    def _debug_print_focus(self, context: str, barcode: str = ''):
-        try:
-            app = QApplication.instance()
-            aw = app.activeWindow() if app else None
-            fw = app.focusWidget() if app else None
-            # Build parent chain from focus widget up to window
-            chain = []
-            cur = fw
-            seen = 0
-            while cur is not None and seen < 10:  # limit to avoid accidental loops
-                chain.append(self._describe_widget(cur))
-                cur = cur.parent()
-                seen += 1
-            chain_str = ' -> '.join(reversed(chain)) if chain else 'None'
-            win_title = ''
-            try:
-                if aw and hasattr(aw, 'windowTitle'):
-                    win_title = aw.windowTitle()
-            except Exception:
-                pass
-            override = getattr(self, '_barcodeOverride', None)
-            print('[Scanner][Focus]',
-                  f"context={context}",
-                  f"barcode='{barcode}'",
-                  f"activeWindow={self._describe_widget(aw)}",
-                  f"windowTitle='{win_title}'",
-                  f"focusPath={chain_str}",
-                  f"override={'yes' if callable(override) else 'no'}")
-        except Exception as _e:
-            print('[Scanner][Focus] debug failed:', _e)
+    # Focus debug helpers have been moved to modules.debug.debug_utils.
+    # To use them for debugging, uncomment the import at the top and call as follows:
+    # debug_print_focus(context, barcode, main_window=self)
+    # describe_widget(widget)
+    # These are not required for normal operation and are intended for development/debugging only.
 
     def _on_focus_changed(self, old: QWidget, new: QWidget):
         try:
