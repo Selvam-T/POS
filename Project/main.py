@@ -29,6 +29,7 @@ from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QFontMetrics, QIcon
 
 from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned, bind_total_label
+from modules.sales.sales_frame_setup import setup_sales_frame
 from modules.devices.barcode_manager import BarcodeManager
 # --- Menu frame dialog controllers ---
 from modules.menu.logout_menu import open_logout_dialog as launch_logout_dialog
@@ -129,7 +130,6 @@ class MainLoader(QMainWindow):
     def open_dialog_wrapper(self, dialog_func, width_ratio=0.45, height_ratio=0.4, *args, **kwargs):
         """Open dialog with overlay and scanner block."""
         self.overlay_manager.toggle_dim_overlay(True)
-        # Block scanner for all dialogs except product menu
         from modules.menu.product_menu import open_product_dialog
         is_product_menu = dialog_func is open_product_dialog
         if not is_product_menu:
@@ -140,7 +140,6 @@ class MainLoader(QMainWindow):
                 pass
         try:
             dlg = dialog_func(self, *args, **kwargs)
-            # ...
             # If the dialog function returns a QDialog, set size/position; else assume it handles itself
             if isinstance(dlg, QDialog):
                 mw, mh = self.frameGeometry().width(), self.frameGeometry().height()
@@ -152,20 +151,17 @@ class MainLoader(QMainWindow):
                     self.overlay_manager.toggle_dim_overlay(False)
                     self.raise_()
                     self.activateWindow()
-                    # Unblock scanner modal block
+                    self._refocus_sales_table()
                     try:
                         if hasattr(self, 'barcode_manager'):
                             self.barcode_manager._end_scanner_modal_block()
                     except Exception:
                         pass
+                # Connect cleanup to finished signal (covers X, Cancel, OK, etc.)
                 dlg.finished.connect(_cleanup)
-                # ...
                 dlg.exec_()
-                # ...
             else:
-                # ...
                 self.overlay_manager.toggle_dim_overlay(False)
-                # Unblock scanner modal block
                 try:
                     if hasattr(self, 'barcode_manager'):
                         self.barcode_manager._end_scanner_modal_block()
@@ -173,7 +169,6 @@ class MainLoader(QMainWindow):
                     pass
         except Exception as e:
             self.overlay_manager.toggle_dim_overlay(False)
-            # Unblock scanner modal block
             try:
                 if hasattr(self, 'barcode_manager'):
                     self.barcode_manager._end_scanner_modal_block()
@@ -221,86 +216,9 @@ class MainLoader(QMainWindow):
         except Exception:
             pass
 
-        # Insert sales_frame.ui into placeholder named 'salesFrame'
-        sales_placeholder = getattr(self, 'salesFrame', None)
-        sales_ui = os.path.join(UI_DIR, 'sales_frame.ui')
-        if sales_placeholder is not None and os.path.exists(sales_ui):
-            sales_widget = uic.loadUi(sales_ui)
-            sales_layout = sales_placeholder.layout()
-            if sales_layout is None:
-                sales_layout = QVBoxLayout(sales_placeholder)
-                sales_placeholder.setLayout(sales_layout)
-            try:
-                sales_layout.setContentsMargins(8, 8, 8, 8)
-                sales_layout.setSpacing(10)
-            except Exception:
-                pass
-            sales_layout.addWidget(sales_widget)
-
-            # Restore sales frame layout logic for table and containers
-            try:
-                # Children order: 0=salesLabel, 1=salesTable, 2=totalContainer, 3=addBtnLayout, 4=receiptLayout
-                sales_layout.setStretch(0, 0)
-                sales_layout.setStretch(1, 7)
-                sales_layout.setStretch(2, 2)
-                sales_layout.setStretch(3, 2)
-                sales_layout.setStretch(4, 2)
-
-                def em_px(widget: QWidget, units: float) -> int:
-                    fm = QFontMetrics(widget.font())
-                    return int(round(units * fm.lineSpacing()))
-
-                total_container = sales_widget.findChild(QWidget, 'totalContainer')
-                if total_container is not None:
-                    total_container.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-                    h = em_px(total_container, 3.6)
-                    total_container.setMinimumHeight(h)
-                    total_container.setMaximumHeight(h)
-
-                add_container = sales_widget.findChild(QWidget, 'addContainer')
-                if add_container is not None:
-                    add_container.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-                    h = em_px(add_container, 4.0)
-                    add_container.setMinimumHeight(h)
-                    add_container.setMaximumHeight(h)
-                    # Wire addContainer buttons to new dialog methods
-                    veg_btn = sales_widget.findChild(QPushButton, 'vegBtn')
-                    if veg_btn is not None:
-                        veg_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-                        veg_btn.clicked.connect(self.open_vegetable_entry_dialog)
-                    manual_btn = sales_widget.findChild(QPushButton, 'manualBtn')
-                    if manual_btn is not None:
-                        manual_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-                        manual_btn.clicked.connect(self.open_manual_panel)
-
-                receipt_container = sales_widget.findChild(QWidget, 'receiptContainer')
-                if receipt_container is not None:
-                    receipt_container.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-                    h = em_px(receipt_container, 4.0)
-                    receipt_container.setMinimumHeight(h)
-                    receipt_container.setMaximumHeight(h)
-                    # Wire receiptContainer buttons to new dialog methods
-                    cancelsale_btn = sales_widget.findChild(QPushButton, 'cancelsaleBtn')
-                    if cancelsale_btn is not None:
-                        cancelsale_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-                        cancelsale_btn.clicked.connect(self.open_cancelsale_panel)
-                    onhold_btn = sales_widget.findChild(QPushButton, 'onholdBtn')
-                    if onhold_btn is not None:
-                        onhold_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-                        onhold_btn.clicked.connect(self.open_onhold_panel)
-                    viewhold_btn = sales_widget.findChild(QPushButton, 'viewholdBtn')
-                    if viewhold_btn is not None:
-                        viewhold_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-                        viewhold_btn.clicked.connect(self.open_viewhold_panel)
-                                
-                sale_table = sales_widget.findChild(QTableWidget, 'salesTable')
-                if sale_table is not None:
-                    sale_table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-                    sale_table.setMinimumHeight(em_px(sales_widget, 10))
-                    setup_sales_table(sale_table)
-                    self.sales_table = sale_table
-            except Exception:
-                pass
+        # Insert sales_frame.ui into placeholder named 'salesFrame' (refactored: see modules/sales/sales_frame_setup.py)
+        # This sets self.sales_table for use elsewhere in MainLoader.
+        setup_sales_frame(self, UI_DIR)
 
         # Insert payment_frame.ui into placeholder named 'paymentFrame'
         payment_placeholder = getattr(self, 'paymentFrame', None)
@@ -467,8 +385,13 @@ class MainLoader(QMainWindow):
 
     def _refocus_sales_table(self) -> None:
         try:
-            if getattr(self, 'sales_table', None) is not None:
-                self.sales_table.setFocus(Qt.OtherFocusReason)
+            table = getattr(self, 'sales_table', None)
+            if table is not None:
+                table.setFocusPolicy(Qt.StrongFocus)
+                table.setFocus(Qt.OtherFocusReason)
+                if table.rowCount() > 0 and table.columnCount() > 0:
+                    table.setCurrentCell(0, 0)
+            # else: do nothing if table not found
         except Exception:
             pass
 

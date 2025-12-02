@@ -1,3 +1,17 @@
+## Refactoring: Sales Frame Setup
+
+The setup logic for the sales frame UI has been moved from `MainLoader.__init__` in `main.py` to a dedicated function in `modules/sales/sales_frame_setup.py`.
+
+### How it works
+- The function `setup_sales_frame(self, UI_DIR)` is called from `MainLoader.__init__`.
+- This function loads the sales frame UI, wires up all widgets and buttons, and sets `self.sales_table` on the main window instance.
+- Other methods in `MainLoader` (such as `_refocus_sales_table`) can use `self.sales_table` as before, because the setup function assigns it as an attribute.
+- No return value is needed from `setup_sales_frame` because it modifies the main window instance directly.
+
+### Why this is beneficial
+- Keeps `main.py` cleaner and more maintainable.
+- Groups all sales frame UI logic in a single, reusable module.
+- Maintains compatibility with existing code that relies on `self.sales_table`.
 ## Why _perform_logout Should Remain in main.py
 
 The `_perform_logout(self)` method is responsible for handling the core application-level logout logic, including:

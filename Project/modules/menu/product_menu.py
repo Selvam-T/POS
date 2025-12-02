@@ -95,22 +95,15 @@ def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial
     except Exception:
         dw_full, dh_full = 600, 400
     # Set frameless window flags directly on loaded content if it's a QDialog
-    try:
-        content.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-        content.setModal(True)
-        content.setFixedSize(dw_full, dh_full)
-        content.setWindowTitle('')
-        dlg = content
-    except Exception:
-        # Fallback to embedding in a QDialog if content is not a QDialog
-        from PyQt5.QtWidgets import QDialog, QVBoxLayout
-        dlg = QDialog(main_window)
-        dlg.setModal(True)
-        dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-        dlg.setFixedSize(dw_full, dh_full)
-        lay = QVBoxLayout(dlg)
-        lay.setContentsMargins(0, 0, 0, 0)
-        lay.addWidget(content)
+    # [DEBUG] Force use of standard QDialog wrapper for isolation testing
+    from PyQt5.QtWidgets import QDialog, QVBoxLayout
+    dlg = QDialog(main_window)
+    dlg.setModal(True)
+    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
+    dlg.setFixedSize(dw_full, dh_full)
+    lay = QVBoxLayout(dlg)
+    lay.setContentsMargins(0, 0, 0, 0)
+    lay.addWidget(content)
 
     # Wire custom window titlebar X button to close dialog
     custom_close_btn = content.findChild(QPushButton, 'customCloseBtn')
@@ -684,6 +677,7 @@ def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial
                 if start_mode in ('remove','update'):
                     on_code_changed(str(initial_code))
     except Exception: pass
+
 
     def _cleanup_overlay(_code):
         try: main_window._hide_dim_overlay()
