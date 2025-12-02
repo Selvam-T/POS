@@ -3,7 +3,7 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QTextEdit, QPlainTextEdit
 from PyQt5.QtCore import Qt
 
-def open_manual_entry_panel(parent, message="Manual Product Entry"):
+def open_manual_entry_dialog(parent, message="Manual Product Entry"):
     """Open the Manual Product Entry panel as a modal dialog (controller logic)."""
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     UI_DIR = os.path.join(BASE_DIR, 'ui')

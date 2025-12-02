@@ -4,7 +4,7 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QTableWidget, QPushButton, QLabel, QHeaderView
 from PyQt5.QtCore import Qt
 
-def open_vegetable_panel(parent):
+def open_vegetable_entry_dialog(parent):
     """Open the Add Vegetable panel as a modal dialog (controller logic)."""
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     UI_DIR = os.path.join(BASE_DIR, 'ui')

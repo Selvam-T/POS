@@ -1,21 +1,11 @@
-from modules.ui_utils.overlay_manager import OverlayManager
 #!/usr/bin/env python3
-"""
-POS System - Main UI Loader
-
-This module composes `main_window.ui`, `sales_frame.ui`, and `payment_frame.ui`.
-Loads a QSS file from `assets/style.qss` when present.
-
-Barcode scanner logic, event filtering, modal blocking, and override handling are now fully managed by
-`modules/devices/barcode_manager.py` (BarcodeManager). All redundant scanner code has been removed from main.py.
-Dialogs and panels interact with the scanner only via BarcodeManager's modal block and override helpers.
-
-"""
+"""POS System main window loader. See Documentation/main_py_overview.md for details."""
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 import sys
 import os
 import time
+from modules.ui_utils.overlay_manager import OverlayManager
 from PyQt5 import uic
 from PyQt5.QtWidgets import (
     QApplication,
@@ -37,15 +27,23 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QSize, QEvent
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QFontMetrics, QIcon
+
 from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned, bind_total_label
 from modules.devices.barcode_manager import BarcodeManager
-from modules.menu.logout_menu import open_logout_dialog as open_logout_dialog_menu
-from modules.menu.admin_menu import open_admin_dialog as open_admin_dialog_menu
-from modules.menu.devices_menu import open_devices_dialog as open_devices_dialog_menu
-from modules.menu.reports_menu import open_reports_dialog as open_reports_dialog_menu
-from modules.menu.greeting_menu import open_greeting_dialog as open_greeting_dialog_menu
-from modules.menu.product_menu import open_product_dialog as open_product_dialog_menu
+# --- Menu frame dialog controllers ---
+from modules.menu.logout_menu import open_logout_dialog as launch_logout_dialog
+from modules.menu.admin_menu import open_admin_dialog as launch_admin_dialog
+from modules.menu.devices_menu import open_devices_dialog as launch_devices_dialog
+from modules.menu.reports_menu import open_reports_dialog as launch_reports_dialog
+from modules.menu.greeting_menu import open_greeting_dialog as launch_greeting_dialog
+from modules.menu.product_menu import open_product_dialog as launch_product_dialog
 from modules.menu.vegetable_menu import VegetableMenuDialog
+# --- Sales frame dialog controllers ---
+from modules.sales.vegetable_entry import open_vegetable_entry_dialog as launch_vegetable_entry_dialog
+from modules.sales.manual_entry import open_manual_entry_dialog as launch_manual_entry_dialog
+from modules.sales.on_hold import open_on_hold_dialog as launch_onhold_dialog
+from modules.sales.view_hold import open_view_hold_dialog as launch_viewhold_dialog
+from modules.sales.cancel_sale import open_cancel_sale_dialog as launch_cancelsale_dialog
 
 from config import (
     ICON_ADMIN,
@@ -75,42 +73,60 @@ def load_qss(app):
         except Exception as e:
             print('Failed to load QSS:', e)
 
-
 class MainLoader(QMainWindow):
+    # Menu dialog launchers (use common wrapper)
     def open_logout_menu_dialog(self):
-        """Open the Logout dialog via standardized method using the common wrapper."""
-        self.open_menu_dialog_wrapper(open_logout_dialog_menu)
+        """Open Logout dialog."""
+        self.open_dialog_wrapper(launch_logout_dialog)
 
     def open_product_menu_dialog(self, **kwargs):
-        """Open the Product Management panel via standardized method using the common wrapper.
-        Accepts kwargs for context (e.g., initial_mode, initial_code) to control tab and prefill logic.
-        """
-        self.open_menu_dialog_wrapper(open_product_dialog_menu, **kwargs)
+        """Open Product Management panel."""
+        self.open_dialog_wrapper(launch_product_dialog, **kwargs)
 
     def open_admin_menu_dialog(self):
-        """Open the Admin dialog via standardized method using the common wrapper."""
-        self.open_menu_dialog_wrapper(open_admin_dialog_menu, current_user='Admin', is_admin=True)
+        """Open Admin dialog."""
+        self.open_dialog_wrapper(launch_admin_dialog, current_user='Admin', is_admin=True)
 
     def open_greeting_menu_dialog(self):
-        """Open the Greeting dialog via standardized method using the common wrapper."""
-        self.open_menu_dialog_wrapper(open_greeting_dialog_menu)
+        """Open Greeting dialog."""
+        self.open_dialog_wrapper(launch_greeting_dialog)
 
     def open_devices_menu_dialog(self):
-        """Open the Devices dialog via standardized method using the common wrapper."""
-        self.open_menu_dialog_wrapper(open_devices_dialog_menu)
+        """Open Devices dialog."""
+        self.open_dialog_wrapper(launch_devices_dialog)
 
     def open_reports_menu_dialog(self):
-        """Open the Reports dialog via standardized method using the common wrapper."""
-        self.open_menu_dialog_wrapper(open_reports_dialog_menu)
+        """Open Reports dialog."""
+        self.open_dialog_wrapper(launch_reports_dialog)
 
     def open_vegetable_menu_dialog(self):
-        """Open the Vegetable Label Edit dialog via standardized method using the common wrapper."""
-        self.open_menu_dialog_wrapper(VegetableMenuDialog)
+        """Open Vegetable Label Edit dialog."""
+        self.open_dialog_wrapper(VegetableMenuDialog)
 
+    # Sales frame dialog launchers (use common wrapper)
+    def open_vegetable_entry_dialog(self):
+        """Open Add Vegetable panel."""
+        self.open_dialog_wrapper(launch_vegetable_entry_dialog)
 
-    # open_logout_menu_dialog now uses the common wrapper; no separate logic needed
-    def open_menu_dialog_wrapper(self, dialog_func, width_ratio=0.45, height_ratio=0.4, *args, **kwargs):
-        """Common wrapper for opening menu dialogs with overlay, sizing, and cleanup. Also blocks barcode scanner while dialog is open."""
+    def open_manual_panel(self):
+        """Open Manual Product Entry panel."""
+        self.open_dialog_wrapper(launch_manual_entry_dialog)
+
+    def open_onhold_panel(self):
+        """Open On Hold panel."""
+        self.open_dialog_wrapper(launch_onhold_dialog)
+
+    def open_viewhold_panel(self):
+        """Open View Hold panel."""
+        self.open_dialog_wrapper(launch_viewhold_dialog)
+
+    def open_cancelsale_panel(self):
+        """Open Cancel Sale panel."""
+        self.open_dialog_wrapper(launch_cancelsale_dialog)
+
+    # All dialog launchers use the common wrapper
+    def open_dialog_wrapper(self, dialog_func, width_ratio=0.45, height_ratio=0.4, *args, **kwargs):
+        """Open dialog with overlay and scanner block."""
         self.overlay_manager.toggle_dim_overlay(True)
         # Block scanner for all dialogs except product menu
         from modules.menu.product_menu import open_product_dialog
@@ -164,37 +180,6 @@ class MainLoader(QMainWindow):
                 pass
             print('Dialog failed:', e)
 
-    def _open_sales_dialog(self, dialog_func):
-        self.overlay_manager.toggle_dim_overlay(True)
-        try:
-            if hasattr(self, 'barcode_manager'):
-                self.barcode_manager._start_scanner_modal_block()
-        except Exception:
-            pass
-        try:
-            dlg = dialog_func(self)
-            def _cleanup(_):
-                self.overlay_manager.toggle_dim_overlay(False)
-                try:
-                    self.raise_()
-                    self.activateWindow()
-                except Exception:
-                    pass
-                try:
-                    if hasattr(self, 'barcode_manager'):
-                        self.barcode_manager._end_scanner_modal_block()
-                except Exception:
-                    pass
-            dlg.finished.connect(_cleanup)
-            dlg.exec_()
-        except Exception as e:
-            self.overlay_manager.toggle_dim_overlay(False)
-            try:
-                if hasattr(self, 'barcode_manager'):
-                    self.barcode_manager._end_scanner_modal_block()
-            except Exception:
-                pass
-            print('Dialog failed:', e)
 
     def __init__(self):
         super().__init__()
@@ -277,14 +262,15 @@ class MainLoader(QMainWindow):
                     h = em_px(add_container, 4.0)
                     add_container.setMinimumHeight(h)
                     add_container.setMaximumHeight(h)
-                    for btn_name in ('vegBtn', 'manualBtn'):
-                        btn = sales_widget.findChild(QPushButton, btn_name)
-                        if btn is not None:
-                            btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-                            if btn_name == 'vegBtn':
-                                btn.clicked.connect(self.open_vegetable_panel)
-                            elif btn_name == 'manualBtn':
-                                btn.clicked.connect(self.open_manual_panel)
+                    # Wire addContainer buttons to new dialog methods
+                    veg_btn = sales_widget.findChild(QPushButton, 'vegBtn')
+                    if veg_btn is not None:
+                        veg_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+                        veg_btn.clicked.connect(self.open_vegetable_entry_dialog)
+                    manual_btn = sales_widget.findChild(QPushButton, 'manualBtn')
+                    if manual_btn is not None:
+                        manual_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+                        manual_btn.clicked.connect(self.open_manual_panel)
 
                 receipt_container = sales_widget.findChild(QWidget, 'receiptContainer')
                 if receipt_container is not None:
@@ -292,19 +278,19 @@ class MainLoader(QMainWindow):
                     h = em_px(receipt_container, 4.0)
                     receipt_container.setMinimumHeight(h)
                     receipt_container.setMaximumHeight(h)
-                    for btn_name in ('cancelsaleBtn', 'onholdBtn', 'viewholdBtn'):
-                        btn = sales_widget.findChild(QPushButton, btn_name)
-                        if btn is not None:
-                            btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-                            if btn_name == 'cancelsaleBtn':
-                                from modules.sales.cancel_sale import open_cancel_sale_dialog
-                                btn.clicked.connect(lambda _, b=btn: self._open_sales_dialog(open_cancel_sale_dialog))                       
-                            elif btn_name == 'onholdBtn':
-                                from modules.sales.on_hold import open_on_hold_dialog
-                                btn.clicked.connect(lambda _, b=btn: self._open_sales_dialog(open_on_hold_dialog))
-                            elif btn_name == 'viewholdBtn':
-                                from modules.sales.view_hold import open_view_hold_dialog
-                                btn.clicked.connect(lambda _, b=btn: self._open_sales_dialog(open_view_hold_dialog))
+                    # Wire receiptContainer buttons to new dialog methods
+                    cancelsale_btn = sales_widget.findChild(QPushButton, 'cancelsaleBtn')
+                    if cancelsale_btn is not None:
+                        cancelsale_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+                        cancelsale_btn.clicked.connect(self.open_cancelsale_panel)
+                    onhold_btn = sales_widget.findChild(QPushButton, 'onholdBtn')
+                    if onhold_btn is not None:
+                        onhold_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+                        onhold_btn.clicked.connect(self.open_onhold_panel)
+                    viewhold_btn = sales_widget.findChild(QPushButton, 'viewholdBtn')
+                    if viewhold_btn is not None:
+                        viewhold_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+                        viewhold_btn.clicked.connect(self.open_viewhold_panel)
                                 
                 sale_table = sales_widget.findChild(QTableWidget, 'salesTable')
                 if sale_table is not None:
@@ -441,15 +427,6 @@ class MainLoader(QMainWindow):
         except Exception:
             pass
 
-    # ----------------- Vegetable panel wiring -----------------
-    def open_vegetable_panel(self):
-        """Launcher for Add Vegetable panel (delegates to controller)."""
-        from modules.sales.vegetable_entry import open_vegetable_panel
-        open_vegetable_panel(self)
-
-
-
-    # (Logout dialog logic moved to modules.menu.logout_menu.open_logout_dialog)
 
     def _perform_logout(self):
         """Perform logout action: stop devices and close app."""
@@ -473,18 +450,7 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
 
-    # ----------------- Manual product entry panel wiring -----------------
-    def open_manual_panel(self, message="Manual Product Entry"):
-        """Launcher for Manual Product Entry panel (delegates to controller)."""
-        from modules.sales.manual_entry import open_manual_entry_panel
-        open_manual_entry_panel(self, message=message)
-
-    # ----------------- Barcode scanner handling -----------------
-    # Barcode handling is now managed by BarcodeManager
-
-    # ...existing code...
-
-    # ----------------- Focus debug helpers -----------------
+    # Focus debug helpers
     def _describe_widget(self, w: QWidget) -> str:
         try:
             if w is None:
@@ -534,20 +500,6 @@ class MainLoader(QMainWindow):
         except Exception:
             pass
 
-    # Swallow Enter/Return keys briefly during scanner activity to avoid triggering default buttons
-    # Scanner activity is now managed by BarcodeManager
-
-    # Event filter for scanner key suppression is now managed by BarcodeManager
-
-    # Best-effort cleanup for a stray first character leaked into disallowed inputs during a scan
-    # Scanner leak cleanup is now managed by BarcodeManager
-
-    # Centralized helper to ignore a scan and clean any leaked first character in the current focus widget
-    # Ignore scan logic is now managed by BarcodeManager
-
-    # ------- Tiny helpers: overlay + scanner modal block + focus/override -------
-
-    # Scanner modal block is now managed by BarcodeManager
 
     def _refocus_sales_table(self) -> None:
         try:
@@ -555,8 +507,6 @@ class MainLoader(QMainWindow):
                 self.sales_table.setFocus(Qt.OtherFocusReason)
         except Exception:
             pass
-
-    # Barcode override is now managed by BarcodeManager
 
     # Block closing via X/Alt+F4 unless allowed by logout
     def closeEvent(self, event):
