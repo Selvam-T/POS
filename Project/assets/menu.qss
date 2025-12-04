@@ -189,7 +189,8 @@ QLabel#label_not_used_1, QLabel#label_not_used_2, QLabel#label_not_used_3,
 QLabel#label_not_used_4, QLabel#label_not_used_5, QLabel#label_not_used_6,
 QLabel#label_not_used_7, QLabel#label_not_used_8, QLabel#label_not_used_9,
 QLabel#label_not_used_10, QLabel#label_not_used_11, QLabel#label_not_used_12,
-QLabel#label_not_used_13, QLabel#label_not_used_14 {
+QLabel#label_not_used_13, QLabel#label_not_used_14, QLabel#label_not_used_15,
+QLabel#label_not_used_16 {
   color: #888;
 }
 QLabel[rightIndicator="true"][active="true"] {

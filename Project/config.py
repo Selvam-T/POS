@@ -109,5 +109,5 @@ DEBUG_CACHE_LOOKUP = True
 APPDATA_DIR = os.path.join(_BASE_DIR, 'AppData')
 
 # Number of vegetable buttons to manage (veg1..vegN). The vegetable entry UI
-# currently provides 14 slots.
-VEG_SLOTS = 14
+# currently provides 16 slots.
+VEG_SLOTS = 16

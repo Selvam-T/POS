@@ -1,14 +1,4 @@
-"""
-Why is VegetableMenuDialog implemented as a class?
-
-Unlike other menu button dialogs (admin_menu, logout_menu, etc.) which use simple functions for modal dialogs, vegetable_menu.py uses a class because:
-- The dialog manages complex, stateful UI with 14 label/slider/indicator rows.
-- It needs to track and update multiple widgets and their states.
-- It emits signals (configChanged) to notify other parts of the app when the configuration changes.
-- It encapsulates UI logic, validation, and state management for the dialog instance.
-
-For simple dialogs, a function is sufficient. For complex, stateful dialogs, a class is preferred for maintainability and clarity.
-"""
+"""VegetableMenuDialog: manages vegetable label editing dialog with toggles and state."""
 import os
 from pathlib import Path
 from typing import List
@@ -19,7 +9,7 @@ from modules.wrappers import settings as app_settings
 
 
 class VegetableMenuDialog(QtWidgets.QDialog):
-    """Dialog to edit 14 vegetable labels with toggle sliders and NOT USED indicator."""
+    """Dialog to edit 16 vegetable labels with toggle sliders and NOT USED indicator."""
 
     configChanged = QtCore.pyqtSignal(dict)  # emits the final mapping dict
 

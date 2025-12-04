@@ -30,18 +30,7 @@ def open_vegetable_entry_dialog(parent):
     # Window flags: remove min/max, keep title + close
     dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
     # Fixed size at 60% of main window, centered
-    try:
-        mw = parent.frameGeometry().width()
-        mh = parent.frameGeometry().height()
-        dw = max(400, int(mw * 0.6))
-        dh = max(300, int(mh * 0.6))
-        dlg.setFixedSize(dw, dh)
-        # Center relative to main window
-        mx = parent.frameGeometry().x()
-        my = parent.frameGeometry().y()
-        dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
-    except Exception:
-        pass
+
     # Load and apply sales.qss for dialog-specific styling
     qss_path = os.path.join(BASE_DIR, 'assets', 'sales.qss')
     if os.path.exists(qss_path):
@@ -81,18 +70,21 @@ def open_vegetable_entry_dialog(parent):
     except Exception as e:
         print('Vegetable table setup failed:', e)
 
-    # Wire keypad buttons to update message label and close on OK/CANCEL (updated to btnVeg1..btnVeg14)
+    # Wire keypad buttons to update message label and close on OK/CANCEL (updated to btnVeg1..btnVeg16)
     try:
         msg = content.findChild(QLabel, 'vegEntryMessage2')
         for name in (
             'btnVeg1','btnVeg2','btnVeg3','btnVeg4',
             'btnVeg5','btnVeg6','btnVeg7','btnVeg8',
             'btnVeg9','btnVeg10','btnVeg11','btnVeg12',
-            'btnVeg13','btnVeg14',
+            'btnVeg13','btnVeg14','btnVeg15','btnVeg16',
         ):
             btn = content.findChild(QPushButton, name)
             if btn is not None and msg is not None:
-                btn.clicked.connect(lambda _, b=btn: msg.setText(f"Selected: {b.text()}"))
+                def set_green_message(_, b=btn):
+                    msg.setText(f"Place {b.text()} on the scale ...")
+                    msg.setStyleSheet("color: green;")
+                btn.clicked.connect(set_green_message)
 
         ok_btn = content.findChild(QPushButton, 'btnVegOk')
         cancel_btn = content.findChild(QPushButton, 'btnVegCancel')
@@ -147,7 +139,7 @@ VEG_BUTTON_NAMES: List[str] = [
     'btnVeg1', 'btnVeg2', 'btnVeg3', 'btnVeg4',
     'btnVeg5', 'btnVeg6', 'btnVeg7', 'btnVeg8',
     'btnVeg9', 'btnVeg10', 'btnVeg11', 'btnVeg12',
-    'btnVeg13', 'btnVeg14',
+    'btnVeg13', 'btnVeg14', 'btnVeg15', 'btnVeg16',
 ]
 
 
