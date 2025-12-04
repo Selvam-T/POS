@@ -16,6 +16,20 @@ def setup_sales_frame(main_window, UI_DIR):
     sales_ui = os.path.join(UI_DIR, 'sales_frame.ui')
     if sales_placeholder is not None and os.path.exists(sales_ui):
         sales_widget = uic.loadUi(sales_ui)
+        # Load and apply sales.qss
+        ASSETS_DIR = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+            'assets'
+        )
+        qss_path = os.path.join(ASSETS_DIR, 'sales.qss')
+        if os.path.exists(qss_path):
+            try:
+                with open(qss_path, 'r', encoding='utf-8') as f:
+                    qss_content = f.read()
+                    sales_widget.setStyleSheet(qss_content)
+                    sales_placeholder.setStyleSheet(qss_content)
+            except Exception as e:
+                print('Failed to load sales.qss:', e)
         sales_layout = sales_placeholder.layout()
         if sales_layout is None:
             sales_layout = QVBoxLayout(sales_placeholder)

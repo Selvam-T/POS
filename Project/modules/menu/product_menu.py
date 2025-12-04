@@ -679,17 +679,6 @@ def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial
     except Exception: pass
 
 
-    def _cleanup_overlay(_code):
-        try: main_window._hide_dim_overlay()
-        except Exception: pass
-        try: main_window.raise_(); main_window.activateWindow()
-        except Exception: pass
-        try: main_window._clear_barcode_override()
-        except Exception: pass
-        try: main_window._refocus_sales_table()
-        except Exception: pass
-
-    dlg.finished.connect(_cleanup_overlay)
 
     # Scanner override routing
     try:

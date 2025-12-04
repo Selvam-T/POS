@@ -1,30 +1,220 @@
-/* sales.qss: Styles for sales-related dialogs and widgets */
+/* =============================================================
+     SALES FRAME AND ITS CHILDREN
+     ============================================================= */
 
-CancelSaleDialog, #CancelSaleDialog {
-    background: #fff8f8;
+/* --- Sales Frame Container --- */
+QFrame#salesFrame {
+    font-family: Tahoma, Verdana;
+    background-color: lightblue;
+    border: 1px solid #333333;
+    border-radius: 8px;
 }
 
-OnHoldDialog, #OnHoldDialog {
-    background: #f8fff8;
+/* --- Sales Label --- */
+QLabel#salesLabel {
+    font-size: 14pt;
+    qproperty-alignment: 'AlignCenter';
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0px;
 }
 
-ViewHoldDialog, #ViewHoldDialog {
-    background: #f8f8ff;
+/* --- Sales Table --- */
+/* Alternating row colors are set programmatically in Python due to embedded widgets. */
+QTableWidget#salesTable {
+    border: 1px solid #4317ab;
+    font-size: 10pt;
+    font-weight: bold;
+    background-color: #e4e4e4;
+    gridline-color: rgba(0, 0, 0, 0.2);
 }
 
-QPushButton {
-    min-width: 80px;
-    min-height: 32px;
-    font-size: 15px;
+QTableWidget#salesTable QHeaderView::section {
+    background-color: #4682b4;
+    color: white;
+    border: 1px solid rgba(0,0,0,0.2);
+    font-size: 10pt;
+    font-weight: bold;
 }
 
-QLabel {
-    font-size: 16px;
-    color: #333;
+QTableWidget::item:selected { background-color: transparent; }
+
+/* --- Quantity Input Field --- */
+QLineEdit#qtyInput {
+    font-size: 10pt;
+    font-weight: bold;
+    qproperty-alignment: AlignCenter;
+    background-color: #fffbe6;
+    border: 2px solid #4682b4;
+    border-radius: 5px;
+}
+QLineEdit#qtyInput:focus {
+    background-color: orange;
+    border: 3px solid green;
+}
+QLineEdit#qtyInput[error="true"] {
+    border: 3px solid red;
+    background-color: #ffcccc;
 }
 
-QListWidget {
-    font-size: 15px;
-    background: #f4f4f4;
-    border: 1px solid #ccc;
+/* --- Remove Button --- */
+QPushButton#removeBtn {
+    background-color: transparent; /* Transparent to show row color */
+    border: 5px solid #d33f12;
+    border-radius: 2px;
+    min-width: 30px;
+    max-width: 30px;
+    min-height: 28px;
+    max-height: 28px;
+    padding: 0px;
+}
+QPushButton#removeBtn:hover {
+    background-color: rgba(255, 0, 0, 0.15);
+    border: 5px solid red;
+}
+QPushButton#removeBtn:pressed {
+    background-color: rgba(255, 0, 0, 0.3);
+    border: 5px solid #990000;
+}
+
+/* --- Total Display Container --- */
+QFrame#totalContainer {
+    min-height: 26px;
+    border-radius: 2px;
+    background: transparent;
+}
+
+QLabel#totalTitle {
+    font-size: 28px;
+    border: none;
+}
+
+QLabel#totalValue {
+    font-size: 28px;;
+    min-width: 84px;   /* 28px * 3 */
+    max-width: 336px;   /* 28px * 12 */
+    background: beige;
+    border: 1px solid #4317ab;
+}
+
+/* --- Add Buttons (vegBtn, manualBtn) --- */
+QPushButton#vegBtn,
+QPushButton#manualBtn {
+    border-radius: 18px;
+    padding: 8px 10px;
+    color: white;
+    font-size: 14pt;
+}
+QPushButton#vegBtn { background-color: green; }
+QPushButton#vegBtn:hover { background-color: #006400; }
+QPushButton#vegBtn:pressed { background-color: #004d00; }
+QPushButton#manualBtn { background-color: purple; }
+QPushButton#manualBtn:hover { background-color: #5e0e5e; }
+QPushButton#manualBtn:pressed { background-color: #3c003c; }
+
+/* --- Receipt Action Buttons (cancelsaleBtn, onholdBtn, viewholdBtn) --- */
+QPushButton#cancelsaleBtn,
+QPushButton#onholdBtn,
+QPushButton#viewholdBtn {
+    border-radius: 18px;
+    padding: 12px 20px;
+    color: white;
+    font-size: 14pt;
+}
+QPushButton#cancelsaleBtn { background-color: #660600; }
+QPushButton#cancelsaleBtn:hover { background-color: #7a0800; }
+QPushButton#cancelsaleBtn:pressed { background-color: #4b0400; }
+QPushButton#onholdBtn { background-color: #998900; }
+QPushButton#onholdBtn:hover { background-color: #b3a300; }
+QPushButton#onholdBtn:pressed { background-color: #7a6f00; }
+QPushButton#viewholdBtn { background-color: #006699; }
+QPushButton#viewholdBtn:hover { background-color: #0077b3; }
+QPushButton#viewholdBtn:pressed { background-color: #004d73; }
+
+
+/* =============================================================
+     VEGETABLE ENTRY DIALOG AND ITS CHILDREN
+     ============================================================= */
+
+QWidget#vegEntryDialog {
+    background-color: #E6F3FF; /* Light Blue */
+    font-family: "Verdana";
+}
+
+/* 1. Generic Button Styling (Applies to all buttons in the dialog) */
+QWidget#vegEntryDialog QPushButton {
+    background-color: #0066CC; /* Blue */
+    color: white;
+    border: 1px solid #005599;
+    border-radius: 10px;
+    font-size: 12pt;           
+    font-family: "Verdana";
+    min-width: 100px;       
+    min-height: 50px;
+    margin: 2px;
+}
+
+QWidget#vegEntryDialog QPushButton:hover {
+    background-color: #0077EE;
+}
+
+QWidget#vegEntryDialog QPushButton:pressed {
+    background-color: #004488;
+}
+
+/* 2. Specific Button Exceptions */
+
+QWidget#vegEntryDialog QPushButton#btnVegOk {
+    background-color: #28a745; 
+    border: 1px solid #1e7e34;
+}
+QWidget#vegEntryDialog QPushButton#btnVegOk:hover {
+    background-color: #34ce57;
+}
+QWidget#vegEntryDialog QPushButton#btnVegOk:pressed {
+    background-color: #0bcd38ff;
+}
+
+QWidget#vegEntryDialog QPushButton#btnVegCancel {
+    background-color: #A52A2A; /* Brown */
+    border: 1px solid #800000;
+}
+QWidget#vegEntryDialog QPushButton#btnVegCancel:hover {
+    background-color: #c03535;
+}
+QWidget#vegEntryDialog QPushButton#btnVegCancel:pressed {
+    background-color: #be0808ff;
+}
+
+/* 3. Message Label Styling */
+QWidget#vegEntryDialog QLabel#vegEntryMessage1,
+QWidget#vegEntryDialog QLabel#vegEntryMessage2 {
+    font-size: 10pt;
+    margin-left: 5px;
+    color: #333333; /* Dark Grey text for readability */
+    font-weight: bold;
+}
+
+/* 4. Table Styling */
+QWidget#vegEntryDialog QTableWidget#vegEntryTable {
+    background-color: #FFFFE0; /* Light Yellow */
+    alternate-background-color: #FFFFF0; /* Slightly lighter yellow for rows */
+    gridline-color: #D3D3D3;
+    font-size: 10pt;
+    color: black;
+}
+
+/* 5. Table Header Styling */
+QWidget#vegEntryDialog QHeaderView::section {
+    background-color: #4682b4;
+    color: white;
+    border: 1px solid rgba(0,0,0,0.2);
+    font-size: 10pt;
+    font-weight: bold;
+}
+
+/* Optional: Style the top-left corner button of the table */
+QWidget#vegEntryDialog QTableCornerButton::section {
+    background-color: #B0C4DE;
+    border: 1px solid #999999;
 }

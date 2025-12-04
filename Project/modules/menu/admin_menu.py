@@ -220,7 +220,9 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
         except Exception:
             pass
         try:
-            host_window.raise_(); host_window.activateWindow()
+            host_window.raise_()
+            host_window.activateWindow()
+            host_window._refocus_sales_table()
         except Exception:
             pass
 

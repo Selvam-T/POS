@@ -42,6 +42,14 @@ def open_vegetable_entry_dialog(parent):
         dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
     except Exception:
         pass
+    # Load and apply sales.qss for dialog-specific styling
+    qss_path = os.path.join(BASE_DIR, 'assets', 'sales.qss')
+    if os.path.exists(qss_path):
+        try:
+            with open(qss_path, 'r', encoding='utf-8') as f:
+                dlg.setStyleSheet(f.read())
+        except Exception as e:
+            print('Failed to load sales.qss for vegetable entry dialog:', e)
 
     # Install content into dialog
     layout = QVBoxLayout(dlg)
@@ -50,20 +58,21 @@ def open_vegetable_entry_dialog(parent):
 
     # Configure the vegetable table headers and behavior
     try:
-        vtable = content.findChild(QTableWidget, 'vegetableTable')
+        vtable = content.findChild(QTableWidget, 'vegEntryTable')
         if vtable is not None:
-            vtable.setColumnCount(4)
-            vtable.setHorizontalHeaderLabels(['No.', 'Item', 'Weight (kg)', 'Total'])
-
+            vtable.setColumnCount(5)
+            vtable.setHorizontalHeaderLabels(['No.', 'Item', 'Weight (kg)', 'Total', 'Del'])
             header = vtable.horizontalHeader()
             header.setStretchLastSection(False)
             header.setSectionResizeMode(0, QHeaderView.Fixed)   # No.
             header.setSectionResizeMode(1, QHeaderView.Stretch) # Item grows
             header.setSectionResizeMode(2, QHeaderView.Fixed)   # Weight
             header.setSectionResizeMode(3, QHeaderView.Fixed)   # Total
+            header.setSectionResizeMode(4, QHeaderView.Fixed)   # Del
             header.resizeSection(0, 48)
-            header.resizeSection(2, 120)
-            header.resizeSection(3, 110)
+            header.resizeSection(2, 125)
+            header.resizeSection(3, 115)
+            header.resizeSection(4, 48)
 
             vtable.setAlternatingRowColors(True)
             vtable.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -74,7 +83,7 @@ def open_vegetable_entry_dialog(parent):
 
     # Wire keypad buttons to update message label and close on OK/CANCEL (updated to btnVeg1..btnVeg14)
     try:
-        msg = content.findChild(QLabel, 'messageLabel')
+        msg = content.findChild(QLabel, 'vegEntryMessage2')
         for name in (
             'btnVeg1','btnVeg2','btnVeg3','btnVeg4',
             'btnVeg5','btnVeg6','btnVeg7','btnVeg8',
