@@ -137,84 +137,95 @@ QPushButton#viewholdBtn:pressed { background-color: #004d73; }
      ============================================================= */
 
 QWidget#vegEntryDialog {
-    background-color: #E6F3FF; /* Light Blue */
+    background-color: #EFF5F9;
     font-family: "Verdana";
 }
 
 /* 1. Generic Button Styling (Applies to all buttons in the dialog) */
 QWidget#vegEntryDialog QPushButton {
-    background-color: #0066CC; /* Blue */
+    background-color: #3498DB;
     color: white;
-    border: 1px solid #005599;
-    border-radius: 10px;
-    font-size: 12pt;           
+    border: 1px solid #2980B9;
+    border-radius: 8px;
+    font-size: 11pt;           
     font-family: "Verdana";
+    font-weight: bold;
     min-width: 100px;       
     min-height: 50px;
-    margin: 2px;
+    margin: 3px;
 }
 
 QWidget#vegEntryDialog QPushButton:hover {
-    background-color: #0077EE;
+    background-color: #5DADE2;
+    border-color: #3498DB;
 }
 
 QWidget#vegEntryDialog QPushButton:pressed {
-    background-color: #004488;
+    background-color: #21618C;
+    padding-top: 2px;
+    padding-left: 2px;
 }
 
 /* 2. Specific Button Exceptions */
 
 QWidget#vegEntryDialog QPushButton#btnVegOk {
-    background-color: #28a745; 
-    border: 1px solid #1e7e34;
+    background-color: #27AE60; 
+    border: 1px solid #1E8449;
 }
 QWidget#vegEntryDialog QPushButton#btnVegOk:hover {
-    background-color: #34ce57;
+    background-color: #2ECC71;
 }
 QWidget#vegEntryDialog QPushButton#btnVegOk:pressed {
-    background-color: #0bcd38ff;
+    background-color: #196F3D;
 }
 
 QWidget#vegEntryDialog QPushButton#btnVegCancel {
-    background-color: #A52A2A; /* Brown */
-    border: 1px solid #800000;
+    background-color: #C0392B; 
+    border: 1px solid #922B21;
 }
 QWidget#vegEntryDialog QPushButton#btnVegCancel:hover {
-    background-color: #c03535;
+    background-color: #E74C3C;
 }
 QWidget#vegEntryDialog QPushButton#btnVegCancel:pressed {
-    background-color: #be0808ff;
+    background-color: #922B21;
 }
 
 /* 3. Message Label Styling */
 QWidget#vegEntryDialog QLabel#vegEntryMessage1,
 QWidget#vegEntryDialog QLabel#vegEntryMessage2 {
-    font-size: 10pt;
+    font-size: 11pt;
     margin-left: 5px;
-    color: #333333; /* Dark Grey text for readability */
+    color: #2C3E50; /* Dark Grey text for readability */
     font-weight: bold;
 }
 
 /* 4. Table Styling */
 QWidget#vegEntryDialog QTableWidget#vegEntryTable {
-    background-color: #FFFFE0; /* Light Yellow */
-    alternate-background-color: #FFFFF0; /* Slightly lighter yellow for rows */
-    gridline-color: #D3D3D3;
+    background-color: #FFFFFF; /* Pure White */
+    alternate-background-color: #F4F6F7; /* Very faint grey-blue for rows */
+    gridline-color: #EAEDED; /* Subtle grid lines */
+    selection-background-color: #D6EAF8; /* When a row is selected */
+    selection-color: #000000;
     font-size: 10pt;
-    color: black;
+    color: #2C3E50;
+    border: 1px solid #BDC3C7; /* Define the outer border of the table */
 }
 
 /* 5. Table Header Styling */
 QWidget#vegEntryDialog QHeaderView::section {
-    background-color: #4682b4;
+    background-color: #34495E; /* Dark Slate Blue/Grey */
     color: white;
-    border: 1px solid rgba(0,0,0,0.2);
+    padding: 4px;
+    border: none; /* Cleaner look without borders between headers */
+    border-right: 1px solid #2C3E50; /* Subtle separator */
+    border-bottom: 2px solid #2C3E50; /* Anchor the header to the table */
     font-size: 10pt;
     font-weight: bold;
+    font-family: "Verdana";
 }
 
 /* Optional: Style the top-left corner button of the table */
 QWidget#vegEntryDialog QTableCornerButton::section {
-    background-color: #B0C4DE;
-    border: 1px solid #999999;
+    background-color: #34495E;
+    border: none;
 }
