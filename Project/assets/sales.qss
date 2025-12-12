@@ -156,8 +156,8 @@ QWidget#vegEntryDialog QPushButton {
 }
 
 QWidget#vegEntryDialog QPushButton:hover {
-    background-color: #5DADE2;
-    border-color: #3498DB;
+    background-color: #EB984E;
+    border-color: #E67E22;
 }
 
 QWidget#vegEntryDialog QPushButton:pressed {
@@ -228,4 +228,106 @@ QWidget#vegEntryDialog QHeaderView::section {
 QWidget#vegEntryDialog QTableCornerButton::section {
     background-color: #34495E;
     border: none;
+}
+
+
+/* =============================================================
+     MANUAL ENTRY DIALOG AND ITS CHILDREN
+     ============================================================= */
+
+QWidget#manualEntryDialog {
+    background-color: #EFF5F9;
+    font-family: "Verdana";
+}
+
+/* 1. Frame Styling */
+QWidget#manualEntryDialog QFrame#manualEntryFrame {
+    background-color: #FFFFFF;
+    border: 1px solid #BDC3C7;
+    border-radius: 5px;
+}
+
+/* 2. Labels Styling */
+QWidget#manualEntryDialog QLabel {
+    font-size: 11pt;
+    color: #2C3E50;
+    font-weight: normal;
+    font-family: "Verdana";
+}
+
+QWidget#manualEntryDialog #lblGeneral {
+    font-weight: bold;
+}
+
+/* 3. Input Fields Styling */
+QWidget#manualEntryDialog QLineEdit {
+    font-size: 10pt;
+    padding: 8px;
+    background-color: #FFFBE6;
+    border: 2px solid #BDC3C7;
+    border-radius: 4px;
+    color: #2C3E50;
+}
+
+QWidget#manualEntryDialog QLineEdit:focus {
+    background-color: #FFF9C4;
+    border: 2px solid #4682B4;
+}
+
+QWidget#manualEntryDialog QLineEdit[error="true"] {
+    background-color: #FFCCCC;
+    border: 2px solid #C0392B;
+}
+
+/* 4. Button Styling */
+QWidget#manualEntryDialog QPushButton {
+    background-color: #3498DB;
+    color: white;
+    border: 1px solid #2980B9;
+    border-radius: 6px;
+    font-size: 11pt;
+    font-family: "Verdana";
+    font-weight: bold;
+    min-width: 80px;
+    min-height: 40px;
+    padding: 5px 10px;
+}
+
+QWidget#manualEntryDialog QPushButton:hover {
+    background-color: #2E86C1;
+    border-color: #1B5E20;
+}
+
+QWidget#manualEntryDialog QPushButton:pressed {
+    background-color: #1F4788;
+    padding-top: 2px;
+    padding-left: 2px;
+}
+
+/* 5. OK Button Specific Styling */
+QWidget#manualEntryDialog QPushButton#btnManualOk {
+    background-color: #27AE60;
+    border: 1px solid #1E8449;
+}
+
+QWidget#manualEntryDialog QPushButton#btnManualOk:hover {
+    background-color: #2ECC71;
+}
+
+QWidget#manualEntryDialog QPushButton#btnManualOk:pressed {
+    background-color: #196F3D;
+}
+
+/* 6. Cancel Button Specific Styling */
+QWidget#manualEntryDialog QPushButton#btnManualCancel {
+    background-color: #C0392B;
+    border: 1px solid #922B21;
+}
+
+QWidget#manualEntryDialog QPushButton#btnManualCancel:hover {
+    background-color: #E74C3C;
+}
+
+QWidget#manualEntryDialog QPushButton#btnManualCancel:pressed {
+    background-color: #922B21;
 }

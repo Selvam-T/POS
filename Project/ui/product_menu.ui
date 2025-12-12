@@ -45,7 +45,7 @@
                         <item>
                             <widget class="QLabel" name="customTitle">
                                 <property name="text">
-                                    <string>Product Management</string>
+                                    <string>Barcode Product Management</string>
                                 </property>
                             </widget>
                         </item>

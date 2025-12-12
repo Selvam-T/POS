@@ -216,7 +216,7 @@
       <item row="7" column="1">
        <widget class="QPushButton" name="btnVegOk">
         <property name="text">
-         <string>OK</string>
+         <string>OK ALL</string>
         </property>
        </widget>
       </item>
