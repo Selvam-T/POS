@@ -138,7 +138,7 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
                 # Product not found - show in status bar
                 unit_price = 0.0
                 if status_bar:
-                    show_temp_status(status_bar, f"⚠ Product '{product_code}' not found in database", 10000)
+                    show_temp_status(status_bar, f"Product '{product_code}' not found in database", 10000)
         else:
             # unit_price provided, just use product code as name
             unit_price = float(unit_price)
@@ -546,7 +546,7 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
         return
         
     if status_bar:
-        show_temp_status(status_bar, f"📷 Scanned: {barcode}", 3000)
+        show_temp_status(status_bar, f"Scanned: {barcode}", 3000)
     
     # Look up product in cache
     found, product_name, unit_price = get_product_info(barcode)
@@ -554,7 +554,7 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
     if not found:
         # Product not found in database
         if status_bar:
-            show_temp_status(status_bar, f"⚠ Product '{barcode}' not found in database", 5000)
+            show_temp_status(status_bar, f"Product '{barcode}' not found in database", 5000)
         return
     
     # Check if product already exists in table
@@ -564,12 +564,12 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
         # Product exists → increment quantity
         _increment_row_quantity(table, existing_row)
         if status_bar:
-            show_temp_status(status_bar, f"✓ Added {product_name} (quantity updated)", 3000)
+            show_temp_status(status_bar, f"Added {product_name} (quantity updated)", 3000)
     else:
         # New product → add row
         _add_product_row(table, barcode, product_name, unit_price, status_bar)
         if status_bar:
-            show_temp_status(status_bar, f"✓ Added {product_name}", 3000)
+            show_temp_status(status_bar, f"Added {product_name}", 3000)
 
 
 def _find_product_in_table(table: QTableWidget, product_code: str) -> Optional[int]:
@@ -629,7 +629,7 @@ def _increment_row_quantity(table: QTableWidget, row: int) -> None:
 
 
 def _add_product_row(table: QTableWidget, product_code: str, product_name: str, 
-                     unit_price: float, status_bar: Optional[QStatusBar] = None) -> None:
+                     unit_price: float, quantity: float = 1, status_bar: Optional[QStatusBar] = None) -> None:
     """
     Add a new product row to the table.
     
@@ -638,6 +638,7 @@ def _add_product_row(table: QTableWidget, product_code: str, product_name: str,
         product_code: Product barcode/code
         product_name: Product display name
         unit_price: Product unit price
+        quantity: Quantity of product to add (default: 1)
         status_bar: Optional QStatusBar for error messages
     """
     # Get current rows data
@@ -677,7 +678,7 @@ def _add_product_row(table: QTableWidget, product_code: str, product_name: str,
     # Add new product
     current_rows.append({
         'product': product_name,
-        'quantity': 1,
+        'quantity': quantity,
         'unit_price': unit_price
     })
     

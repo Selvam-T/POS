@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>350</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>350</width>
-    <height>350</height>
+    <height>400</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -203,6 +203,32 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QLabel" name="lblError">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_4">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
        <height>30</height>
       </size>
      </property>
@@ -277,7 +303,7 @@
     </layout>
    </item>
    <item>
-    <spacer name="verticalSpacer_4">
+    <spacer name="verticalSpacer_5">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -287,7 +313,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>20</height>
+       <height>25</height>
       </size>
      </property>
     </spacer>
