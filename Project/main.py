@@ -31,6 +31,7 @@ from PyQt5.QtGui import QFontMetrics, QIcon
 from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned, bind_total_label
 from modules.sales.sales_frame_setup import setup_sales_frame
 from modules.devices.barcode_manager import BarcodeManager
+from modules.wrappers.dialog_wrapper import DialogWrapper
 # --- Menu frame dialog controllers ---
 from modules.menu.logout_menu import open_logout_dialog as launch_logout_dialog
 from modules.menu.admin_menu import open_admin_dialog as launch_admin_dialog
@@ -79,156 +80,66 @@ class MainLoader(QMainWindow):
     # Menu dialog launchers (use common wrapper)
     def open_logout_menu_dialog(self):
         """Open Logout dialog."""
-        self.open_dialog_wrapper(launch_logout_dialog)
+        self.dialog_wrapper.open_standard_dialog(
+            launch_logout_dialog,
+            on_finish=self._perform_logout
+        )
 
     def open_product_menu_dialog(self, **kwargs):
         """Open Product Management panel."""
-        self.open_product_menu_dialog(launch_product_dialog)
+        self.dialog_wrapper.open_product_dialog(launch_product_dialog, **kwargs)
         
     def open_admin_menu_dialog(self):
         """Open Admin dialog."""
-        self.open_dialog_wrapper(launch_admin_dialog, current_user='Admin', is_admin=True)
+        self.dialog_wrapper.open_standard_dialog(
+            launch_admin_dialog,
+            current_user='Admin',
+            is_admin=True
+        )
 
     def open_greeting_menu_dialog(self):
         """Open Greeting dialog."""
-        self.open_dialog_wrapper(launch_greeting_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_greeting_dialog)
 
     def open_devices_menu_dialog(self):
         """Open Devices dialog."""
-        self.open_dialog_wrapper(launch_devices_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_devices_dialog)
 
     def open_reports_menu_dialog(self):
         """Open Reports dialog."""
-        self.open_dialog_wrapper(launch_reports_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_reports_dialog)
 
     def open_vegetable_menu_dialog(self):
         """Open Vegetable Label Edit dialog."""
-        self.open_dialog_wrapper(VegetableMenuDialog)
+        self.dialog_wrapper.open_standard_dialog(VegetableMenuDialog)
 
     # Sales frame dialog launchers (use common wrapper)
     def open_vegetable_entry_dialog(self):
         """Open Add Vegetable panel."""
-        self.open_dialog_wrapper(launch_vegetable_entry_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_vegetable_entry_dialog)
 
     def open_manual_panel(self):
         """Open Manual Product Entry panel."""
-        self.open_dialog_wrapper(launch_manual_entry_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_manual_entry_dialog)
 
     def open_onhold_panel(self):
         """Open On Hold panel."""
-        self.open_dialog_wrapper(launch_onhold_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_onhold_dialog)
 
     def open_viewhold_panel(self):
         """Open View Hold panel."""
-        self.open_dialog_wrapper(launch_viewhold_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_viewhold_dialog)
 
     def open_cancelsale_panel(self):
         """Open Cancel Sale panel."""
-        self.open_dialog_wrapper(launch_cancelsale_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_cancelsale_dialog)
 
-    # All dialog launchers use the common wrapper (excpect product menu)
-    def open_dialog_wrapper(self, dialog_func, width_ratio=0.45, height_ratio=0.4, *args, **kwargs):
-        """Open dialog with overlay and scanner block."""
-        self.overlay_manager.toggle_dim_overlay(True)
-        try:
-            if hasattr(self, 'barcode_manager'):
-                self.barcode_manager._start_scanner_modal_block()
-        except Exception:
-            pass
-        try:
-            dlg = dialog_func(self, *args, **kwargs)
-            # Case A: Function returned a QDialog object (e.g. Vegetable Menu)
-            if isinstance(dlg, QDialog):
-                mw, mh = self.frameGeometry().width(), self.frameGeometry().height()
-                dw, dh = max(360, int(mw * width_ratio)), max(220, int(mh * height_ratio))
-                dlg.setFixedSize(dw, dh)
-                mx, my = self.frameGeometry().x(), self.frameGeometry().y()
-                dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
-                
-                def _cleanup(_):
-                    self.overlay_manager.toggle_dim_overlay(False)
-                    try:
-                        if hasattr(self, 'barcode_manager'):
-                            self.barcode_manager._end_scanner_modal_block()
-                    except Exception:
-                        pass
-                    self.raise_()
-                    self.activateWindow()
-                    self._refocus_sales_table()
-                # Connect cleanup to finished signal (covers X, Cancel, OK, etc.)
-                dlg.finished.connect(_cleanup)
-                dlg.exec_()
 
-            # Case B: Function ran exec_() itself (e.g. Logout, Admin)    
-            else:
-                self.overlay_manager.toggle_dim_overlay(False)
-                try:
-                    if hasattr(self, 'barcode_manager'):
-                        self.barcode_manager._end_scanner_modal_block()
-                except Exception:
-                    pass
-
-                self.raise_()
-                self.activateWindow()
-                self._refocus_sales_table()
-
-        except Exception as e:
-            self.overlay_manager.toggle_dim_overlay(False)
-            try:
-                if hasattr(self, 'barcode_manager'):
-                    self.barcode_manager._end_scanner_modal_block()
-            except Exception:
-
-                pass
-            print('Dialog failed:', e)
-
-    def open_product_menu_dialog(self, *args, **kwargs):
-        """
-        Open Product Management panel with dedicated handling.
-        """
-        self.overlay_manager.toggle_dim_overlay(True)
-        
-        try:
-            launch_product_dialog(self, **kwargs)
-        except Exception as e:
-            print('Product dialog failed:', e)
-        finally:
-            # 1. Hide Overlay
-            self.overlay_manager.toggle_dim_overlay(False)
-            
-            # 2. Force Qt to process the 'Hide' event immediately. 
-            # This ensures the Overlay widget is removed from the focus chain.
-            QApplication.processEvents()
-            
-            try:
-                self._clear_barcode_override()
-            except Exception:
-                pass
-
-            # 3. Define the focus restoration logic
-            def _force_focus_restore():
-                try:
-                    # Ensure main window is visually active
-                    self.show()
-                    self.raise_()
-                    self.activateWindow()
-                    
-                    # Force Qt to drop focus from the "Product" button or hidden overlay
-                    fw = QApplication.focusWidget()
-                    if fw:
-                        fw.clearFocus()
-                    
-                    # Finally, give focus to the table
-                    self._refocus_sales_table()
-                except Exception:
-                    pass
-
-            # 4. Trigger with a short delay (10ms is usually sufficient if processEvents is used)
-            QTimer.singleShot(10, _force_focus_restore)
 
     def __init__(self):
         super().__init__()
         self.overlay_manager = OverlayManager(self)
+        self.dialog_wrapper = DialogWrapper(self)
         main_ui = os.path.join(UI_DIR, 'main_window.ui')
         uic.loadUi(main_ui, self)
         # Remove the window close button (X) to force using Logout
