@@ -23,6 +23,19 @@ GREETING_STRINGS = [
 ]
 
 def open_greeting_dialog(parent=None):
+    """Open the Greeting message selection dialog.
+    
+    DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
+    This function only creates and returns the QDialog.
+    
+    Selected greeting stored in dlg.greeting_result attribute (or None if cancelled).
+    
+    Args:
+        parent: Parent window instance
+    
+    Returns:
+        QDialog instance ready for DialogWrapper.open_standard_dialog() to execute
+    """
     ui_path = os.path.join(UI_DIR, 'greeting_menu.ui')
     if not os.path.exists(ui_path):
         print('DEBUG: greeting_menu.ui not found at', ui_path)
@@ -51,8 +64,13 @@ def open_greeting_dialog(parent=None):
         ok_btn.clicked.connect(dlg.accept)
     if cancel_btn:
         cancel_btn.clicked.connect(dlg.reject)
-    dlg.exec_()
-    # Return selected greeting or None if cancelled
-    if dlg.result() == QDialog.Accepted and combo:
-        return combo.currentText()
-    return None
+    
+    # Store selected greeting in dialog attribute for retrieval after execution
+    dlg.greeting_result = None
+    def _store_greeting():
+        if dlg.result() == QDialog.Accepted and combo:
+            dlg.greeting_result = combo.currentText()
+    dlg.finished.connect(_store_greeting)
+    
+    # Return QDialog for DialogWrapper to execute
+    return dlg

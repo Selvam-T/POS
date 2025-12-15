@@ -12,19 +12,19 @@ _UI_DIR = os.path.join(_PROJECT_DIR, 'ui')
 
 
 
-def open_logout_dialog(host_window) -> None:
+def open_logout_dialog(host_window):
     """Open the Logout confirmation dialog as a modal using ui/logout_menu.ui.
+    
+    DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
+    This function only creates and returns the QDialog.
 
     Args:
-        host_window: The main window (expects helper methods like _show_dim_overlay and _hide_dim_overlay).
+        host_window: The main window instance
+    
+    Returns:
+        QDialog instance ready for DialogWrapper.open_standard_dialog() to execute
     """
     logout_ui = os.path.join(_UI_DIR, 'logout_menu.ui')
-
-    # Dim background (best-effort)
-    try:
-        host_window._show_dim_overlay()
-    except Exception:
-        pass
 
     # Load UI content
     content = None
@@ -97,21 +97,5 @@ def open_logout_dialog(host_window) -> None:
         except Exception:
             pass
 
-    # Cleanup dim overlay and focus when closed
-    def _cleanup(_result):
-        try:
-            host_window._hide_dim_overlay()
-        except Exception:
-            pass
-        try:
-            host_window.raise_()
-            host_window.activateWindow()
-        except Exception:
-            pass
-
-    dlg.finished.connect(_cleanup)
-    try:
-        dlg.raise_()
-    except Exception:
-        pass
-    dlg.exec_()
+    # Return QDialog for DialogWrapper to execute
+    return dlg

@@ -9,8 +9,8 @@ Rationale for extraction:
 - Allows dedicated styling via product_menu.qss
 
 Assumptions:
-- main_window supplies methods: _show_dim_overlay, _hide_dim_overlay, _clear_barcode_override,
-  _refocus_sales_table and attributes: sales_table, statusbar
+- main_window supplies method: _refocus_sales_table and attributes: sales_table, statusbar
+- DialogWrapper handles overlay management, barcode override cleanup, and focus restoration
 - Database operations available from modules.db_operation
 - UI file located at ui/product_menu.ui relative to BASE_DIR/UI_DIR from config
 """
@@ -51,24 +51,13 @@ def _load_stylesheet() -> str:
 
 
 def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial_code: Optional[str] = None):
-    # Debug print removed
     product_ui = os.path.join(UI_DIR, 'product_menu.ui')
     if not os.path.exists(product_ui):
-        # Debug print removed
         return
-
-    # Show dim overlay
-    try:
-        main_window._show_dim_overlay()
-    except Exception:
-        pass
 
     try:
         content = uic.loadUi(product_ui)
     except Exception as e:
-        # Debug print removed
-        try: main_window._hide_dim_overlay()
-        except Exception: pass
         return
 
     # Add predefined items to category combo box
@@ -729,6 +718,6 @@ def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial
     except Exception:
         pass
 
-    # Debug print removed
-    dlg.exec_()
-    # Debug print removed
+
+    # Return QDialog to wrapper for execution
+    return dlg

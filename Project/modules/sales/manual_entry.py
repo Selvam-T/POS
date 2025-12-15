@@ -4,7 +4,17 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout
 from PyQt5.QtCore import Qt
 
 def open_manual_entry_dialog(parent):
-    """Open the Manual Product Entry dialog and return product data."""
+    """Open the Manual Product Entry dialog and return QDialog for wrapper execution.
+    
+    DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
+    This function only creates and returns the QDialog.
+    
+    Args:
+        parent: Main window instance
+    
+    Returns:
+        QDialog instance ready for DialogWrapper.open_standard_dialog() to execute
+    """
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     UI_DIR = os.path.join(BASE_DIR, 'ui')
     manual_ui = os.path.join(UI_DIR, 'manual_entry.ui')
@@ -13,21 +23,17 @@ def open_manual_entry_dialog(parent):
         print('manual_entry.ui not found at', manual_ui)
         return None
 
-    # Create dimming overlay over the main window
-    parent.overlay_manager.toggle_dim_overlay(True)
-
-    # Build a modal dialog and embed the loaded UI inside
+    # Load UI content
     try:
         content = uic.loadUi(manual_ui)
     except Exception as e:
         print('Failed to load manual_entry.ui:', e)
-        parent.overlay_manager.toggle_dim_overlay(False)
         return None
 
+    # Create dialog container
     dlg = QDialog(parent)
     dlg.setModal(True)
     dlg.setWindowTitle('Manual Product Input')
-    # Window flags: remove min/max, keep title + close
     dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
     
     # Install content into dialog
@@ -50,18 +56,6 @@ def open_manual_entry_dialog(parent):
     except Exception as e:
         print('Failed to load sales.qss:', e)
     
-    # Center dialog relative to main window (using UI's size settings)
-    try:
-        mw = parent.frameGeometry().width()
-        mh = parent.frameGeometry().height()
-        mx = parent.frameGeometry().x()
-        my = parent.frameGeometry().y()
-        dw = dlg.width()
-        dh = dlg.height()
-        dlg.move(mx + (mw - dw) // 2, my + (mh - dh) // 2)
-    except Exception:
-        pass
-
     # Get input fields
     product_name_input = content.findChild(type(content), 'inputProductName')
     quantity_input = content.findChild(type(content), 'inputQuantity')
@@ -69,12 +63,11 @@ def open_manual_entry_dialog(parent):
     btn_ok = content.findChild(type(content), 'btnManualOk')
     btn_cancel = content.findChild(type(content), 'btnManualCancel')
 
-    # Data container
-    result_data = None
+    # Data container to store result
+    result_data = {'accepted': False}
 
     # OK button handler
     def handle_ok():
-        nonlocal result_data
         try:
             product_name = product_name_input.text().strip() if product_name_input else ""
             quantity_str = quantity_input.text().strip() if quantity_input else "0"
@@ -100,13 +93,13 @@ def open_manual_entry_dialog(parent):
                 print("Unit Price must be greater than 0")
                 return
             
-            result_data = {
+            # Store result data on dialog object for later retrieval
+            dlg.manual_entry_result = {
                 'product_name': product_name,
                 'quantity': quantity,
                 'unit_price': unit_price,
                 'total': quantity * unit_price
             }
-            
             dlg.accept()
         except Exception as e:
             print('Error processing manual entry:', e)
@@ -121,36 +114,5 @@ def open_manual_entry_dialog(parent):
     if btn_cancel:
         btn_cancel.clicked.connect(handle_cancel)
 
-    # Mark that a generic modal is open to block scanner routing
-    try:
-        if hasattr(parent, 'barcode_manager'):
-            parent.barcode_manager._start_scanner_modal_block()
-    except Exception:
-        pass
-
-    # Ensure overlay hides and focus returns when dialog closes
-    def _cleanup_overlay(_code):
-        parent.overlay_manager.toggle_dim_overlay(False)
-        # Bring main window back to front
-        try:
-            parent.raise_()
-            parent.activateWindow()
-        except Exception:
-            pass
-        # Unblock scanner and restore focus to sales table
-        try:
-            if hasattr(parent, 'barcode_manager'):
-                parent.barcode_manager._end_scanner_modal_block()
-        except Exception:
-            pass
-        try:
-            parent._refocus_sales_table()
-        except Exception:
-            pass
-
-    dlg.finished.connect(_cleanup_overlay)
-
-    # Execute modally
-    dlg.exec_()
-    
-    return result_data
+    # Return QDialog for DialogWrapper to execute
+    return dlg

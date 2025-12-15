@@ -1,35 +1,45 @@
 # --- Vegetable Entry Dialog Controller ---
 import os
+from typing import List, Dict
 from PyQt5 import uic
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QTableWidget, QPushButton, QLabel, QHeaderView
 from PyQt5.QtCore import Qt
 
+from modules.wrappers import settings as app_settings
+
+
 def open_vegetable_entry_dialog(parent):
-    """Open the Add Vegetable panel as a modal dialog (controller logic)."""
+    """Open the Add Vegetable panel as a modal dialog.
+    
+    DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
+    This function only creates and returns the QDialog.
+    
+    Args:
+        parent: Main window instance
+    
+    Returns:
+        QDialog instance ready for DialogWrapper.open_standard_dialog() to execute
+    """
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     UI_DIR = os.path.join(BASE_DIR, 'ui')
     veg_ui = os.path.join(UI_DIR, 'vegetable_entry.ui')
+    
     if not os.path.exists(veg_ui):
         print('vegetable_entry.ui not found at', veg_ui)
-        return
-
-    # Create dimming overlay over the main window
-    parent.overlay_manager.toggle_dim_overlay(True)
+        return None
 
     # Build a modal dialog and embed the loaded UI inside
     try:
         content = uic.loadUi(veg_ui)
     except Exception as e:
         print('Failed to load vegetable_entry.ui:', e)
-        parent.overlay_manager.toggle_dim_overlay(False)
-        return
+        return None
 
     dlg = QDialog(parent)
     dlg.setModal(True)
     dlg.setWindowTitle('Digital Weight Input')
-    # Window flags: remove min/max, keep title + close
     dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
-    # Fixed size at 60% of main window, centered
 
     # Load and apply sales.qss for dialog-specific styling
     qss_path = os.path.join(BASE_DIR, 'assets', 'sales.qss')
@@ -70,7 +80,7 @@ def open_vegetable_entry_dialog(parent):
     except Exception as e:
         print('Vegetable table setup failed:', e)
 
-    # Wire keypad buttons to update message label and close on OK/CANCEL (updated to btnVeg1..btnVeg16)
+    # Wire keypad buttons to update message label and close on OK/CANCEL
     try:
         msg = content.findChild(QLabel, 'vegEntryMessage2')
         for name in (
@@ -95,43 +105,8 @@ def open_vegetable_entry_dialog(parent):
     except Exception as e:
         print('Vegetable keypad wiring failed:', e)
 
-    # Ensure overlay hides and focus returns when dialog closes
-    def _cleanup_overlay(_code):
-        parent.overlay_manager.toggle_dim_overlay(False)
-        # Bring main window back to front
-        try:
-            parent.raise_()
-            parent.activateWindow()
-        except Exception:
-            pass
-        # Remove barcode override when dialog closes
-        try:
-            if hasattr(parent, 'barcode_manager'):
-                parent.barcode_manager.clear_barcode_override()
-        except Exception:
-            pass
-        # Unblock scanner modal block
-        try:
-            if hasattr(parent, 'barcode_manager'):
-                parent.barcode_manager._end_scanner_modal_block()
-        except Exception:
-            pass
-
-    dlg.finished.connect(_cleanup_overlay)
-
-    # Block scanner while this dialog is open
-    try:
-        if hasattr(parent, 'barcode_manager'):
-            parent.barcode_manager._start_scanner_modal_block()
-    except Exception:
-        pass
-
-    # Execute modally
-    dlg.exec_()
-from typing import List, Dict
-from PyQt5 import QtWidgets
-
-from modules.wrappers import settings as app_settings
+    # Return QDialog for DialogWrapper to execute
+    return dlg
 
 
 # Button object names in ui/vegetable_entry.ui, in left-to-right, top-to-bottom order
@@ -184,3 +159,4 @@ class VegetableEntryController:
         # editor_dialog must emit configChanged(dict)
         if hasattr(editor_dialog, 'configChanged'):
             editor_dialog.configChanged.connect(self.apply_mapping)
+

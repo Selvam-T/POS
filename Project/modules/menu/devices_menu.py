@@ -12,25 +12,25 @@ QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
 
 
 def open_devices_dialog(host_window, *args, **kwargs):
-    """Open Devices dialog (ui/devices_menu.ui) as a modal frameless panel, standardized for menu dialogs."""
+    """Open Devices dialog (ui/devices_menu.ui) as a modal frameless panel.
+    
+    DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
+    This function only creates and returns the QDialog.
+    
+    Args:
+        host_window: Main window instance
+    
+    Returns:
+        QDialog instance ready for DialogWrapper.open_standard_dialog() to execute
+    """
     ui_path = os.path.join(UI_DIR, 'devices_menu.ui')
     if not os.path.exists(ui_path):
         return None
-
-    # Best-effort dim overlay
-    try:
-        host_window._show_dim_overlay()
-    except Exception:
-        pass
 
     # Load UI
     try:
         content = uic.loadUi(ui_path)
     except Exception:
-        try:
-            host_window._hide_dim_overlay()
-        except Exception:
-            pass
         return None
 
     # Use content if it’s already a QDialog; otherwise wrap
@@ -83,16 +83,5 @@ def open_devices_dialog(host_window, *args, **kwargs):
     if cancel:
         cancel.clicked.connect(dlg.reject)
 
-    def _cleanup_overlay(_code):
-        try:
-            host_window._hide_dim_overlay()
-        except Exception:
-            pass
-        try:
-            host_window.raise_()
-            host_window.activateWindow()
-        except Exception:
-            pass
-
-    dlg.finished.connect(_cleanup_overlay)
+    # Return QDialog for DialogWrapper to execute
     return dlg

@@ -60,7 +60,6 @@ from config import (
     DEBUG_CACHE_LOOKUP,
 )
 from modules.date_time.info_section import InfoSectionController
-# from modules.debug.debug_utils import describe_widget, debug_print_focus  # Uncomment for focus debugging
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
@@ -77,7 +76,6 @@ def load_qss(app):
             print('Failed to load QSS:', e)
 
 class MainLoader(QMainWindow):
-    # Menu dialog launchers (use common wrapper)
     def open_logout_menu_dialog(self):
         """Open Logout dialog."""
         self.dialog_wrapper.open_standard_dialog(
@@ -113,7 +111,6 @@ class MainLoader(QMainWindow):
         """Open Vegetable Label Edit dialog."""
         self.dialog_wrapper.open_standard_dialog(VegetableMenuDialog)
 
-    # Sales frame dialog launchers (use common wrapper)
     def open_vegetable_entry_dialog(self):
         """Open Add Vegetable panel."""
         self.dialog_wrapper.open_standard_dialog(launch_vegetable_entry_dialog)
@@ -166,7 +163,6 @@ class MainLoader(QMainWindow):
 
         # Initialize barcode manager
         self.barcode_manager = BarcodeManager(self)
-        # Install barcode manager as event filter for scanner key suppression
         try:
             app = QApplication.instance()
             if app is not None:
@@ -176,8 +172,7 @@ class MainLoader(QMainWindow):
         except Exception:
             pass
 
-        # Insert sales_frame.ui into placeholder named 'salesFrame' (refactored: see modules/sales/sales_frame_setup.py)
-        # This sets self.sales_table for use elsewhere in MainLoader.
+        # Insert sales_frame.ui into placeholder named 'salesFrame'
         setup_sales_frame(self, UI_DIR)
 
         # Insert payment_frame.ui into placeholder named 'paymentFrame'
@@ -295,18 +290,6 @@ class MainLoader(QMainWindow):
         except Exception as e:
             print('Failed to wire menu buttons:', e)
 
-        # BarcodeManager installs its own event filter and handles scanner activity
-
-        # Optional: verbose focus change logging
-        try:
-            if DEBUG_FOCUS_CHANGES:
-                app = QApplication.instance()
-                if app is not None:
-                    app.focusChanged.connect(self._on_focus_changed)
-        except Exception:
-            pass
-
-
     def _perform_logout(self):
         """Perform logout action: stop devices and close app."""
         # Stop scanner if running
@@ -328,32 +311,6 @@ class MainLoader(QMainWindow):
                 QApplication.instance().quit()
             except Exception:
                 pass
-
-
-    # Focus debug helpers have been moved to modules.debug.debug_utils.
-    # To use them for debugging, uncomment the import at the top and call as follows:
-    # debug_print_focus(context, barcode, main_window=self)
-    # describe_widget(widget)
-    # These are not required for normal operation and are intended for development/debugging only.
-
-    def _on_focus_changed(self, old: QWidget, new: QWidget):
-        try:
-            print('[FocusChanged]', self._describe_widget(old), '->', self._describe_widget(new))
-        except Exception:
-            pass
-
-
-    def _refocus_sales_table(self) -> None:
-        try:
-            table = getattr(self, 'sales_table', None)
-            if table is not None:
-                table.setFocusPolicy(Qt.StrongFocus)
-                table.setFocus(Qt.OtherFocusReason)
-                if table.rowCount() > 0 and table.columnCount() > 0:
-                    table.setCurrentCell(0, 0)
-            # else: do nothing if table not found
-        except Exception:
-            pass
 
     # Block closing via X/Alt+F4 unless allowed by logout
     def closeEvent(self, event):

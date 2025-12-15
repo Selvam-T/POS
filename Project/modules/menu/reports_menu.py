@@ -21,18 +21,20 @@ def _center_dialog_relative_to(dlg: QDialog, host) -> None:
         pass
 
 def open_reports_dialog(host_window):
-    """Open Reports dialog (ui/reports_menu.ui) as a modal frameless panel."""
+    """Open Reports dialog (ui/reports_menu.ui) as a modal frameless panel.
+    
+    DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
+    This function only creates and returns the QDialog.
+    
+    Args:
+        host_window: Main window instance
+    
+    Returns:
+        QDialog instance ready for DialogWrapper.open_standard_dialog() to execute
+    """
     ui_path = os.path.join(UI_DIR, 'reports_menu.ui')
     if not os.path.exists(ui_path):
         return None
-
-
-    # Best-effort dim overlay
-    try:
-        host_window._show_dim_overlay()
-    except Exception:
-        pass
-
 
     # Load the UI file as a QWidget
     content = uic.loadUi(ui_path)
@@ -76,16 +78,5 @@ def open_reports_dialog(host_window):
     if cancel:
         cancel.clicked.connect(dlg.reject)
 
-    def _cleanup_overlay(_code):
-        try:
-            host_window._hide_dim_overlay()
-        except Exception:
-            pass
-        try:
-            host_window.raise_()
-            host_window.activateWindow()
-        except Exception:
-            pass
-
-    dlg.finished.connect(_cleanup_overlay)
+    # Return QDialog for DialogWrapper to execute
     return dlg

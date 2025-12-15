@@ -40,12 +40,33 @@ class DialogWrapper:
         except Exception:
             pass
 
+    def _refocus_sales_table(self):
+        """Restore focus to sales table after dialog closes."""
+        try:
+            from PyQt5.QtCore import Qt
+            table = getattr(self.main, 'sales_table', None)
+            if table is not None:
+                table.setFocusPolicy(Qt.StrongFocus)
+                table.setFocus(Qt.OtherFocusReason)
+                if table.rowCount() > 0 and table.columnCount() > 0:
+                    table.setCurrentCell(0, 0)
+        except Exception:
+            pass
+
     def _restore_focus(self):
         """Restore focus to sales table and activate main window."""
         try:
             self.main.raise_()
             self.main.activateWindow()
-            self.main._refocus_sales_table()
+            self._refocus_sales_table()
+        except Exception:
+            pass
+
+    def _clear_scanner_override(self):
+        """Clear barcode override set by product menu dialog."""
+        try:
+            if hasattr(self.main, 'barcode_manager'):
+                self.main.barcode_manager._barcodeOverride = None
         except Exception:
             pass
 
@@ -146,10 +167,7 @@ class DialogWrapper:
 
             def _product_cleanup(_):
                 self._hide_overlay()
-                try:
-                    self.main._clear_barcode_override()
-                except Exception:
-                    pass
+                self._clear_scanner_override()
                 # Timer-deferred focus restoration (handles overlay hide event processing)
                 def _restore():
                     self._restore_focus()

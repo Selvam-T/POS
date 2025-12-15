@@ -10,34 +10,30 @@ ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
 
 
-def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool = True) -> None:
+def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool = True):
     """Open the Admin Settings dialog (ui/admin_menu.ui) as a modal.
+    
+    DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
+    This function only creates and returns the QDialog.
 
     Args:
-        host_window: Main window (needs _show_dim_overlay/_hide_dim_overlay helpers like logout dialog).
+        host_window: Main window instance
         current_user: Display name for "Logged in as:" label.
         is_admin: If False, the dialog will open read-only (no password/email changes allowed).
+    
+    Returns:
+        QDialog instance ready for DialogWrapper.open_standard_dialog() to execute
     """
     ui_path = os.path.join(UI_DIR, 'admin_menu.ui')
     if not os.path.exists(ui_path):
         print('admin_menu.ui missing at', ui_path)
-        return
-
-    # Dim background (best effort)
-    try:
-        host_window._show_dim_overlay()
-    except Exception:
-        pass
+        return None
 
     try:
         content = uic.loadUi(ui_path)
     except Exception as e:
         print('Failed to load admin_menu.ui:', e)
-        try:
-            host_window._hide_dim_overlay()
-        except Exception:
-            pass
-        return
+        return None
 
     # If the .ui root is already a QDialog use it; else wrap
     if isinstance(content, QDialog):
@@ -58,21 +54,6 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
     custom_close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
     if custom_close_btn is not None:
         custom_close_btn.clicked.connect(dlg.reject)
-
-    # Center relative to main window & size to hint
-    try:
-        dlg.adjustSize()
-        sh = dlg.sizeHint()
-        mw = host_window.frameGeometry().width()
-        mh = host_window.frameGeometry().height()
-        dw = max(520, sh.width() + 24)
-        dh = max(380, sh.height() + 24)
-        dlg.setFixedSize(dw, dh)
-        mx = host_window.frameGeometry().x()
-        my = host_window.frameGeometry().y()
-        dlg.move(mx + (mw - dw)//2, my + (mh - dh)//2)
-    except Exception:
-        pass
 
     # Populate logged-in label
     try:
@@ -213,23 +194,5 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
     except Exception:
         pass
 
-    # Cleanup overlay when closed
-    def _cleanup(_code):
-        try:
-            host_window._hide_dim_overlay()
-        except Exception:
-            pass
-        try:
-            host_window.raise_()
-            host_window.activateWindow()
-            host_window._refocus_sales_table()
-        except Exception:
-            pass
-
-    dlg.finished.connect(_cleanup)
-
-    try:
-        dlg.raise_()
-    except Exception:
-        pass
-    dlg.exec_()
+    # Return QDialog for DialogWrapper to execute
+    return dlg
