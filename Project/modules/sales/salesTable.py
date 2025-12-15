@@ -567,7 +567,7 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
             show_temp_status(status_bar, f"Added {product_name} (quantity updated)", 3000)
     else:
         # New product → add row
-        _add_product_row(table, barcode, product_name, unit_price, status_bar)
+        _add_product_row(table, barcode, product_name, unit_price, quantity=1, status_bar=status_bar)
         if status_bar:
             show_temp_status(status_bar, f"Added {product_name}", 3000)
 

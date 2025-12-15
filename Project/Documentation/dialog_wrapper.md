@@ -158,11 +158,23 @@ def open_logout_dialog(main_window):
 
 ---
 
+## Known Issues & Fixes
+
+### Barcode Scanning with DialogWrapper Integration
+
+**Issue:** When integrating DialogWrapper, ensure all dialog controller functions properly pass keyword arguments when calling internal functions. Specifically, when `handle_barcode_scanned()` calls `_add_product_row()`, the status_bar parameter must be passed as a keyword argument to avoid positional argument mismatches.
+
+**Status:** ✅ Fixed in `modules/sales/salesTable.py` line 570
+
+---
+
 ## Testing Checklist
 
 - [ ] Admin dialog: open → OK → overlay gone, focus returns
 - [ ] Logout dialog: open → OK → app exits
 - [ ] Product menu: open → scan barcode → works
+- [ ] Barcode scan: 1st scan adds row correctly with qty=1
+- [ ] Barcode scan: 2nd+ scans increment quantity properly
 - [ ] All dialogs: X button closes properly
 - [ ] Sales table regains focus after any dialog
 
@@ -173,7 +185,7 @@ def open_logout_dialog(main_window):
 - `main.py` - MainLoader, dialog launchers
 - `modules/wrappers/dialog_wrapper.py` - DialogWrapper class
 - `modules/menu/*` - Dialog controllers
-- `modules/sales/*` - Sales dialog controllers
+- `modules/sales/*` - Sales dialog controllers and salesTable utilities
 - `modules/ui_utils/overlay_manager.py` - Overlay management
 - `modules/devices/barcode_manager.py` - Scanner blocking
 
