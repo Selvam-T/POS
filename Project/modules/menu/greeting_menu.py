@@ -38,14 +38,13 @@ def open_greeting_dialog(parent=None):
     """
     ui_path = os.path.join(UI_DIR, 'greeting_menu.ui')
     if not os.path.exists(ui_path):
-        print('DEBUG: greeting_menu.ui not found at', ui_path)
+        print('greeting_menu.ui not found at', ui_path)
         raise FileNotFoundError(f'greeting_menu.ui not found at {ui_path}')
     dlg = uic.loadUi(ui_path)
     from PyQt5.QtCore import Qt
     dlg.setModal(True)
     dlg.setWindowTitle('Customer Greeting Message')
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-    dlg.setFixedSize(420, 300)
     all_widgets = dlg.findChildren(QComboBox)
     combo = all_widgets[0] if all_widgets else None
     if combo is not None:

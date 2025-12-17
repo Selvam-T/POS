@@ -1,6 +1,6 @@
 import os
 from PyQt5 import uic
-from PyQt5.QtWidgets import QDialog, QVBoxLayout
+from PyQt5.QtWidgets import QDialog
 from PyQt5.QtCore import Qt
 
 def open_manual_entry_dialog(parent):
@@ -23,29 +23,19 @@ def open_manual_entry_dialog(parent):
         print('manual_entry.ui not found at', manual_ui)
         return None
 
-    # Load UI content
+    # Load dialog directly (QDialog root from .ui file)
     try:
-        content = uic.loadUi(manual_ui)
+        dlg = uic.loadUi(manual_ui)
     except Exception as e:
         print('Failed to load manual_entry.ui:', e)
         return None
 
-    # Create dialog container
-    dlg = QDialog(parent)
+    # Set dialog properties
+    dlg.setParent(parent)
     dlg.setModal(True)
     dlg.setWindowTitle('Manual Product Input')
     dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
     
-    # Install content into dialog
-    layout = QVBoxLayout(dlg)
-    layout.setContentsMargins(0, 0, 0, 0)
-    layout.addWidget(content)
-
-    # Apply size constraints from the loaded UI to the dialog
-    dlg.setMinimumSize(content.minimumSize())
-    dlg.setMaximumSize(content.maximumSize())
-    dlg.resize(content.size())
-
     # Apply styles
     try:
         assets_dir = os.path.join(BASE_DIR, 'assets')
@@ -57,11 +47,11 @@ def open_manual_entry_dialog(parent):
         print('Failed to load sales.qss:', e)
     
     # Get input fields
-    product_name_input = content.findChild(type(content), 'inputProductName')
-    quantity_input = content.findChild(type(content), 'inputQuantity')
-    unit_price_input = content.findChild(type(content), 'inputUnitPrice')
-    btn_ok = content.findChild(type(content), 'btnManualOk')
-    btn_cancel = content.findChild(type(content), 'btnManualCancel')
+    product_name_input = dlg.findChild(type(dlg), 'inputProductName')
+    quantity_input = dlg.findChild(type(dlg), 'inputQuantity')
+    unit_price_input = dlg.findChild(type(dlg), 'inputUnitPrice')
+    btn_ok = dlg.findChild(type(dlg), 'btnManualOk')
+    btn_cancel = dlg.findChild(type(dlg), 'btnManualCancel')
 
     # Data container to store result
     result_data = {'accepted': False}

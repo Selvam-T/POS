@@ -80,56 +80,58 @@ class MainLoader(QMainWindow):
         """Open Logout dialog."""
         self.dialog_wrapper.open_standard_dialog(
             launch_logout_dialog,
+            dialog_key='logout_menu',
             on_finish=self._perform_logout
         )
 
     def open_product_menu_dialog(self, **kwargs):
         """Open Product Management panel."""
-        self.dialog_wrapper.open_product_dialog(launch_product_dialog, **kwargs)
+        self.dialog_wrapper.open_product_dialog(launch_product_dialog, dialog_key='product_menu', **kwargs)
         
     def open_admin_menu_dialog(self):
         """Open Admin dialog."""
         self.dialog_wrapper.open_standard_dialog(
             launch_admin_dialog,
+            dialog_key='admin_menu',
             current_user='Admin',
             is_admin=True
         )
-
     def open_greeting_menu_dialog(self):
         """Open Greeting dialog."""
+        self.dialog_wrapper.open_standard_dialog(launch_greeting_dialog, dialog_key='greeting_menu')
         self.dialog_wrapper.open_standard_dialog(launch_greeting_dialog)
 
     def open_devices_menu_dialog(self):
         """Open Devices dialog."""
-        self.dialog_wrapper.open_standard_dialog(launch_devices_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_devices_dialog, dialog_key='devices_menu')
 
     def open_reports_menu_dialog(self):
         """Open Reports dialog."""
-        self.dialog_wrapper.open_standard_dialog(launch_reports_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_reports_dialog, dialog_key='reports_menu')
 
     def open_vegetable_menu_dialog(self):
         """Open Vegetable Label Edit dialog."""
-        self.dialog_wrapper.open_standard_dialog(VegetableMenuDialog)
+        self.dialog_wrapper.open_standard_dialog(VegetableMenuDialog, dialog_key='vegetable_menu')
 
     def open_vegetable_entry_dialog(self):
         """Open Add Vegetable panel."""
-        self.dialog_wrapper.open_standard_dialog(launch_vegetable_entry_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_vegetable_entry_dialog, dialog_key='vegetable_entry')
 
     def open_manual_panel(self):
         """Open Manual Product Entry panel."""
-        self.dialog_wrapper.open_standard_dialog(launch_manual_entry_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_manual_entry_dialog, dialog_key='manual_entry')
 
     def open_onhold_panel(self):
         """Open On Hold panel."""
-        self.dialog_wrapper.open_standard_dialog(launch_onhold_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_onhold_dialog, dialog_key='on_hold')
 
     def open_viewhold_panel(self):
         """Open View Hold panel."""
-        self.dialog_wrapper.open_standard_dialog(launch_viewhold_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_viewhold_dialog, dialog_key='view_hold')
 
     def open_cancelsale_panel(self):
         """Open Cancel Sale panel."""
-        self.dialog_wrapper.open_standard_dialog(launch_cancelsale_dialog)
+        self.dialog_wrapper.open_standard_dialog(launch_cancelsale_dialog, dialog_key='cancel_sale')
 
 
 
@@ -334,7 +336,8 @@ def main():
     app = QApplication(sys.argv)
     load_qss(app)
     window = MainLoader()
-    window.show()
+    """window.show()"""
+    window.showMaximized()
     try:
         # Bring window to front in case it opens behind other windows
         window.raise_()

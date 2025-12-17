@@ -84,12 +84,10 @@ def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial
     except Exception:
         dw_full, dh_full = 600, 400
     # Set frameless window flags directly on loaded content if it's a QDialog
-    # [DEBUG] Force use of standard QDialog wrapper for isolation testing
     from PyQt5.QtWidgets import QDialog, QVBoxLayout
     dlg = QDialog(main_window)
     dlg.setModal(True)
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-    dlg.setFixedSize(dw_full, dh_full)
     lay = QVBoxLayout(dlg)
     lay.setContentsMargins(0, 0, 0, 0)
     lay.addWidget(content)

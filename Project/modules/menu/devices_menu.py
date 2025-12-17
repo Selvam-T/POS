@@ -3,7 +3,6 @@ import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QPushButton, QComboBox, QLineEdit, QLabel, QWidget
-from modules.menu.dialog_utils import center_dialog_relative_to
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
@@ -47,15 +46,6 @@ def open_devices_dialog(host_window, *args, **kwargs):
     dlg.setModal(True)
     dlg.setWindowModality(Qt.ApplicationModal)
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-
-    # Size & center
-    try:
-        host_w = host_window.frameGeometry().width()
-        host_h = host_window.frameGeometry().height()
-        dlg.setFixedSize(max(500, int(host_w * 0.55)), max(360, int(host_h * 0.52)))
-    except Exception:
-        dlg.setFixedSize(640, 440)
-    center_dialog_relative_to(dlg, host_window)
 
     # Titlebar close (optional)
     try:

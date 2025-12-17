@@ -31,6 +31,29 @@ DialogWrapper.open_standard_dialog() or open_product_dialog()
 
 Location: `modules/wrappers/dialog_wrapper.py`
 
+### Dialog Size Configuration
+
+Dialog sizes are controlled by the `DIALOG_RATIOS` dictionary, where each dialog maps to `(width_ratio, height_ratio)` as fractions of the maximized main window:
+
+```python
+DIALOG_RATIOS = {
+    'vegetable_entry': (0.5, 0.7),
+    'manual_entry': (0.4, 0.3),
+    'logout_menu': (0.4, 0.4),
+    'admin_menu': (0.7, 0.7),
+    'devices_menu': (0.7, 0.7),
+    'reports_menu': (0.7, 0.7),
+    'greeting_menu': (0.7, 0.7),
+    'product_menu': (0.7, 0.7),
+    'vegetable_menu': (0.7, 0.7),
+    'on_hold': (0.7, 0.7),
+    'view_hold': (0.7, 0.7),
+    'cancel_sale': (0.7, 0.7),
+}
+```
+
+Actual dialog size respects the `minimumSize` constraint from the `.ui` file as a safety floor.
+
 ### Constructor
 
 ```python
@@ -40,59 +63,62 @@ def __init__(self, main_window):
 
 ### Helper Functions
 
-- `_show_overlay()` - Shows overlay (dims background)
-- `_hide_overlay()` - Hides overlay
-- `_block_scanner()` - Blocks barcode scanner during dialog
-- `_unblock_scanner()` - Re-enables barcode scanner
-- `_restore_focus()` - Restores focus to sales table
-- `_size_and_center(dlg, width_ratio=0.45, height_ratio=0.4)` - Sizes and centers dialog
-- `_create_cleanup(on_finish=None)` - Factory for cleanup callback
+- `_show_overlay()` / `_hide_overlay()` - Overlay dimming
+- `_block_scanner()` / `_unblock_scanner()` - Scanner input blocking
+- `_restore_focus()` - Focus restoration to main window
+- `_refocus_sales_table()` - Focus to sales table
+- `_clear_scanner_override()` - Clears product menu barcode override
+- `_setup_dialog_geometry(dlg, width_ratio, height_ratio)` - Sizes and centers dialog based on ratios
+- `_create_cleanup(on_finish=None)` - Factory for dialog close callbacks
 
 ---
 
 ## Main Wrapper Functions
 
-### `open_standard_dialog(dialog_func, width_ratio=0.45, height_ratio=0.4, on_finish=None, *args, **kwargs)`
+### `open_standard_dialog(dialog_func, dialog_key=None, on_finish=None, *args, **kwargs)`
 
 Universal wrapper for all standard dialogs.
 
-**Execution:**
-1. Show overlay, block scanner
+**Behavior:**
+1. Show overlay and block scanner
 2. Call dialog function → get QDialog
-3. Size and center dialog
-4. Connect cleanup to finished signal
-5. Call `dlg.exec_()`
-6. On close: hide overlay, unblock scanner, restore focus, call optional on_finish
+3. Look up size ratios from `DIALOG_RATIOS` using `dialog_key`
+4. Size and center dialog based on ratios (respecting minimumSize floor)
+5. Connect cleanup to finished signal
+6. Execute dialog
+7. On close: hide overlay, unblock scanner, restore focus, call optional on_finish
 
 **Example:**
 ```python
 def open_logout_menu_dialog(self):
     self.dialog_wrapper.open_standard_dialog(
         launch_logout_dialog,
+        dialog_key='logout_menu',
         on_finish=self._perform_logout
     )
 
 def open_admin_menu_dialog(self):
     self.dialog_wrapper.open_standard_dialog(
         launch_admin_dialog,
+        dialog_key='admin_menu',
         current_user='Admin',
         is_admin=True
     )
 ```
 
-### `open_product_dialog(dialog_func, **kwargs)`
+### `open_product_dialog(dialog_func, dialog_key=None, **kwargs)`
 
-Special wrapper for product_menu (allows barcode input).
+Special wrapper for product_menu (allows barcode input during dialog).
 
-**Differences:**
-- Scanner is **NOT blocked** (allows barcode scanning)
+**Differences from standard:**
+- Scanner is **NOT blocked** (allows barcode scanning in product code field)
 - Resets barcode override on close
 - Uses 10ms timer-deferred focus restoration
 
 **Example:**
 ```python
 def open_product_menu_dialog(self, **kwargs):
-    self.dialog_wrapper.open_product_dialog(launch_product_dialog, **kwargs)
+    self.dialog_wrapper.open_product_dialog(launch_product_dialog, dialog_key='product_menu', **kwargs)
 ```
 
 ---
@@ -101,25 +127,27 @@ def open_product_menu_dialog(self, **kwargs):
 
 ### Standard Dialogs (use `open_standard_dialog()`)
 
-| Dialog | Blocks Scanner |
-|--------|----------------|
-| logout_menu | Yes |
-| admin_menu | Yes |
-| greeting_menu | Yes |
-| devices_menu | Yes |
-| reports_menu | Yes |
-| vegetable_menu | Yes |
-| vegetable_entry | Yes |
-| manual_entry | Yes |
-| onhold | Yes |
-| viewhold | Yes |
-| cancelsale | Yes |
+| Dialog | Width Ratio | Height Ratio | Blocks Scanner |
+|--------|-------------|--------------|----------------|
+| logout_menu | 0.4 | 0.4 | Yes |
+| admin_menu | 0.7 | 0.7 | Yes |
+| greeting_menu | 0.7 | 0.7 | Yes |
+| devices_menu | 0.7 | 0.7 | Yes |
+| reports_menu | 0.7 | 0.7 | Yes |
+| vegetable_menu | 0.7 | 0.7 | Yes |
+| vegetable_entry | 0.5 | 0.7 | Yes |
+| manual_entry | 0.4 | 0.3 | Yes |
+| on_hold | 0.7 | 0.7 | Yes |
+| view_hold | 0.7 | 0.7 | Yes |
+| cancel_sale | 0.7 | 0.7 | Yes |
 
 ### Product Dialog (use `open_product_dialog()`)
 
-| Dialog | Blocks Scanner |
-|--------|----------------|
-| product_menu | **No** |
+| Dialog | Width Ratio | Height Ratio | Blocks Scanner |
+|--------|-------------|--------------|----------------|
+| product_menu | 0.7 | 0.7 | **No** |
+
+**Note:** All ratios are fractions of the maximized main window dimensions. Actual size respects minimumSize from `.ui` file as a safety floor.
 
 ---
 
@@ -191,4 +219,4 @@ def open_logout_dialog(main_window):
 
 ---
 
-_Last updated: December 15, 2025_
+_Last updated: December 17, 2025_

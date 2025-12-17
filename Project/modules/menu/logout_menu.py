@@ -49,14 +49,6 @@ def open_logout_dialog(host_window):
     layout.setContentsMargins(0, 0, 0, 0)
     if content is not None:
         layout.addWidget(content)
-        try:
-            content.adjustSize()
-            sh = content.sizeHint()
-            dw = max(360, sh.width() + 24)
-            dh = max(140, sh.height() + 24)
-            dlg.setFixedSize(dw, dh)
-        except Exception:
-            dlg.setFixedSize(420, 180)
     else:
         # Simple fallback content
         info = QLabel('Are you sure you want to logout?')
@@ -72,7 +64,6 @@ def open_logout_dialog(host_window):
         hl.addWidget(btn_cancel)
         hl.addWidget(btn_ok)
         layout.addWidget(row)
-        dlg.setFixedSize(420, 180)
         try:
             btn_cancel.clicked.connect(dlg.reject)
             btn_ok.clicked.connect(lambda: (dlg.accept(), host_window._perform_logout()))

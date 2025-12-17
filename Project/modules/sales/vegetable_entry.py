@@ -3,7 +3,7 @@ import os
 from typing import List, Dict
 from PyQt5 import uic
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QTableWidget, QPushButton, QLabel, QHeaderView
+from PyQt5.QtWidgets import QDialog, QTableWidget, QPushButton, QLabel, QHeaderView
 from PyQt5.QtCore import Qt
 
 from modules.wrappers import settings as app_settings
@@ -29,14 +29,15 @@ def open_vegetable_entry_dialog(parent):
         print('vegetable_entry.ui not found at', veg_ui)
         return None
 
-    # Build a modal dialog and embed the loaded UI inside
+    # Load dialog directly (QDialog root from .ui file)
     try:
-        content = uic.loadUi(veg_ui)
+        dlg = uic.loadUi(veg_ui)
     except Exception as e:
         print('Failed to load vegetable_entry.ui:', e)
         return None
 
-    dlg = QDialog(parent)
+    # Set dialog properties
+    dlg.setParent(parent)
     dlg.setModal(True)
     dlg.setWindowTitle('Digital Weight Input')
     dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
@@ -50,28 +51,25 @@ def open_vegetable_entry_dialog(parent):
         except Exception as e:
             print('Failed to load sales.qss for vegetable entry dialog:', e)
 
-    # Install content into dialog
-    layout = QVBoxLayout(dlg)
-    layout.setContentsMargins(0, 0, 0, 0)
-    layout.addWidget(content)
-
     # Configure the vegetable table headers and behavior
     try:
-        vtable = content.findChild(QTableWidget, 'vegEntryTable')
+        vtable = dlg.findChild(QTableWidget, 'vegEntryTable')
         if vtable is not None:
-            vtable.setColumnCount(5)
-            vtable.setHorizontalHeaderLabels(['No.', 'Item', 'Weight (kg)', 'Total', 'Del'])
+            vtable.setColumnCount(6)
+            vtable.setHorizontalHeaderLabels(['No.', 'Item', 'Kilogram', 'Unit Price', 'Total', 'Del'])
             header = vtable.horizontalHeader()
             header.setStretchLastSection(False)
             header.setSectionResizeMode(0, QHeaderView.Fixed)   # No.
             header.setSectionResizeMode(1, QHeaderView.Stretch) # Item grows
-            header.setSectionResizeMode(2, QHeaderView.Fixed)   # Weight
-            header.setSectionResizeMode(3, QHeaderView.Fixed)   # Total
-            header.setSectionResizeMode(4, QHeaderView.Fixed)   # Del
+            header.setSectionResizeMode(2, QHeaderView.Fixed)   # Kilogram
+            header.setSectionResizeMode(3, QHeaderView.Fixed)   # Unit price
+            header.setSectionResizeMode(4, QHeaderView.Fixed)   # Total
+            header.setSectionResizeMode(5, QHeaderView.Fixed)   # Del
             header.resizeSection(0, 48)
             header.resizeSection(2, 125)
             header.resizeSection(3, 115)
-            header.resizeSection(4, 48)
+            header.resizeSection(4, 115)
+            header.resizeSection(5, 48)
 
             vtable.setAlternatingRowColors(True)
             vtable.setEditTriggers(QTableWidget.NoEditTriggers)
@@ -82,22 +80,22 @@ def open_vegetable_entry_dialog(parent):
 
     # Wire keypad buttons to update message label and close on OK/CANCEL
     try:
-        msg = content.findChild(QLabel, 'vegEntryMessage2')
+        msg = dlg.findChild(QLabel, 'vegEntryMessage2')
         for name in (
             'btnVeg1','btnVeg2','btnVeg3','btnVeg4',
             'btnVeg5','btnVeg6','btnVeg7','btnVeg8',
             'btnVeg9','btnVeg10','btnVeg11','btnVeg12',
             'btnVeg13','btnVeg14','btnVeg15','btnVeg16',
         ):
-            btn = content.findChild(QPushButton, name)
+            btn = dlg.findChild(QPushButton, name)
             if btn is not None and msg is not None:
                 def set_green_message(_, b=btn):
                     msg.setText(f"Place {b.text()} on the scale ...")
                     msg.setStyleSheet("color: green;")
                 btn.clicked.connect(set_green_message)
 
-        ok_btn = content.findChild(QPushButton, 'btnVegOk')
-        cancel_btn = content.findChild(QPushButton, 'btnVegCancel')
+        ok_btn = dlg.findChild(QPushButton, 'btnVegOk')
+        cancel_btn = dlg.findChild(QPushButton, 'btnVegCancel')
         if ok_btn is not None:
             ok_btn.clicked.connect(lambda: dlg.accept())
         if cancel_btn is not None:
