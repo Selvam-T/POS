@@ -1,7 +1,7 @@
 {
   "veg1": {
-    "state": "custom",
-    "label": "Orange"
+    "state": "unused",
+    "label": "unused"
   },
   "veg2": {
     "state": "unused",
@@ -52,6 +52,14 @@
     "label": "unused"
   },
   "veg14": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg15": {
+    "state": "unused",
+    "label": "unused"
+  },
+  "veg16": {
     "state": "unused",
     "label": "unused"
   }
