@@ -16,7 +16,7 @@ class DialogWrapper:
         'reports_menu': (0.7, 0.7),
         'greeting_menu': (0.3, 0.3),
         'product_menu': (0.5, 0.7),
-        'vegetable_menu': (0.3, 0.6),
+        'vegetable_menu': (0.3, 0.7),
         'on_hold': (0.7, 0.7),
         'view_hold': (0.7, 0.7),
         'cancel_sale': (0.7, 0.7),

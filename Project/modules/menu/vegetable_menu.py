@@ -1,256 +1,388 @@
-"""VegetableMenuDialog: manages vegetable label editing dialog with toggles and state."""
+"""Vegetable Management dialog controller for POS system.
+
+Manages 16 vegetable slots (Veg01-Veg16) with database integration.
+Pattern matches other menu controllers (admin_menu, reports_menu, product_menu).
+"""
 import os
-from pathlib import Path
-from typing import List
+from PyQt5 import uic
+from PyQt5.QtCore import Qt, QDateTime, QTimer
+from PyQt5.QtWidgets import (
+    QDialog, QVBoxLayout, QPushButton, QLineEdit, 
+    QComboBox, QLabel
+)
 
-from PyQt5 import QtWidgets, QtCore, uic, QtGui
+from modules.db_operation import (
+    get_product_info, get_product_full, add_product, 
+    delete_product, refresh_product_cache
+)
+from modules.db_operation.database import DB_PATH
 
-from modules.wrappers import settings as app_settings
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+UI_DIR = os.path.join(BASE_DIR, 'ui')
+ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
+QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
+
+# Vegetable slot count
+VEG_SLOTS = 16
 
 
-class VegetableMenuDialog(QtWidgets.QDialog):
-    """Dialog to edit 16 vegetable labels with toggle sliders and NOT USED indicator."""
+def open_vegetable_menu_dialog(host_window):
+    """Open Vegetable Management dialog as a modal.
+    
+    DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
+    This function only creates and returns the QDialog.
+    
+    Args:
+        host_window: Main window instance
+    
+    Returns:
+        QDialog instance ready for DialogWrapper.open_standard_dialog() to execute
+    """
+    ui_path = os.path.join(UI_DIR, 'vegetable_menu.ui')
+    if not os.path.exists(ui_path):
+        print(f'vegetable_menu.ui not found at {ui_path}')
+        return None
 
-    configChanged = QtCore.pyqtSignal(dict)  # emits the final mapping dict
+    try:
+        content = uic.loadUi(ui_path)
+    except Exception as e:
+        print(f'Failed to load vegetable_menu.ui: {e}')
+        return None
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.FramelessWindowHint | QtCore.Qt.CustomizeWindowHint)
-        # Load .ui as a child widget, not as the dialog itself
-        self._base_dir = Path(__file__).resolve().parents[2]  # .../POS/Project
-        ui_path = self._base_dir / 'ui' / 'vegetable_menu.ui'
-        uic.loadUi(str(ui_path), self) # Pass 'self' as the second argument
-        # Wire custom window titlebar X button to close dialog
-        custom_close_btn = self.findChild(QtWidgets.QPushButton, 'customCloseBtn')
-        if custom_close_btn is not None:
-            custom_close_btn.clicked.connect(self.reject)
-        # Find all required widgets from content
-        self._rows = []  # list of tuples (lineEdit, slider, not_used_label)
-        for i in range(1, app_settings.veg_slots() + 1):
-            le = self.findChild(QtWidgets.QLineEdit, f"lineEdit_value_{i}")
-            sl = self.findChild(QtWidgets.QSlider, f"slider_toggle_{i}")
-            nu = self.findChild(QtWidgets.QLabel, f"label_not_used_{i}")
-            if not (isinstance(le, QtWidgets.QLineEdit) and isinstance(sl, QtWidgets.QSlider) and isinstance(nu, QtWidgets.QLabel)):
-                continue
-            self._rows.append((le, sl, nu))
-            # Ensure placeholder text looks inactive/muted consistently
-            try:
-                pal = le.palette()
-                pal.setColor(QtGui.QPalette.PlaceholderText, QtGui.QColor('#888888'))
-                le.setPalette(pal)
-            except Exception:
-                pass
-            # Mark the right-side label so QSS rules can target it without affecting other labels
-            try:
-                nu.setProperty('rightIndicator', True)
-                nu.style().unpolish(nu)
-                nu.style().polish(nu)
-                nu.update()
-            except Exception:
-                pass
-            sl.setRange(0, 1)
-            sl.setSingleStep(1)
-            sl.setPageStep(1)
-            # Make the slider compact to look like a switch
-            try:
-                sl.setFixedWidth(52)
-                sl.setFixedHeight(20)
-            except Exception:
-                pass
-            sl.valueChanged.connect(lambda v, idx=i: self._on_toggle_changed(idx, v))
-            # Right-side label styling handled via QSS
-            # Clear messages on any user edits
-            try:
-                le.textChanged.connect(self._clear_message)
-            except Exception:
-                pass
-        # Wire buttons
-        pushButton_ok = self.findChild(QtWidgets.QPushButton, 'pushButton_ok')
-        if pushButton_ok is not None:
-            pushButton_ok.clicked.connect(self._on_ok)
-        pushButton_cancel = self.findChild(QtWidgets.QPushButton, 'pushButton_cancel')
-        if pushButton_cancel is not None:
-            pushButton_cancel.clicked.connect(self.reject)
-        # Load existing mapping and populate
-        self._load_and_populate()
+    # Wrap in QDialog if needed
+    if isinstance(content, QDialog):
+        dlg = content
+    else:
+        dlg = QDialog(host_window)
+        lay = QVBoxLayout(dlg)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(content)
 
-    # ---------------------------- UI helpers ----------------------------
-    def _on_toggle_changed(self, idx: int, value: int) -> None:
-        # New semantics:
-        # value 0 (left) -> left side selected: QLineEdit editable; right text grayed
-        # value 1 (right) -> left side not editable (read-only); right text remains grayed
-        le, sl, nu = self._rows[idx - 1]
-        if value == 0:
-            le.setReadOnly(False)
-            le.setEnabled(True)
-            # Visuals handled via QSS
-            # Mark slider active for QSS (green background)
-            sl.setProperty('active', True)
-            # Mark input active for QSS (blue border)
-            le.setProperty('active', True)
-            # Right label becomes inactive color when left side is active
-            nu.setProperty('active', False)
-        else:
-            # Right selected: make left non-editable but not visually grayed
-            le.setReadOnly(True)
-            le.setEnabled(True)
-            # Visuals handled via QSS
-            # Mark slider inactive for QSS (gray background)
-            sl.setProperty('active', False)
-            # Mark input inactive for QSS
-            le.setProperty('active', False)
-            # Right label becomes active color when right side is active
-            nu.setProperty('active', True)
+    # Frameless + modal
+    dlg.setParent(host_window)
+    dlg.setModal(True)
+    dlg.setWindowModality(Qt.ApplicationModal)
+    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
 
-        # Refresh style to apply dynamic property changes
+    # Apply stylesheet
+    if os.path.exists(QSS_PATH):
         try:
-            sl.style().unpolish(sl)
-            sl.style().polish(sl)
-            sl.update()
-        except Exception:
-            pass
-        try:
-            le.style().unpolish(le)
-            le.style().polish(le)
-            le.update()
-        except Exception:
-            pass
-        try:
-            nu.style().unpolish(nu)
-            nu.style().polish(nu)
-            nu.update()
-        except Exception:
-            pass
-        # Clear any message when toggling choices
-        self._clear_message()
-
-    def _load_and_populate(self) -> None:
-        mapping = app_settings.load_vegetables()
-        n = min(app_settings.veg_slots(), len(self._rows))
-        for i in range(1, n + 1):
-            le, sl, nu = self._rows[i - 1]
-            entry = mapping.get(f"veg{i}", {"state": "unused", "label": "unused"})
-            if entry.get("state") == "custom":
-                # Left position (0) means editable
-                sl.setValue(0)
-                le.setReadOnly(False)
-                le.setEnabled(True)
-                le.setText(entry.get("label", ""))
-                # Visuals handled via QSS
-                sl.setProperty('active', True)
-                le.setProperty('active', True)
-                nu.setProperty('active', False)
-            else:
-                # Right position (1) means NOT USED
-                sl.setValue(1)
-                le.setReadOnly(True)
-                le.setEnabled(True)
-                le.clear()
-                # Visuals handled via QSS
-                sl.setProperty('active', False)
-                le.setProperty('active', False)
-                nu.setProperty('active', True)
-
-            # Ensure QSS picks up the property
-            try:
-                sl.style().unpolish(sl)
-                sl.style().polish(sl)
-                sl.update()
-            except Exception:
-                pass
-            try:
-                le.style().unpolish(le)
-                le.style().polish(le)
-                le.update()
-            except Exception:
-                pass
-            try:
-                nu.style().unpolish(nu)
-                nu.style().polish(nu)
-                nu.update()
-            except Exception:
-                pass
-        # Clear message on load
-        self._clear_message()
-
-        # Load dialog-specific stylesheet if available
-        try:
-            qss_path = self._base_dir / 'assets' / 'menu.qss'
-            if qss_path.exists():
-                with open(qss_path, 'r', encoding='utf-8') as f:
-                    self.setStyleSheet(f.read())
-        except Exception:
-            pass
-
-    # ---------------------------- Validation + Save ----------------------------
-    def _collect_active_labels(self) -> List[str]:
-        labels: List[str] = []
-        for i, (le, sl, _nu) in enumerate(self._rows, start=1):
-            if sl.value() == 0:  # left selected => custom/editable
-                txt = le.text().strip()
-                if not txt:
-                    le.setFocus()
-                    raise ValueError(f"Vegetable {i} cannot be empty.")
-                labels.append(txt)
-        # Duplicate check (case-insensitive)
-        lowered = [s.casefold() for s in labels]
-        seen = set()
-        for i, l in enumerate(lowered):
-            if l in seen:
-                raise ValueError("Duplicate labels are not allowed.")
-            seen.add(l)
-        return labels
-
-    def _sorted_assignment(self, labels: List[str]) -> dict:
-        # Sort A→Z (case-insensitive) and assign left-to-right; remainder unused
-        labels_sorted = sorted(labels, key=lambda s: s.casefold())
-        n = app_settings.veg_slots()
-        new_map = {f"veg{i}": {"state": "unused", "label": "unused"} for i in range(1, n + 1)}
-        for idx, lbl in enumerate(labels_sorted, start=1):
-            if idx > n:
-                break
-            new_map[f"veg{idx}"] = {"state": "custom", "label": lbl}
-        return new_map
-
-    def _on_ok(self) -> None:
-        try:
-            labels = self._collect_active_labels()
-        except ValueError as e:
-            self._set_message(str(e), kind='error')
-            return
-        mapping = self._sorted_assignment(labels)
-        try:
-            app_settings.save_vegetables(mapping)
+            with open(QSS_PATH, 'r', encoding='utf-8') as f:
+                dlg.setStyleSheet(f.read())
         except Exception as e:
-            self._set_message(f"Could not save labels: {e}", kind='error')
+            print(f'Failed to load menu.qss: {e}')
+
+    # Find widgets
+    combo_vegetable = dlg.findChild(QComboBox, 'comboVegetable')
+    input_product_code = dlg.findChild(QLineEdit, 'inputProductCode')
+    input_product_name = dlg.findChild(QLineEdit, 'inputProductName')
+    input_selling_price = dlg.findChild(QLineEdit, 'inputSellingPrice')
+    combo_unit = dlg.findChild(QComboBox, 'comboUnit')
+    input_supplier = dlg.findChild(QLineEdit, 'inputSupplier')
+    input_cost_price = dlg.findChild(QLineEdit, 'inputCostPrice')
+    lbl_error = dlg.findChild(QLabel, 'lblError')
+    btn_add = dlg.findChild(QPushButton, 'pushButton_add')
+    btn_remove = dlg.findChild(QPushButton, 'pushButton_remove')
+    btn_cancel = dlg.findChild(QPushButton, 'pushButton_cancel')
+    custom_close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
+
+    # Make product code non-focusable and read-only
+    if input_product_code is not None:
+        input_product_code.setFocusPolicy(Qt.NoFocus)
+        input_product_code.setReadOnly(True)
+
+    # Helper: Show error message
+    def show_error(msg: str):
+        if lbl_error is not None:
+            lbl_error.setText(msg)
+            lbl_error.setStyleSheet('color: red;')
+
+    # Helper: Clear error message
+    def clear_error():
+        if lbl_error is not None:
+            lbl_error.clear()
+
+    # Populate combobox from cache
+    if combo_vegetable is not None:
+        combo_vegetable.clear()
+        # Add placeholder item at top
+        combo_vegetable.addItem('Select Vegetable to update', userData=None)
+        for i in range(1, VEG_SLOTS + 1):
+            code = f'Veg{i:02d}'
+            found, name, price = get_product_info(code)
+            if found:
+                combo_vegetable.addItem(name, userData=code)
+            else:
+                placeholder = f'VEGETABLE {i}'
+                combo_vegetable.addItem(placeholder, userData=code)
+
+    # Helper: Load selected vegetable data into form
+    def load_vegetable_data(index):
+        """Load data for selected vegetable slot into input fields."""
+        clear_error()
+        
+        if combo_vegetable is None or index < 0:
             return
-        # notify and close
-        self._clear_message()
-        self.configChanged.emit(mapping)
-        self.accept()
+        
+        selected_code = combo_vegetable.itemData(index)
+        
+        # Clear fields and remove focus if placeholder selected
+        if selected_code is None:
+            if input_product_code is not None:
+                input_product_code.clear()
+            if input_product_name is not None:
+                input_product_name.clear()
+                input_product_name.clearFocus()
+            if input_selling_price is not None:
+                input_selling_price.clear()
+                input_selling_price.clearFocus()
+            if combo_unit is not None:
+                combo_unit.setCurrentIndex(0)
+                combo_unit.clearFocus()
+            if input_supplier is not None:
+                input_supplier.clear()
+                input_supplier.clearFocus()
+            if input_cost_price is not None:
+                input_cost_price.clear()
+                input_cost_price.clearFocus()
+            # Set focus to combobox itself
+            if combo_vegetable is not None:
+                combo_vegetable.setFocus()
+            return
+        
+        # Display product code
+        if input_product_code is not None:
+            input_product_code.setText(selected_code)
+        
+        # Check if vegetable exists in database
+        found, details = get_product_full(selected_code)
+        
+        if found and details.get('name'):
+            # Populate fields with existing data
+            if input_product_name is not None:
+                input_product_name.setText(details.get('name', ''))
+            if input_selling_price is not None:
+                input_selling_price.setText(str(details.get('price', '')))
+            if combo_unit is not None:
+                unit = details.get('unit', '')
+                idx = combo_unit.findText(unit, Qt.MatchFixedString)
+                if idx >= 0:
+                    combo_unit.setCurrentIndex(idx)
+            if input_supplier is not None:
+                input_supplier.setText(details.get('supplier', ''))
+            if input_cost_price is not None:
+                cost = details.get('cost', None)
+                input_cost_price.setText(str(cost) if cost else '')
+        else:
+            # Clear fields for new entry
+            if input_product_name is not None:
+                input_product_name.clear()
+            if input_selling_price is not None:
+                input_selling_price.clear()
+            if combo_unit is not None:
+                combo_unit.setCurrentIndex(0)
+            if input_supplier is not None:
+                input_supplier.clear()
+            if input_cost_price is not None:
+                input_cost_price.clear()
+        
+        # Set focus to product name field for immediate typing
+        if input_product_name is not None:
+            QTimer.singleShot(0, lambda: input_product_name.setFocus())
+    
+    # Connect combobox selection change to load data
+    if combo_vegetable is not None:
+        combo_vegetable.currentIndexChanged.connect(load_vegetable_data)
+        # Set to placeholder (index 0) and focus on combobox
+        if combo_vegetable.count() > 0:
+            combo_vegetable.setCurrentIndex(0)
+            combo_vegetable.setFocus()
 
-    # ---------------------------- Message helpers ----------------------------
-    def _set_message(self, text: str, kind: str = 'info') -> None:
-        lbl = getattr(self, 'messageLabel', None)
-        if isinstance(lbl, QtWidgets.QLabel):
-            try:
-                lbl.setText(text)
-                lbl.setProperty('kind', kind)
-                lbl.style().unpolish(lbl)
-                lbl.style().polish(lbl)
-                lbl.update()
-            except Exception:
-                pass
+    # Helper: Validate mandatory fields
+    def validate_inputs():
+        if input_product_name is None or not input_product_name.text().strip():
+            show_error('Error: Name is required')
+            return False
+        if input_selling_price is None or not input_selling_price.text().strip():
+            show_error('Error: Selling price is required')
+            return False
+        try:
+            price = float(input_selling_price.text().strip())
+            if price <= 0:
+                show_error('Error: Valid selling price is required')
+                return False
+        except ValueError:
+            show_error('Error: Invalid selling price format')
+            return False
+        if combo_unit is None or combo_unit.currentIndex() <= 0:
+            show_error('Error: Unit is required')
+            return False
+        clear_error()
+        return True
 
-    def _clear_message(self) -> None:
-        lbl = getattr(self, 'messageLabel', None)
-        if isinstance(lbl, QtWidgets.QLabel):
+    # Helper: Get current vegetables from cache
+    def get_current_vegetables():
+        """Returns list of dicts with vegetable data from cache."""
+        vegetables = []
+        for i in range(1, VEG_SLOTS + 1):
+            code = f'Veg{i:02d}'
+            found, details = get_product_full(code)
+            if found and details.get('name'):
+                vegetables.append({
+                    'code': code,
+                    'name': details['name'],
+                    'price': details.get('price', 0.0),
+                    'category': details.get('category', 'Vegetable'),
+                    'supplier': details.get('supplier', ''),
+                    'cost': details.get('cost', None),
+                    'unit': details.get('unit', 'KG'),
+                })
+        return vegetables
+
+    # Helper: Sort and reassign vegetables to database
+    def sort_and_update_database(vegetables_list):
+        """Sort vegetables A-Z, batch update database and cache."""
+        # Sort alphabetically (case-insensitive)
+        sorted_vegs = sorted(vegetables_list, key=lambda v: v['name'].casefold())
+        
+        # Batch delete all Veg01-Veg16
+        for i in range(1, VEG_SLOTS + 1):
+            delete_product(f'Veg{i:02d}')
+        
+        # Insert sorted vegetables sequentially
+        for i, veg in enumerate(sorted_vegs, start=1):
+            now_str = QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss')
+            add_product(
+                product_code=f'Veg{i:02d}',
+                name=veg['name'],
+                selling_price=veg['price'],
+                category=veg.get('category', 'Vegetable'),
+                supplier=veg.get('supplier'),
+                cost_price=veg.get('cost'),
+                unit=veg.get('unit', 'KG'),
+                last_updated=now_str
+            )
+        
+        # Refresh cache
+        refresh_product_cache()
+
+    # ADD button handler
+    def on_add_clicked():
+        clear_error()
+        
+        # Validate inputs
+        if not validate_inputs():
+            return
+        
+        # Get selected product code
+        if combo_vegetable is None:
+            show_error('Error: No vegetable selected')
+            return
+        
+        selected_code = combo_vegetable.currentData()
+        if not selected_code:
+            show_error('Error: Invalid vegetable selection')
+            return
+        
+        # Gather input values
+        name = input_product_name.text().strip()
+        try:
+            price = float(input_selling_price.text().strip())
+        except ValueError:
+            show_error('Error: Invalid selling price')
+            return
+        
+        unit = combo_unit.currentText().strip() if combo_unit else 'KG'
+        category = 'Vegetable'
+        supplier = input_supplier.text().strip() if input_supplier and input_supplier.text().strip() else None
+        
+        cost = None
+        if input_cost_price and input_cost_price.text().strip():
             try:
-                lbl.clear()
-                lbl.setProperty('kind', 'info')
-                lbl.style().unpolish(lbl)
-                lbl.style().polish(lbl)
-                lbl.update()
-            except Exception:
+                cost = float(input_cost_price.text().strip())
+            except ValueError:
                 pass
+        
+        # Get current vegetables from cache
+        vegetables = get_current_vegetables()
+        
+        # Check if this slot already has a vegetable and update, or add new
+        existing = None
+        for i, veg in enumerate(vegetables):
+            if veg['code'] == selected_code:
+                existing = i
+                break
+        
+        new_veg = {
+            'code': selected_code,
+            'name': name,
+            'price': price,
+            'category': category,
+            'supplier': supplier,
+            'cost': cost,
+            'unit': unit
+        }
+        
+        if existing is not None:
+            vegetables[existing] = new_veg
+        else:
+            vegetables.append(new_veg)
+        
+        # Sort and update database
+        try:
+            sort_and_update_database(vegetables)
+            dlg.accept()
+        except Exception as e:
+            show_error(f'Error: {e}')
+
+    # REMOVE button handler
+    def on_remove_clicked():
+        clear_error()
+        
+        # Get selected product code
+        if combo_vegetable is None:
+            show_error('Error: No vegetable selected')
+            return
+        
+        selected_code = combo_vegetable.currentData()
+        if not selected_code:
+            show_error('Error: Invalid vegetable selection')
+            return
+        
+        # Check if vegetable exists in cache
+        found, name, price = get_product_info(selected_code)
+        if not found:
+            # Extract placeholder number for error message
+            placeholder_num = selected_code.replace('Veg', '').lstrip('0')
+            show_error(f'Error: No vegetable added for VEGETABLE {placeholder_num}')
+            return
+        
+        # Get current vegetables
+        vegetables = get_current_vegetables()
+        
+        # Remove the selected vegetable
+        vegetables = [v for v in vegetables if v['code'] != selected_code]
+        
+        # Sort and update database
+        try:
+            sort_and_update_database(vegetables)
+            dlg.accept()
+        except Exception as e:
+            show_error(f'Error: {e}')
+
+    # CANCEL button handler
+    def on_cancel_clicked():
+        dlg.reject()
+
+    # Wire buttons
+    if btn_add is not None:
+        btn_add.clicked.connect(on_add_clicked)
+    if btn_remove is not None:
+        btn_remove.clicked.connect(on_remove_clicked)
+    if btn_cancel is not None:
+        btn_cancel.clicked.connect(on_cancel_clicked)
+    if custom_close_btn is not None:
+        custom_close_btn.clicked.connect(on_cancel_clicked)
+
+    return dlg
 

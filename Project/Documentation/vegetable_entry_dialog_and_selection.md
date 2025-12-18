@@ -12,7 +12,7 @@ This document describes the workflow for the Vegetable Entry dialog, where users
 
 - The table widget in the UI file must have the objectName set to `vegEntryTable`.
 - The dialog controller locates the table using `content.findChild(QTableWidget, 'vegEntryTable')`.
-- The table is configured with 5 columns and custom header labels: `['No.', 'Item', 'Weight (kg)', 'Total', 'Del']`.
+- The table is configured with 5 columns and custom header labels: `['No.', 'Item', 'Weight (KG)', 'Total', 'Del']`.
 - Column widths and resize modes are set programmatically for consistent appearance.
 
 ## QSS Styling

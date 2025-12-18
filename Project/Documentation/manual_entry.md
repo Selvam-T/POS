@@ -220,7 +220,7 @@ else:
 
 ## Future Enhancements
 
-- [ ] Add unit selection (Kg, Lbs, Pieces, etc.)
+- [ ] Add unit selection (KG, EACH, etc.)
 - [ ] Add product category selection
 - [ ] Add barcode/SKU field
 - [ ] Add tax rate configuration

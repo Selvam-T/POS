@@ -39,7 +39,7 @@ from modules.menu.devices_menu import open_devices_dialog as launch_devices_dial
 from modules.menu.reports_menu import open_reports_dialog as launch_reports_dialog
 from modules.menu.greeting_menu import open_greeting_dialog as launch_greeting_dialog
 from modules.menu.product_menu import open_product_dialog as launch_product_dialog
-from modules.menu.vegetable_menu import VegetableMenuDialog
+from modules.menu.vegetable_menu import open_vegetable_menu_dialog as launch_vegetable_menu_dialog
 # --- Sales frame dialog controllers ---
 from modules.sales.vegetable_entry import open_vegetable_entry_dialog as launch_vegetable_entry_dialog
 from modules.sales.manual_entry import open_manual_entry_dialog as launch_manual_entry_dialog
@@ -110,8 +110,11 @@ class MainLoader(QMainWindow):
         self.dialog_wrapper.open_standard_dialog(launch_reports_dialog, dialog_key='reports_menu')
 
     def open_vegetable_menu_dialog(self):
-        """Open Vegetable Label Edit dialog."""
-        self.dialog_wrapper.open_standard_dialog(VegetableMenuDialog, dialog_key='vegetable_menu')
+        """Open Vegetable Management dialog."""
+        self.dialog_wrapper.open_product_dialog(
+            launch_vegetable_menu_dialog,
+            dialog_key='vegetable_menu'
+        )
 
     def open_vegetable_entry_dialog(self):
         """Open Add Vegetable panel."""

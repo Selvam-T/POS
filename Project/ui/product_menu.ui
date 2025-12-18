@@ -198,12 +198,12 @@
                                         <widget class="QComboBox" name="unitComboBox">
                                             <item>
                                                 <property name="text">
-                                                    <string>pcs</string>
+                                                    <string>EACH</string>
                                                 </property>
                                             </item>
                                             <item>
                                                 <property name="text">
-                                                    <string>kg</string>
+                                                    <string>KG</string>
                                                 </property>
                                             </item>
                                         </widget>

@@ -238,8 +238,17 @@ QDialog#VegetableMenuDialog QComboBox:focus {
 }
 
 QDialog#VegetableMenuDialog QComboBox::drop-down {
-  border: none;
-  width: 20px;
+  subcontrol-origin: padding;
+  subcontrol-position: top right;
+  width: 30px;
+  border-left: 1px solid #BDC3C7;
+  background: #FFFBE6;
+}
+
+QDialog#VegetableMenuDialog QComboBox::down-arrow {
+  image: url(assets/icons/combo_arrow_down.svg);
+  width: 16px;
+  height: 16px;
 }
 
 /* 5. Error message Styling */

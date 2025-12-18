@@ -454,7 +454,7 @@ def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial
                 if not matched and category_combo.count()>0: category_combo.setCurrentIndex(0)
             if unit_combo:
                 val = str(pdata.get('unit','')).strip().lower()
-                norm = 'pcs' if val in ('piece','pieces','pcs','pc') else ('kg' if val in ('kg','kilogram','kilograms') else val)
+                norm = 'EACH' if val in ('piece','pieces','pcs','pc','each','EACH') else ('KG' if val in ('kg','KG','kilogram','kilograms') else val)
                 matched=False
                 for i in range(unit_combo.count()):
                     if unit_combo.itemText(i).strip().lower() == norm:

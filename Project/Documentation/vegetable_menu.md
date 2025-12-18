@@ -43,8 +43,8 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
 - `lblUnit`: "Unit * :"
 - `comboUnit`: Dropdown with options:
   - "Select Unit" (default)
-  - "Kg"
-  - "Pcs"
+  - "KG"
+  - "EACH"
 
 **Row 5: Selling Price** (Required)
 - `lblSellingPrice`: "Selling Price * :"
@@ -71,8 +71,8 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
 ## Key Features
 
 ### Unit Selection Logic
-- **Kg mode:** Vegetable entry expects weight from weighing scale
-- **Pcs mode:** Vegetable entry does not expect scale reading, uses piece count
+- **KG mode:** Vegetable entry expects weight from weighing scale
+- **EACH mode:** Vegetable entry does not expect scale reading, uses piece count
 - Controller must handle unit-specific behavior in `vegetable_entry.py`
 
 ### Required vs Optional Fields
@@ -109,7 +109,7 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
 ### Validation Rules
 1. Vegetable must be selected (not "Select vegetable to update")
 2. Product Name must not be empty
-3. Unit must be selected (Kg or Pcs, not "Select Unit")
+3. Unit must be selected (KG or EACH, not "Select Unit")
 4. Selling Price must be a valid number
 5. Cost Price (if provided) must be a valid number
 6. Supplier is optional
