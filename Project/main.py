@@ -99,7 +99,7 @@ class MainLoader(QMainWindow):
     def open_greeting_menu_dialog(self):
         """Open Greeting dialog."""
         self.dialog_wrapper.open_standard_dialog(launch_greeting_dialog, dialog_key='greeting_menu')
-        self.dialog_wrapper.open_standard_dialog(launch_greeting_dialog)
+        """self.dialog_wrapper.open_standard_dialog(launch_greeting_dialog)"""
 
     def open_devices_menu_dialog(self):
         """Open Devices dialog."""

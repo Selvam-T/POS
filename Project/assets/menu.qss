@@ -156,7 +156,7 @@ QDialog#VegetableMenuDialog {
   font-family: "Verdana";
 }
 
-/* Title Bar Styling (logout_menu style) */
+/* 1. Title Bar Styling */
 QDialog#VegetableMenuDialog QFrame#customTitleBar {
   background: transparent;
   border-bottom: 1px solid #e6e6e6;
@@ -189,7 +189,7 @@ QDialog#VegetableMenuDialog QPushButton#customCloseBtn:pressed {
   background: #ffc2c2;
 }
 
-/* Content Layout Styling (manual_entry style) */
+/* 2. Content Layout Styling */
 QDialog#VegetableMenuDialog QLabel {
   font-size: 11pt;
   color: #2C3E50;
@@ -197,7 +197,7 @@ QDialog#VegetableMenuDialog QLabel {
   font-family: "Verdana";
 }
 
-/* Input Fields Styling */
+/* 3. Input Fields Styling */
 QDialog#VegetableMenuDialog QLineEdit {
   font-size: 10pt;
   padding: 8px;
@@ -222,7 +222,7 @@ QDialog#VegetableMenuDialog QLineEdit:read-only {
   color: #555;
 }
 
-/* ComboBox Styling */
+/* 4. ComboBox Styling */
 QDialog#VegetableMenuDialog QComboBox {
   font-size: 10pt;
   padding: 8px;
@@ -242,15 +242,16 @@ QDialog#VegetableMenuDialog QComboBox::drop-down {
   width: 20px;
 }
 
-/* Error Label Styling */
+/* 5. Error message Styling */
 QDialog#VegetableMenuDialog QLabel#lblError {
   color: #C0392B;
   font-weight: bold;
   min-height: 20px;
 }
 
-/* Button Styling */
-QDialog#VegetableMenuDialog QPushButton#pushButton_ok,
+/* 6. Button Styling */
+QDialog#VegetableMenuDialog QPushButton#pushButton_add,
+QDialog#VegetableMenuDialog QPushButton#pushButton_remove,
 QDialog#VegetableMenuDialog QPushButton#pushButton_cancel {
   font-size: 11pt;
   font-family: "Verdana";
@@ -261,40 +262,58 @@ QDialog#VegetableMenuDialog QPushButton#pushButton_cancel {
   border-radius: 6px;
 }
 
-QDialog#VegetableMenuDialog QPushButton#pushButton_ok {
+QDialog#VegetableMenuDialog QPushButton#pushButton_add {
   background-color: #27AE60;
   color: white;
   border: 1px solid #1E8449;
 }
 
-QDialog#VegetableMenuDialog QPushButton#pushButton_ok:hover {
+QDialog#VegetableMenuDialog QPushButton#pushButton_add:hover {
   background-color: #2ECC71;
 }
 
-QDialog#VegetableMenuDialog QPushButton#pushButton_ok:pressed {
+QDialog#VegetableMenuDialog QPushButton#pushButton_add:pressed {
   background-color: #196F3D;
   padding-top: 2px;
   padding-left: 2px;
 }
 
-QDialog#VegetableMenuDialog QPushButton#pushButton_cancel {
+QDialog#VegetableMenuDialog QPushButton#pushButton_remove {
   background-color: #C0392B;
   color: white;
   border: 1px solid #922B21;
 }
 
-QDialog#VegetableMenuDialog QPushButton#pushButton_cancel:hover {
+QDialog#VegetableMenuDialog QPushButton#pushButton_remove:hover {
   background-color: #E74C3C;
 }
 
-QDialog#VegetableMenuDialog QPushButton#pushButton_cancel:pressed {
+QDialog#VegetableMenuDialog QPushButton#pushButton_remove:pressed {
   background-color: #922B21;
   padding-top: 2px;
   padding-left: 2px;
 }
+
+QDialog#VegetableMenuDialog QPushButton#pushButton_cancel {
+  background-color: #7F8C8D;
+  color: white;
+  border: 1px solid #616A6B;
+}
+
+QDialog#VegetableMenuDialog QPushButton#pushButton_cancel:hover {
+  background-color: #95A5A6;
+}
+
+QDialog#VegetableMenuDialog QPushButton#pushButton_cancel:pressed {
+  background-color: #555F60;
+  padding-top: 2px;
+  padding-left: 2px;
+}
+
 QPushButton#customCloseBtn:pressed {
   background: #ffc9c9;
 }
+
 QLabel#label_title {
   color: #222;
   font-size: 18px;
@@ -328,10 +347,6 @@ QLineEdit {
 }
 QLineEdit[active="true"] {
   border-color: #2684ff;
-}
-QLineEdit:read-only {
-  background: #f5f5f5;
-  color: #555;
 }
 QLineEdit[active="true"] {
   color: #222;
