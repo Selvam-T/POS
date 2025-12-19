@@ -1,5 +1,5 @@
 """
-Sales table setup and helper functions
+Table setup and helper functions for product tables
 Provides:
 - setup_sales_table(table): configure headers, widths, and insert a placeholder row
 - set_sales_rows(table, rows): populate rows with qty input, unit price, totals, and a delete button
@@ -100,14 +100,15 @@ def setup_sales_table(table: QTableWidget) -> None:
     set_sales_rows(table, [])
 
 
-def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: Optional[QStatusBar] = None) -> None:
+def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: Optional[QStatusBar] = None, editable: bool = True) -> None:
     """Replace table rows with provided data.
     Fetches product info from cache if unit_price not provided.
     
     Args:
         table: QTableWidget to populate
-        rows: list of dicts with keys: product (str), quantity (int/float), unit_price (float, optional)
+        rows: list of dicts with keys: product (str), quantity (int/float), unit_price (float, optional), display_text (str, optional)
         status_bar: Optional QStatusBar to show error messages for invalid products
+        editable: Whether quantity cells should be editable (default: True)
     """
     table.setRowCount(0)
     for r, data in enumerate(rows):
@@ -151,8 +152,13 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
 
         # Col 2: Quantity (QLineEdit to match QSS qtyInput styling) inside a tintable container
         qty_val = data.get('quantity', 0)
-        qty_edit = QLineEdit(str(qty_val))
+        display_text = data.get('display_text', str(qty_val))  # Allow custom display text (e.g., "500 g")
+        qty_edit = QLineEdit(display_text)
         qty_edit.setObjectName('qtyInput')  # styled via QSS
+        # Store numeric value for calculations
+        qty_edit.setProperty('numeric_value', float(qty_val))
+        # Set editability
+        qty_edit.setReadOnly(not editable)
         # Ensure style-sheet backgrounds are actually painted for this widget
         try:
             qty_edit.setAttribute(Qt.WA_StyledBackground, True)
@@ -163,8 +169,9 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         except Exception:
             pass
         qty_edit.setAlignment(Qt.AlignCenter)
-        # Recalculate total when quantity changes - use dynamic row lookup
-        qty_edit.textChanged.connect(lambda _t, e=qty_edit, t=table: _recalc_from_editor(e, t))
+        # Recalculate total when quantity changes - use dynamic row lookup (only if editable)
+        if editable:
+            qty_edit.textChanged.connect(lambda _t, e=qty_edit, t=table: _recalc_from_editor(e, t))
         # Select the row when the qty input gains focus; clear selection when editing finishes
         _install_row_focus_behavior(qty_edit, table, r)
         qty_container = QWidget()
@@ -294,11 +301,26 @@ def recalc_row_total(table: QTableWidget, row: int) -> None:
     if qty_container is not None:
         editor = qty_container if isinstance(qty_container, QLineEdit) else qty_container.findChild(QLineEdit, 'qtyInput')
         if isinstance(editor, QLineEdit):
-            try:
-                text = editor.text()
-                qty = float(text) if text not in ('', None, '') else 0.0
-            except ValueError:
-                qty = 0.0
+            # Check if field is read-only (uses stored numeric value) or editable (parse text)
+            if editor.isReadOnly():
+                # For read-only fields, use stored numeric value
+                numeric_val = editor.property('numeric_value')
+                if numeric_val is not None:
+                    try:
+                        qty = float(numeric_val)
+                    except (ValueError, TypeError):
+                        qty = 0.0
+                else:
+                    qty = 0.0
+            else:
+                # For editable fields, parse text and update stored value
+                try:
+                    text = editor.text()
+                    qty = float(text) if text not in ('', None, '') else 0.0
+                    # Update stored numeric value for consistency
+                    editor.setProperty('numeric_value', qty)
+                except ValueError:
+                    qty = 0.0
         else:
             # Unlikely, but try reading from an item if present
             qty_item = table.item(row, 2)
@@ -567,7 +589,7 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
             show_temp_status(status_bar, f"Added {product_name} (quantity updated)", 3000)
     else:
         # New product → add row
-        _add_product_row(table, barcode, product_name, unit_price, quantity=1, status_bar=status_bar)
+        _add_product_row(table, barcode, product_name, unit_price, quantity=1, status_bar=status_bar, editable=True)
         if status_bar:
             show_temp_status(status_bar, f"Added {product_name}", 3000)
 
@@ -629,7 +651,8 @@ def _increment_row_quantity(table: QTableWidget, row: int) -> None:
 
 
 def _add_product_row(table: QTableWidget, product_code: str, product_name: str, 
-                     unit_price: float, quantity: float = 1, status_bar: Optional[QStatusBar] = None) -> None:
+                     unit_price: float, quantity: float = 1, status_bar: Optional[QStatusBar] = None, 
+                     editable: bool = True, display_text: Optional[str] = None) -> None:
     """
     Add a new product row to the table.
     
@@ -640,6 +663,8 @@ def _add_product_row(table: QTableWidget, product_code: str, product_name: str,
         unit_price: Product unit price
         quantity: Quantity of product to add (default: 1)
         status_bar: Optional QStatusBar for error messages
+        editable: Whether quantity cell should be editable (default: True)
+        display_text: Optional custom display text for quantity (e.g., "500 g")
     """
     # Get current rows data
     current_rows = []
@@ -649,16 +674,30 @@ def _add_product_row(table: QTableWidget, product_code: str, product_name: str,
         if product_item is None:
             continue
             
-        # Get quantity
+        # Get quantity and display text
         qty_container = table.cellWidget(r, 2)
         qty = 1
+        row_display_text = None
         if qty_container is not None:
             editor = qty_container.findChild(QLineEdit, 'qtyInput')
             if editor is not None:
-                try:
-                    qty = float(editor.text()) if editor.text() else 1
-                except ValueError:
-                    qty = 1
+                # Use numeric_value property if available (preserves read-only values)
+                numeric_val = editor.property('numeric_value')
+                if numeric_val is not None:
+                    try:
+                        qty = float(numeric_val)
+                    except (ValueError, TypeError):
+                        qty = 1
+                else:
+                    # Parse text for editable fields
+                    try:
+                        qty = float(editor.text()) if editor.text() else 1
+                    except ValueError:
+                        qty = 1
+                
+                # Preserve display text if different from numeric value
+                if editor.isReadOnly():
+                    row_display_text = editor.text()
         
         # Get unit price
         price_item = table.item(r, 3)
@@ -669,18 +708,24 @@ def _add_product_row(table: QTableWidget, product_code: str, product_name: str,
             except ValueError:
                 price = 0.0
         
-        current_rows.append({
+        row_data = {
             'product': product_item.text(),  # Store name for now
             'quantity': qty,
             'unit_price': price
-        })
+        }
+        if row_display_text is not None:
+            row_data['display_text'] = row_display_text
+        current_rows.append(row_data)
     
     # Add new product
-    current_rows.append({
+    new_row = {
         'product': product_name,
         'quantity': quantity,
         'unit_price': unit_price
-    })
+    }
+    if display_text is not None:
+        new_row['display_text'] = display_text
+    current_rows.append(new_row)
     
-    # Rebuild table with new data
-    set_sales_rows(table, current_rows, status_bar)
+    # Rebuild table with new data (use editable=True for all existing rows, new row uses parameter)
+    set_sales_rows(table, current_rows, status_bar, editable=editable)

@@ -105,7 +105,7 @@ class BarcodeManager(QObject):
             pass
 
         try:
-            from modules.sales.salesTable import handle_barcode_scanned
+            from modules.table import handle_barcode_scanned
             if not found:
                 # Product not found - open Product Management in ADD mode with code prefilled
                 if status_bar and hasattr(status_bar, 'showMessage'):

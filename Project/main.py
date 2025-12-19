@@ -28,7 +28,7 @@ from PyQt5.QtCore import Qt, QSize, QEvent, QTimer
 from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QFontMetrics, QIcon
 
-from modules.sales.salesTable import setup_sales_table, handle_barcode_scanned, bind_total_label
+from modules.table import setup_sales_table, handle_barcode_scanned, bind_total_label
 from modules.sales.sales_frame_setup import setup_sales_frame
 from modules.devices.barcode_manager import BarcodeManager
 from modules.wrappers.dialog_wrapper import DialogWrapper

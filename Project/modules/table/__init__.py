@@ -1,7 +1,8 @@
 """
-Sales module for the POS system.
+Table operations module for the POS system.
+Provides generic table setup and manipulation functions for product tables.
 """
-from modules.table import (
+from .table_operations import (
     setup_sales_table,
     set_sales_rows,
     remove_table_row,
@@ -10,6 +11,7 @@ from modules.table import (
     bind_total_label,
     recompute_total,
     get_total,
+    handle_barcode_scanned,
 )
 
 __all__ = [
@@ -21,4 +23,5 @@ __all__ = [
     'bind_total_label',
     'recompute_total',
     'get_total',
+    'handle_barcode_scanned',
 ]

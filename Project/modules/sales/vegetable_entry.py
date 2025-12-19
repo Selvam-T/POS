@@ -56,7 +56,7 @@ def open_vegetable_entry_dialog(parent):
         vtable = dlg.findChild(QTableWidget, 'vegEntryTable')
         if vtable is not None:
             vtable.setColumnCount(6)
-            vtable.setHorizontalHeaderLabels(['No.', 'Item', 'Kilogram', 'Unit Price', 'Total', 'Del'])
+            vtable.setHorizontalHeaderLabels(['No.', 'Name', 'Kilogram', 'Unit Price', 'Total', 'Del'])
             header = vtable.horizontalHeader()
             header.setStretchLastSection(False)
             header.setSectionResizeMode(0, QHeaderView.Fixed)   # No.

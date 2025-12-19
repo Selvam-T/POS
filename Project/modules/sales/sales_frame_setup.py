@@ -5,7 +5,7 @@ import os
 from PyQt5 import uic
 from PyQt5.QtWidgets import QVBoxLayout, QSizePolicy, QPushButton, QWidget, QTableWidget, QLabel
 from PyQt5.QtGui import QFontMetrics
-from modules.sales.salesTable import setup_sales_table
+from modules.table import setup_sales_table
 
 def setup_sales_frame(main_window, UI_DIR):
     """
@@ -107,7 +107,7 @@ def setup_sales_frame(main_window, UI_DIR):
                 if total_container is not None:
                     total_label = total_container.findChild(QLabel, 'totalValue')
                     if total_label is not None:
-                        from modules.sales.salesTable import bind_total_label
+                        from modules.table import bind_total_label
                         bind_total_label(sale_table, total_label)
         except Exception:
             pass

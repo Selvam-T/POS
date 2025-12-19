@@ -28,7 +28,7 @@ from modules.db_operation import (
     add_product, update_product, delete_product, refresh_product_cache,
     get_product_info, get_product_full, PRODUCT_CACHE
 )
-from modules.sales.salesTable import handle_barcode_scanned
+from modules.table import handle_barcode_scanned
 # Derive project base dir from this file location: modules/menu -> modules -> Project
 # __file__ = .../Project/modules/menu/product_menu.py
 # dirname x1 => .../Project/modules/menu
