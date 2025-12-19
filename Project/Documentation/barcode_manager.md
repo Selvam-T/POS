@@ -14,8 +14,30 @@
 
 - **Modal Scanner Blocking:**
   - Provides methods to temporarily block scanner input during modal dialogs or critical UI operations.
+  - **Input Whitelist for Modal Dialogs:** Allows keyboard input in specific editable fields during modals (see Whitelisted Fields below).
   - Ensures that scanner input does not interfere with dialogs or data entry when the UI is in a modal state.
   - Automatically unblocks scanner input when dialogs are closed.
+
+## Whitelisted Fields for Modal Input
+
+During modal dialogs, the barcode manager allows keyboard input in specific fields to support legitimate user entry. The whitelist includes:
+
+**Editable Fields:**
+- `qtyInput` — Quantity input in manual entry and vegetable entry dialogs
+- `productCodeLineEdit` — Product code field in manual entry
+- `refundInput` — Refund amount input
+- `inputProductName` — Product name field in product/vegetable menu
+- `inputSellingPrice` — Selling price field in product/vegetable menu
+- `inputSupplier` — Supplier field in product/vegetable menu
+- `inputCostPrice` — Cost price field in product/vegetable menu
+
+**Purpose:**
+- Prevents barcode scanner leaks while allowing users to type in quantity, product codes, prices, etc.
+- Without whitelist, all keyboard input (including typing) would be blocked during modals
+- Improves UX for data entry in modal dialogs
+
+**Implementation:**
+Event filter checks widget's `objectName` against whitelist before blocking input events.
 
 - **Barcode Override Handling:**
   - Supports barcode override logic, allowing certain dialogs or UI states to temporarily take exclusive control of scanner input.

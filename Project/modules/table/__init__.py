@@ -12,6 +12,7 @@ from .table_operations import (
     recompute_total,
     get_total,
     handle_barcode_scanned,
+    _rebuild_mixed_editable_table,
 )
 
 __all__ = [
@@ -24,4 +25,5 @@ __all__ = [
     'recompute_total',
     'get_total',
     'handle_barcode_scanned',
+    '_rebuild_mixed_editable_table',
 ]

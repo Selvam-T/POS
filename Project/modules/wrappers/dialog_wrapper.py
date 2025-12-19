@@ -8,7 +8,7 @@ class DialogWrapper:
 
     # Dialog size ratios (width_ratio, height_ratio) as fraction of main window
     DIALOG_RATIOS = {
-        'vegetable_entry': (0.4, 0.8),
+        'vegetable_entry': (0.5, 0.8),
         'manual_entry': (0.4, 0.3),
         'logout_menu': (0.25, 0.25),
         'admin_menu': (0.4, 0.3),
@@ -29,6 +29,7 @@ class DialogWrapper:
             main_window: MainLoader instance (QMainWindow).
         """
         self.main = main_window
+        self._last_dialog = None  # Track last executed dialog for callbacks
 
     # ============ Helper Functions ============
 
@@ -185,6 +186,7 @@ class DialogWrapper:
 
             self._setup_dialog_geometry(dlg, width_ratio, height_ratio)
             dlg.finished.connect(self._create_cleanup(on_finish))
+            self._last_dialog = dlg  # Store reference for callbacks
             dlg.exec_()
 
         except Exception as e:

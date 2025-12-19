@@ -118,7 +118,91 @@ class MainLoader(QMainWindow):
 
     def open_vegetable_entry_dialog(self):
         """Open Add Vegetable panel."""
-        self.dialog_wrapper.open_standard_dialog(launch_vegetable_entry_dialog, dialog_key='vegetable_entry')
+        # Store reference to process after dialog closes
+        def on_vegetable_entry_finish():
+            """Process vegetable rows after dialog closes."""
+            if not hasattr(self, 'sales_table'):
+                return
+            
+            try:
+                from modules.table import set_sales_rows
+                from PyQt5.QtWidgets import QLineEdit
+                
+                # Get the dialog that just closed
+                dlg = self.dialog_wrapper._last_dialog
+                if dlg is None or dlg.result() != QDialog.Accepted:
+                    return
+                
+                vegetable_rows = dlg.property('vegetable_rows')
+                if not vegetable_rows:
+                    return
+                
+                # Get existing rows from sales table
+                existing_rows = []
+                for r in range(self.sales_table.rowCount()):
+                    product_item = self.sales_table.item(r, 1)
+                    if product_item is None:
+                        continue
+                    
+                    # Get quantity and editable state
+                    qty_container = self.sales_table.cellWidget(r, 2)
+                    qty = 1.0
+                    display_text = None
+                    row_editable = True
+                    if qty_container is not None:
+                        editor = qty_container.findChild(QLineEdit, 'qtyInput')
+                        if editor is not None:
+                            row_editable = not editor.isReadOnly()
+                            numeric_val = editor.property('numeric_value')
+                            if numeric_val is not None:
+                                try:
+                                    qty = float(numeric_val)
+                                except (ValueError, TypeError):
+                                    qty = 1.0
+                            else:
+                                try:
+                                    qty = float(editor.text()) if editor.text() else 1.0
+                                except ValueError:
+                                    qty = 1.0
+                            
+                            if not row_editable:
+                                display_text = editor.text()
+                    
+                    # Get unit price
+                    price_item = self.sales_table.item(r, 3)
+                    price = 0.0
+                    if price_item is not None:
+                        try:
+                            price = float(price_item.text())
+                        except ValueError:
+                            price = 0.0
+                    
+                    row_data = {
+                        'product': product_item.text(),
+                        'quantity': qty,
+                        'unit_price': price,
+                        'editable': row_editable
+                    }
+                    if display_text:
+                        row_data['display_text'] = display_text
+                    existing_rows.append(row_data)
+                
+                # Combine existing + vegetable rows
+                combined_rows = existing_rows + vegetable_rows
+                
+                # Rebuild sales table with mixed editable states
+                from modules.table.table_operations import _rebuild_mixed_editable_table
+                _rebuild_mixed_editable_table(self.sales_table, combined_rows)
+            except Exception as e:
+                print(f'Failed to transfer vegetable rows: {e}')
+                import traceback
+                traceback.print_exc()
+        
+        self.dialog_wrapper.open_standard_dialog(
+            launch_vegetable_entry_dialog, 
+            dialog_key='vegetable_entry',
+            on_finish=on_vegetable_entry_finish
+        )
 
     def open_manual_panel(self):
         """Open Manual Product Entry panel."""

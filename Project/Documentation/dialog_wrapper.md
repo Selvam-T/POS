@@ -159,7 +159,53 @@ class MainLoader(QMainWindow):
         super().__init__()
         self.overlay_manager = OverlayManager(self)
         self.dialog_wrapper = DialogWrapper(self)
+        # ... setup_sales_frame() calls ...
+        # Uses _rebuild_mixed_editable_table for unit-aware row states
 ```
+
+### Vegetable Entry Dialog Integration
+
+The `open_vegetable_entry_dialog` callback combines existing sales rows with new vegetable entries:
+
+```python
+def open_vegetable_entry_dialog(self):
+    def callback(veg_rows):
+        if not veg_rows:
+            return
+        
+        # Extract existing rows WITH editable states
+        existing_rows = []
+        for row in range(self.sales_table.rowCount()):
+            qty_widget = self.sales_table.cellWidget(row, 2)
+            row_editable = not qty_widget.isReadOnly()  # Preserve KG/EACH state
+            
+            row_data = {
+                'product': self.sales_table.item(row, 1).text(),
+                'quantity': qty_widget.property('numeric_value') or float(qty_widget.text()),
+                'unit_price': float(self.sales_table.item(row, 3).text()),
+                'editable': row_editable,
+            }
+            
+            if qty_widget.isReadOnly() and qty_widget.text():
+                row_data['display_text'] = qty_widget.text()  # Preserve "600 g" formatting
+            
+            existing_rows.append(row_data)
+        
+        # Combine and rebuild with per-row editable states
+        combined = existing_rows + veg_rows
+        _rebuild_mixed_editable_table(self.sales_table, combined)
+    
+    self.dialog_wrapper.open_standard_dialog(
+        launch_vegetable_entry_dialog,
+        dialog_key='vegetable_entry',
+        on_finish=callback
+    )
+```
+
+**Key points:**
+- Preserves editable state from existing rows (KG items stay read-only)
+- Uses `_rebuild_mixed_editable_table()` to handle mixed KG/EACH rows
+- Maintains display formatting (e.g., "600 g" for weights)
 
 ---
 

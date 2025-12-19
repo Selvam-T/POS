@@ -37,7 +37,7 @@ class BarcodeManager(QObject):
         # Early cache lookup and debug
         try:
             from modules.db_operation import get_product_info, PRODUCT_CACHE
-            found, product_name, unit_price = get_product_info(barcode)
+            found, product_name, unit_price, _ = get_product_info(barcode)
             if DEBUG_CACHE_LOOKUP:
                 raw = barcode
                 norm = (raw or '').strip().upper()
@@ -143,14 +143,29 @@ class BarcodeManager(QObject):
             now = time.time()
             try:
                 if getattr(self, '_modalBlockScanner', False):
-                    text = ''
+                    # Check if focus is on an editable input widget
+                    app = QApplication.instance()
+                    fw = app.focusWidget() if app else None
+                    obj_name = ''
                     try:
-                        text = event.text() or ''
+                        obj_name = fw.objectName() if fw is not None else ''
                     except Exception:
+                        obj_name = ''
+                    
+                    # Allow input in specific editable fields even during modal block
+                    is_allowed_input = obj_name in ('qtyInput', 'productCodeLineEdit', 'refundInput', 
+                                                     'inputProductName', 'inputSellingPrice', 
+                                                     'inputSupplier', 'inputCostPrice')
+                    
+                    if not is_allowed_input:
                         text = ''
-                    is_printable = len(text) == 1 and (31 < ord(text) < 127)
-                    if is_printable or k in (Qt.Key_Return, Qt.Key_Enter):
-                        return True
+                        try:
+                            text = event.text() or ''
+                        except Exception:
+                            text = ''
+                        is_printable = len(text) == 1 and (31 < ord(text) < 127)
+                        if is_printable or k in (Qt.Key_Return, Qt.Key_Enter):
+                            return True
             except Exception:
                 pass
             if k in (Qt.Key_Return, Qt.Key_Enter) and now <= getattr(self, '_suppressEnterUntil', 0.0):

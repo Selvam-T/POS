@@ -71,8 +71,13 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
 ## Key Features
 
 ### Unit Selection Logic
-- **KG mode:** Vegetable entry expects weight from weighing scale
-- **EACH mode:** Vegetable entry does not expect scale reading, uses piece count
+- **KG mode:** Vegetable entry expects weight from weighing scale (simulated 600g), quantity cells READ-ONLY
+- **EACH mode:** Vegetable entry does not expect scale reading, uses editable piece count
+- **Standardized units:** Only KG or EACH allowed (dropdown options)
+- **Case-insensitive handling:** Controller normalizes to uppercase (`.strip().upper()`) before save
+- **Lookup normalization:** Unit comparison uses uppercase for dropdown population (`findText(unit.upper())`)
+- **Database storage:** All units stored uppercase (KG or EACH)
+- **Default handling:** Empty/NULL units default to EACH
 - Controller must handle unit-specific behavior in `vegetable_entry.py`
 
 ### Required vs Optional Fields
@@ -110,9 +115,12 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
 1. Vegetable must be selected (not "Select vegetable to update")
 2. Product Name must not be empty
 3. Unit must be selected (KG or EACH, not "Select Unit")
-4. Selling Price must be a valid number
-5. Cost Price (if provided) must be a valid number
-6. Supplier is optional
+4. **Unit normalization:** Input case-insensitive, stored uppercase in database
+5. **Unit defaults:** Empty/NULL units default to EACH
+6. Selling Price must be a valid number
+7. Cost Price (if provided) must be a valid number
+8. Supplier is optional
+9. **PRODUCT_CACHE update:** On save, cache updated with `{code: (name, price, unit)}` 3-tuple
 
 ## Example Workflow
 1. User opens dialog

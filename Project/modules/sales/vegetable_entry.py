@@ -1,12 +1,25 @@
 # --- Vegetable Entry Dialog Controller ---
 import os
-from typing import List, Dict
+from typing import List, Dict, Optional
 from PyQt5 import uic
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QDialog, QTableWidget, QPushButton, QLabel, QHeaderView
+from PyQt5.QtWidgets import QDialog, QTableWidget, QPushButton, QLabel, QHeaderView, QLineEdit, QWidget
 from PyQt5.QtCore import Qt
+from functools import partial
 
 from modules.wrappers import settings as app_settings
+from modules.db_operation import get_product_info, get_product_full
+from modules.table import set_sales_rows, setup_sales_table
+from modules.table.table_operations import _rebuild_mixed_editable_table
+
+
+def weight_simulation() -> int:
+    """Simulate weighing scale reading.
+    
+    Returns:
+        Weight in grams (simulated as 600g)
+    """
+    return 600
 
 
 def open_vegetable_entry_dialog(parent):
@@ -51,53 +64,69 @@ def open_vegetable_entry_dialog(parent):
         except Exception as e:
             print('Failed to load sales.qss for vegetable entry dialog:', e)
 
-    # Configure the vegetable table headers and behavior
+    # Configure the vegetable table using shared setup function
     try:
         vtable = dlg.findChild(QTableWidget, 'vegEntryTable')
         if vtable is not None:
-            vtable.setColumnCount(6)
-            vtable.setHorizontalHeaderLabels(['No.', 'Name', 'Kilogram', 'Unit Price', 'Total', 'Del'])
-            header = vtable.horizontalHeader()
-            header.setStretchLastSection(False)
-            header.setSectionResizeMode(0, QHeaderView.Fixed)   # No.
-            header.setSectionResizeMode(1, QHeaderView.Stretch) # Item grows
-            header.setSectionResizeMode(2, QHeaderView.Fixed)   # Kilogram
-            header.setSectionResizeMode(3, QHeaderView.Fixed)   # Unit price
-            header.setSectionResizeMode(4, QHeaderView.Fixed)   # Total
-            header.setSectionResizeMode(5, QHeaderView.Fixed)   # Del
-            header.resizeSection(0, 48)
-            header.resizeSection(2, 125)
-            header.resizeSection(3, 115)
-            header.resizeSection(4, 115)
-            header.resizeSection(5, 48)
-
-            vtable.setAlternatingRowColors(True)
+            setup_sales_table(vtable)
+            
+            # Additional vegetable table settings
             vtable.setEditTriggers(QTableWidget.NoEditTriggers)
             vtable.setSelectionBehavior(QTableWidget.SelectRows)
             vtable.setSelectionMode(QTableWidget.SingleSelection)
+            vtable.verticalHeader().setDefaultSectionSize(48)
     except Exception as e:
         print('Vegetable table setup failed:', e)
 
-    # Wire keypad buttons to update message label and close on OK/CANCEL
+    # Wire keypad buttons and set up vegetable button logic
     try:
         msg = dlg.findChild(QLabel, 'vegEntryMessage2')
-        for name in (
+        vtable = dlg.findChild(QTableWidget, 'vegEntryTable')
+        
+        # Load vegetable products and configure buttons
+        for i, name in enumerate((
             'btnVeg1','btnVeg2','btnVeg3','btnVeg4',
             'btnVeg5','btnVeg6','btnVeg7','btnVeg8',
             'btnVeg9','btnVeg10','btnVeg11','btnVeg12',
             'btnVeg13','btnVeg14','btnVeg15','btnVeg16',
-        ):
+        ), start=1):
             btn = dlg.findChild(QPushButton, name)
-            if btn is not None and msg is not None:
-                def set_green_message(_, b=btn):
-                    msg.setText(f"Place {b.text()} on the scale ...")
-                    msg.setStyleSheet("color: green;")
-                btn.clicked.connect(set_green_message)
+            if btn is None:
+                continue
+            
+            # Load product info for VegXX code
+            veg_code = f'Veg{i:02d}'
+            found, product_name, unit_price, _ = get_product_info(veg_code)
+            
+            if found:
+                # Product exists - set button label and enable
+                btn.setText(product_name)
+                btn.setEnabled(True)
+                btn.setProperty('unused', False)
+                
+                # Get full product details for unit
+                _, details = get_product_full(veg_code)
+                unit = details.get('unit', 'EA') if details else 'EA'
+                
+                # Connect button click handler using partial to avoid lambda closure issues
+                btn.clicked.connect(
+                    partial(_handle_vegetable_button_click, dlg, msg, vtable, veg_code, product_name, unit_price, unit)
+                )
+            else:
+                # Product doesn't exist - disable button
+                btn.setText('Not Used')
+                btn.setEnabled(False)
+                btn.setProperty('unused', True)
+            
+            # Apply styling
+            btn.style().unpolish(btn)
+            btn.style().polish(btn)
 
+        # Wire OK/CANCEL buttons
         ok_btn = dlg.findChild(QPushButton, 'btnVegOk')
         cancel_btn = dlg.findChild(QPushButton, 'btnVegCancel')
         if ok_btn is not None:
-            ok_btn.clicked.connect(lambda: dlg.accept())
+            ok_btn.clicked.connect(lambda: _handle_ok_all(dlg, vtable))
         if cancel_btn is not None:
             cancel_btn.clicked.connect(lambda: dlg.reject())
     except Exception as e:
@@ -105,6 +134,259 @@ def open_vegetable_entry_dialog(parent):
 
     # Return QDialog for DialogWrapper to execute
     return dlg
+
+
+def _handle_vegetable_button_click(dlg: QDialog, msg_label: Optional[QLabel], 
+                                   vtable: Optional[QTableWidget], 
+                                   product_code: str, product_name: str, 
+                                   unit_price: float, unit: str) -> None:
+    """Handle vegetable button click - add product to table based on unit type.
+    
+    Args:
+        dlg: Dialog instance
+        msg_label: Message label for user feedback
+        vtable: Vegetable entry table
+        product_code: Product code (e.g., Veg01)
+        product_name: Product display name
+        unit_price: Unit price
+        unit: Unit type ('KG' or 'EA')
+    """
+    if vtable is None:
+        return
+    
+    # Normalize unit to uppercase for comparison
+    unit_upper = unit.upper() if unit else 'EA'
+    
+    if unit_upper == 'KG':
+        # KG item - need weighing scale input (simulated for now)
+        if msg_label:
+            msg_label.setText(f"Place {product_name} on the scale ...")
+            msg_label.setStyleSheet("color: green;")
+        
+        # Read from weighing scale simulation
+        try:
+            weight_grams = weight_simulation()
+        except Exception as e:
+            if msg_label:
+                msg_label.setText(f"Error reading scale: {e}")
+                msg_label.setStyleSheet("color: red;")
+            return
+        
+        if weight_grams <= 0:
+            if msg_label:
+                msg_label.setText("Error: Invalid weight from scale")
+                msg_label.setStyleSheet("color: red;")
+            return
+        
+        # Convert grams to kg for calculation
+        weight_kg = weight_grams / 1000.0
+        total = weight_kg * unit_price
+        
+        # Format display text
+        if weight_grams < 1000:
+            display_text = f"{weight_grams} g"
+        else:
+            display_text = f"{weight_kg:.2f} kg"
+        
+        # Add row with read-only quantity
+        _add_vegetable_row(vtable, product_name, weight_kg, unit_price, 
+                          display_text=display_text, editable=False)
+        
+        if msg_label:
+            msg_label.setText(f"Added {product_name}: {display_text}")
+            msg_label.setStyleSheet("color: green;")
+    
+    else:  # unit == 'EA'
+        # EACH item - no weighing needed
+        quantity = 1
+        total = quantity * unit_price
+        
+        # Add row with editable quantity (no custom display text)
+        _add_vegetable_row(vtable, product_name, quantity, unit_price, 
+                          display_text=None, editable=True)
+        
+        if msg_label:
+            msg_label.setText(f"Added {product_name}")
+            msg_label.setStyleSheet("color: green;")
+
+
+def _add_vegetable_row(vtable: QTableWidget, product_name: str, quantity: float, 
+                      unit_price: float, display_text: Optional[str] = None, 
+                      editable: bool = True) -> None:
+    """Add a vegetable row to the vegEntryTable, or update if duplicate.
+    
+    If product already exists:
+    - EACH items: Increment quantity by 1
+    - KG items: Add the new weight to existing weight
+    
+    Args:
+        vtable: Vegetable entry table
+        product_name: Product display name
+        quantity: Numeric quantity (kg for weight items, count for EACH)
+        unit_price: Unit price
+        display_text: Optional custom display (e.g., "500 g")
+        editable: Whether quantity is editable
+    """
+    # Get current rows and check for duplicates
+    current_rows = []
+    found_duplicate = False
+    duplicate_index = -1
+    for r in range(vtable.rowCount()):
+        product_item = vtable.item(r, 1)
+        if product_item is None:
+            continue
+        
+        # Check if this is a duplicate product
+        existing_product_name = product_item.text()
+        if existing_product_name == product_name:
+            found_duplicate = True
+            duplicate_index = len(current_rows)
+        
+        # Get quantity data
+        qty_container = vtable.cellWidget(r, 2)
+        qty = 1.0
+        row_display_text = None
+        row_editable = True
+        if qty_container is not None:
+            editor = qty_container.findChild(QtWidgets.QLineEdit, 'qtyInput')
+            if editor is not None:
+                row_editable = not editor.isReadOnly()
+                numeric_val = editor.property('numeric_value')
+                if numeric_val is not None:
+                    try:
+                        qty = float(numeric_val)
+                    except (ValueError, TypeError):
+                        qty = 1.0
+                else:
+                    try:
+                        qty = float(editor.text()) if editor.text() else 1.0
+                    except ValueError:
+                        qty = 1.0
+                
+                if not row_editable:
+                    row_display_text = editor.text()
+        
+        # Get unit price
+        price_item = vtable.item(r, 3)
+        price = 0.0
+        if price_item is not None:
+            try:
+                price = float(price_item.text())
+            except ValueError:
+                price = 0.0
+        
+        row_data = {
+            'product': existing_product_name,
+            'quantity': qty,
+            'unit_price': price,
+            'editable': row_editable
+        }
+        if row_display_text:
+            row_data['display_text'] = row_display_text
+        current_rows.append(row_data)
+    
+    # Handle duplicate: update existing row quantity
+    if found_duplicate and duplicate_index >= 0:
+        existing_row = current_rows[duplicate_index]
+        existing_editable = existing_row.get('editable', True)
+        
+        if existing_editable:
+            # EACH item - increment by 1
+            existing_row['quantity'] = existing_row['quantity'] + 1
+            # Remove display_text key to use numeric value
+            if 'display_text' in existing_row:
+                del existing_row['display_text']
+        else:
+            # KG item - add new weight to existing
+            new_qty = existing_row['quantity'] + quantity
+            existing_row['quantity'] = new_qty
+            
+            # Update display text for the combined weight
+            weight_grams = int(new_qty * 1000)
+            if weight_grams < 1000:
+                existing_row['display_text'] = f"{weight_grams} g"
+            else:
+                existing_row['display_text'] = f"{new_qty:.2f} kg"
+    else:
+        # No duplicate - add new row
+        new_row = {
+            'product': product_name,
+            'quantity': quantity,
+            'unit_price': unit_price,
+            'editable': editable
+        }
+        if display_text:
+            new_row['display_text'] = display_text
+        current_rows.append(new_row)
+    
+    # Rebuild table with mixed editable states using shared function
+    _rebuild_mixed_editable_table(vtable, current_rows)
+
+
+def _handle_ok_all(dlg: QDialog, vtable: Optional[QTableWidget]) -> None:
+    """Handle OK ALL button - store vegetable rows data and close dialog.
+    
+    The rows will be transferred to main salesTable by the caller.
+    """
+    if vtable is None:
+        dlg.reject()
+        return
+    
+    # Extract all rows from vegEntryTable
+    rows_to_transfer = []
+    for r in range(vtable.rowCount()):
+        product_item = vtable.item(r, 1)
+        if product_item is None:
+            continue
+        
+        # Get quantity data and editable state
+        qty_container = vtable.cellWidget(r, 2)
+        qty = 1.0
+        display_text = None
+        row_editable = True
+        if qty_container is not None:
+            editor = qty_container.findChild(QtWidgets.QLineEdit, 'qtyInput')
+            if editor is not None:
+                row_editable = not editor.isReadOnly()
+                numeric_val = editor.property('numeric_value')
+                if numeric_val is not None:
+                    try:
+                        qty = float(numeric_val)
+                    except (ValueError, TypeError):
+                        qty = 1.0
+                else:
+                    try:
+                        qty = float(editor.text()) if editor.text() else 1.0
+                    except ValueError:
+                        qty = 1.0
+                
+                if not row_editable:
+                    display_text = editor.text()
+        
+        # Get unit price
+        price_item = vtable.item(r, 3)
+        price = 0.0
+        if price_item is not None:
+            try:
+                price = float(price_item.text())
+            except ValueError:
+                price = 0.0
+        
+        row_data = {
+            'product': product_item.text(),
+            'quantity': qty,
+            'unit_price': price,
+            'editable': row_editable
+        }
+        if display_text:
+            row_data['display_text'] = display_text
+        rows_to_transfer.append(row_data)
+    
+    # Store rows on dialog object for retrieval by caller
+    dlg.setProperty('vegetable_rows', rows_to_transfer)
+    
+    # Accept dialog
+    dlg.accept()
 
 
 # Button object names in ui/vegetable_entry.ui, in left-to-right, top-to-bottom order

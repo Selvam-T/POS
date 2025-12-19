@@ -65,6 +65,10 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
 
 - **Sales Table Management:**
   - Loads and configures the sales table, binds the total label, and manages row operations.
+  - **Unit-aware editable states:** KG items have read-only quantity cells, EACH items have editable quantity cells.
+  - **Mixed table rebuilding:** Uses `_rebuild_mixed_editable_table()` when combining KG and EACH items from dialogs.
+  - **Barcode blocking:** KG items cannot be added via barcode scan (shows message to use Vegetable Entry).
+  - **PRODUCT_CACHE integration:** Fetches product info as 4-tuple `(found, name, price, unit)` for unit-based behavior.
 
 - **Window and Application Behavior:**
   - Disables the main window's close (X) button to enforce logout flow.

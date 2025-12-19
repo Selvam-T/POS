@@ -89,10 +89,13 @@ The Manual Entry dialog allows users to manually input product information when 
       'product_name': str,      # Non-empty string
       'quantity': float,        # Positive number
       'unit_price': float,      # Positive number
-      'total': float            # quantity × unit_price
+      'total': float,           # quantity × unit_price
+      'editable': bool          # Always True for manual entry (count-based items)
   }
   ```
 - **Cancelled/Error**: `None`
+
+**Note:** Manual entry items are always treated as count-based (like EACH units) with editable quantity cells. KG items requiring weighing must use the Vegetable Entry dialog instead.
 
 ### Process Flow
 

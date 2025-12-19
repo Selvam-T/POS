@@ -166,6 +166,29 @@ QWidget#vegEntryDialog QPushButton:pressed {
     padding-left: 2px;
 }
 
+/* Remove button exception - override general button styles for delete icons in table */
+QWidget#vegEntryDialog QPushButton#removeBtn {
+    background-color: transparent;
+    border: 5px solid #d33f12;
+    border-radius: 2px;
+    min-width: 30px;
+    max-width: 30px;
+    min-height: 28px;
+    max-height: 28px;
+    padding: 0px;
+    margin: 0px;
+}
+
+QWidget#vegEntryDialog QPushButton#removeBtn:hover {
+    background-color: rgba(255, 0, 0, 0.15);
+    border: 5px solid red;
+}
+
+QWidget#vegEntryDialog QPushButton#removeBtn:pressed {
+    background-color: rgba(255, 0, 0, 0.3);
+    border: 5px solid #990000;
+}
+
 /* 2. Specific Button Exceptions */
 
 QWidget#vegEntryDialog QPushButton#btnVegOk {

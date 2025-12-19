@@ -1,46 +1,136 @@
 # Vegetable Entry Dialog and Selection Workflow
 
-This document describes the workflow for the Vegetable Entry dialog, where users select a vegetable, place it on the scale, and input its weight. It also covers how button names are updated from the Vegetable Menu editor, and how selection, weighing, and entry are handled in the POS system.
+This document describes the workflow for the Vegetable Entry dialog, where users select vegetables with unit-aware behavior: KG items require weighing scale input (simulated 600g), while EACH items use editable quantity counts.
 
 ## Key Components
 
-- **UI File:** `ui/vegetable_entry.ui` — layout for the entry dialog (table, keypad buttons, message label).
-- **Logic:** `modules/sales/vegetable_entry.py` — controller for dialog, table setup, button selection, and scale input.
+- **UI File:** `ui/vegetable_entry.ui` — layout for the entry dialog (16 button grid, table, OK/CANCEL controls).
+- **Logic:** `modules/sales/vegetable_entry.py` — controller for dialog, table setup, button selection, unit-based behavior, and duplicate handling.
 - **Settings:** `modules/wrappers/settings.py` — manages vegetable label configuration and persistence (used by the Vegetable Menu editor).
+- **Database:** `modules/db_operation/database.py` — provides product info with unit (KG/EACH) from PRODUCT_CACHE.
 
-## Table Setup and Header Configuration
+## Dialog Layout
 
-- The table widget in the UI file must have the objectName set to `vegEntryTable`.
-- The dialog controller locates the table using `content.findChild(QTableWidget, 'vegEntryTable')`.
-- The table is configured with 5 columns and custom header labels: `['No.', 'Item', 'Weight (KG)', 'Total', 'Del']`.
-- Column widths and resize modes are set programmatically for consistent appearance.
+### Button Grid (16 Buttons)
+- **Buttons:** `btnVeg01` to `btnVeg16` mapped to Veg01-Veg16 product codes
+- **Enabled buttons:** Show product name from database (fetched via `get_product_info()`)
+- **Disabled buttons:** Display "Not Used" when no product configured for slot
+
+### Table (vegEntryTable)
+- **Columns:** `['No.', 'Item', 'Quantity', 'Unit Price', 'Total', 'Del']`
+- **Purpose:** Temporary staging area for vegetable items before transfer to sales table
+- **Editable behavior:** Per-row based on unit type (see below)
+
+### Control Buttons
+- **OK ALL:** Transfers all rows from vegEntryTable to salesTable, preserves editable states
+- **CANCEL ALL:** Closes dialog without transfer
+
+## Unit-Based Behavior
+
+### KG Items (Weight-Based)
+When user clicks a KG vegetable button:
+1. Dialog reads weighing scale (simulated: 600g = 0.6 kg)
+2. Adds row to vegEntryTable with:
+   - `quantity`: Numeric weight in kg (e.g., `0.6`)
+   - `display_text`: Human-readable format (e.g., `"600 g"`)
+   - `editable`: `False` (quantity cell is READ-ONLY)
+3. **Duplicate handling:** If same KG item clicked again, ADDS weights (e.g., 600g + 600g = 1200g)
+
+### EACH Items (Count-Based)
+When user clicks an EACH vegetable button:
+1. Adds row to vegEntryTable with:
+   - `quantity`: Numeric count (default: `1`)
+   - No `display_text` (shows raw number)
+   - `editable`: `True` (quantity cell is EDITABLE)
+2. **Duplicate handling:** If same EACH item clicked again, INCREMENTS quantity by 1
+
+### Unit Detection Logic
+```python
+# From _handle_vegetable_button_click()
+_, name, price, unit = get_product_info(product_code)
+unit_upper = unit.upper() if unit else 'EACH'
+
+if unit_upper == 'KG':
+    editable = False
+    weight = 0.6  # Simulated weighing scale
+    display_text = format_weight(weight)  # "600 g"
+else:
+    editable = True
+    weight = 1
+    display_text = None  # Use numeric display
+```
+
+## Table Operations Integration
+
+### Table Setup
+Uses `modules.table.table_operations.setup_sales_table()` for column configuration and styling.
+
+### Row Management
+- **Add row:** `_add_vegetable_row()` checks for duplicates, handles unit-specific behavior
+- **Remove row:** Click DEL button (SVG icon, 32x32, row height 48px)
+- **Rebuild table:** `_rebuild_vegetable_table()` respects per-row editable states
+
+### Duplicate Detection
+```python
+# From _add_vegetable_row()
+existing_row_index = _find_product_in_table(vegEntryTable, product_name)
+if existing_row_index is not None:
+    if unit_upper == 'EACH':
+        # Increment quantity by 1
+        current_qty = get_numeric_value(qty_widget)
+        new_qty = current_qty + 1
+        qty_widget.setText(str(int(new_qty)))
+    elif unit_upper == 'KG':
+        # Add weights
+        current_weight = get_numeric_value(qty_widget)
+        new_weight = current_weight + weight
+        qty_widget.setText(format_weight(new_weight))
+        qty_widget.setProperty('numeric_value', new_weight)
+```
+
+## Transfer to Sales Table
+
+### OK ALL Button Handler
+Extracts rows from vegEntryTable and transfers to main salesTable:
+```python
+# From _handle_ok_all()
+for row in range(vegEntryTable.rowCount()):
+    product_name = vegEntryTable.item(row, 1).text()
+    qty_widget = vegEntryTable.cellWidget(row, 2)
+    qty_val = qty_widget.property('numeric_value') or float(qty_widget.text())
+    
+    # PRESERVE editable flag
+    is_readonly = qty_widget.isReadOnly()
+    editable = not is_readonly
+    
+    display_text_val = None
+    if is_readonly and qty_widget.text():
+        display_text_val = qty_widget.text()
+    
+    rows.append({
+        'product': product_name,
+        'quantity': qty_val,
+        'unit_price': unit_price,
+        'editable': editable,
+        'display_text': display_text_val
+    })
+
+# Main window callback uses _rebuild_mixed_editable_table
+_rebuild_mixed_editable_table(sales_table, combined_rows)
+```
 
 ## QSS Styling
 
 - Dialog-specific styles are loaded from `assets/sales.qss` and applied to the dialog.
 - Styles for buttons, labels, and table headers are modularized for maintainability.
 
-## Debugging and Verification
-
-- Debug print statements were previously used to verify table discovery and header setup, but have now been removed for production use.
-- If the table is not found, ensure the objectName in the `.ui` file matches `vegEntryTable`.
-
-## Button Label Mapping and Selection
-
-- The controller maps vegetable labels from settings to keypad buttons (`btnVeg1` to `btnVeg14`).
-- When a button is pressed, the corresponding vegetable is selected for weighing.
-- Disabled buttons display 'Not Used'; enabled buttons show the custom label.
-- Button states and labels are updated dynamically based on settings.
-
-## Persistence
-
-- Changes to vegetable labels are saved via the settings module and reflected in the dialog on next open.
-
 ## Recent Changes (Dec 2025)
 
-- Table widget objectName updated to `vegEntryTable` for consistency.
-- Debug print statements for table discovery and header setup removed.
-- Documentation and code updated to reflect new table name and logic.
+- **Unit-aware behavior:** KG items read-only with weighing, EACH items editable with counts
+- **Duplicate handling:** EACH increments quantity, KG adds weights
+- **Clean architecture:** Unit detection from PRODUCT_CACHE (3-tuple with unit)
+- **Transfer preservation:** Editable flag preserved when moving to sales table
+- **Mixed table support:** Uses `_rebuild_mixed_editable_table()` for per-row editable states
 
 ## Quick Reference
 

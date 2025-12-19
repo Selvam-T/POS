@@ -406,7 +406,7 @@ def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial
         if mode == 'add':
             if not t:
                 set_status('', True); set_code_error_style(False); set_ok_button_enabled(True); return
-            c_found, _, _price = get_product_info(t)
+            c_found, _, _price, _ = get_product_info(t)
             if c_found:
                 set_status('Error: Product code already exists.', False); set_code_error_style(True); set_ok_button_enabled(False); return
             d_found, pdata_full = get_product_full(t)
@@ -422,7 +422,7 @@ def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial
             return
         found, pdata = get_product_full(t)
         if not found or not pdata:
-            c_found, c_name, c_price = get_product_info(t)
+            c_found, c_name, c_price, _ = get_product_info(t)
             if not c_found:
                 clear_fields(except_code=True); set_fields_enabled(False); set_status('Product not found.', False); return
             pdata = {'name': c_name,'price': c_price,'category':'','supplier':'','cost_price':None,'unit':'','last_updated':'',}
@@ -453,11 +453,13 @@ def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial
                         category_combo.setCurrentIndex(i); matched=True; break
                 if not matched and category_combo.count()>0: category_combo.setCurrentIndex(0)
             if unit_combo:
-                val = str(pdata.get('unit','')).strip().lower()
-                norm = 'EACH' if val in ('piece','pieces','pcs','pc','each','EACH') else ('KG' if val in ('kg','KG','kilogram','kilograms') else val)
+                val = str(pdata.get('unit','')).strip().upper()
+                # Normalize to KG or EACH
+                if not val or val not in ['KG', 'EACH']:
+                    val = 'EACH'
                 matched=False
                 for i in range(unit_combo.count()):
-                    if unit_combo.itemText(i).strip().lower() == norm:
+                    if unit_combo.itemText(i).strip().upper() == val:
                         unit_combo.setCurrentIndex(i); matched=True; break
                 if not matched and unit_combo.count()>0: unit_combo.setCurrentIndex(0)
         except Exception:
@@ -481,7 +483,10 @@ def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial
                 cat = category_combo.currentText().strip() if category_combo else None
                 supplier = supplier_edit.text().strip() if supplier_edit else None
                 cost_val = float(cost_edit.text()) if (cost_edit and cost_edit.text().strip()) else None
-                unit_val = unit_combo.currentText().strip() if unit_combo else None
+                unit_val = unit_combo.currentText().strip().upper() if unit_combo and unit_combo.currentText().strip() else None
+                # Ensure valid unit
+                if unit_val and unit_val not in ['KG', 'EACH']:
+                    unit_val = 'EACH'
                 now_str = QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss')
                 ok, msg = add_product(code, name_val, price, cat, supplier, cost_val, unit_val, now_str)
                 if not ok:
@@ -526,7 +531,10 @@ def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial
                 cat = category_combo.currentText().strip() if category_combo else None
                 supplier = supplier_edit.text().strip() if (supplier_edit and supplier_edit.text().strip()) else None
                 cost_val = float(cost_edit.text()) if (cost_edit and cost_edit.text().strip()) else None
-                unit_val = unit_combo.currentText().strip() if unit_combo else None
+                unit_val = unit_combo.currentText().strip().upper() if unit_combo and unit_combo.currentText().strip() else None
+                # Ensure valid unit
+                if unit_val and unit_val not in ['KG', 'EACH']:
+                    unit_val = 'EACH'
                 ok, msg = update_product(code_edit.text().strip(), name_val, price_val, cat, supplier, cost_val, unit_val)
                 if not ok:
                     set_status(f'Error: {msg}', False); return

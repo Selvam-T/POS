@@ -109,7 +109,7 @@ def open_vegetable_menu_dialog(host_window):
         combo_vegetable.addItem('Select Vegetable to update', userData=None)
         for i in range(1, VEG_SLOTS + 1):
             code = f'Veg{i:02d}'
-            found, name, price = get_product_info(code)
+            found, name, price, _ = get_product_info(code)
             if found:
                 combo_vegetable.addItem(name, userData=code)
             else:
@@ -164,7 +164,10 @@ def open_vegetable_menu_dialog(host_window):
             if input_selling_price is not None:
                 input_selling_price.setText(str(details.get('price', '')))
             if combo_unit is not None:
-                unit = details.get('unit', '')
+                unit = details.get('unit', '').strip().upper()  # Normalize to uppercase
+                # Default to EACH if empty
+                if not unit:
+                    unit = 'EACH'
                 idx = combo_unit.findText(unit, Qt.MatchFixedString)
                 if idx >= 0:
                     combo_unit.setCurrentIndex(idx)
@@ -200,8 +203,12 @@ def open_vegetable_menu_dialog(host_window):
 
     # Helper: Validate mandatory fields
     def validate_inputs():
+        # Validation order: Product name → Unit → Selling price
         if input_product_name is None or not input_product_name.text().strip():
             show_error('Error: Name is required')
+            return False
+        if combo_unit is None or combo_unit.currentIndex() <= 0:
+            show_error('Error: Unit is required')
             return False
         if input_selling_price is None or not input_selling_price.text().strip():
             show_error('Error: Selling price is required')
@@ -213,9 +220,6 @@ def open_vegetable_menu_dialog(host_window):
                 return False
         except ValueError:
             show_error('Error: Invalid selling price format')
-            return False
-        if combo_unit is None or combo_unit.currentIndex() <= 0:
-            show_error('Error: Unit is required')
             return False
         clear_error()
         return True
@@ -292,7 +296,10 @@ def open_vegetable_menu_dialog(host_window):
             show_error('Error: Invalid selling price')
             return
         
-        unit = combo_unit.currentText().strip() if combo_unit else 'KG'
+        unit = combo_unit.currentText().strip().upper() if combo_unit else 'EACH'
+        # Ensure valid unit
+        if unit not in ['KG', 'EACH']:
+            unit = 'EACH'
         category = 'Vegetable'
         supplier = input_supplier.text().strip() if input_supplier and input_supplier.text().strip() else None
         
@@ -350,7 +357,7 @@ def open_vegetable_menu_dialog(host_window):
             return
         
         # Check if vegetable exists in cache
-        found, name, price = get_product_info(selected_code)
+        found, name, price, _ = get_product_info(selected_code)
         if not found:
             # Extract placeholder number for error message
             placeholder_num = selected_code.replace('Veg', '').lstrip('0')

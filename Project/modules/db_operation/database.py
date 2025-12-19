@@ -9,9 +9,9 @@ from PyQt5.QtWidgets import QStatusBar
 from PyQt5.QtCore import QTimer
 
 
-# Global product cache (SLIM): {product_code: (name, selling_price)}
-# Keep cache small and focused for fast name/price lookups during scans and sales table display.
-PRODUCT_CACHE: Dict[str, Tuple[str, float]] = {}
+# Global product cache: {product_code: (name, selling_price, unit)}
+# Includes unit for determining if items require weighing (KG) or are count-based (EACH)
+PRODUCT_CACHE: Dict[str, Tuple[str, float, str]] = {}
 
 # Note: All barcode validations must use in-memory PRODUCT_CACHE only.
 
@@ -99,15 +99,16 @@ def load_product_cache(db_path: str = DB_PATH) -> bool:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         
-        # Query all products from Product_list table
-        cursor.execute("SELECT product_code, name, selling_price FROM Product_list")
+        # Query all products from Product_list table including unit
+        cursor.execute("SELECT product_code, name, selling_price, unit FROM Product_list")
         rows = cursor.fetchall()
         
         for row in rows:
-            product_code, name, selling_price = row
+            product_code, name, selling_price, unit = row
             PRODUCT_CACHE[_norm(product_code)] = (
                 str(name) if name is not None else '',
                 float(selling_price) if selling_price is not None else 0.0,
+                str(unit).strip().upper() if unit is not None else 'EACH',  # Default to EACH if unit is NULL
             )
         
         conn.close()
@@ -122,36 +123,37 @@ def load_product_cache(db_path: str = DB_PATH) -> bool:
         return False
 
 
-def get_product_info(product_code: str) -> Tuple[bool, str, float]:
+def get_product_info(product_code: str) -> Tuple[bool, str, float, str]:
     """Get product information from cache.
     
     Args:
         product_code: The product barcode/code to lookup
         
     Returns:
-        Tuple of (found, name, price)
+        Tuple of (found, name, price, unit)
         - found: True if product exists in cache
         - name: Product name (or product_code if not found)
         - price: Selling price (or 0.0 if not found)
+        - unit: Unit type ('KG' or 'EACH', default 'EACH' if not found)
     """
     key_norm = _norm(product_code)
     if key_norm in PRODUCT_CACHE:
-        name, price = PRODUCT_CACHE[key_norm]
-        return True, (name if name else product_code), float(price)
+        name, price, unit = PRODUCT_CACHE[key_norm]
+        return True, (name if name else product_code), float(price), unit
     # Backward compatibility: try raw and lower/upper variants
     raw = str(product_code) if product_code is not None else ''
     if raw in PRODUCT_CACHE:
-        name, price = PRODUCT_CACHE[raw]
-        return True, (name if name else product_code), float(price)
+        name, price, unit = PRODUCT_CACHE[raw]
+        return True, (name if name else product_code), float(price), unit
     low = raw.lower()
     if low in PRODUCT_CACHE:
-        name, price = PRODUCT_CACHE[low]
-        return True, (name if name else product_code), float(price)
+        name, price, unit = PRODUCT_CACHE[low]
+        return True, (name if name else product_code), float(price), unit
     up = raw.upper()
     if up in PRODUCT_CACHE:
-        name, price = PRODUCT_CACHE[up]
-        return True, (name if name else product_code), float(price)
-    return False, product_code, 0.0
+        name, price, unit = PRODUCT_CACHE[up]
+        return True, (name if name else product_code), float(price), unit
+    return False, product_code, 0.0, 'EACH'
 
 
 def get_product_full(product_code: str) -> Tuple[bool, Dict[str, Any]]:
@@ -284,12 +286,13 @@ def add_product(
         )
         conn.commit()
         conn.close()
-        # Update slim cache with name and price
+        # Update cache with name, price, and unit
         # Ensure only normalized key exists in cache
         _remove_cache_variants(code_norm)
         PRODUCT_CACHE[_norm(code_norm)] = (
             str(name_norm) if name_norm is not None else '',
             float(selling_price) if selling_price is not None else 0.0,
+            str(unit).strip().upper() if unit is not None else 'EACH',
         )
         return True, "Product added"
     except sqlite3.IntegrityError:
@@ -362,13 +365,14 @@ def update_product(
             return False, "Product not found"
         conn.commit()
         conn.close()
-        # Update slim cache with provided name/price (keep existing if not provided)
+        # Update cache with provided name/price/unit (keep existing if not provided)
         key = _norm(product_code)
-        curr_name, curr_price = PRODUCT_CACHE.get(key, ('', 0.0))
+        curr_name, curr_price, curr_unit = PRODUCT_CACHE.get(key, ('', 0.0, 'EACH'))
         new_name = curr_name if name is None or str(name) == '' else _to_camel_case(name)
         new_price = curr_price if selling_price is None else float(selling_price)
+        new_unit = curr_unit if unit is None else str(unit).strip().upper()
         _remove_cache_variants(product_code)
-        PRODUCT_CACHE[key] = (new_name, new_price)
+        PRODUCT_CACHE[key] = (new_name, new_price, new_unit)
         return True, "Product updated"
     except sqlite3.Error as e:
         return False, f"DB error: {e}"

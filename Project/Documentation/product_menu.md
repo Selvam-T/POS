@@ -9,16 +9,22 @@ The `product_menu` module provides the logic and UI integration for the Product 
 The module is designed to:
 - Enforce uniqueness for both Product Code and Product Name.
 - Normalize product names to CamelCase.
+- **Standardize units:** Only KG or EACH allowed (case-insensitive input, stored uppercase).
+- **Unit validation:** Empty/NULL units default to EACH.
 - Hide the Last Updated field in ADD mode.
 - Use display-only labels in REMOVE mode for clarity and safety.
 - Disable REMOVE and UPDATE tabs if there are active sales (rows in the sales table).
 - Apply a dedicated stylesheet (`product_menu.qss`) for consistent UI.
+- **PRODUCT_CACHE integration:** Updates cache with (name, price, unit) 3-tuple on add/update.
 - Modularize logic for maintainability and future unit testing.
 
 ## Key Features
 - **Scoped Widget Binding**: Each tab has its own set of widgets (with duplicate object names), requiring dynamic binding and event wiring when the tab changes.
 - **Sales-Active Lock**: If the sales table has rows, only the ADD tab is enabled; REMOVE and UPDATE are disabled.
 - **Barcode Integration**: Supports barcode scanning to prefill product codes and trigger product lookup.
+- **Unit Standardization**: All units normalized to uppercase (KG or EACH) before database write. Input accepts any case (kg, Kg, each, EACH) but stores uppercase.
+- **Unit Validation**: Dropdown limited to KG/EACH options. Empty selections default to EACH.
+- **Cache Updates**: All add/update operations refresh PRODUCT_CACHE with 3-tuple: `{code: (name, price, unit)}`.
 - **Status Feedback**: Provides real-time status messages for validation and operation results.
 
 ## Lingering Problem
