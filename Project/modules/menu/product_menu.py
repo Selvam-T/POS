@@ -50,7 +50,7 @@ def _load_stylesheet() -> str:
     return ''
 
 
-def open_product_dialog(main_window, initial_mode: Optional[str] = None, initial_code: Optional[str] = None):
+def open_dialog_scanner_enabled(main_window, initial_mode: Optional[str] = None, initial_code: Optional[str] = None):
     product_ui = os.path.join(UI_DIR, 'product_menu.ui')
     if not os.path.exists(product_ui):
         return

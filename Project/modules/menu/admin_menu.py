@@ -22,7 +22,7 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
         is_admin: If False, the dialog will open read-only (no password/email changes allowed).
     
     Returns:
-        QDialog instance ready for DialogWrapper.open_standard_dialog() to execute
+        QDialog instance ready for DialogWrapper.open_dialog_scanner_blocked() to execute
     """
     ui_path = os.path.join(UI_DIR, 'admin_menu.ui')
     if not os.path.exists(ui_path):

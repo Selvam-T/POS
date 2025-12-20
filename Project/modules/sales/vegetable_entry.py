@@ -32,7 +32,7 @@ def open_vegetable_entry_dialog(parent):
         parent: Main window instance
     
     Returns:
-        QDialog instance ready for DialogWrapper.open_standard_dialog() to execute
+        QDialog instance ready for DialogWrapper.open_dialog_scanner_blocked() to execute
     """
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     UI_DIR = os.path.join(BASE_DIR, 'ui')

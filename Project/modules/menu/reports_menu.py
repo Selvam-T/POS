@@ -20,7 +20,7 @@ def open_reports_dialog(host_window):
         host_window: Main window instance
     
     Returns:
-        QDialog instance ready for DialogWrapper.open_standard_dialog() to execute
+        QDialog instance ready for DialogWrapper.open_dialog_scanner_blocked() to execute
     """
     ui_path = os.path.join(UI_DIR, 'reports_menu.ui')
     if not os.path.exists(ui_path):

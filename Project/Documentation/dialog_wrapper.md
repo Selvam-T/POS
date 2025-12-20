@@ -18,7 +18,7 @@ All dialogs now follow the **Case A pattern**:
 Dialog Controller (e.g., logout_menu.py)
     ↓ Creates and returns QDialog
     ↓
-DialogWrapper.open_standard_dialog() or open_product_dialog()
+DialogWrapper.open_dialog_scanner_blocked() or open_dialog_scanner_enabled()
     ↓ Wrapper handles: exec_(), sizing, centering, cleanup
 ```
 
@@ -75,7 +75,7 @@ def __init__(self, main_window):
 
 ## Main Wrapper Functions
 
-### `open_standard_dialog(dialog_func, dialog_key=None, on_finish=None, *args, **kwargs)`
+### `open_dialog_scanner_blocked(dialog_func, dialog_key=None, on_finish=None, *args, **kwargs)`
 
 Universal wrapper for all standard dialogs.
 
@@ -91,14 +91,14 @@ Universal wrapper for all standard dialogs.
 **Example:**
 ```python
 def open_logout_menu_dialog(self):
-    self.dialog_wrapper.open_standard_dialog(
+    self.dialog_wrapper.open_dialog_scanner_blocked(
         launch_logout_dialog,
         dialog_key='logout_menu',
         on_finish=self._perform_logout
     )
 
 def open_admin_menu_dialog(self):
-    self.dialog_wrapper.open_standard_dialog(
+    self.dialog_wrapper.open_dialog_scanner_blocked(
         launch_admin_dialog,
         dialog_key='admin_menu',
         current_user='Admin',
@@ -106,7 +106,7 @@ def open_admin_menu_dialog(self):
     )
 ```
 
-### `open_product_dialog(dialog_func, dialog_key=None, **kwargs)`
+### `open_dialog_scanner_enabled(dialog_func, dialog_key=None, **kwargs)`
 
 Special wrapper for product_menu (allows barcode input during dialog).
 
@@ -118,14 +118,14 @@ Special wrapper for product_menu (allows barcode input during dialog).
 **Example:**
 ```python
 def open_product_menu_dialog(self, **kwargs):
-    self.dialog_wrapper.open_product_dialog(launch_product_dialog, dialog_key='product_menu', **kwargs)
+    self.dialog_wrapper.open_dialog_scanner_enabled(launch_product_dialog, dialog_key='product_menu', **kwargs)
 ```
 
 ---
 
 ## Dialog Categorization
 
-### Standard Dialogs (use `open_standard_dialog()`)
+### Standard Dialogs (use `open_dialog_scanner_blocked()`)
 
 | Dialog | Width Ratio | Height Ratio | Blocks Scanner |
 |--------|-------------|--------------|----------------|
@@ -141,7 +141,7 @@ def open_product_menu_dialog(self, **kwargs):
 | view_hold | 0.7 | 0.7 | Yes |
 | cancel_sale | 0.7 | 0.7 | Yes |
 
-### Product Dialog (use `open_product_dialog()`)
+### Product Dialog (use `open_dialog_scanner_enabled()`)
 
 | Dialog | Width Ratio | Height Ratio | Blocks Scanner |
 |--------|-------------|--------------|----------------|
@@ -195,7 +195,7 @@ def open_vegetable_entry_dialog(self):
         combined = existing_rows + veg_rows
         _rebuild_mixed_editable_table(self.sales_table, combined)
     
-    self.dialog_wrapper.open_standard_dialog(
+    self.dialog_wrapper.open_dialog_scanner_blocked(
         launch_vegetable_entry_dialog,
         dialog_key='vegetable_entry',
         on_finish=callback

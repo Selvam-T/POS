@@ -38,7 +38,7 @@ from modules.menu.admin_menu import open_admin_dialog as launch_admin_dialog
 from modules.menu.devices_menu import open_devices_dialog as launch_devices_dialog
 from modules.menu.reports_menu import open_reports_dialog as launch_reports_dialog
 from modules.menu.greeting_menu import open_greeting_dialog as launch_greeting_dialog
-from modules.menu.product_menu import open_product_dialog as launch_product_dialog
+from modules.menu.product_menu import open_dialog_scanner_enabled as launch_product_dialog
 from modules.menu.vegetable_menu import open_vegetable_menu_dialog as launch_vegetable_menu_dialog
 # --- Sales frame dialog controllers ---
 from modules.sales.vegetable_entry import open_vegetable_entry_dialog as launch_vegetable_entry_dialog
@@ -78,19 +78,19 @@ def load_qss(app):
 class MainLoader(QMainWindow):
     def open_logout_menu_dialog(self):
         """Open Logout dialog."""
-        self.dialog_wrapper.open_standard_dialog(
+        self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_logout_dialog,
             dialog_key='logout_menu',
-            on_finish=self._perform_logout
+            on_finish=lambda: self._perform_logout()
         )
 
     def open_product_menu_dialog(self, **kwargs):
         """Open Product Management panel."""
-        self.dialog_wrapper.open_product_dialog(launch_product_dialog, dialog_key='product_menu', **kwargs)
+        self.dialog_wrapper.open_dialog_scanner_enabled(launch_product_dialog, dialog_key='product_menu', **kwargs)
         
     def open_admin_menu_dialog(self):
         """Open Admin dialog."""
-        self.dialog_wrapper.open_standard_dialog(
+        self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_admin_dialog,
             dialog_key='admin_menu',
             current_user='Admin',
@@ -98,22 +98,22 @@ class MainLoader(QMainWindow):
         )
     def open_greeting_menu_dialog(self):
         """Open Greeting dialog."""
-        self.dialog_wrapper.open_standard_dialog(launch_greeting_dialog, dialog_key='greeting_menu')
-        """self.dialog_wrapper.open_standard_dialog(launch_greeting_dialog)"""
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_greeting_dialog, dialog_key='greeting_menu')
+        """self.dialog_wrapper.open_dialog_scanner_blocked(launch_greeting_dialog)"""
 
     def open_devices_menu_dialog(self):
         """Open Devices dialog."""
-        self.dialog_wrapper.open_standard_dialog(launch_devices_dialog, dialog_key='devices_menu')
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_devices_dialog, dialog_key='devices_menu')
 
     def open_reports_menu_dialog(self):
         """Open Reports dialog."""
-        self.dialog_wrapper.open_standard_dialog(launch_reports_dialog, dialog_key='reports_menu')
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_reports_dialog, dialog_key='reports_menu')
 
     def open_vegetable_menu_dialog(self):
         """Open Vegetable Management dialog."""
-        self.dialog_wrapper.open_product_dialog(
-            launch_vegetable_menu_dialog,
-            dialog_key='vegetable_menu'
+        self.dialog_wrapper.open_dialog_scanner_enabled(
+            launch_vegetable_entry_dialog,
+            dialog_key='vegetable_entry'
         )
 
     def open_vegetable_entry_dialog(self):
@@ -198,7 +198,7 @@ class MainLoader(QMainWindow):
                 import traceback
                 traceback.print_exc()
         
-        self.dialog_wrapper.open_standard_dialog(
+        self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_vegetable_entry_dialog, 
             dialog_key='vegetable_entry',
             on_finish=on_vegetable_entry_finish
@@ -206,19 +206,19 @@ class MainLoader(QMainWindow):
 
     def open_manual_panel(self):
         """Open Manual Product Entry panel."""
-        self.dialog_wrapper.open_standard_dialog(launch_manual_entry_dialog, dialog_key='manual_entry')
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_manual_entry_dialog, dialog_key='manual_entry')
 
     def open_onhold_panel(self):
         """Open On Hold panel."""
-        self.dialog_wrapper.open_standard_dialog(launch_onhold_dialog, dialog_key='on_hold')
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_onhold_dialog, dialog_key='on_hold')
 
     def open_viewhold_panel(self):
         """Open View Hold panel."""
-        self.dialog_wrapper.open_standard_dialog(launch_viewhold_dialog, dialog_key='view_hold')
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_viewhold_dialog, dialog_key='view_hold')
 
     def open_cancelsale_panel(self):
         """Open Cancel Sale panel."""
-        self.dialog_wrapper.open_standard_dialog(launch_cancelsale_dialog, dialog_key='cancel_sale')
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_cancelsale_dialog, dialog_key='cancel_sale')
 
 
 

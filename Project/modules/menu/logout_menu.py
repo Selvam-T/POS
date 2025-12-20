@@ -22,7 +22,7 @@ def open_logout_dialog(host_window):
         host_window: The main window instance
     
     Returns:
-        QDialog instance ready for DialogWrapper.open_standard_dialog() to execute
+        QDialog instance ready for DialogWrapper.open_dialog_scanner_blocked() to execute
     """
     logout_ui = os.path.join(_UI_DIR, 'logout_menu.ui')
 

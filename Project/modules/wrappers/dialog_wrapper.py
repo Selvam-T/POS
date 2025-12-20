@@ -150,7 +150,7 @@ class DialogWrapper:
 
     # ============ Main Wrapper Functions ============
 
-    def open_standard_dialog(
+    def open_dialog_scanner_blocked(
         self,
         dialog_func,
         dialog_key=None,
@@ -158,7 +158,7 @@ class DialogWrapper:
         *args,
         **kwargs
     ):
-        """Unified wrapper for standard dialogs.
+        """Unified wrapper for dialogs with scanner input blocked.
         
         Dialog size is calculated based on ratios of main window dimensions,
         with minimumSize from .ui file enforced as safety floor.
@@ -194,8 +194,8 @@ class DialogWrapper:
             self._unblock_scanner()
             print(f'Dialog failed: {e}')
 
-    def open_product_dialog(self, dialog_func, dialog_key=None, **kwargs):
-        """Special wrapper for product_menu dialog (allows barcode input).
+    def open_dialog_scanner_enabled(self, dialog_func, dialog_key=None, **kwargs):
+        """Wrapper for dialogs that allow scanner input (e.g., product_menu).
         
         Product dialog:
         - Does NOT block scanner (allows barcode input in product code field)
