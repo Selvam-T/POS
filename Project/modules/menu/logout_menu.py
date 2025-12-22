@@ -8,6 +8,8 @@ from modules.menu.dialog_utils import center_dialog_relative_to
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 _PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))  # .../Project
 _UI_DIR = os.path.join(_PROJECT_DIR, 'ui')
+_ASSETS_DIR = os.path.join(_PROJECT_DIR, 'assets')
+_QSS_PATH = os.path.join(_ASSETS_DIR, 'menu.qss')
 
 
 
@@ -39,6 +41,15 @@ def open_logout_dialog(host_window):
     dlg.setModal(True)
     dlg.setObjectName('LogoutDialogContainer')
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
+    
+    # Apply stylesheet
+    if os.path.exists(_QSS_PATH):
+        try:
+            with open(_QSS_PATH, 'r', encoding='utf-8') as f:
+                dlg.setStyleSheet(f.read())
+        except Exception as e:
+            print(f'Failed to load menu.qss: {e}')
+    
     # Wire custom window titlebar X button to close dialog
     if content is not None:
         custom_close_btn = content.findChild(QPushButton, 'customCloseBtn')

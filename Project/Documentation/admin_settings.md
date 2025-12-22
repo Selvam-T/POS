@@ -70,7 +70,7 @@ This document describes the Admin Settings dialog, its UI structure, access rule
 
 ## QSS Hooks
 
-Define shared dialog styles in `assets/style.qss` to keep a consistent look with other menu dialogs. Common selectors:
+Define shared dialog styles in `assets/menu.qss` to keep a consistent look with other menu dialogs. Common selectors:
 
 ```css
 /* Title bar */

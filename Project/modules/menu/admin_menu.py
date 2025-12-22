@@ -50,6 +50,15 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
     dlg.setWindowModality(Qt.ApplicationModal)
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
     dlg.setObjectName('AdminDialogContainer')
+    
+    # Apply stylesheet
+    if os.path.exists(QSS_PATH):
+        try:
+            with open(QSS_PATH, 'r', encoding='utf-8') as f:
+                dlg.setStyleSheet(f.read())
+        except Exception as e:
+            print(f'Failed to load menu.qss: {e}')
+    
     # Wire custom window titlebar X button to close dialog
     custom_close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
     if custom_close_btn is not None:

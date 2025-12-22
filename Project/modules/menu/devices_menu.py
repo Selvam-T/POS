@@ -47,6 +47,14 @@ def open_devices_dialog(host_window, *args, **kwargs):
     dlg.setWindowModality(Qt.ApplicationModal)
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
 
+    # Apply stylesheet
+    if os.path.exists(QSS_PATH):
+        try:
+            with open(QSS_PATH, 'r', encoding='utf-8') as f:
+                dlg.setStyleSheet(f.read())
+        except Exception as e:
+            print(f'Failed to load menu.qss: {e}')
+
     # Titlebar close (optional)
     try:
         xbtn: QPushButton = dlg.findChild(QPushButton, 'customCloseBtn')

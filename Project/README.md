@@ -55,7 +55,7 @@ Project/
 ├── tools/
 │   └── format_assets.py         # Formatter for .ui (lxml) and .qss (jsbeautifier)
 ├── assets/
-│   ├── style.qss               # Global stylesheet (QSS)
+│   ├── main.qss                # Global stylesheet (QSS)
 │   └── icons/                   # SVG/PNG icons (menu, delete, etc.)
 ├── ui/
 │   ├── main_window.ui          # Main application window (info header + work area)
@@ -171,7 +171,7 @@ Implementation details:
 - QSS no longer forces header label alignment; we use padding for consistent spacing:
    - `QLabel#labelDate { padding-left: 30px; }`
    - `QLabel#labelDayTime { padding-right: 30px; }`
-   - You can adjust padding in `assets/style.qss`.
+   - You can adjust padding in `assets/main.qss`.
 
 
 ### Adding Products to Sale
@@ -200,7 +200,7 @@ For a deep dive into the exact routing rules, protections, and debug options, se
 - Clicking Logout opens a modal confirmation dialog (frameless) and dims the background.
 - Yes, Logout: stops the scanner and exits the app. Cancel returns to the app.
 - Styling the logout dialog:
-   - Title bar background: `QFrame#customTitleBar` in `assets/style.qss`
+   - Title bar background: `QFrame#customTitleBar` in `assets/main.qss`
    - Close (X) button: `QPushButton#customCloseBtn` (font size, colors, hover/pressed)
    - Tip: Use 6‑digit hex `#RRGGBB` (or 8-digit `#ffRRGGBB`) for opaque colors. `#AARRGGBB` with a low AA will appear washed out.
 
@@ -324,7 +324,7 @@ See `Project_Journal.md` for detailed architecture documentation, design decisio
 **Solution:** Check database path and table schema. Verify `Product_list` table exists with correct columns.
 
 ### QSS Not Loading
-**Solution:** Verify `assets/style.qss` exists. Check console for error messages.
+**Solution:** Verify `assets/main.qss` exists. Check console for error messages.
 
 ### Scanner types characters into the wrong field
 This can happen with HID “keyboard wedge” scanners before the app detects the scan burst (first-character leak). The app:

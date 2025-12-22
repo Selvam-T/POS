@@ -24,19 +24,19 @@
   </property>
   <layout class="QVBoxLayout" name="mainVegetableMenuLayout">
    <property name="spacing">
-    <number>0</number>
+    <number>7</number>
    </property>
    <property name="leftMargin">
-    <number>0</number>
+    <number>10</number>
    </property>
    <property name="topMargin">
     <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>0</number>
+    <number>10</number>
    </property>
    <property name="bottomMargin">
-    <number>0</number>
+    <number>10</number>
    </property>
    <item>
     <widget class="QFrame" name="customTitleBar">
@@ -44,17 +44,14 @@
       <enum>QFrame::NoFrame</enum>
      </property>
      <layout class="QHBoxLayout" name="customTitleLayout">
-      <property name="spacing">
-       <number>10</number>
-      </property>
       <property name="leftMargin">
-       <number>10</number>
+       <number>0</number>
       </property>
       <property name="topMargin">
        <number>0</number>
       </property>
       <property name="rightMargin">
-       <number>10</number>
+       <number>0</number>
       </property>
       <property name="bottomMargin">
        <number>10</number>
@@ -73,12 +70,9 @@
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="titleLabel">
+       <widget class="QLabel" name="customTitle">
         <property name="text">
          <string>Edit Vegetables</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
         </property>
        </widget>
       </item>
@@ -97,14 +91,11 @@
       </item>
       <item>
        <widget class="QPushButton" name="customCloseBtn">
-        <property name="maximumSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
-        </property>
         <property name="text">
-         <string>X</string>
+         <string>x</string>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
         </property>
        </widget>
       </item>

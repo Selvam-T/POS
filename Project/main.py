@@ -67,7 +67,7 @@ ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 
 
 def load_qss(app):
-    qss_path = os.path.join(ASSETS_DIR, 'style.qss')
+    qss_path = os.path.join(ASSETS_DIR, 'main.qss')
     if os.path.exists(qss_path):
         try:
             with open(qss_path, 'r', encoding='utf-8') as f:

@@ -1,525 +1,525 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-    <class>AdminMenuDialog</class>
-    <widget class="QDialog" name="AdminMenuDialog">
-        <property name="geometry">
-            <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>560</width>
-                <height>420</height>
-            </rect>
+ <class>AdminMenuDialog</class>
+ <widget class="QDialog" name="AdminMenuDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>560</width>
+    <height>420</height>
+   </rect>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QFrame" name="customTitleBar">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <layout class="QHBoxLayout" name="customTitleLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>10</number>
+      </property>
+      <item>
+       <spacer name="titleSpacer1">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
-            <item>
-                <widget class="QFrame" name="customTitleBar">
-                    <property name="frameShape">
-                        <enum>QFrame::NoFrame</enum>
-                    </property>
-                    <layout class="QHBoxLayout" name="customTitleLayout">
-                        <item>
-                            <spacer name="titleSpacer1">
-                                <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                </property>
-                                <property name="sizeHint" stdset="0">
-                                    <size>
-                                        <width>40</width>
-                                        <height>20</height>
-                                    </size>
-                                </property>
-                            </spacer>
-                        </item>
-                        <item>
-                            <widget class="QLabel" name="customTitle">
-                                <property name="text">
-                                    <string>Admin Settings</string>
-                                </property>
-                            </widget>
-                        </item>
-                        <item>
-                            <spacer name="titleSpacer2">
-                                <property name="orientation">
-                                    <enum>Qt::Horizontal</enum>
-                                </property>
-                                <property name="sizeHint" stdset="0">
-                                    <size>
-                                        <width>40</width>
-                                        <height>20</height>
-                                    </size>
-                                </property>
-                            </spacer>
-                        </item>
-                        <item>
-                            <widget class="QPushButton" name="customCloseBtn">
-                                <property name="minimumSize">
-                                    <size>
-                                        <width>28</width>
-                                        <height>28</height>
-                                    </size>
-                                </property>
-                                <property name="maximumSize">
-                                    <size>
-                                        <width>28</width>
-                                        <height>28</height>
-                                    </size>
-                                </property>
-                                <property name="toolTip">
-                                    <string>Close</string>
-                                </property>
-                                <property name="text">
-                                    <string>×</string>
-                                </property>
-                                <property name="flat">
-                                    <bool>true</bool>
-                                </property>
-                            </widget>
-                        </item>
-                    </layout>
-                </widget>
-            </item>
-            <item>
-                <spacer name="horizontalSpacer">
-                    <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                        <size>
-                            <width>40</width>
-                            <height>10</height>
-                        </size>
-                    </property>
-                </spacer>
-            </item>
-            <item>
-                <widget class="QLabel" name="loggedInLabel">
-                    <property name="text">
-                        <string>Logged in as: Admin</string>
-                    </property>
-                    <property name="alignment">
-                        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                    </property>
-                </widget>
-            </item>
-            <item>
-                <spacer name="horizontalSpacer_2">
-                    <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                        <size>
-                            <width>40</width>
-                            <height>20</height>
-                        </size>
-                    </property>
-                </spacer>
-            </item>
-            <item>
-                <widget class="QTabWidget" name="tabWidget">
-                    <property name="tabPosition">
-                        <enum>QTabWidget::North</enum>
-                    </property>
-                    <property name="currentIndex">
-                        <number>2</number>
-                    </property>
-                    <widget class="QWidget" name="tabAdmin">
-                        <attribute name="title">
-                            <string>ADMIN</string>
-                        </attribute>
-                        <layout class="QVBoxLayout" name="tabAdminLayout">
-                            <item>
-                                <widget class="QGroupBox" name="groupAdminPassword">
-                                    <property name="title">
-                                        <string>Change Admin Password</string>
-                                    </property>
-                                    <layout class="QFormLayout" name="formAdmin">
-                                        <item row="0" column="0">
-                                            <widget class="QLabel" name="labelAdminCurrent">
-                                                <property name="text">
-                                                    <string>Current Password:</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item row="0" column="1">
-                                            <layout class="QHBoxLayout" name="layoutAdminCurrent">
-                                                <item>
-                                                    <widget class="QLineEdit" name="adminCurrentPassword">
-                                                        <property name="echoMode">
-                                                            <enum>QLineEdit::Password</enum>
-                                                        </property>
-                                                        <property name="placeholderText">
-                                                            <string>********</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item>
-                                                    <widget class="QToolButton" name="btnToggleAdminCurrent">
-                                                        <property name="toolTip">
-                                                            <string>Show/Hide</string>
-                                                        </property>
-                                                        <property name="text">
-                                                            <string>👁</string>
-                                                        </property>
-                                                        <property name="checkable">
-                                                            <bool>true</bool>
-                                                        </property>
-                                                        <property name="autoRaise">
-                                                            <bool>true</bool>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                            </layout>
-                                        </item>
-                                        <item row="1" column="0">
-                                            <widget class="QLabel" name="labelAdminNew">
-                                                <property name="text">
-                                                    <string>New Password:</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item row="1" column="1">
-                                            <widget class="QLineEdit" name="adminNewPassword">
-                                                <property name="echoMode">
-                                                    <enum>QLineEdit::Password</enum>
-                                                </property>
-                                                <property name="placeholderText">
-                                                    <string>Enter new password</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                    </layout>
-                                </widget>
-                            </item>
-                            <item>
-                                <spacer name="horizontalSpacer_7">
-                                    <property name="orientation">
-                                        <enum>Qt::Horizontal</enum>
-                                    </property>
-                                    <property name="sizeHint" stdset="0">
-                                        <size>
-                                            <width>40</width>
-                                            <height>20</height>
-                                        </size>
-                                    </property>
-                                </spacer>
-                            </item>
-                            <item>
-                                <layout class="QHBoxLayout" name="layoutAdminSave">
-                                    <item>
-                                        <spacer name="adminSaveSpacer">
-                                            <property name="orientation">
-                                                <enum>Qt::Horizontal</enum>
-                                            </property>
-                                            <property name="sizeHint" stdset="0">
-                                                <size>
-                                                    <width>40</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                    </item>
-                                    <item>
-                                        <widget class="QPushButton" name="btnAdminSave">
-                                            <property name="text">
-                                                <string>SAVE CHANGES</string>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                    <item>
-                                        <widget class="QPushButton" name="btnAdminCancel">
-                                            <property name="text">
-                                                <string>CANCEL</string>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                </layout>
-                            </item>
-                            <item>
-                                <spacer name="horizontalSpacer_8">
-                                    <property name="orientation">
-                                        <enum>Qt::Horizontal</enum>
-                                    </property>
-                                    <property name="sizeHint" stdset="0">
-                                        <size>
-                                            <width>40</width>
-                                            <height>10</height>
-                                        </size>
-                                    </property>
-                                </spacer>
-                            </item>
-                            <item>
-                                <layout class="QVBoxLayout" name="layoutMessageAdmin">
-                                    <item>
-                                        <widget class="QLabel" name="messageLabelAdmin">
-                                            <property name="text">
-                                                <string/>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                </layout>
-                            </item>
-                        </layout>
-                    </widget>
-                    <widget class="QWidget" name="tabStaff">
-                        <attribute name="title">
-                            <string>STAFF</string>
-                        </attribute>
-                        <layout class="QVBoxLayout" name="tabStaffLayout">
-                            <item>
-                                <widget class="QGroupBox" name="groupStaffPassword">
-                                    <property name="title">
-                                        <string>Change Staff Password</string>
-                                    </property>
-                                    <layout class="QFormLayout" name="formStaff">
-                                        <item row="0" column="0">
-                                            <widget class="QLabel" name="labelStaffCurrent">
-                                                <property name="text">
-                                                    <string>Current Password:</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item row="0" column="1">
-                                            <layout class="QHBoxLayout" name="layoutStaffCurrent">
-                                                <item>
-                                                    <widget class="QLineEdit" name="staffCurrentPassword">
-                                                        <property name="echoMode">
-                                                            <enum>QLineEdit::Password</enum>
-                                                        </property>
-                                                        <property name="placeholderText">
-                                                            <string>********</string>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                                <item>
-                                                    <widget class="QToolButton" name="btnToggleStaffCurrent">
-                                                        <property name="toolTip">
-                                                            <string>Show/Hide</string>
-                                                        </property>
-                                                        <property name="text">
-                                                            <string>👁</string>
-                                                        </property>
-                                                        <property name="checkable">
-                                                            <bool>true</bool>
-                                                        </property>
-                                                        <property name="autoRaise">
-                                                            <bool>true</bool>
-                                                        </property>
-                                                    </widget>
-                                                </item>
-                                            </layout>
-                                        </item>
-                                        <item row="1" column="0">
-                                            <widget class="QLabel" name="labelStaffNew">
-                                                <property name="text">
-                                                    <string>New Password:</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item row="1" column="1">
-                                            <widget class="QLineEdit" name="staffNewPassword">
-                                                <property name="echoMode">
-                                                    <enum>QLineEdit::Password</enum>
-                                                </property>
-                                                <property name="placeholderText">
-                                                    <string>Enter new password</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                    </layout>
-                                </widget>
-                            </item>
-                            <item>
-                                <spacer name="horizontalSpacer_3">
-                                    <property name="orientation">
-                                        <enum>Qt::Horizontal</enum>
-                                    </property>
-                                    <property name="sizeHint" stdset="0">
-                                        <size>
-                                            <width>40</width>
-                                            <height>20</height>
-                                        </size>
-                                    </property>
-                                </spacer>
-                            </item>
-                            <item>
-                                <layout class="QHBoxLayout" name="layoutStaffSave">
-                                    <item>
-                                        <spacer name="staffSaveSpacer">
-                                            <property name="orientation">
-                                                <enum>Qt::Horizontal</enum>
-                                            </property>
-                                            <property name="sizeHint" stdset="0">
-                                                <size>
-                                                    <width>40</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                    </item>
-                                    <item>
-                                        <widget class="QPushButton" name="btnStaffSave">
-                                            <property name="text">
-                                                <string>SAVE CHANGES</string>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                    <item>
-                                        <widget class="QPushButton" name="btnStaffCancel">
-                                            <property name="text">
-                                                <string>CANCEL</string>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                </layout>
-                            </item>
-                            <item>
-                                <spacer name="horizontalSpacer_4">
-                                    <property name="orientation">
-                                        <enum>Qt::Horizontal</enum>
-                                    </property>
-                                    <property name="sizeHint" stdset="0">
-                                        <size>
-                                            <width>40</width>
-                                            <height>10</height>
-                                        </size>
-                                    </property>
-                                </spacer>
-                            </item>
-                            <item>
-                                <layout class="QVBoxLayout" name="layoutMessageStaff">
-                                    <item>
-                                        <widget class="QLabel" name="messageLabelStaff">
-                                            <property name="frameShape">
-                                                <enum>QFrame::NoFrame</enum>
-                                            </property>
-                                            <property name="text">
-                                                <string/>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                </layout>
-                            </item>
-                        </layout>
-                    </widget>
-                    <widget class="QWidget" name="tabEmail">
-                        <attribute name="title">
-                            <string>EMAIL</string>
-                        </attribute>
-                        <layout class="QVBoxLayout" name="tabEmailLayout">
-                            <item>
-                                <widget class="QGroupBox" name="groupEmail">
-                                    <property name="title">
-                                        <string>Email Settings</string>
-                                    </property>
-                                    <layout class="QFormLayout" name="formEmail">
-                                        <item row="0" column="0">
-                                            <widget class="QLabel" name="labelCurrentEmail">
-                                                <property name="text">
-                                                    <string>Current Email:</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item row="0" column="1">
-                                            <widget class="QLineEdit" name="currentEmailLineEdit">
-                                                <property name="readOnly">
-                                                    <bool>true</bool>
-                                                </property>
-                                                <property name="placeholderText">
-                                                    <string>user@example.com</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item row="1" column="0">
-                                            <widget class="QLabel" name="labelNewEmail">
-                                                <property name="text">
-                                                    <string>New Email:</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                        <item row="1" column="1">
-                                            <widget class="QLineEdit" name="newEmailLineEdit">
-                                                <property name="placeholderText">
-                                                    <string>Enter new recovery email</string>
-                                                </property>
-                                            </widget>
-                                        </item>
-                                    </layout>
-                                </widget>
-                            </item>
-                            <item>
-                                <spacer name="horizontalSpacer_5">
-                                    <property name="orientation">
-                                        <enum>Qt::Horizontal</enum>
-                                    </property>
-                                    <property name="sizeHint" stdset="0">
-                                        <size>
-                                            <width>40</width>
-                                            <height>20</height>
-                                        </size>
-                                    </property>
-                                </spacer>
-                            </item>
-                            <item>
-                                <layout class="QHBoxLayout" name="layoutEmailSave">
-                                    <item>
-                                        <spacer name="emailSaveSpacer">
-                                            <property name="orientation">
-                                                <enum>Qt::Horizontal</enum>
-                                            </property>
-                                            <property name="sizeHint" stdset="0">
-                                                <size>
-                                                    <width>40</width>
-                                                    <height>20</height>
-                                                </size>
-                                            </property>
-                                        </spacer>
-                                    </item>
-                                    <item>
-                                        <widget class="QPushButton" name="btnEmailSave">
-                                            <property name="text">
-                                                <string>SAVE CHANGES</string>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                    <item>
-                                        <widget class="QPushButton" name="btnEmailCancel">
-                                            <property name="text">
-                                                <string>CANCEL</string>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                </layout>
-                            </item>
-                            <item>
-                                <spacer name="horizontalSpacer_6">
-                                    <property name="orientation">
-                                        <enum>Qt::Horizontal</enum>
-                                    </property>
-                                    <property name="sizeHint" stdset="0">
-                                        <size>
-                                            <width>40</width>
-                                            <height>10</height>
-                                        </size>
-                                    </property>
-                                </spacer>
-                            </item>
-                            <item>
-                                <layout class="QVBoxLayout" name="layoutMessageEmail">
-                                    <item>
-                                        <widget class="QLabel" name="messageLabelEmail">
-                                            <property name="text">
-                                                <string/>
-                                            </property>
-                                        </widget>
-                                    </item>
-                                </layout>
-                            </item>
-                        </layout>
-                    </widget>
-                </widget>
-            </item>
-        </layout>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="customTitle">
+        <property name="text">
+         <string>Admin Settings</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="titleSpacer2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item alignment="Qt::AlignRight|Qt::AlignTop">
+       <widget class="QPushButton" name="customCloseBtn">
+        <property name="toolTip">
+         <string>Close</string>
+        </property>
+        <property name="text">
+         <string>x</string>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
-    <resources/>
-    <connections/>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>10</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QLabel" name="loggedInLabel">
+     <property name="text">
+      <string>Logged in as: Admin</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="tabPosition">
+      <enum>QTabWidget::North</enum>
+     </property>
+     <property name="currentIndex">
+      <number>2</number>
+     </property>
+     <widget class="QWidget" name="tabAdmin">
+      <attribute name="title">
+       <string>ADMIN</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="tabAdminLayout">
+       <item>
+        <widget class="QGroupBox" name="groupAdminPassword">
+         <property name="title">
+          <string>Change Admin Password</string>
+         </property>
+         <layout class="QFormLayout" name="formAdmin">
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelAdminCurrent">
+            <property name="text">
+             <string>Current Password:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <layout class="QHBoxLayout" name="layoutAdminCurrent">
+            <item>
+             <widget class="QLineEdit" name="adminCurrentPassword">
+              <property name="echoMode">
+               <enum>QLineEdit::Password</enum>
+              </property>
+              <property name="placeholderText">
+               <string>********</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnToggleAdminCurrent">
+              <property name="toolTip">
+               <string>Show/Hide</string>
+              </property>
+              <property name="text">
+               <string>👁</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="autoRaise">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelAdminNew">
+            <property name="text">
+             <string>New Password:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="adminNewPassword">
+            <property name="echoMode">
+             <enum>QLineEdit::Password</enum>
+            </property>
+            <property name="placeholderText">
+             <string>Enter new password</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_7">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="layoutAdminSave">
+         <item>
+          <spacer name="adminSaveSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnAdminSave">
+           <property name="text">
+            <string>SAVE CHANGES</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnAdminCancel">
+           <property name="text">
+            <string>CANCEL</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_8">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="layoutMessageAdmin">
+         <item>
+          <widget class="QLabel" name="messageLabelAdmin">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabStaff">
+      <attribute name="title">
+       <string>STAFF</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="tabStaffLayout">
+       <item>
+        <widget class="QGroupBox" name="groupStaffPassword">
+         <property name="title">
+          <string>Change Staff Password</string>
+         </property>
+         <layout class="QFormLayout" name="formStaff">
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelStaffCurrent">
+            <property name="text">
+             <string>Current Password:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <layout class="QHBoxLayout" name="layoutStaffCurrent">
+            <item>
+             <widget class="QLineEdit" name="staffCurrentPassword">
+              <property name="echoMode">
+               <enum>QLineEdit::Password</enum>
+              </property>
+              <property name="placeholderText">
+               <string>********</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="btnToggleStaffCurrent">
+              <property name="toolTip">
+               <string>Show/Hide</string>
+              </property>
+              <property name="text">
+               <string>👁</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="autoRaise">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelStaffNew">
+            <property name="text">
+             <string>New Password:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="staffNewPassword">
+            <property name="echoMode">
+             <enum>QLineEdit::Password</enum>
+            </property>
+            <property name="placeholderText">
+             <string>Enter new password</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="layoutStaffSave">
+         <item>
+          <spacer name="staffSaveSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnStaffSave">
+           <property name="text">
+            <string>SAVE CHANGES</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnStaffCancel">
+           <property name="text">
+            <string>CANCEL</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="layoutMessageStaff">
+         <item>
+          <widget class="QLabel" name="messageLabelStaff">
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabEmail">
+      <attribute name="title">
+       <string>EMAIL</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="tabEmailLayout">
+       <item>
+        <widget class="QGroupBox" name="groupEmail">
+         <property name="title">
+          <string>Email Settings</string>
+         </property>
+         <layout class="QFormLayout" name="formEmail">
+          <item row="0" column="0">
+           <widget class="QLabel" name="labelCurrentEmail">
+            <property name="text">
+             <string>Current Email:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="currentEmailLineEdit">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="placeholderText">
+             <string>user@example.com</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="labelNewEmail">
+            <property name="text">
+             <string>New Email:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="newEmailLineEdit">
+            <property name="placeholderText">
+             <string>Enter new recovery email</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="layoutEmailSave">
+         <item>
+          <spacer name="emailSaveSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnEmailSave">
+           <property name="text">
+            <string>SAVE CHANGES</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnEmailCancel">
+           <property name="text">
+            <string>CANCEL</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_6">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="layoutMessageEmail">
+         <item>
+          <widget class="QLabel" name="messageLabelEmail">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
 </ui>

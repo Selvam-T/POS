@@ -45,6 +45,15 @@ def open_greeting_dialog(parent=None):
     dlg.setModal(True)
     dlg.setWindowTitle('Customer Greeting Message')
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
+    
+    # Apply stylesheet
+    if os.path.exists(QSS_PATH):
+        try:
+            with open(QSS_PATH, 'r', encoding='utf-8') as f:
+                dlg.setStyleSheet(f.read())
+        except Exception as e:
+            print(f'Failed to load menu.qss: {e}')
+    
     all_widgets = dlg.findChildren(QComboBox)
     combo = all_widgets[0] if all_widgets else None
     if combo is not None:

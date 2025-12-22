@@ -226,7 +226,7 @@ For a concise overview and updated project structure, see `README.md`.
 - **Purpose:** Application loader and UI composer
 - **Framework:** PyQt5 with .ui file loading via `uic`
 # Project Journal - POS System Development
-- **Styling:** Loads global QSS from `assets/style.qss`
+- **Styling:** Loads global QSS from `assets/main.qss`
 
 ### Directory Structure
 ```
@@ -235,7 +235,7 @@ Project/
 ├── requirements.txt       # Python dependencies
 ├── Project_Journal.md     # This document
 ├── assets/
-│   ├── style.qss         # Global stylesheet
+│   ├── main.qss          # Global stylesheet
 │   └── icons/
 │       └── delete.svg    # Delete button icon
 ├── ui/
@@ -300,7 +300,7 @@ Historical note:
 - **Margins:** `(12, 6, 12, 6)` - Horizontal spacing from window edges
 
 **Styling:**
-- Controlled via `style.qss` for consistency
+- Controlled via `main.qss` for consistency
 - Burger button size managed through QSS min/max constraints
 
 ---

@@ -17,6 +17,18 @@
       <enum>QFrame::NoFrame</enum>
      </property>
      <layout class="QHBoxLayout" name="customTitleLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>10</number>
+      </property>
       <item>
        <spacer name="titleSpacer1">
         <property name="orientation">
@@ -58,26 +70,11 @@
       </item>
       <item>
        <widget class="QPushButton" name="customCloseBtn">
-        <property name="minimumSize">
-         <size>
-          <width>28</width>
-          <height>28</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>28</width>
-          <height>28</height>
-         </size>
-        </property>
         <property name="toolTip">
          <string>Close</string>
         </property>
         <property name="text">
-         <string>×</string>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
+         <string>x</string>
         </property>
        </widget>
       </item>
