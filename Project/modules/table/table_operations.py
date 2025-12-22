@@ -1,5 +1,4 @@
-"""
-Table setup and helper functions for product tables
+"""Table setup and helper functions for product tables
 Provides:
 - setup_sales_table(table): configure headers, widths, and insert a placeholder row
 - set_sales_rows(table, rows): populate rows with qty input, unit price, totals, and a delete button
@@ -8,6 +7,12 @@ Provides:
 - bind_total_label(table, label): bind the Sales totalValue label and keep it updated
 - recompute_total(table): recompute and return grand total from all row totals
 - get_total(table): return last computed grand total
+- find_product_in_table(table, product_code): search for product by code, return row index or None
+- increment_row_quantity(table, row): increment quantity by 1 (handles EACH/KG automatically)
+
+Public functions for duplicate detection (used by barcode scanning and vegetable entry):
+- find_product_in_table(table, product_code): searches by product code via cache lookup
+- increment_row_quantity(table, row): increments EACH items by 1, handles read-only KG items
 """
 from typing import List, Dict, Any, Optional
 from PyQt5.QtCore import Qt, QEvent, QObject, QTimer
@@ -758,7 +763,7 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
     is_kg_item = (unit == 'KG')
     
     # Check if product already exists in table
-    existing_row = _find_product_in_table(table, barcode)
+    existing_row = find_product_in_table(table, barcode)
     
     if existing_row is not None:
         # Product exists → increment quantity (only if editable)
@@ -766,7 +771,7 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
         if qty_container:
             editor = qty_container.findChild(QLineEdit, 'qtyInput')
             if editor and not editor.isReadOnly():
-                _increment_row_quantity(table, existing_row)
+                increment_row_quantity(table, existing_row)
                 if status_bar:
                     show_temp_status(status_bar, f"Added {product_name} (quantity updated)", 3000)
             else:
@@ -787,17 +792,26 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
                 show_temp_status(status_bar, f"Added {product_name}", 3000)
 
 
-def _find_product_in_table(table: QTableWidget, product_code: str) -> Optional[int]:
+def find_product_in_table(table: QTableWidget, product_code: str) -> Optional[int]:
     """
     Search table for existing product by code.
     
+    Used by barcode scanning and vegetable entry dialog for duplicate detection.
+    Searches by product code, looks up name from cache, and compares with table rows.
+    
     Args:
         table: QTableWidget to search
-        product_code: Product code to find
+        product_code: Product code to find (e.g., barcode or 'Veg01')
         
     Returns:
         Row index if found, None otherwise
     """
+    # Look up product name once before searching
+    found, product_name, _, _ = get_product_info(product_code)
+    if not found:
+        return None
+    
+    # Search table rows for matching product name
     for row in range(table.rowCount()):
         # Get product name from column 1
         item = table.item(row, 1)
@@ -805,20 +819,20 @@ def _find_product_in_table(table: QTableWidget, product_code: str) -> Optional[i
             continue
             
         # Check if this row contains the product
-        # Since we store product name, we need to look it up
-        product_text = item.text()
-        
-        # Try to match by getting product info
-        found, name, _, _ = get_product_info(product_code)
-        if found and product_text == name:
+        table_product_name = item.text()
+        if table_product_name == product_name:
             return row
             
     return None
 
 
-def _increment_row_quantity(table: QTableWidget, row: int) -> None:
+def increment_row_quantity(table: QTableWidget, row: int) -> None:
     """
     Increment quantity in specified row by 1.
+    
+    Automatically handles both EACH and KG items:
+    - EACH items (editable): Increments integer count by 1
+    - KG items (read-only): Adds weight (caller must use add_product_row for KG)
     
     Args:
         table: QTableWidget containing the row

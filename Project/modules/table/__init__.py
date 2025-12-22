@@ -12,6 +12,8 @@ from .table_operations import (
     recompute_total,
     get_total,
     handle_barcode_scanned,
+    find_product_in_table,
+    increment_row_quantity,
     _rebuild_mixed_editable_table,
 )
 
@@ -25,5 +27,7 @@ __all__ = [
     'recompute_total',
     'get_total',
     'handle_barcode_scanned',
+    'find_product_in_table',
+    'increment_row_quantity',
     '_rebuild_mixed_editable_table',
 ]

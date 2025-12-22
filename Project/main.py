@@ -123,7 +123,14 @@ class MainLoader(QMainWindow):
         """Open Add Vegetable panel."""
         # Store reference to process after dialog closes
         def on_vegetable_entry_finish():
-            """Process vegetable rows after dialog closes."""
+            """Process vegetable rows after dialog closes.
+            
+            Merges vegEntryTable rows with existing sales table rows:
+            - Checks for duplicates by product name
+            - EACH items: adds quantities together
+            - KG items: adds weights together
+            - Type mismatches: keeps existing row
+            """
             if not hasattr(self, 'sales_table'):
                 return
             
@@ -184,8 +191,34 @@ class MainLoader(QMainWindow):
                     }
                     existing_rows.append(row_data)
                 
-                # Combine existing + vegetable rows
-                combined_rows = existing_rows + vegetable_rows
+                # Merge vegetable rows into existing rows (check for duplicates by product name)
+                for veg_row in vegetable_rows:
+                    veg_product_name = veg_row.get('product', '')
+                    veg_qty = veg_row.get('quantity', 0.0)
+                    veg_price = veg_row.get('unit_price', 0.0)
+                    veg_editable = veg_row.get('editable', True)
+                    
+                    # Find matching product in existing rows
+                    found_match = False
+                    for existing_row in existing_rows:
+                        if existing_row['product'] == veg_product_name:
+                            # Found duplicate - merge quantities
+                            if veg_editable and existing_row['editable']:
+                                # Both EACH items - add quantities
+                                existing_row['quantity'] += veg_qty
+                            elif not veg_editable and not existing_row['editable']:
+                                # Both KG items - add weights
+                                existing_row['quantity'] += veg_qty
+                            # If types mismatch (one EACH, one KG), keep existing and ignore new
+                            found_match = True
+                            break
+                    
+                    if not found_match:
+                        # No duplicate - add as new row
+                        existing_rows.append(veg_row)
+                
+                # Rebuild sales table with merged rows
+                combined_rows = existing_rows
                 
                 # Rebuild sales table with mixed editable states
                 from modules.table.table_operations import _rebuild_mixed_editable_table

@@ -1,4 +1,12 @@
 # --- Vegetable Entry Dialog Controller ---
+"""Vegetable Entry Dialog - allows selecting vegetables from a 4x4 grid.
+
+Each vegetable button triggers weighing (for KG items) or increments count (for EACH items).
+The dialog maintains an internal table (vegEntryTable) that accumulates selections.
+Duplicate detection: uses shared table_operations functions (find_product_in_table, increment_row_quantity)
+for consistent duplicate handling across barcode scanning and vegetable entry.
+On OK, all rows are transferred to the main sales table with duplicate merging.
+"""
 import os
 from typing import List, Dict, Optional
 from PyQt5 import uic
@@ -10,6 +18,7 @@ from functools import partial
 from modules.wrappers import settings as app_settings
 from modules.db_operation import get_product_info, get_product_full
 from modules.table import set_sales_rows, setup_sales_table
+from modules.table import find_product_in_table, increment_row_quantity
 from modules.table.table_operations import _rebuild_mixed_editable_table
 
 
@@ -183,7 +192,7 @@ def _handle_vegetable_button_click(dlg: QDialog, msg_label: Optional[QLabel],
         total = weight_kg * unit_price
         
         # Add row with read-only quantity (kg value stored, unit shown in unit column)
-        _add_vegetable_row(vtable, product_name, weight_kg, unit_price, 
+        _add_vegetable_row(vtable, product_code, product_name, weight_kg, unit_price, 
                           editable=False)
         
         if msg_label:
@@ -201,7 +210,7 @@ def _handle_vegetable_button_click(dlg: QDialog, msg_label: Optional[QLabel],
         total = quantity * unit_price
         
         # Add row with editable quantity
-        _add_vegetable_row(vtable, product_name, quantity, unit_price, 
+        _add_vegetable_row(vtable, product_code, product_name, quantity, unit_price, 
                           editable=True)
         
         if msg_label:
@@ -209,40 +218,78 @@ def _handle_vegetable_button_click(dlg: QDialog, msg_label: Optional[QLabel],
             msg_label.setStyleSheet("color: green;")
 
 
-def _add_vegetable_row(vtable: QTableWidget, product_name: str, quantity: float, 
-                      unit_price: float, editable: bool = True) -> None:
+def _add_vegetable_row(vtable: QTableWidget, product_code: str, product_name: str, 
+                      quantity: float, unit_price: float, editable: bool = True) -> None:
     """Add a vegetable row to the vegEntryTable, or update if duplicate.
     
+    Uses shared table_operations functions for consistent duplicate detection.
+    
     If product already exists:
-    - EACH items: Increment quantity by 1
-    - KG items: Add the new weight to existing weight
+    - EACH items (editable): Increment quantity by 1
+    - KG items (read-only): Add new weight to existing weight
     
     Args:
         vtable: Vegetable entry table
+        product_code: Product code (e.g., 'Veg01')
         product_name: Product display name
         quantity: Numeric quantity (kg for weight items, count for EACH)
         unit_price: Unit price
-        editable: Whether quantity is editable
+        editable: Whether quantity is editable (True=EACH, False=KG)
     """
-    # Get current rows and check for duplicates
+    # Check for duplicate using shared function (searches by product code)
+    existing_row = find_product_in_table(vtable, product_code)
+    
+    if existing_row is not None:
+        # Product exists - check if it's editable (EACH) or read-only (KG)
+        qty_container = vtable.cellWidget(existing_row, 2)
+        if qty_container:
+            editor = qty_container.findChild(QtWidgets.QLineEdit, 'qtyInput')
+            if editor:
+                if not editor.isReadOnly():
+                    # EACH item - increment by 1 (shared function handles this)
+                    increment_row_quantity(vtable, existing_row)
+                else:
+                    # KG item - add weights together
+                    numeric_val = editor.property('numeric_value')
+                    if numeric_val is not None:
+                        try:
+                            current_qty = float(numeric_val)
+                        except (ValueError, TypeError):
+                            current_qty = 0.0
+                    else:
+                        current_qty = 0.0
+                    
+                    new_qty = current_qty + quantity
+                    editor.setProperty('numeric_value', new_qty)
+                    
+                    # Update display
+                    weight_grams = int(new_qty * 1000)
+                    if weight_grams < 1000:
+                        editor.setText(str(weight_grams))
+                    else:
+                        editor.setText(f"{new_qty:.2f}")
+                    
+                    # Update unit column
+                    unit_item = vtable.item(existing_row, 3)
+                    if unit_item:
+                        unit_item.setText('g' if weight_grams < 1000 else 'kg')
+                    
+                    # Recalculate total
+                    from modules.table.table_operations import recalc_row_total
+                    recalc_row_total(vtable, existing_row)
+        # Always return when duplicate found, even if update failed
+        return
+    
+    # No duplicate - get current rows and add new one
     current_rows = []
-    found_duplicate = False
-    duplicate_index = -1
     for r in range(vtable.rowCount()):
         product_item = vtable.item(r, 1)
         if product_item is None:
             continue
         
-        # Check if this is a duplicate product
-        existing_product_name = product_item.text()
-        if existing_product_name == product_name:
-            found_duplicate = True
-            duplicate_index = len(current_rows)
-        
-        # Get quantity data
+        # Get quantity and editable state
         qty_container = vtable.cellWidget(r, 2)
         qty = 1.0
-        row_display_text = None
         row_editable = True
         if qty_container is not None:
             editor = qty_container.findChild(QtWidgets.QLineEdit, 'qtyInput')
@@ -270,36 +317,23 @@ def _add_vegetable_row(vtable: QTableWidget, product_name: str, quantity: float,
                 price = 0.0
         
         row_data = {
-            'product': existing_product_name,
+            'product': product_item.text(),
             'quantity': qty,
             'unit_price': price,
             'editable': row_editable
         }
         current_rows.append(row_data)
     
-    # Handle duplicate: update existing row quantity
-    if found_duplicate and duplicate_index >= 0:
-        existing_row = current_rows[duplicate_index]
-        existing_editable = existing_row.get('editable', True)
-        
-        if existing_editable:
-            # EACH item - increment by 1
-            existing_row['quantity'] = existing_row['quantity'] + 1
-        else:
-            # KG item - add new weight to existing
-            new_qty = existing_row['quantity'] + quantity
-            existing_row['quantity'] = new_qty
-    else:
-        # No duplicate - add new row
-        new_row = {
-            'product': product_name,
-            'quantity': quantity,
-            'unit_price': unit_price,
-            'editable': editable
-        }
-        current_rows.append(new_row)
+    # Add new row
+    new_row = {
+        'product': product_name,
+        'quantity': quantity,
+        'unit_price': unit_price,
+        'editable': editable
+    }
+    current_rows.append(new_row)
     
-    # Rebuild table with mixed editable states using shared function
+    # Rebuild table with mixed editable states
     _rebuild_mixed_editable_table(vtable, current_rows)
 
 
