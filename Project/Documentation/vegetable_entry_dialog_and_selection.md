@@ -16,9 +16,15 @@ This document describes the workflow for the Vegetable Entry dialog, where users
 - **Enabled buttons:** Show product name from database (fetched via `get_product_info()`)
 - **Disabled buttons:** Display "Not Used" when no product configured for slot
 
-### Table (vegEntryTable)
-- **Columns:** `['No.', 'Item', 'Quantity', 'Unit Price', 'Total', 'Del']`
+### Table (vegEntryTable) - 7 Columns
+- **Columns:** `['No.', 'Product', 'Quantity', '', 'Unit Price', 'Total', 'Del']`
+  - Column 3 has empty header, displays unit ('g', 'kg', or 'ea')
 - **Purpose:** Temporary staging area for vegetable items before transfer to sales table
+- **Quantity Display:**
+  - KG items < 1000g: Shows grams (e.g., "600")
+  - KG items ≥ 1000g: Shows kg with 2 decimals (e.g., "1.20")
+  - EACH items: Shows integer count
+- **Unit Display:** Separate column shows 'g', 'kg', or 'ea'
 - **Editable behavior:** Per-row based on unit type (see below)
 
 ### Control Buttons
@@ -31,17 +37,18 @@ This document describes the workflow for the Vegetable Entry dialog, where users
 When user clicks a KG vegetable button:
 1. Dialog reads weighing scale (simulated: 600g = 0.6 kg)
 2. Adds row to vegEntryTable with:
-   - `quantity`: Numeric weight in kg (e.g., `0.6`)
-   - `display_text`: Human-readable format (e.g., `"600 g"`)
+   - `quantity`: Numeric weight in kg (e.g., `0.6`, stored for calculations)
+   - **Display**: "600" in Quantity column, "g" in Unit column
    - `editable`: `False` (quantity cell is READ-ONLY)
 3. **Duplicate handling:** If same KG item clicked again, ADDS weights (e.g., 600g + 600g = 1200g)
+   - Updates to display "1.20" in Quantity, "kg" in Unit
 
 ### EACH Items (Count-Based)
 When user clicks an EACH vegetable button:
 1. Adds row to vegEntryTable with:
    - `quantity`: Numeric count (default: `1`)
-   - No `display_text` (shows raw number)
-   - `editable`: `True` (quantity cell is EDITABLE)
+   - **Display**: Integer (e.g., "1") in Quantity column, "ea" in Unit column
+   - `editable`: `True` (quantity cell is EDITABLE, integer only, max 9999)
 2. **Duplicate handling:** If same EACH item clicked again, INCREMENTS quantity by 1
 
 ### Unit Detection Logic

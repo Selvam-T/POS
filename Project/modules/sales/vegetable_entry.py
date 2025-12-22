@@ -182,18 +182,17 @@ def _handle_vegetable_button_click(dlg: QDialog, msg_label: Optional[QLabel],
         weight_kg = weight_grams / 1000.0
         total = weight_kg * unit_price
         
-        # Format display text
-        if weight_grams < 1000:
-            display_text = f"{weight_grams} g"
-        else:
-            display_text = f"{weight_kg:.2f} kg"
-        
-        # Add row with read-only quantity
+        # Add row with read-only quantity (kg value stored, unit shown in unit column)
         _add_vegetable_row(vtable, product_name, weight_kg, unit_price, 
-                          display_text=display_text, editable=False)
+                          editable=False)
         
         if msg_label:
-            msg_label.setText(f"Added {product_name}: {display_text}")
+            # Show user-friendly weight in message
+            if weight_grams < 1000:
+                display_msg = f"{weight_grams} g"
+            else:
+                display_msg = f"{weight_kg:.2f} kg"
+            msg_label.setText(f"Added {product_name}: {display_msg}")
             msg_label.setStyleSheet("color: green;")
     
     else:  # unit == 'EA'
@@ -201,9 +200,9 @@ def _handle_vegetable_button_click(dlg: QDialog, msg_label: Optional[QLabel],
         quantity = 1
         total = quantity * unit_price
         
-        # Add row with editable quantity (no custom display text)
+        # Add row with editable quantity
         _add_vegetable_row(vtable, product_name, quantity, unit_price, 
-                          display_text=None, editable=True)
+                          editable=True)
         
         if msg_label:
             msg_label.setText(f"Added {product_name}")
@@ -211,8 +210,7 @@ def _handle_vegetable_button_click(dlg: QDialog, msg_label: Optional[QLabel],
 
 
 def _add_vegetable_row(vtable: QTableWidget, product_name: str, quantity: float, 
-                      unit_price: float, display_text: Optional[str] = None, 
-                      editable: bool = True) -> None:
+                      unit_price: float, editable: bool = True) -> None:
     """Add a vegetable row to the vegEntryTable, or update if duplicate.
     
     If product already exists:
@@ -224,7 +222,6 @@ def _add_vegetable_row(vtable: QTableWidget, product_name: str, quantity: float,
         product_name: Product display name
         quantity: Numeric quantity (kg for weight items, count for EACH)
         unit_price: Unit price
-        display_text: Optional custom display (e.g., "500 g")
         editable: Whether quantity is editable
     """
     # Get current rows and check for duplicates
@@ -262,12 +259,9 @@ def _add_vegetable_row(vtable: QTableWidget, product_name: str, quantity: float,
                         qty = float(editor.text()) if editor.text() else 1.0
                     except ValueError:
                         qty = 1.0
-                
-                if not row_editable:
-                    row_display_text = editor.text()
         
-        # Get unit price
-        price_item = vtable.item(r, 3)
+        # Get unit price from column 4
+        price_item = vtable.item(r, 4)
         price = 0.0
         if price_item is not None:
             try:
@@ -281,8 +275,6 @@ def _add_vegetable_row(vtable: QTableWidget, product_name: str, quantity: float,
             'unit_price': price,
             'editable': row_editable
         }
-        if row_display_text:
-            row_data['display_text'] = row_display_text
         current_rows.append(row_data)
     
     # Handle duplicate: update existing row quantity
@@ -293,20 +285,10 @@ def _add_vegetable_row(vtable: QTableWidget, product_name: str, quantity: float,
         if existing_editable:
             # EACH item - increment by 1
             existing_row['quantity'] = existing_row['quantity'] + 1
-            # Remove display_text key to use numeric value
-            if 'display_text' in existing_row:
-                del existing_row['display_text']
         else:
             # KG item - add new weight to existing
             new_qty = existing_row['quantity'] + quantity
             existing_row['quantity'] = new_qty
-            
-            # Update display text for the combined weight
-            weight_grams = int(new_qty * 1000)
-            if weight_grams < 1000:
-                existing_row['display_text'] = f"{weight_grams} g"
-            else:
-                existing_row['display_text'] = f"{new_qty:.2f} kg"
     else:
         # No duplicate - add new row
         new_row = {
@@ -315,8 +297,6 @@ def _add_vegetable_row(vtable: QTableWidget, product_name: str, quantity: float,
             'unit_price': unit_price,
             'editable': editable
         }
-        if display_text:
-            new_row['display_text'] = display_text
         current_rows.append(new_row)
     
     # Rebuild table with mixed editable states using shared function
@@ -359,12 +339,9 @@ def _handle_ok_all(dlg: QDialog, vtable: Optional[QTableWidget]) -> None:
                         qty = float(editor.text()) if editor.text() else 1.0
                     except ValueError:
                         qty = 1.0
-                
-                if not row_editable:
-                    display_text = editor.text()
         
-        # Get unit price
-        price_item = vtable.item(r, 3)
+        # Get unit price from column 4
+        price_item = vtable.item(r, 4)
         price = 0.0
         if price_item is not None:
             try:
@@ -378,8 +355,6 @@ def _handle_ok_all(dlg: QDialog, vtable: Optional[QTableWidget]) -> None:
             'unit_price': price,
             'editable': row_editable
         }
-        if display_text:
-            row_data['display_text'] = display_text
         rows_to_transfer.append(row_data)
     
     # Store rows on dialog object for retrieval by caller

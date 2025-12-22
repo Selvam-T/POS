@@ -3,6 +3,15 @@
 ## Overview
 This module provides generic table operations for product tables in the POS system, including setup, row management, and automatic total value binding. Used by both the sales table and vegetable entry table.
 
+## Table Structure (7 Columns)
+- **Column 0**: No. (row number, auto-renumbered)
+- **Column 1**: Product (product name)
+- **Column 2**: Quantity (numeric value only, QLineEdit with validation)
+- **Column 3**: Unit (displays 'g', 'kg', or 'ea' - empty header)
+- **Column 4**: Unit Price
+- **Column 5**: Total (calculated: quantity × unit price)
+- **Column 6**: Del (delete button)
+
 ## Key Functions
 - `setup_sales_table(table)`: Configures table columns, headers, and default appearance. Should be called once after creating or loading the table widget.
 - `set_sales_rows(table, rows, status_bar=None, editable=True)`: Populates the table with product rows. Applies single editable state to ALL rows.
@@ -23,18 +32,25 @@ This module provides generic table operations for product tables in the POS syst
 - All cache operations (add, update) maintain unit information
 - `get_product_info(code)` returns `(found, name, price, unit)`
 
-### KG vs EACH Item Handling
+### KG vs EACH Item Display and Behavior
 **KG Items** (weight-based):
 - Require weighing scale input
 - Can ONLY be added via Vegetable Entry dialog
 - Barcode scanning is BLOCKED (shows: "KG item - use Vegetable Entry to weigh")
-- Quantity cells are READ-ONLY in both tables
-- Display format: "600 g" or "1.250 kg"
+- Quantity cells are READ-ONLY (non-editable)
+- **Quantity Display**: 
+  - < 1000g: Shows grams (e.g., "600" with unit "g")
+  - ≥ 1000g: Shows kg with 2 decimals (e.g., "1.20" with unit "kg")
+- **Storage**: Always stored in kg for calculations (e.g., 0.6 kg for 600g)
 
 **EACH Items** (count-based):
 - Can be added via barcode scan or manual entry
-- Quantity cells are EDITABLE in both tables
-- Display format: numeric count (e.g., "1", "2", "5")
+- Quantity cells are EDITABLE
+- **Quantity Display**: Integer only (e.g., "5" with unit "ea")
+- **Validation**: 
+  - QIntValidator enforces integer input only
+  - Range: 1-9999
+  - Non-numeric characters automatically rejected
 
 ## Advanced Features
 
@@ -47,7 +63,7 @@ from modules.table import _rebuild_mixed_editable_table
 rows = [
     {
         'product': 'Carrot',
-        'quantity': 0.6,  # kg
+        'quantity': 0.6,  # kg (stored in kg, displays as "600" with unit "g")
         'unit_price': 3.0,
         'editable': False,  # KG item - read-only
         'display_text': '600 g'

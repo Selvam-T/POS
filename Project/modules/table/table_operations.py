@@ -45,13 +45,14 @@ def setup_sales_table(table: QTableWidget) -> None:
     """Configure headers and add a sample placeholder row. Rows can be
     regenerated dynamically by calling set_sales_rows(table, rows).
 
-            Columns (0..5):
+            Columns (0..6):
                 0 No. (row number)
                 1 Product (text)
                 2 Quantity (editable input)
-                3 Unit Price (non-editable)
-                4 Total (calculated/non-editable)
-                5 Del (Remove button X)
+                3 Unit (g/kg/ea - non-editable)
+                4 Unit Price (non-editable)
+                5 Total (calculated/non-editable)
+                6 Del (Remove button X)
     """
     if table is None:
         return
@@ -67,9 +68,9 @@ def setup_sales_table(table: QTableWidget) -> None:
         except Exception:
             pass
 
-    # Ensure 6 columns and set headers
-    table.setColumnCount(6)
-    table.setHorizontalHeaderLabels(['No.', 'Product', 'Quantity', 'Unit Price', 'Total', 'Del'])
+    # Ensure 7 columns and set headers
+    table.setColumnCount(7)
+    table.setHorizontalHeaderLabels(['No.', 'Product', 'Quantity', '', 'Unit Price', 'Total', 'Del'])
 
     # Resize behavior and widths
     header: QHeaderView = table.horizontalHeader()
@@ -78,15 +79,17 @@ def setup_sales_table(table: QTableWidget) -> None:
     header.setSectionResizeMode(0, QHeaderView.Fixed)            # No.
     header.setSectionResizeMode(1, QHeaderView.Stretch)          # Product
     header.setSectionResizeMode(2, QHeaderView.Fixed)            # Quantity
-    header.setSectionResizeMode(3, QHeaderView.Fixed)            # Unit Price
-    header.setSectionResizeMode(4, QHeaderView.Fixed)            # Total
-    header.setSectionResizeMode(5, QHeaderView.Fixed)            # Del
+    header.setSectionResizeMode(3, QHeaderView.Fixed)            # Unit (empty header)
+    header.setSectionResizeMode(4, QHeaderView.Fixed)            # Unit Price
+    header.setSectionResizeMode(5, QHeaderView.Fixed)            # Total
+    header.setSectionResizeMode(6, QHeaderView.Fixed)            # Del
     # Apply pixel widths
     header.resizeSection(0, 48)   # No.
-    header.resizeSection(2, 130)  # Qty (wider to fit weight display like "600 g")
-    header.resizeSection(3, 120)  # Unit Price
-    header.resizeSection(4, 120)  # Total
-    header.resizeSection(5, 48)   # Del (X)
+    header.resizeSection(2, 100)  # Qty (narrower now that unit is separate)
+    header.resizeSection(3, 40)   # Unit (3 letters max: 'g', 'kg', 'ea')
+    header.resizeSection(4, 120)  # Unit Price
+    header.resizeSection(5, 120)  # Total
+    header.resizeSection(6, 48)   # Del (X)
 
     # Row header visibility, alternating colors, edit/selection behavior are configured in the .ui
 
@@ -152,16 +155,23 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
 
         # Col 2: Quantity (QLineEdit to match QSS qtyInput styling) inside a tintable container
         qty_val = data.get('quantity', 0)
-        # Format display: use provided display_text, or format as integer if whole number, else show 2 decimals
-        if 'display_text' in data:
-            display_text = data['display_text']
-        elif float(qty_val) == int(float(qty_val)):
-            display_text = str(int(float(qty_val)))
+        # Format display: for KG items show grams if < 1kg, else show kg with 2 decimals
+        if not editable:
+            # KG item - stored value is in kg
+            weight_grams = int(float(qty_val) * 1000)
+            if weight_grams < 1000:
+                display_text = str(weight_grams)  # Show grams: 600
+            else:
+                display_text = f"{float(qty_val):.2f}"  # Show kg: 1.20
         else:
-            display_text = f"{float(qty_val):.2f}"
+            # EACH item - display as integer
+            if float(qty_val) == int(float(qty_val)):
+                display_text = str(int(float(qty_val)))
+            else:
+                display_text = f"{float(qty_val):.2f}"
         qty_edit = QLineEdit(display_text)
         qty_edit.setObjectName('qtyInput')  # styled via QSS
-        # Store numeric value for calculations
+        # Store numeric value for calculations (always in base unit: kg for weight, count for EACH)
         qty_edit.setProperty('numeric_value', float(qty_val))
         # Set editability
         qty_edit.setReadOnly(not editable)
@@ -175,8 +185,12 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         except Exception:
             pass
         qty_edit.setAlignment(Qt.AlignCenter)
-        # Recalculate total when quantity changes - use dynamic row lookup (only if editable)
+        # Add input validation for EACH items (integer only, max 9999)
         if editable:
+            from PyQt5.QtGui import QIntValidator
+            validator = QIntValidator(1, 9999, qty_edit)
+            qty_edit.setValidator(validator)
+            # Recalculate total when quantity changes - use dynamic row lookup
             qty_edit.textChanged.connect(lambda _t, e=qty_edit, t=table: _recalc_from_editor(e, t))
         # Select the row when the qty input gains focus; clear selection when editing finishes
         _install_row_focus_behavior(qty_edit, table, r)
@@ -188,24 +202,39 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         qty_layout.addWidget(qty_edit)
         table.setCellWidget(r, 2, qty_container)
 
-        # Col 3: Unit Price (non-editable item) - use fetched price
+        # Col 3: Unit (non-editable item) - show 'g', 'kg', or 'ea'
+        unit_text = 'ea'  # default for EACH items
+        if not editable:
+            # KG item - determine unit based on quantity (stored in kg)
+            weight_grams = int(float(qty_val) * 1000)
+            if weight_grams < 1000:
+                unit_text = 'g'
+            else:
+                unit_text = 'kg'
+        item_unit = QTableWidgetItem(unit_text)
+        item_unit.setTextAlignment(Qt.AlignCenter)
+        item_unit.setFlags(item_unit.flags() & ~Qt.ItemIsEditable)
+        item_unit.setBackground(QBrush(row_color))
+        table.setItem(r, 3, item_unit)
+
+        # Col 4: Unit Price (non-editable item) - use fetched price
         item_price = QTableWidgetItem(f"{unit_price:.2f}")
         item_price.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         item_price.setFlags(item_price.flags() & ~Qt.ItemIsEditable)
         item_price.setBackground(QBrush(row_color))
-        table.setItem(r, 3, item_price)
+        table.setItem(r, 4, item_price)
 
-        # Col 4: Total (non-editable item) - calculate from qty and fetched price
+        # Col 5: Total (non-editable item) - calculate from qty and fetched price
         total = float(qty_val) * float(unit_price)
         item_total = QTableWidgetItem(f"{total:.2f}")
         item_total.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         item_total.setFlags(item_total.flags() & ~Qt.ItemIsEditable)
         item_total.setBackground(QBrush(row_color))
-        table.setItem(r, 4, item_total)
+        table.setItem(r, 5, item_total)
 
     # Backgrounds for rows will be applied after all rows are created
 
-        # Col 5: Remove button (centered, circular X)
+        # Col 6: Remove button (centered, circular X)
         btn = QPushButton()
         btn.setObjectName('removeBtn')  # styled via QSS
         btn.setIcon(QIcon(ICON_DELETE))
@@ -229,7 +258,7 @@ def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(0)
         lay.addWidget(btn, 0, Qt.AlignCenter)
-        table.setCellWidget(r, 5, container)
+        table.setCellWidget(r, 6, container)
 
     # After building all rows, update the aggregated total if bound
     try:
@@ -286,12 +315,19 @@ def _rebuild_mixed_editable_table(table: QTableWidget, rows: List[Dict[str, Any]
         table.setItem(r, 1, item_product)
         
         # Col 2: Quantity (editable or read-only based on row data)
-        if display_text:
-            qty_display = str(display_text)
-        elif float(qty_val) == int(float(qty_val)):
-            qty_display = str(int(float(qty_val)))
+        if not editable:
+            # KG item - stored value is in kg
+            weight_grams = int(float(qty_val) * 1000)
+            if weight_grams < 1000:
+                qty_display = str(weight_grams)  # Show grams: 600
+            else:
+                qty_display = f"{float(qty_val):.2f}"  # Show kg: 1.20
         else:
-            qty_display = f"{float(qty_val):.2f}"
+            # EACH item - display as integer
+            if float(qty_val) == int(float(qty_val)):
+                qty_display = str(int(float(qty_val)))
+            else:
+                qty_display = f"{float(qty_val):.2f}"
         qty_edit = QLineEdit(qty_display)
         qty_edit.setObjectName('qtyInput')
         qty_edit.setProperty('numeric_value', float(qty_val))
@@ -301,6 +337,9 @@ def _rebuild_mixed_editable_table(table: QTableWidget, rows: List[Dict[str, Any]
         qty_edit.setAlignment(Qt.AlignCenter)
         
         if editable:
+            from PyQt5.QtGui import QIntValidator
+            validator = QIntValidator(1, 9999, qty_edit)
+            qty_edit.setValidator(validator)
             qty_edit.textChanged.connect(lambda _t, e=qty_edit, t=table: _recalc_from_editor(e, t))
         _install_row_focus_behavior(qty_edit, table, r)
         
@@ -312,22 +351,37 @@ def _rebuild_mixed_editable_table(table: QTableWidget, rows: List[Dict[str, Any]
         qty_layout.addWidget(qty_edit)
         table.setCellWidget(r, 2, qty_container)
         
-        # Col 3: Unit Price
+        # Col 3: Unit (non-editable item) - show 'g', 'kg', or 'ea'
+        unit_text = 'ea'  # default for EACH items
+        if not editable:
+            # KG item - determine unit based on quantity (stored in kg)
+            weight_grams = int(float(qty_val) * 1000)
+            if weight_grams < 1000:
+                unit_text = 'g'
+            else:
+                unit_text = 'kg'
+        item_unit = QTableWidgetItem(unit_text)
+        item_unit.setTextAlignment(Qt.AlignCenter)
+        item_unit.setFlags(item_unit.flags() & ~Qt.ItemIsEditable)
+        item_unit.setBackground(QBrush(row_color))
+        table.setItem(r, 3, item_unit)
+        
+        # Col 4: Unit Price
         item_price = QTableWidgetItem(f"{unit_price:.2f}")
         item_price.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         item_price.setFlags(item_price.flags() & ~Qt.ItemIsEditable)
         item_price.setBackground(QBrush(row_color))
-        table.setItem(r, 3, item_price)
+        table.setItem(r, 4, item_price)
         
-        # Col 4: Total
+        # Col 5: Total
         total = float(qty_val) * float(unit_price)
         item_total = QTableWidgetItem(f"{total:.2f}")
         item_total.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         item_total.setFlags(item_total.flags() & ~Qt.ItemIsEditable)
         item_total.setBackground(QBrush(row_color))
-        table.setItem(r, 4, item_total)
+        table.setItem(r, 5, item_total)
         
-        # Col 5: Remove button
+        # Col 6: Remove button
         btn = QPushButton()
         btn.setObjectName('removeBtn')
         btn.setIcon(QIcon(ICON_DELETE))
@@ -343,7 +397,7 @@ def _rebuild_mixed_editable_table(table: QTableWidget, rows: List[Dict[str, Any]
         lay.setContentsMargins(0, 0, 0, 0)
         lay.setSpacing(0)
         lay.addWidget(btn, 0, Qt.AlignCenter)
-        table.setCellWidget(r, 5, container)
+        table.setCellWidget(r, 6, container)
     
     try:
         _update_total_value(table)
@@ -374,19 +428,19 @@ def remove_table_row(table: QTableWidget, row: int) -> None:
             num_item.setBackground(QBrush(row_color))
             
             # Update colors for other item-based cells
-            for col in [1, 3, 4]:  # Product, Unit Price, Total
+            for col in [1, 3, 4, 5]:  # Product, Unit, Unit Price, Total
                 item = table.item(r, col)
                 if item is not None:
                     item.setBackground(QBrush(row_color))
             
-            # Update container background for columns 2 and 5 (widgets)
-            for col in [2, 5]:  # Quantity, Remove button
+            # Update container background for columns 2 and 6 (widgets)
+            for col in [2, 6]:  # Quantity, Remove button
                 container = table.cellWidget(r, col)
                 if container is not None:
-                    # Column 2 (quantity) keeps row color, column 5 (delete button) stays transparent
+                    # Column 2 (quantity) keeps row color, column 6 (delete button) stays transparent
                     if col == 2:
                         container.setStyleSheet(f"background-color: {row_color.name()};")
-                    else:  # col == 5
+                    else:  # col == 6
                         container.setStyleSheet("background-color: transparent;")
         # Update the aggregated total if bound
         try:
@@ -420,7 +474,7 @@ def recalc_row_total(table: QTableWidget, row: int) -> None:
         if isinstance(editor, QLineEdit):
             # Check if field is read-only (uses stored numeric value) or editable (parse text)
             if editor.isReadOnly():
-                # For read-only fields, use stored numeric value
+                # For read-only KG fields, use stored numeric value (in kg)
                 numeric_val = editor.property('numeric_value')
                 if numeric_val is not None:
                     try:
@@ -430,10 +484,14 @@ def recalc_row_total(table: QTableWidget, row: int) -> None:
                 else:
                     qty = 0.0
             else:
-                # For editable fields, parse text and update stored value
+                # For editable EACH fields, parse integer text and update stored value
                 try:
                     text = editor.text()
                     qty = float(text) if text not in ('', None, '') else 0.0
+                    # Enforce max value
+                    if qty > 9999:
+                        qty = 9999
+                        editor.setText('9999')
                     # Update stored numeric value for consistency
                     editor.setProperty('numeric_value', qty)
                 except ValueError:
@@ -451,8 +509,8 @@ def recalc_row_total(table: QTableWidget, row: int) -> None:
             qty = float(qty_item.text()) if qty_item is not None else 0.0
         except ValueError:
             qty = 0.0
-    # Read unit price from column 3 item (non-editable)
-    price_item = table.item(row, 3)
+    # Read unit price from column 4 item (non-editable)
+    price_item = table.item(row, 4)
     try:
         price = float(price_item.text()) if price_item is not None else 0.0
     except (ValueError, AttributeError):
@@ -466,7 +524,7 @@ def recalc_row_total(table: QTableWidget, row: int) -> None:
     total_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
     total_item.setFlags(total_item.flags() & ~Qt.ItemIsEditable)
     total_item.setBackground(QBrush(row_color))  # Apply alternating row color
-    table.setItem(row, 4, total_item)
+    table.setItem(row, 5, total_item)
     # Update the aggregated total on every row total change
     try:
         _update_total_value(table)
@@ -479,9 +537,9 @@ def _remove_by_button(table: QTableWidget, btn: QPushButton) -> None:
     Looks up the row containing the provided button and removes it.
     Robust against row reordering/renumbering.
     """
-    # Find the row whose column 5 cell contains this button instance
+    # Find the row whose column 6 cell contains this button instance
     for r in range(table.rowCount()):
-        cell = table.cellWidget(r, 5)
+        cell = table.cellWidget(r, 6)
         if cell is None:
             continue
         child = cell.findChild(QPushButton, 'removeBtn')
@@ -491,8 +549,8 @@ def _remove_by_button(table: QTableWidget, btn: QPushButton) -> None:
 
 
 def _highlight_row_for_deletion(table: QTableWidget, row: int) -> None:
-    """Highlight the row (columns 0-4) when the remove button is pressed.
-    Column 5 (the remove button itself) is excluded from highlighting.
+    """Highlight the row (columns 0-5) when the remove button is pressed.
+    Column 6 (the remove button itself) is excluded from highlighting.
     """
     if row < 0 or row >= table.rowCount():
         return
@@ -500,8 +558,8 @@ def _highlight_row_for_deletion(table: QTableWidget, row: int) -> None:
     # Get highlight color from config
     highlight_color = QColor(ROW_COLOR_DELETE_HIGHLIGHT)
     
-    # Apply highlight to item-based cells (columns 0, 1, 3, 4)
-    for col in [0, 1, 3, 4]:
+    # Apply highlight to item-based cells (columns 0, 1, 3, 4, 5)
+    for col in [0, 1, 3, 4, 5]:
         item = table.item(row, col)
         if item is not None:
             item.setBackground(QBrush(highlight_color))
@@ -516,9 +574,9 @@ def _highlight_row_by_button(table: QTableWidget, btn: QPushButton) -> None:
     """Find the row containing the button and highlight it.
     This dynamically looks up the row index to handle post-deletion shifts.
     """
-    # Find the row whose column 5 cell contains this button instance
+    # Find the row whose column 6 cell contains this button instance
     for r in range(table.rowCount()):
-        cell = table.cellWidget(r, 5)
+        cell = table.cellWidget(r, 6)
         if cell is None:
             continue
         child = cell.findChild(QPushButton, 'removeBtn')
@@ -617,14 +675,14 @@ def _format_currency(val: float) -> str:
 
 
 def recompute_total(table: QTableWidget) -> float:
-    """Recompute the grand total from the 'Total' column (col 4) and update label if bound.
+    """Recompute the grand total from the 'Total' column (col 5) and update label if bound.
 
     Returns the computed total.
     """
     total = 0.0
     try:
         for r in range(table.rowCount()):
-            item = table.item(r, 4)
+            item = table.item(r, 5)
             if item is None:
                 continue
             try:
@@ -812,7 +870,6 @@ def _add_product_row(table: QTableWidget, product_code: str, product_name: str,
         # Get quantity, display text, and editable state
         qty_container = table.cellWidget(r, 2)
         qty = 1
-        row_display_text = None
         row_editable = True
         if qty_container is not None:
             editor = qty_container.findChild(QLineEdit, 'qtyInput')
@@ -833,13 +890,9 @@ def _add_product_row(table: QTableWidget, product_code: str, product_name: str,
                         qty = float(editor.text()) if editor.text() else 1
                     except ValueError:
                         qty = 1
-                
-                # Preserve display text if different from numeric value
-                if not row_editable:
-                    row_display_text = editor.text()
         
-        # Get unit price
-        price_item = table.item(r, 3)
+        # Get unit price from column 4
+        price_item = table.item(r, 4)
         price = 0.0
         if price_item is not None:
             try:
@@ -853,8 +906,6 @@ def _add_product_row(table: QTableWidget, product_code: str, product_name: str,
             'unit_price': price,
             'editable': row_editable
         }
-        if row_display_text is not None:
-            row_data['display_text'] = row_display_text
         current_rows.append(row_data)
     
     # Add new product
@@ -864,8 +915,6 @@ def _add_product_row(table: QTableWidget, product_code: str, product_name: str,
         'unit_price': unit_price,
         'editable': editable
     }
-    if display_text is not None:
-        new_row['display_text'] = display_text
     current_rows.append(new_row)
     
     # Rebuild table with mixed editable states

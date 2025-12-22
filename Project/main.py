@@ -150,7 +150,6 @@ class MainLoader(QMainWindow):
                     # Get quantity and editable state
                     qty_container = self.sales_table.cellWidget(r, 2)
                     qty = 1.0
-                    display_text = None
                     row_editable = True
                     if qty_container is not None:
                         editor = qty_container.findChild(QLineEdit, 'qtyInput')
@@ -167,12 +166,9 @@ class MainLoader(QMainWindow):
                                     qty = float(editor.text()) if editor.text() else 1.0
                                 except ValueError:
                                     qty = 1.0
-                            
-                            if not row_editable:
-                                display_text = editor.text()
                     
-                    # Get unit price
-                    price_item = self.sales_table.item(r, 3)
+                    # Get unit price from column 4
+                    price_item = self.sales_table.item(r, 4)
                     price = 0.0
                     if price_item is not None:
                         try:
@@ -186,8 +182,6 @@ class MainLoader(QMainWindow):
                         'unit_price': price,
                         'editable': row_editable
                     }
-                    if display_text:
-                        row_data['display_text'] = display_text
                     existing_rows.append(row_data)
                 
                 # Combine existing + vegetable rows
@@ -239,7 +233,6 @@ class MainLoader(QMainWindow):
                     # Get quantity and editable state
                     qty_container = self.sales_table.cellWidget(r, 2)
                     qty = 1.0
-                    display_text = None
                     row_editable = True
                     if qty_container is not None:
                         editor = qty_container.findChild(QLineEdit, 'qtyInput')
@@ -256,12 +249,9 @@ class MainLoader(QMainWindow):
                                     qty = float(editor.text()) if editor.text() else 1.0
                                 except ValueError:
                                     qty = 1.0
-                            
-                            if not row_editable:
-                                display_text = editor.text()
                     
-                    # Get unit price
-                    price_item = self.sales_table.item(r, 3)
+                    # Get unit price from column 4
+                    price_item = self.sales_table.item(r, 4)
                     price = 0.0
                     if price_item is not None:
                         try:
@@ -275,11 +265,9 @@ class MainLoader(QMainWindow):
                         'unit_price': price,
                         'editable': row_editable
                     }
-                    if display_text:
-                        row_data['display_text'] = display_text
                     existing_rows.append(row_data)
                 
-                # Create manual entry row (always editable, no display_text)
+                # Create manual entry row (always editable)
                 manual_row = {
                     'product': manual_result['product_name'],
                     'quantity': manual_result['quantity'],

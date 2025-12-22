@@ -3,6 +3,8 @@
 ## Overview
 The Manual Entry dialog allows users to manually input product information when items cannot be processed through the standard vegetable entry or barcode scanning methods. This is useful for miscellaneous items, special products, or when the barcode scanner is unavailable.
 
+**Note:** All manual entries are treated as EACH (count-based) items with editable quantities (integer only, range 1-9999). They display with unit "ea" in the sales table.
+
 ## Files Involved
 
 ### UI Definition
