@@ -60,8 +60,9 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
 
 - **Menu and Sales Frame Wiring:**
   - Wires right-side menu buttons to their respective dialog launcher methods.
-  - Wires sales frame buttons (e.g., Vegetable Entry, Manual Entry, On Hold, View Hold, Cancel Sale) to their dialog launcher methods.
+  - Wires sales frame buttons (e.g., Vegetable Entry, Manual Entry, On Hold, View Hold, Cancel All) to their dialog launcher methods.
   - Sets up icons, tooltips, and fallback text for menu buttons.
+  - Cancel All button opens confirmation dialog; on confirm, clears all sales table rows and resets total to $0.00.
 
 - **Sales Table Management:**
   - Loads and configures the sales table, binds the total label, and manages row operations.

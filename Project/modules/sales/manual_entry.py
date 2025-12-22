@@ -1,6 +1,6 @@
 import os
 from PyQt5 import uic
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QDialog, QLineEdit, QPushButton, QLabel
 from PyQt5.QtCore import Qt
 
 def open_manual_entry_dialog(parent):
@@ -47,52 +47,93 @@ def open_manual_entry_dialog(parent):
         print('Failed to load sales.qss:', e)
     
     # Get input fields
-    product_name_input = dlg.findChild(type(dlg), 'inputProductName')
-    quantity_input = dlg.findChild(type(dlg), 'inputQuantity')
-    unit_price_input = dlg.findChild(type(dlg), 'inputUnitPrice')
-    btn_ok = dlg.findChild(type(dlg), 'btnManualOk')
-    btn_cancel = dlg.findChild(type(dlg), 'btnManualCancel')
-
-    # Data container to store result
-    result_data = {'accepted': False}
+    product_name_input = dlg.findChild(QLineEdit, 'inputProductName')
+    quantity_input = dlg.findChild(QLineEdit, 'inputQuantity')
+    unit_price_input = dlg.findChild(QLineEdit, 'inputUnitPrice')
+    error_label = dlg.findChild(QLabel, 'lblError')
+    btn_ok = dlg.findChild(QPushButton, 'btnManualOk')
+    btn_cancel = dlg.findChild(QPushButton, 'btnManualCancel')
 
     # OK button handler
     def handle_ok():
+        # TODO: Consider creating a shared validation utility (modules/ui_utils/validation.py)
+        # for consistent error messaging and field focus management across all modal dialogs.
+        # This would centralize validation patterns used in manual_entry, vegetable_entry, 
+        # product_menu, admin_menu, etc.
         try:
             product_name = product_name_input.text().strip() if product_name_input else ""
-            quantity_str = quantity_input.text().strip() if quantity_input else "0"
-            unit_price_str = unit_price_input.text().strip() if unit_price_input else "0"
+            quantity_str = quantity_input.text().strip() if quantity_input else ""
+            unit_price_str = unit_price_input.text().strip() if unit_price_input else ""
             
-            # Validate inputs
+            # Validate product name
             if not product_name:
-                print("Product name cannot be empty")
+                if error_label:
+                    error_label.setText("⚠ Product name is required")
+                    error_label.setStyleSheet("color: #ff6b6b;")
+                if product_name_input:
+                    product_name_input.setFocus()
+                return
+            
+            # Validate quantity
+            if not quantity_str:
+                if error_label:
+                    error_label.setText("⚠ Quantity is required")
+                    error_label.setStyleSheet("color: #ff6b6b;")
+                if quantity_input:
+                    quantity_input.setFocus()
                 return
             
             try:
                 quantity = float(quantity_str)
-                unit_price = float(unit_price_str)
+                if quantity <= 0:
+                    raise ValueError("Must be positive")
             except ValueError:
-                print("Quantity and Unit Price must be valid numbers")
+                if error_label:
+                    error_label.setText("⚠ Quantity must be a positive number")
+                    error_label.setStyleSheet("color: #ff6b6b;")
+                if quantity_input:
+                    quantity_input.selectAll()
+                    quantity_input.setFocus()
                 return
             
-            if quantity <= 0:
-                print("Quantity must be greater than 0")
+            # Validate unit price
+            if not unit_price_str:
+                if error_label:
+                    error_label.setText("⚠ Unit price is required")
+                    error_label.setStyleSheet("color: #ff6b6b;")
+                if unit_price_input:
+                    unit_price_input.setFocus()
                 return
             
-            if unit_price <= 0:
-                print("Unit Price must be greater than 0")
+            try:
+                unit_price = float(unit_price_str)
+                if unit_price <= 0:
+                    raise ValueError("Must be positive")
+            except ValueError:
+                if error_label:
+                    error_label.setText("⚠ Unit price must be a positive number")
+                    error_label.setStyleSheet("color: #ff6b6b;")
+                if unit_price_input:
+                    unit_price_input.selectAll()
+                    unit_price_input.setFocus()
                 return
+            
+            # Success - clear error and store result
+            if error_label:
+                error_label.setText("✓ Adding to sale...")
+                error_label.setStyleSheet("color: #4caf50;")
             
             # Store result data on dialog object for later retrieval
             dlg.manual_entry_result = {
                 'product_name': product_name,
                 'quantity': quantity,
-                'unit_price': unit_price,
-                'total': quantity * unit_price
+                'unit_price': unit_price
             }
             dlg.accept()
         except Exception as e:
-            print('Error processing manual entry:', e)
+            if error_label:
+                error_label.setText(f"Error: {str(e)}")
+                error_label.setStyleSheet("color: #ff6b6b;")
 
     # Cancel button handler
     def handle_cancel():

@@ -16,6 +16,7 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - Product lookup via barcode/product code
 - Row deletion with visual feedback
 - Alternating row colors for better readability
+- Cancel All functionality with confirmation dialog to clear entire sales table
 
 ✅ **Modern UI**
 - Runtime .ui file loading (Qt Designer compatible)

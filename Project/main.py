@@ -76,6 +76,7 @@ def load_qss(app):
             print('Failed to load QSS:', e)
 
 class MainLoader(QMainWindow):
+    # ========== Menu Frame Dialog Handlers ==========
     def open_logout_menu_dialog(self):
         """Open Logout dialog."""
         self.dialog_wrapper.open_dialog_scanner_blocked(
@@ -111,10 +112,12 @@ class MainLoader(QMainWindow):
 
     def open_vegetable_menu_dialog(self):
         """Open Vegetable Management dialog."""
-        self.dialog_wrapper.open_dialog_scanner_enabled(
-            launch_vegetable_entry_dialog,
-            dialog_key='vegetable_entry'
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            launch_vegetable_menu_dialog,
+            dialog_key='vegetable_menu'
         )
+
+    # ========== Sales Frame Dialog Handlers ==========
 
     def open_vegetable_entry_dialog(self):
         """Open Add Vegetable panel."""
@@ -206,7 +209,99 @@ class MainLoader(QMainWindow):
 
     def open_manual_panel(self):
         """Open Manual Product Entry panel."""
-        self.dialog_wrapper.open_dialog_scanner_blocked(launch_manual_entry_dialog, dialog_key='manual_entry')
+        def on_manual_entry_finish():
+            """Process manual entry data after dialog closes."""
+            if not hasattr(self, 'sales_table'):
+                return
+            
+            try:
+                from modules.table import set_sales_rows
+                from modules.table.table_operations import _rebuild_mixed_editable_table
+                from PyQt5.QtWidgets import QLineEdit
+                
+                # Get the dialog that just closed
+                dlg = self.dialog_wrapper._last_dialog
+                if dlg is None or dlg.result() != QDialog.Accepted:
+                    return
+                
+                # Retrieve manual entry result
+                manual_result = getattr(dlg, 'manual_entry_result', None)
+                if not manual_result:
+                    return
+                
+                # Get existing rows from sales table
+                existing_rows = []
+                for r in range(self.sales_table.rowCount()):
+                    product_item = self.sales_table.item(r, 1)
+                    if product_item is None:
+                        continue
+                    
+                    # Get quantity and editable state
+                    qty_container = self.sales_table.cellWidget(r, 2)
+                    qty = 1.0
+                    display_text = None
+                    row_editable = True
+                    if qty_container is not None:
+                        editor = qty_container.findChild(QLineEdit, 'qtyInput')
+                        if editor is not None:
+                            row_editable = not editor.isReadOnly()
+                            numeric_val = editor.property('numeric_value')
+                            if numeric_val is not None:
+                                try:
+                                    qty = float(numeric_val)
+                                except (ValueError, TypeError):
+                                    qty = 1.0
+                            else:
+                                try:
+                                    qty = float(editor.text()) if editor.text() else 1.0
+                                except ValueError:
+                                    qty = 1.0
+                            
+                            if not row_editable:
+                                display_text = editor.text()
+                    
+                    # Get unit price
+                    price_item = self.sales_table.item(r, 3)
+                    price = 0.0
+                    if price_item is not None:
+                        try:
+                            price = float(price_item.text())
+                        except ValueError:
+                            price = 0.0
+                    
+                    row_data = {
+                        'product': product_item.text(),
+                        'quantity': qty,
+                        'unit_price': price,
+                        'editable': row_editable
+                    }
+                    if display_text:
+                        row_data['display_text'] = display_text
+                    existing_rows.append(row_data)
+                
+                # Create manual entry row (always editable, no display_text)
+                manual_row = {
+                    'product': manual_result['product_name'],
+                    'quantity': manual_result['quantity'],
+                    'unit_price': manual_result['unit_price'],
+                    'editable': True  # Manual entries are always editable count items
+                }
+                
+                # Combine existing + manual row
+                combined_rows = existing_rows + [manual_row]
+                
+                # Rebuild sales table with mixed editable states
+                _rebuild_mixed_editable_table(self.sales_table, combined_rows)
+            except Exception as e:
+                print(f'Failed to transfer manual entry: {e}')
+                import traceback
+                traceback.print_exc()
+        
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            launch_manual_entry_dialog, 
+            dialog_key='manual_entry',
+            on_finish=on_manual_entry_finish
+        )
 
     def open_onhold_panel(self):
         """Open On Hold panel."""
@@ -217,11 +312,14 @@ class MainLoader(QMainWindow):
         self.dialog_wrapper.open_dialog_scanner_blocked(launch_viewhold_dialog, dialog_key='view_hold')
 
     def open_cancelsale_panel(self):
-        """Open Cancel Sale panel."""
-        self.dialog_wrapper.open_dialog_scanner_blocked(launch_cancelsale_dialog, dialog_key='cancel_sale')
+        """Open Cancel Sale confirmation dialog."""
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            launch_cancelsale_dialog,
+            dialog_key='cancel_sale',
+            on_finish=lambda: self._clear_sales_table()
+        )
 
-
-
+    # ========== Initialization ==========
     def __init__(self):
         super().__init__()
         self.overlay_manager = OverlayManager(self)
@@ -379,6 +477,40 @@ class MainLoader(QMainWindow):
         except Exception as e:
             print('Failed to wire menu buttons:', e)
 
+    # ========== Post-Dialog Action Handlers ==========
+    def _clear_sales_table(self):
+        """Clear all items from sales table and reset total to zero.
+        
+        Called after user confirms Cancel All action.
+        """
+        if not hasattr(self, 'sales_table'):
+            return
+        
+        try:
+            # Check if dialog was confirmed
+            dlg = self.dialog_wrapper._last_dialog
+            if dlg is None or dlg.result() != QDialog.Accepted:
+                return
+            
+            # Clear all rows from sales table
+            self.sales_table.setRowCount(0)
+            
+            # Recompute total (will set to 0.00 and update label)
+            from modules.table import recompute_total
+            recompute_total(self.sales_table)
+            
+            # Future: When payment frame is implemented, reset it here
+            # Example:
+            # payment_inputs = ['cashInput', 'netsInput', 'paynowInput', 'voucherInput']
+            # for input_name in payment_inputs:
+            #     input_widget = self.findChild(QLineEdit, input_name)
+            #     if input_widget:
+            #         input_widget.clear()
+        except Exception as e:
+            print(f'Failed to clear sales table: {e}')
+            import traceback
+            traceback.print_exc()
+
     def _perform_logout(self):
         """Perform logout action: stop devices and close app."""
         # Stop scanner if running
@@ -401,6 +533,7 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
 
+    # ========== Window Lifecycle ==========
     # Block closing via X/Alt+F4 unless allowed by logout
     def closeEvent(self, event):
         try:

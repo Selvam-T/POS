@@ -155,7 +155,8 @@ class BarcodeManager(QObject):
                     # Allow input in specific editable fields even during modal block
                     is_allowed_input = obj_name in ('qtyInput', 'productCodeLineEdit', 'refundInput', 
                                                      'inputProductName', 'inputSellingPrice', 
-                                                     'inputSupplier', 'inputCostPrice')
+                                                     'inputSupplier', 'inputCostPrice',
+                                                     'inputQuantity', 'inputUnitPrice')
                     
                     if not is_allowed_input:
                         text = ''

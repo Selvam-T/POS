@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>CancelSaleDialog</class>
  <widget class="QDialog" name="CancelSaleDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>306</width>
+    <height>75</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Cancel Sale</string>
   </property>
@@ -9,7 +17,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Are you sure you want to cancel the current sale?</string>
+      <string>Do you confirm you want to clear the transactions?</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
