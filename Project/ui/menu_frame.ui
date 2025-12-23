@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ui version="4.0">
+  <class>MenuPanel</class>
+  <widget class="QWidget" name="MenuPanel">
+    <property name="geometry">
+      <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>240</width>
+        <height>600</height>
+      </rect>
+    </property>
+    <layout class="QVBoxLayout" name="menuLayout">
+      <property name="spacing">
+        <number>5</number>
+      </property>
+      <property name="leftMargin">
+        <number>0</number>
+      </property>
+      <property name="topMargin">
+        <number>0</number>
+      </property>
+      <property name="rightMargin">
+        <number>0</number>
+      </property>
+      <property name="bottomMargin">
+        <number>0</number>
+      </property>
+      <item alignment="Qt::AlignHCenter">
+        <widget class="QPushButton" name="adminBtn">
+          <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+            </sizepolicy>
+          </property>
+          <property name="text">
+            <string>Admin</string>
+          </property>
+        </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+        <widget class="QPushButton" name="reportsBtn">
+          <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+            </sizepolicy>
+          </property>
+          <property name="text">
+            <string>Reports</string>
+          </property>
+        </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+        <widget class="QPushButton" name="vegetableBtn">
+          <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+            </sizepolicy>
+          </property>
+          <property name="text">
+            <string>Vegetable</string>
+          </property>
+        </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+        <widget class="QPushButton" name="productBtn">
+          <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+            </sizepolicy>
+          </property>
+          <property name="text">
+            <string>Product</string>
+          </property>
+        </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+        <widget class="QPushButton" name="greetingBtn">
+          <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+            </sizepolicy>
+          </property>
+          <property name="text">
+            <string>Greeting</string>
+          </property>
+        </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+        <widget class="QPushButton" name="deviceBtn">
+          <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+            </sizepolicy>
+          </property>
+          <property name="text">
+            <string>Device</string>
+          </property>
+        </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
+        <widget class="QPushButton" name="logoutBtn">
+          <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+            </sizepolicy>
+          </property>
+          <property name="text">
+            <string>Logout</string>
+          </property>
+        </widget>
+      </item>
+    </layout>
+  </widget>
+  <resources/>
+  <connections/>
+</ui>
