@@ -42,6 +42,13 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - Graceful fallback when database unavailable
  - Windows-console-safe logging (ASCII only)
 
+✅ **Consistent Dialog Button Styling**
+- All dialog action buttons now use standardized object names:
+    - Constructive: ends with `Ok` (e.g., `btnAdminOk`, `btnVegmenuOk`)
+    - Destructive: ends with `Del` (e.g., `btnVegmenuDel`)
+    - Dismissive: ends with `Cancel` (e.g., `btnAdminCancel`, `btnVegmenuCancel`)
+- QSS uses suffix-based selectors for unified color, font, and hover/pressed effects across all dialogs.
+
 ## Project Structure
 
 ```

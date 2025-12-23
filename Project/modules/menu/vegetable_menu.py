@@ -81,9 +81,9 @@ def open_vegetable_menu_dialog(host_window):
     input_supplier = dlg.findChild(QLineEdit, 'inputSupplier')
     input_cost_price = dlg.findChild(QLineEdit, 'inputCostPrice')
     lbl_error = dlg.findChild(QLabel, 'lblError')
-    btn_add = dlg.findChild(QPushButton, 'pushButton_add')
-    btn_remove = dlg.findChild(QPushButton, 'pushButton_remove')
-    btn_cancel = dlg.findChild(QPushButton, 'pushButton_cancel')
+    btn_add = dlg.findChild(QPushButton, 'btnVegmenuOk')
+    btn_remove = dlg.findChild(QPushButton, 'btnVegmenuDel')
+    btn_cancel = dlg.findChild(QPushButton, 'btnVegmenuCancel')
     custom_close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
 
     # Make product code non-focusable and read-only

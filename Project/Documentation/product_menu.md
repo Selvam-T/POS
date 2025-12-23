@@ -32,9 +32,16 @@ The module is designed to:
 - The CANCEL button works in the ADD tab but does not reliably close the dialog in REMOVE or UPDATE/VIEW tabs. Extensive attempts to rebind signals, forcibly close the dialog, and connect all tab instances have not resolved the issue. The root cause appears to be a PyQt signal/slot or focus quirk when switching tabs with duplicate object names.
 - **Workaround:** Users can close the dialog from the ADD tab or by using the window close button (if enabled). Further investigation is needed, possibly involving unique object names per tab or a refactor to avoid duplicate widget names.
 
+## Button Naming and Styling Update (Dec 2025)
+- All dialog action buttons now use unique, suffix-based object names for clarity and reliable signal wiring:
+    - OK/affirmative: ends with `Ok` (e.g., `btnAddOk`, `btnUpdateOk`)
+    - Destructive: ends with `Del` (e.g., `btnVegmenuDel`)
+    - Cancel/dismiss: ends with `Cancel` (e.g., `btnAddCancel`, `btnUpdateCancel`)
+- QSS styling now uses these suffixes for consistent color, font, and hover/pressed effects.
+- The previous issue with CANCEL button wiring is resolved by using unique object names per tab.
+
 ## Further Features To Be Implemented
 - **Dynamic Tab Enablement:** Refresh tab enable/disable state if sales table contents change while the dialog is open.
-- **Unique Widget Naming:** Assign unique object names to OK/CANCEL buttons per tab to eliminate signal ambiguity.
 - **Unit Tests:** Add automated tests for product CRUD operations and UI event handling.
 - **Improved Error Handling:** More granular feedback for database errors and validation failures.
 - **Accessibility Enhancements:** Keyboard navigation, focus management, and screen reader support.

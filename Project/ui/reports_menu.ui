@@ -136,7 +136,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btnTodayPrint">
+          <widget class="QPushButton" name="btnTodayOk">
            <property name="text">
             <string>PRINT</string>
            </property>
@@ -270,7 +270,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="btnRangeClose">
+          <widget class="QPushButton" name="btnRangeCancel">
            <property name="text">
             <string>CLOSE</string>
            </property>

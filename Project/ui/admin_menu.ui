@@ -219,7 +219,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btnAdminSave">
+          <widget class="QPushButton" name="btnAdminOk">
            <property name="text">
             <string>SAVE CHANGES</string>
            </property>
@@ -357,7 +357,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btnStaffSave">
+          <widget class="QPushButton" name="btnStaffOk">
            <property name="text">
             <string>SAVE CHANGES</string>
            </property>
@@ -475,7 +475,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="btnEmailSave">
+          <widget class="QPushButton" name="btnEmailOk">
            <property name="text">
             <string>SAVE CHANGES</string>
            </property>

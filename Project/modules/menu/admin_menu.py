@@ -87,9 +87,9 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
     def _set_change_enabled(enabled: bool):
         try:
             for name in (
-                'adminCurrentPassword','adminNewPassword','btnAdminSave',
-                'staffCurrentPassword','staffNewPassword','btnStaffSave',
-                'currentEmailLineEdit','newEmailLineEdit','btnEmailSave',
+                'adminCurrentPassword','adminNewPassword','btnAdminOk',
+                'staffCurrentPassword','staffNewPassword','btnStaffOk',
+                'currentEmailLineEdit','newEmailLineEdit','btnEmailOk',
                 'btnToggleAdminCurrent','btnToggleStaffCurrent'
             ):
                 w = dlg.findChild(QWidget, name)
@@ -155,7 +155,7 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
         except Exception:
             pass
 
-    for btn_name in ('btnAdminSave','btnAdminCancel','btnStaffSave','btnStaffCancel','btnEmailSave','btnEmailCancel'):
+    for btn_name in ('btnAdminOk','btnAdminCancel','btnStaffOk','btnStaffCancel','btnEmailOk','btnEmailCancel'):
         b: QPushButton = dlg.findChild(QPushButton, btn_name)
         if b is not None:
             try:

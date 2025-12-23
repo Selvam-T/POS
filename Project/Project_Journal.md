@@ -225,7 +225,6 @@ For a concise overview and updated project structure, see `README.md`.
 ### Entry Point: `main.py`
 - **Purpose:** Application loader and UI composer
 - **Framework:** PyQt5 with .ui file loading via `uic`
-# Project Journal - POS System Development
 - **Styling:** Loads global QSS from `assets/main.qss`
 
 ### Directory Structure
@@ -239,7 +238,6 @@ Project/
 │   └── icons/
 │       └── delete.svg    # Delete button icon
 ├── ui/
-3. [Right-side Menu](#right-side-menu)
 │   ├── main_window.ui    # Main application window
 │   ├── payment_frame.ui  # Payment section
 │   └── vegetable_entry.ui      # Digital weight input dialog
@@ -1250,6 +1248,22 @@ def handle_barcode_scanned(table, barcode, status_bar):
 
 ---
 
-**Document maintained by:** Development team  
-**Last updated:** November 5, 2025  
-**Update frequency:** End of each development session / before each commit
+## Update Summary (December 23, 2025)
+
+### Dialog Button Naming and QSS Styling Standardization
+
+- **Dialog button object names standardized** across all menu dialogs for consistency and maintainability:
+    - Constructive actions (OK, Save, Add, Update, Print, etc.) now end with `Ok` (e.g., `btnAdminOk`, `btnVegmenuOk`, `btnTodayOk`).
+    - Destructive actions (Delete/Remove) now end with `Del` (e.g., `btnVegmenuDel`).
+    - Dismissive actions (Cancel/Close) now end with `Cancel` (e.g., `btnAdminCancel`, `btnVegmenuCancel`, `btnRangeCancel`).
+- **All references in Python controller files updated** to match new object names.
+- **QSS styling for QPushButton** now uses suffix-based selectors for consistent look and feel:
+    - `[objectName$="Ok"]` for constructive (green)
+    - `[objectName$="Del"]` for destructive (red)
+    - `[objectName$="Cancel"]` for dismissive (gray)
+    - Includes hover and pressed effects, and unified font styling.
+- **Documentation and code comments updated** to reflect new naming and styling conventions.
+
+Quality gates: PASS (manual dialog testing, button wiring, and visual validation). All dialogs now have consistent button appearance and reliable signal connections.
+
+---

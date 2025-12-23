@@ -87,8 +87,8 @@ def open_logout_dialog(host_window):
     if content is not None:
         try:
             container = content
-            btn_cancel: QPushButton = container.findChild(QPushButton, 'pushButton_cancel')
-            btn_ok: QPushButton = container.findChild(QPushButton, 'pushButton_logout')
+            btn_cancel: QPushButton = container.findChild(QPushButton, 'btnLogoutCancel')
+            btn_ok: QPushButton = container.findChild(QPushButton, 'btnLogoutOk')
             btn_x: QPushButton = container.findChild(QPushButton, 'customCloseBtn')
             if btn_cancel is not None:
                 btn_cancel.clicked.connect(dlg.reject)
