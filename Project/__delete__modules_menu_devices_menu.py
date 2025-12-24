@@ -1,1 +1,0 @@
-This file marks modules/menu/devices_menu.py for deletion.

@@ -30,7 +30,7 @@
        <number>10</number>
       </property>
       <item>
-       <spacer name="horizontalSpacer_2">
+       <spacer name="titleSpacer2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -84,9 +84,9 @@
       <attribute name="title">
        <string>ADD</string>
       </attribute>
-      <layout class="QVBoxLayout" name="layoutAdd">
+    <layout class="QVBoxLayout" name="addLayout">
        <item>
-        <widget class="QLabel" name="subHeaderLabel">
+        <widget class="QLabel" name="addSubHeaderLabel">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -100,36 +100,36 @@
         </widget>
        </item>
        <item>
-        <layout class="QFormLayout" name="formLayout">
+        <layout class="QFormLayout" name="add_formLayout">
          <item row="0" column="0">
-          <widget class="QLabel" name="productCodeLabel">
+          <widget class="QLabel" name="addProductCodeLabel">
            <property name="text">
             <string>Product Code*</string>
            </property>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="productCodeLineEdit"/>
+          <widget class="QLineEdit" name="addProductCodeLineEdit"/>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="productNameLabel">
+          <widget class="QLabel" name="addProductNameLabel">
            <property name="text">
             <string>Product Name*</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLineEdit" name="productNameLineEdit"/>
+          <widget class="QLineEdit" name="addProductNameLineEdit"/>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="categoryLabel">
+          <widget class="QLabel" name="addCategoryLabel">
            <property name="text">
             <string>Category*</string>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QComboBox" name="categoryComboBox">
+          <widget class="QComboBox" name="addCategoryComboBox">
            <item>
             <property name="text">
              <string>Other</string>
@@ -153,34 +153,31 @@
           </widget>
          </item>
          <item row="3" column="0">
-          <widget class="QLabel" name="costPriceLabel">
+          <widget class="QLabel" name="addCostPriceLabel">
            <property name="text">
             <string>Cost Price</string>
            </property>
           </widget>
          </item>
          <item row="3" column="1">
-          <widget class="QLineEdit" name="costPriceLineEdit"/>
+          <widget class="QLineEdit" name="addCostPriceLineEdit"/>
          </item>
          <item row="4" column="0">
-          <widget class="QLabel" name="sellingPriceLabel">
+          <widget class="QLabel" name="addSellingPriceLabel">
            <property name="text">
             <string>Selling Price*</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="1">
-          <widget class="QLineEdit" name="sellingPriceLineEdit"/>
-         </item>
          <item row="5" column="0">
-          <widget class="QLabel" name="unitLabel">
+          <widget class="QLabel" name="addUnitLabel">
            <property name="text">
             <string>Unit</string>
            </property>
           </widget>
          </item>
          <item row="5" column="1">
-          <widget class="QLineEdit" name="unitLineEdit">
+          <widget class="QLineEdit" name="addUnitLineEdit">
            <property name="text">
             <string>EACH</string>
            </property>
@@ -190,19 +187,22 @@
           </widget>
          </item>
          <item row="6" column="0">
-          <widget class="QLabel" name="supplierLabel">
+          <widget class="QLabel" name="addSupplierLabel">
            <property name="text">
             <string>Supplier</string>
            </property>
           </widget>
          </item>
          <item row="6" column="1">
-          <widget class="QLineEdit" name="supplierLineEdit"/>
+          <widget class="QLineEdit" name="addSupplierLineEdit"/>
+         </item>
+         <item row="4" column="1">
+          <widget class="QLineEdit" name="addSellingPriceLineEdit"/>
          </item>
         </layout>
        </item>
        <item>
-        <widget class="QLabel" name="statusLabel">
+        <widget class="QLabel" name="addStatusLabel">
          <property name="text">
           <string/>
          </property>
@@ -215,7 +215,7 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="add_actionButtons">
+        <layout class="QHBoxLayout" name="add_actionBtns">
          <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
@@ -251,9 +251,9 @@
       <attribute name="title">
        <string>REMOVE</string>
       </attribute>
-      <layout class="QVBoxLayout" name="layoutRemove">
+    <layout class="QVBoxLayout" name="removeLayout">
        <item>
-        <widget class="QLabel" name="subHeaderLabel">
+        <widget class="QLabel" name="removeSubHeaderLabel">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -267,284 +267,91 @@
         </widget>
        </item>
        <item>
-        <widget class="QWidget" name="searchRowWidget" native="true">
-         <layout class="QHBoxLayout" name="searchRowLayout">
-          <property name="spacing">
-           <number>8</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="labelSearchBy">
-            <property name="text">
-             <string>Search by:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="searchCodeLineEdit">
-            <property name="toolTip">
-             <string>Scan or type product code</string>
-            </property>
-            <property name="placeholderText">
-             <string>Enter Product Code</string>
-            </property>
-            <property name="clearButtonEnabled">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QFrame" name="searchModeFrame">
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Plain</enum>
-            </property>
-            <layout class="QHBoxLayout" name="searchModeLayout">
-             <property name="spacing">
-              <number>6</number>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLabel" name="lblModeCode">
-               <property name="text">
-                <string>Code</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSlider" name="searchModeSlider">
-               <property name="minimumSize">
-                <size>
-                 <width>52</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>52</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>Toggle search mode (Code | Name)</string>
-               </property>
-               <property name="minimum">
-                <number>0</number>
-               </property>
-               <property name="maximum">
-                <number>1</number>
-               </property>
-               <property name="singleStep">
-                <number>1</number>
-               </property>
-               <property name="pageStep">
-                <number>1</number>
-               </property>
-               <property name="value">
-                <number>0</number>
-               </property>
-               <property name="tracking">
-                <bool>false</bool>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="lblModeName">
-               <property name="text">
-                <string>Name</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="searchNameComboBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="editable">
-             <bool>true</bool>
-            </property>
-            <property name="insertPolicy">
-             <enum>QComboBox::NoInsert</enum>
-            </property>
-            <property name="sizeAdjustPolicy">
-             <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
-            </property>
-            <property name="minimumContentsLength">
-             <number>12</number>
-            </property>
-            <property name="placeholderText">
-             <string>Enter Product Name</string>
-            </property>
-            <item>
-             <property name="text">
-              <string/>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <layout class="QFormLayout" name="formLayout">
+        <layout class="QFormLayout" name="remove_formLayout">
          <item row="0" column="0">
-          <widget class="QLabel" name="productCodeLabel">
+          <widget class="QLabel" name="removeProductCodeLabel">
            <property name="text">
             <string>Product Code</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="productCodeDisplayLabel">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="productNameLabel">
+          <widget class="QLabel" name="removeProductNameLabel">
            <property name="text">
             <string>Product Name</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1">
-          <widget class="QLabel" name="productNameDisplayLabel">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="categoryLabel">
+          <widget class="QLabel" name="removeCategoryLabel">
            <property name="text">
             <string>Category</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
-          <widget class="QLabel" name="categoryDisplayLabel">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
          <item row="3" column="0">
-          <widget class="QLabel" name="costPriceLabel">
+          <widget class="QLabel" name="removeCostPriceLabel">
            <property name="text">
             <string>Cost Price</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
-          <widget class="QLabel" name="costPriceDisplayLabel">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
          <item row="4" column="0">
-          <widget class="QLabel" name="sellingPriceLabel">
+          <widget class="QLabel" name="removeSellingPriceLabel">
            <property name="text">
             <string>Selling Price</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="1">
-          <widget class="QLabel" name="sellingPriceDisplayLabel">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
          <item row="5" column="0">
-          <widget class="QLabel" name="unitLabel">
+          <widget class="QLabel" name="removeUnitLabel">
            <property name="text">
             <string>Unit</string>
            </property>
           </widget>
          </item>
-         <item row="5" column="1">
-          <widget class="QLineEdit" name="unitLineEdit">
-           <property name="text">
-            <string>EACH</string>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
          <item row="6" column="0">
-          <widget class="QLabel" name="supplierLabel">
+          <widget class="QLabel" name="removeSupplierLabel">
            <property name="text">
             <string>Supplier</string>
            </property>
           </widget>
          </item>
-         <item row="6" column="1">
-          <widget class="QLabel" name="supplierDisplayLabel">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
          <item row="7" column="0">
-          <widget class="QLabel" name="lastUpdatedLabel">
+          <widget class="QLabel" name="removeLastUpdatedLabel">
            <property name="text">
             <string>Last updated</string>
            </property>
           </widget>
          </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="removeProductCodeLineEdit"/>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="removeProductNameComboBox"/>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="removeCategoryLineEdit"/>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="removeCostPriceLineEdit"/>
+         </item>
+         <item row="4" column="1">
+          <widget class="QLineEdit" name="removeSellingPriceLineEdit"/>
+         </item>
+         <item row="6" column="1">
+          <widget class="QLineEdit" name="removeSupplieLineEdit"/>
+         </item>
+         <item row="5" column="1">
+          <widget class="QLineEdit" name="removeUnitLineEdit"/>
+         </item>
          <item row="7" column="1">
-          <widget class="QLabel" name="lastUpdatedDisplayLabel">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
+          <widget class="QLineEdit" name="removeLastUpdatedLineEdit"/>
          </item>
         </layout>
        </item>
        <item>
-        <widget class="QLabel" name="statusLabel_2">
+        <widget class="QLabel" name="removeStatusLabel">
          <property name="text">
           <string/>
          </property>
@@ -557,7 +364,7 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="remove_actionButtons">
+        <layout class="QHBoxLayout" name="remove_actionBtns">
          <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
@@ -593,9 +400,9 @@
       <attribute name="title">
        <string>UPDATE / VIEW</string>
       </attribute>
-      <layout class="QVBoxLayout" name="layoutUpdate">
+    <layout class="QVBoxLayout" name="updateLayout">
        <item>
-        <widget class="QLabel" name="subHeaderLabel">
+        <widget class="QLabel" name="updateSubHeaderLabel">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -609,228 +416,66 @@
         </widget>
        </item>
        <item>
-        <widget class="QWidget" name="searchRowWidget" native="true">
-         <layout class="QHBoxLayout" name="searchRowLayout">
-          <property name="spacing">
-           <number>8</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="labelSearchBy">
-            <property name="text">
-             <string>Search by:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="searchCodeLineEdit">
-            <property name="toolTip">
-             <string>Scan or type product code</string>
-            </property>
-            <property name="placeholderText">
-             <string>Enter Product Code</string>
-            </property>
-            <property name="clearButtonEnabled">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QFrame" name="searchModeFrame">
-            <property name="frameShape">
-             <enum>QFrame::NoFrame</enum>
-            </property>
-            <property name="frameShadow">
-             <enum>QFrame::Plain</enum>
-            </property>
-            <layout class="QHBoxLayout" name="searchModeLayout">
-             <property name="spacing">
-              <number>6</number>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item>
-              <widget class="QLabel" name="lblModeCode">
-               <property name="text">
-                <string>Code</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QSlider" name="searchModeSlider">
-               <property name="minimumSize">
-                <size>
-                 <width>52</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>52</width>
-                 <height>20</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>Toggle search mode (Code | Name)</string>
-               </property>
-               <property name="minimum">
-                <number>0</number>
-               </property>
-               <property name="maximum">
-                <number>1</number>
-               </property>
-               <property name="singleStep">
-                <number>1</number>
-               </property>
-               <property name="pageStep">
-                <number>1</number>
-               </property>
-               <property name="value">
-                <number>0</number>
-               </property>
-               <property name="tracking">
-                <bool>false</bool>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="lblModeName">
-               <property name="text">
-                <string>Name</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="searchNameComboBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="editable">
-             <bool>true</bool>
-            </property>
-            <property name="insertPolicy">
-             <enum>QComboBox::NoInsert</enum>
-            </property>
-            <property name="sizeAdjustPolicy">
-             <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
-            </property>
-            <property name="minimumContentsLength">
-             <number>12</number>
-            </property>
-            <property name="placeholderText">
-             <string>Enter Product Name</string>
-            </property>
-            <item>
-             <property name="text">
-              <string/>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <layout class="QFormLayout" name="formLayout">
+        <layout class="QFormLayout" name="update_formLayout">
          <item row="0" column="0">
-          <widget class="QLabel" name="productCodeLabel">
+          <widget class="QLabel" name="updateProductCodeLabel">
            <property name="text">
-            <string>Product Code</string>
+            <string>Product Code *</string>
            </property>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="productCodeLineEdit">
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
+          <widget class="QLineEdit" name="updateProductCodeLineEdit"/>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="productNameLabel">
+          <widget class="QLabel" name="updateProductNameLabel">
            <property name="text">
-            <string>Product Name</string>
+            <string>Product Name *</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLineEdit" name="productNameLineEdit"/>
+          <widget class="QComboBox" name="updateProductNameComboBox"/>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="categoryLabel">
+          <widget class="QLabel" name="updateCategoryLabel">
            <property name="text">
             <string>Category</string>
            </property>
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QComboBox" name="categoryComboBox"/>
+          <widget class="QComboBox" name="updateCategoryComboBox"/>
          </item>
          <item row="3" column="0">
-          <widget class="QLabel" name="costPriceLabel">
+          <widget class="QLabel" name="updateCostPriceLabel">
            <property name="text">
             <string>Cost Price</string>
            </property>
           </widget>
          </item>
          <item row="3" column="1">
-          <widget class="QLineEdit" name="costPriceLineEdit"/>
+          <widget class="QLineEdit" name="updateCostPriceLineEdit"/>
          </item>
          <item row="4" column="0">
-          <widget class="QLabel" name="sellingPriceLabel">
+          <widget class="QLabel" name="updateSellingPriceLabel">
            <property name="text">
-            <string>Selling Price</string>
+            <string>Selling Price *</string>
            </property>
           </widget>
          </item>
          <item row="4" column="1">
-          <widget class="QLineEdit" name="sellingPriceLineEdit"/>
+          <widget class="QLineEdit" name="updateSellingPriceLineEdit"/>
          </item>
          <item row="5" column="0">
-          <widget class="QLabel" name="unitLabel">
+          <widget class="QLabel" name="updateUnitLabel">
            <property name="text">
             <string>Unit</string>
            </property>
           </widget>
          </item>
          <item row="5" column="1">
-          <widget class="QLineEdit" name="unitLineEdit">
+          <widget class="QLineEdit" name="updateUnitLineEdit">
            <property name="text">
             <string>EACH</string>
            </property>
@@ -840,24 +485,24 @@
           </widget>
          </item>
          <item row="6" column="0">
-          <widget class="QLabel" name="supplierLabel">
+          <widget class="QLabel" name="updateSupplierLabel">
            <property name="text">
             <string>Supplier</string>
            </property>
           </widget>
          </item>
          <item row="6" column="1">
-          <widget class="QLineEdit" name="supplierLineEdit"/>
+          <widget class="QLineEdit" name="updateSupplierLineEdit"/>
          </item>
          <item row="7" column="0">
-          <widget class="QLabel" name="lastUpdatedLabel">
+          <widget class="QLabel" name="updateLastUpdatedLabel">
            <property name="text">
             <string>Last updated</string>
            </property>
           </widget>
          </item>
          <item row="7" column="1">
-          <widget class="QLineEdit" name="lastUpdatedLineEdit">
+          <widget class="QLineEdit" name="updateLastUpdatedLineEdit">
            <property name="readOnly">
             <bool>true</bool>
            </property>
@@ -866,7 +511,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QLabel" name="statusLabel_3">
+        <widget class="QLabel" name="updateStatusLabel">
          <property name="text">
           <string/>
          </property>
@@ -879,7 +524,7 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="update_actionButtons">
+        <layout class="QHBoxLayout" name="update_actionBtns">
          <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
