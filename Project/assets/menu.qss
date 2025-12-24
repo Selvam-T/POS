@@ -1,3 +1,11 @@
+/* =============================
+   DIALOG BACKGROUND
+   ============================= */
+
+QDialog {
+    background: #ffffff;
+}
+
 /* =========================================================
    UNIFIED TITLE BAR STYLING FOR ALL MENU DIALOGS
    ========================================================= */
@@ -5,7 +13,6 @@
 /* Title Bar Frame */
 QFrame#customTitleBar {
     background-color: #ffffff;
-    border-bottom: 1px solid #e6e6e6;
     min-height: 40px;
 }
 

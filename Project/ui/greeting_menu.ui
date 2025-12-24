@@ -161,14 +161,14 @@
      <item>
       <widget class="QPushButton" name="btnGreetOk">
        <property name="text">
-        <string>Ok</string>
+        <string>UPDATE</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="btnGreetCancel">
        <property name="text">
-        <string>Cancel</string>
+        <string>CANCEL</string>
        </property>
       </widget>
      </item>
