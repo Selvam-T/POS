@@ -53,6 +53,22 @@
         </widget>
       </item>
       <item alignment="Qt::AlignHCenter">
+        <widget class="QPushButton" name="historyBtn">
+          <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+            </sizepolicy>
+          </property>
+          <property name="text">
+            <string>History</string>
+          </property>
+          <property name="toolTip">
+            <string>Receipt history</string>
+          </property>
+        </widget>
+      </item>
+      <item alignment="Qt::AlignHCenter">
         <widget class="QPushButton" name="vegetableBtn">
           <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -88,19 +104,6 @@
           </property>
           <property name="text">
             <string>Greeting</string>
-          </property>
-        </widget>
-      </item>
-      <item alignment="Qt::AlignHCenter">
-        <widget class="QPushButton" name="deviceBtn">
-          <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-            </sizepolicy>
-          </property>
-          <property name="text">
-            <string>Device</string>
           </property>
         </widget>
       </item>

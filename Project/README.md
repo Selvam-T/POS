@@ -1,3 +1,6 @@
+## Note on Device Manager Functionality
+
+The device manager functionality to configure devices such as barcode scanners, receipt printers, and electronic weighing scales was shelved and is not included in this project. This decision was made because such configuration was deemed out of the project scope.
 # ANUMANI POS System
 
 A Point of Sale (POS) application built with PyQt5 and SQLite. It features a preloaded product cache for instant lookups, a modular UI composed from .ui files, a compact icon-only right-side menu, and barcode scanner integration.

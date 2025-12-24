@@ -35,7 +35,7 @@ from modules.wrappers.dialog_wrapper import DialogWrapper
 # --- Menu frame dialog controllers ---
 from modules.menu.logout_menu import open_logout_dialog as launch_logout_dialog
 from modules.menu.admin_menu import open_admin_dialog as launch_admin_dialog
-from modules.menu.devices_menu import open_devices_dialog as launch_devices_dialog
+from modules.menu.history_menu import open_history_dialog as launch_history_dialog
 from modules.menu.reports_menu import open_reports_dialog as launch_reports_dialog
 from modules.menu.greeting_menu import open_greeting_dialog as launch_greeting_dialog
 from modules.menu.product_menu import open_dialog_scanner_enabled as launch_product_dialog
@@ -53,7 +53,7 @@ from config import (
     ICON_VEGETABLE,
     ICON_PRODUCT,
     ICON_GREETING,
-    ICON_DEVICE,
+    ICON_HISTORY,
     ICON_LOGOUT,
     DEBUG_SCANNER_FOCUS,
     DEBUG_FOCUS_CHANGES,
@@ -102,9 +102,9 @@ class MainLoader(QMainWindow):
         self.dialog_wrapper.open_dialog_scanner_blocked(launch_greeting_dialog, dialog_key='greeting_menu')
         """self.dialog_wrapper.open_dialog_scanner_blocked(launch_greeting_dialog)"""
 
-    def open_devices_menu_dialog(self):
-        """Open Devices dialog."""
-        self.dialog_wrapper.open_dialog_scanner_blocked(launch_devices_dialog, dialog_key='devices_menu')
+    def open_history_menu_dialog(self):
+        """Open Receipt History dialog."""
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_history_dialog, dialog_key='history_menu')
 
     def open_reports_menu_dialog(self):
         """Open Reports dialog."""
@@ -232,7 +232,7 @@ class MainLoader(QMainWindow):
             'vegetableBtn': ICON_VEGETABLE,
             'productBtn': ICON_PRODUCT,
             'greetingBtn': ICON_GREETING,
-            'deviceBtn': ICON_DEVICE,
+            'historyBtn': ICON_HISTORY,
             'logoutBtn': ICON_LOGOUT,
         }
         try:
@@ -258,7 +258,7 @@ class MainLoader(QMainWindow):
                 'vegetableBtn': 'Vegetable',
                 'productBtn': 'Product',
                 'greetingBtn': 'Greeting',
-                'deviceBtn': 'Device',
+                'historyBtn': 'History',
                 'logoutBtn': 'Logout',
             }
 
@@ -298,8 +298,8 @@ class MainLoader(QMainWindow):
                     btn.clicked.connect(self.open_admin_menu_dialog)
                 elif obj_name == 'reportsBtn':
                     btn.clicked.connect(self.open_reports_menu_dialog)
-                elif obj_name == 'deviceBtn':
-                    btn.clicked.connect(self.open_devices_menu_dialog)
+                elif obj_name == 'historyBtn':
+                    btn.clicked.connect(self.open_history_menu_dialog)
                 else:
                     try:
                         btn.setEnabled(False)

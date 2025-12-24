@@ -41,7 +41,7 @@ DIALOG_RATIOS = {
     'manual_entry': (0.4, 0.3),
     'logout_menu': (0.4, 0.4),
     'admin_menu': (0.7, 0.7),
-    'devices_menu': (0.7, 0.7),
+    'history_menu': (0.7, 0.7),
     'reports_menu': (0.7, 0.7),
     'greeting_menu': (0.7, 0.7),
     'product_menu': (0.7, 0.7),
@@ -132,7 +132,7 @@ def open_product_menu_dialog(self, **kwargs):
 | logout_menu | 0.4 | 0.4 | Yes |
 | admin_menu | 0.7 | 0.7 | Yes |
 | greeting_menu | 0.7 | 0.7 | Yes |
-| devices_menu | 0.7 | 0.7 | Yes |
+| history_menu | 0.7 | 0.7 | Yes |
 | reports_menu | 0.7 | 0.7 | Yes |
 | vegetable_menu | 0.7 | 0.7 | Yes |
 | vegetable_entry | 0.5 | 0.7 | Yes |

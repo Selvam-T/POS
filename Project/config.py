@@ -51,7 +51,7 @@ ICON_REPORTS = 'assets/icons/reports.svg'
 ICON_VEGETABLE = 'assets/icons/vegetable.svg'
 ICON_PRODUCT = 'assets/icons/product.svg'
 ICON_GREETING = 'assets/icons/greeting.svg'
-ICON_DEVICE = 'assets/icons/device.svg'
+ICON_HISTORY = 'assets/icons/receipt_history.svg'
 ICON_LOGOUT = 'assets/icons/logout.svg'
 
 # =============================================================================
