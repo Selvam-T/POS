@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>560</width>
-    <height>420</height>
+    <height>469</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -79,36 +79,78 @@
     </widget>
    </item>
    <item>
-    <spacer name="horizontalSpacer">
+    <spacer name="verticalSpacer_4">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>40</width>
-       <height>10</height>
+       <width>20</width>
+       <height>20</height>
       </size>
      </property>
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="loggedInLabel">
-     <property name="text">
-      <string>Logged in as: Admin</string>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>20</number>
      </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+     <property name="leftMargin">
+      <number>10</number>
      </property>
-    </widget>
+     <property name="topMargin">
+      <number>10</number>
+     </property>
+     <property name="rightMargin">
+      <number>10</number>
+     </property>
+     <property name="bottomMargin">
+      <number>10</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="userHeaderLabel">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="loginHeaderLabel">
+       <property name="text">
+        <string>logged in</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </item>
    <item>
-    <spacer name="horizontalSpacer_2">
+    <spacer name="verticalSpacer_11">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>40</width>
+       <width>20</width>
        <height>20</height>
       </size>
      </property>
@@ -128,13 +170,31 @@
       </attribute>
       <layout class="QVBoxLayout" name="tabAdminLayout">
        <item>
-        <widget class="QGroupBox" name="groupAdminPassword">
+        <widget class="QGroupBox" name="adminQGroupBox">
          <property name="title">
           <string>Change Admin Password</string>
          </property>
          <layout class="QFormLayout" name="formAdmin">
+          <property name="horizontalSpacing">
+           <number>10</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>15</number>
+          </property>
+          <property name="leftMargin">
+           <number>10</number>
+          </property>
+          <property name="topMargin">
+           <number>20</number>
+          </property>
+          <property name="rightMargin">
+           <number>10</number>
+          </property>
+          <property name="bottomMargin">
+           <number>10</number>
+          </property>
           <item row="0" column="0">
-           <widget class="QLabel" name="labelAdminCurrent">
+           <widget class="QLabel" name="adminCurLabel">
             <property name="text">
              <string>Current Password:</string>
             </property>
@@ -143,7 +203,7 @@
           <item row="0" column="1">
            <layout class="QHBoxLayout" name="layoutAdminCurrent">
             <item>
-             <widget class="QLineEdit" name="adminCurrentPassword">
+             <widget class="QLineEdit" name="adminCurPwdCodeLineEdit">
               <property name="echoMode">
                <enum>QLineEdit::Password</enum>
               </property>
@@ -153,7 +213,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="btnToggleAdminCurrent">
+             <widget class="QToolButton" name="adminQToolBtn">
               <property name="toolTip">
                <string>Show/Hide</string>
               </property>
@@ -171,14 +231,14 @@
            </layout>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="labelAdminNew">
+           <widget class="QLabel" name="adminNewLabel">
             <property name="text">
              <string>New Password:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="adminNewPassword">
+           <widget class="QLineEdit" name="adminNewPwdCodeLineEdit">
             <property name="echoMode">
              <enum>QLineEdit::Password</enum>
             </property>
@@ -191,20 +251,49 @@
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_7">
+        <spacer name="verticalSpacer_9">
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>40</width>
+           <width>20</width>
            <height>20</height>
           </size>
          </property>
         </spacer>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="layoutAdminSave">
+        <widget class="QLabel" name="adminStatusLabel">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_10">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="admin_actionBtns">
          <item>
           <spacer name="adminSaveSpacer">
            <property name="orientation">
@@ -235,28 +324,20 @@
         </layout>
        </item>
        <item>
-        <spacer name="horizontalSpacer_8">
+        <spacer name="verticalSpacer_8">
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>40</width>
-           <height>10</height>
+           <width>20</width>
+           <height>20</height>
           </size>
          </property>
         </spacer>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="layoutMessageAdmin">
-         <item>
-          <widget class="QLabel" name="messageLabelAdmin">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
        </item>
       </layout>
      </widget>
@@ -266,13 +347,31 @@
       </attribute>
       <layout class="QVBoxLayout" name="tabStaffLayout">
        <item>
-        <widget class="QGroupBox" name="groupStaffPassword">
+        <widget class="QGroupBox" name="staffQGroupBox">
          <property name="title">
           <string>Change Staff Password</string>
          </property>
          <layout class="QFormLayout" name="formStaff">
+          <property name="horizontalSpacing">
+           <number>10</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>15</number>
+          </property>
+          <property name="leftMargin">
+           <number>10</number>
+          </property>
+          <property name="topMargin">
+           <number>20</number>
+          </property>
+          <property name="rightMargin">
+           <number>10</number>
+          </property>
+          <property name="bottomMargin">
+           <number>10</number>
+          </property>
           <item row="0" column="0">
-           <widget class="QLabel" name="labelStaffCurrent">
+           <widget class="QLabel" name="staffCurLabel">
             <property name="text">
              <string>Current Password:</string>
             </property>
@@ -281,7 +380,7 @@
           <item row="0" column="1">
            <layout class="QHBoxLayout" name="layoutStaffCurrent">
             <item>
-             <widget class="QLineEdit" name="staffCurrentPassword">
+             <widget class="QLineEdit" name="staffCurPwdCodeLineEdit">
               <property name="echoMode">
                <enum>QLineEdit::Password</enum>
               </property>
@@ -291,7 +390,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="btnToggleStaffCurrent">
+             <widget class="QToolButton" name="staffQToolBtn">
               <property name="toolTip">
                <string>Show/Hide</string>
               </property>
@@ -309,14 +408,14 @@
            </layout>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="labelStaffNew">
+           <widget class="QLabel" name="staffNewLabel">
             <property name="text">
              <string>New Password:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="staffNewPassword">
+           <widget class="QLineEdit" name="staffNewPwdCodeLineEdit">
             <property name="echoMode">
              <enum>QLineEdit::Password</enum>
             </property>
@@ -329,20 +428,49 @@
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_3">
+        <spacer name="verticalSpacer_6">
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>40</width>
+           <width>20</width>
            <height>20</height>
           </size>
          </property>
         </spacer>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="layoutStaffSave">
+        <widget class="QLabel" name="staffStatusLabel">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_7">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="staff_actionBtns">
          <item>
           <spacer name="staffSaveSpacer">
            <property name="orientation">
@@ -373,31 +501,20 @@
         </layout>
        </item>
        <item>
-        <spacer name="horizontalSpacer_4">
+        <spacer name="verticalSpacer_5">
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>40</width>
-           <height>10</height>
+           <width>20</width>
+           <height>20</height>
           </size>
          </property>
         </spacer>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="layoutMessageStaff">
-         <item>
-          <widget class="QLabel" name="messageLabelStaff">
-           <property name="frameShape">
-            <enum>QFrame::NoFrame</enum>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
        </item>
       </layout>
      </widget>
@@ -407,20 +524,38 @@
       </attribute>
       <layout class="QVBoxLayout" name="tabEmailLayout">
        <item>
-        <widget class="QGroupBox" name="groupEmail">
+        <widget class="QGroupBox" name="emailQGroupBox">
          <property name="title">
           <string>Email Settings</string>
          </property>
          <layout class="QFormLayout" name="formEmail">
+          <property name="horizontalSpacing">
+           <number>10</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>15</number>
+          </property>
+          <property name="leftMargin">
+           <number>10</number>
+          </property>
+          <property name="topMargin">
+           <number>20</number>
+          </property>
+          <property name="rightMargin">
+           <number>10</number>
+          </property>
+          <property name="bottomMargin">
+           <number>10</number>
+          </property>
           <item row="0" column="0">
-           <widget class="QLabel" name="labelCurrentEmail">
+           <widget class="QLabel" name="emailCurLabel">
             <property name="text">
              <string>Current Email:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="currentEmailLineEdit">
+           <widget class="QLineEdit" name="emailCurCodeLineEdit">
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -430,14 +565,14 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="labelNewEmail">
+           <widget class="QLabel" name="emailNewLabel">
             <property name="text">
              <string>New Email:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="newEmailLineEdit">
+           <widget class="QLineEdit" name="emailNewCodeLineEdit">
             <property name="placeholderText">
              <string>Enter new recovery email</string>
             </property>
@@ -447,20 +582,49 @@
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_5">
+        <spacer name="verticalSpacer_3">
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>40</width>
+           <width>20</width>
            <height>20</height>
           </size>
          </property>
         </spacer>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="layoutEmailSave">
+        <widget class="QLabel" name="emailStatusLabel">
+         <property name="text">
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="email_actionBtns">
          <item>
           <spacer name="emailSaveSpacer">
            <property name="orientation">
@@ -491,28 +655,20 @@
         </layout>
        </item>
        <item>
-        <spacer name="horizontalSpacer_6">
+        <spacer name="verticalSpacer">
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>40</width>
-           <height>10</height>
+           <width>20</width>
+           <height>20</height>
           </size>
          </property>
         </spacer>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="layoutMessageEmail">
-         <item>
-          <widget class="QLabel" name="messageLabelEmail">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
        </item>
       </layout>
      </widget>

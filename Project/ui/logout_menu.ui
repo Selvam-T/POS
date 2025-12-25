@@ -84,7 +84,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="label_message">
+    <widget class="QLabel" name="logoutHeaderLabel">
      <property name="text">
       <string>Logout Account</string>
      </property>
