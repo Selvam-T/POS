@@ -52,7 +52,7 @@ QPushButton#customCloseBtn:pressed {
 
 /* Constructive (OK) */
 QPushButton[objectName$="Ok"] {
-    background-color: #4caf50;
+    background-color: #2196f3;
     color: white;
     font-size: 14pt;
     font-weight: bold;
@@ -62,10 +62,10 @@ QPushButton[objectName$="Ok"] {
     border: none;
 }
 QPushButton[objectName$="Ok"]:hover {
-    background-color: #43a047;
+    background-color: #1e88e5;
 }
 QPushButton[objectName$="Ok"]:pressed {
-    background-color: #388e3c;
+    background-color: #1976d2;
 }
 
 /* Destructive (Del) */
@@ -88,7 +88,7 @@ QPushButton[objectName$="Del"]:pressed {
 
 /* Dismissive (Cancel) */
 QPushButton[objectName$="Cancel"] {
-    background-color: #9e9e9e;
+    background-color:  #9ea8b7;
     color: white;
     font-size: 14pt;
     font-weight: bold;
@@ -98,8 +98,8 @@ QPushButton[objectName$="Cancel"] {
     border: none;
 }
 QPushButton[objectName$="Cancel"]:hover {
-    background-color: #757575;
+    background-color: #757f8e;
 }
 QPushButton[objectName$="Cancel"]:pressed {
-    background-color: #616161;
+    background-color: #616b79;
 }

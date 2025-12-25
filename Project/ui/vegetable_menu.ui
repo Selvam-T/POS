@@ -164,7 +164,7 @@
           </size>
          </property>
          <property name="text">
-          <string>ADD or REMOVE :</string>
+          <string>ADD or REMOVE * :</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
