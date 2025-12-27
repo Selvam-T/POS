@@ -140,11 +140,12 @@ class DialogWrapper:
         Returns:
             Cleanup function to connect to dlg.finished signal.
         """
-        def _cleanup(_):
+        def _cleanup(result):
             self._hide_overlay()
             self._unblock_scanner()
             self._restore_focus()
-            if on_finish:
+            # Only call on_finish if dialog was accepted (e.g., OK pressed)
+            if on_finish and result == QDialog.Accepted:
                 on_finish()
         return _cleanup
 
