@@ -24,39 +24,46 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
 
 ### Input Fields Grid
 
+
 **Row 0: Vegetable Selection**
-- `lblChoose`: "Choose Vegetable * :"
-- `comboVegetable`: Dropdown with "Select vegetable to update" placeholder + 16 vegetable slots
+- `vegMChooseLabel`: "Choose Vegetable * :"
+- `vegMChooseComboBox`: Dropdown with "Select vegetable to update" placeholder + 16 vegetable slots
 
 **Row 1: Spacer**
 - `gridRowSpacer`: Fixed 40px height spacer between selection and fields
 
+
 **Row 2: Product Code**
-- `lblProductCode`: "Product code :"
-- `inputProductCode`: Read-only QLineEdit
+- `vegMProductCodeLabel`: "Product code :"
+- `vegMProductCodeLineEdit`: Read-only QLineEdit
+
 
 **Row 3: Product Name** (Required)
-- `lblProductName`: "Product Name * :"
-- `inputProductName`: Editable, placeholder "Enter product name"
+- `vegMProductNameLabel`: "Product Name * :"
+- `vegMProductNameLineEdit`: Editable, placeholder "Enter product name"
+
 
 **Row 4: Unit** (Required)
-- `lblUnit`: "Unit * :"
-- `comboUnit`: Dropdown with options:
+- `vegMUnitLabel`: "Unit * :"
+- `vegMUnitComboBox`: Dropdown with options:
   - "Select Unit" (default)
   - "KG"
   - "EACH"
 
+
 **Row 5: Selling Price** (Required)
-- `lblSellingPrice`: "Selling Price * :"
-- `inputSellingPrice`: Editable, placeholder "Enter selling price"
+- `vegMSellingPriceLabel`: "Selling Price * :"
+- `vegMSellingPriceLineEdit`: Editable, placeholder "Enter selling price"
+
 
 **Row 6: Cost Price** (Optional)
-- `lblCostPrice`: "Cost Price :"
-- `inputCostPrice`: Editable, placeholder "Optional"
+- `vegMCostPriceLabel`: "Cost Price :"
+- `vegMCostPriceLineEdit`: Editable, placeholder "Optional"
+
 
 **Row 7: Supplier** (Optional)
-- `lblSupplier`: "Supplier :"
-- `inputSupplier`: Editable, placeholder "Optional"
+- `vegMSupplierLabel`: "Supplier :"
+- `vegMSupplierLineEdit`: Editable, placeholder "Optional"
 
 ### Error Display
 - `lblError`: Center-aligned label for validation messages

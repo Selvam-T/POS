@@ -156,7 +156,9 @@ class BarcodeManager(QObject):
                     is_allowed_input = obj_name in ('qtyInput', 'productCodeLineEdit', 'refundInput', 
                                                      'inputProductName', 'inputSellingPrice', 
                                                      'inputSupplier', 'inputCostPrice',
-                                                     'inputQuantity', 'inputUnitPrice')
+                                                     'inputQuantity', 'inputUnitPrice',
+                                                     'vegMCostPriceLineEdit', 'vegMProductNameLineEdit', 
+                                                     'vegMSellingPriceLineEdit', 'vegMSupplierLineEdit')
                     
                     if not is_allowed_input:
                         text = ''

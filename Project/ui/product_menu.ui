@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>480</width>
-    <height>509</height>
+    <height>587</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -102,7 +102,7 @@
        <item>
         <layout class="QFormLayout" name="add_formLayout">
          <item row="0" column="0">
-          <widget class="QLabel" name="addProductCodeLabel">
+          <widget class="QLabel" name="addProductCodeFieldLbl">
            <property name="text">
             <string>Product Code*</string>
            </property>
@@ -112,7 +112,7 @@
           <widget class="QLineEdit" name="addProductCodeLineEdit"/>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="addProductNameLabel">
+          <widget class="QLabel" name="addProductNameFieldLbl">
            <property name="text">
             <string>Product Name*</string>
            </property>
@@ -122,7 +122,7 @@
           <widget class="QLineEdit" name="addProductNameLineEdit"/>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="addCategoryLabel">
+          <widget class="QLabel" name="addCategoryFieldLbl">
            <property name="text">
             <string>Category</string>
            </property>
@@ -153,7 +153,7 @@
           </widget>
          </item>
          <item row="3" column="0">
-          <widget class="QLabel" name="addCostPriceLabel">
+          <widget class="QLabel" name="addCostPriceFieldLbl">
            <property name="text">
             <string>Cost Price</string>
            </property>
@@ -163,14 +163,14 @@
           <widget class="QLineEdit" name="addCostPriceLineEdit"/>
          </item>
          <item row="4" column="0">
-          <widget class="QLabel" name="addSellingPriceLabel">
+          <widget class="QLabel" name="addSellingPriceFieldLbl">
            <property name="text">
             <string>Selling Price*</string>
            </property>
           </widget>
          </item>
          <item row="5" column="0">
-          <widget class="QLabel" name="addUnitLabel">
+          <widget class="QLabel" name="addUnitFieldLbl">
            <property name="text">
             <string>Unit</string>
            </property>
@@ -187,7 +187,7 @@
           </widget>
          </item>
          <item row="6" column="0">
-          <widget class="QLabel" name="addSupplierLabel">
+          <widget class="QLabel" name="addSupplierFieldLbl">
            <property name="text">
             <string>Supplier</string>
            </property>
@@ -269,14 +269,14 @@
        <item>
         <layout class="QFormLayout" name="remove_formLayout">
          <item row="0" column="0">
-          <widget class="QLabel" name="subLabel_3">
+          <widget class="QLabel" name="searchSubLbl">
            <property name="text">
             <string>Search by :</string>
            </property>
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="removeSearchLabel">
+          <widget class="QLabel" name="removeSearchFieldLbl">
            <property name="text">
             <string>Product Name - </string>
            </property>
@@ -286,7 +286,7 @@
           <widget class="QComboBox" name="removeSearchComboBox"/>
          </item>
          <item row="3" column="0">
-          <widget class="QLabel" name="removeProductCodeLabel">
+          <widget class="QLabel" name="removeProductCodeFieldLbl">
            <property name="text">
             <string>Product Code - </string>
            </property>
@@ -296,7 +296,7 @@
           <widget class="QLineEdit" name="removeProductCodeLineEdit"/>
          </item>
          <item row="5" column="0">
-          <widget class="QLabel" name="removeProductNameLabel">
+          <widget class="QLabel" name="removeProductNameFieldLbl">
            <property name="text">
             <string>Product Name</string>
            </property>
@@ -306,7 +306,7 @@
           <widget class="QLineEdit" name="removeProductNameLineEdit"/>
          </item>
          <item row="6" column="0">
-          <widget class="QLabel" name="removeCategoryLabel">
+          <widget class="QLabel" name="removeCategoryFieldLbl">
            <property name="text">
             <string>Category</string>
            </property>
@@ -316,7 +316,7 @@
           <widget class="QLineEdit" name="removeCategoryLineEdit"/>
          </item>
          <item row="7" column="0">
-          <widget class="QLabel" name="removeCostPriceLabel">
+          <widget class="QLabel" name="removeCostPriceFieldLbl">
            <property name="text">
             <string>Cost Price</string>
            </property>
@@ -326,7 +326,7 @@
           <widget class="QLineEdit" name="removeCostPriceLineEdit"/>
          </item>
          <item row="8" column="0">
-          <widget class="QLabel" name="removeSellingPriceLabel">
+          <widget class="QLabel" name="removeSellingPriceFieldLbl">
            <property name="text">
             <string>Selling Price</string>
            </property>
@@ -336,7 +336,7 @@
           <widget class="QLineEdit" name="removeSellingPriceLineEdit"/>
          </item>
          <item row="9" column="0">
-          <widget class="QLabel" name="removeUnitLabel">
+          <widget class="QLabel" name="removeUnitFieldLbl">
            <property name="text">
             <string>Unit</string>
            </property>
@@ -350,21 +350,21 @@
           </widget>
          </item>
          <item row="10" column="0">
-          <widget class="QLabel" name="removeSupplierLabel">
+          <widget class="QLabel" name="removeSupplierFieldLbl">
            <property name="text">
             <string>Supplier</string>
            </property>
           </widget>
          </item>
          <item row="10" column="1">
-          <widget class="QLineEdit" name="removeSupplieLineEdit">
+          <widget class="QLineEdit" name="removeSupplierLineEdit">
            <property name="readOnly">
             <bool>true</bool>
            </property>
           </widget>
          </item>
          <item row="11" column="0">
-          <widget class="QLabel" name="removeLastUpdatedLabel">
+          <widget class="QLabel" name="removeLastUpdatedFieldLbl">
            <property name="text">
             <string>Last updated</string>
            </property>
@@ -507,7 +507,7 @@
        <item>
         <layout class="QFormLayout" name="update_formLayout">
          <item row="0" column="0">
-          <widget class="QLabel" name="subLabel">
+          <widget class="QLabel" name="searchSubLbl2">
            <property name="text">
             <string>Search by :</string>
            </property>
@@ -546,7 +546,7 @@
           </spacer>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="updateSearchLabel">
+          <widget class="QLabel" name="updateSearchFieldLbl">
            <property name="text">
             <string>Product Name -</string>
            </property>
@@ -556,7 +556,7 @@
           <widget class="QComboBox" name="updateSearchComboBox"/>
          </item>
          <item row="3" column="0">
-          <widget class="QLabel" name="updateProductCodeLabel">
+          <widget class="QLabel" name="updateProductCodeFieldLbl">
            <property name="text">
             <string>Product Code - </string>
            </property>
@@ -598,14 +598,14 @@
           </spacer>
          </item>
          <item row="5" column="0">
-          <widget class="QLabel" name="subLabel_2">
+          <widget class="QLabel" name="editSubLbl">
            <property name="text">
             <string>Edit fields :</string>
            </property>
           </widget>
          </item>
          <item row="7" column="0">
-          <widget class="QLabel" name="updateProductNameLabel">
+          <widget class="QLabel" name="updateProductNameFieldLbl">
            <property name="text">
             <string>Product Name *</string>
            </property>
@@ -615,7 +615,7 @@
           <widget class="QLineEdit" name="updateProductNameLineEdit"/>
          </item>
          <item row="8" column="0">
-          <widget class="QLabel" name="updateCategoryLabel">
+          <widget class="QLabel" name="updateCategoryFieldLbl">
            <property name="text">
             <string>Category</string>
            </property>
@@ -625,7 +625,7 @@
           <widget class="QComboBox" name="updateCategoryComboBox"/>
          </item>
          <item row="9" column="0">
-          <widget class="QLabel" name="updateCostPriceLabel">
+          <widget class="QLabel" name="updateCostPriceFieldLbl">
            <property name="text">
             <string>Cost Price</string>
            </property>
@@ -635,7 +635,7 @@
           <widget class="QLineEdit" name="updateCostPriceLineEdit"/>
          </item>
          <item row="10" column="0">
-          <widget class="QLabel" name="updateSellingPriceLabel">
+          <widget class="QLabel" name="updateSellingPriceFieldLbl">
            <property name="text">
             <string>Selling Price *</string>
            </property>
@@ -645,7 +645,7 @@
           <widget class="QLineEdit" name="updateSellingPriceLineEdit"/>
          </item>
          <item row="11" column="0">
-          <widget class="QLabel" name="updateUnitLabel">
+          <widget class="QLabel" name="updateUnitFieldLbl">
            <property name="text">
             <string>Unit</string>
            </property>
@@ -662,7 +662,7 @@
           </widget>
          </item>
          <item row="12" column="0">
-          <widget class="QLabel" name="updateSupplierLabel">
+          <widget class="QLabel" name="updateSupplierFieldLbl">
            <property name="text">
             <string>Supplier</string>
            </property>
@@ -672,7 +672,7 @@
           <widget class="QLineEdit" name="updateSupplierLineEdit"/>
          </item>
          <item row="13" column="0">
-          <widget class="QLabel" name="updateLastUpdatedLabel">
+          <widget class="QLabel" name="updateLastUpdatedFieldLbl">
            <property name="text">
             <string>Last updated</string>
            </property>
@@ -785,7 +785,7 @@
   <tabstop>removeCostPriceLineEdit</tabstop>
   <tabstop>removeSellingPriceLineEdit</tabstop>
   <tabstop>removeUnitLineEdit</tabstop>
-  <tabstop>removeSupplieLineEdit</tabstop>
+  <tabstop>removeSupplierLineEdit</tabstop>
   <tabstop>removeLastUpdatedLineEdit</tabstop>
   <tabstop>btnRemoveOk</tabstop>
   <tabstop>btnRemoveCancel</tabstop>

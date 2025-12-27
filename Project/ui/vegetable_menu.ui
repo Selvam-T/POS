@@ -150,7 +150,7 @@
         <number>10</number>
        </property>
        <item row="0" column="0">
-        <widget class="QLabel" name="lblChoose">
+        <widget class="QLabel" name="vegMsubLabel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -172,7 +172,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QComboBox" name="comboVegetable">
+        <widget class="QComboBox" name="vegMChooseComboBox">
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -262,7 +262,7 @@
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="lblProductCode">
+        <widget class="QLabel" name="vegMProductCodeFieldLbl">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -284,7 +284,7 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QLineEdit" name="inputProductCode"/>
+        <widget class="QLineEdit" name="vegMProductCodeLineEdit"/>
        </item>
        <item row="1" column="0" colspan="2">
         <spacer name="gridRowSpacer">
@@ -303,7 +303,7 @@
         </spacer>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="lblProductName">
+        <widget class="QLabel" name="vegMProductNameFieldLbl">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -325,14 +325,14 @@
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QLineEdit" name="inputProductName">
+        <widget class="QLineEdit" name="vegMProductNameLineEdit">
          <property name="placeholderText">
           <string>Enter product name</string>
          </property>
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="lblUnit">
+        <widget class="QLabel" name="vegMUnitFieldLbl">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -354,7 +354,7 @@
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QComboBox" name="comboUnit">
+        <widget class="QComboBox" name="vegMUnitComboBox">
          <property name="currentIndex">
           <number>0</number>
          </property>
@@ -376,7 +376,7 @@
         </widget>
        </item>
        <item row="5" column="0">
-        <widget class="QLabel" name="lblSellingPrice">
+        <widget class="QLabel" name="vegMSellingPriceFieldLbl">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -398,14 +398,14 @@
         </widget>
        </item>
        <item row="5" column="1">
-        <widget class="QLineEdit" name="inputSellingPrice">
+        <widget class="QLineEdit" name="vegMSellingPriceLineEdit">
          <property name="placeholderText">
           <string>Enter selling price</string>
          </property>
         </widget>
        </item>
        <item row="6" column="0">
-        <widget class="QLabel" name="lblCostPrice">
+        <widget class="QLabel" name="vegMCostPriceFieldLbl">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -427,14 +427,14 @@
         </widget>
        </item>
        <item row="6" column="1">
-        <widget class="QLineEdit" name="inputCostPrice">
+        <widget class="QLineEdit" name="vegMCostPriceLineEdit">
          <property name="placeholderText">
           <string>Optional</string>
          </property>
         </widget>
        </item>
        <item row="7" column="0">
-        <widget class="QLabel" name="lblSupplier">
+        <widget class="QLabel" name="vegMSupplierFieldLbl">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -456,7 +456,7 @@
         </widget>
        </item>
        <item row="7" column="1">
-        <widget class="QLineEdit" name="inputSupplier">
+        <widget class="QLineEdit" name="vegMSupplierLineEdit">
          <property name="placeholderText">
           <string>Optional</string>
          </property>
@@ -484,7 +484,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="lblError">
+      <widget class="QLabel" name="vegMStatusLabel">
        <property name="text">
         <string/>
        </property>
