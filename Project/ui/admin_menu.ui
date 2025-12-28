@@ -7,10 +7,31 @@
     <x>0</x>
     <y>0</y>
     <width>560</width>
-    <height>469</height>
+    <height>495</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>5</number>
+   </property>
+   <property name="leftMargin">
+    <number>10</number>
+   </property>
+   <property name="topMargin">
+    <number>20</number>
+   </property>
+   <property name="rightMargin">
+    <number>10</number>
+   </property>
+   <property name="bottomMargin">
+    <number>30</number>
+   </property>
    <item>
     <widget class="QFrame" name="customTitleBar">
      <property name="frameShape">
@@ -89,7 +110,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>20</height>
+       <height>10</height>
       </size>
      </property>
     </spacer>
@@ -162,15 +183,33 @@
       <enum>QTabWidget::North</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
+     </property>
+     <property name="documentMode">
+      <bool>false</bool>
      </property>
      <widget class="QWidget" name="tabAdmin">
       <attribute name="title">
        <string>ADMIN</string>
       </attribute>
       <layout class="QVBoxLayout" name="tabAdminLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
+       <property name="topMargin">
+        <number>40</number>
+       </property>
+       <property name="rightMargin">
+        <number>10</number>
+       </property>
+       <property name="bottomMargin">
+        <number>20</number>
+       </property>
        <item>
-        <widget class="QGroupBox" name="adminQGroupBox">
+        <widget class="QGroupBox" name="adminGroupBox">
          <property name="title">
           <string>Change Admin Password</string>
          </property>
@@ -179,7 +218,7 @@
            <number>10</number>
           </property>
           <property name="verticalSpacing">
-           <number>15</number>
+           <number>20</number>
           </property>
           <property name="leftMargin">
            <number>10</number>
@@ -191,10 +230,10 @@
            <number>10</number>
           </property>
           <property name="bottomMargin">
-           <number>10</number>
+           <number>20</number>
           </property>
           <item row="0" column="0">
-           <widget class="QLabel" name="adminCurLabel">
+           <widget class="QLabel" name="adminCurFieldLbl">
             <property name="text">
              <string>Current Password:</string>
             </property>
@@ -213,7 +252,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="adminQToolBtn">
+             <widget class="QToolButton" name="adminToolBtn">
               <property name="toolTip">
                <string>Show/Hide</string>
               </property>
@@ -231,7 +270,7 @@
            </layout>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="adminNewLabel">
+           <widget class="QLabel" name="adminNewFieldLbl">
             <property name="text">
              <string>New Password:</string>
             </property>
@@ -261,7 +300,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>20</height>
+           <height>10</height>
           </size>
          </property>
         </spacer>
@@ -287,7 +326,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>20</height>
+           <height>10</height>
           </size>
          </property>
         </spacer>
@@ -323,22 +362,6 @@
          </item>
         </layout>
        </item>
-       <item>
-        <spacer name="verticalSpacer_8">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabStaff">
@@ -346,8 +369,23 @@
        <string>STAFF</string>
       </attribute>
       <layout class="QVBoxLayout" name="tabStaffLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
+       <property name="topMargin">
+        <number>40</number>
+       </property>
+       <property name="rightMargin">
+        <number>10</number>
+       </property>
+       <property name="bottomMargin">
+        <number>20</number>
+       </property>
        <item>
-        <widget class="QGroupBox" name="staffQGroupBox">
+        <widget class="QGroupBox" name="staffGroupBox">
          <property name="title">
           <string>Change Staff Password</string>
          </property>
@@ -356,7 +394,7 @@
            <number>10</number>
           </property>
           <property name="verticalSpacing">
-           <number>15</number>
+           <number>20</number>
           </property>
           <property name="leftMargin">
            <number>10</number>
@@ -368,10 +406,10 @@
            <number>10</number>
           </property>
           <property name="bottomMargin">
-           <number>10</number>
+           <number>20</number>
           </property>
           <item row="0" column="0">
-           <widget class="QLabel" name="staffCurLabel">
+           <widget class="QLabel" name="staffCurFieldLbl">
             <property name="text">
              <string>Current Password:</string>
             </property>
@@ -408,7 +446,7 @@
            </layout>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="staffNewLabel">
+           <widget class="QLabel" name="staffNewFieldLbl">
             <property name="text">
              <string>New Password:</string>
             </property>
@@ -438,7 +476,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>20</height>
+           <height>10</height>
           </size>
          </property>
         </spacer>
@@ -464,7 +502,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>20</height>
+           <height>10</height>
           </size>
          </property>
         </spacer>
@@ -500,22 +538,6 @@
          </item>
         </layout>
        </item>
-       <item>
-        <spacer name="verticalSpacer_5">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabEmail">
@@ -523,17 +545,32 @@
        <string>EMAIL</string>
       </attribute>
       <layout class="QVBoxLayout" name="tabEmailLayout">
+       <property name="spacing">
+        <number>10</number>
+       </property>
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
+       <property name="topMargin">
+        <number>40</number>
+       </property>
+       <property name="rightMargin">
+        <number>10</number>
+       </property>
+       <property name="bottomMargin">
+        <number>20</number>
+       </property>
        <item>
-        <widget class="QGroupBox" name="emailQGroupBox">
+        <widget class="QGroupBox" name="emailGroupBox">
          <property name="title">
-          <string>Email Settings</string>
+          <string>Change Email</string>
          </property>
          <layout class="QFormLayout" name="formEmail">
           <property name="horizontalSpacing">
            <number>10</number>
           </property>
           <property name="verticalSpacing">
-           <number>15</number>
+           <number>20</number>
           </property>
           <property name="leftMargin">
            <number>10</number>
@@ -545,10 +582,10 @@
            <number>10</number>
           </property>
           <property name="bottomMargin">
-           <number>10</number>
+           <number>20</number>
           </property>
           <item row="0" column="0">
-           <widget class="QLabel" name="emailCurLabel">
+           <widget class="QLabel" name="emailCurFieldLbl">
             <property name="text">
              <string>Current Email:</string>
             </property>
@@ -565,7 +602,7 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="emailNewLabel">
+           <widget class="QLabel" name="emailNewFieldLbl">
             <property name="text">
              <string>New Email:</string>
             </property>
@@ -592,7 +629,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>20</height>
+           <height>10</height>
           </size>
          </property>
         </spacer>
@@ -618,7 +655,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>20</height>
+           <height>10</height>
           </size>
          </property>
         </spacer>
@@ -653,22 +690,6 @@
           </widget>
          </item>
         </layout>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>

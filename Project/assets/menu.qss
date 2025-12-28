@@ -54,7 +54,7 @@ QPushButton#customCloseBtn:pressed {
 QPushButton[objectName$="Ok"] {
     background-color: #2196f3;
     color: white;
-    font-size: 14pt;
+    font-size: 12pt;
     font-weight: bold;
     font-family: Arial, sans-serif;
     padding: 8px 24px;
@@ -72,7 +72,7 @@ QPushButton[objectName$="Ok"]:pressed {
 QPushButton[objectName$="Del"] {
     background-color: #f44336;
     color: white;
-    font-size: 14pt;
+    font-size: 12pt;
     font-weight: bold;
     font-family: Arial, sans-serif;
     padding: 8px 24px;
@@ -90,7 +90,7 @@ QPushButton[objectName$="Del"]:pressed {
 QPushButton[objectName$="Cancel"] {
     background-color:  #9ea8b7;
     color: white;
-    font-size: 14pt;
+    font-size: 12pt;
     font-weight: bold;
     font-family: Arial, sans-serif;
     padding: 8px 24px;
@@ -102,4 +102,189 @@ QPushButton[objectName$="Cancel"]:hover {
 }
 QPushButton[objectName$="Cancel"]:pressed {
     background-color: #616b79;
+}
+
+/* =========================================================
+   COMMON WIDGET STYLES (suffix-based, like button action styles)
+   ========================================================= */
+
+/* -----------------------------
+   Inputs
+   ----------------------------- */
+
+QLineEdit[objectName$="LineEdit"] {
+    background-color: #ffffff;
+    color: #222222;
+    border: 1px solid #c7cdd6;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 12pt;
+    selection-background-color: #cfe8ff;
+}
+
+QLineEdit[objectName$="LineEdit"]:focus {
+    border: 1px solid #2196f3;
+}
+
+QLineEdit[objectName$="LineEdit"]:disabled {
+    background-color: #f3f5f7;
+    color: #7a8594;
+    border: 1px solid #d6dbe2;
+}
+
+QComboBox[objectName$="ComboBox"] {
+    background-color: #ffffff;
+    color: #222222;
+    border: 1px solid #c7cdd6;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 12pt;
+}
+
+QComboBox[objectName$="ComboBox"]:focus {
+    border: 1px solid #2196f3;
+}
+
+QComboBox[objectName$="ComboBox"]:disabled {
+    background-color: #f3f5f7;
+    color: #7a8594;
+    border: 1px solid #d6dbe2;
+}
+
+QComboBox[objectName$="ComboBox"]::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 28px;
+    border-left: 1px solid #c7cdd6;
+}
+
+QComboBox[objectName$="ComboBox"] QAbstractItemView {
+    background-color: #ffffff;
+    border: 1px solid #c7cdd6;
+    selection-background-color: #cfe8ff;
+    selection-color: #222222;
+    outline: 0;
+}
+
+/* -----------------------------
+   Labels
+   ----------------------------- */
+
+/* Default label look for most menu labels (keeps title label separate via #customTitle) */
+QLabel[objectName$="Label"] {
+    color: #222222;
+    font-size: 12pt;
+}
+
+/* Field label category (ends with FieldLbl) */
+QLabel[objectName$="FieldLbl"] {
+    color: #05425f;
+    font-size: 10.5pt;
+    font-weight: 600;
+    padding: 2px 0px;
+}
+QLabel[objectName$="vegMSelectFieldLbl"] {
+    color: #1a39e9;
+}
+
+/* Header label category (ends with HeaderLabel) */
+QLabel[objectName$="HeaderLabel"] {
+    /*color: #222222; */
+    color: #1a39e9;
+    font-size: 16pt;
+    font-weight: 700;
+    padding: 6px 0px 10px 0px;
+}
+
+/* Sub label category ( search: , select:) */
+QLabel[objectName$="SubLbl"] {
+    color: green;
+    font-size: 11pt;
+}
+
+/* Status/message label category (ends with StatusLabel) */
+QLabel[objectName$="StatusLabel"] {
+    color: #1f2937;
+    padding: 6px 10px;
+    font-size: 10pt;
+    font-weight: 500;
+}
+
+/* -----------------------------
+   Tool buttons
+   ----------------------------- */
+
+QToolButton[objectName$="ToolBtn"] {
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 4px;
+}
+
+QToolButton[objectName$="ToolBtn"]:hover {
+    background-color: #eaf3ff;
+    border: 1px solid #cfe8ff;
+}
+
+QToolButton[objectName$="ToolBtn"]:pressed {
+    background-color: #cfe8ff;
+    border: 1px solid #b8dcff;
+}
+
+/* -----------------------------
+   Group boxes
+   ----------------------------- */
+
+QGroupBox[objectName$="GroupBox"] {
+    border: 1px solid #d6dbe2;
+    border-radius: 6px;
+    margin-top: 14px;
+    padding: 12px;
+    background-color: #ffffff;
+    font-size: 12pt;
+}
+
+QGroupBox[objectName$="GroupBox"]::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    top: 0px;
+    padding: 0px 6px;
+    color: #222222;
+    font-weight: 700;
+    background-color: #ffffff;
+}
+
+/* -----------------------------
+   Tabs (Product menu)
+   ----------------------------- */
+
+QTabWidget#tabWidget::pane {
+    border: 1px solid #d6dbe2;
+    border-radius: 6px;
+    top: -1px;
+    background-color: #ffffff;
+}
+
+QTabBar::tab {
+    padding: 10px 24px;     /* more space around title text */
+    margin-right: 8px;      /* gap between the 3 tabs */
+    min-height: 34px;
+    min-width: 180px;       /* helps avoid elide */
+    background-color: #f3f5f7;
+    border: 1px solid #d6dbe2;
+    padding: 8px 14px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    font-size: 12pt;
+    color: #222222;
+}
+
+QTabBar::tab:selected {
+    background-color: #ffffff;
+    border-bottom-color: #ffffff;
+    font-weight: 700;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: #eaf3ff;
 }

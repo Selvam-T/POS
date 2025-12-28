@@ -1253,9 +1253,9 @@ def handle_barcode_scanned(table, barcode, status_bar):
 ### Dialog Button Naming and QSS Styling Standardization
 
 - **Dialog button object names standardized** across all menu dialogs for consistency and maintainability:
-    - Constructive actions (OK, Save, Add, Update, Print, etc.) now end with `Ok` (e.g., `btnAdminOk`, `btnVegmenuOk`, `btnTodayOk`).
-    - Destructive actions (Delete/Remove) now end with `Del` (e.g., `btnVegmenuDel`).
-    - Dismissive actions (Cancel/Close) now end with `Cancel` (e.g., `btnAdminCancel`, `btnVegmenuCancel`, `btnRangeCancel`).
+    - Constructive actions (OK, Save, Add, Update, Print, etc.) now end with `Ok` (e.g., `btnAdminOk`, `btnVegMOk`, `btnTodayOk`).
+    - Destructive actions (Delete/Remove) now end with `Del` (e.g., `btnVegMDel`).
+    - Dismissive actions (Cancel/Close) now end with `Cancel` (e.g., `btnAdminCancel`, `btnVegMCancel`, `btnRangeCancel`).
 - **All references in Python controller files updated** to match new object names.
 - **QSS styling for QPushButton** now uses suffix-based selectors for consistent look and feel:
     - `[objectName$="Ok"]` for constructive (green)

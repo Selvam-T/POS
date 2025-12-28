@@ -24,7 +24,7 @@ from modules.table import handle_barcode_scanned
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-QSS_PATH = os.path.join(ASSETS_DIR, 'product_menu.qss')
+QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
 
 
 def _load_stylesheet() -> str:

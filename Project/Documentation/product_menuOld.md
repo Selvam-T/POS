@@ -24,7 +24,7 @@ The previous CANCEL button issue is resolved due to unique widget names per tab.
 ## Button Naming and Styling Update (Dec 2025)
 - All dialog action buttons now use unique, suffix-based object names for clarity and reliable signal wiring:
     - OK/affirmative: ends with `Ok` (e.g., `btnAddOk`, `btnUpdateOk`)
-    - Destructive: ends with `Del` (e.g., `btnVegmenuDel`)
+    - Destructive: ends with `Del` (e.g., `btnVegMDel`)
     - Cancel/dismiss: ends with `Cancel` (e.g., `btnAddCancel`, `btnUpdateCancel`)
 - QSS styling now uses these suffixes for consistent color, font, and hover/pressed effects.
 - The previous issue with CANCEL button wiring is resolved by using unique object names per tab.
