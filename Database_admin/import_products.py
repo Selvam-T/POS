@@ -11,12 +11,25 @@ Usage:
     python import_products.py
     python import_products.py --overwrite  (to overwrite existing records)
 """
+
 import sqlite3
 import csv
 import os
 import sys
 from pathlib import Path
 from datetime import datetime
+
+# Camel case normalization (copied from export_products.py)
+def to_camel_case(text: str) -> str:
+    if text is None:
+        return ''
+    s = str(text).strip()
+    if not s:
+        return ''
+    for sep in ['\t', '\n', '_', '-']:
+        s = s.replace(sep, ' ')
+    parts = [p for p in s.split(' ') if p]
+    return ' '.join(w[:1].upper() + w[1:].lower() if w else '' for w in parts)
 
 
 def load_config():
@@ -91,11 +104,11 @@ def import_products(overwrite=False):
             
             for row_num, row in enumerate(reader, start=2):
                 try:
-                    # Get required fields
-                    product_code = row.get('product_code', '').strip()
-                    name = row.get('name', '').strip()
+                    # Get required fields and normalize to camel case for strings
+                    product_code = to_camel_case(row.get('product_code', '').strip())
+                    name = to_camel_case(row.get('name', '').strip())
                     selling_price_str = row.get('selling_price', '').strip()
-                    
+
                     # Validate required fields
                     if not product_code:
                         errors.append(f"Row {row_num}: product_code is empty")
@@ -106,19 +119,19 @@ def import_products(overwrite=False):
                     if not selling_price_str:
                         errors.append(f"Row {row_num}: selling_price is empty")
                         continue
-                    
+
                     try:
                         selling_price = float(selling_price_str)
                     except ValueError:
                         errors.append(f"Row {row_num}: Invalid selling_price '{selling_price_str}'")
                         continue
-                    
-                    # Get optional fields
-                    category = row.get('category', '').strip() or None
-                    supplier = row.get('supplier', '').strip() or None
+
+                    # Get optional fields and normalize to camel case for strings
+                    category = to_camel_case(row.get('category', '').strip()) or None
+                    supplier = to_camel_case(row.get('supplier', '').strip()) or None
                     cost_price_str = row.get('cost_price', '').strip()
                     cost_price = float(cost_price_str) if cost_price_str else None
-                    unit = row.get('unit', '').strip() or None
+                    unit = to_camel_case(row.get('unit', '').strip()) or None
                     last_updated = row.get('last_updated', '').strip() or datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     
                     # Check if product exists

@@ -48,7 +48,7 @@ Creates the `Product_list` table with the following schema:
 ┌──────────────────┬──────────┬──────────┬─────────────────┐
 │ Column           │ Type     │ Nullable │ Constraint      │
 ├──────────────────┼──────────┼──────────┼─────────────────┤
-│ product_code     │ TEXT     │ NOT NULL │ PRIMARY KEY     │
+│ product_code     │ TEXT     │ NOT NULL │ PRIMARY KEY (UNIQUE) │
 │ name             │ TEXT     │ NOT NULL │                 │
 │ category         │ TEXT     │ NULL     │                 │
 │ supplier         │ TEXT     │ NULL     │                 │
@@ -66,6 +66,9 @@ First, place your `products.csv` file in the `data/` folder with this format:
 product_code,name,category,supplier,selling_price,cost_price,unit,last_updated
 PROD001,Product Name,Category,Supplier,99.99,50.00,kg,2025-01-01 00:00:00
 ```
+
+
+All string fields (product_code, name, category, supplier, unit) are automatically normalized to Camel Case during import. Numeric fields (selling_price, cost_price) are not case sensitive and are imported as-is.
 
 Then run:
 ```bash
@@ -118,7 +121,8 @@ CSV_FILE_PATH=data/products.csv   # CSV import file
 
 ## 📋 CSV Format Requirements
 
-Your `products.csv` must have these columns:
+
+Your `products.csv` must have these columns. Only `product_code` is unique (primary key); all other fields can have duplicates. String fields are normalized to Camel Case on import:
 
 | Column | Required | Type | Example |
 |--------|----------|------|---------|
@@ -172,5 +176,5 @@ Your `products.csv` must have these columns:
 
 ---
 
-**Version:** 1.0  
-**Last Updated:** October 30, 2025
+**Version:** 1.1  
+**Last Updated:** December 31, 2025
