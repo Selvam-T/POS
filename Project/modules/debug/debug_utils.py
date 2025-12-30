@@ -18,7 +18,6 @@ def describe_widget(w: QWidget) -> str:
 def debug_print_focus(context: str, barcode: str = '', main_window=None):
     """
     Print detailed focus/widget chain for debugging scanner and focus issues.
-    Pass main_window if you want to use its _barcodeOverride attribute.
     """
     try:
         app = QApplication.instance()
@@ -39,13 +38,11 @@ def debug_print_focus(context: str, barcode: str = '', main_window=None):
                 win_title = aw.windowTitle()
         except Exception:
             pass
-        override = getattr(main_window, '_barcodeOverride', None) if main_window else None
         print('[Scanner][Focus]',
               f"context={context}",
               f"barcode='{barcode}'",
               f"activeWindow={describe_widget(aw)}",
               f"windowTitle='{win_title}'",
-              f"focusPath={chain_str}",
-              f"override={'yes' if callable(override) else 'no'}")
+              f"focusPath={chain_str}")
     except Exception as _e:
         print('[Scanner][Focus] debug failed:', _e)

@@ -104,6 +104,13 @@ QPushButton[objectName$="Cancel"]:pressed {
     background-color: #616b79;
 }
 
+QPushButton:focus {
+    outline: none; /* Remove default outline if needed */
+    border: 4px solid #10761e;
+    border-radius: 4px;
+    padding: 6px 16px;
+}
+
 /* =========================================================
    COMMON WIDGET STYLES (suffix-based, like button action styles)
    ========================================================= */
@@ -165,6 +172,12 @@ QComboBox[objectName$="ComboBox"] QAbstractItemView {
     selection-color: #222222;
     outline: 0;
 }
+
+/* Specify QComboBox placeholder text color in python code. 
+    I must specify color for ComboBox index 0 and rest of index inline,
+    index 0 being placeholder text, the rest selectable text
+    If it is not in .qss then it is cumbersome.
+*/
 
 /* -----------------------------
    Labels

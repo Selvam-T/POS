@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
+    <width>603</width>
     <height>600</height>
    </rect>
   </property>
@@ -133,7 +133,7 @@
       <number>0</number>
      </property>
      <item>
-      <layout class="QGridLayout" name="inputFieldsLayout">
+      <layout class="QGridLayout" name="inputFieldsLayout" columnstretch="0,0">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -325,7 +325,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="select2SubLbl">
          <property name="text">
-          <string>Select a Vegetable slot :</string>
+          <string>SELECT A VEGETABLE SLOT :</string>
          </property>
         </widget>
        </item>
@@ -658,6 +658,19 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>vegMChooseComboBox</tabstop>
+  <tabstop>vegMProductCodeLineEdit</tabstop>
+  <tabstop>vegMProductNameLineEdit</tabstop>
+  <tabstop>vegMUnitComboBox</tabstop>
+  <tabstop>vegMSellingPriceLineEdit</tabstop>
+  <tabstop>vegMCostPriceLineEdit</tabstop>
+  <tabstop>vegMSupplierLineEdit</tabstop>
+  <tabstop>btnVegMOk</tabstop>
+  <tabstop>btnVegMDel</tabstop>
+  <tabstop>btnVegMCancel</tabstop>
+  <tabstop>customCloseBtn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

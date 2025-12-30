@@ -43,7 +43,7 @@ def open_greeting_dialog(parent=None):
     dlg = uic.loadUi(ui_path)
     from PyQt5.QtCore import Qt
     dlg.setModal(True)
-    dlg.setWindowTitle('Customer Greeting Message')
+    
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
     
     # Apply stylesheet

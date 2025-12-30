@@ -1,30 +1,50 @@
-"""Product Management dialog logic.
+"""Product Management dialog controller (product_menu.py).
 
-This is the fixed version of the former product_menuOLD.py, intended to be used with product_menu.ui.
+Key requirements implemented:
+- Two entry routes:
+  1) Menu button: full ADD/REMOVE/UPDATE tabs enabled.
+  2) Sales-frame missing barcode: lands on ADD tab with product code prefilled, and REMOVE/UPDATE tabs disabled.
+- Focus: whenever tab changes, focus lands on the tab's *ProductCodeLineEdit.
+- Scanner: dialog is launched via dialog_wrapper.open_dialog_scanner_enabled(); barcode scans are routed via
+  barcode_manager override into the active tab's *ProductCodeLineEdit, and then loaders populate fields.
+- Display-only QLineEdit: readOnly + NoFocus to keep consistent UI border styling.
+
+Notes:
+- DB / cache operations use modules.db_operation functions and refresh PRODUCT_CACHE after CRUD.
+- When launched from sales-frame (sale_active), a successful ADD triggers an immediate re-process of the barcode
+  into the sales table via modules.table.handle_barcode_scanned (same pattern as your original controller).
 """
 
-from typing import Optional, Dict, Any, Tuple
+from __future__ import annotations
+
+from typing import Optional, Dict, Any
 import os
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import (
-    QApplication, QDialog, QVBoxLayout,
-    QLabel, QPushButton, QLineEdit, QComboBox, QTabWidget, QCompleter
+    QDialog, QVBoxLayout, QLabel, QPushButton, QLineEdit, QComboBox, QTabWidget, QWidget, QCompleter
 )
 from PyQt5.QtCore import Qt, QDateTime, QTimer
 
 from modules.db_operation import (
     add_product, update_product, delete_product, refresh_product_cache,
-    get_product_info, get_product_full, PRODUCT_CACHE
+    get_product_full, PRODUCT_CACHE
 )
+import modules.db_operation as dbop
 from modules.table import handle_barcode_scanned
 
+from modules.ui_utils import input_validation
+from modules.ui_utils import ui_feedback
 
 # Derive project base dir from this file location: modules/menu -> modules -> Project
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
+UI_PATH = os.path.join(UI_DIR, 'product_menu.ui')
+
+DEFAULT_UNIT = 'EACH'
+DEFAULT_CATEGORY = 'Other'
 
 
 def _load_stylesheet() -> str:
@@ -37,34 +57,31 @@ def _load_stylesheet() -> str:
     return ''
 
 
-def open_dialog_scanner_enabled(main_window, initial_mode: Optional[str] = None, initial_code: Optional[str] = None):
-    """Open the Product Management dialog.
+def open_dialog_scanner_enabled(main_window, initial_mode: Optional[str] = None, initial_code: Optional[str] = None) -> QDialog:
+    """Create the Product Management dialog and return it (do not exec_ here)."""
 
-    initial_mode: 'add' | 'remove' | 'update' (optional)
-    initial_code: product code coming from a barcode scan (optional)
-    """
-    # ---------------- UI LOAD ----------------
-    # Prefer product_menu.ui, but keep a fallback for older deployments.
-    ui_candidates = [
-        os.path.join(UI_DIR, 'product_menu.ui'),
-        os.path.join(UI_DIR, 'product_menuOLD.ui'),
-    ]
-    product_ui = next((p for p in ui_candidates if os.path.exists(p)), None)
-    if not product_ui:
-        return None
+    # Business rule: if opened from sales-frame scan and no explicit mode, lock to ADD.
+    sale_active = (initial_code is not None and (initial_mode is None or str(initial_mode).strip().lower() in ('', 'add')))
 
-    try:
-        content = uic.loadUi(product_ui)
-    except Exception:
-        return None
+    # ---- dialog + ui load ----
+    content = uic.loadUi(UI_PATH)
 
-    dlg = QDialog(main_window)
+    # Wrap in QDialog if needed (UI top-level is usually a QDialog)
+    if isinstance(content, QDialog):
+        dlg = content
+        dlg.setParent(main_window)
+    else:
+        dlg = QDialog(main_window)
+        lay = QVBoxLayout(dlg)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(content)
+
+    dlg.setObjectName("productMenuDialog")
+
+    # Frameless + modal (prevents OS titlebar in addition to your custom titlebar)
     dlg.setModal(True)
+    dlg.setWindowModality(Qt.ApplicationModal)
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-
-    lay = QVBoxLayout(dlg)
-    lay.setContentsMargins(0, 0, 0, 0)
-    lay.addWidget(content)
 
     # Apply stylesheet (optional)
     qss = _load_stylesheet()
@@ -75,29 +92,39 @@ def open_dialog_scanner_enabled(main_window, initial_mode: Optional[str] = None,
             pass
 
     # Wire custom window close button (if present)
-    custom_close_btn = content.findChild(QPushButton, 'customCloseBtn')
+    custom_close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
     if custom_close_btn is not None:
         custom_close_btn.clicked.connect(dlg.reject)
 
-    tab_widget: QTabWidget = content.findChild(QTabWidget, 'tabWidget')
+    tab_widget: Optional[QTabWidget] = dlg.findChild(QTabWidget, 'tabWidget')
 
-    # ---------------- WIDGET BINDING (GLOBAL, NOT TAB-SCOPED) ----------------
+    # If opened from sales-frame missing barcode, lock to ADD only
+    if tab_widget is not None and sale_active:
+        try:
+            tab_widget.setTabEnabled(1, False)  # REMOVE
+            tab_widget.setTabEnabled(2, False)  # UPDATE
+            tab_widget.setCurrentIndex(0)
+        except Exception:
+            pass
+
+
+    # ---- helpers ----
     def w_line(name: str) -> Optional[QLineEdit]:
-        return content.findChild(QLineEdit, name)
+        return dlg.findChild(QLineEdit, name)
 
     def w_combo(name: str) -> Optional[QComboBox]:
-        return content.findChild(QComboBox, name)
-
-    def w_btn(name: str) -> Optional[QPushButton]:
-        return content.findChild(QPushButton, name)
+        return dlg.findChild(QComboBox, name)
 
     def w_lbl(name: str) -> Optional[QLabel]:
-        return content.findChild(QLabel, name)
+        return dlg.findChild(QLabel, name)
+
+    def w_btn(name: str) -> Optional[QPushButton]:
+        return dlg.findChild(QPushButton, name)
 
     ui: Dict[str, Dict[str, Any]] = {
         'add': {
             'code': w_line('addProductCodeLineEdit'),
-            'name': w_line('addProductNameLineEdit') or w_combo('addProductNameComboBox'),
+            'name': w_line('addProductNameLineEdit'),
             'category': w_combo('addCategoryComboBox'),
             'cost': w_line('addCostPriceLineEdit'),
             'sell': w_line('addSellingPriceLineEdit'),
@@ -108,23 +135,23 @@ def open_dialog_scanner_enabled(main_window, initial_mode: Optional[str] = None,
             'cancel': w_btn('btnAddCancel'),
         },
         'remove': {
+            'search': w_combo('removeSearchComboBox'),
             'code': w_line('removeProductCodeLineEdit'),
             'name': w_line('removeProductNameLineEdit'),
-            'search': w_combo('removeSearchComboBox'),
             'category': w_line('removeCategoryLineEdit'),
             'cost': w_line('removeCostPriceLineEdit'),
             'sell': w_line('removeSellingPriceLineEdit'),
             'unit': w_line('removeUnitLineEdit'),
-            'supplier': w_line('removeSupplierLineEdit') or w_line('removeSupplieLineEdit'),
+            'supplier': w_line('removeSupplierLineEdit'),
             'last_updated': w_line('removeLastUpdatedLineEdit'),
             'status': w_lbl('removeStatusLabel'),
             'ok': w_btn('btnRemoveOk'),
             'cancel': w_btn('btnRemoveCancel'),
         },
         'update': {
+            'search': w_combo('updateSearchComboBox'),
             'code': w_line('updateProductCodeLineEdit'),
             'name': w_line('updateProductNameLineEdit'),
-            'search': w_combo('updateSearchComboBox'),
             'category': w_combo('updateCategoryComboBox'),
             'cost': w_line('updateCostPriceLineEdit'),
             'sell': w_line('updateSellingPriceLineEdit'),
@@ -134,496 +161,63 @@ def open_dialog_scanner_enabled(main_window, initial_mode: Optional[str] = None,
             'status': w_lbl('updateStatusLabel'),
             'ok': w_btn('btnUpdateOk'),
             'cancel': w_btn('btnUpdateCancel'),
-        },
+        }
     }
 
-    # ---------------- HELPERS ----------------
-    def set_status(mode: str, text: str, ok: bool = True):
-        lbl = ui.get(mode, {}).get('status')
-        if not lbl:
+    # ---- basic widget policies per your table ----
+    # Product code fields: allow keyboard + scanner input.
+    for mode in ('add', 'remove', 'update'):
+        le: Optional[QLineEdit] = ui[mode].get('code')
+        if le is not None:
+            le.setFocusPolicy(Qt.StrongFocus)
+
+    # Display-only helpers
+    def set_display_only(le: Optional[QLineEdit], default_text: str = ''):
+        if le is None:
             return
-        try:
-            lbl.setText(text or '')
-            lbl.setStyleSheet('color: #1b5e20;' if ok else 'color: #b71c1c;')
-        except Exception:
-            pass
+        le.setReadOnly(True)
+        le.setFocusPolicy(Qt.NoFocus)
+        if default_text:
+            le.setText(default_text)
 
-    def norm_unit(raw: str) -> str:
-        u = (raw or '').strip().upper()
-        if not u:
-            return ''
-        if u in ('KG', 'KGS', 'KILOGRAM', 'KILOGRAMS'):
-            return 'KG'
-        if u in ('EACH', 'EA', 'PCS', 'PC', 'PIECE', 'PIECES'):
-            return 'EACH'
-        # keep it permissive but stable; default to EACH
-        return 'EACH'
+    # Default value + display-only
+    set_display_only(ui['add'].get('unit'), DEFAULT_UNIT)
+    set_display_only(ui['update'].get('unit'), DEFAULT_UNIT)
+    set_display_only(ui['update'].get('last_updated'))
+    set_display_only(ui['remove'].get('name'))
+    set_display_only(ui['remove'].get('category'))
+    set_display_only(ui['remove'].get('cost'))
+    set_display_only(ui['remove'].get('sell'))
+    set_display_only(ui['remove'].get('unit'))
+    set_display_only(ui['remove'].get('supplier'))
+    set_display_only(ui['remove'].get('last_updated'))
 
-    def parse_money(raw: str) -> Optional[float]:
-        s = (raw or '').strip()
-        if not s:
-            return None
-        return float(s)
+    # Category combos: selection only
+    for mode in ('add', 'update'):
+        combo: Optional[QComboBox] = ui[mode].get('category')
+        if combo is not None:
+            combo.setEditable(False)
 
-    def populate_categories(combo: Optional[QComboBox]):
-        if not combo:
-            return
-        try:
-            if combo.count() == 0:
-                for txt in ['Other', 'Electronics', 'Food', 'Apparel']:
-                    combo.addItem(txt)
-        except Exception:
-            pass
-
-    def refresh_search_combos():
-        # Product cache is assumed to be {code: (name, price, unit)} or compatible.
-        names = sorted(set((v[0] or '').strip() for v in PRODUCT_CACHE.values() if v and v[0]))
-        for mode in ('remove', 'update'):
-            combo: QComboBox = ui[mode].get('search')
-            if not combo:
-                continue
+    # Search combos: editable typing + completer
+    for mode in ('remove', 'update'):
+        combo: Optional[QComboBox] = ui[mode].get('search')
+        if combo is not None:
+            combo.setEditable(True)
+            # stable objectName for the internal lineEdit so you can whitelist it
             try:
-                combo.blockSignals(True)
-                combo.setEditable(True)
-                combo.setInsertPolicy(QComboBox.NoInsert)
-                combo.setEnabled(True)
-                combo.clear()
-                combo.addItems(names)
-                combo.setCurrentIndex(-1)
                 le = combo.lineEdit()
-                if le:
-                    le.setPlaceholderText('Search product name…')
-                completer = QCompleter(names)
-                completer.setCaseSensitivity(Qt.CaseInsensitive)
-                completer.setFilterMode(Qt.MatchContains)
-                combo.setCompleter(completer)
-                combo.blockSignals(False)
-            except Exception:
-                try:
-                    combo.blockSignals(False)
-                except Exception:
-                    pass
-
-    def find_code_by_name(name: str) -> Optional[str]:
-        if not name:
-            return None
-        needle = name.strip().lower()
-        for code, tup in PRODUCT_CACHE.items():
-            nm = (tup[0] if tup else '') or ''
-            if nm.strip().lower() == needle:
-                return str(code)
-        return None
-
-    def load_product_into_remove(code: str):
-        found, pdata = get_product_full(code)
-        if not found or not pdata:
-            set_status('remove', 'Product not found.', ok=False)
-            return
-        ui['remove']['code'].setText(code)
-        ui['remove']['name'].setText(pdata.get('name', ''))
-        ui['remove']['category'].setText(pdata.get('category', ''))
-        ui['remove']['cost'].setText(str(pdata.get('cost_price', '') or ''))
-        ui['remove']['sell'].setText(str(pdata.get('price', '') or ''))
-        ui['remove']['unit'].setText(pdata.get('unit', '') or '')
-        if ui['remove'].get('supplier'):
-            ui['remove']['supplier'].setText(pdata.get('supplier', '') or '')
-        if ui['remove'].get('last_updated'):
-            ui['remove']['last_updated'].setText(str(pdata.get('last_updated', '') or ''))
-        set_status('remove', 'Product found.', ok=True)
-
-    def load_product_into_update(code: str):
-        found, pdata = get_product_full(code)
-        if not found or not pdata:
-            set_status('update', 'Product not found.', ok=False)
-            return
-        ui['update']['code'].setText(code)
-        ui['update']['name'].setText(pdata.get('name', ''))
-        combo = ui['update'].get('category')
-        if combo:
-            try:
-                idx = combo.findText(pdata.get('category', ''), Qt.MatchFixedString)
-                combo.setCurrentIndex(idx if idx >= 0 else 0)
-            except Exception:
-                pass
-        ui['update']['cost'].setText(str(pdata.get('cost_price', '') or ''))
-        ui['update']['sell'].setText(str(pdata.get('price', '') or ''))
-        ui['update']['unit'].setText(pdata.get('unit', '') or '')
-        ui['update']['supplier'].setText(pdata.get('supplier', '') or '')
-        if ui['update'].get('last_updated'):
-            ui['update']['last_updated'].setText(str(pdata.get('last_updated', '') or ''))
-        set_status('update', 'Product found.', ok=True)
-
-    def clear_mode_fields(mode: str, keep_code: bool = False):
-        if mode == 'add':
-            if not keep_code and ui['add']['code']:
-                ui['add']['code'].clear()
-            namew = ui['add']['name']
-            if isinstance(namew, QLineEdit):
-                namew.clear()
-            elif isinstance(namew, QComboBox):
-                namew.setCurrentIndex(-1)
-            for k in ('cost', 'sell', 'unit', 'supplier'):
-                le = ui['add'].get(k)
-                if le:
-                    le.clear()
-            if ui['add'].get('category'):
-                try:
-                    ui['add']['category'].setCurrentIndex(0)
-                except Exception:
-                    pass
-        elif mode in ('remove', 'update'):
-            for k, w in ui[mode].items():
-                if k in ('ok', 'cancel', 'search', 'status', 'category'):
-                    continue
-                if keep_code and k == 'code':
-                    continue
-                if isinstance(w, QLineEdit):
-                    w.clear()
-            # reset category combo for update
-            if mode == 'update' and ui['update'].get('category'):
-                try:
-                    ui['update']['category'].setCurrentIndex(0)
-                except Exception:
-                    pass
-            # clear search box selection too
-            combo = ui[mode].get('search')
-            if combo:
-                try:
-                    combo.setCurrentIndex(-1)
-                    if combo.lineEdit():
-                        combo.lineEdit().clear()
-                except Exception:
-                    pass
-
-        set_status(mode, '', ok=True)
-
-    # ---------------- ADD MODE: CODE DUPLICATE CHECK ----------------
-    def set_add_code_error_state(is_error: bool, msg: str = ''):
-        le = ui['add']['code']
-        okbtn = ui['add'].get('ok')
-        if le:
-            try:
-                le.setStyleSheet('border: 2px solid #b71c1c;' if is_error else '')
-            except Exception:
-                pass
-        if okbtn:
-            try:
-                okbtn.setEnabled(not is_error)
-            except Exception:
-                pass
-        if msg:
-            set_status('add', msg, ok=not is_error)
-        else:
-            if is_error:
-                set_status('add', 'Error: Product code already exists.', ok=False)
-            else:
-                set_status('add', '', ok=True)
-
-    def on_add_code_changed(text: str):
-        code = (text or '').strip()
-        if not code:
-            set_add_code_error_state(False, '')
-            return
-        try:
-            c_found, *_ = get_product_info(code)
-            if c_found:
-                set_add_code_error_state(True)
-                return
-        except Exception:
-            pass
-        try:
-            d_found, _pdata = get_product_full(code)
-            if d_found:
-                set_add_code_error_state(True)
-                return
-        except Exception:
-            pass
-        set_add_code_error_state(False, '')
-
-    # ---------------- SEARCH COMBOS: REMOVE/UPDATE ----------------
-    def on_remove_search_selected(name: str):
-        code = find_code_by_name(name)
-        if not code:
-            set_status('remove', 'Product not found.', ok=False)
-            return
-        load_product_into_remove(code)
-
-    def on_update_search_selected(name: str):
-        code = find_code_by_name(name)
-        if not code:
-            set_status('update', 'Product not found.', ok=False)
-            return
-        load_product_into_update(code)
-
-    def wire_search_combo(combo: Optional[QComboBox], handler):
-        if not combo:
-            return
-        try:
-            combo.activated[str].connect(handler)
-        except Exception:
-            pass
-        # Enter key on editable line edit
-        try:
-            le = combo.lineEdit()
-            if le:
-                le.returnPressed.connect(lambda c=combo: handler(c.currentText()))
-        except Exception:
-            pass
-        # completer selection
-        try:
-            comp = combo.completer()
-            if comp:
-                comp.activated[str].connect(handler)
-        except Exception:
-            pass
-
-    # ---------------- OK ACTIONS ----------------
-    def do_add():
-        code_le = ui['add']['code']
-        if not code_le:
-            return
-        code = (code_le.text() or '').strip()
-        namew = ui['add']['name']
-        name = ''
-        if isinstance(namew, QLineEdit):
-            name = (namew.text() or '').strip()
-        elif isinstance(namew, QComboBox):
-            name = (namew.currentText() or '').strip()
-
-        sell = (ui['add']['sell'].text() or '').strip() if ui['add'].get('sell') else ''
-        cat = (ui['add']['category'].currentText() or '').strip() if ui['add'].get('category') else ''
-        unit = norm_unit(ui['add']['unit'].text() if ui['add'].get('unit') else '')
-
-        missing = []
-        if not code:
-            missing.append('Product Code')
-        if not name:
-            missing.append('Product Name')
-        if not sell:
-            missing.append('Selling Price')
-        if not cat:
-            missing.append('Category')
-        if not unit:
-            missing.append('Unit')
-
-        if missing:
-            set_status('add', 'Error: Please provide ' + ', '.join(missing), ok=False)
-            return
-
-        try:
-            price_val = parse_money(sell)
-            if price_val is None:
-                raise ValueError('Invalid Selling Price')
-        except Exception:
-            set_status('add', 'Error: Selling Price must be a number.', ok=False)
-            return
-
-        cost_raw = (ui['add']['cost'].text() or '').strip() if ui['add'].get('cost') else ''
-        cost_val = 0.0
-        if cost_raw:
-            try:
-                cost_val = float(cost_raw)
-            except Exception:
-                set_status('add', 'Error: Cost Price must be a number.', ok=False)
-                return
-
-        supplier = (ui['add']['supplier'].text() or '').strip() if ui['add'].get('supplier') else ''
-
-        now_str = QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss')
-        try:
-            ok, msg = add_product(code, name, price_val, cat, supplier, cost_val, unit, now_str)
-            if not ok:
-                set_status('add', f'Error: {msg}', ok=False)
-                return
-        except Exception as e:
-            set_status('add', f'Error: {e}', ok=False)
-            return
-
-        try:
-            refresh_product_cache()
-        except Exception:
-            pass
-        refresh_search_combos()
-
-        set_status('add', 'Added successfully.', ok=True)
-
-        # If dialog was launched due to scan during sales, auto-add to sales table
-        try:
-            code_to_add = (str(initial_code).strip() if initial_code else code)
-            if code_to_add and getattr(main_window, 'sales_table', None) is not None:
-                status_bar = getattr(main_window, 'statusbar', None)
-                QTimer.singleShot(0, lambda c=code_to_add, sb=status_bar: handle_barcode_scanned(main_window.sales_table, c, sb))
-        except Exception:
-            pass
-
-        QTimer.singleShot(800, dlg.accept)
-
-    def do_remove():
-        code = (ui['remove']['code'].text() or '').strip() if ui['remove'].get('code') else ''
-        if not code:
-            set_status('remove', 'Error: Provide Product Code to delete.', ok=False)
-            return
-        try:
-            ok, msg = delete_product(code)
-            if not ok:
-                set_status('remove', f'Error: {msg}', ok=False)
-                return
-        except Exception as e:
-            set_status('remove', f'Error: {e}', ok=False)
-            return
-
-        try:
-            refresh_product_cache()
-        except Exception:
-            pass
-        refresh_search_combos()
-
-        set_status('remove', 'Deleted successfully.', ok=True)
-        QTimer.singleShot(800, dlg.accept)
-
-    def do_update():
-        code = (ui['update']['code'].text() or '').strip() if ui['update'].get('code') else ''
-        name = (ui['update']['name'].text() or '').strip() if ui['update'].get('name') else ''
-        sell = (ui['update']['sell'].text() or '').strip() if ui['update'].get('sell') else ''
-        cat = (ui['update']['category'].currentText() or '').strip() if ui['update'].get('category') else ''
-        unit = norm_unit(ui['update']['unit'].text() if ui['update'].get('unit') else '')
-
-        missing = []
-        if not code:
-            missing.append('Product Code')
-        if not name:
-            missing.append('Product Name')
-        if not sell:
-            missing.append('Selling Price')
-        if not cat:
-            missing.append('Category')
-        if not unit:
-            missing.append('Unit')
-        if missing:
-            set_status('update', 'Error: Please provide ' + ', '.join(missing), ok=False)
-            return
-
-        # ensure exists before update
-        try:
-            exists, _pdata = get_product_full(code)
-            if not exists:
-                set_status('update', 'Error: Product code not found.', ok=False)
-                return
-        except Exception:
-            pass
-
-        try:
-            price_val = parse_money(sell)
-            if price_val is None:
-                raise ValueError('Invalid Selling Price')
-        except Exception:
-            set_status('update', 'Error: Selling Price must be a number.', ok=False)
-            return
-
-        cost_raw = (ui['update']['cost'].text() or '').strip() if ui['update'].get('cost') else ''
-        cost_val = 0.0
-        if cost_raw:
-            try:
-                cost_val = float(cost_raw)
-            except Exception:
-                set_status('update', 'Error: Cost Price must be a number.', ok=False)
-                return
-
-        supplier = (ui['update']['supplier'].text() or '').strip() if ui['update'].get('supplier') else ''
-
-        try:
-            ok, msg = update_product(code, name, price_val, cat, supplier, cost_val, unit)
-            if not ok:
-                set_status('update', f'Error: {msg}', ok=False)
-                return
-        except Exception as e:
-            set_status('update', f'Error: {e}', ok=False)
-            return
-
-        # update last updated field in UI (if present)
-        if ui['update'].get('last_updated'):
-            try:
-                ui['update']['last_updated'].setText(QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss'))
+                if le is not None:
+                    le.setObjectName(f"{mode}SearchComboLineEdit")
             except Exception:
                 pass
 
-        try:
-            refresh_product_cache()
-        except Exception:
-            pass
-        refresh_search_combos()
-
-        set_status('update', 'Updated successfully.', ok=True)
-        QTimer.singleShot(800, dlg.accept)
-
-    # ---------------- WIRING ----------------
-    # Category combos
-    populate_categories(ui['add'].get('category'))
-    populate_categories(ui['update'].get('category'))
-
-    # Search combos
-    refresh_search_combos()
-    wire_search_combo(ui['remove'].get('search'), on_remove_search_selected)
-    wire_search_combo(ui['update'].get('search'), on_update_search_selected)
-
-    # Buttons: connect once per button (no tab-scoped rebinding)
-    def safe_connect(btn: Optional[QPushButton], fn):
-        if not btn:
-            return
-        try:
-            btn.clicked.disconnect()
-        except Exception:
-            pass
-        try:
-            btn.clicked.connect(fn)
-        except Exception:
-            pass
-
-    safe_connect(ui['add'].get('ok'), do_add)
-    safe_connect(ui['remove'].get('ok'), do_remove)
-    safe_connect(ui['update'].get('ok'), do_update)
-
-    safe_connect(ui['add'].get('cancel'), lambda: (clear_mode_fields('add', keep_code=False), dlg.reject()))
-    safe_connect(ui['remove'].get('cancel'), lambda: (clear_mode_fields('remove', keep_code=False), dlg.reject()))
-    safe_connect(ui['update'].get('cancel'), lambda: (clear_mode_fields('update', keep_code=False), dlg.reject()))
-
-    # Add code validation
-    if ui['add'].get('code'):
-        try:
-            ui['add']['code'].textChanged.disconnect()
-        except Exception:
-            pass
-        ui['add']['code'].textChanged.connect(on_add_code_changed)
-
-    # Return pressed on remove/update code fields to load product
-    if ui['remove'].get('code'):
-        ui['remove']['code'].returnPressed.connect(lambda: load_product_into_remove(ui['remove']['code'].text().strip()))
-    if ui['update'].get('code'):
-        ui['update']['code'].returnPressed.connect(lambda: load_product_into_update(ui['update']['code'].text().strip()))
-
-    # Tab switching: focus appropriate code field
-    def mode_from_index(idx: int) -> str:
-        return 'add' if idx == 0 else ('remove' if idx == 1 else 'update')
-
-    def focus_code_for_mode(mode: str):
-        le = ui[mode].get('code')
-        if le:
-            try:
-                le.setFocus()
-                le.selectAll()
-            except Exception:
-                pass
-
-    # Sales-active rule: if opened from barcode scan with no explicit mode, lock to ADD.
-    sale_active = (initial_mode is None and initial_code is not None)
-
+    # ---- sale_active tab lock ----
     def set_mode_tabs_enabled(enabled: bool):
         if not tab_widget:
             return
         try:
-            # keep Add enabled always
-            tab_widget.setTabEnabled(1, enabled)
-            tab_widget.setTabEnabled(2, enabled)
+            tab_widget.setTabEnabled(1, enabled)  # REMOVE
+            tab_widget.setTabEnabled(2, enabled)  # UPDATE
         except Exception:
             pass
 
@@ -635,100 +229,531 @@ def open_dialog_scanner_enabled(main_window, initial_mode: Optional[str] = None,
             except Exception:
                 pass
         else:
-            # choose initial tab by initial_mode if given
-            m = (initial_mode or '').strip().lower()
-            idx = 0 if m == 'add' else (1 if m == 'remove' else (2 if m == 'update' else 0))
+            mode = (initial_mode or '').strip().lower()
+            idx = {'add': 0, 'remove': 1, 'update': 2}.get(mode, 0)
+            tab_widget.setCurrentIndex(idx)
+
+    # ---- status helpers ----
+    def set_status(mode: str, msg: str, ok: bool) -> bool:
+        lbl: Optional[QLabel] = ui.get(mode, {}).get('status')
+        if not lbl:
+            return False
+        return ui_feedback.set_status_label(lbl, msg, ok)
+
+    def clear_status(mode: str) -> bool:
+        lbl: Optional[QLabel] = ui.get(mode, {}).get('status')
+        if not lbl:
+            return False
+        return ui_feedback.clear_status_label(lbl)
+
+    # ---- cache/name helpers ----
+    def refresh_search_combos():
+        names = sorted({(v[0] or '').strip() for v in PRODUCT_CACHE.values() if v and (v[0] or '').strip()})
+        for mode in ('remove', 'update'):
+            combo: Optional[QComboBox] = ui[mode].get('search')
+            if not combo:
+                continue
+            current = (combo.currentText() or '').strip()
+            combo.blockSignals(True)
+            combo.clear()
+            combo.addItems(names)
+            combo.blockSignals(False)
+            if current:
+                combo.setEditText(current)
             try:
-                tab_widget.setCurrentIndex(idx)
+                comp = QCompleter(names, combo)
+                comp.setCaseSensitivity(Qt.CaseInsensitive)
+                comp.setFilterMode(Qt.MatchContains)
+                comp.setCompletionMode(QCompleter.PopupCompletion)
+                combo.setCompleter(comp)
             except Exception:
                 pass
 
-        def _on_tab(idx: int):
-            if sale_active and idx != 0:
+    def find_code_by_exact_name(name: str) -> Optional[str]:
+        needle = (name or '').strip().lower()
+        if not needle:
+            return None
+        for code, tup in PRODUCT_CACHE.items():
+            nm = (tup[0] if tup else '') or ''
+            if nm.strip().lower() == needle:
+                return str(code)
+        return None
+
+    # ---- populate loaders (REMOVE/UPDATE) ----
+    def load_product_into_remove(code: str):
+        found, pdata = get_product_full(code)
+        if not found or not pdata:
+            set_status('remove', 'Product not found.', ok=False)
+            return
+        ui['remove']['name'].setText(pdata.get('name', '') or '')
+        ui['remove']['category'].setText(pdata.get('category', '') or '')
+        ui['remove']['cost'].setText(str(pdata.get('cost_price', '') or ''))
+        ui['remove']['sell'].setText(str(pdata.get('price', '') or ''))
+        ui['remove']['unit'].setText(pdata.get('unit', '') or DEFAULT_UNIT)
+        ui['remove']['supplier'].setText(pdata.get('supplier', '') or '')
+        ui['remove']['last_updated'].setText(str(pdata.get('last_updated', '') or ''))
+        set_status('remove', 'Product found.', ok=True)
+
+    def load_product_into_update(code: str):
+        found, pdata = get_product_full(code)
+        if not found or not pdata:
+            set_status('update', 'Product not found.', ok=False)
+            return
+        ui['update']['name'].setText(pdata.get('name', '') or '')
+        combo = ui['update'].get('category')
+        if combo:
+            try:
+                idx = combo.findText(pdata.get('category', '') or '', Qt.MatchFixedString)
+                combo.setCurrentIndex(idx if idx >= 0 else 0)
+            except Exception:
+                pass
+        ui['update']['cost'].setText(str(pdata.get('cost_price', '') or ''))
+        ui['update']['sell'].setText(str(pdata.get('price', '') or ''))
+        ui['update']['unit'].setText(pdata.get('unit', '') or DEFAULT_UNIT)
+        ui['update']['supplier'].setText(pdata.get('supplier', '') or '')
+        ui['update']['last_updated'].setText(str(pdata.get('last_updated', '') or ''))
+        set_status('update', 'Product found.', ok=True)
+
+    # ---- reset helpers ----
+    def clear_mode_fields(mode: str):
+        clear_status(mode)
+        if mode == 'add':
+            for key in ('code', 'name', 'cost', 'sell', 'supplier'):
+                le = ui['add'].get(key)
+                if isinstance(le, QLineEdit):
+                    le.clear()
+            if ui['add'].get('unit'):
+                ui['add']['unit'].setText(DEFAULT_UNIT)
+            combo = ui['add'].get('category')
+            if isinstance(combo, QComboBox):
                 try:
-                    tab_widget.blockSignals(True)
-                    tab_widget.setCurrentIndex(0)
-                    tab_widget.blockSignals(False)
+                    idx = combo.findText(DEFAULT_CATEGORY, Qt.MatchFixedString)
+                    combo.setCurrentIndex(idx if idx >= 0 else 0)
+                except Exception:
+                    combo.setCurrentIndex(0)
+
+        elif mode == 'remove':
+            combo = ui['remove'].get('search')
+            if isinstance(combo, QComboBox):
+                try:
+                    combo.setCurrentIndex(-1)
+                    combo.setEditText('')
                 except Exception:
                     pass
+            for key in ('code', 'name', 'category', 'cost', 'sell', 'supplier', 'last_updated'):
+                le = ui['remove'].get(key)
+                if isinstance(le, QLineEdit):
+                    le.clear()
+            if ui['remove'].get('unit'):
+                ui['remove']['unit'].setText(DEFAULT_UNIT)
+
+        elif mode == 'update':
+            combo = ui['update'].get('search')
+            if isinstance(combo, QComboBox):
+                try:
+                    combo.setCurrentIndex(-1)
+                    combo.setEditText('')
+                except Exception:
+                    pass
+            for key in ('code', 'name', 'cost', 'sell', 'supplier', 'last_updated'):
+                le = ui['update'].get(key)
+                if isinstance(le, QLineEdit):
+                    le.clear()
+            if ui['update'].get('unit'):
+                ui['update']['unit'].setText(DEFAULT_UNIT)
+            combo_cat = ui['update'].get('category')
+            if isinstance(combo_cat, QComboBox):
+                try:
+                    idx = combo_cat.findText(DEFAULT_CATEGORY, Qt.MatchFixedString)
+                    combo_cat.setCurrentIndex(idx if idx >= 0 else 0)
+                except Exception:
+                    combo_cat.setCurrentIndex(0)
+
+    def mode_from_index(idx: int) -> str:
+        return {0: 'add', 1: 'remove', 2: 'update'}.get(idx, 'add')
+
+    def focus_code_for_mode(mode: str):
+        le = ui.get(mode, {}).get('code')
+        if isinstance(le, QLineEdit):
+            le.setFocus(Qt.OtherFocusReason)
+
+    # ---- combobox selection ----
+    def on_remove_search_selected(name: str):
+        clear_status('remove')
+        code = find_code_by_exact_name(name)
+        if not code:
+            set_status('remove', 'Product not found.', ok=False)
+            return
+        ui['remove']['code'].setText(code)
+        load_product_into_remove(code)
+
+    def on_update_search_selected(name: str):
+        clear_status('update')
+        code = find_code_by_exact_name(name)
+        if not code:
+            set_status('update', 'Product not found.', ok=False)
+            return
+        ui['update']['code'].setText(code)
+        load_product_into_update(code)
+
+    # ---- CRUD handlers (uses your db_operation signatures) ----
+    def parse_money(raw: str) -> Optional[float]:
+        s = (raw or '').strip()
+        if not s:
+            return None
+        return float(s)
+
+    def do_add():
+        code = (ui['add']['code'].text() or '').strip() if ui['add'].get('code') else ''
+        name = (ui['add']['name'].text() or '').strip() if ui['add'].get('name') else ''
+        sell = (ui['add']['sell'].text() or '').strip() if ui['add'].get('sell') else ''
+        cat = (ui['add']['category'].currentText() or '').strip() if ui['add'].get('category') else DEFAULT_CATEGORY
+        supplier = (ui['add']['supplier'].text() or '').strip() if ui['add'].get('supplier') else ''
+        cost_raw = (ui['add']['cost'].text() or '').strip() if ui['add'].get('cost') else ''
+        unit = (ui['add']['unit'].text() or '').strip() if ui['add'].get('unit') else DEFAULT_UNIT
+        if not unit:
+            unit = DEFAULT_UNIT
+
+        ok, err = input_validation.is_mandatory(code)
+        if not ok:
+            set_status('add', f'Error: Product Code - {err}', ok=False)
+            return
+        ok, err = input_validation.is_mandatory(name)
+        if not ok:
+            set_status('add', f'Error: Product Name - {err}', ok=False)
+            return
+        ok, err = input_validation.is_mandatory(sell)
+        if not ok:
+            set_status('add', f'Error: Selling Price - {err}', ok=False)
+            return
+
+        # Ensure code does not already exist (cache is authoritative in runtime)
+        ok, err = input_validation.exists_in_memory_cache(code, code_exists_in_cache)
+        if ok:
+            set_status('add', 'Error: Product Code already exists.', ok=False)
+            return
+
+        ok, err = input_validation.validate_unit_price(sell)
+        if not ok:
+            set_status('add', f'Error: Selling Price - {err}', ok=False)
+            return
+        price_val = float(sell)
+
+        cost_val = 0.0
+        if cost_raw:
+            ok, err = input_validation.validate_total_price(cost_raw) if hasattr(input_validation, 'validate_total_price') else (True, '')
+            if not ok:
+                set_status('add', f'Error: Cost Price - {err}', ok=False)
                 return
-            focus_code_for_mode(mode_from_index(idx))
+            cost_val = float(cost_raw)
 
-        tab_widget.currentChanged.connect(_on_tab)
-
-    # Initial code injection
-    if initial_code:
-        code = str(initial_code).strip()
-        if sale_active:
-            if ui['add'].get('code'):
-                ui['add']['code'].setText(code)
-        else:
-            m = (initial_mode or '').strip().lower()
-            if m == 'remove':
-                if ui['remove'].get('code'):
-                    ui['remove']['code'].setText(code)
-                    load_product_into_remove(code)
-            elif m == 'update':
-                if ui['update'].get('code'):
-                    ui['update']['code'].setText(code)
-                    load_product_into_update(code)
-            else:
-                if ui['add'].get('code'):
-                    ui['add']['code'].setText(code)
-
-    # Barcode override: only for search combos (by name) when those widgets are focused
-    prev_override = getattr(main_window, '_barcodeOverride', None)
-    prev_mgr_override = None
-    try:
-        if hasattr(main_window, 'barcode_manager'):
-            prev_mgr_override = getattr(main_window.barcode_manager, '_barcodeOverride', None)
-    except Exception:
-        prev_mgr_override = None
-
-    def _barcode_to_product_name(raw: str) -> bool:
+        now_str = QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss')
         try:
-            if not raw:
-                return False
-            inst = QApplication.instance()
-            fw = inst.focusWidget() if inst else None
-            txt = raw.strip()
-            # If focus is on search combo line edit, try to select matching name
-            for mode, handler in (('remove', on_remove_search_selected), ('update', on_update_search_selected)):
-                combo = ui[mode].get('search')
-                if not combo:
-                    continue
-                le = combo.lineEdit()
-                if fw is combo or fw is le:
-                    for i in range(combo.count()):
-                        if txt.lower() == combo.itemText(i).strip().lower():
-                            combo.setCurrentIndex(i)
-                            handler(combo.itemText(i))
-                            return True
+            ok_db, msg = add_product(code, name, price_val, cat, supplier, cost_val, unit, now_str)
+            if not ok_db:
+                set_status('add', f'Error: {msg}', ok=False)
+                return
+        except Exception as e:
+            set_status('add', f'Error: {e}', ok=False)
+            return
+
+        try:
+            refresh_product_cache()
+        except Exception:
+            pass
+
+        set_status('add', 'Added successfully.', ok=True)
+
+        # If launched from sales, re-run scan so item appears in transaction
+        if sale_active:
+            try:
+                code_to_add = (str(initial_code).strip() if initial_code else code)
+                if code_to_add and getattr(main_window, 'sales_table', None) is not None:
+                    status_bar = getattr(main_window, 'statusbar', None)
+                    QTimer.singleShot(0, lambda c=code_to_add, sb=status_bar: handle_barcode_scanned(main_window.sales_table, c, sb))
+            except Exception:
+                pass
+
+        QTimer.singleShot(500, dlg.accept)
+
+    def do_remove():
+        code = (ui['remove']['code'].text() or '').strip() if ui['remove'].get('code') else ''
+        ok, err = input_validation.is_mandatory(code)
+        if not ok:
+            set_status('remove', f'Error: Product Code - {err}', ok=False)
+            return
+
+        # Ensure code exists before delete
+        ok, err = input_validation.exists_in_memory_cache(code, code_exists_in_cache)
+        if not ok:
+            set_status('remove', f'Error: {err}', ok=False)
+            return
+
+        try:
+            ok_db, msg = delete_product(code)
+            if not ok_db:
+                set_status('remove', f'Error: {msg}', ok=False)
+                return
+        except Exception as e:
+            set_status('remove', f'Error: {e}', ok=False)
+            return
+
+        try:
+            refresh_product_cache()
+        except Exception:
+            pass
+
+        set_status('remove', 'Deleted successfully.', ok=True)
+        QTimer.singleShot(500, dlg.accept)
+
+    def do_update():
+        code = (ui['update']['code'].text() or '').strip() if ui['update'].get('code') else ''
+        name = (ui['update']['name'].text() or '').strip() if ui['update'].get('name') else ''
+        sell = (ui['update']['sell'].text() or '').strip() if ui['update'].get('sell') else ''
+        cat = (ui['update']['category'].currentText() or '').strip() if ui['update'].get('category') else DEFAULT_CATEGORY
+        supplier = (ui['update']['supplier'].text() or '').strip() if ui['update'].get('supplier') else ''
+        cost_raw = (ui['update']['cost'].text() or '').strip() if ui['update'].get('cost') else ''
+        unit = (ui['update']['unit'].text() or '').strip() if ui['update'].get('unit') else DEFAULT_UNIT
+        if not unit:
+            unit = DEFAULT_UNIT
+
+        ok, err = input_validation.is_mandatory(code)
+        if not ok:
+            set_status('update', f'Error: Product Code - {err}', ok=False)
+            return
+        ok, err = input_validation.is_mandatory(name)
+        if not ok:
+            set_status('update', f'Error: Product Name - {err}', ok=False)
+            return
+        ok, err = input_validation.is_mandatory(sell)
+        if not ok:
+            set_status('update', f'Error: Selling Price - {err}', ok=False)
+            return
+
+        # Ensure code exists before update
+        ok, err = input_validation.exists_in_memory_cache(code, code_exists_in_cache)
+        if not ok:
+            set_status('update', f'Error: {err}', ok=False)
+            return
+
+        ok, err = input_validation.validate_unit_price(sell)
+        if not ok:
+            set_status('update', f'Error: Selling Price - {err}', ok=False)
+            return
+        price_val = float(sell)
+
+        cost_val = 0.0
+        if cost_raw:
+            ok, err = input_validation.validate_total_price(cost_raw) if hasattr(input_validation, 'validate_total_price') else (True, '')
+            if not ok:
+                set_status('update', f'Error: Cost Price - {err}', ok=False)
+                return
+            cost_val = float(cost_raw)
+
+        try:
+            ok_db, msg = update_product(code, name, price_val, cat, supplier, cost_val, unit)
+            if not ok_db:
+                set_status('update', f'Error: {msg}', ok=False)
+                return
+        except Exception as e:
+            set_status('update', f'Error: {e}', ok=False)
+            return
+
+        try:
+            refresh_product_cache()
+        except Exception:
+            pass
+
+        # UI display only (DB layer should set last_updated)
+        if ui['update'].get('last_updated'):
+            ui['update']['last_updated'].setText(QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss'))
+
+        set_status('update', 'Updated successfully.', ok=True)
+        QTimer.singleShot(500, dlg.accept)
+
+    # ---- wiring ----
+    refresh_search_combos()
+
+    # search selection wiring
+    if isinstance(ui['remove'].get('search'), QComboBox):
+        ui['remove']['search'].activated[str].connect(on_remove_search_selected)
+        try:
+            comp = ui['remove']['search'].completer()
+            if comp:
+                comp.activated[str].connect(on_remove_search_selected)
+        except Exception:
+            pass
+
+    if isinstance(ui['update'].get('search'), QComboBox):
+        ui['update']['search'].activated[str].connect(on_update_search_selected)
+        try:
+            comp = ui['update']['search'].completer()
+            if comp:
+                comp.activated[str].connect(on_update_search_selected)
+        except Exception:
+            pass
+
+    # code change wiring (trigger loaders automatically on scan/programmatic setText)
+    if isinstance(ui['remove'].get('code'), QLineEdit):
+        ui['remove']['code'].textChanged.connect(lambda t: (t and load_product_into_remove(t.strip())))
+    if isinstance(ui['update'].get('code'), QLineEdit):
+        ui['update']['code'].textChanged.connect(lambda t: (t and load_product_into_update(t.strip())))
+
+    # buttons
+    if ui['add'].get('ok'):
+        ui['add']['ok'].clicked.connect(do_add)
+    if ui['remove'].get('ok'):
+        ui['remove']['ok'].clicked.connect(do_remove)
+    if ui['update'].get('ok'):
+        ui['update']['ok'].clicked.connect(do_update)
+
+    def do_cancel():
+        dlg.reject()
+
+    for mode in ('add', 'remove', 'update'):
+        btn = ui[mode].get('cancel')
+        if isinstance(btn, QPushButton):
+            btn.clicked.connect(do_cancel)
+
+    # tab focus behavior
+    def on_tab_changed(idx: int):
+        mode = mode_from_index(idx)
+        clear_status(mode)
+        focus_code_for_mode(mode)
+
+    if tab_widget is not None:
+        tab_widget.currentChanged.connect(on_tab_changed)
+
+    
+    def code_exists_in_cache(code: str) -> bool:
+        c = (code or '').strip()
+        if not c:
             return False
+        cache = getattr(dbop, 'PRODUCT_CACHE', None)
+        if not cache:
+            return False
+        if c in cache:
+            return True
+        # sometimes cache keys might be ints
+        try:
+            ci = int(c)
+            return ci in cache
         except Exception:
             return False
 
+# ---- barcode override: route scans into active tab product code ----
+    def barcode_override(barcode: str) -> bool:
+        code = (barcode or '').strip()
+        if not code:
+            return False
+
+        # Determine current mode/tab
+        mode = 'add'
+        if tab_widget is not None:
+            mode = mode_from_index(tab_widget.currentIndex())
+
+        # If dialog opened due to a missing code from sales, always land on ADD
+        if initial_code and tab_widget is not None:
+            try:
+                tab_widget.setCurrentIndex(0)
+                mode = 'add'
+            except Exception:
+                pass
+
+        le = ui.get(mode, {}).get('code')
+        if not isinstance(le, QLineEdit):
+            return False
+
+        le.setText(code)
+
+        if mode == 'add':
+            if code_exists_in_cache(code):
+                set_status('add', 'Error: Product Code already exists.', ok=False)
+                try:
+                    le.setFocus(Qt.OtherFocusReason)
+                    le.selectAll()
+                except Exception:
+                    pass
+            else:
+                clear_status('add')
+                name_le = ui['add'].get('name')
+                if isinstance(name_le, QLineEdit):
+                    try:
+                        name_le.setFocus(Qt.OtherFocusReason)
+                    except Exception:
+                        pass
+                else:
+                    try:
+                        le.deselect()
+                        le.setCursorPosition(len(code))
+                    except Exception:
+                        pass
+            return True
+
+        # REMOVE/UPDATE: keep focus and allow loaders to populate (scan does not back-fill search combobox)
+        try:
+            le.setFocus(Qt.OtherFocusReason)
+            le.deselect()
+            le.setCursorPosition(len(code))
+        except Exception:
+            pass
+        return True
+
+        # Always land on ADD tab if sale_active
+        if tab_widget is not None and sale_active:
+            try:
+                tab_widget.setCurrentIndex(0)
+            except Exception:
+                pass
+
+        mode = 'add'
+        if tab_widget is not None:
+            mode = mode_from_index(tab_widget.currentIndex())
+
+        le = ui.get(mode, {}).get('code')
+        if isinstance(le, QLineEdit):
+            le.setText(code)
+            # loaders are triggered by textChanged (remove/update); add does not auto-fill
+            clear_status(mode)
+            return True
+        return False
+
     try:
-        main_window._barcodeOverride = _barcode_to_product_name
-        if hasattr(main_window, 'barcode_manager'):
-            main_window.barcode_manager._barcodeOverride = _barcode_to_product_name
+        bm = getattr(main_window, 'barcode_manager', None)
+        if bm is not None:
+            if hasattr(bm, 'set_barcode_override'):
+                bm.set_barcode_override(barcode_override)
+            else:
+                setattr(bm, '_barcodeOverride', barcode_override)
     except Exception:
         pass
 
-    def _restore_overrides():
+    # ---- initial reset + landing ----
+    clear_mode_fields('add')
+    clear_mode_fields('remove')
+    clear_mode_fields('update')
+
+    # Populate REMOVE/UPDATE search dropdowns once at dialog open
+    try:
+        refresh_search_combos()
+        QTimer.singleShot(0, refresh_search_combos)
+    except Exception:
+        pass
+
+    # Landing page always ADD + product code focus
+    if tab_widget is not None:
         try:
-            main_window._barcodeOverride = prev_override
-        except Exception:
-            pass
-        try:
-            if hasattr(main_window, 'barcode_manager'):
-                main_window.barcode_manager._barcodeOverride = prev_mgr_override
+            tab_widget.setCurrentIndex(0)
         except Exception:
             pass
 
-    dlg.finished.connect(lambda _=None: _restore_overrides())
+    # If opened from sales scan, prefill product code in ADD
+    if initial_code:
+        try:
+            barcode_override(str(initial_code))
+        except Exception:
+            pass
 
-    # Focus initial
     if tab_widget is not None:
         focus_code_for_mode(mode_from_index(tab_widget.currentIndex()))
     else:

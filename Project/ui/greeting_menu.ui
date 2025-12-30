@@ -60,7 +60,7 @@
       <item>
        <widget class="QLabel" name="customTitle">
         <property name="text">
-         <string>Customer Greeting Message</string>
+         <string>Holiday Greeting</string>
         </property>
        </widget>
       </item>
@@ -109,7 +109,7 @@
    <item>
     <widget class="QLabel" name="selectSubLbl">
      <property name="text">
-      <string>Select Receipt Greeting:</string>
+      <string>SELECT MESSAGE :</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -188,6 +188,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>greetingComboBox</tabstop>
+  <tabstop>btnGreetOk</tabstop>
+  <tabstop>btnGreetCancel</tabstop>
+  <tabstop>customCloseBtn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

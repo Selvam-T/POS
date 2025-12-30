@@ -65,6 +65,18 @@ class BarcodeManager(QObject):
                 except Exception:
                     handled = False
                 if handled:
+                    try:
+                        from PyQt5.QtWidgets import QApplication, QLineEdit
+                        fw = QApplication.instance().focusWidget() if QApplication.instance() else None
+                        self._cleanup_scanner_leak(fw, barcode)
+                        # Also clean up the code QLineEdit in the active dialog if different from fw
+                        dlg = QApplication.activeModalWidget() or QApplication.activeWindow()
+                        if dlg is not None:
+                            code_le = dlg.findChild(QLineEdit, 'addProductCodeLineEdit')
+                            if code_le is not None and code_le is not fw:
+                                self._cleanup_scanner_leak(code_le, barcode)
+                    except Exception:
+                        pass
                     return  # accepted by dialog
                 else:
                     self._ignore_scan(barcode, reason='override-not-focused')
@@ -152,14 +164,29 @@ class BarcodeManager(QObject):
                     except Exception:
                         obj_name = ''
                     
-                    # Allow input in specific editable fields even during modal block
-                    is_allowed_input = obj_name in ('qtyInput', 'productCodeLineEdit', 'refundInput', 
-                                                     'inputProductName', 'inputSellingPrice', 
-                                                     'inputSupplier', 'inputCostPrice',
-                                                     'inputQuantity', 'inputUnitPrice',
-                                                     'vegMCostPriceLineEdit', 'vegMProductNameLineEdit', 
-                                                     'vegMSellingPriceLineEdit', 'vegMSupplierLineEdit')
-                    
+                    # Allow input in specific editable fields or QPushButton even during modal block
+                    from PyQt5.QtWidgets import QPushButton
+                    is_allowed_input = obj_name in (
+                        'qtyInput', 'productCodeLineEdit', 'refundInput',
+                        'inputProductName', 'inputSellingPrice',
+                        'inputSupplier', 'inputCostPrice',
+                        'inputQuantity', 'inputUnitPrice',
+                        'vegMCostPriceLineEdit', 'vegMProductNameLineEdit',
+                        'vegMSellingPriceLineEdit', 'vegMSupplierLineEdit',
+                        'addProductNameLineEdit', 'addCostPriceLineEdit',
+                        'addSellingPriceLineEdit', 'addSupplierLineEdit',
+                        'updateProductNameLineEdit', 'updateCostPriceLineEdit',
+                        'updateSellingPriceLineEdit', 'updateSupplierLineEdit',
+                        'removeSearchComboLineEdit', 'updateSearchComboLineEdit'
+                    )
+                    # Also allow if the focused widget is a QPushButton
+                    if fw is not None:
+                        try:
+                            from PyQt5.QtWidgets import QPushButton
+                            if isinstance(fw, QPushButton):
+                                is_allowed_input = True
+                        except Exception:
+                            pass
                     if not is_allowed_input:
                         text = ''
                         try:

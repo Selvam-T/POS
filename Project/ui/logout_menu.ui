@@ -81,7 +81,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>30</height>
+       <height>10</height>
       </size>
      </property>
     </spacer>
@@ -107,7 +107,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>20</height>
+       <height>30</height>
       </size>
      </property>
     </spacer>
@@ -115,7 +115,13 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_buttons">
      <property name="spacing">
-      <number>20</number>
+      <number>40</number>
+     </property>
+     <property name="leftMargin">
+      <number>30</number>
+     </property>
+     <property name="rightMargin">
+      <number>30</number>
      </property>
      <item>
       <widget class="QPushButton" name="btnLogoutOk">
@@ -137,7 +143,13 @@
         </font>
        </property>
        <property name="text">
-        <string>LOGOUT</string>
+        <string>YES</string>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
        </property>
       </widget>
      </item>
@@ -161,7 +173,7 @@
         </font>
        </property>
        <property name="text">
-        <string>CANCEL</string>
+        <string>NO</string>
        </property>
        <property name="iconSize">
         <size>
@@ -181,7 +193,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>20</height>
+       <height>10</height>
       </size>
      </property>
     </spacer>

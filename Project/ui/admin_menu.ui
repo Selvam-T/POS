@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>560</width>
-    <height>495</height>
+    <height>502</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -183,7 +183,7 @@
       <enum>QTabWidget::North</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -697,6 +697,24 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>adminCurPwdCodeLineEdit</tabstop>
+  <tabstop>adminToolBtn</tabstop>
+  <tabstop>adminNewPwdCodeLineEdit</tabstop>
+  <tabstop>btnAdminOk</tabstop>
+  <tabstop>btnAdminCancel</tabstop>
+  <tabstop>staffCurPwdCodeLineEdit</tabstop>
+  <tabstop>staffQToolBtn</tabstop>
+  <tabstop>staffNewPwdCodeLineEdit</tabstop>
+  <tabstop>btnStaffOk</tabstop>
+  <tabstop>btnStaffCancel</tabstop>
+  <tabstop>emailCurCodeLineEdit</tabstop>
+  <tabstop>emailNewCodeLineEdit</tabstop>
+  <tabstop>btnEmailOk</tabstop>
+  <tabstop>btnEmailCancel</tabstop>
+  <tabstop>customCloseBtn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

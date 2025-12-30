@@ -70,6 +70,7 @@ This document outlines the validation requirements and logic for all dialogs and
 
 ## Error Propagation
 - Error messages are routed to the appropriate UI element depending on the dialog/frame.
+- For dynamic error styling, use helpers from ui_utils/ui_feedback.py.
 
 ## Implementation Notes
 
@@ -79,6 +80,15 @@ Validation functions now return a tuple: (is_valid, error_message). This allows 
 - All other validation functions provide clear error messages for invalid input.
 
 Update this section as new validation logic is added or integrated.
+
+## Folder and File Location (Updated)
+- input_validation.py has been moved from modules/validation/ to modules/ui_utils/.
+- The validation folder has been deleted.
+- All imports should now use:
+  ```python
+  from modules.ui_utils import input_validation
+  ```
+- Error message dynamic styling is now handled by ui_utils/ui_feedback.py.
 
 ---
 *Update this document as new validation requirements are discovered or implemented.*

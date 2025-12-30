@@ -16,7 +16,7 @@ class DialogWrapper:
         'reports_menu': (0.7, 0.7),
         'greeting_menu': (0.3, 0.3),
         'product_menu': (0.5, 0.7),
-        'vegetable_menu': (0.3, 0.7),
+        'vegetable_menu': (0.32, 0.7),
         'on_hold': (0.7, 0.7),
         'view_hold': (0.7, 0.7),
         'cancel_sale': (0.7, 0.7),
@@ -82,8 +82,13 @@ class DialogWrapper:
     def _clear_scanner_override(self):
         """Clear barcode override set by product menu dialog."""
         try:
-            if hasattr(self.main, 'barcode_manager'):
-                self.main.barcode_manager._barcodeOverride = None
+            bm = getattr(self.main, 'barcode_manager', None)
+            if bm is None:
+                return
+            if hasattr(bm, 'clear_barcode_override'):
+                bm.clear_barcode_override()
+            else:
+                bm._barcodeOverride = None
         except Exception:
             pass
 

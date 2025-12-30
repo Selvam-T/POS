@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>480</width>
-    <height>613</height>
+    <height>638</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -60,7 +60,7 @@
       <item>
        <widget class="QLabel" name="customTitle">
         <property name="text">
-         <string>Barcode Product Management</string>
+         <string>Product Management</string>
         </property>
        </widget>
       </item>
@@ -91,9 +91,25 @@
     </widget>
    </item>
    <item>
+    <spacer name="verticalSpacer_10">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tabAdd">
       <attribute name="title">
@@ -286,7 +302,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="searchSubLbl">
            <property name="text">
-            <string>Search by :</string>
+            <string>SEARCH BY :</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -294,24 +310,24 @@
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="removeSearchFieldLbl">
-           <property name="text">
-            <string>Product Name - </string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QComboBox" name="removeSearchComboBox"/>
-         </item>
-         <item row="3" column="0">
           <widget class="QLabel" name="removeProductCodeFieldLbl">
            <property name="text">
             <string>Product Code - </string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="2" column="1">
           <widget class="QLineEdit" name="removeProductCodeLineEdit"/>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="removeSearchFieldLbl">
+           <property name="text">
+            <string>Product Name - </string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QComboBox" name="removeSearchComboBox"/>
          </item>
          <item row="5" column="0">
           <widget class="QLabel" name="removeProductNameFieldLbl">
@@ -527,7 +543,7 @@
          <item row="0" column="0">
           <widget class="QLabel" name="search2SubLbl">
            <property name="text">
-            <string>Search by :</string>
+            <string>SEARCH BY :</string>
            </property>
           </widget>
          </item>
@@ -564,24 +580,24 @@
           </spacer>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="updateSearchFieldLbl">
-           <property name="text">
-            <string>Product Name -</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QComboBox" name="updateSearchComboBox"/>
-         </item>
-         <item row="3" column="0">
           <widget class="QLabel" name="updateProductCodeFieldLbl">
            <property name="text">
             <string>Product Code - </string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="2" column="1">
           <widget class="QLineEdit" name="updateProductCodeLineEdit"/>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="updateSearchFieldLbl">
+           <property name="text">
+            <string>Product Name -</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QComboBox" name="updateSearchComboBox"/>
          </item>
          <item row="4" column="0">
           <spacer name="verticalSpacer_3">
@@ -618,7 +634,7 @@
          <item row="5" column="0">
           <widget class="QLabel" name="editSubLbl">
            <property name="text">
-            <string>Edit fields :</string>
+            <string>EDIT FIELDS :</string>
            </property>
           </widget>
          </item>
@@ -788,7 +804,6 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
   <tabstop>addProductCodeLineEdit</tabstop>
   <tabstop>addProductNameLineEdit</tabstop>
   <tabstop>addCategoryComboBox</tabstop>
@@ -799,6 +814,8 @@
   <tabstop>btnAddOk</tabstop>
   <tabstop>btnAddCancel</tabstop>
   <tabstop>removeProductCodeLineEdit</tabstop>
+  <tabstop>removeSearchComboBox</tabstop>
+  <tabstop>removeProductNameLineEdit</tabstop>
   <tabstop>removeCategoryLineEdit</tabstop>
   <tabstop>removeCostPriceLineEdit</tabstop>
   <tabstop>removeSellingPriceLineEdit</tabstop>
@@ -808,6 +825,8 @@
   <tabstop>btnRemoveOk</tabstop>
   <tabstop>btnRemoveCancel</tabstop>
   <tabstop>updateProductCodeLineEdit</tabstop>
+  <tabstop>updateSearchComboBox</tabstop>
+  <tabstop>updateProductNameLineEdit</tabstop>
   <tabstop>updateCategoryComboBox</tabstop>
   <tabstop>updateCostPriceLineEdit</tabstop>
   <tabstop>updateSellingPriceLineEdit</tabstop>
@@ -817,6 +836,7 @@
   <tabstop>btnUpdateOk</tabstop>
   <tabstop>btnUpdateCancel</tabstop>
   <tabstop>customCloseBtn</tabstop>
+  <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>
  <connections/>
