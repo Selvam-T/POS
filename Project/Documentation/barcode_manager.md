@@ -20,24 +20,24 @@
 
 ## Whitelisted Fields for Modal Input
 
-During modal dialogs, the barcode manager allows keyboard input in specific fields to support legitimate user entry. The whitelist includes:
+### Generalized Product Code Field Detection (2025-12-30)
+
+Barcode scanning is now allowed in any field whose `objectName` ends with `ProductCodeLineEdit` (e.g., `addProductCodeLineEdit`, `removeProductCodeLineEdit`, `updateProductCodeLineEdit`, etc.). This convention applies across all dialogs that support barcode entry.
 
 **Editable Fields:**
+- Any `QLineEdit` whose `objectName` ends with `ProductCodeLineEdit` (for product code entry in any dialog)
 - `qtyInput` — Quantity input in manual entry and vegetable entry dialogs
-- `productCodeLineEdit` — Product code field in manual entry
 - `refundInput` — Refund amount input
-- `inputProductName` — Product name field in product/vegetable menu
-- `inputSellingPrice` — Selling price field in product/vegetable menu
-- `inputSupplier` — Supplier field in product/vegetable menu
-- `inputCostPrice` — Cost price field in product/vegetable menu
+- Other fields as needed for manual entry (see code for full list)
 
 **Purpose:**
-- Prevents barcode scanner leaks while allowing users to type in quantity, product codes, prices, etc.
-- Without whitelist, all keyboard input (including typing) would be blocked during modals
-- Improves UX for data entry in modal dialogs
+- Prevents barcode scanner leaks while allowing barcode entry only in the correct product code field for each dialog
+- Automatically supports new dialogs as long as they follow the naming convention
+- Reduces code duplication and improves maintainability
 
 **Implementation:**
-Event filter checks widget's `objectName` against whitelist before blocking input events.
+- BarcodeManager checks the focused widget's `objectName` using `.endswith('ProductCodeLineEdit')` to determine if barcode input is allowed
+- If focus is not in a product code field, barcode input is blocked, the leaked character is cleaned up, and an error message is shown in the dialog's status label (if present)
 
 - **Barcode Override Handling:**
   - Supports barcode override logic, allowing certain dialogs or UI states to temporarily take exclusive control of scanner input.
@@ -89,4 +89,10 @@ self.barcode_manager._end_scanner_modal_block()
 
 ---
 
-_Last updated: December 2, 2025_
+### Changelog
+
+- **2025-12-30:** Barcode scan logic generalized to allow scanning in any field whose objectName ends with `ProductCodeLineEdit`. No need to hardcode field names for each dialog. Error feedback and cleanup are handled generically.
+
+---
+
+_Last updated: December 30, 2025_

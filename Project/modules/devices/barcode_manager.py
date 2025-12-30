@@ -26,7 +26,6 @@ class BarcodeManager(QObject):
         Handle barcode scanned event. Routes barcode to appropriate handler based on current context.
         """
         parent = self.parent()
-        # Debug: print where the focus is when a scan is received
         try:
             from config import DEBUG_SCANNER_FOCUS, DEBUG_CACHE_LOOKUP
             if DEBUG_SCANNER_FOCUS and hasattr(parent, '_debug_print_focus'):
@@ -34,7 +33,6 @@ class BarcodeManager(QObject):
         except Exception:
             pass
         barcode = (barcode or '').strip()
-        # Early cache lookup and debug
         try:
             from modules.db_operation import get_product_info, PRODUCT_CACHE
             found, product_name, unit_price, _ = get_product_info(barcode)
@@ -55,31 +53,37 @@ class BarcodeManager(QObject):
         except Exception as _e:
             print('[Scanner][Cache] debug failed:', _e)
 
-        # If a modal has installed a barcode override, handle it focus-safely
+        # Generalized barcode override logic for all dialogs with *ProductCodeLineEdit
         try:
+            from PyQt5.QtWidgets import QApplication, QLineEdit, QLabel
             override = getattr(self, '_barcodeOverride', None)
+            fw = QApplication.instance().focusWidget() if QApplication.instance() else None
+            obj_name = fw.objectName() if fw and hasattr(fw, 'objectName') else ''
+            # Allow scan only if focus is in a product code field (endswith convention)
             if callable(override):
-                handled = False
-                try:
-                    handled = override(barcode)
-                except Exception:
+                if obj_name.endswith('ProductCodeLineEdit'):
                     handled = False
-                if handled:
                     try:
-                        from PyQt5.QtWidgets import QApplication, QLineEdit
-                        fw = QApplication.instance().focusWidget() if QApplication.instance() else None
-                        self._cleanup_scanner_leak(fw, barcode)
-                        # Also clean up the code QLineEdit in the active dialog if different from fw
-                        dlg = QApplication.activeModalWidget() or QApplication.activeWindow()
-                        if dlg is not None:
-                            code_le = dlg.findChild(QLineEdit, 'addProductCodeLineEdit')
-                            if code_le is not None and code_le is not fw:
-                                self._cleanup_scanner_leak(code_le, barcode)
+                        handled = override(barcode)
                     except Exception:
-                        pass
-                    return  # accepted by dialog
+                        handled = False
+                    if handled:
+                        self._cleanup_scanner_leak(fw, barcode)
+                        return  # accepted by dialog
                 else:
-                    self._ignore_scan(barcode, reason='override-not-focused')
+                    # Clean up the leaked char, keep focus, show error
+                    self._cleanup_scanner_leak(fw, barcode)
+                    # Show error in a status label if present (try to find any QLabel ending with StatusLabel)
+                    dlg = QApplication.activeModalWidget() or QApplication.activeWindow()
+                    if dlg is not None:
+                        # Try to find a status label with a common naming pattern
+                        status_lbl = None
+                        for lbl_name in ['addStatusLabel', 'removeStatusLabel', 'updateStatusLabel', 'refundStatusLabel', 'historyStatusLabel']:
+                            status_lbl = dlg.findChild(QLabel, lbl_name)
+                            if status_lbl is not None:
+                                break
+                        if status_lbl is not None:
+                            status_lbl.setText('Scan only in Product Code field')
                     return
         except Exception:
             pass
