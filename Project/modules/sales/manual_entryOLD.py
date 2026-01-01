@@ -1,7 +1,9 @@
 import os
 from PyQt5 import uic
-from PyQt5.QtWidgets import QDialog, QLineEdit, QPushButton, QLabel
+from PyQt5.QtWidgets import QDialog, QLineEdit, QPushButton, QLabel, QComboBox
 from PyQt5.QtCore import Qt
+from modules.ui_utils import input_handler, ui_feedback
+from modules.db_operation.database import PRODUCT_CACHE
 
 def open_manual_entry_dialog(parent):
     """Open the Manual Product Entry dialog and return QDialog for wrapper execution.
@@ -30,12 +32,11 @@ def open_manual_entry_dialog(parent):
         print('Failed to load manual_entry.ui:', e)
         return None
 
-    # Set dialog properties
+    # Set dialog properties (frameless, no OS title bar)
     dlg.setParent(parent)
     dlg.setModal(True)
-    dlg.setWindowTitle('Manual Product Input')
-    dlg.setWindowFlags(Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
-    
+    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
+
     # Apply styles
     try:
         assets_dir = os.path.join(BASE_DIR, 'assets')
@@ -45,97 +46,69 @@ def open_manual_entry_dialog(parent):
                 dlg.setStyleSheet(f.read())
     except Exception as e:
         print('Failed to load sales.qss:', e)
-    
+
     # Get input fields
-    product_name_input = dlg.findChild(QLineEdit, 'inputProductName')
-    quantity_input = dlg.findChild(QLineEdit, 'inputQuantity')
-    unit_price_input = dlg.findChild(QLineEdit, 'inputUnitPrice')
-    error_label = dlg.findChild(QLabel, 'lblError')
+    product_name_line = dlg.findChild(QLineEdit, 'manualProductNameLineEdit')
+    product_code_line = dlg.findChild(QLineEdit, 'manualProductCodeLineEdit')
+    quantity_input = dlg.findChild(QLineEdit, 'manualQuantityLineEdit')
+    unit_price_input = dlg.findChild(QLineEdit, 'manualUnitPriceLineEdit') if hasattr(dlg, 'manualUnitPriceLineEdit') else None
+    error_label = dlg.findChild(QLabel, 'manualStatusLabel') or dlg.findChild(QLabel, 'lblError')
     btn_ok = dlg.findChild(QPushButton, 'btnManualOk')
     btn_cancel = dlg.findChild(QPushButton, 'btnManualCancel')
+    custom_close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
 
-    # OK button handler
+
+    # --- QLineEdit + QCompleter for product name search ---
+    from PyQt5.QtWidgets import QCompleter
+    product_names = [v[0] for v in PRODUCT_CACHE.values() if v[0]]
+    name_to_code = {v[0]: k for k, v in PRODUCT_CACHE.items() if v[0]}
+    if product_name_line is not None:
+        completer = QCompleter(product_names, product_name_line)
+        completer.setCaseSensitivity(Qt.CaseInsensitive)
+        completer.setFilterMode(Qt.MatchContains)
+        completer.setCompletionMode(QCompleter.PopupCompletion)
+        product_name_line.setCompleter(completer)
+        product_name_line.setPlaceholderText("Search Product Name")
+
+        # When a product name is selected or editing finished, update product code field
+        def update_product_code():
+            name = product_name_line.text().strip()
+            code = name_to_code.get(name, "")
+            if product_code_line is not None:
+                product_code_line.setText(code)
+        product_name_line.editingFinished.connect(update_product_code)
+
+    # Use input_handler for validation and ui_feedback for status
     def handle_ok():
-        # TODO: Consider creating a shared validation utility (modules/ui_utils/validation.py)
-        # for consistent error messaging and field focus management across all modal dialogs.
-        # This would centralize validation patterns used in manual_entry, vegetable_entry, 
-        # product_menu, admin_menu, etc.
         try:
-            product_name = product_name_input.text().strip() if product_name_input else ""
-            quantity_str = quantity_input.text().strip() if quantity_input else ""
-            unit_price_str = unit_price_input.text().strip() if unit_price_input else ""
-            
             # Validate product name
-            if not product_name:
-                if error_label:
-                    error_label.setText("⚠ Product name is required")
-                    error_label.setStyleSheet("color: #ff6b6b;")
-                if product_name_input:
-                    product_name_input.setFocus()
+            if product_name_line is None or not product_name_line.text().strip():
+                ui_feedback.set_status_label(error_label, "Product name must be selected.", ok=False)
+                product_name_line.setFocus()
                 return
-            
+            # Validate product code
+            if product_code_line is None or not product_code_line.text().strip():
+                ui_feedback.set_status_label(error_label, "Product code missing.", ok=False)
+                product_code_line.setFocus()
+                return
             # Validate quantity
-            if not quantity_str:
-                if error_label:
-                    error_label.setText("⚠ Quantity is required")
-                    error_label.setStyleSheet("color: #ff6b6b;")
-                if quantity_input:
-                    quantity_input.setFocus()
-                return
-            
-            try:
-                quantity = float(quantity_str)
-                if quantity <= 0:
-                    raise ValueError("Must be positive")
-            except ValueError:
-                if error_label:
-                    error_label.setText("⚠ Quantity must be a positive number")
-                    error_label.setStyleSheet("color: #ff6b6b;")
-                if quantity_input:
-                    quantity_input.selectAll()
-                    quantity_input.setFocus()
-                return
-            
-            # Validate unit price
-            if not unit_price_str:
-                if error_label:
-                    error_label.setText("⚠ Unit price is required")
-                    error_label.setStyleSheet("color: #ff6b6b;")
-                if unit_price_input:
-                    unit_price_input.setFocus()
-                return
-            
-            try:
-                unit_price = float(unit_price_str)
-                if unit_price <= 0:
-                    raise ValueError("Must be positive")
-            except ValueError:
-                if error_label:
-                    error_label.setText("⚠ Unit price must be a positive number")
-                    error_label.setStyleSheet("color: #ff6b6b;")
-                if unit_price_input:
-                    unit_price_input.selectAll()
-                    unit_price_input.setFocus()
-                return
-            
-            # Success - clear error and store result
-            if error_label:
-                error_label.setText("✓ Adding to sale...")
-                error_label.setStyleSheet("color: #4caf50;")
-            
-            # Store result data on dialog object for later retrieval
+            quantity = input_handler.handle_quantity_input(quantity_input)
+            # Validate unit price (if present)
+            unit_price = None
+            if unit_price_input is not None:
+                unit_price = input_handler.handle_price_input(unit_price_input, price_type="unit price")
+            # All good
+            ui_feedback.set_status_label(error_label, "✓ Adding to sale...", ok=True)
             dlg.manual_entry_result = {
-                'product_name': product_name,
+                'product_name': product_name_line.text().strip(),
+                'product_code': product_code_line.text().strip(),
                 'quantity': quantity,
                 'unit_price': unit_price
             }
             dlg.accept()
         except Exception as e:
-            if error_label:
-                error_label.setText(f"Error: {str(e)}")
-                error_label.setStyleSheet("color: #ff6b6b;")
+            ui_feedback.set_status_label(error_label, f"{str(e)}", ok=False)
 
-    # Cancel button handler
     def handle_cancel():
         dlg.reject()
 
@@ -144,6 +117,8 @@ def open_manual_entry_dialog(parent):
         btn_ok.clicked.connect(handle_ok)
     if btn_cancel:
         btn_cancel.clicked.connect(handle_cancel)
+    if custom_close_btn:
+        custom_close_btn.clicked.connect(handle_cancel)
 
-    # Return QDialog for DialogWrapper to execute
+    # Return QDialog for DialogWrapper to execute (scanner will be blocked by wrapper)
     return dlg

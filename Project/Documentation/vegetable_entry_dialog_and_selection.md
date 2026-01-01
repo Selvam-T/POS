@@ -8,24 +8,33 @@ This document describes the workflow for the Vegetable Entry dialog, where users
 - **Logic:** `modules/sales/vegetable_entry.py` — controller for dialog, table setup, button selection, unit-based behavior, and duplicate handling.
 - **Settings:** `modules/wrappers/settings.py` — manages vegetable label configuration and persistence (used by the Vegetable Menu editor).
 - **Database:** `modules/db_operation/database.py` — provides product info with unit (KG/EACH) from PRODUCT_CACHE.
-- **Dropdown Model:** `PRODUCT_DROPDOWN_MODEL` (in `database.py`) — Qt model for efficient product selection in combo boxes, always kept in sync with PRODUCT_CACHE and the database.
 
 ## Dialog Layout
 
 ## Product Dropdown Model (Model/View Architecture)
 
-To efficiently support large product lists and fast product selection, the application uses a Qt model called `PRODUCT_DROPDOWN_MODEL`:
-
-- **Purpose:** Provides a memory-resident model for all product selection combo boxes, allowing instant loading and search-as-you-type filtering, even with thousands of products.
-- **Lifecycle:** Created and updated in `database.py` whenever PRODUCT_CACHE is loaded or refreshed (e.g., at app startup or after CRUD operations). Always consistent with the database and PRODUCT_CACHE.
-- **Usage:**
-    - Dialogs set their QComboBox with `combo.setModel(PRODUCT_DROPDOWN_MODEL)` instead of adding items one by one.
-    - Each item in the model stores the product name (display) and product code (userData), supporting fast mapping and lookup.
-    - Proxy filtering (QSortFilterProxyModel) can be layered for search-as-you-type UX.
-- **Benefits:**
-    - Eliminates slow dialog loading due to large product lists.
-    - Ensures all dialogs use a consistent, up-to-date product list.
-    - Centralizes product selection logic for maintainability and performance.
+ 
+ ## Dialog Layout
+ 
+ ## Unit-Based Behavior
+ 
+ ### KG Items (Weight-Based)
+ When user clicks a KG vegetable button:
+ 1. Dialog reads weighing scale (simulated: 600g = 0.6 kg)
+ 2. Adds row to vegEntryTable with:
+     - `quantity`: Numeric weight in kg (e.g., `0.6`, stored for calculations)
+     - **Display**: "600" in Quantity column, "g" in Unit column
+     - `editable`: `False` (quantity cell is READ-ONLY)
+ 3. **Duplicate handling:** If same KG item clicked again, ADDS weights (e.g., 600g + 600g = 1200g)
+     - Updates to display "1.20" in Quantity, "kg" in Unit
+ 
+ ### EACH Items (Count-Based)
+ When user clicks an EACH vegetable button:
+ 1. Adds row to vegEntryTable with:
+     - `quantity`: Numeric count (default: `1`)
+     - **Display**: Integer (e.g., "1") in Quantity column, "ea" in Unit column
+     - `editable`: `True` (quantity cell is EDITABLE, integer only, max 9999)
+ 2. **Duplicate handling:** If same EACH item clicked again, INCREMENTS quantity by 1
 
 ### Button Grid (16 Buttons)
 - **Buttons:** `btnVeg01` to `btnVeg16` mapped to Veg01-Veg16 product codes

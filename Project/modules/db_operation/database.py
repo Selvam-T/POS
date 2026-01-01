@@ -14,26 +14,7 @@ from PyQt5.QtCore import QTimer
 # Includes unit for determining if items require weighing (KG) or are count-based (EACH)
 PRODUCT_CACHE: Dict[str, Tuple[str, float, str]] = {}
 
-# Qt model for product dropdowns (name as display, code as userData)
-PRODUCT_DROPDOWN_MODEL = None
 
-def refresh_product_dropdown_model():
-    """Create or update the PRODUCT_DROPDOWN_MODEL from PRODUCT_CACHE."""
-    global PRODUCT_DROPDOWN_MODEL
-    try:
-        from PyQt5.QtGui import QStandardItemModel, QStandardItem
-        from PyQt5.QtCore import Qt
-    except ImportError:
-        PRODUCT_DROPDOWN_MODEL = None
-        return
-    model = QStandardItemModel()
-    for code, (name, price, unit) in PRODUCT_CACHE.items():
-        if name:
-            item = QStandardItem(name)
-            item.setData(code, Qt.UserRole)
-            model.appendRow(item)
-    PRODUCT_DROPDOWN_MODEL = model
-    return model
 
 # Note: All barcode validations must use in-memory PRODUCT_CACHE only.
 
@@ -127,8 +108,7 @@ def load_product_cache(db_path: str = DB_PATH) -> bool:
                 _to_camel_case(unit) if unit is not None else 'Each',
             )
         conn.close()
-        # Refresh dropdown model after cache is loaded
-        refresh_product_dropdown_model()
+        # (No dropdown model refresh needed)
         return True
     except sqlite3.Error as e:
         print(f"[DB ERROR] Database error loading products: {e}")

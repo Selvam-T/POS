@@ -1,94 +1,85 @@
-# Input Validation Documentation
+# Input Validation
 
-This document outlines the validation requirements and logic for all dialogs and frames in the POS application. It will be updated as development progresses.
+This document describes the shared validation rules used by POS dialogs/frames.
 
-## General Guidelines
-- Centralized validation module to be reused across dialogs and frames.
-- Error messages propagate to appropriate UI elements (QLabel, status bar, etc.).
+## Contract
+- All validators in `modules/ui_utils/input_validation.py` return `(True, "")` if valid, or `(False, "error message")` if invalid.
+- “Mandatory fields” (which fields are required) is a dialog/controller responsibility.
+- UI error display is handled by the caller (QLabel/status bar/etc.).
 
-## Validation Rules
-### Numeric Fields
-- **Quantity**: DECIMAL(10,3), min 0.01 (KG) or 1 (unit), max 9999
-- **Unit Price**: DECIMAL(13,2), min 0.1, max 5000
-- **Total Price**: DECIMAL(15,2), min 0, max 10000
-- **Grand Total**: DECIMAL(17,2), min 0, max 100000
+Import pattern:
+```python
+from modules.ui_utils import input_validation
+```
 
-### String Fields
-- All user string inputs limited to 15 characters.
+## Core Rules (Constants)
+- Quantity
+  - KG: min `0.01`
+  - Unit: min `1` and must be integer
+  - Max `9999`
+- Unit/Selling price: min `0.1`, max `5000`
+- Total price: min `0`, max `10000`
+- Grand total: min `0`, max `100000`
+- String fields: max length `15`
+- Password: min length `8`
 
-## Dialog/Frame Specific Validation
-### Sales Frame
-- Quantity: Integer (unit) or float (KG), validated per above.
-- Error messages to main window status bar.
+## Key Validators (by purpose)
 
-### Vegetable Entry Table
-- Editable quantity, same validation as sales table.
+### Required fields (dialog-level)
+- `validate_required_fields(fields)`
+  - Pass only the fields that are required for that dialog, e.g. `[("Product Code", code), ("Selling Price", price)]`.
+  - Fields that are defaulted/auto-filled should not be included.
 
-### Manual Entry Dialog
-- Product name: string, not empty, max 15 chars.
-- Quantity: integer, not empty.
-- Unit price: float, not empty.
-- Error messages to `lblError` QLabel.
+### Product code
+- `validate_product_code_format(code, digits_only=False, min_len=4, max_len=30)`
+  - Format-only validation (required/non-empty + length, optional digits-only).
+  - Use anywhere the user can type/scan a product code (ADD/REMOVE/UPDATE/manual entry).
 
-### Payment Frame
-- Amount tendered, change due, refund: float.
-- Refund: barcode must exist in DB, else error.
-- Error messages to main window status bar.
+Flow validators (format + existence rule):
+- `validate_product_code_for_add(code, code_exists_func, ...)` → must be valid format AND must **not** already exist.
+- `validate_product_code_for_lookup(code, code_exists_func, ...)` → must be valid format AND must **exist**.
 
-### Menu Frame
-- Error/info messages to dedicated QLabel.
+### Product name
+- `validate_product_name(name)` → required, max length.
 
-### Admin Menu
-- New password: min 8 chars.
-- New email: standard email validation.
+### Quantity
+- `validate_quantity(value, unit_type='unit')` → required, numeric, min/max, and integer-only for `unit`.
+- `validate_table_quantity(value)` → compatibility alias that delegates to `validate_quantity`.
 
-### Reports Dialog
-- Date/time selection: validate that "from" is not after "to".
+### Prices
+- `validate_unit_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX)` → numeric + min/max.
+- `validate_price(value, price_type="price")` → mandatory wrapper around `validate_unit_price`.
+- `validate_selling_price(value, ...)` → uses `validate_unit_price` (range enforced).
+- `validate_cost_price(value, ...)` → optional (empty allowed) else numeric + range.
+- `validate_total_price(value)`, `validate_grand_total(value)` → numeric + range.
 
-### Vegetable Menu
-- comboVegetable, product name, unit, selling price: mandatory, not empty.
-- Product name: string, max 15 chars.
-- Unit, selling price, cost price: float.
-- Supplier: optional.
+### Unit / Supplier / Category
+- `validate_unit(value)`
+  - Placeholder `"Select Unit"` is invalid.
+  - If a dialog always sets a valid default unit, it may skip calling this (but validation is cheap safety).
+- `validate_supplier(value)`
+  - Optional; if provided must be alphanumeric (spaces allowed) and within max length.
+- `validate_category(value)`
+  - Optional (placeholder/empty allowed); max length enforced if provided.
 
-### Product Menu
-- **ADD TAB**: product code, product name, selling price: mandatory, not empty.
-- Product code: must exist in DB.
-- Product name: string, max 15 chars.
-- Unit: default value, no validation.
-- Supplier: optional.
-- **REMOVE TAB**: search by name can be empty/any string; product code must exist if provided.
-- **UPDATE TAB**: product name mandatory, max 15 chars; selling price mandatory, float; cost price optional, float; supplier optional.
+### Email / Password
+- “New” format validators:
+  - `validate_email(value)`
+  - `validate_password(value)`
+- “Current” match validators (for change-email/password flows):
+  - `validate_current_email(value, current_email)`
+  - `validate_current_password(value, current_password)`
 
-### Other Dialogs
-- Greeting and logout: no user input.
-- History: search only, not validation.
+### Misc
+- `validate_date_range(from_date, to_date)`
+- `exists_in_database(value, db_lookup_func)`
+- `exists_in_memory_cache(value, cache_lookup_func)`
 
-## Validation Timing
-- Mandatory field checks are performed only when the dialog action button (e.g., OK, Submit) is clicked.
-- Input field value validation is performed after typing (on field focus-out or input completion).
-
-## Error Propagation
-- Error messages are routed to the appropriate UI element depending on the dialog/frame.
-- For dynamic error styling, use helpers from ui_utils/ui_feedback.py.
-
-## Implementation Notes
-
-Validation functions now return a tuple: (is_valid, error_message). This allows UI code to display specific error messages and handle focus management consistently.
-
-- Quantity validation for tables (salesTable, vegEntryTable) enforces that quantity cannot be empty or zero. If violated, the error message is: "Minimum qty is 1, delete row if you don't want item."
-- All other validation functions provide clear error messages for invalid input.
-
-Update this section as new validation logic is added or integrated.
-
-## Folder and File Location (Updated)
-- input_validation.py has been moved from modules/validation/ to modules/ui_utils/.
-- The validation folder has been deleted.
-- All imports should now use:
-  ```python
-  from modules.ui_utils import input_validation
-  ```
-- Error message dynamic styling is now handled by ui_utils/ui_feedback.py.
+## Dialog Notes (high-level)
+- Manual entry name search (QLineEdit + QCompleter): treat the field value as a normal string; it may contain a placeholder (ignored) or a selected product name. Required-field logic should be checked at OK-time.
+- Product Menu:
+  - ADD: product code is a new identifier → validate format + must-not-exist.
+  - REMOVE/UPDATE: product code is a lookup key → validate format + must-exist.
 
 ---
-*Update this document as new validation requirements are discovered or implemented.*
+Update this document when new dialogs or validation rules are added.

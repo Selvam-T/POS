@@ -1,29 +1,53 @@
-"""
-input_handler.py
-Reusable input reading functions for POS dialogs/widgets. Delegates validation to input_validation.py.
+"""modules/ui_utils/input_handler.py
+
+Reusable input reading and validation functions for POS dialogs/widgets.
+Each handler reads input from a widget, delegates validation to input_validation.py,
+and returns the cleaned value or raises ValueError.
 """
 
-from PyQt5.QtWidgets import QLineEdit, QComboBox
-from PyQt5.QtCore import Qt
+from __future__ import annotations
+
 import re
+
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QComboBox, QLineEdit
+
 from modules.ui_utils import input_validation
 
 
+def _raise_if_invalid(result):
+    """Accepts either (ok, err) from validators or None; raises ValueError on invalid."""
+    if result is None:
+        return
+    if isinstance(result, tuple) and len(result) == 2:
+        ok, err = result
+        if not ok:
+            raise ValueError(err)
+        return
+    # If a validator returns something unexpected, treat as pass-through.
+
+
+def handle_product_name_search_LineEdit(line_edit: QLineEdit, name_to_code: dict) -> str:
+    """Validate product name from QLineEdit and map to product code using name_to_code."""
+    name = line_edit.text().strip()
+    try:
+        _raise_if_invalid(input_validation.validate_product_name(name))
+    except ValueError as ve:
+        raise ValueError(f"Invalid product name: {ve}")
+    if name not in name_to_code:
+        raise ValueError("Product name not found in list. Please select a valid product.")
+    return name_to_code[name]
+
+
 def handle_product_code_input(line_edit: QLineEdit) -> str:
-    """
-    Reads and validates product code input from a QLineEdit widget.
-    Returns the cleaned product code string if valid, else raises ValueError.
-    """
+    """Validate and return product code from QLineEdit."""
     code = line_edit.text().strip()
-    input_validation.validate_product_code(code)
+    _raise_if_invalid(input_validation.validate_product_code_format(code))
     return code
 
 
 def handle_product_name_search(combo_box: QComboBox, search_text: str) -> list:
-    """
-    Filters and returns matching product names from QComboBox based on search_text.
-    Returns a list of matching items.
-    """
+    """Return product names from QComboBox matching search_text."""
     search_text = search_text.strip().lower()
     matches = []
     for i in range(combo_box.count()):
@@ -34,110 +58,76 @@ def handle_product_name_search(combo_box: QComboBox, search_text: str) -> list:
 
 
 def handle_product_name_input(line_edit: QLineEdit) -> str:
-    """
-    Reads and validates product name input from a QLineEdit widget.
-    Returns the cleaned product name string if valid, else raises ValueError.
-    """
+    """Validate and return product name from QLineEdit."""
     name = line_edit.text().strip()
-    input_validation.validate_product_name(name)
+    _raise_if_invalid(input_validation.validate_product_name(name))
     return name
 
 
 def handle_quantity_input(line_edit: QLineEdit) -> float:
-    """
-    Reads and validates quantity input from a QLineEdit widget.
-    Returns the quantity as a float if valid, else raises ValueError.
-    """
+    """Validate and return quantity as float from QLineEdit."""
     text = line_edit.text().strip()
-    input_validation.validate_quantity(text)
+    _raise_if_invalid(input_validation.validate_quantity(text))
     return float(text)
 
 
 def handle_email_input(line_edit: QLineEdit) -> str:
-    """
-    Reads and validates email input from a QLineEdit widget.
-    Returns the email string if valid, else raises ValueError.
-    """
+    """Validate and return email from QLineEdit."""
     email = line_edit.text().strip()
-    input_validation.validate_email(email)
+    _raise_if_invalid(input_validation.validate_email(email))
     return email
 
 
 def handle_password_input(line_edit: QLineEdit) -> str:
-    """
-    Reads and validates password input from a QLineEdit widget.
-    Returns the password string if valid, else raises ValueError.
-    """
+    """Validate and return password from QLineEdit."""
     password = line_edit.text()
-    input_validation.validate_password(password)
+    _raise_if_invalid(input_validation.validate_password(password))
     return password
 
 
 def handle_unit_input_combo(combo_box: QComboBox) -> str:
-    """
-    Reads unit input from a QComboBox widget.
-    Returns the selected unit string if valid (not default/placeholder), else raises ValueError.
-    """
+    """Validate and return selected unit from QComboBox."""
     unit = combo_box.currentText().strip()
-    input_validation.validate_unit(unit)
+    _raise_if_invalid(input_validation.validate_unit(unit))
     return unit
 
 
 def handle_price_input(line_edit: QLineEdit, price_type: str = "price") -> float:
-    """
-    Reads and validates cost or selling price input from a QLineEdit widget.
-    Returns the price as a float if valid, else raises ValueError.
-    """
+    """Validate and return price as float from QLineEdit."""
     text = line_edit.text().strip()
-    input_validation.validate_price(text, price_type)
+    _raise_if_invalid(input_validation.validate_price(text, price_type))
     return float(text)
 
 
 def handle_supplier_input(line_edit: QLineEdit) -> str:
-    """
-    Reads and validates supplier input from a QLineEdit widget.
-    Returns the supplier string (optional, can be empty).
-    """
+    """Validate and return supplier from QLineEdit (optional)."""
     supplier = line_edit.text().strip()
-    input_validation.validate_supplier(supplier)
+    _raise_if_invalid(input_validation.validate_supplier(supplier))
     return supplier
 
 
 def handle_category_input_line(line_edit: QLineEdit) -> str:
-    """
-    Reads and validates category input from a QLineEdit widget.
-    Returns the category string if valid, else raises ValueError.
-    """
+    """Validate and return category from QLineEdit."""
     category = line_edit.text().strip()
-    input_validation.validate_category(category)
+    _raise_if_invalid(input_validation.validate_category(category))
     return category
 
 
 def handle_category_input_combo(combo_box: QComboBox) -> str:
-    """
-    Reads category input from a QComboBox widget.
-    Returns the selected category string if valid (not default/placeholder), else raises ValueError.
-    """
+    """Validate and return selected category from QComboBox."""
     category = combo_box.currentText().strip()
-    input_validation.validate_category(category)
+    _raise_if_invalid(input_validation.validate_category(category))
     return category
 
 
 def handle_veg_choose_combo(combo_box: QComboBox) -> str:
-    """
-    Reads vegetable slot selection from vegMChooseComboBox.
-    Returns the selected slot string (including placeholder if selected).
-    No validation is performed; dialog/controller should handle logic for placeholder/default selection.
-    """
+    """Return selected vegetable slot from QComboBox (no validation)."""
     return combo_box.currentText().strip()
 
 
 def handle_greeting_combo(combo_box: QComboBox) -> str:
-    """
-    Reads greeting selection from greeting_menu QComboBox.
-    Returns the selected greeting string (no placeholder validation).
-    """
+    """Return selected greeting from QComboBox (no validation)."""
     return combo_box.currentText().strip()
 
 
-# Additional reusable input handlers can be added here for other widgets and dialogs.
+# Add more input handlers as needed.
