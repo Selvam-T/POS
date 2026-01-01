@@ -1,6 +1,26 @@
 """
 input_validation.py
 Centralized validation functions for POS dialogs and frames.
+
+- All validation logic for user input fields is implemented here.
+- Each function returns (True, "") if valid, or (False, error_message) if invalid.
+- For error message propagation, call ui_feedback from within this module as needed.
+- Controllers/dialogs should use these functions via input_handler.py for all input validation.
+
+Validation functions include:
+- validate_quantity(value, unit_type='unit')
+- validate_unit_price(value)
+- validate_total_price(value)
+- validate_product_code(value)
+- validate_product_name(value)
+- validate_email(value)
+- validate_password(value)
+- validate_supplier(value)
+- validate_category(value)
+- validate_price(value, price_type)
+- validate_unit(value)
+
+See each function for parameter and return details.
 """
 
 import re
