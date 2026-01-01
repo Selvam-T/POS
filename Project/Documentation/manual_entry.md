@@ -1,4 +1,29 @@
 # Manual Entry Dialog Documentation
+# January 2026 Update
+
+## UI Changes
+
+The Manual Entry dialog now includes a custom frameless title bar (`customTitleBar` QFrame) at the top, matching the structure and widget names used in `vegetable_menu.ui`:
+
+- `customTitleBar` (QFrame)
+    - `customTitleLayout` (QHBoxLayout)
+        - `horizontalSpacer_1` (QSpacer)
+        - `customTitle` (QLabel, displays dialog title)
+        - `horizontalSpacer_2` (QSpacer)
+        - `customCloseBtn` (QPushButton, closes dialog)
+
+This provides a consistent look and feel across dialogs and supports a frameless, modern UI. The close button is now always available in the custom title bar.
+
+## Controller Status
+
+The manual entry controller logic is a work in progress and will be updated to follow the integration pattern used in `vegetable_menu.py`. This includes:
+
+- Dialog lifecycle management via `DialogWrapper` (overlay, scanner blocking, centering, focus restoration)
+- Widget lookup and event wiring for custom title bar controls
+- Consistent input validation and error handling
+
+Refer to `modules/menu/vegetable_menu.py` for the latest controller structure and integration approach. Manual entry will adopt similar patterns for UI loading, widget access, and event handling.
+
 
 ## Overview
 The Manual Entry dialog allows users to manually input product information when items cannot be processed through the standard vegetable entry or barcode scanning methods. This is useful for miscellaneous items, special products, or when the barcode scanner is unavailable.
@@ -23,6 +48,17 @@ The Manual Entry dialog allows users to manually input product information when 
 - **Selector**: `QWidget#manualEntryDialog`
 
 ## UI Layout Structure
+### Title Bar Example
+
+```
+┌─────────────────────────────────────────┐
+│ [customTitleBar] ────────────────────── │
+│   [customTitle]   [customCloseBtn]      │
+│─────────────────────────────────────────│
+│  Enter Item Details Manually:           │
+│  ...existing layout...                  │
+└─────────────────────────────────────────┘
+```
 
 ```
 ┌─────────────────────────────────────────┐
@@ -229,7 +265,9 @@ def _add_items_to_sales_table(self, source_type):
 - Data merged into sales table using `_rebuild_mixed_editable_table()`
 
 ## Known Limitations
+## Work in Progress
 
+- The controller logic and documentation will be updated as development continues. For now, see `vegetable_menu.py` for reference implementation and integration details.
 1. **Size Behavior**: The dialog size is controlled entirely by the `.ui` file properties. The Python code applies these constraints to the QDialog.
 
 2. **Fixed Spacer**: The 30px spacing between input fields and buttons (`verticalSpacer_3`) is fixed and will not change with dialog resizing.
