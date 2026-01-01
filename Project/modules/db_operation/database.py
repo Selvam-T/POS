@@ -9,9 +9,31 @@ from PyQt5.QtWidgets import QStatusBar
 from PyQt5.QtCore import QTimer
 
 
+
 # Global product cache: {product_code: (name, selling_price, unit)}
 # Includes unit for determining if items require weighing (KG) or are count-based (EACH)
 PRODUCT_CACHE: Dict[str, Tuple[str, float, str]] = {}
+
+# Qt model for product dropdowns (name as display, code as userData)
+PRODUCT_DROPDOWN_MODEL = None
+
+def refresh_product_dropdown_model():
+    """Create or update the PRODUCT_DROPDOWN_MODEL from PRODUCT_CACHE."""
+    global PRODUCT_DROPDOWN_MODEL
+    try:
+        from PyQt5.QtGui import QStandardItemModel, QStandardItem
+        from PyQt5.QtCore import Qt
+    except ImportError:
+        PRODUCT_DROPDOWN_MODEL = None
+        return
+    model = QStandardItemModel()
+    for code, (name, price, unit) in PRODUCT_CACHE.items():
+        if name:
+            item = QStandardItem(name)
+            item.setData(code, Qt.UserRole)
+            model.appendRow(item)
+    PRODUCT_DROPDOWN_MODEL = model
+    return model
 
 # Note: All barcode validations must use in-memory PRODUCT_CACHE only.
 
@@ -89,32 +111,25 @@ def load_product_cache(db_path: str = DB_PATH) -> bool:
     """
     global PRODUCT_CACHE
     PRODUCT_CACHE.clear()
-    
     try:
         if not os.path.exists(db_path):
-            # Avoid non-ASCII symbols for Windows console compatibility
             print(f"[WARN] Database not found at: {db_path}")
             return False
-            
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
-        
-        # Query all products from Product_list table including unit
         cursor.execute("SELECT product_code, name, selling_price, unit FROM Product_list")
         rows = cursor.fetchall()
-        
         for row in rows:
             product_code, name, selling_price, unit = row
             PRODUCT_CACHE[_to_camel_case(product_code)] = (
                 _to_camel_case(name) if name is not None else '',
                 float(selling_price) if selling_price is not None else 0.0,
-                _to_camel_case(unit) if unit is not None else 'Each',  # Default to Each if unit is NULL
+                _to_camel_case(unit) if unit is not None else 'Each',
             )
-        
         conn.close()
-        # Cache loaded
+        # Refresh dropdown model after cache is loaded
+        refresh_product_dropdown_model()
         return True
-
     except sqlite3.Error as e:
         print(f"[DB ERROR] Database error loading products: {e}")
         return False

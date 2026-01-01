@@ -1,8 +1,9 @@
 import os
 from PyQt5 import uic
-from PyQt5.QtWidgets import QDialog, QLineEdit, QPushButton, QLabel
+from PyQt5.QtWidgets import QDialog, QLineEdit, QPushButton, QLabel, QComboBox
 from PyQt5.QtCore import Qt
-from modules.ui_utils import input_handler
+from modules.ui_utils import input_handler, ui_feedback
+from modules.db_operation.database import PRODUCT_CACHE
 
 def open_manual_entry_dialog(parent):
     """Open the Manual Product Entry dialog and return QDialog for wrapper execution.
@@ -47,33 +48,67 @@ def open_manual_entry_dialog(parent):
         print('Failed to load sales.qss:', e)
 
     # Get input fields
-    product_name_input = dlg.findChild(QLineEdit, 'inputProductName')
-    quantity_input = dlg.findChild(QLineEdit, 'inputQuantity')
-    unit_price_input = dlg.findChild(QLineEdit, 'inputUnitPrice')
-    error_label = dlg.findChild(QLabel, 'lblError')
+    product_name_combo = dlg.findChild(QComboBox, 'manualSearchComboBox')
+    product_code_line = dlg.findChild(QLineEdit, 'manualProductCodeLineEdit')
+    quantity_input = dlg.findChild(QLineEdit, 'manualQuantityLineEdit')
+    unit_price_input = dlg.findChild(QLineEdit, 'manualUnitPriceLineEdit') if hasattr(dlg, 'manualUnitPriceLineEdit') else None
+    error_label = dlg.findChild(QLabel, 'manualStatusLabel') or dlg.findChild(QLabel, 'lblError')
     btn_ok = dlg.findChild(QPushButton, 'btnManualOk')
     btn_cancel = dlg.findChild(QPushButton, 'btnManualCancel')
     custom_close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
 
-    # Use input_handler for validation
+
+    # Populate product name combo with all product names from PRODUCT_CACHE
+    if product_name_combo is not None:
+        product_name_combo.clear()
+        product_name_combo.addItem("Select Product", None)
+        for code, (name, price, unit) in PRODUCT_CACHE.items():
+            if name:
+                product_name_combo.addItem(name, code)
+
+    # When a product is selected, update the product code field
+    def on_product_selected(index):
+        if product_name_combo is None or product_code_line is None:
+            return
+        code = product_name_combo.itemData(index)
+        if code:
+            product_code_line.setText(code)
+        else:
+            product_code_line.clear()
+
+    if product_name_combo is not None:
+        product_name_combo.currentIndexChanged.connect(on_product_selected)
+
+    # Use input_handler for validation and ui_feedback for status
     def handle_ok():
         try:
-            product_name = input_handler.handle_product_name_input(product_name_input)
+            # Validate product selection
+            if product_name_combo is None or product_name_combo.currentIndex() <= 0:
+                ui_feedback.set_status_label(error_label, "Product name must be selected.", ok=False)
+                product_name_combo.setFocus()
+                return
+            # Validate product code
+            if product_code_line is None or not product_code_line.text().strip():
+                ui_feedback.set_status_label(error_label, "Product code missing.", ok=False)
+                product_code_line.setFocus()
+                return
+            # Validate quantity
             quantity = input_handler.handle_quantity_input(quantity_input)
-            unit_price = input_handler.handle_price_input(unit_price_input, price_type="unit price")
-            if error_label:
-                error_label.setText("✓ Adding to sale...")
-                error_label.setStyleSheet("color: #4caf50;")
+            # Validate unit price (if present)
+            unit_price = None
+            if unit_price_input is not None:
+                unit_price = input_handler.handle_price_input(unit_price_input, price_type="unit price")
+            # All good
+            ui_feedback.set_status_label(error_label, "✓ Adding to sale...", ok=True)
             dlg.manual_entry_result = {
-                'product_name': product_name,
+                'product_name': product_name_combo.currentText(),
+                'product_code': product_code_line.text().strip(),
                 'quantity': quantity,
                 'unit_price': unit_price
             }
             dlg.accept()
         except Exception as e:
-            if error_label:
-                error_label.setText(f"⚠ {str(e)}")
-                error_label.setStyleSheet("color: #ff6b6b;")
+            ui_feedback.set_status_label(error_label, f"{str(e)}", ok=False)
 
     def handle_cancel():
         dlg.reject()
