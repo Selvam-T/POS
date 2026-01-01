@@ -30,6 +30,7 @@ from modules.db_operation import (
     add_product, update_product, delete_product, refresh_product_cache,
     get_product_full, PRODUCT_CACHE
 )
+from modules.db_operation.database import _to_camel_case
 import modules.db_operation as dbop
 from modules.table import handle_barcode_scanned
 
@@ -43,8 +44,8 @@ ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
 UI_PATH = os.path.join(UI_DIR, 'product_menu.ui')
 
-DEFAULT_UNIT = 'EACH'
-DEFAULT_CATEGORY = 'Other'
+DEFAULT_UNIT = _to_camel_case('Each')
+DEFAULT_CATEGORY = _to_camel_case('Other')
 
 
 def _load_stylesheet() -> str:
@@ -270,12 +271,12 @@ def open_dialog_scanner_enabled(main_window, initial_mode: Optional[str] = None,
                 pass
 
     def find_code_by_exact_name(name: str) -> Optional[str]:
-        needle = (name or '').strip().lower()
+        needle = (name or '').strip().casefold()
         if not needle:
             return None
         for code, tup in PRODUCT_CACHE.items():
             nm = (tup[0] if tup else '') or ''
-            if nm.strip().lower() == needle:
+            if nm.strip().casefold() == needle:
                 return str(code)
         return None
 
@@ -285,12 +286,12 @@ def open_dialog_scanner_enabled(main_window, initial_mode: Optional[str] = None,
         if not found or not pdata:
             set_status('remove', 'Product not found.', ok=False)
             return
-        ui['remove']['name'].setText(pdata.get('name', '') or '')
-        ui['remove']['category'].setText(pdata.get('category', '') or '')
+        ui['remove']['name'].setText(_to_camel_case(pdata.get('name', '')) or '')
+        ui['remove']['category'].setText(_to_camel_case(pdata.get('category', '')) or '')
         ui['remove']['cost'].setText(str(pdata.get('cost_price', '') or ''))
         ui['remove']['sell'].setText(str(pdata.get('price', '') or ''))
-        ui['remove']['unit'].setText(pdata.get('unit', '') or DEFAULT_UNIT)
-        ui['remove']['supplier'].setText(pdata.get('supplier', '') or '')
+        ui['remove']['unit'].setText(_to_camel_case(pdata.get('unit', '')) or DEFAULT_UNIT)
+        ui['remove']['supplier'].setText(_to_camel_case(pdata.get('supplier', '')) or '')
         ui['remove']['last_updated'].setText(str(pdata.get('last_updated', '') or ''))
         set_status('remove', 'Product found.', ok=True)
 
@@ -299,18 +300,19 @@ def open_dialog_scanner_enabled(main_window, initial_mode: Optional[str] = None,
         if not found or not pdata:
             set_status('update', 'Product not found.', ok=False)
             return
-        ui['update']['name'].setText(pdata.get('name', '') or '')
+        ui['update']['name'].setText(_to_camel_case(pdata.get('name', '')) or '')
         combo = ui['update'].get('category')
         if combo:
             try:
-                idx = combo.findText(pdata.get('category', '') or '', Qt.MatchFixedString)
+                cat_val = _to_camel_case(pdata.get('category', '')) or DEFAULT_CATEGORY
+                idx = combo.findText(cat_val, Qt.MatchFixedString)
                 combo.setCurrentIndex(idx if idx >= 0 else 0)
             except Exception:
                 pass
         ui['update']['cost'].setText(str(pdata.get('cost_price', '') or ''))
         ui['update']['sell'].setText(str(pdata.get('price', '') or ''))
-        ui['update']['unit'].setText(pdata.get('unit', '') or DEFAULT_UNIT)
-        ui['update']['supplier'].setText(pdata.get('supplier', '') or '')
+        ui['update']['unit'].setText(_to_camel_case(pdata.get('unit', '')) or DEFAULT_UNIT)
+        ui['update']['supplier'].setText(_to_camel_case(pdata.get('supplier', '')) or '')
         ui['update']['last_updated'].setText(str(pdata.get('last_updated', '') or ''))
         set_status('update', 'Product found.', ok=True)
 
@@ -626,20 +628,16 @@ def open_dialog_scanner_enabled(main_window, initial_mode: Optional[str] = None,
 
     
     def code_exists_in_cache(code: str) -> bool:
-        c = (code or '').strip()
+        c = (code or '').strip().casefold()
         if not c:
             return False
         cache = getattr(dbop, 'PRODUCT_CACHE', None)
         if not cache:
             return False
-        if c in cache:
-            return True
-        # sometimes cache keys might be ints
-        try:
-            ci = int(c)
-            return ci in cache
-        except Exception:
-            return False
+        for k in cache:
+            if str(k).strip().casefold() == c:
+                return True
+        return False
 
 # ---- barcode override: route scans into active tab product code ----
     def barcode_override(barcode: str) -> bool:

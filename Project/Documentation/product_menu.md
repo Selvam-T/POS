@@ -39,6 +39,22 @@ Product Menu is launched via:
 
 - `dialog_wrapper.open_dialog_scanner_enabled()`
 
+---
+
+## Design Notes and Expected Behavior (2025-12-30)
+
+**1. Barcode scanning in product code fields:**
+- Barcode scanning is allowed in any field whose `objectName` ends with `ProductCodeLineEdit` (e.g., `addProductCodeLineEdit`, `removeProductCodeLineEdit`, `updateProductCodeLineEdit`).
+- The barcode override logic is generalized for all such fields, not just specific ones.
+- Users can scan barcodes into any product code field in any tab, and the scan will be processed correctly.
+
+**2. Manual typing in product code widgets:**
+- Manual typing is allowed in all product code widgets by default.
+- Input is only blocked if a modal block is explicitly activated (rare for product_menu).
+- In normal operation, users can freely type product codes in these fields.
+
+This design ensures both barcode scanning and manual entry are supported in product code fields, providing a consistent and user-friendly experience.
+
 This launcher uses a **scanner-enabled modal** approach: the dialog installs a **barcode override callback** rather than globally blocking scanner input.
 
 ### Barcode routing

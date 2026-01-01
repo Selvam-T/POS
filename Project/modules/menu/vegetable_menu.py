@@ -159,20 +159,23 @@ def open_vegetable_menu_dialog(host_window):
         
         if found and details.get('name'):
             # Populate fields with existing data
+            from modules.db_operation.database import _to_camel_case
             if input_product_name is not None:
-                input_product_name.setText(details.get('name', ''))
+                input_product_name.setText(_to_camel_case(details.get('name', '')))
             if input_selling_price is not None:
                 input_selling_price.setText(str(details.get('price', '')))
             if combo_unit is not None:
-                unit = details.get('unit', '').strip().upper()  # Normalize to uppercase
-                # Default to EACH if empty
+                unit = _to_camel_case(details.get('unit', ''))
+                # Default to Each if empty
                 if not unit:
-                    unit = 'EACH'
-                idx = combo_unit.findText(unit, Qt.MatchFixedString)
-                if idx >= 0:
-                    combo_unit.setCurrentIndex(idx)
+                    unit = _to_camel_case('Each')
+                # Case-insensitive match for unit
+                for i in range(combo_unit.count()):
+                    if combo_unit.itemText(i).strip().casefold() == unit.strip().casefold():
+                        combo_unit.setCurrentIndex(i)
+                        break
             if input_supplier is not None:
-                input_supplier.setText(details.get('supplier', ''))
+                input_supplier.setText(_to_camel_case(details.get('supplier', '')))
             if input_cost_price is not None:
                 cost = details.get('cost', None)
                 input_cost_price.setText(str(cost) if cost else '')
@@ -232,14 +235,15 @@ def open_vegetable_menu_dialog(host_window):
             code = f'Veg{i:02d}'
             found, details = get_product_full(code)
             if found and details.get('name'):
+                from modules.db_operation.database import _to_camel_case
                 vegetables.append({
                     'code': code,
-                    'name': details['name'],
+                    'name': _to_camel_case(details['name']),
                     'price': details.get('price', 0.0),
-                    'category': details.get('category', 'Vegetable'),
-                    'supplier': details.get('supplier', ''),
+                    'category': _to_camel_case(details.get('category', 'Vegetable')),
+                    'supplier': _to_camel_case(details.get('supplier', '')),
                     'cost': details.get('cost', None),
-                    'unit': details.get('unit', 'KG'),
+                    'unit': _to_camel_case(details.get('unit', 'Kg')),
                 })
         return vegetables
 
@@ -254,16 +258,17 @@ def open_vegetable_menu_dialog(host_window):
             delete_product(f'Veg{i:02d}')
         
         # Insert sorted vegetables sequentially
+        from modules.db_operation.database import _to_camel_case
         for i, veg in enumerate(sorted_vegs, start=1):
             now_str = QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss')
             add_product(
                 product_code=f'Veg{i:02d}',
-                name=veg['name'],
+                name=_to_camel_case(veg['name']),
                 selling_price=veg['price'],
-                category=veg.get('category', 'Vegetable'),
-                supplier=veg.get('supplier'),
+                category=_to_camel_case(veg.get('category', 'Vegetable')),
+                supplier=_to_camel_case(veg.get('supplier')),
                 cost_price=veg.get('cost'),
-                unit=veg.get('unit', 'KG'),
+                unit=_to_camel_case(veg.get('unit', 'Kg')),
                 last_updated=now_str
             )
         
@@ -296,12 +301,13 @@ def open_vegetable_menu_dialog(host_window):
             show_error('Error: Invalid selling price')
             return
         
-        unit = combo_unit.currentText().strip().upper() if combo_unit else 'EACH'
+        from modules.db_operation.database import _to_camel_case
+        unit = _to_camel_case(combo_unit.currentText().strip()) if combo_unit else _to_camel_case('Each')
         # Ensure valid unit
-        if unit not in ['KG', 'EACH']:
-            unit = 'EACH'
-        category = 'Vegetable'
-        supplier = input_supplier.text().strip() if input_supplier and input_supplier.text().strip() else None
+        if unit not in [_to_camel_case('Kg'), _to_camel_case('Each')]:
+            unit = _to_camel_case('Each')
+        category = _to_camel_case('Vegetable')
+        supplier = _to_camel_case(input_supplier.text().strip()) if input_supplier and input_supplier.text().strip() else None
         
         cost = None
         if input_cost_price and input_cost_price.text().strip():
@@ -322,7 +328,7 @@ def open_vegetable_menu_dialog(host_window):
         
         new_veg = {
             'code': selected_code,
-            'name': name,
+            'name': _to_camel_case(name),
             'price': price,
             'category': category,
             'supplier': supplier,

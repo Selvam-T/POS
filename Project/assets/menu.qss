@@ -165,6 +165,12 @@ QComboBox[objectName$="ComboBox"]::drop-down {
     border-left: 1px solid #c7cdd6;
 }
 
+QComboBox[objectName$="ComboBox"]::down-arrow {
+    image: url(assets/icons/down_arrow.svg);
+    width: 18px;
+    height: 18px;
+}
+
 QComboBox[objectName$="ComboBox"] QAbstractItemView {
     background-color: #ffffff;
     border: 1px solid #c7cdd6;

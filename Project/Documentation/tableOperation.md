@@ -117,6 +117,19 @@ setup_sales_table(sales_table)
 bind_total_label(sales_table, total_label)  # total_label is a QLabel instance
 ```
 
+## Case-Insensitive Product Lookup and CamelCase Normalization
+
+- All product codes and names are normalized to CamelCase (title case, trimmed) when updating or looking up in PRODUCT_CACHE and the database.
+- Product lookups (by code or name) are case-insensitive, ensuring consistent behavior regardless of input case.
+- The cache and database always store and compare product codes and names in a normalized form, preventing duplicates due to case differences.
+- When adding or updating products, both product code and product name must be unique (enforced at the database level for name, and by PRIMARY KEY for code).
+- Example: Adding 'apple', 'Apple', or 'APPLE' as product names will all be treated as the same and only one can exist.
+
+### Technical Details
+- PRODUCT_CACHE keys and values are normalized using the `_to_camel_case` and `_norm` functions.
+- Database queries for product name uniqueness use `COLLATE NOCASE` to enforce case-insensitive uniqueness.
+- The UI and all table operations use the normalized product name and code for display and lookup.
+
 ## Integration
 - The sales table is set up and bound to the total label in `modules/sales/sales_frame_setup.py`.
 - The vegetable entry table uses the same functions with `editable=False` for weight-based products.

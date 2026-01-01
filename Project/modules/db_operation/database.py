@@ -105,10 +105,10 @@ def load_product_cache(db_path: str = DB_PATH) -> bool:
         
         for row in rows:
             product_code, name, selling_price, unit = row
-            PRODUCT_CACHE[_norm(product_code)] = (
-                str(name) if name is not None else '',
+            PRODUCT_CACHE[_to_camel_case(product_code)] = (
+                _to_camel_case(name) if name is not None else '',
                 float(selling_price) if selling_price is not None else 0.0,
-                str(unit).strip().upper() if unit is not None else 'EACH',  # Default to EACH if unit is NULL
+                _to_camel_case(unit) if unit is not None else 'Each',  # Default to Each if unit is NULL
             )
         
         conn.close()
@@ -256,14 +256,15 @@ def add_product(
         code_norm = _to_camel_case(product_code)
         category_norm = _to_camel_case(category) if category is not None else None
         supplier_norm = _to_camel_case(supplier) if supplier is not None else None
+        unit_norm = _to_camel_case(unit) if unit is not None else 'Each'
 
+        # Check for duplicate product name (case-insensitive)
         conn = sqlite3.connect(db_path)
         cur = conn.cursor()
-        # Enforce unique name at app level (case-insensitive, trimmed)
-        cur.execute("SELECT 1 FROM Product_list WHERE TRIM(name)=TRIM(?) COLLATE NOCASE", (name_norm,))
+        cur.execute("SELECT product_code FROM Product_list WHERE name = ? COLLATE NOCASE", (name_norm,))
         if cur.fetchone():
             conn.close()
-            return False, "Product name must be unique"
+            return False, "Product name already exists"
         # Default timestamp if not provided
         if last_updated is None:
             last_updated = _now_str()
@@ -280,7 +281,7 @@ def add_product(
                 supplier_norm,
                 float(selling_price) if selling_price is not None else 0.0,
                 float(cost_price) if cost_price is not None else None,
-                unit,
+                unit_norm,
                 last_updated,
             ),
         )
@@ -289,14 +290,17 @@ def add_product(
         # Update cache with name, price, and unit
         # Ensure only normalized key exists in cache
         _remove_cache_variants(code_norm)
-        PRODUCT_CACHE[_norm(code_norm)] = (
-            str(name_norm) if name_norm is not None else '',
+        PRODUCT_CACHE[code_norm] = (
+            name_norm if name_norm is not None else '',
             float(selling_price) if selling_price is not None else 0.0,
-            str(unit).strip().upper() if unit is not None else 'EACH',
+            unit_norm,
         )
         return True, "Product added"
-    except sqlite3.IntegrityError:
-        return False, "Product already exists"
+    except sqlite3.IntegrityError as e:
+        # Distinguish between product code and name uniqueness
+        if 'uq_product_name_nocase' in str(e):
+            return False, "Product name already exists"
+        return False, "Product code already exists"
     except sqlite3.Error as e:
         return False, f"DB error: {e}"
     except Exception as e:
@@ -321,19 +325,17 @@ def update_product(
             return False, "Product code required"
         sets = []
         params = []
+        name_norm = None
         if name is not None:
             name_norm = _to_camel_case(name)
-            # Enforce unique name excluding current product
-            conn_chk = sqlite3.connect(db_path)
-            cur_chk = conn_chk.cursor()
-            cur_chk.execute(
-                "SELECT 1 FROM Product_list WHERE TRIM(name)=TRIM(?) COLLATE NOCASE AND product_code <> ?",
-                (name_norm, product_code),
-            )
-            exists = cur_chk.fetchone()
-            conn_chk.close()
-            if exists:
-                return False, "Product name must be unique"
+            # Check for duplicate name (case-insensitive, different product_code)
+            conn = sqlite3.connect(db_path)
+            cur = conn.cursor()
+            cur.execute("SELECT product_code FROM Product_list WHERE name = ? COLLATE NOCASE AND product_code != ? COLLATE NOCASE", (name_norm, _to_camel_case(product_code)))
+            if cur.fetchone():
+                conn.close()
+                return False, "Product name already exists"
+            conn.close()
             sets.append("name = ?")
             params.append(name_norm)
         if selling_price is not None:
@@ -349,14 +351,15 @@ def update_product(
             sets.append("cost_price = ?")
             params.append(float(cost_price))
         if unit is not None:
+            unit_norm = _to_camel_case(unit)
             sets.append("unit = ?")
-            params.append(unit)
+            params.append(unit_norm)
         if not sets:
             return False, "No fields to update"
         # Always update last_updated
         sets.append("last_updated = ?")
         params.append(_now_str())
-        params.append(product_code)
+        params.append(_to_camel_case(product_code))
         conn = sqlite3.connect(db_path)
         cur = conn.cursor()
         cur.execute(f"UPDATE Product_list SET {', '.join(sets)} WHERE product_code = ?", params)
@@ -366,11 +369,11 @@ def update_product(
         conn.commit()
         conn.close()
         # Update cache with provided name/price/unit (keep existing if not provided)
-        key = _norm(product_code)
-        curr_name, curr_price, curr_unit = PRODUCT_CACHE.get(key, ('', 0.0, 'EACH'))
+        key = _to_camel_case(product_code)
+        curr_name, curr_price, curr_unit = PRODUCT_CACHE.get(key, ('', 0.0, 'Each'))
         new_name = curr_name if name is None or str(name) == '' else _to_camel_case(name)
         new_price = curr_price if selling_price is None else float(selling_price)
-        new_unit = curr_unit if unit is None else str(unit).strip().upper()
+        new_unit = curr_unit if unit is None else _to_camel_case(unit)
         _remove_cache_variants(product_code)
         PRODUCT_CACHE[key] = (new_name, new_price, new_unit)
         return True, "Product updated"
@@ -387,7 +390,7 @@ def delete_product(product_code: str, db_path: str = DB_PATH) -> Tuple[bool, str
             return False, f"Database not found at: {db_path}"
         conn = sqlite3.connect(db_path)
         cur = conn.cursor()
-        cur.execute("DELETE FROM Product_list WHERE product_code = ?", (product_code,))
+        cur.execute("DELETE FROM Product_list WHERE product_code = ? COLLATE NOCASE", (product_code,))
         if cur.rowcount == 0:
             conn.close()
             return False, "Product not found"

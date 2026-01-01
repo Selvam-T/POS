@@ -24,6 +24,23 @@
 
 Barcode scanning is now allowed in any field whose `objectName` ends with `ProductCodeLineEdit` (e.g., `addProductCodeLineEdit`, `removeProductCodeLineEdit`, `updateProductCodeLineEdit`, etc.). This convention applies across all dialogs that support barcode entry.
 
+---
+
+## Design Notes and Expected Behavior (2025-12-30)
+
+**1. Barcode override and scanning in product code fields:**
+- The barcode override logic is generalized: barcode scanning is allowed in any field whose `objectName` ends with `ProductCodeLineEdit` across all dialogs, not just specific fields or search combos.
+- This ensures that barcode scans are always accepted in product code entry fields, as long as the naming convention is followed.
+- Expected behavior: Users can scan barcodes into any product code field in any dialog, and the scan will be processed correctly.
+
+**2. Manual typing in product code widgets:**
+- Manual typing is allowed in all product code widgets (e.g., addProductCodeLineEdit) by default.
+- The event filter only blocks manual typing when `_modalBlockScanner` is explicitly set to `True` (e.g., during certain modal dialogs that require blocking input).
+- In normal operation (such as the ADD tab of product_menu), `_modalBlockScanner` is `False`, so users can freely type in product code fields.
+- Expected behavior: Users can always type product codes manually in these fields unless a modal block is specifically activated.
+
+This design ensures both barcode scanning and manual entry are supported in product code fields, providing a consistent and user-friendly experience.
+
 **Editable Fields:**
 - Any `QLineEdit` whose `objectName` ends with `ProductCodeLineEdit` (for product code entry in any dialog)
 - `qtyInput` — Quantity input in manual entry and vegetable entry dialogs
