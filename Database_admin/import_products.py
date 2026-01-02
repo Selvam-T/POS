@@ -19,6 +19,7 @@ import sys
 from pathlib import Path
 from datetime import datetime
 
+
 # Camel case normalization (copied from export_products.py)
 def to_camel_case(text: str) -> str:
     if text is None:
@@ -30,6 +31,22 @@ def to_camel_case(text: str) -> str:
         s = s.replace(sep, ' ')
     parts = [p for p in s.split(' ') if p]
     return ' '.join(w[:1].upper() + w[1:].lower() if w else '' for w in parts)
+
+# Unit normalization: map variants to canonical 'Kg' or 'Each'
+def _normalize_unit(unit: str) -> str:
+    if not unit or not unit.strip():
+        return 'Each'
+    u = unit.strip().lower()
+    # Reasonable variants for KG
+    kg_variants = {'KG', 'kg', 'Kg', 'kilo', 'kilogram', 'kilograms', 'kgs', 'kilos'}
+    # Reasonable variants for EACH
+    each_variants = {'EACH', 'EA', 'Each', 'each', 'ea', 'unit', 'piece', 'pieces', 'count', 'item', 'items'}
+    if u in kg_variants:
+        return 'Kg'
+    if u in each_variants:
+        return 'Each'
+    # Fallback: title case
+    return to_camel_case(unit)
 
 
 def load_config():
@@ -131,7 +148,7 @@ def import_products(overwrite=False):
                     supplier = to_camel_case(row.get('supplier', '').strip()) or None
                     cost_price_str = row.get('cost_price', '').strip()
                     cost_price = float(cost_price_str) if cost_price_str else None
-                    unit = to_camel_case(row.get('unit', '').strip()) or None
+                    unit = _normalize_unit(row.get('unit', ''))
                     last_updated = row.get('last_updated', '').strip() or datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     
                     # Check if product exists
