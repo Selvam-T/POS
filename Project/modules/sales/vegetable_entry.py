@@ -1,12 +1,4 @@
-# --- Vegetable Entry Dialog Controller ---
-"""Vegetable Entry Dialog - allows selecting vegetables from a 4x4 grid.
 
-Each vegetable button triggers weighing (for KG items) or increments count (for EACH items).
-The dialog maintains an internal table (vegEntryTable) that accumulates selections.
-Duplicate detection: uses shared table_operations functions (find_product_in_table, increment_row_quantity)
-for consistent duplicate handling across barcode scanning and vegetable entry.
-On OK, all rows are transferred to the main sales table with duplicate merging.
-"""
 import os
 from typing import List, Dict, Optional
 from PyQt5 import uic
@@ -18,9 +10,7 @@ from functools import partial
 from modules.wrappers import settings as app_settings
 from modules.db_operation import get_product_info, get_product_full
 from modules.db_operation.database import PRODUCT_CACHE
-from modules.table import setup_sales_table
-from modules.table import find_product_in_table, increment_row_quantity
-from modules.table.table_operations import set_table_rows
+
 
 
 def weight_simulation() -> int:
@@ -78,9 +68,8 @@ def open_vegetable_entry_dialog(parent):
     try:
         vtable = dlg.findChild(QTableWidget, 'vegEntryTable')
         if vtable is not None:
+            from modules.table.table_operations import setup_sales_table
             setup_sales_table(vtable)
-            
-            # Additional vegetable table settings
             vtable.setEditTriggers(QTableWidget.NoEditTriggers)
             vtable.setSelectionBehavior(QTableWidget.SelectRows)
             vtable.setSelectionMode(QTableWidget.SingleSelection)

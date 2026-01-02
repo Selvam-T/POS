@@ -4,7 +4,6 @@ Provides generic table setup and manipulation functions for product tables.
 """
 from .table_operations import (
     setup_sales_table,
-    remove_table_row,
     recalc_row_total,
     get_row_color,
     bind_total_label,
@@ -17,7 +16,6 @@ from .table_operations import (
 )
 __all__ = [
     'setup_sales_table',
-    'remove_table_row',
     'recalc_row_total',
     'get_row_color',
     'bind_total_label',

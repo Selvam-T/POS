@@ -132,16 +132,6 @@ def setup_sales_table(table: QTableWidget) -> None:
     # Start with empty table - products will be added via barcode scanner
     set_table_rows(table, [])
 
-def display_unit(unit, quantity):
-    """Return display string for unit column based on canonical unit and quantity."""
-    if unit is None:
-        return ''
-    u = unit.lower()
-    if u == 'each':
-        return 'ea'
-    if u == 'kg':
-        return 'g' if quantity < 1 else 'kg'
-    return unit
 
 
 def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: Optional[QStatusBar] = None) -> None:
@@ -269,48 +259,7 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         pass
 
 
-def remove_table_row(table: QTableWidget, row: int) -> None:
-    if 0 <= row < table.rowCount():
-        table.removeRow(row)
-        # Clear any selection so no row shows as highlighted
-        try:
-            table.clearSelection()
-        except Exception:
-            pass
-        # Renumber the No. column and reapply alternating colors after removal
-        for r in range(table.rowCount()):
-            # Get alternating row color
-            row_color = get_row_color(r)
-            
-            # Update row number
-            num_item = table.item(r, 0)
-            if num_item is None:
-                num_item = QTableWidgetItem()
-                num_item.setFlags(num_item.flags() & ~Qt.ItemIsEditable)
-                table.setItem(r, 0, num_item)
-            num_item.setText(str(r + 1))
-            num_item.setBackground(QBrush(row_color))
-            
-            # Update colors for other item-based cells
-            for col in [1, 3, 4, 5]:  # Product, Unit, Unit Price, Total
-                item = table.item(r, col)
-                if item is not None:
-                    item.setBackground(QBrush(row_color))
-            
-            # Update container background for columns 2 and 6 (widgets)
-            for col in [2, 6]:  # Quantity, Remove button
-                container = table.cellWidget(r, col)
-                if container is not None:
-                    # Column 2 (quantity) keeps row color, column 6 (delete button) stays transparent
-                    if col == 2:
-                        container.setStyleSheet(f"background-color: {row_color.name()};")
-                    else:  # col == 6
-                        container.setStyleSheet("background-color: transparent;")
-        # Update the aggregated total if bound
-        try:
-            _update_total_value(table)
-        except Exception:
-            pass
+
 
 
 def _recalc_from_editor(editor: QLineEdit, table: QTableWidget) -> None:
