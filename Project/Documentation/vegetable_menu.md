@@ -80,12 +80,13 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
 ### Unit Selection Logic
 - **KG mode:** Vegetable entry expects weight from weighing scale (simulated 600g), quantity cells READ-ONLY
 - **EACH mode:** Vegetable entry does not expect scale reading, uses editable piece count
-- **Standardized units:** Only KG or EACH allowed (dropdown options)
-- **Case-insensitive handling:** Controller normalizes to uppercase (`.strip().upper()`) before save
-- **Lookup normalization:** Unit comparison uses uppercase for dropdown population (`findText(unit.upper())`)
-- **Database storage:** All units stored uppercase (KG or EACH)
-- **Default handling:** Empty/NULL units default to EACH
-- Controller must handle unit-specific behavior in `vegetable_entry.py`
+- **Standardized units:** Only canonical units "Kg" or "Each" are allowed and stored. All entry points (menu, barcode, dialogs) canonicalize units before saving or merging.
+- **Canonicalization:** All unit strings are converted to canonical form ("Kg" or "Each") using `canonicalize_unit()` before any database, cache, or table operation.
+- **Dropdown options:** Only "Kg" and "Each" are available for selection.
+- **Database and cache:** All units are stored as "Kg" or "Each" (never mixed case or synonyms).
+- **Default handling:** Empty/NULL units default to "Each".
+- **Merging and display:** All merging and duplicate logic uses canonical units. Table display logic (unit column, editable state) is handled by `set_table_rows()`.
+- **Behavior:** KG items are always read-only in the table; EACH items are always editable.
 
 ### Required vs Optional Fields
 - **Required (marked with *):**

@@ -1,13 +1,13 @@
 # Vegetable Entry Dialog and Selection Workflow
 
-This document describes the workflow for the Vegetable Entry dialog, where users select vegetables with unit-aware behavior: KG items require weighing scale input (simulated 600g), while EACH items use editable quantity counts.
+This document describes the workflow for the Vegetable Entry dialog, where users select vegetables with unit-aware behavior: KG items require weighing scale input (simulated 600g), while EACH items use editable quantity counts. All units are canonicalized to "Kg" or "Each" at every entry point, and all merging, display, and table logic is unified and robust.
 
 ## Key Components
 
 - **UI File:** `ui/vegetable_entry.ui` — layout for the entry dialog (16 button grid, table, OK/CANCEL controls).
 - **Logic:** `modules/sales/vegetable_entry.py` — controller for dialog, table setup, button selection, unit-based behavior, and duplicate handling.
 - **Settings:** `modules/wrappers/settings.py` — manages vegetable label configuration and persistence (used by the Vegetable Menu editor).
-- **Database:** `modules/db_operation/database.py` — provides product info with unit (KG/EACH) from PRODUCT_CACHE.
+- **Database:** `modules/db_operation/database.py` — provides product info with canonical unit ("Kg"/"Each") from PRODUCT_CACHE. All units are canonicalized before any operation.
 
 ## Dialog Layout
 
@@ -62,19 +62,21 @@ This document describes the workflow for the Vegetable Entry dialog, where users
 When user clicks a KG vegetable button:
 1. Dialog reads weighing scale (simulated: 600g = 0.6 kg)
 2. Adds row to vegEntryTable with:
-   - `quantity`: Numeric weight in kg (e.g., `0.6`, stored for calculations)
-   - **Display**: "600" in Quantity column, "g" in Unit column
-   - `editable`: `False` (quantity cell is READ-ONLY)
+    - `quantity`: Numeric weight in kg (e.g., `0.6`, stored for calculations)
+    - **Display**: "600" in Quantity column, "g" in Unit column
+    - `editable`: `False` (quantity cell is READ-ONLY)
 3. **Duplicate handling:** If same KG item clicked again, ADDS weights (e.g., 600g + 600g = 1200g)
-   - Updates to display "1.20" in Quantity, "kg" in Unit
+    - Updates to display "1.20" in Quantity, "kg" in Unit
+    - All merging is handled via a canonical data list and table rebuild, ensuring no duplicate rows.
 
 ### EACH Items (Count-Based)
 When user clicks an EACH vegetable button:
 1. Adds row to vegEntryTable with:
-   - `quantity`: Numeric count (default: `1`)
-   - **Display**: Integer (e.g., "1") in Quantity column, "ea" in Unit column
-   - `editable`: `True` (quantity cell is EDITABLE, integer only, max 9999)
+    - `quantity`: Numeric count (default: `1`)
+    - **Display**: Integer (e.g., "1") in Quantity column, "ea" in Unit column
+    - `editable`: `True` (quantity cell is EDITABLE, integer only, max 9999)
 2. **Duplicate handling:** If same EACH item clicked again, INCREMENTS quantity by 1
+    - All merging is handled via a canonical data list and table rebuild, ensuring no duplicate rows.
 
 ### Unit Detection Logic
 ```python
@@ -98,27 +100,12 @@ else:
 Uses `modules.table.table_operations.setup_sales_table()` for column configuration and styling.
 
 ### Row Management
-- **Add row:** `_add_vegetable_row()` checks for duplicates, handles unit-specific behavior
+- **Add row:** `_add_vegetable_row()` checks for duplicates and merges using canonical units and a single data list, then calls `set_table_rows()` to rebuild the table.
 - **Remove row:** Click DEL button (SVG icon, 32x32, row height 48px)
 - **Rebuild table:** `_rebuild_vegetable_table()` respects per-row editable states
 
 ### Duplicate Detection
-```python
-# From _add_vegetable_row()
-existing_row_index = _find_product_in_table(vegEntryTable, product_name)
-if existing_row_index is not None:
-    if unit_upper == 'EACH':
-        # Increment quantity by 1
-        current_qty = get_numeric_value(qty_widget)
-        new_qty = current_qty + 1
-        qty_widget.setText(str(int(new_qty)))
-    elif unit_upper == 'KG':
-        # Add weights
-        current_weight = get_numeric_value(qty_widget)
-        new_weight = current_weight + weight
-        qty_widget.setText(format_weight(new_weight))
-        qty_widget.setProperty('numeric_value', new_weight)
-```
+All duplicate detection and merging is handled by scraping the table to a canonical data list, merging by product name and canonical unit, and then rebuilding the table. No in-place cell updates are performed; all changes go through the data list and `set_table_rows()`.
 
 ## Transfer to Sales Table
 

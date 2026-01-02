@@ -1,3 +1,42 @@
+from typing import List, Dict, Any, Optional
+from PyQt5.QtCore import Qt, QEvent, QObject, QTimer
+from PyQt5.QtWidgets import (
+    QWidget,
+    QTableWidget,
+    QTableWidgetItem,
+    QHBoxLayout,
+    QPushButton,
+    QLineEdit,
+    QStatusBar,
+    QLabel,
+    QHeaderView
+)
+
+def get_sales_data(table: QTableWidget) -> List[Dict[str, Any]]:
+    """
+    Converts the current Table UI back into a List of Dicts.
+    This is the "Single Source of Truth" for merging and deletions.
+    """
+    from modules.table.unit_helpers import canonicalize_unit
+    rows = []
+    for r in range(table.rowCount()):
+        name_item = table.item(r, 1)
+        unit_item = table.item(r, 3)
+        price_item = table.item(r, 4)
+        qty_container = table.cellWidget(r, 2)
+        if not name_item or not qty_container:
+            continue
+        editor = qty_container.findChild(QLineEdit, 'qtyInput')
+        # Use the stored 'numeric_value' property (the Kg/Count float)
+        qty = float(editor.property('numeric_value') or 0.0) if editor else 0.0
+        rows.append({
+            'product_name': name_item.text(),
+            'quantity': qty,
+            'unit_price': float(price_item.text() or 0.0) if price_item else 0.0,
+            'unit': canonicalize_unit(unit_item.text()) if unit_item else '',
+            'editable': not editor.isReadOnly() if editor else False
+        })
+    return rows
 
 """POS sales table functions (see docs for details)."""
 from typing import List, Dict, Any, Optional
@@ -106,18 +145,14 @@ def display_unit(unit, quantity):
 
 
 def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: Optional[QStatusBar] = None) -> None:
-    # Debug print removed
-    """Rebuild table with per-row editable states based on product unit type.
-
-    The editable state is determined when products are added:
-    - KG items (requires weighing): editable=False, display shows weight (e.g., "600 g")
-    - EACH items (count-based): editable=True, display shows numeric count
-
-    Unit information comes from PRODUCT_CACHE which includes (name, price, unit).
+    """
+    Display logic only: Rebuilds the table from the provided canonical data rows.
+    Does not mutate or merge data. All logic for merging, canonicalization, and data updates
+    should be handled before calling this function.
 
     Args:
         table: QTableWidget to populate
-        rows: List of row dicts with keys: product, quantity, unit_price, editable, display_text (optional)
+        rows: List of row dicts with canonical keys: product_name, quantity, unit_price, unit, editable
         status_bar: Optional status bar for messages
     """
     from PyQt5.QtWidgets import QTableWidgetItem, QHBoxLayout, QPushButton, QLineEdit, QWidget
@@ -125,18 +160,18 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
     from PyQt5.QtCore import QSize, Qt
     from functools import partial
     from config import ICON_DELETE
+    from modules.table.unit_helpers import get_display_unit
 
     table.setRowCount(0)
 
-    from modules.table.unit_helpers import get_display_unit
     for r, data in enumerate(rows):
         table.insertRow(r)
-
         row_color = get_row_color(r)
         product_name = str(data.get('product_name', data.get('product', '')))
         qty_val = data.get('quantity', 1)
         unit_price = data.get('unit_price', 0.0)
         editable = data.get('editable', True)
+        unit_canon = data.get('unit', '')
 
         # Col 0: Row number
         item_no = QTableWidgetItem(str(r + 1))
@@ -145,7 +180,7 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         item_no.setBackground(QBrush(row_color))
         table.setItem(r, 0, item_no)
 
-        # Col 1: Product name (display)
+        # Col 1: Product name
         item_product = QTableWidgetItem(product_name)
         item_product.setFlags(item_product.flags() & ~Qt.ItemIsEditable)
         item_product.setBackground(QBrush(row_color))
@@ -188,21 +223,20 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         table.setCellWidget(r, 2, qty_container)
 
         # Col 3: Unit (non-editable item) - use get_display_unit for display
-        unit_canon = data.get('unit', '')
         display_unit = get_display_unit(unit_canon, float(qty_val))
         item_unit = QTableWidgetItem(display_unit)
         item_unit.setTextAlignment(Qt.AlignCenter)
         item_unit.setFlags(item_unit.flags() & ~Qt.ItemIsEditable)
         item_unit.setBackground(QBrush(row_color))
         table.setItem(r, 3, item_unit)
-        
+
         # Col 4: Unit Price
         item_price = QTableWidgetItem(f"{unit_price:.2f}")
         item_price.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
         item_price.setFlags(item_price.flags() & ~Qt.ItemIsEditable)
         item_price.setBackground(QBrush(row_color))
         table.setItem(r, 4, item_price)
-        
+
         # Col 5: Total
         total = float(qty_val) * float(unit_price)
         item_total = QTableWidgetItem(f"{total:.2f}")
@@ -210,7 +244,7 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         item_total.setFlags(item_total.flags() & ~Qt.ItemIsEditable)
         item_total.setBackground(QBrush(row_color))
         table.setItem(r, 5, item_total)
-        
+
         # Col 6: Remove button
         btn = QPushButton()
         btn.setObjectName('removeBtn')
@@ -220,7 +254,7 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         btn.setAutoFillBackground(False)
         btn.pressed.connect(partial(_highlight_row_by_button, table, btn))
         btn.clicked.connect(partial(_remove_by_button, table, btn))
-        
+
         container = QWidget()
         container.setStyleSheet("background-color: transparent;")
         lay = QHBoxLayout(container)
@@ -228,7 +262,7 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         lay.setSpacing(0)
         lay.addWidget(btn, 0, Qt.AlignCenter)
         table.setCellWidget(r, 6, container)
-    
+
     try:
         _update_total_value(table)
     except Exception:
@@ -367,15 +401,21 @@ def _remove_by_button(table: QTableWidget, btn: QPushButton) -> None:
     Looks up the row containing the provided button and removes it.
     Robust against row reordering/renumbering.
     """
+    # Get current data from UI
+    data = get_sales_data(table)
     # Find the row whose column 6 cell contains this button instance
+    idx_to_remove = -1
     for r in range(table.rowCount()):
         cell = table.cellWidget(r, 6)
         if cell is None:
             continue
         child = cell.findChild(QPushButton, 'removeBtn')
         if child is btn:
-            remove_table_row(table, r)
-            return
+            idx_to_remove = r
+            break
+    if idx_to_remove != -1:
+        data.pop(idx_to_remove)
+        set_table_rows(table, data)
 
 
 def _highlight_row_for_deletion(table: QTableWidget, row: int) -> None:
@@ -578,6 +618,7 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
     # Look up product in cache (includes unit type)
     from modules.table.unit_helpers import canonicalize_unit
     found, product_name, unit_price, unit = get_product_info(barcode)
+    from modules.table.unit_helpers import canonicalize_unit
     unit_canon = canonicalize_unit(unit)
 
     if not found:
@@ -655,23 +696,11 @@ def increment_row_quantity(table: QTableWidget, row: int) -> None:
         table: QTableWidget containing the row
         row: Row index to update
     """
-    # Get current quantity from column 2 (QLineEdit in container)
-    qty_container = table.cellWidget(row, 2)
-    if qty_container is None:
-        return
-        
-    editor = qty_container.findChild(QLineEdit, 'qtyInput')
-    if editor is None:
-        return
-        
-    try:
-        current_qty = float(editor.text()) if editor.text() else 0.0
-        new_qty = current_qty + 1
-        editor.setText(str(int(new_qty)))
-        # recalc_row_total will be triggered by textChanged signal
-    except ValueError:
-        # If text is invalid, reset to 1
-        editor.setText('1')
+    # Canonical increment using get_sales_data and set_table_rows
+    data = get_sales_data(table)
+    if 0 <= row < len(data):
+        data[row]['quantity'] += 1
+        set_table_rows(table, data)
 
 
 def _add_product_row(table: QTableWidget, product_code: str, product_name: str, 

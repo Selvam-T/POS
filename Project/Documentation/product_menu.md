@@ -32,30 +32,56 @@ Triggered when the cashier scans a barcode that **is not found** in `PRODUCT_CAC
 
 ---
 
+
+# Product Menu (Product Management Dialog)
+
+Updated: January 2, 2026
+
+This doc replaces the legacy `product_menu.md`. It documents the current **product_menu controller** behavior and the design decisions implemented as of January 2026.
+
+---
+
+## Purpose
+
+The Product Menu is a modal dialog used to manage the product table via **ADD / REMOVE / UPDATE** operations. It integrates with:
+
+- Database CRUD functions (`modules.db_operation`)
+- In-memory cache (`PRODUCT_CACHE`) kept in sync after CRUD
+- Barcode scanner routing (`BarcodeManager` override path)
+- Sales table flow (re-process scan after a successful ADD when opened from sales)
+
+---
+
+## Canonical Unit Handling (2026 Update)
+
+- **All product units are canonicalized to either "Kg" or "Each" at every entry point** (manual, barcode, dialog, CRUD).
+- The UI, database, and cache never store or display non-canonical units.
+- All entry points (menu, barcode, dialogs) canonicalize units before saving or merging using `canonicalize_unit()`.
+- Only "Kg" or "Each" are valid and stored in the database, cache, and all table operations.
+
+---
+
+## Entry Routes (2 ways to open)
+
+### Route A — From Menu Frame (admin/product management)
+- Opens Product Menu with **ADD / REMOVE / UPDATE tabs enabled**.
+- Lands on **ADD tab** by default.
+- User can switch tabs freely.
+
+### Route B — From Sales Frame (missing barcode)
+Triggered when the cashier scans a barcode that **is not found** in `PRODUCT_CACHE`.
+- Product Menu opens in **ADD mode** with the scanned code prefilled.
+- **REMOVE / UPDATE tabs are disabled** (business rule).
+- After successful ADD, the barcode is re-processed into the sales table so the item appears in the transaction.
+
+---
+
 ## Modal + Scanner Behavior (how it works)
 
 ### Launcher
 Product Menu is launched via:
 
 - `dialog_wrapper.open_dialog_scanner_enabled()`
-
----
-
-## Design Notes and Expected Behavior (2025-12-30)
-
-**1. Barcode scanning in product code fields:**
-- Barcode scanning is allowed in any field whose `objectName` ends with `ProductCodeLineEdit` (e.g., `addProductCodeLineEdit`, `removeProductCodeLineEdit`, `updateProductCodeLineEdit`).
-- The barcode override logic is generalized for all such fields, not just specific ones.
-- Users can scan barcodes into any product code field in any tab, and the scan will be processed correctly.
-
-**2. Manual typing in product code widgets:**
-- Manual typing is allowed in all product code widgets by default.
-- Input is only blocked if a modal block is explicitly activated (rare for product_menu).
-- In normal operation, users can freely type product codes in these fields.
-
-This design ensures both barcode scanning and manual entry are supported in product code fields, providing a consistent and user-friendly experience.
-
-This launcher uses a **scanner-enabled modal** approach: the dialog installs a **barcode override callback** rather than globally blocking scanner input.
 
 ### Barcode routing
 - `BarcodeManager` receives a scan string.
@@ -126,9 +152,7 @@ Editable + validated:
 - CostPrice (optional numeric)
 - SellingPrice (mandatory numeric)
 - Supplier
-
-Not editable:
-- Unit: default `EACH` and treated as display-only
+- Unit (dropdown, only "Kg" or "Each"; always canonicalized before save)
 
 ### REMOVE tab
 Editable:
@@ -153,9 +177,9 @@ Editable:
 - CostPrice
 - SellingPrice
 - Supplier
+- Unit (dropdown, only "Kg" or "Each"; always canonicalized before save)
 
 Display-only:
-- Unit: default `EACH`
 - LastUpdated: display-only (set by DB and reflected in UI)
 
 ---
@@ -170,6 +194,7 @@ Rules:
 - In all tabs, **ProductCode** is mandatory.
 - If **ProductName** and **SellingPrice** are editable in the tab, they are mandatory too.
   - (REMOVE tab displays name/price as read-only, so those are not validated there.)
+- **Unit** is always validated and canonicalized to "Kg" or "Each" before any save or update.
 
 Status/error propagation:
 - `input_validation` returns True/False (+ error text).
@@ -218,7 +243,7 @@ Scan/manual code entry behavior:
 ## Data Sources & Population
 
 ### Primary source for lookups
-- `PRODUCT_CACHE` is considered authoritative during runtime.
+- `PRODUCT_CACHE` is considered authoritative during runtime and always stores canonical units ("Kg" or "Each").
 - Full record for display is loaded using:
   - `get_product_full(code)`
 
@@ -232,10 +257,11 @@ Scan/manual code entry behavior:
 
 ### ADD
 When OK is clicked and mandatory fields pass:
-1. Create record in DB (`add_product(...)`) including `last_updated` timestamp formatted as `yyyy-MM-dd HH:mm:ss`
-2. Refresh in-memory cache (`refresh_product_cache()`)
-3. Show green confirmation in ADD status label
-4. Close dialog
+1. The unit is canonicalized to either "Kg" or "Each" using `canonicalize_unit()` before saving.
+2. Create record in DB (`add_product(...)`) including `last_updated` timestamp formatted as `yyyy-MM-dd HH:mm:ss`, with canonical unit only.
+3. Refresh in-memory cache (`refresh_product_cache()`), which will now only contain canonical units.
+4. Show green confirmation in ADD status label
+5. Close dialog
 
 Sales-frame route special case:
 - After ADD succeeds, the controller immediately calls:
@@ -251,11 +277,12 @@ When OK is clicked:
 
 ### UPDATE
 When OK is clicked:
-1. Update record in DB (`update_product(...)`)
-2. Refresh cache (`refresh_product_cache()`)
-3. Update UI last_updated display (DB is responsible for persistence)
-4. Show green confirmation
-5. Close dialog
+1. The unit is canonicalized to either "Kg" or "Each" using `canonicalize_unit()` before saving.
+2. Update record in DB (`update_product(...)`)
+3. Refresh cache (`refresh_product_cache()`)
+4. Update UI last_updated display (DB is responsible for persistence)
+5. Show green confirmation
+6. Close dialog
 
 ---
 

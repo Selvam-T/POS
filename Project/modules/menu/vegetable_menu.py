@@ -1,3 +1,5 @@
+# Import _to_camel_case for use in this module
+from modules.db_operation.database import _to_camel_case
 """Vegetable Management dialog controller for POS system.
 
 Manages 16 vegetable slots (Veg01-Veg16) with database integration.
@@ -261,6 +263,7 @@ def open_vegetable_menu_dialog(host_window):
         from modules.db_operation.database import _to_camel_case
         for i, veg in enumerate(sorted_vegs, start=1):
             now_str = QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss')
+            from modules.table.unit_helpers import canonicalize_unit
             add_product(
                 product_code=f'Veg{i:02d}',
                 name=_to_camel_case(veg['name']),
@@ -268,7 +271,7 @@ def open_vegetable_menu_dialog(host_window):
                 category=_to_camel_case(veg.get('category', 'Vegetable')),
                 supplier=_to_camel_case(veg.get('supplier')),
                 cost_price=veg.get('cost'),
-                unit=_to_camel_case(veg.get('unit', 'Kg')),
+                unit=canonicalize_unit(veg.get('unit', 'Kg')),
                 last_updated=now_str
             )
         
@@ -331,7 +334,7 @@ def open_vegetable_menu_dialog(host_window):
             'category': category,
             'supplier': supplier,
             'cost': cost,
-            'unit': unit
+            'unit': unit  # already canonical
         }
         
         if existing is not None:

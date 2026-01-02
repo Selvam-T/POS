@@ -23,6 +23,14 @@ The logic for setting up the sales frame UI has been refactored out of `main.py`
 ## Total Value Binding
 After the sales table is set up, the `totalValue` label (a `QLabel` in the UI) is automatically bound to the table using `bind_total_label`. This ensures the displayed total is always up to date as products are added, removed, or quantities changed.
 
+## Canonical Unit Handling and Robust Merging (2026 Update)
+
+- All sales table operations (add, update, delete, barcode scan, dialog transfer) use only canonical units: "Kg" or "Each".
+- All merging, duplicate detection, and display logic is handled via a canonical data list and table rebuild (`set_table_rows`).
+- KG items are always read-only; EACH items are always editable.
+- Barcode scanning blocks KG items and prompts the user to use Vegetable Entry.
+- All table operations are robust and unified for maintainability.
+
 **Example:**
 ```python
 from modules.sales.sales_frame_setup import setup_sales_frame

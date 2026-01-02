@@ -415,6 +415,9 @@ def open_dialog_scanner_enabled(main_window, initial_mode: Optional[str] = None,
         unit = (ui['add']['unit'].text() or '').strip() if ui['add'].get('unit') else DEFAULT_UNIT
         if not unit:
             unit = DEFAULT_UNIT
+        # Canonicalize unit before saving
+        from modules.table.unit_helpers import canonicalize_unit
+        unit = canonicalize_unit(unit)
 
         ok, err = input_validation.is_mandatory(code)
         if not ok:

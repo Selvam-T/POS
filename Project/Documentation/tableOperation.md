@@ -25,12 +25,13 @@ This module provides generic table operations for product tables in the POS syst
 
 ## Product Cache Integration
 
-### Unit-Aware Product Cache
+### Canonical Unit Handling (2026 Update)
 **PRODUCT_CACHE** now stores: `{product_code: (name, price, unit)}`
-- **Unit types**: `'KG'` (weight-based, requires weighing) or `'EACH'` (count-based)
-- Loaded from database on startup: `SELECT product_code, name, selling_price, unit FROM Product_list`
-- All cache operations (add, update) maintain unit information
-- `get_product_info(code)` returns `(found, name, price, unit)`
+- **Unit types**: Only canonical units "Kg" (weight-based, requires weighing) or "Each" (count-based) are allowed and stored.
+- All entry points (barcode, dialogs, menus) canonicalize units before saving or merging using `canonicalize_unit()`.
+- Loaded from database on startup: `SELECT product_code, name, selling_price, unit FROM Product_list` (units are canonicalized on load and save)
+- All cache operations (add, update) maintain canonical unit information only.
+- `get_product_info(code)` returns `(found, name, price, unit)` with canonical unit.
 
 ### KG vs EACH Item Display and Behavior
 **KG Items** (weight-based):
@@ -54,8 +55,8 @@ This module provides generic table operations for product tables in the POS syst
 
 ## Advanced Features
 
-### Mixed Editable States with `set_table_rows()`
-When tables contain both KG and EACH items, use this function to preserve per-row editable states:
+### Mixed Editable States and Robust Merging with `set_table_rows()`
+When tables contain both KG and EACH items, use this function to preserve per-row editable states. All merging, duplicate detection, and display logic is handled via a canonical data list and table rebuild:
 
 ```python
 from modules.table import set_table_rows
@@ -65,6 +66,7 @@ rows = [
         'product': 'Carrot',
         'quantity': 0.6,  # kg (stored in kg, displays as "600" with unit "g")
         'unit_price': 3.0,
+        'unit': 'Kg',
         'editable': False,  # KG item - read-only
         'display_text': '600 g'
     },
@@ -72,6 +74,7 @@ rows = [
         'product': 'Onion',
         'quantity': 2,
         'unit_price': 1.5,
+        'unit': 'Each',
         'editable': True,  # EACH item - editable
     }
 ]
@@ -79,8 +82,8 @@ set_table_rows(sales_table, rows)
 ```
 
 ### Editable State Determination
-Editable state is set automatically based on unit type when products are added:
-- **Vegetable Entry dialog**: Checks unit from `get_product_full()`, sets `editable=False` for KG
+Editable state is set automatically based on canonical unit type when products are added:
+- **Vegetable Entry dialog**: Checks canonical unit from `get_product_full()`, sets `editable=False` for KG
 - **Barcode scan**: Blocks KG items entirely, only adds EACH items with `editable=True`
 - **Transfer operations**: Preserve `editable` flag from source table
 
@@ -97,6 +100,7 @@ rows = [
         'product': 'Product Name',
         'quantity': 1.5,  # Numeric value for calculations
         'unit_price': 50.0,
+        'unit': 'Kg' or 'Each',  # Canonical unit only
         'editable': True,  # Whether quantity cell is editable
         'display_text': '1.5 kg'  # Optional: custom display for read-only fields
     }

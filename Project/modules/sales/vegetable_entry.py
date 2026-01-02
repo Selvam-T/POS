@@ -236,132 +236,36 @@ def _add_vegetable_row(vtable: QTableWidget, product_code: str, product_name: st
         unit_price: Unit price
         editable: Whether quantity is editable (True=EACH, False=KG)
     """
+    from modules.table.table_operations import get_sales_data, set_table_rows
     from modules.table.unit_helpers import canonicalize_unit
-    # Get canonical unit from product code (from cache)
-    from modules.db_operation import get_product_info
-    found, _, _, unit = get_product_info(product_code)
-    unit_canon = canonicalize_unit(unit)
-    # Check for duplicate using shared function (searches by product code and canonical unit)
-    existing_row = find_product_in_table(vtable, product_code, unit_canon)
-    
-    if existing_row is not None:
-        # Product exists - check if it's editable (EACH) or read-only (KG)
-        qty_container = vtable.cellWidget(existing_row, 2)
-        if qty_container:
-            editor = qty_container.findChild(QtWidgets.QLineEdit, 'qtyInput')
-            if editor:
-                if not editor.isReadOnly():
-                    # EACH item - increment by 1 (shared function handles this)
-                    increment_row_quantity(vtable, existing_row)
-                else:
-                    # KG item - add weights together
-                    numeric_val = editor.property('numeric_value')
-                    if numeric_val is not None:
-                        try:
-                            current_qty = float(numeric_val)
-                        except (ValueError, TypeError):
-                            current_qty = 0.0
-                    else:
-                        current_qty = 0.0
-                    
-                    new_qty = current_qty + quantity
-                    editor.setProperty('numeric_value', new_qty)
-                    
-                    # Update display
-                    weight_grams = int(new_qty * 1000)
-                    if weight_grams < 1000:
-                        editor.setText(str(weight_grams))
-                    else:
-                        editor.setText(f"{new_qty:.2f}")
-                    
-                    # Update unit column
-                    unit_item = vtable.item(existing_row, 3)
-                    if unit_item:
-                        unit_item.setText('g' if weight_grams < 1000 else 'kg')
-                    
-                    # Recalculate total
-                    from modules.table.table_operations import recalc_row_total
-                    recalc_row_total(vtable, existing_row)
-        # Always return when duplicate found, even if update failed
-        return
-    
-    # No duplicate - get current rows and add new one
-    current_rows = []
-    from modules.table.table_operations import display_unit
-    for r in range(vtable.rowCount()):
-        product_item = vtable.item(r, 1)
-        if product_item is None:
-            continue
-        name = product_item.text()
-        # Always resolve product_code for this row (from hidden property or lookup)
-        found_code = None
-        for code, (n, _, _) in PRODUCT_CACHE.items():
-            if n == name:
-                found_code = code
-                break
-        lookup_code = found_code if found_code else name
-        # Always resolve canonical unit from product_code
-        _, _, _, unit = get_product_info(lookup_code)
-        # Canonicalize unit for storage
-        unit_canon = 'Each' if unit and unit.upper() == 'EACH' else ('Kg' if unit and unit.upper() == 'KG' else unit)
-        # Get quantity and editable state
-        qty_container = vtable.cellWidget(r, 2)
-        qty = 1.0
-        row_editable = True
-        if qty_container is not None:
-            editor = qty_container.findChild(QtWidgets.QLineEdit, 'qtyInput')
-            if editor is not None:
-                row_editable = not editor.isReadOnly()
-                numeric_val = editor.property('numeric_value')
-                if numeric_val is not None:
-                    try:
-                        qty = float(numeric_val)
-                    except (ValueError, TypeError):
-                        qty = 1.0
-                else:
-                    try:
-                        qty = float(editor.text()) if editor.text() else 1.0
-                    except ValueError:
-                        qty = 1.0
-        # Get unit price from column 4
-        price_item = vtable.item(r, 4)
-        price = 0.0
-        if price_item is not None:
-            try:
-                price = float(price_item.text())
-            except ValueError:
-                price = 0.0
-        row_data = {
-            'product_code': lookup_code,
-            'product_name': name,
-            'quantity': qty,
-            'unit': unit_canon,
-            'unit_price': price
-        }
-        current_rows.append(row_data)
-    # Always resolve canonical unit for the new row using product_code
-    _, _, _, unit_for_new = get_product_info(product_code)
-    unit_for_new_canon = 'Each' if unit_for_new and unit_for_new.upper() == 'EACH' else ('Kg' if unit_for_new and unit_for_new.upper() == 'KG' else unit_for_new)
-    new_row = {
-        'product_code': product_code,
-        'product_name': product_name,
-        'quantity': quantity,
-        'unit': unit_for_new_canon,
-        'unit_price': unit_price
-    }
-    current_rows.append(new_row)
-    # Rebuild table with mixed editable states (pass product_name as 'product' for display, and correct unit display)
-    display_rows = [
-        {
-            'product': row['product_name'],
-            'quantity': row['quantity'],
-            'unit_price': row['unit_price'],
-            'unit': display_unit(row['unit'], row['quantity']),
-            'editable': (row['unit'].upper() != 'KG')
-        }
-        for row in current_rows
-    ]
-    set_table_rows(vtable, display_rows)
+    # 1. Scrape current UI state into a clean data list
+    current_data = get_sales_data(vtable)
+    # 2. Determine target unit
+    target_unit = canonicalize_unit("Kg" if not editable else "Each")
+    # 3. Look for duplicate in the DATA LIST
+    found = False
+    for row in current_data:
+        # Compare normalized names and canonical units
+        if (row['product_name'].strip().lower() == product_name.strip().lower() and 
+            row['unit'] == target_unit):
+            # Found! Just update the math
+            if editable:
+                row['quantity'] += 1 # EACH items increment by 1
+            else:
+                row['quantity'] += quantity # KG items add weight
+            found = True
+            break
+    if not found:
+        # Not found! Append a new dict
+        current_data.append({
+            'product_name': product_name,
+            'quantity': quantity,
+            'unit_price': unit_price,
+            'unit': target_unit,
+            'editable': editable
+        })
+    # 4. Rebuild the table (This handles colors, numbering, and 'g' vs 'kg' automatically)
+    set_table_rows(vtable, current_data)
 
 
 def _handle_ok_all(dlg: QDialog, vtable: Optional[QTableWidget]) -> None:
@@ -416,14 +320,16 @@ def _handle_ok_all(dlg: QDialog, vtable: Optional[QTableWidget]) -> None:
                 price = float(price_item.text())
             except ValueError:
                 price = 0.0
+        from modules.table.unit_helpers import canonicalize_unit
+        canon_unit = canonicalize_unit(unit)
         row_data = {
             'product': name,  # always use product name for display
             'product_code': code,
             'product_name': name,
             'quantity': qty,
             'unit_price': price,
-            'unit': unit,
-            'editable': (unit.upper() != 'KG')
+            'unit': canon_unit,
+            'editable': (canon_unit == 'Each')
         }
         # Debug print removed
         rows_to_transfer.append(row_data)
