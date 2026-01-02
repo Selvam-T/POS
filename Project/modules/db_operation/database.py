@@ -32,9 +32,10 @@ DB_PATH = CONFIG_DB_PATH or _DERIVED_DB_PATH
 
 
 def _norm(code: Optional[str]) -> str:
-    """Normalize product codes for consistent cache keys (uppercase, trimmed)."""
+    """Normalize product codes for consistent cache keys (CamelCase, trimmed)."""
     try:
-        return str(code).strip().upper()
+        from modules.db_operation.database import _to_camel_case
+        return _to_camel_case(str(code).strip())
     except Exception:
         return ''
 

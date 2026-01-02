@@ -1,19 +1,4 @@
-"""Table setup and helper functions for product tables
-Provides:
-- setup_sales_table(table): configure headers, widths, and insert a placeholder row
-- set_sales_rows(table, rows): populate rows with qty input, unit price, totals, and a delete button
-- remove_table_row(table, row): delete a row and renumber the first column
-- recalc_row_total(table, row): recompute total from qty x unit price
-- bind_total_label(table, label): bind the Sales totalValue label and keep it updated
-- recompute_total(table): recompute and return grand total from all row totals
-- get_total(table): return last computed grand total
-- find_product_in_table(table, product_code): search for product by code, return row index or None
-- increment_row_quantity(table, row): increment quantity by 1 (handles EACH/KG automatically)
-
-Public functions for duplicate detection (used by barcode scanning and vegetable entry):
-- find_product_in_table(table, product_code): searches by product code via cache lookup
-- increment_row_quantity(table, row): increments EACH items by 1, handles read-only KG items
-"""
+"""POS sales table functions (see docs for details)."""
 from typing import List, Dict, Any, Optional
 from PyQt5.QtCore import Qt, QEvent, QObject, QTimer
 from PyQt5.QtWidgets import (
@@ -105,176 +90,13 @@ def setup_sales_table(table: QTableWidget) -> None:
     table.setSelectionMode(QTableWidget.NoSelection)
 
     # Start with empty table - products will be added via barcode scanner
-    set_sales_rows(table, [])
+    set_table_rows(table, [])
 
 
-def set_sales_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: Optional[QStatusBar] = None, editable: bool = True) -> None:
-    """Replace table rows with provided data.
-    Fetches product info from cache if unit_price not provided.
-    
-    Args:
-        table: QTableWidget to populate
-        rows: list of dicts with keys: product (str), quantity (int/float), unit_price (float, optional), display_text (str, optional)
-        status_bar: Optional QStatusBar to show error messages for invalid products
-        editable: Whether quantity cells should be editable (default: True)
-    """
-    table.setRowCount(0)
-    for r, data in enumerate(rows):
-        table.insertRow(r)
-
-        # Get alternating row color
-        row_color = get_row_color(r)
-
-        # Col 0: Row number (non-editable)
-        item_no = QTableWidgetItem(str(r + 1))
-        item_no.setTextAlignment(Qt.AlignCenter)
-        item_no.setFlags(item_no.flags() & ~Qt.ItemIsEditable)
-        item_no.setBackground(QBrush(row_color))
-        table.setItem(r, 0, item_no)
-
-        # Fetch product info from cache if unit_price not in data
-        product_code = str(data.get('product', ''))
-        product_name = product_code  # Default to code
-        unit_price = data.get('unit_price', None)
-        
-        if unit_price is None:
-            # Query product cache
-            found, name, price, _ = get_product_info(product_code)
-            if found:
-                product_name = name
-                unit_price = price
-            else:
-                # Product not found - show in status bar
-                unit_price = 0.0
-                if status_bar:
-                    show_temp_status(status_bar, f"Product '{product_code}' not found in database", 10000)
-        else:
-            # unit_price provided, just use product code as name
-            unit_price = float(unit_price)
-
-        # Col 1: Product name (non-editable item)
-        item_product = QTableWidgetItem(product_name)
-        item_product.setFlags(item_product.flags() & ~Qt.ItemIsEditable)
-        item_product.setBackground(QBrush(row_color))
-        table.setItem(r, 1, item_product)
-
-        # Col 2: Quantity (QLineEdit to match QSS qtyInput styling) inside a tintable container
-        qty_val = data.get('quantity', 0)
-        # Format display: for KG items show grams if < 1kg, else show kg with 2 decimals
-        if not editable:
-            # KG item - stored value is in kg
-            weight_grams = int(float(qty_val) * 1000)
-            if weight_grams < 1000:
-                display_text = str(weight_grams)  # Show grams: 600
-            else:
-                display_text = f"{float(qty_val):.2f}"  # Show kg: 1.20
-        else:
-            # EACH item - display as integer
-            if float(qty_val) == int(float(qty_val)):
-                display_text = str(int(float(qty_val)))
-            else:
-                display_text = f"{float(qty_val):.2f}"
-        qty_edit = QLineEdit(display_text)
-        qty_edit.setObjectName('qtyInput')  # styled via QSS
-        # Store numeric value for calculations (always in base unit: kg for weight, count for EACH)
-        qty_edit.setProperty('numeric_value', float(qty_val))
-        # Set editability
-        qty_edit.setReadOnly(not editable)
-        # Ensure style-sheet backgrounds are actually painted for this widget
-        try:
-            qty_edit.setAttribute(Qt.WA_StyledBackground, True)
-        except Exception:
-            pass
-        try:
-            qty_edit.setAutoFillBackground(False)  # Allow QSS to control background instead of palette
-        except Exception:
-            pass
-        qty_edit.setAlignment(Qt.AlignCenter)
-        # Add input validation for EACH items (integer only, max 9999)
-        if editable:
-            from PyQt5.QtGui import QIntValidator
-            validator = QIntValidator(1, 9999, qty_edit)
-            qty_edit.setValidator(validator)
-            # Recalculate total when quantity changes - use dynamic row lookup
-            qty_edit.textChanged.connect(lambda _t, e=qty_edit, t=table: _recalc_from_editor(e, t))
-        # Select the row when the qty input gains focus; clear selection when editing finishes
-        _install_row_focus_behavior(qty_edit, table, r)
-        qty_container = QWidget()
-        qty_container.setStyleSheet(f"background-color: {row_color.name()};")  # Apply row color to container (is overriding widget background color in cells 2 and 5)
-        qty_layout = QHBoxLayout(qty_container)
-        qty_layout.setContentsMargins(0, 0, 0, 0)
-        qty_layout.setSpacing(0)
-        qty_layout.addWidget(qty_edit)
-        table.setCellWidget(r, 2, qty_container)
-
-        # Col 3: Unit (non-editable item) - show 'g', 'kg', or 'ea'
-        unit_text = 'ea'  # default for EACH items
-        if not editable:
-            # KG item - determine unit based on quantity (stored in kg)
-            weight_grams = int(float(qty_val) * 1000)
-            if weight_grams < 1000:
-                unit_text = 'g'
-            else:
-                unit_text = 'kg'
-        item_unit = QTableWidgetItem(unit_text)
-        item_unit.setTextAlignment(Qt.AlignCenter)
-        item_unit.setFlags(item_unit.flags() & ~Qt.ItemIsEditable)
-        item_unit.setBackground(QBrush(row_color))
-        table.setItem(r, 3, item_unit)
-
-        # Col 4: Unit Price (non-editable item) - use fetched price
-        item_price = QTableWidgetItem(f"{unit_price:.2f}")
-        item_price.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        item_price.setFlags(item_price.flags() & ~Qt.ItemIsEditable)
-        item_price.setBackground(QBrush(row_color))
-        table.setItem(r, 4, item_price)
-
-        # Col 5: Total (non-editable item) - calculate from qty and fetched price
-        total = float(qty_val) * float(unit_price)
-        item_total = QTableWidgetItem(f"{total:.2f}")
-        item_total.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        item_total.setFlags(item_total.flags() & ~Qt.ItemIsEditable)
-        item_total.setBackground(QBrush(row_color))
-        table.setItem(r, 5, item_total)
-
-    # Backgrounds for rows will be applied after all rows are created
-
-        # Col 6: Remove button (centered, circular X)
-        btn = QPushButton()
-        btn.setObjectName('removeBtn')  # styled via QSS
-        btn.setIcon(QIcon(ICON_DELETE))
-        btn.setIconSize(QSize(36, 36))
-        try:
-            btn.setAttribute(Qt.WA_StyledBackground, True)
-        except Exception:
-            pass
-        try:
-            btn.setAutoFillBackground(False)  # Allow QSS to control background instead of palette
-        except Exception:
-            pass
-        # Size and look via QSS (QPushButton#removeBtn)
-        # Highlight row when button is clicked (before removal)
-        btn.pressed.connect(partial(_highlight_row_by_button, table, btn))
-        btn.clicked.connect(partial(_remove_by_button, table, btn))
-        # Center in cell via container layout
-        container = QWidget()
-        container.setStyleSheet("background-color: transparent;")  # Transparent to show row color and allow button states
-        lay = QHBoxLayout(container)
-        lay.setContentsMargins(0, 0, 0, 0)
-        lay.setSpacing(0)
-        lay.addWidget(btn, 0, Qt.AlignCenter)
-        table.setCellWidget(r, 6, container)
-
-    # After building all rows, update the aggregated total if bound
-    try:
-        _update_total_value(table)
-    except Exception:
-        pass
-
-    # Table remains empty if no rows provided (clean state for barcode scanner)
 
 
-def _rebuild_mixed_editable_table(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: Optional[QStatusBar] = None) -> None:
+
+def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: Optional[QStatusBar] = None) -> None:
     """Rebuild table with per-row editable states based on product unit type.
     
     The editable state is determined when products are added:
@@ -298,22 +120,23 @@ def _rebuild_mixed_editable_table(table: QTableWidget, rows: List[Dict[str, Any]
     
     for r, data in enumerate(rows):
         table.insertRow(r)
-        
+
         row_color = get_row_color(r)
-        product_name = str(data.get('product', ''))
+        # Use product_name for display if present, else fallback to product (code)
+        product_name = str(data.get('product_name', data.get('product', '')))
         qty_val = data.get('quantity', 1)
         unit_price = data.get('unit_price', 0.0)
         editable = data.get('editable', True)
         display_text = data.get('display_text', None)
-        
+
         # Col 0: Row number
         item_no = QTableWidgetItem(str(r + 1))
         item_no.setTextAlignment(Qt.AlignCenter)
         item_no.setFlags(item_no.flags() & ~Qt.ItemIsEditable)
         item_no.setBackground(QBrush(row_color))
         table.setItem(r, 0, item_no)
-        
-        # Col 1: Product name
+
+        # Col 1: Product name (display)
         item_product = QTableWidgetItem(product_name)
         item_product.setFlags(item_product.flags() & ~Qt.ItemIsEditable)
         item_product.setBackground(QBrush(row_color))
@@ -356,15 +179,22 @@ def _rebuild_mixed_editable_table(table: QTableWidget, rows: List[Dict[str, Any]
         qty_layout.addWidget(qty_edit)
         table.setCellWidget(r, 2, qty_container)
         
-        # Col 3: Unit (non-editable item) - show 'g', 'kg', or 'ea'
-        unit_text = 'ea'  # default for EACH items
-        if not editable:
-            # KG item - determine unit based on quantity (stored in kg)
-            weight_grams = int(float(qty_val) * 1000)
-            if weight_grams < 1000:
-                unit_text = 'g'
-            else:
-                unit_text = 'kg'
+        # Col 3: Unit (non-editable item) - use 'unit' from data if present, else fallback
+        unit_text = str(data.get('unit', '')).lower()
+        if not unit_text:
+            unit_text = 'ea'  # default for EACH items
+            if not editable:
+                # KG item - determine unit based on quantity (stored in kg)
+                weight_grams = int(float(qty_val) * 1000)
+                if weight_grams < 1000:
+                    unit_text = 'g'
+                else:
+                    unit_text = 'kg'
+        # Normalize 'each' to 'ea' for display
+        if unit_text == 'each':
+            unit_text = 'ea'
+        # Print debug info for unit
+        print(f"[salesTable] Row {r} product={product_name} editable={editable} qty={qty_val} unit_text={unit_text}")
         item_unit = QTableWidgetItem(unit_text)
         item_unit.setTextAlignment(Qt.AlignCenter)
         item_unit.setFlags(item_unit.flags() & ~Qt.ItemIsEditable)
@@ -932,4 +762,4 @@ def _add_product_row(table: QTableWidget, product_code: str, product_name: str,
     current_rows.append(new_row)
     
     # Rebuild table with mixed editable states
-    _rebuild_mixed_editable_table(table, current_rows, status_bar)
+    set_table_rows(table, current_rows, status_bar)

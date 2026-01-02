@@ -3,7 +3,6 @@ Sales module for the POS system.
 """
 from modules.table import (
     setup_sales_table,
-    set_sales_rows,
     remove_table_row,
     recalc_row_total,
     get_row_color,
@@ -14,7 +13,6 @@ from modules.table import (
 
 __all__ = [
     'setup_sales_table',
-    'set_sales_rows',
     'remove_table_row',
     'recalc_row_total',
     'get_row_color',

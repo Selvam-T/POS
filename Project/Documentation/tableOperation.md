@@ -15,7 +15,7 @@ This module provides generic table operations for product tables in the POS syst
 ## Key Functions
 - `setup_sales_table(table)`: Configures table columns, headers, and default appearance. Should be called once after creating or loading the table widget.
 - `set_sales_rows(table, rows, status_bar=None, editable=True)`: Populates the table with product rows. Applies single editable state to ALL rows.
-- `_rebuild_mixed_editable_table(table, rows, status_bar=None)`: **NEW**: Rebuilds table with per-row editable states. Used when mixing KG (read-only) and EACH (editable) items.
+- `set_table_rows(table, rows, status_bar=None)`: **NEW**: Rebuilds table with per-row editable states. Used when mixing KG (read-only) and EACH (editable) items.
 - `remove_table_row(table, row)`: Removes a row and updates numbering and colors.
 - `recalc_row_total(table, row)`: Recomputes the total for a row when quantity or price changes.
 - `bind_total_label(table, label)`: **Binds a QLabel (usually `totalValue` in the UI) to the table. The label will automatically update whenever the table's contents change.**
@@ -54,11 +54,11 @@ This module provides generic table operations for product tables in the POS syst
 
 ## Advanced Features
 
-### Mixed Editable States with `_rebuild_mixed_editable_table()`
+### Mixed Editable States with `set_table_rows()`
 When tables contain both KG and EACH items, use this function to preserve per-row editable states:
 
 ```python
-from modules.table import _rebuild_mixed_editable_table
+from modules.table import set_table_rows
 
 rows = [
     {
@@ -75,7 +75,7 @@ rows = [
         'editable': True,  # EACH item - editable
     }
 ]
-_rebuild_mixed_editable_table(sales_table, rows)
+set_table_rows(sales_table, rows)
 ```
 
 ### Editable State Determination

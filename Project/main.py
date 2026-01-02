@@ -124,7 +124,7 @@ class MainLoader(QMainWindow):
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_vegetable_entry_dialog, 
             dialog_key='vegetable_entry',
-            on_finish=lambda: self._add_items_to_sales_table('vegetable')
+            on_finish=self._add_items_to_sales_table
         )
 
     def open_manual_panel(self):
@@ -132,7 +132,7 @@ class MainLoader(QMainWindow):
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_manual_entry_dialog, 
             dialog_key='manual_entry',
-            on_finish=lambda: self._add_items_to_sales_table('manual')
+            on_finish=self._add_items_to_sales_table
         )
 
     def open_onhold_panel(self):
@@ -310,58 +310,47 @@ class MainLoader(QMainWindow):
             print('Failed to wire menu buttons:', e)
 
     # ========== Post-Dialog Action Handlers ==========
-    def _add_items_to_sales_table(self, source_type):
+    def _add_items_to_sales_table(self):
         """Unified handler to add items from dialogs to sales table.
-        
-        Args:
-            source_type: Either 'vegetable' or 'manual' to indicate dialog source
-            
-        Process:
-        - Reads dialog results (vegetable_rows or manual_result)
-        - Normalizes data format to unified row structure
-        - Merges with existing sales table rows (handles duplicates)
-        - Rebuilds table with combined data
+        Reads dialog results (vegetable_rows or manual_entry_result), normalizes to row format,
+        merges with existing sales table rows (handles duplicates), and rebuilds the table.
         """
         if not hasattr(self, 'sales_table'):
             return
-        
+
         try:
             from PyQt5.QtWidgets import QLineEdit
-            from modules.table.table_operations import _rebuild_mixed_editable_table
-            
+            from modules.table.table_operations import set_table_rows
+
             # Get the dialog that just closed
             dlg = self.dialog_wrapper._last_dialog
             if dlg is None or dlg.result() != QDialog.Accepted:
                 return
-            
-            # Read and normalize dialog results based on source type
+
+            # Read and normalize dialog results
             new_rows = []
-            if source_type == 'vegetable':
-                vegetable_rows = dlg.property('vegetable_rows')
-                if not vegetable_rows:
-                    return
-                new_rows = vegetable_rows  # Already in correct format
-            elif source_type == 'manual':
-                manual_result = getattr(dlg, 'manual_entry_result', None)
-                if not manual_result:
-                    return
-                # Convert manual result to row format
+            vegetable_rows = getattr(dlg, 'vegetable_rows', None)
+            manual_result = getattr(dlg, 'manual_entry_result', None)
+            if vegetable_rows:
+                new_rows = vegetable_rows
+            elif manual_result:
                 new_rows = [{
                     'product': manual_result['product_name'],
                     'quantity': manual_result['quantity'],
                     'unit_price': manual_result['unit_price'],
+                    'unit': manual_result.get('unit', 'Each'),
                     'editable': True  # Manual entries are always editable count items
                 }]
             else:
                 return
-            
+
             # Get existing rows from sales table
             existing_rows = []
             for r in range(self.sales_table.rowCount()):
                 product_item = self.sales_table.item(r, 1)
                 if product_item is None:
                     continue
-                
+
                 # Get quantity and editable state
                 qty_container = self.sales_table.cellWidget(r, 2)
                 qty = 1.0
@@ -381,7 +370,7 @@ class MainLoader(QMainWindow):
                                 qty = float(editor.text()) if editor.text() else 1.0
                             except ValueError:
                                 qty = 1.0
-                
+
                 # Get unit price from column 4
                 price_item = self.sales_table.item(r, 4)
                 price = 0.0
@@ -390,7 +379,7 @@ class MainLoader(QMainWindow):
                         price = float(price_item.text())
                     except ValueError:
                         price = 0.0
-                
+
                 row_data = {
                     'product': product_item.text(),
                     'quantity': qty,
@@ -398,42 +387,36 @@ class MainLoader(QMainWindow):
                     'editable': row_editable
                 }
                 existing_rows.append(row_data)
-            
-            # Merge new rows into existing rows
-            # For vegetables: check for duplicates by product name and merge quantities
-            # For manual: simply append (no duplicate checking for manual entries)
-            if source_type == 'vegetable':
-                for new_row in new_rows:
-                    new_product_name = new_row.get('product', '')
-                    new_qty = new_row.get('quantity', 0.0)
-                    new_editable = new_row.get('editable', True)
-                    
-                    # Find matching product in existing rows
-                    found_match = False
-                    for existing_row in existing_rows:
-                        if existing_row['product'] == new_product_name:
-                            # Found duplicate - merge quantities
-                            if new_editable and existing_row['editable']:
-                                # Both EACH items - add quantities
-                                existing_row['quantity'] += new_qty
-                            elif not new_editable and not existing_row['editable']:
-                                # Both KG items - add weights
-                                existing_row['quantity'] += new_qty
-                            # If types mismatch (one EACH, one KG), keep existing and ignore new
-                            found_match = True
-                            break
-                    
-                    if not found_match:
-                        # No duplicate - add as new row
-                        existing_rows.append(new_row)
-            else:
-                # Manual entry: simply append all new rows
-                existing_rows.extend(new_rows)
-            
+
+            # Merge new rows into existing rows (handle duplicates for all sources)
+            for new_row in new_rows:
+                new_product_name = new_row.get('product', '')
+                new_qty = new_row.get('quantity', 0.0)
+                new_editable = new_row.get('editable', True)
+
+                # Find matching product in existing rows
+                found_match = False
+                for existing_row in existing_rows:
+                    if existing_row['product'] == new_product_name:
+                        # Found duplicate - merge quantities
+                        if new_editable and existing_row['editable']:
+                            # Both EACH items - add quantities
+                            existing_row['quantity'] += new_qty
+                        elif not new_editable and not existing_row['editable']:
+                            # Both KG items - add weights
+                            existing_row['quantity'] += new_qty
+                        # If types mismatch (one EACH, one KG), keep existing and ignore new
+                        found_match = True
+                        break
+
+                if not found_match:
+                    # No duplicate - add as new row
+                    existing_rows.append(new_row)
+
             # Rebuild sales table with merged rows
-            _rebuild_mixed_editable_table(self.sales_table, existing_rows)
+            set_table_rows(self.sales_table, existing_rows)
         except Exception as e:
-            print(f'Failed to add items to sales table from {source_type}: {e}')
+            print(f'Failed to add items to sales table: {e}')
             import traceback
             traceback.print_exc()
 

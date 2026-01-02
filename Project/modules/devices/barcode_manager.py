@@ -181,7 +181,9 @@ class BarcodeManager(QObject):
                         'addSellingPriceLineEdit', 'addSupplierLineEdit',
                         'updateProductNameLineEdit', 'updateCostPriceLineEdit',
                         'updateSellingPriceLineEdit', 'updateSupplierLineEdit',
-                        'removeSearchComboLineEdit', 'updateSearchComboLineEdit'
+                        'removeSearchComboLineEdit', 'updateSearchComboLineEdit',
+                        # Manual entry dialog fields:
+                        'manualProductCodeLineEdit', 'manualNameSearchLineEdit', 'manualQuantityLineEdit'
                     )
                     # Also allow if the focused widget is a QPushButton
                     if fw is not None:

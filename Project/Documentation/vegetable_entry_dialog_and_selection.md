@@ -162,7 +162,7 @@ self.dialog_wrapper.open_dialog_scanner_blocked(
 # 1. Read dialog results (vegetable_rows property)
 # 2. Extract existing sales table rows
 # 3. Merge with duplicate detection (EACH: increment, KG: add weights)
-# 4. Rebuild table with _rebuild_mixed_editable_table()
+# 4. Rebuild table with set_table_rows()
 ```
 
 ## QSS Styling
@@ -176,7 +176,7 @@ self.dialog_wrapper.open_dialog_scanner_blocked(
 - **Duplicate handling:** EACH increments quantity, KG adds weights
 - **Clean architecture:** Unit detection from PRODUCT_CACHE (3-tuple with unit)
 - **Transfer preservation:** Editable flag preserved when moving to sales table
-- **Mixed table support:** Uses `_rebuild_mixed_editable_table()` for per-row editable states
+- **Mixed table support:** Uses `set_table_rows()` for per-row editable states
 
 ## Quick Reference
 

@@ -262,7 +262,7 @@ def _add_items_to_sales_table(self, source_type):
 - Dialog launched via: `self.dialog_wrapper.open_dialog_scanner_blocked(launch_manual_entry_dialog, ...)`
 - Result processed by: `_add_items_to_sales_table('manual')` callback
 - Shared handler reads `dlg.manual_entry_result` attribute
-- Data merged into sales table using `_rebuild_mixed_editable_table()`
+- Data merged into sales table using `set_table_rows()`
 
 ## Known Limitations
 ## Work in Progress

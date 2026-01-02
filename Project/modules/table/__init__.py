@@ -4,7 +4,6 @@ Provides generic table setup and manipulation functions for product tables.
 """
 from .table_operations import (
     setup_sales_table,
-    set_sales_rows,
     remove_table_row,
     recalc_row_total,
     get_row_color,
@@ -14,12 +13,10 @@ from .table_operations import (
     handle_barcode_scanned,
     find_product_in_table,
     increment_row_quantity,
-    _rebuild_mixed_editable_table,
+    set_table_rows,
 )
-
 __all__ = [
     'setup_sales_table',
-    'set_sales_rows',
     'remove_table_row',
     'recalc_row_total',
     'get_row_color',
@@ -29,5 +26,6 @@ __all__ = [
     'handle_barcode_scanned',
     'find_product_in_table',
     'increment_row_quantity',
-    '_rebuild_mixed_editable_table',
+    'set_table_rows',
 ]
+

@@ -17,9 +17,10 @@ from functools import partial
 
 from modules.wrappers import settings as app_settings
 from modules.db_operation import get_product_info, get_product_full
+from modules.db_operation.database import PRODUCT_CACHE
 from modules.table import setup_sales_table
 from modules.table import find_product_in_table, increment_row_quantity
-from modules.table.table_operations import _rebuild_mixed_editable_table
+from modules.table.table_operations import set_table_rows
 
 
 def weight_simulation() -> int:
@@ -286,7 +287,18 @@ def _add_vegetable_row(vtable: QTableWidget, product_code: str, product_name: st
         product_item = vtable.item(r, 1)
         if product_item is None:
             continue
-        
+        name = product_item.text()
+        # Always resolve product_code for this row (from hidden property or lookup)
+        # If you have a hidden product_code column, use it; else, fallback to name
+        # Here, we assume product_name is unique enough for lookup
+        found_code = None
+        for code, (n, _, _) in PRODUCT_CACHE.items():
+            if n == name:
+                found_code = code
+                break
+        lookup_code = found_code if found_code else name
+        # Always resolve unit from product_code
+        _, _, _, unit = get_product_info(lookup_code)
         # Get quantity and editable state
         qty_container = vtable.cellWidget(r, 2)
         qty = 1.0
@@ -306,7 +318,6 @@ def _add_vegetable_row(vtable: QTableWidget, product_code: str, product_name: st
                         qty = float(editor.text()) if editor.text() else 1.0
                     except ValueError:
                         qty = 1.0
-        
         # Get unit price from column 4
         price_item = vtable.item(r, 4)
         price = 0.0
@@ -315,26 +326,36 @@ def _add_vegetable_row(vtable: QTableWidget, product_code: str, product_name: st
                 price = float(price_item.text())
             except ValueError:
                 price = 0.0
-        
         row_data = {
-            'product': product_item.text(),
+            'product_code': lookup_code,
+            'product_name': name,
             'quantity': qty,
-            'unit_price': price,
-            'editable': row_editable
+            'unit': unit,
+            'unit_price': price
         }
         current_rows.append(row_data)
-    
-    # Add new row
+    # Always resolve unit for the new row using product_code
+    _, _, _, unit_for_new = get_product_info(product_code)
     new_row = {
-        'product': product_name,
+        'product_code': product_code,
+        'product_name': product_name,
         'quantity': quantity,
-        'unit_price': unit_price,
-        'editable': editable
+        'unit': unit_for_new,
+        'unit_price': unit_price
     }
     current_rows.append(new_row)
-    
-    # Rebuild table with mixed editable states
-    _rebuild_mixed_editable_table(vtable, current_rows)
+    # Rebuild table with mixed editable states (pass product_name as 'product' for display, and correct unit)
+    display_rows = [
+        {
+            'product': row['product_name'],
+            'quantity': row['quantity'],
+            'unit_price': row['unit_price'],
+            'unit': row['unit'],
+            'editable': (row['unit'].upper() != 'KG')
+        }
+        for row in current_rows
+    ]
+    set_table_rows(vtable, display_rows)
 
 
 def _handle_ok_all(dlg: QDialog, vtable: Optional[QTableWidget]) -> None:
@@ -352,16 +373,17 @@ def _handle_ok_all(dlg: QDialog, vtable: Optional[QTableWidget]) -> None:
         product_item = vtable.item(r, 1)
         if product_item is None:
             continue
-        
-        # Get quantity data and editable state
+        name = product_item.text()
+        found, code, _, unit = get_product_info(name)
+        if not found:
+            code = name
+            unit = ''
+        # Get quantity data
         qty_container = vtable.cellWidget(r, 2)
         qty = 1.0
-        display_text = None
-        row_editable = True
         if qty_container is not None:
             editor = qty_container.findChild(QtWidgets.QLineEdit, 'qtyInput')
             if editor is not None:
-                row_editable = not editor.isReadOnly()
                 numeric_val = editor.property('numeric_value')
                 if numeric_val is not None:
                     try:
@@ -373,7 +395,6 @@ def _handle_ok_all(dlg: QDialog, vtable: Optional[QTableWidget]) -> None:
                         qty = float(editor.text()) if editor.text() else 1.0
                     except ValueError:
                         qty = 1.0
-        
         # Get unit price from column 4
         price_item = vtable.item(r, 4)
         price = 0.0
@@ -382,18 +403,17 @@ def _handle_ok_all(dlg: QDialog, vtable: Optional[QTableWidget]) -> None:
                 price = float(price_item.text())
             except ValueError:
                 price = 0.0
-        
         row_data = {
-            'product': product_item.text(),
+            'product': code,  # use product_code for unique merging
+            'product_name': name,  # for display
             'quantity': qty,
             'unit_price': price,
-            'editable': row_editable
+            'unit': unit,
+            'editable': (unit.upper() != 'KG')
         }
         rows_to_transfer.append(row_data)
-    
     # Store rows on dialog object for retrieval by caller
     dlg.setProperty('vegetable_rows', rows_to_transfer)
-    
     # Accept dialog
     dlg.accept()
 

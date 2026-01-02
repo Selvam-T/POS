@@ -138,32 +138,10 @@
      <property name="verticalSpacing">
       <number>20</number>
      </property>
-     <item row="2" column="0">
-      <widget class="QLabel" name="manualQuantityFieldLbl">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>100</width>
-         <height>0</height>
-        </size>
-       </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="manualProductCodeFieldLbl">
        <property name="text">
-        <string>Quantity:</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="manualQuantityLineEdit">
-       <property name="placeholderText">
-        <string>Enter quantity</string>
+        <string>Product Code - </string>
        </property>
       </widget>
      </item>
@@ -189,10 +167,32 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="manualProductCodeFieldLbl">
+     <item row="3" column="0">
+      <widget class="QLabel" name="manualQuantityFieldLbl">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
-        <string>Product Code - </string>
+        <string>Quantity:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="manualQuantityLineEdit">
+       <property name="placeholderText">
+        <string>Enter quantity</string>
        </property>
       </widget>
      </item>
@@ -201,6 +201,23 @@
      </item>
      <item row="1" column="1">
       <widget class="QLineEdit" name="manualNameSearchLineEdit"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="manualUnitFieldLbl">
+       <property name="text">
+        <string>Unit:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="manualUnitLineEdit">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -335,6 +352,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>manualProductCodeLineEdit</tabstop>
+  <tabstop>manualNameSearchLineEdit</tabstop>
+  <tabstop>manualQuantityLineEdit</tabstop>
+  <tabstop>btnManualOk</tabstop>
+  <tabstop>btnManualCancel</tabstop>
+  <tabstop>customCloseBtn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
