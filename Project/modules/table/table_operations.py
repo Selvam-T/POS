@@ -1,3 +1,4 @@
+
 """POS sales table functions (see docs for details)."""
 from typing import List, Dict, Any, Optional
 from PyQt5.QtCore import Qt, QEvent, QObject, QTimer
@@ -92,19 +93,28 @@ def setup_sales_table(table: QTableWidget) -> None:
     # Start with empty table - products will be added via barcode scanner
     set_table_rows(table, [])
 
-
-
+def display_unit(unit, quantity):
+    """Return display string for unit column based on canonical unit and quantity."""
+    if unit is None:
+        return ''
+    u = unit.lower()
+    if u == 'each':
+        return 'ea'
+    if u == 'kg':
+        return 'g' if quantity < 1 else 'kg'
+    return unit
 
 
 def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: Optional[QStatusBar] = None) -> None:
+    # Debug print removed
     """Rebuild table with per-row editable states based on product unit type.
-    
+
     The editable state is determined when products are added:
     - KG items (requires weighing): editable=False, display shows weight (e.g., "600 g")
     - EACH items (count-based): editable=True, display shows numeric count
-    
+
     Unit information comes from PRODUCT_CACHE which includes (name, price, unit).
-    
+
     Args:
         table: QTableWidget to populate
         rows: List of row dicts with keys: product, quantity, unit_price, editable, display_text (optional)
@@ -115,19 +125,18 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
     from PyQt5.QtCore import QSize, Qt
     from functools import partial
     from config import ICON_DELETE
-    
+
     table.setRowCount(0)
-    
+
+    from modules.table.unit_helpers import get_display_unit
     for r, data in enumerate(rows):
         table.insertRow(r)
 
         row_color = get_row_color(r)
-        # Use product_name for display if present, else fallback to product (code)
         product_name = str(data.get('product_name', data.get('product', '')))
         qty_val = data.get('quantity', 1)
         unit_price = data.get('unit_price', 0.0)
         editable = data.get('editable', True)
-        display_text = data.get('display_text', None)
 
         # Col 0: Row number
         item_no = QTableWidgetItem(str(r + 1))
@@ -141,15 +150,14 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         item_product.setFlags(item_product.flags() & ~Qt.ItemIsEditable)
         item_product.setBackground(QBrush(row_color))
         table.setItem(r, 1, item_product)
-        
+
         # Col 2: Quantity (editable or read-only based on row data)
         if not editable:
             # KG item - stored value is in kg
-            weight_grams = int(float(qty_val) * 1000)
-            if weight_grams < 1000:
-                qty_display = str(weight_grams)  # Show grams: 600
+            if qty_val < 1.0:
+                qty_display = str(int(float(qty_val) * 1000))  # Show grams
             else:
-                qty_display = f"{float(qty_val):.2f}"  # Show kg: 1.20
+                qty_display = f"{float(qty_val):.2f}"  # Show kg
         else:
             # EACH item - display as integer
             if float(qty_val) == int(float(qty_val)):
@@ -163,14 +171,14 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         qty_edit.setAttribute(Qt.WA_StyledBackground, True)
         qty_edit.setAutoFillBackground(False)
         qty_edit.setAlignment(Qt.AlignCenter)
-        
+
         if editable:
             from PyQt5.QtGui import QIntValidator
             validator = QIntValidator(1, 9999, qty_edit)
             qty_edit.setValidator(validator)
             qty_edit.textChanged.connect(lambda _t, e=qty_edit, t=table: _recalc_from_editor(e, t))
         _install_row_focus_behavior(qty_edit, table, r)
-        
+
         qty_container = QWidget()
         qty_container.setStyleSheet(f"background-color: {row_color.name()};")
         qty_layout = QHBoxLayout(qty_container)
@@ -178,24 +186,11 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         qty_layout.setSpacing(0)
         qty_layout.addWidget(qty_edit)
         table.setCellWidget(r, 2, qty_container)
-        
-        # Col 3: Unit (non-editable item) - use 'unit' from data if present, else fallback
-        unit_text = str(data.get('unit', '')).lower()
-        if not unit_text:
-            unit_text = 'ea'  # default for EACH items
-            if not editable:
-                # KG item - determine unit based on quantity (stored in kg)
-                weight_grams = int(float(qty_val) * 1000)
-                if weight_grams < 1000:
-                    unit_text = 'g'
-                else:
-                    unit_text = 'kg'
-        # Normalize 'each' to 'ea' for display
-        if unit_text == 'each':
-            unit_text = 'ea'
-        # Print debug info for unit
-        print(f"[salesTable] Row {r} product={product_name} editable={editable} qty={qty_val} unit_text={unit_text}")
-        item_unit = QTableWidgetItem(unit_text)
+
+        # Col 3: Unit (non-editable item) - use get_display_unit for display
+        unit_canon = data.get('unit', '')
+        display_unit = get_display_unit(unit_canon, float(qty_val))
+        item_unit = QTableWidgetItem(display_unit)
         item_unit.setTextAlignment(Qt.AlignCenter)
         item_unit.setFlags(item_unit.flags() & ~Qt.ItemIsEditable)
         item_unit.setBackground(QBrush(row_color))
@@ -581,22 +576,20 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
         show_temp_status(status_bar, f"Scanned: {barcode}", 3000)
     
     # Look up product in cache (includes unit type)
+    from modules.table.unit_helpers import canonicalize_unit
     found, product_name, unit_price, unit = get_product_info(barcode)
-    
+    unit_canon = canonicalize_unit(unit)
+
     if not found:
-        # Product not found in database
         if status_bar:
             show_temp_status(status_bar, f"Product '{barcode}' not found in database", 5000)
         return
-    
-    # Check if KG item (requires weighing)
-    is_kg_item = (unit == 'KG')
-    
-    # Check if product already exists in table
-    existing_row = find_product_in_table(table, barcode)
-    
+
+    is_kg_item = (unit_canon == 'Kg')
+
+    existing_row = find_product_in_table(table, barcode, unit_canon)
+
     if existing_row is not None:
-        # Product exists → increment quantity (only if editable)
         qty_container = table.cellWidget(existing_row, 2)
         if qty_container:
             editor = qty_container.findChild(QLineEdit, 'qtyInput')
@@ -605,24 +598,20 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
                 if status_bar:
                     show_temp_status(status_bar, f"Added {product_name} (quantity updated)", 3000)
             else:
-                # KG item - need to weigh again
                 if status_bar:
                     show_temp_status(status_bar, f"KG item - use Vegetable Entry to weigh", 3000)
         return
     else:
-        # New product → add row
         if is_kg_item:
-            # KG item - need weighing, skip for now
             if status_bar:
                 show_temp_status(status_bar, f"{product_name} is KG item - use Vegetable Entry to weigh", 5000)
         else:
-            # EACH item - add normally
-            _add_product_row(table, barcode, product_name, unit_price, quantity=1, status_bar=status_bar, editable=True)
+            _add_product_row(table, barcode, product_name, unit_price, unit_canon, quantity=1, status_bar=status_bar, editable=True)
             if status_bar:
                 show_temp_status(status_bar, f"Added {product_name}", 3000)
 
 
-def find_product_in_table(table: QTableWidget, product_code: str) -> Optional[int]:
+def find_product_in_table(table: QTableWidget, product_code: str, unit_canon: str = None) -> Optional[int]:
     """
     Search table for existing product by code.
     
@@ -637,22 +626,20 @@ def find_product_in_table(table: QTableWidget, product_code: str) -> Optional[in
         Row index if found, None otherwise
     """
     # Look up product name once before searching
-    found, product_name, _, _ = get_product_info(product_code)
+    from modules.table.unit_helpers import canonicalize_unit
+    found, product_name, _, unit = get_product_info(product_code)
     if not found:
         return None
-    
-    # Search table rows for matching product name
+    unit_canon = unit_canon or canonicalize_unit(unit)
     for row in range(table.rowCount()):
-        # Get product name from column 1
         item = table.item(row, 1)
-        if item is None:
+        unit_item = table.item(row, 3)
+        if item is None or unit_item is None:
             continue
-            
-        # Check if this row contains the product
         table_product_name = item.text()
-        if table_product_name == product_name:
+        table_unit = canonicalize_unit(unit_item.text())
+        if table_product_name == product_name and table_unit == unit_canon:
             return row
-            
     return None
 
 
@@ -688,7 +675,7 @@ def increment_row_quantity(table: QTableWidget, row: int) -> None:
 
 
 def _add_product_row(table: QTableWidget, product_code: str, product_name: str, 
-                     unit_price: float, quantity: float = 1, status_bar: Optional[QStatusBar] = None, 
+                     unit_price: float, unit: str, quantity: float = 1, status_bar: Optional[QStatusBar] = None, 
                      editable: bool = True, display_text: Optional[str] = None) -> None:
     """
     Add a new product row to the table.
@@ -744,11 +731,14 @@ def _add_product_row(table: QTableWidget, product_code: str, product_name: str,
             except ValueError:
                 price = 0.0
         
+        unit_item = table.item(r, 3)
+        unit_val = unit_item.text() if unit_item is not None else ''
         row_data = {
-            'product': product_item.text(),  # Store name for now
+            'product': product_item.text(),
             'quantity': qty,
             'unit_price': price,
-            'editable': row_editable
+            'editable': row_editable,
+            'unit': unit_val
         }
         current_rows.append(row_data)
     
@@ -757,7 +747,8 @@ def _add_product_row(table: QTableWidget, product_code: str, product_name: str,
         'product': product_name,
         'quantity': quantity,
         'unit_price': unit_price,
-        'editable': editable
+        'editable': editable,
+        'unit': unit
     }
     current_rows.append(new_row)
     

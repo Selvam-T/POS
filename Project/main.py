@@ -321,6 +321,7 @@ class MainLoader(QMainWindow):
         try:
             from PyQt5.QtWidgets import QLineEdit
             from modules.table.table_operations import set_table_rows
+            from modules.table.unit_helpers import canonicalize_unit
 
             # Get the dialog that just closed
             dlg = self.dialog_wrapper._last_dialog
@@ -332,14 +333,21 @@ class MainLoader(QMainWindow):
             vegetable_rows = getattr(dlg, 'vegetable_rows', None)
             manual_result = getattr(dlg, 'manual_entry_result', None)
             if vegetable_rows:
-                new_rows = vegetable_rows
+                print(f"[main.py] Received vegetable_rows: {vegetable_rows}")
+                new_rows = []
+                for row in vegetable_rows:
+                    row_copy = dict(row)
+                    row_copy['product'] = row.get('product_name', row.get('product', ''))
+                    row_copy['unit'] = canonicalize_unit(row_copy.get('unit', 'Each'))
+                    new_rows.append(row_copy)
             elif manual_result:
+                unit_val = canonicalize_unit(manual_result.get('unit', 'Each'))
                 new_rows = [{
                     'product': manual_result['product_name'],
                     'quantity': manual_result['quantity'],
                     'unit_price': manual_result['unit_price'],
-                    'unit': manual_result.get('unit', 'Each'),
-                    'editable': True  # Manual entries are always editable count items
+                    'unit': unit_val,
+                    'editable': unit_val != 'Kg'
                 }]
             else:
                 return
@@ -351,7 +359,6 @@ class MainLoader(QMainWindow):
                 if product_item is None:
                     continue
 
-                # Get quantity and editable state
                 qty_container = self.sales_table.cellWidget(r, 2)
                 qty = 1.0
                 row_editable = True
@@ -371,7 +378,6 @@ class MainLoader(QMainWindow):
                             except ValueError:
                                 qty = 1.0
 
-                # Get unit price from column 4
                 price_item = self.sales_table.item(r, 4)
                 price = 0.0
                 if price_item is not None:
@@ -380,43 +386,41 @@ class MainLoader(QMainWindow):
                     except ValueError:
                         price = 0.0
 
+                unit_item = self.sales_table.item(r, 3)
+                unit_val = canonicalize_unit(unit_item.text() if unit_item is not None else '')
                 row_data = {
                     'product': product_item.text(),
                     'quantity': qty,
                     'unit_price': price,
-                    'editable': row_editable
+                    'editable': row_editable,
+                    'unit': unit_val
                 }
                 existing_rows.append(row_data)
 
             # Merge new rows into existing rows (handle duplicates for all sources)
             for new_row in new_rows:
-                new_product_name = new_row.get('product', '')
-                new_qty = new_row.get('quantity', 0.0)
+                new_product = new_row.get('product', '')
+                new_unit = new_row.get('unit', '')
                 new_editable = new_row.get('editable', True)
+                new_qty = new_row.get('quantity', 0.0)
 
-                # Find matching product in existing rows
                 found_match = False
                 for existing_row in existing_rows:
-                    if existing_row['product'] == new_product_name:
-                        # Found duplicate - merge quantities
-                        if new_editable and existing_row['editable']:
-                            # Both EACH items - add quantities
-                            existing_row['quantity'] += new_qty
-                        elif not new_editable and not existing_row['editable']:
-                            # Both KG items - add weights
-                            existing_row['quantity'] += new_qty
-                        # If types mismatch (one EACH, one KG), keep existing and ignore new
+                    if (
+                        existing_row['product'] == new_product and
+                        existing_row.get('unit', '') == new_unit and
+                        existing_row.get('editable', True) == new_editable
+                    ):
+                        existing_row['quantity'] += new_qty
                         found_match = True
                         break
 
                 if not found_match:
-                    # No duplicate - add as new row
                     existing_rows.append(new_row)
 
-            # Rebuild sales table with merged rows
+            print(f"[main.py] FINAL rows to set_table_rows: {existing_rows}")
             set_table_rows(self.sales_table, existing_rows)
         except Exception as e:
-            print(f'Failed to add items to sales table: {e}')
             import traceback
             traceback.print_exc()
 

@@ -81,6 +81,19 @@ def _normalize_for_compare(text: Optional[str]) -> str:
         return ''
     return str(text).strip().lower()
 
+# Unit normalization: map variants to canonical 'Kg' or 'Each'
+def _normalize_unit(unit: Optional[str]) -> str:
+    if not unit or not str(unit).strip():
+        return 'Each'
+    u = str(unit).strip().lower()
+    kg_variants = {'kg', 'kilo', 'kilogram', 'kilograms', 'kgs', 'kilos'}
+    each_variants = {'each', 'ea', 'unit', 'piece', 'pieces', 'count', 'item', 'items'}
+    if u in kg_variants:
+        return 'Kg'
+    if u in each_variants:
+        return 'Each'
+    # Fallback: title case
+    return _to_camel_case(unit)
 
 def load_product_cache(db_path: str = DB_PATH) -> bool:
     """Load all products from database into memory cache.
@@ -106,7 +119,7 @@ def load_product_cache(db_path: str = DB_PATH) -> bool:
             PRODUCT_CACHE[_to_camel_case(product_code)] = (
                 _to_camel_case(name) if name is not None else '',
                 float(selling_price) if selling_price is not None else 0.0,
-                _to_camel_case(unit) if unit is not None else 'Each',
+                _normalize_unit(unit),
             )
         conn.close()
         # (No dropdown model refresh needed)

@@ -301,11 +301,9 @@ def open_vegetable_menu_dialog(host_window):
             show_error('Error: Invalid selling price')
             return
         
-        from modules.db_operation.database import _to_camel_case
-        unit = _to_camel_case(combo_unit.currentText().strip()) if combo_unit else _to_camel_case('Each')
-        # Ensure valid unit
-        if unit not in [_to_camel_case('Kg'), _to_camel_case('Each')]:
-            unit = _to_camel_case('Each')
+        from modules.table.unit_helpers import canonicalize_unit
+        unit_raw = combo_unit.currentText().strip() if combo_unit else 'Each'
+        unit = canonicalize_unit(unit_raw)
         category = _to_camel_case('Vegetable')
         supplier = _to_camel_case(input_supplier.text().strip()) if input_supplier and input_supplier.text().strip() else None
         

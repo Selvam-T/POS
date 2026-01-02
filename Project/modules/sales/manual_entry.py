@@ -187,7 +187,6 @@ def open_manual_entry_dialog(parent):
 				quantity_input.setFocus()
 				return
 			quantity = float(text) if unit.lower() == 'kg' else int(float(text))
-			print(f"[manual_entry] Selected product_code={result['product_code']} unit={unit} quantity={quantity}")
 			# All good
 			ui_feedback.set_status_label(error_label, "✓ Adding to sale...", ok=True)
 			dlg.manual_entry_result = {
@@ -197,7 +196,6 @@ def open_manual_entry_dialog(parent):
 				'unit': unit,
 				'unit_price': unit_price
 			}
-			print(f"[DEBUG][manual_entry] Passing to salesTable: product_code={result['product_code']}, product_name={result['product_name']}, quantity={quantity}, unit={unit}, unit_price={unit_price}")
 			dlg.accept()
 		except Exception as e:
 			msg = str(e)

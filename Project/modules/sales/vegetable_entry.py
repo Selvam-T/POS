@@ -116,7 +116,7 @@ def open_vegetable_entry_dialog(parent):
                 
                 # Get full product details for unit
                 _, details = get_product_full(veg_code)
-                unit = details.get('unit', 'EA') if details else 'EA'
+                unit = details.get('unit', 'Each') if details else 'Each'
                 
                 # Connect button click handler using partial to avoid lambda closure issues
                 btn.clicked.connect(
@@ -164,10 +164,9 @@ def _handle_vegetable_button_click(dlg: QDialog, msg_label: Optional[QLabel],
     if vtable is None:
         return
     
-    # Normalize unit to uppercase for comparison
-    unit_upper = unit.upper() if unit else 'EA'
-    
-    if unit_upper == 'KG':
+    from modules.table.unit_helpers import canonicalize_unit
+    unit_canon = canonicalize_unit(unit)
+    if unit_canon == 'Kg':
         # KG item - need weighing scale input (simulated for now)
         if msg_label:
             msg_label.setText(f"Place {product_name} on the scale ...")
@@ -205,7 +204,7 @@ def _handle_vegetable_button_click(dlg: QDialog, msg_label: Optional[QLabel],
             msg_label.setText(f"Added {product_name}: {display_msg}")
             msg_label.setStyleSheet("color: green;")
     
-    else:  # unit == 'EA'
+    else:  # unit == 'Each'
         # EACH item - no weighing needed
         quantity = 1
         total = quantity * unit_price
@@ -237,8 +236,13 @@ def _add_vegetable_row(vtable: QTableWidget, product_code: str, product_name: st
         unit_price: Unit price
         editable: Whether quantity is editable (True=EACH, False=KG)
     """
-    # Check for duplicate using shared function (searches by product code)
-    existing_row = find_product_in_table(vtable, product_code)
+    from modules.table.unit_helpers import canonicalize_unit
+    # Get canonical unit from product code (from cache)
+    from modules.db_operation import get_product_info
+    found, _, _, unit = get_product_info(product_code)
+    unit_canon = canonicalize_unit(unit)
+    # Check for duplicate using shared function (searches by product code and canonical unit)
+    existing_row = find_product_in_table(vtable, product_code, unit_canon)
     
     if existing_row is not None:
         # Product exists - check if it's editable (EACH) or read-only (KG)
@@ -283,22 +287,23 @@ def _add_vegetable_row(vtable: QTableWidget, product_code: str, product_name: st
     
     # No duplicate - get current rows and add new one
     current_rows = []
+    from modules.table.table_operations import display_unit
     for r in range(vtable.rowCount()):
         product_item = vtable.item(r, 1)
         if product_item is None:
             continue
         name = product_item.text()
         # Always resolve product_code for this row (from hidden property or lookup)
-        # If you have a hidden product_code column, use it; else, fallback to name
-        # Here, we assume product_name is unique enough for lookup
         found_code = None
         for code, (n, _, _) in PRODUCT_CACHE.items():
             if n == name:
                 found_code = code
                 break
         lookup_code = found_code if found_code else name
-        # Always resolve unit from product_code
+        # Always resolve canonical unit from product_code
         _, _, _, unit = get_product_info(lookup_code)
+        # Canonicalize unit for storage
+        unit_canon = 'Each' if unit and unit.upper() == 'EACH' else ('Kg' if unit and unit.upper() == 'KG' else unit)
         # Get quantity and editable state
         qty_container = vtable.cellWidget(r, 2)
         qty = 1.0
@@ -330,27 +335,28 @@ def _add_vegetable_row(vtable: QTableWidget, product_code: str, product_name: st
             'product_code': lookup_code,
             'product_name': name,
             'quantity': qty,
-            'unit': unit,
+            'unit': unit_canon,
             'unit_price': price
         }
         current_rows.append(row_data)
-    # Always resolve unit for the new row using product_code
+    # Always resolve canonical unit for the new row using product_code
     _, _, _, unit_for_new = get_product_info(product_code)
+    unit_for_new_canon = 'Each' if unit_for_new and unit_for_new.upper() == 'EACH' else ('Kg' if unit_for_new and unit_for_new.upper() == 'KG' else unit_for_new)
     new_row = {
         'product_code': product_code,
         'product_name': product_name,
         'quantity': quantity,
-        'unit': unit_for_new,
+        'unit': unit_for_new_canon,
         'unit_price': unit_price
     }
     current_rows.append(new_row)
-    # Rebuild table with mixed editable states (pass product_name as 'product' for display, and correct unit)
+    # Rebuild table with mixed editable states (pass product_name as 'product' for display, and correct unit display)
     display_rows = [
         {
             'product': row['product_name'],
             'quantity': row['quantity'],
             'unit_price': row['unit_price'],
-            'unit': row['unit'],
+            'unit': display_unit(row['unit'], row['quantity']),
             'editable': (row['unit'].upper() != 'KG')
         }
         for row in current_rows
@@ -374,11 +380,19 @@ def _handle_ok_all(dlg: QDialog, vtable: Optional[QTableWidget]) -> None:
         if product_item is None:
             continue
         name = product_item.text()
-        found, code, _, unit = get_product_info(name)
-        if not found:
-            code = name
-            unit = ''
-        # Get quantity data
+        # Find product code by matching name in PRODUCT_CACHE
+        from modules.db_operation.database import PRODUCT_CACHE
+        code = None
+        for k, v in PRODUCT_CACHE.items():
+            if v[0] == name:
+                code = k
+                break
+        if code is None:
+            code = name  # fallback, but should not happen if cache is correct
+        cache_val = PRODUCT_CACHE.get(code)
+        print(f"[vegetable_entry] PRODUCT_CACHE lookup for name '{name}' (code '{code}'): {cache_val}")
+        found, _, _, unit = get_product_info(code)
+        print(f"[vegetable_entry] get_product_info('{code}') -> found={found}, unit={unit}")
         qty_container = vtable.cellWidget(r, 2)
         qty = 1.0
         if qty_container is not None:
@@ -395,7 +409,6 @@ def _handle_ok_all(dlg: QDialog, vtable: Optional[QTableWidget]) -> None:
                         qty = float(editor.text()) if editor.text() else 1.0
                     except ValueError:
                         qty = 1.0
-        # Get unit price from column 4
         price_item = vtable.item(r, 4)
         price = 0.0
         if price_item is not None:
@@ -404,17 +417,19 @@ def _handle_ok_all(dlg: QDialog, vtable: Optional[QTableWidget]) -> None:
             except ValueError:
                 price = 0.0
         row_data = {
-            'product': code,  # use product_code for unique merging
-            'product_name': name,  # for display
+            'product': name,  # always use product name for display
+            'product_code': code,
+            'product_name': name,
             'quantity': qty,
             'unit_price': price,
             'unit': unit,
             'editable': (unit.upper() != 'KG')
         }
+        # Debug print removed
         rows_to_transfer.append(row_data)
     # Store rows on dialog object for retrieval by caller
-    dlg.setProperty('vegetable_rows', rows_to_transfer)
-    # Accept dialog
+    # Debug print removed
+    dlg.vegetable_rows = rows_to_transfer
     dlg.accept()
 
 
