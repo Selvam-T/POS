@@ -1,7 +1,6 @@
 /* =============================
    DIALOG BACKGROUND
    ============================= */
-
 QDialog {
     background-color: #ffffff;
     border-top: 1px solid #eeeeee;
@@ -11,47 +10,26 @@ QDialog {
 }
 
 /* =========================================================
-   UNIFIED TITLE BAR STYLING FOR ALL MENU DIALOGS
+   TITLE BAR STYLING
    ========================================================= */
-
-/* Title Bar Frame */
 QFrame#customTitleBar {
     background-color: #ffffff;
     min-height: 40px;
 }
 
-/* Title Label */
 QLabel#customTitle {
     color: #222222;
     font-size: 20px;
     font-weight: 700;
-    padding-left: 0px;
 }
 
-/* Close Button */
 QPushButton#customCloseBtn {
     color: #18042f;
     background: transparent;
     border: none;
     font-size: 40px;
     font-weight: bold;
-    min-width: 40px;
-    min-height: 40px;
-    max-width: 44px;
-    max-height: 44px;
-    padding: 0px;
 }
-
-QPushButton#customCloseBtn:hover {
-    color: #1a39e9;
-    font-size: 40px;
-}
-
-QPushButton#customCloseBtn:pressed {
-    color: #eb8a0b;
-    font-size: 45px;
-}
-
 
 /* =============================
    BUTTON ACTION STYLES
@@ -62,288 +40,77 @@ QPushButton {
     font-weight: 600;
     font-family: "Segoe UI", Arial, sans-serif;
     padding: 8px 24px;
-    letter-spacing: 1px; 
     border-radius: 6px;
 }
 
-/* --- Constructive (OK) - Electric Blue --- */
+/* OK Button */
 QPushButton[objectName$="Ok"] {
-    /* High-contrast gradient: Sky to Royal Blue */
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
-                                      stop:0 #4facfe, stop:1 #0062ff);
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #4facfe, stop:1 #0062ff);
     border: 1px solid #0046b3;
 }
 
-QPushButton[objectName$="Ok"]:hover {
-    /* Brighter "glowing" top */
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
-                                      stop:0 #72c6ff, stop:1 #0062ff);
-}
-
-QPushButton[objectName$="Ok"]:pressed {
-    /* Deep blue "inset" effect */
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
-                                      stop:0 #003a99, stop:1 #0062ff);
-    padding-top: 10px; 
-}
-
-
-/* --- Destructive (Del) - Vivid Crimson --- */
-QPushButton[objectName$="Del"] {
-    /* Gradient: Bright Red to Deep Cherry */
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
-                                      stop:0 #ff5f6d, stop:1 #d90429);
-    border: 1px solid #99031c;
-}
-
-QPushButton[objectName$="Del"]:hover {
-    /* "Hot" Red hover state */
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
-                                      stop:0 #ff8a95, stop:1 #d90429);
-}
-
-QPushButton[objectName$="Del"]:pressed {
-    /* Dark Crimson inset */
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
-                                      stop:0 #800216, stop:1 #d90429);
-    padding-top: 10px;
-}
-
-
-/* --- Dismissive (Cancel) - Polished Slate --- */
+/* Cancel Button */
 QPushButton[objectName$="Cancel"] {
-    /* Gradient: Metallic Silver to Charcoal */
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
-                                      stop:0 #bdc3c7, stop:1 #6c757d);
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #bdc3c7, stop:1 #6c757d);
     border: 1px solid #495057;
 }
 
-QPushButton[objectName$="Cancel"]:hover {
-    /* Chrome-like shine */
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
-                                      stop:0 #dce1e5, stop:1 #6c757d);
-}
-
-QPushButton[objectName$="Cancel"]:pressed {
-    /* Deep Lead inset */
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
-                                      stop:0 #343a40, stop:1 #6c757d);
-    padding-top: 10px;
-}
-
-
-/* --- Focus State --- */
-QPushButton:focus {
-    outline: none;
-    /* Neon-purple ring to make it stand out on pure white */
-    border: 2px solid #a855f7; 
+/* Delete Button */
+QPushButton[objectName$="Del"] {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #ff5f6d, stop:1 #d90429);
+    border: 1px solid #99031c;
 }
 
 /* =========================================================
-   COMMON WIDGET STYLES (suffix-based, like button action styles)
+   STATUS LABELS (DYNAMIC PROPERTIES)
    ========================================================= */
 
-/* -----------------------------
-   Inputs
-   ----------------------------- */
+/* Default look for all status labels */
+QLabel[objectName$="StatusLabel"] {
+    color: #4b5563; /* Neutral Gray-Blue */
+    padding: 6px 10px;
+    font-size: 10pt;
+    font-weight: 500;
+    background: transparent;
+    border: 1px solid transparent;
+}
 
-QLineEdit[objectName$="LineEdit"] {
+/* Success State - Triggered by .setProperty("status", "success") */
+QLabel[status="success"] {
+    color: #166534; /* Dark Green */
+    background-color: #f0fdf4; /* Light Green Tint */
+    border: 1px solid #bbf7d0;
+    border-radius: 4px;
+}
+
+/* Error State - Triggered by .setProperty("status", "error") */
+QLabel[status="error"] {
+    color: #991b1b; /* Dark Red */
+    background-color: #fef2f2; /* Light Red Tint */
+    border: 1px solid #fecaca;
+    border-radius: 4px;
+}
+
+/* =========================================================
+   COMMON INPUT WIDGETS
+   ========================================================= */
+
+QLineEdit, QComboBox {
     background-color: #ffffff;
     color: #222222;
     border: 1px solid #c7cdd6;
     border-radius: 4px;
     padding: 6px 10px;
     font-size: 12pt;
-    selection-background-color: #cfe8ff;
 }
 
-QLineEdit[objectName$="LineEdit"]:focus {
+QLineEdit:focus, QComboBox:focus {
     border: 1px solid #2196f3;
 }
 
-QLineEdit[objectName$="LineEdit"]:disabled {
-    background-color: #f3f5f7;
-    color: #7a8594;
-    border: 1px solid #d6dbe2;
-}
-
-QComboBox[objectName$="ComboBox"] {
-    background-color: #ffffff;
-    color: #222222;
-    border: 1px solid #c7cdd6;
-    border-radius: 4px;
-    padding: 6px 10px;
-    font-size: 12pt;
-}
-
-QComboBox[objectName$="ComboBox"]:focus {
-    border: 1px solid #2196f3;
-}
-
-QComboBox[objectName$="ComboBox"]:disabled {
-    background-color: #f3f5f7;
-    color: #7a8594;
-    border: 1px solid #d6dbe2;
-}
-
-QComboBox[objectName$="ComboBox"]::drop-down {
-    subcontrol-origin: padding;
-    subcontrol-position: top right;
-    width: 28px;
-    border-left: 1px solid #c7cdd6;
-}
-
-QComboBox[objectName$="ComboBox"]::down-arrow {
-    image: url(assets/icons/down_arrow.svg);
-    width: 18px;
-    height: 18px;
-}
-
-QComboBox[objectName$="ComboBox"] QAbstractItemView {
-    background-color: #ffffff;
-    border: 1px solid #c7cdd6;
-    selection-background-color: #cfe8ff;
-    selection-color: #222222;
-    outline: 0;
-}
-
-/* Specify QComboBox placeholder text color in python code. 
-    I must specify color for ComboBox index 0 and rest of index inline,
-    index 0 being placeholder text, the rest selectable text
-    If it is not in .qss then it is cumbersome.
-*/
-
-/* -----------------------------
-   Labels
-   ----------------------------- */
-
-/* Default label look for most menu labels (keeps title label separate via #customTitle) */
-QLabel[objectName$="Label"] {
-    color: #222222;
-    font-size: 12pt;
-}
-
-/* Field label category (ends with FieldLbl) */
+/* Field labels */
 QLabel[objectName$="FieldLbl"] {
     color: #05425f;
     font-size: 10.5pt;
     font-weight: 600;
-    padding: 2px 0px;
-}
-QLabel[objectName$="vegMSelectFieldLbl"] {
-    color: #1a39e9;
-}
-
-/* Header label category (ends with HeaderLabel) */
-QLabel[objectName$="HeaderLabel"] {
-    /*color: #222222; */
-    color: #1a39e9;
-    font-size: 16pt;
-    font-weight: 700;
-    padding: 6px 0px 10px 0px;
-}
-
-/* Sub label category ( search: , select:)
-QLabel[objectName$="SubLbl"] {
-    color: #37474f;          
-    font-size: 13pt; 
-    font-weight: 600;
-    padding-bottom: 2px; 
-    background: transparent;
-}
-
-/* Status/message label category (ends with StatusLabel) */
-QLabel[objectName$="StatusLabel"] {
-    padding: 6px 10px;
-    font-size: 10pt;
-    font-weight: 500;
-    color: #1f2937; /* Default Neutral */
-}
-
-/* --- Dynamic Status States --- */
-QLabel[status="success"] {
-    color: #2e7d32;
-}
-
-QLabel[status="error"] {
-    color: #d32f2f;
-}
-
-/* -----------------------------
-   Tool buttons
-   ----------------------------- */
-
-QToolButton[objectName$="ToolBtn"] {
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    padding: 4px;
-}
-
-QToolButton[objectName$="ToolBtn"]:hover {
-    background-color: #eaf3ff;
-    border: 1px solid #cfe8ff;
-}
-
-QToolButton[objectName$="ToolBtn"]:pressed {
-    background-color: #cfe8ff;
-    border: 1px solid #b8dcff;
-}
-
-/* -----------------------------
-   Group boxes
-   ----------------------------- */
-
-QGroupBox[objectName$="GroupBox"] {
-    border: 1px solid #d6dbe2;
-    border-radius: 6px;
-    margin-top: 14px;
-    padding: 12px;
-    background-color: #ffffff;
-    font-size: 12pt;
-}
-
-QGroupBox[objectName$="GroupBox"]::title {
-    subcontrol-origin: margin;
-    left: 10px;
-    top: 0px;
-    padding: 0px 6px;
-    color: #222222;
-    font-weight: 700;
-    background-color: #ffffff;
-}
-
-/* -----------------------------
-   Tabs (Product menu)
-   ----------------------------- */
-
-QTabWidget#tabWidget::pane {
-    border: 1px solid #d6dbe2;
-    border-radius: 6px;
-    top: -1px;
-    background-color: #ffffff;
-}
-
-QTabBar::tab {
-    padding: 10px 24px;     /* more space around title text */
-    margin-right: 8px;      /* gap between the 3 tabs */
-    min-height: 34px;
-    min-width: 180px;       /* helps avoid elide */
-    background-color: #f3f5f7;
-    border: 1px solid #d6dbe2;
-    padding: 8px 14px;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-    font-size: 12pt;
-    color: #222222;
-}
-
-QTabBar::tab:selected {
-    background-color: #ffffff;
-    border-bottom-color: #ffffff;
-    font-weight: 700;
-}
-
-QTabBar::tab:hover:!selected {
-    background-color: #eaf3ff;
 }
