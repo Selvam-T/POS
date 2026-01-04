@@ -243,6 +243,12 @@
            <layout class="QHBoxLayout" name="layoutAdminCurrent">
             <item>
              <widget class="QLineEdit" name="adminCurPwdCodeLineEdit">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>40</height>
+               </size>
+              </property>
               <property name="echoMode">
                <enum>QLineEdit::Password</enum>
               </property>
@@ -278,6 +284,12 @@
           </item>
           <item row="1" column="1">
            <widget class="QLineEdit" name="adminNewPwdCodeLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="echoMode">
              <enum>QLineEdit::Password</enum>
             </property>
@@ -333,19 +345,15 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="admin_actionBtns">
-         <item>
-          <spacer name="adminSaveSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
+         <property name="spacing">
+          <number>40</number>
+         </property>
+         <property name="leftMargin">
+          <number>30</number>
+         </property>
+         <property name="rightMargin">
+          <number>30</number>
+         </property>
          <item>
           <widget class="QPushButton" name="btnAdminOk">
            <property name="text">
@@ -419,6 +427,12 @@
            <layout class="QHBoxLayout" name="layoutStaffCurrent">
             <item>
              <widget class="QLineEdit" name="staffCurPwdCodeLineEdit">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>40</height>
+               </size>
+              </property>
               <property name="echoMode">
                <enum>QLineEdit::Password</enum>
               </property>
@@ -454,6 +468,12 @@
           </item>
           <item row="1" column="1">
            <widget class="QLineEdit" name="staffNewPwdCodeLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="echoMode">
              <enum>QLineEdit::Password</enum>
             </property>
@@ -509,19 +529,15 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="staff_actionBtns">
-         <item>
-          <spacer name="staffSaveSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
+         <property name="spacing">
+          <number>40</number>
+         </property>
+         <property name="leftMargin">
+          <number>30</number>
+         </property>
+         <property name="rightMargin">
+          <number>30</number>
+         </property>
          <item>
           <widget class="QPushButton" name="btnStaffOk">
            <property name="text">
@@ -593,6 +609,12 @@
           </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="emailCurCodeLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -610,6 +632,12 @@
           </item>
           <item row="1" column="1">
            <widget class="QLineEdit" name="emailNewCodeLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="placeholderText">
              <string>Enter new recovery email</string>
             </property>
@@ -662,19 +690,15 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="email_actionBtns">
-         <item>
-          <spacer name="emailSaveSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
+         <property name="spacing">
+          <number>40</number>
+         </property>
+         <property name="leftMargin">
+          <number>30</number>
+         </property>
+         <property name="rightMargin">
+          <number>30</number>
+         </property>
          <item>
           <widget class="QPushButton" name="btnEmailOk">
            <property name="text">

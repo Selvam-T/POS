@@ -1,6 +1,12 @@
 from __future__ import annotations
 
-from PyQt5.QtWidgets import QCompleter, QLineEdit, QLabel
+from PyQt5.QtWidgets import QCompleter, QLineEdit, QLabel, QComboBox
+# Helper to raise error if validation fails
+def _raise_if_invalid(result):
+    ok, err = result if isinstance(result, (list, tuple)) else (result, None)
+    if not ok:
+        raise ValueError(err or "Invalid input")
+    return True
 from PyQt5.QtCore import Qt
 from modules.ui_utils import ui_feedback
 from modules.ui_utils import input_validation
@@ -208,6 +214,9 @@ def get_product_code_by_name(product_name, product_cache):
                 else:
                     ui_feedback.set_status_label(error_label, "", ok=True)
         return bool(result)
+
+# Utility: search combo box for matches (fixes combo_box not defined error)
+def search_combo_box(combo_box: QComboBox, search_text: str):
     search_text = search_text.strip().lower()
     matches = []
     for i in range(combo_box.count()):

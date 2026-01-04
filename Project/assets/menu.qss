@@ -3,7 +3,11 @@
    ============================= */
 
 QDialog {
-    background: #ffffff;
+    background-color: #ffffff;
+    border-top: 1px solid #eeeeee;
+    border-left: 1px solid #eeeeee;
+    border-bottom: 4px solid #d1d1d1;
+    border-right: 2px solid #d1d1d1;
 }
 
 /* =========================================================
@@ -26,7 +30,7 @@ QLabel#customTitle {
 
 /* Close Button */
 QPushButton#customCloseBtn {
-    color: #1a39e9;
+    color: #18042f;
     background: transparent;
     border: none;
     font-size: 40px;
@@ -39,76 +43,100 @@ QPushButton#customCloseBtn {
 }
 
 QPushButton#customCloseBtn:hover {
-    color: #eb8a0b;
+    color: #1a39e9;
+    font-size: 40px;
 }
 
 QPushButton#customCloseBtn:pressed {
-    color: #18042f;
+    color: #eb8a0b;
+    font-size: 45px;
 }
+
 
 /* =============================
    BUTTON ACTION STYLES
    ============================= */
+QPushButton {
+    color: white;
+    font-size: 12pt;
+    font-weight: 600;
+    font-family: "Segoe UI", Arial, sans-serif;
+    padding: 8px 24px;
+    letter-spacing: 1px; 
+    border-radius: 6px;
+}
 
-/* Constructive (OK) */
+/* --- Constructive (OK) - Electric Blue --- */
 QPushButton[objectName$="Ok"] {
-    background-color: #2196f3;
-    color: white;
-    font-size: 12pt;
-    font-weight: bold;
-    font-family: Arial, sans-serif;
-    padding: 8px 24px;
-    border-radius: 4px;
-    border: none;
+    /* High-contrast gradient: Sky to Royal Blue */
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #4facfe, stop:1 #0062ff);
+    border: 1px solid #0046b3;
 }
+
 QPushButton[objectName$="Ok"]:hover {
-    background-color: #1e88e5;
+    /* Brighter "glowing" top */
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #72c6ff, stop:1 #0062ff);
 }
+
 QPushButton[objectName$="Ok"]:pressed {
-    background-color: #1976d2;
+    /* Deep blue "inset" effect */
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #003a99, stop:1 #0062ff);
+    padding-top: 10px; 
 }
 
-/* Destructive (Del) */
+
+/* --- Destructive (Del) - Vivid Crimson --- */
 QPushButton[objectName$="Del"] {
-    background-color: #f44336;
-    color: white;
-    font-size: 12pt;
-    font-weight: bold;
-    font-family: Arial, sans-serif;
-    padding: 8px 24px;
-    border-radius: 4px;
-    border: none;
+    /* Gradient: Bright Red to Deep Cherry */
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #ff5f6d, stop:1 #d90429);
+    border: 1px solid #99031c;
 }
+
 QPushButton[objectName$="Del"]:hover {
-    background-color: #d32f2f;
+    /* "Hot" Red hover state */
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #ff8a95, stop:1 #d90429);
 }
+
 QPushButton[objectName$="Del"]:pressed {
-    background-color: #b71c1c;
+    /* Dark Crimson inset */
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #800216, stop:1 #d90429);
+    padding-top: 10px;
 }
 
-/* Dismissive (Cancel) */
+
+/* --- Dismissive (Cancel) - Polished Slate --- */
 QPushButton[objectName$="Cancel"] {
-    background-color:  #9ea8b7;
-    color: white;
-    font-size: 12pt;
-    font-weight: bold;
-    font-family: Arial, sans-serif;
-    padding: 8px 24px;
-    border-radius: 4px;
-    border: none;
-}
-QPushButton[objectName$="Cancel"]:hover {
-    background-color: #757f8e;
-}
-QPushButton[objectName$="Cancel"]:pressed {
-    background-color: #616b79;
+    /* Gradient: Metallic Silver to Charcoal */
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #bdc3c7, stop:1 #6c757d);
+    border: 1px solid #495057;
 }
 
+QPushButton[objectName$="Cancel"]:hover {
+    /* Chrome-like shine */
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #dce1e5, stop:1 #6c757d);
+}
+
+QPushButton[objectName$="Cancel"]:pressed {
+    /* Deep Lead inset */
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #343a40, stop:1 #6c757d);
+    padding-top: 10px;
+}
+
+
+/* --- Focus State --- */
 QPushButton:focus {
-    outline: none; /* Remove default outline if needed */
-    border: 4px solid #10761e;
-    border-radius: 4px;
-    padding: 6px 16px;
+    outline: none;
+    /* Neon-purple ring to make it stand out on pure white */
+    border: 2px solid #a855f7; 
 }
 
 /* =========================================================
@@ -215,18 +243,30 @@ QLabel[objectName$="HeaderLabel"] {
     padding: 6px 0px 10px 0px;
 }
 
-/* Sub label category ( search: , select:) */
+/* Sub label category ( search: , select:)
 QLabel[objectName$="SubLbl"] {
-    color: green;
-    font-size: 11pt;
+    color: #37474f;          
+    font-size: 13pt; 
+    font-weight: 600;
+    padding-bottom: 2px; 
+    background: transparent;
 }
 
 /* Status/message label category (ends with StatusLabel) */
 QLabel[objectName$="StatusLabel"] {
-    color: #1f2937;
     padding: 6px 10px;
     font-size: 10pt;
     font-weight: 500;
+    color: #1f2937; /* Default Neutral */
+}
+
+/* --- Dynamic Status States --- */
+QLabel[status="success"] {
+    color: #2e7d32;
+}
+
+QLabel[status="error"] {
+    color: #d32f2f;
 }
 
 /* -----------------------------

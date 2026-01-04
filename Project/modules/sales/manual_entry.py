@@ -35,24 +35,22 @@ def open_manual_entry_dialog(parent):
 	dlg.setModal(True)
 	dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
 
-	# Styling temporarily disabled for debugging input/display issues
-	# try:
-	#     assets_dir = os.path.join(BASE_DIR, 'assets')
-	#     sales_qss = os.path.join(assets_dir, 'sales.qss')
-	#     if os.path.exists(sales_qss):
-	#         with open(sales_qss, 'r', encoding='utf-8') as f:
-	#             dlg.setStyleSheet(f.read())
-	# except Exception as e:
-	#     print('Failed to load sales.qss:', e)
+	# Apply menu.qss styling for menu dialog consistency
+	try:
+		assets_dir = os.path.join(BASE_DIR, 'assets')
+		menu_qss = os.path.join(assets_dir, 'menu.qss')
+		if os.path.exists(menu_qss):
+			with open(menu_qss, 'r', encoding='utf-8') as f:
+				dlg.setStyleSheet(f.read())
+	except Exception as e:
+		print('Failed to load menu.qss:', e)
 
 	# Get widgets
 	product_name_line = dlg.findChild(QLineEdit, 'manualNameSearchLineEdit')
 	product_code_line = dlg.findChild(QLineEdit, 'manualProductCodeLineEdit')
 	quantity_input = dlg.findChild(QLineEdit, 'manualQuantityLineEdit')
 	unit_line = dlg.findChild(QLineEdit, 'manualUnitLineEdit')
-	# Set initial placeholder for quantity
-	if quantity_input is not None:
-		quantity_input.setPlaceholderText('Enter Quantity')
+	
 	# Helper to update placeholder based on unit
 	def update_quantity_placeholder():
 		if quantity_input is None or unit_line is None:
@@ -74,8 +72,7 @@ def open_manual_entry_dialog(parent):
 	custom_close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
 
 	# --- QLineEdit for product name search with shared input handler ---
-	product_name_line.setPlaceholderText("Search Product Name")
-	print("manualNameSearchLineEdit readOnly:", product_name_line.isReadOnly(), "enabled:", product_name_line.isEnabled())
+	# product_name_line.setPlaceholderText("Search Product Name")
 	product_names = [rec[0] for rec in PRODUCT_CACHE.values() if rec and rec[0]]
 	from modules.ui_utils.input_handler import setup_name_search_lineedit
 	completer = setup_name_search_lineedit(product_name_line, product_names, error_label)
@@ -98,28 +95,35 @@ def open_manual_entry_dialog(parent):
 	product_name_line.editingFinished.connect(lambda: on_product_name_edit())
 	product_name_line.returnPressed.connect(lambda: on_product_name_edit())
 	if completer is not None:
-		completer.activated.connect(lambda name: on_product_name_edit(name))
+		def on_completer_activated(name):
+			on_product_name_edit(name)
+			if quantity_input is not None:
+				quantity_input.setFocus()
+		completer.activated.connect(on_completer_activated)
 	# Connect dual-source handlers for product code
 	def on_product_code_edit():
-		handle_product_code_edit(product_code_line, product_name_line, unit_line, PRODUCT_CACHE, error_label, source_type='cache')
+		found = handle_product_code_edit(product_code_line, product_name_line, unit_line, PRODUCT_CACHE, error_label, source_type='cache')
 		update_quantity_placeholder()
+		if found and quantity_input is not None:
+			quantity_input.setFocus()
 	product_code_line.editingFinished.connect(on_product_code_edit)
 	product_code_line.returnPressed.connect(on_product_code_edit)
 
-	# Prevent Enter in QLineEdit from triggering dialog accept
-	def block_enter_accept(event):
+	# Improved event filter: trigger validation on Enter for each field
+	def custom_eventFilter(obj, event):
 		if event.type() == event.KeyPress and event.key() in (Qt.Key_Return, Qt.Key_Enter):
-			return True
+			if isinstance(obj, QLineEdit):
+				if obj == product_name_line:
+					on_product_name_edit()
+				elif obj == product_code_line:
+					on_product_code_edit()
+				elif obj == quantity_input:
+					handle_ok()
+				return True  # Block event from propagating (prevents dialog accept)
 		return False
 	for line_edit in (product_code_line, product_name_line, quantity_input):
 		if line_edit is not None:
 			line_edit.installEventFilter(dlg)
-	orig_eventFilter = dlg.eventFilter
-	def custom_eventFilter(obj, event):
-		if isinstance(obj, QLineEdit) and event.type() == event.KeyPress and event.key() in (Qt.Key_Return, Qt.Key_Enter):
-			# Block Enter/Return in QLineEdit
-			return True
-		return orig_eventFilter(obj, event)
 	dlg.eventFilter = custom_eventFilter
 
 	# Real-time feedback: update product name and status as product code changes

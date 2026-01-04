@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>400</height>
+    <height>600</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>350</width>
-    <height>400</height>
+    <height>600</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -113,7 +113,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>10</height>
+       <height>20</height>
       </size>
      </property>
     </spacer>
@@ -124,28 +124,95 @@
       <number>0</number>
      </property>
      <property name="topMargin">
-      <number>20</number>
+      <number>0</number>
      </property>
      <property name="rightMargin">
       <number>0</number>
      </property>
      <property name="bottomMargin">
-      <number>20</number>
+      <number>0</number>
      </property>
      <property name="horizontalSpacing">
-      <number>10</number>
+      <number>0</number>
      </property>
      <property name="verticalSpacing">
-      <number>20</number>
+      <number>15</number>
      </property>
-     <item row="0" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="manualProductCodeFieldLbl">
        <property name="text">
         <string>Product Code - </string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
+     <item row="4" column="0">
+      <spacer name="verticalSpacer_7">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="7" column="1">
+      <widget class="QLineEdit" name="manualUnitLineEdit">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <spacer name="verticalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>25</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="1" column="1">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>5</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="3" column="0">
       <widget class="QLabel" name="manualSearchFieldLbl">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -167,7 +234,14 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="7" column="0">
+      <widget class="QLabel" name="manualUnitFieldLbl">
+       <property name="text">
+        <string>Unit:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="0">
       <widget class="QLabel" name="manualQuantityFieldLbl">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -189,35 +263,97 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="manualQuantityLineEdit">
-       <property name="placeholderText">
-        <string>Enter quantity</string>
+     <item row="0" column="0">
+      <widget class="QLabel" name="searchSubLbl">
+       <property name="text">
+        <string>SEARCH :</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="manualProductCodeLineEdit"/>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="manualNameSearchLineEdit"/>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="manualUnitFieldLbl">
+     <item row="5" column="0">
+      <widget class="QLabel" name="search2SubLbl">
        <property name="text">
-        <string>Unit:</string>
+        <string>EDIT :</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="manualUnitLineEdit">
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
+      <widget class="QLineEdit" name="manualProductCodeLineEdit">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>40</height>
+        </size>
        </property>
       </widget>
+     </item>
+     <item row="1" column="0">
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>5</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="8" column="1">
+      <widget class="QLineEdit" name="manualQuantityLineEdit">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>40</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="manualNameSearchLineEdit">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>40</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <spacer name="verticalSpacer_8">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>5</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="6" column="1">
+      <spacer name="verticalSpacer_9">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>5</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>
@@ -235,7 +371,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>10</height>
+       <height>15</height>
       </size>
      </property>
     </spacer>
@@ -261,7 +397,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>10</height>
+       <height>15</height>
       </size>
      </property>
     </spacer>
@@ -269,21 +405,14 @@
    <item>
     <layout class="QHBoxLayout" name="manual_actionBtns">
      <property name="spacing">
-      <number>7</number>
+      <number>40</number>
      </property>
-     <item>
-      <spacer name="buttonSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
+     <property name="leftMargin">
+      <number>30</number>
+     </property>
+     <property name="rightMargin">
+      <number>30</number>
+     </property>
      <item>
       <widget class="QPushButton" name="btnManualOk">
        <property name="sizePolicy">
@@ -328,7 +457,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Cancel</string>
+        <string>CANCEL</string>
        </property>
       </widget>
      </item>
@@ -345,7 +474,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>10</height>
+       <height>5</height>
       </size>
      </property>
     </spacer>
@@ -354,11 +483,11 @@
  </widget>
  <tabstops>
   <tabstop>manualProductCodeLineEdit</tabstop>
+  <tabstop>customCloseBtn</tabstop>
   <tabstop>manualNameSearchLineEdit</tabstop>
   <tabstop>manualQuantityLineEdit</tabstop>
   <tabstop>btnManualOk</tabstop>
   <tabstop>btnManualCancel</tabstop>
-  <tabstop>customCloseBtn</tabstop>
  </tabstops>
  <resources/>
  <connections/>

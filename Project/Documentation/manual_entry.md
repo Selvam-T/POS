@@ -26,7 +26,13 @@ Refer to `modules/menu/vegetable_menu.py` for the latest controller structure an
 
 
 ## Overview
+
 The Manual Entry dialog allows users to manually input product information when items cannot be processed through the standard vegetable entry or barcode scanning methods. This is useful for miscellaneous items, special products, or when the barcode scanner is unavailable.
+
+### January 2026 Workflow Enhancements
+- **Focus Jump:** After selecting a product name from the dropdown or entering a valid product code, focus automatically moves to the Quantity field for faster entry.
+- **Immediate Validation:** Pressing Enter in any field triggers immediate validation. If the input is valid, focus advances to the next logical field or submits the form (when in Quantity).
+- **POS-Optimized Flow:** This workflow matches standard POS behavior: type/select product, type quantity, press Enter, done.
 
 **Note:** All manual entries are treated as EACH (count-based) items with editable quantities (integer only, range 1-9999). They display with unit "ea" in the sales table.
 
@@ -169,25 +175,23 @@ The Manual Entry dialog allows users to manually input product information when 
 ## Styling (sales.qss)
 
 ### Dialog Background
-```css
-QWidget#manualEntryDialog {
-    background-color: #EFF5F9;  /* Light blue background */
-    font-family: "Verdana";
-}
-```
 
-### Labels
-- Font size: 11pt
-- Color: #2C3E50 (dark grey)
-- Font weight: Bold
-- Font family: "Verdana"
+### Parameters
+- `parent`: Parent window (typically the main sales window)
 
-### Input Fields
-- Font size: 10pt
-- Padding: 8px
-- Background: #FFFBE6 (pale yellow)
-- Border: 2px solid #BDC3C7 (grey)
-- Border-radius: 4px
+### Returns
+- **Success**: Dictionary with keys:
+    ```python
+    {
+            'product_name': str,      # Non-empty string
+            'quantity': float,        # Positive number
+            'unit_price': float,      # Positive number
+            'editable': bool          # Always True for manual entry (count-based items)
+    }
+    ```
+- **Cancelled/Error**: `None`
+
+**Note:** Manual entry items are always treated as count-based (like EACH units) with editable quantity cells. KG items requiring weighing must use the Vegetable Entry dialog instead.
 
 **Focus State**:
 - Background: #FFF9C4 (lighter yellow)
@@ -215,35 +219,36 @@ QWidget#manualEntryDialog {
 
 ## Usage Example (Refactored Dec 2025)
 
-```python
-# From main.py: open_manual_panel()
-def open_manual_panel(self):
-    """Open Manual Product Entry panel."""
-    self.dialog_wrapper.open_dialog_scanner_blocked(
-        launch_manual_entry_dialog, 
-        dialog_key='manual_entry',
-        on_finish=lambda: self._add_items_to_sales_table('manual')
-    )
 
-# The shared handler processes the result:
-def _add_items_to_sales_table(self, source_type):
-    """Unified handler for both vegetable and manual entry dialogs."""
-    dlg = self.dialog_wrapper._last_dialog
-    if dlg is None or dlg.result() != QDialog.Accepted:
-        return
-    
-    if source_type == 'manual':
-        # Read result from dialog attribute
-        manual_result = getattr(dlg, 'manual_entry_result', None)
-        if not manual_result:
-            return
-        
-        # Convert to row format
-        new_rows = [{
-            'product': manual_result['product_name'],
-            'quantity': manual_result['quantity'],
-            'unit_price': manual_result['unit_price'],
-            'editable': True  # Manual entries always editable
+1. **Load UI**
+    - Loads `manual_entry.ui` from UI directory
+    - Handles missing file gracefully
+
+2. **Create Dialog**
+    - Creates QDialog with modal behavior
+    - Sets window title: "Manual Product Input"
+    - Window flags: Dialog | CustomizeWindowHint | WindowTitleHint | WindowCloseButtonHint
+    - Removes min/max buttons, keeps title bar and close button
+
+3. **Apply Styling**
+    - Loads `sales.qss` and applies stylesheet
+    - Includes specific styles for manual entry dialog
+
+4. **Input Validation & Focus Behavior**
+    - Product Name: Cannot be empty. After selection (dropdown or Enter), focus jumps to Quantity.
+    - Product Code: After valid entry, focus jumps to Quantity.
+    - Quantity: Must be a valid positive number. Pressing Enter here submits the form if all fields are valid.
+    - All fields: Pressing Enter triggers immediate validation and focus advancement.
+
+5. **Store Result**
+    - On success, stores result as dialog attribute: `dlg.manual_entry_result = {...}`
+    - Result structure: `{'product_name': str, 'quantity': float, 'unit_price': float}`
+    - Dialog accepts (OK)
+
+6. **Overlay & Scanner Management** (Handled by DialogWrapper)
+    - DialogWrapper handles dimming overlay activation/deactivation
+    - Scanner blocking/unblocking managed automatically
+    - Dialog centering and focus restoration handled by wrapper
         }]
         
         # Merge with existing rows and rebuild table

@@ -97,14 +97,17 @@
     </widget>
    </item>
    <item>
-    <spacer name="horizontalSpacer">
+    <spacer name="verticalSpacer_2">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>40</width>
-       <height>10</height>
+       <width>20</width>
+       <height>20</height>
       </size>
      </property>
     </spacer>
@@ -137,19 +140,15 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="layoutTodayBtn">
-         <item>
-          <spacer name="todayBtnSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
+         <property name="spacing">
+          <number>40</number>
+         </property>
+         <property name="leftMargin">
+          <number>30</number>
+         </property>
+         <property name="rightMargin">
+          <number>30</number>
+         </property>
          <item>
           <widget class="QPushButton" name="btnTodayOk">
            <property name="text">
@@ -167,14 +166,17 @@
         </layout>
        </item>
        <item>
-        <spacer name="horizontalSpacer_8">
+        <spacer name="verticalSpacer">
          <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>40</width>
-           <height>10</height>
+           <width>20</width>
+           <height>20</height>
           </size>
          </property>
         </spacer>
@@ -203,6 +205,12 @@
            <layout class="QHBoxLayout" name="layoutStaffCurrent">
             <item>
              <widget class="QLineEdit" name="staffCurrentPassword">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>40</height>
+               </size>
+              </property>
               <property name="echoMode">
                <enum>QLineEdit::Password</enum>
               </property>
@@ -238,6 +246,12 @@
           </item>
           <item row="1" column="1">
            <widget class="QLineEdit" name="staffNewPassword">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="echoMode">
              <enum>QLineEdit::Password</enum>
             </property>
@@ -264,19 +278,15 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="layoutRangeBtn">
-         <item>
-          <spacer name="rangeBtnSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
+         <property name="spacing">
+          <number>40</number>
+         </property>
+         <property name="leftMargin">
+          <number>30</number>
+         </property>
+         <property name="rightMargin">
+          <number>30</number>
+         </property>
          <item>
           <widget class="QPushButton" name="btnRangeOk">
            <property name="text">
@@ -342,6 +352,12 @@
           </item>
           <item row="0" column="1">
            <widget class="QLineEdit" name="currentEmailLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="readOnly">
              <bool>true</bool>
             </property>
@@ -359,6 +375,12 @@
           </item>
           <item row="1" column="1">
            <widget class="QLineEdit" name="newEmailLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
             <property name="placeholderText">
              <string>Enter new recovery email</string>
             </property>
@@ -382,19 +404,15 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="layoutSummaryBtn">
-         <item>
-          <spacer name="summarySaveSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
+         <property name="spacing">
+          <number>40</number>
+         </property>
+         <property name="leftMargin">
+          <number>30</number>
+         </property>
+         <property name="rightMargin">
+          <number>30</number>
+         </property>
          <item>
           <widget class="QPushButton" name="btnSummaryOk">
            <property name="text">

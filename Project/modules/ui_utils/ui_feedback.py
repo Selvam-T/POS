@@ -14,28 +14,32 @@ All helpers return True/False so controllers can use the return value if desired
 
 from PyQt5.QtWidgets import QLabel
 
-
 def set_status_label(label: QLabel, message: str, ok: bool) -> bool:
-    """Set status message and apply simple red/green coloring."""
+    """Set status message and apply QSS styling via dynamic properties."""
     if label is None:
         return False
 
     label.setText(message or "")
+    
+    # Assign the property value defined in menu.qss
+    status_value = "success" if ok else "error"
+    label.setProperty("status", status_value)
 
-    # Keep styling simple and local (no global QSS required).
-    # If you later switch to QSS/property-based styling, you can update this in one place.
-    if ok:
-        label.setStyleSheet("color: green;")
-        return True
-
-    label.setStyleSheet("color: red;")
-    return False
-
+    # RE-POLISH: This is required for Qt to re-apply QSS 
+    # based on the new property value.
+    label.style().unpolish(label)
+    label.style().polish(label)
+    
+    return ok
 
 def clear_status_label(label: QLabel) -> bool:
-    """Clear message and remove inline color styling."""
+    """Clear message and reset status property."""
     if label is None:
         return False
+        
     label.setText("")
-    label.setStyleSheet("")
+    label.setProperty("status", "none")
+    
+    label.style().unpolish(label)
+    label.style().polish(label)
     return True
