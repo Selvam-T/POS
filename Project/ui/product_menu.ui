@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>563</width>
-    <height>850</height>
+    <height>900</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>850</height>
+    <height>900</height>
    </size>
   </property>
   <layout class="QVBoxLayout" name="mainVerticalLayout">
@@ -115,7 +115,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabAdd">
       <attribute name="title">
@@ -432,12 +432,12 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>15</height>
+           <height>25</height>
           </size>
          </property>
         </spacer>
@@ -800,12 +800,12 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>15</height>
+           <height>25</height>
           </size>
          </property>
         </spacer>

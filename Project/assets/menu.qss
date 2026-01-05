@@ -49,16 +49,56 @@ QPushButton[objectName$="Ok"] {
     border: 1px solid #0046b3;
 }
 
+QPushButton[objectName$="Ok"]:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #90caf9, stop:1 #2196f3);
+}
+
+QPushButton[objectName$="Ok"]:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #1565c0, stop:1 #2196f3);
+    padding-top: 10px;
+}
+
 /* Cancel Button */
 QPushButton[objectName$="Cancel"] {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #bdc3c7, stop:1 #6c757d);
     border: 1px solid #495057;
 }
 
+QPushButton[objectName$="Cancel"]:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #d1d9e2, stop:1 #9ea8b7);
+}
+
+QPushButton[objectName$="Cancel"]:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #7a828f, stop:1 #9ea8b7); /* Softer gray */
+    padding-top: 10px;
+}
+
 /* Delete Button */
 QPushButton[objectName$="Del"] {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #ff5f6d, stop:1 #d90429);
     border: 1px solid #99031c;
+}
+
+QPushButton[objectName$="Del"]:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #ff8a80, stop:1 #f44336);
+}
+
+QPushButton[objectName$="Del"]:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #b71c1c, stop:1 #f44336);
+    padding-top: 10px;
+}
+
+/* --- Focus State --- */
+QPushButton:focus {
+    outline: none;
+    /* Keeps your purple focus, but adjusted thickness to prevent "jumping" */
+    border: 2px solid #451076; 
 }
 
 /* =========================================================
@@ -108,9 +148,99 @@ QLineEdit:focus, QComboBox:focus {
     border: 1px solid #2196f3;
 }
 
+/* ComboBox Dropdown Arrow */
+QComboBox::down-arrow {
+    image: url(assets/icons/down_arrow.svg);
+    width: 22px;
+    height: 22px;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+    border-left: 1px solid #c7cdd6;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+/* ToolButton SVG Icon */
+QToolButton {
+    border: none;
+    background: transparent;
+}
+
+QToolButton::icon {
+    image: url(assets/icons/eye.svg);
+    width: 22px;
+    height: 22px;
+}
+
 /* Field labels */
 QLabel[objectName$="FieldLbl"] {
     color: #05425f;
     font-size: 10.5pt;
     font-weight: 600;
+}
+
+/* Header Label */
+QLabel[objectName$="HeaderLabel"] {
+    font-size: 14pt;
+    font-weight: 500;
+    color: #222222;
+}
+
+QLabel[objectName$="userHeaderLabel"] {
+    color: #0eec1d;
+}
+
+/* TabWidget */
+QTabWidget::pane {
+    border: 1px solid #c7cdd6;
+    background: #ffffff;
+    border-radius: 4px;
+}
+
+QTabBar::tab {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #f8f9fa, stop:1 #e9ecef); /* Sharper contrast for visible gradient */
+    color: #2c2b2b;
+    padding: 12px 22px;
+    margin-right: 4px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    font-family: sans-serif;
+    font-size: 9pt;
+    font-weight: 600;
+    min-width: 132px;
+    letter-spacing: 0.75px;
+}
+
+QTabBar::tab:selected {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #4facfe, stop:1 #0062ff);
+    color: white;
+    font-weight: 800;
+    letter-spacing: 0.75px;
+    border-bottom: 2px solid #0062ff; /* Visual indicator */
+}
+
+QTabBar::tab:hover:!selected {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #e3f2fd, stop:1 #bbdefb); /* Brighter for visibility */
+    color: #0062ff; /* Text color change on hover */
+}
+
+/* GroupBox with inline title */
+QGroupBox {
+    font-size: 8pt;
+    font-weight: 600;
+    border: 1px solid #c7cdd6;
+    border-radius: 4px;
+    margin-top: 8px;
+    padding-top: 12px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    color: #05425f;
+    padding: 0 4px 0 4px;
 }
