@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>900</height>
+    <height>800</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>500</width>
-    <height>500</height>
+    <height>700</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -22,7 +22,7 @@
     <height>16777215</height>
    </size>
   </property>
-  <layout class="QVBoxLayout" name="mainVegEntryLayout">
+  <layout class="QVBoxLayout" name="mainVerticalLayout">
    <property name="spacing">
     <number>10</number>
    </property>
@@ -76,14 +76,14 @@
     </widget>
    </item>
    <item>
-    <spacer name="vegEntryHSpacer1">
+    <spacer name="verticalSpacer">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>40</width>
-       <height>5</height>
+       <width>20</width>
+       <height>15</height>
       </size>
      </property>
     </spacer>
@@ -105,14 +105,14 @@
     </widget>
    </item>
    <item>
-    <spacer name="vegEntryHSpacer2">
+    <spacer name="verticalSpacer_2">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>40</width>
-       <height>5</height>
+       <width>20</width>
+       <height>10</height>
       </size>
      </property>
     </spacer>
@@ -300,14 +300,14 @@
     </widget>
    </item>
    <item>
-    <spacer name="vegEntryHSpacer3">
+    <spacer name="verticalSpacer_3">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>40</width>
-       <height>5</height>
+       <width>20</width>
+       <height>20</height>
       </size>
      </property>
     </spacer>
@@ -323,14 +323,17 @@
     </widget>
    </item>
    <item>
-    <spacer name="vegEntryHSpacer4">
+    <spacer name="verticalSpacer_4">
      <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>40</width>
-       <height>10</height>
+       <width>20</width>
+       <height>25</height>
       </size>
      </property>
     </spacer>

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>560</width>
-    <height>502</height>
+    <height>550</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -16,9 +16,15 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>550</height>
+   </size>
+  </property>
+  <layout class="QVBoxLayout" name="mainVerticalLayout">
    <property name="spacing">
-    <number>5</number>
+    <number>10</number>
    </property>
    <property name="leftMargin">
     <number>10</number>
@@ -105,7 +111,7 @@
       <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
+      <enum>QSizePolicy::Expanding</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -135,7 +141,7 @@
      <item>
       <widget class="QLabel" name="userHeaderLabel">
        <property name="text">
-        <string/>
+        <string>User Name</string>
        </property>
       </widget>
      </item>
@@ -167,7 +173,7 @@
       <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
+      <enum>QSizePolicy::Expanding</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -221,16 +227,16 @@
            <number>20</number>
           </property>
           <property name="leftMargin">
-           <number>10</number>
+           <number>0</number>
           </property>
           <property name="topMargin">
-           <number>20</number>
+           <number>25</number>
           </property>
           <property name="rightMargin">
-           <number>10</number>
+           <number>0</number>
           </property>
           <property name="bottomMargin">
-           <number>20</number>
+           <number>25</number>
           </property>
           <item row="0" column="0">
            <widget class="QLabel" name="adminCurFieldLbl">
@@ -307,7 +313,7 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
+          <enum>QSizePolicy::Expanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -333,7 +339,7 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
+          <enum>QSizePolicy::Expanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -405,16 +411,16 @@
            <number>20</number>
           </property>
           <property name="leftMargin">
-           <number>10</number>
+           <number>0</number>
           </property>
           <property name="topMargin">
-           <number>20</number>
+           <number>25</number>
           </property>
           <property name="rightMargin">
-           <number>10</number>
+           <number>0</number>
           </property>
           <property name="bottomMargin">
-           <number>20</number>
+           <number>25</number>
           </property>
           <item row="0" column="0">
            <widget class="QLabel" name="staffCurFieldLbl">
@@ -491,7 +497,7 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
+          <enum>QSizePolicy::Expanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -517,7 +523,7 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
+          <enum>QSizePolicy::Expanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -589,16 +595,16 @@
            <number>20</number>
           </property>
           <property name="leftMargin">
-           <number>10</number>
+           <number>0</number>
           </property>
           <property name="topMargin">
-           <number>20</number>
+           <number>25</number>
           </property>
           <property name="rightMargin">
-           <number>10</number>
+           <number>0</number>
           </property>
           <property name="bottomMargin">
-           <number>20</number>
+           <number>25</number>
           </property>
           <item row="0" column="0">
            <widget class="QLabel" name="emailCurFieldLbl">
@@ -652,7 +658,7 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
+          <enum>QSizePolicy::Expanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -678,7 +684,7 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
+          <enum>QSizePolicy::Expanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>

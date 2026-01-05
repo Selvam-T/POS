@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>603</width>
-    <height>793</height>
+    <width>610</width>
+    <height>700</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -24,7 +24,7 @@
   </property>
   <layout class="QVBoxLayout" name="mainVegetableMenuLayout">
    <property name="spacing">
-    <number>5</number>
+    <number>10</number>
    </property>
    <property name="leftMargin">
     <number>10</number>
@@ -108,12 +108,12 @@
       <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
+      <enum>QSizePolicy::Expanding</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>50</height>
+       <height>10</height>
       </size>
      </property>
     </spacer>
@@ -138,13 +138,13 @@
      <item>
       <layout class="QGridLayout" name="inputFieldsLayout" columnstretch="0,0">
        <property name="leftMargin">
-        <number>0</number>
+        <number>10</number>
        </property>
        <property name="topMargin">
         <number>0</number>
        </property>
        <property name="rightMargin">
-        <number>0</number>
+        <number>10</number>
        </property>
        <property name="bottomMargin">
         <number>0</number>
@@ -221,7 +221,7 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
+          <enum>QSizePolicy::Expanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -237,7 +237,7 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
+          <enum>QSizePolicy::Expanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -679,7 +679,7 @@
          </property>
          <property name="font">
           <font>
-           <pointsize>12</pointsize>
+           <pointsize>8</pointsize>
           </font>
          </property>
          <property name="text">
@@ -722,7 +722,7 @@
          </property>
          <property name="font">
           <font>
-           <pointsize>12</pointsize>
+           <pointsize>8</pointsize>
           </font>
          </property>
          <property name="text">
@@ -733,22 +733,6 @@
       </layout>
      </item>
     </layout>
-   </item>
-   <item>
-    <spacer name="verticalSpacer_4">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>15</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>

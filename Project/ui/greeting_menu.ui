@@ -7,12 +7,18 @@
     <x>0</x>
     <y>0</y>
     <width>420</width>
-    <height>300</height>
+    <height>320</height>
    </rect>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>250</height>
+   </size>
+  </property>
+  <layout class="QVBoxLayout" name="mainVerticalLayout">
    <property name="spacing">
-    <number>5</number>
+    <number>10</number>
    </property>
    <property name="leftMargin">
     <number>10</number>
@@ -96,7 +102,7 @@
       <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
+      <enum>QSizePolicy::Expanding</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -151,7 +157,7 @@
       <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
+      <enum>QSizePolicy::Expanding</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -162,7 +168,7 @@
     </spacer>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="greeting_actionBtns">
      <property name="spacing">
       <number>40</number>
      </property>
