@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>800</height>
+    <height>880</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>500</width>
-    <height>700</height>
+    <height>880</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -27,17 +27,97 @@
     <number>10</number>
    </property>
    <property name="leftMargin">
-    <number>0</number>
+    <number>15</number>
    </property>
    <property name="topMargin">
-    <number>0</number>
+    <number>20</number>
    </property>
    <property name="rightMargin">
-    <number>0</number>
+    <number>15</number>
    </property>
    <property name="bottomMargin">
-    <number>0</number>
+    <number>30</number>
    </property>
+   <item>
+    <widget class="QFrame" name="customTitleBar">
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <layout class="QHBoxLayout" name="customTitleLayout">
+      <property name="spacing">
+       <number>5</number>
+      </property>
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>10</number>
+      </property>
+      <item>
+       <spacer name="horizontalSpacer_1">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="customTitle">
+        <property name="text">
+         <string>Vegetable Entry</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="customCloseBtn">
+        <property name="text">
+         <string>x</string>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_5">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>5</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
    <item>
     <widget class="QTableWidget" name="vegEntryTable">
      <property name="minimumSize">
@@ -89,7 +169,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="vegEntryMessage1">
+    <widget class="QLabel" name="vegEFieldLbl">
      <property name="text">
       <string>Select Vegetable:</string>
      </property>
@@ -108,6 +188,9 @@
     <spacer name="verticalSpacer_2">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
@@ -145,126 +228,126 @@
        <number>5</number>
       </property>
       <item row="7" column="2">
-       <widget class="QPushButton" name="btnVegCancel">
+       <widget class="QPushButton" name="btnVegECancel">
         <property name="text">
          <string>CANCEL ALL</string>
         </property>
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QPushButton" name="btnVeg1">
+       <widget class="QPushButton" name="vegEButton1">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QPushButton" name="btnVeg10">
+       <widget class="QPushButton" name="vegEButton10">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="1" column="2">
-       <widget class="QPushButton" name="btnVeg6">
+       <widget class="QPushButton" name="vegEButton6">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QPushButton" name="btnVeg5">
+       <widget class="QPushButton" name="vegEButton5">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="4" column="2">
-       <widget class="QPushButton" name="btnVeg12">
+       <widget class="QPushButton" name="vegEButton12">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="3" column="2">
-       <widget class="QPushButton" name="btnVeg9">
+       <widget class="QPushButton" name="vegEButton9">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QPushButton" name="btnVeg4">
+       <widget class="QPushButton" name="vegEButton4">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QPushButton" name="btnVeg7">
+       <widget class="QPushButton" name="vegEButton7">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QPushButton" name="btnVeg2">
+       <widget class="QPushButton" name="vegEButton2">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="7" column="1">
-       <widget class="QPushButton" name="btnVegOk">
+       <widget class="QPushButton" name="btnVegEOk">
         <property name="text">
          <string>OK ALL</string>
         </property>
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="QPushButton" name="btnVeg11">
+       <widget class="QPushButton" name="vegEButton11">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QPushButton" name="btnVeg8">
+       <widget class="QPushButton" name="vegEButton8">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="0" column="2">
-       <widget class="QPushButton" name="btnVeg3">
+       <widget class="QPushButton" name="vegEButton3">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="7" column="0">
-       <widget class="QPushButton" name="btnVeg16">
+       <widget class="QPushButton" name="vegEButton16">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="6" column="0">
-       <widget class="QPushButton" name="btnVeg13">
+       <widget class="QPushButton" name="vegEButton13">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="6" column="2">
-       <widget class="QPushButton" name="btnVeg15">
+       <widget class="QPushButton" name="vegEButton15">
         <property name="text">
          <string>Not Used</string>
         </property>
        </widget>
       </item>
       <item row="6" column="1">
-       <widget class="QPushButton" name="btnVeg14">
+       <widget class="QPushButton" name="vegEButton14">
         <property name="text">
          <string>Not Used</string>
         </property>
@@ -274,6 +357,9 @@
        <spacer name="rowSpacer1">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -287,6 +373,9 @@
        <spacer name="rowSpacer2">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -304,6 +393,9 @@
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
@@ -313,7 +405,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="vegEntryMessage2">
+    <widget class="QLabel" name="vegEStatusLabel">
      <property name="text">
       <string>Place vegetable on the scale ...</string>
      </property>
@@ -328,12 +420,12 @@
       <enum>Qt::Vertical</enum>
      </property>
      <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
+      <enum>QSizePolicy::Expanding</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>25</height>
+       <height>5</height>
       </size>
      </property>
     </spacer>

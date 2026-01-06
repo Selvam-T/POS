@@ -12,16 +12,24 @@ This module provides generic table operations for product tables in the POS syst
 - **Column 5**: Total (calculated: quantity × unit price)
 - **Column 6**: Del (delete button)
 
+
 ## Key Functions
 - `setup_sales_table(table)`: Configures table columns, headers, and default appearance. Should be called once after creating or loading the table widget.
 - `set_sales_rows(table, rows, status_bar=None, editable=True)`: Populates the table with product rows. Applies single editable state to ALL rows.
-- `set_table_rows(table, rows, status_bar=None)`: **NEW**: Rebuilds table with per-row editable states. Used when mixing KG (read-only) and EACH (editable) items.
+- `set_table_rows(table, rows, status_bar=None)`: Rebuilds table with per-row editable states. Used when mixing KG (read-only) and EACH (editable) items. **Display logic uses the `numeric_value` property to preserve high-precision weights (KG) while showing user-friendly units (g/kg/ea).**
 - `remove_table_row(table, row)`: Removes a row and updates numbering and colors.
-- `recalc_row_total(table, row)`: Recomputes the total for a row when quantity or price changes.
-- `bind_total_label(table, label)`: **Binds a QLabel (usually `totalValue` in the UI) to the table. The label will automatically update whenever the table's contents change.**
+- `recalc_row_total(table, row)`: Recomputes the total for a row when quantity or price changes. **Handles ValueError from input_handler if invalid characters are typed.**
+- `bind_total_label(table, label)`: Binds a QLabel (usually `totalValue` in the UI) to the table. The label will automatically update whenever the table's contents change.
 - `recompute_total(table)`: Recomputes and returns the grand total from all rows, updating the bound label if present.
 - `get_total(table)`: Returns the last computed grand total.
 - `handle_barcode_scanned(table, barcode, status_bar=None)`: Processes barcode scans. **BLOCKS KG items** (shows message to use Vegetable Entry), adds EACH items normally.
+
+### Centralized Quantity Validation (2026 Update)
+- `get_sales_data(table)`: Now uses `input_handler.handle_quantity_input` for extracting and validating quantity from each row. This ensures all numeric checks, limits (e.g., 9999), and error handling are consistent and centralized. Manual `float()` conversion is no longer used for editable rows.
+- `recalc_row_total(table, row)`: Now catches `ValueError` from the input handler, so invalid user input (e.g., non-numeric) does not crash the table. Invalid or empty input results in a quantity of 0.0 for that row.
+
+### Display Logic and Numeric Value Property
+- `set_table_rows`: Always sets the `numeric_value` property on the quantity editor widget. For KG items, this preserves the high-precision weight (in kg) for calculations, while the display text shows grams or kg as appropriate. For EACH items, the property matches the integer value shown. This ensures calculations and display remain accurate and user-friendly.
 
 ## Product Cache Integration
 
@@ -44,14 +52,18 @@ This module provides generic table operations for product tables in the POS syst
   - ≥ 1000g: Shows kg with 2 decimals (e.g., "1.20" with unit "kg")
 - **Storage**: Always stored in kg for calculations (e.g., 0.6 kg for 600g)
 
+
 **EACH Items** (count-based):
 - Can be added via barcode scan or manual entry
 - Quantity cells are EDITABLE
 - **Quantity Display**: Integer only (e.g., "5" with unit "ea")
 - **Validation**: 
-  - QIntValidator enforces integer input only
-  - Range: 1-9999
-  - Non-numeric characters automatically rejected
+    - **Regex Validator (2026 Update):** Uses `QRegularExpressionValidator` with the pattern `^[1-9][0-9]{0,3}$`.
+        - The first digit must be 1-9, so '0' is instantly blocked and cannot appear.
+        - Only allows 1-4 digit positive integers (1-9999).
+        - Letters, symbols, and leading zeros are instantly rejected.
+        - User can press '0' as much as they want, but it is swallowed and never appears.
+        - This solves the "0" problem and prevents invalid input at the source.
 
 ## Advanced Features
 

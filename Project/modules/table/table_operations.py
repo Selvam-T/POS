@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Optional
-from PyQt5.QtCore import Qt, QEvent, QObject, QTimer
+from PyQt5.QtCore import Qt, QEvent, QObject, QRegularExpression
 from PyQt5.QtWidgets import (
     QWidget,
     QTableWidget,
@@ -11,49 +11,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QHeaderView
 )
-
-def get_sales_data(table: QTableWidget) -> List[Dict[str, Any]]:
-    """
-    Converts the current Table UI back into a List of Dicts.
-    This is the "Single Source of Truth" for merging and deletions.
-    """
-    from modules.table.unit_helpers import canonicalize_unit
-    rows = []
-    for r in range(table.rowCount()):
-        name_item = table.item(r, 1)
-        unit_item = table.item(r, 3)
-        price_item = table.item(r, 4)
-        qty_container = table.cellWidget(r, 2)
-        if not name_item or not qty_container:
-            continue
-        editor = qty_container.findChild(QLineEdit, 'qtyInput')
-        # Use the stored 'numeric_value' property (the Kg/Count float)
-        qty = float(editor.property('numeric_value') or 0.0) if editor else 0.0
-        rows.append({
-            'product_name': name_item.text(),
-            'quantity': qty,
-            'unit_price': float(price_item.text() or 0.0) if price_item else 0.0,
-            'unit': canonicalize_unit(unit_item.text()) if unit_item else '',
-            'editable': not editor.isReadOnly() if editor else False
-        })
-    return rows
-
-"""POS sales table functions (see docs for details)."""
-from typing import List, Dict, Any, Optional
-from PyQt5.QtCore import Qt, QEvent, QObject, QTimer
-from PyQt5.QtWidgets import (
-    QWidget,
-    QTableWidget,
-    QTableWidgetItem,
-    QHBoxLayout,
-    QPushButton,
-    QLineEdit,
-    QStatusBar,
-    QLabel,
-)
-from PyQt5.QtWidgets import QHeaderView
-from PyQt5.QtGui import QColor, QBrush, QPalette, QIcon
-from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QColor, QBrush, QRegularExpressionValidator
 from functools import partial
 from config import ROW_COLOR_EVEN, ROW_COLOR_ODD, ROW_COLOR_DELETE_HIGHLIGHT, ICON_DELETE
 from modules.db_operation import get_product_info, show_temp_status
@@ -198,9 +156,9 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         qty_edit.setAlignment(Qt.AlignCenter)
 
         if editable:
-            from PyQt5.QtGui import QIntValidator
-            validator = QIntValidator(1, 9999, qty_edit)
-            qty_edit.setValidator(validator)
+            regex = QRegularExpression(r"^[1-9][0-9]{0,3}$")
+            validator = QRegularExpressionValidator(regex, qty_edit)
+            qty_edit.setValidator(validator)    
             qty_edit.textChanged.connect(lambda _t, e=qty_edit, t=table: _recalc_from_editor(e, t))
         _install_row_focus_behavior(qty_edit, table, r)
 
@@ -259,9 +217,6 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         pass
 
 
-
-
-
 def _recalc_from_editor(editor: QLineEdit, table: QTableWidget) -> None:
     """Find the row containing the editor and recalculate its total.
     This dynamically looks up the current row to handle post-deletion shifts.
@@ -279,70 +234,43 @@ def _recalc_from_editor(editor: QLineEdit, table: QTableWidget) -> None:
 
 
 def recalc_row_total(table: QTableWidget, row: int) -> None:
-    # Read qty from column 2 editor inside container if present; fallback to item
+    """Calculates row total using centralized input validation."""
+    from modules.ui_utils import input_handler
+    
     qty_container = table.cellWidget(row, 2)
-    qty = 0.0
-    if qty_container is not None:
-        editor = qty_container if isinstance(qty_container, QLineEdit) else qty_container.findChild(QLineEdit, 'qtyInput')
-        if isinstance(editor, QLineEdit):
-            # Check if field is read-only (uses stored numeric value) or editable (parse text)
-            if editor.isReadOnly():
-                # For read-only KG fields, use stored numeric value (in kg)
-                numeric_val = editor.property('numeric_value')
-                if numeric_val is not None:
-                    try:
-                        qty = float(numeric_val)
-                    except (ValueError, TypeError):
-                        qty = 0.0
-                else:
-                    qty = 0.0
-            else:
-                # For editable EACH fields, parse integer text and update stored value
-                try:
-                    text = editor.text()
-                    qty = float(text) if text not in ('', None, '') else 0.0
-                    # Enforce max value
-                    if qty > 9999:
-                        qty = 9999
-                        editor.setText('9999')
-                    # Update stored numeric value for consistency
-                    editor.setProperty('numeric_value', qty)
-                except ValueError:
-                    qty = 0.0
-        else:
-            # Unlikely, but try reading from an item if present
-            qty_item = table.item(row, 2)
-            try:
-                qty = float(qty_item.text()) if qty_item is not None else 0.0
-            except ValueError:
-                qty = 0.0
-    else:
-        qty_item = table.item(row, 2)
-        try:
-            qty = float(qty_item.text()) if qty_item is not None else 0.0
-        except ValueError:
-            qty = 0.0
-    # Read unit price from column 4 item (non-editable)
     price_item = table.item(row, 4)
+    if qty_container is None: return
+
+    editor = qty_container.findChild(QLineEdit, 'qtyInput')
+    
+    qty = 0.0
     try:
-        price = float(price_item.text()) if price_item is not None else 0.0
+        if editor.isReadOnly():
+            # KG item: use stored numeric value
+            qty = float(editor.property('numeric_value') or 0.0)
+        else:
+            # EACH item: validate text and sync property
+            qty = input_handler.handle_quantity_input(editor, unit_type='unit')
+            editor.setProperty('numeric_value', qty)
+    except ValueError:
+        # If invalid (e.g. empty), qty remains 0.0
+        qty = 0.0
+
+    try:
+        price = float(price_item.text()) if price_item else 0.0
     except (ValueError, AttributeError):
         price = 0.0
+
     total = qty * price
-    
-    # Get alternating row color
     row_color = get_row_color(row)
     
     total_item = QTableWidgetItem(f"{total:.2f}")
     total_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
     total_item.setFlags(total_item.flags() & ~Qt.ItemIsEditable)
-    total_item.setBackground(QBrush(row_color))  # Apply alternating row color
+    total_item.setBackground(QBrush(row_color))
     table.setItem(row, 5, total_item)
-    # Update the aggregated total on every row total change
-    try:
-        _update_total_value(table)
-    except Exception:
-        pass
+    
+    _update_total_value(table)
 
 
 def _remove_by_button(table: QTableWidget, btn: QPushButton) -> None:
@@ -387,6 +315,10 @@ def _highlight_row_for_deletion(table: QTableWidget, row: int) -> None:
     qty_container = table.cellWidget(row, 2)
     if qty_container is not None:
         qty_container.setStyleSheet(f"background-color: {highlight_color.name()};")
+
+def bind_status_label(table: QTableWidget, label: QLabel) -> None:
+    """Binds a status label to the table so internal validation can show errors."""
+    table._status_label = label
 
 
 def _highlight_row_by_button(table: QTableWidget, btn: QPushButton) -> None:
@@ -440,21 +372,27 @@ def _install_row_focus_behavior(editor: QLineEdit, table: QTableWidget, row: int
         # Some line edit variants may not have returnPressed; editingFinished is sufficient
         pass
 
-
 def _on_qty_commit(editor: QLineEdit, table: QTableWidget) -> None:
-    """Clear selection and defocus the qty editor so focus-based styles revert."""
+    from modules.ui_utils import input_handler, ui_feedback
+    
+    status_lbl = getattr(table, '_status_label', None)
+    
     try:
-        table.clearSelection()
-    except Exception:
-        pass
-    try:
+        input_handler.handle_quantity_input(editor, unit_type='unit')
+        
+        # Success: Clear previous errors and move focus
+        if status_lbl:
+            ui_feedback.clear_status_label(status_lbl)
+            
         table.setFocus(Qt.OtherFocusReason)
-    except Exception:
-        pass
-    try:
         editor.clearFocus()
-    except Exception:
-        pass
+    except ValueError as e:
+        # Failure: Show the error message and keep focus
+        if status_lbl:
+            ui_feedback.set_status_label(status_lbl, str(e), ok=False)
+            
+        editor.setFocus()
+        editor.selectAll()
 
 
 # ----------------- Grand total helpers -----------------
@@ -655,80 +593,62 @@ def increment_row_quantity(table: QTableWidget, row: int) -> None:
 def _add_product_row(table: QTableWidget, product_code: str, product_name: str, 
                      unit_price: float, unit: str, quantity: float = 1, status_bar: Optional[QStatusBar] = None, 
                      editable: bool = True, display_text: Optional[str] = None) -> None:
-    """
-    Add a new product row to the table.
+    """Adds a new row by leveraging get_sales_data as the single source of truth."""
     
-    Args:
-        table: QTableWidget to update
-        product_code: Product barcode/code
-        product_name: Product display name
-        unit_price: Product unit price
-        quantity: Quantity of product to add (default: 1)
-        status_bar: Optional QStatusBar for error messages
-        editable: Whether quantity cell should be editable (default: True)
-        display_text: Optional custom display text for quantity (e.g., "500 g")
-    """
-    # Get current rows data
-    current_rows = []
-    for r in range(table.rowCount()):
-        # Extract product code from row
-        product_item = table.item(r, 1)
-        if product_item is None:
-            continue
-            
-        # Get quantity, display text, and editable state
-        qty_container = table.cellWidget(r, 2)
-        qty = 1
-        row_editable = True
-        if qty_container is not None:
-            editor = qty_container.findChild(QLineEdit, 'qtyInput')
-            if editor is not None:
-                # Preserve editable state
-                row_editable = not editor.isReadOnly()
-                
-                # Use numeric_value property if available (preserves read-only values)
-                numeric_val = editor.property('numeric_value')
-                if numeric_val is not None:
-                    try:
-                        qty = float(numeric_val)
-                    except (ValueError, TypeError):
-                        qty = 1
-                else:
-                    # Parse text for editable fields
-                    try:
-                        qty = float(editor.text()) if editor.text() else 1
-                    except ValueError:
-                        qty = 1
-        
-        # Get unit price from column 4
-        price_item = table.item(r, 4)
-        price = 0.0
-        if price_item is not None:
-            try:
-                price = float(price_item.text())
-            except ValueError:
-                price = 0.0
-        
-        unit_item = table.item(r, 3)
-        unit_val = unit_item.text() if unit_item is not None else ''
-        row_data = {
-            'product': product_item.text(),
-            'quantity': qty,
-            'unit_price': price,
-            'editable': row_editable,
-            'unit': unit_val
-        }
-        current_rows.append(row_data)
+    # 1. Scrape current data using the centralized function
+    current_data = get_sales_data(table)
     
-    # Add new product
-    new_row = {
-        'product': product_name,
+    # 2. Append the new row
+    current_data.append({
+        'product_name': product_name,
         'quantity': quantity,
         'unit_price': unit_price,
-        'editable': editable,
-        'unit': unit
-    }
-    current_rows.append(new_row)
+        'unit': unit,
+        'editable': editable
+    })
     
-    # Rebuild table with mixed editable states
-    set_table_rows(table, current_rows, status_bar)
+    # 3. Rebuild the table
+    set_table_rows(table, current_data, status_bar)
+
+
+def get_sales_data(table: QTableWidget) -> List[Dict[str, Any]]:
+    """
+    Converts the current Table UI back into a List of Dicts.
+    Uses input_handler to ensure data extraction matches validation rules.
+    """
+    from modules.ui_utils import input_handler
+    from modules.table.unit_helpers import canonicalize_unit
+    
+    rows = []
+    for r in range(table.rowCount()):
+        name_item = table.item(r, 1)
+        unit_item = table.item(r, 3)
+        price_item = table.item(r, 4)
+        qty_container = table.cellWidget(r, 2)
+        
+        if not name_item or not qty_container:
+            continue
+            
+        editor = qty_container.findChild(QLineEdit, 'qtyInput')
+        unit_canon = canonicalize_unit(unit_item.text()) if unit_item else ''
+        
+        # Centralized Extraction: handles both 'Kg' (read-only property) 
+        # and 'Each' (editable text) logic via input_handler
+        try:
+            # Note: We use the stored numeric_value for read-only KG rows, 
+            # and validate text for editable Each rows.
+            if editor.isReadOnly():
+                qty = float(editor.property('numeric_value') or 0.0)
+            else:
+                qty = input_handler.handle_quantity_input(editor, unit_type='unit')
+        except (ValueError, TypeError):
+            qty = 0.0
+
+        rows.append({
+            'product_name': name_item.text(),
+            'quantity': qty,
+            'unit_price': float(price_item.text() or 0.0) if price_item else 0.0,
+            'unit': unit_canon,
+            'editable': not editor.isReadOnly() if editor else False
+        })
+    return rows

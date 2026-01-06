@@ -2,9 +2,10 @@
 
 import re
 
-QUANTITY_MIN_KG = 0.01
+QUANTITY_MIN_KG = 0.005   
+QUANTITY_MAX_KG = 25.0
 QUANTITY_MIN_UNIT = 1
-QUANTITY_MAX = 9999
+QUANTITY_MAX_UNIT = 9999
 
 UNIT_PRICE_MIN = 0.1
 UNIT_PRICE_MAX = 5000
@@ -23,26 +24,26 @@ ALPHANUMERIC_REGEX = re.compile(r"^[A-Za-z0-9 ]+$")
 
 
 def validate_quantity(value, unit_type='unit'):
-	if value is None or str(value).strip() == "":
-		return False, "Quantity is required"
-	try:
-		val = float(value)
-		if unit_type == 'kg':
-			if val < QUANTITY_MIN_KG:
-				return False, f"Minimum quantity is {QUANTITY_MIN_KG}"
-			if val > QUANTITY_MAX:
-				return False, f"Maximum quantity is {QUANTITY_MAX}"
-			return True, ""
-		else:
-			if not val.is_integer():
-				return False, "Quantity must be an integer"
-			if val < QUANTITY_MIN_UNIT:
-				return False, f"Minimum quantity is {QUANTITY_MIN_UNIT}"
-			if val > QUANTITY_MAX:
-				return False, f"Maximum quantity is {QUANTITY_MAX}"
-			return True, ""
-	except (ValueError, TypeError):
-		return False, "Quantity must be a number"
+    if value is None or str(value).strip() == "":
+        return False, "Quantity is required"
+    try:
+        val = float(value)
+        if unit_type.lower() == 'kg':
+            if val < QUANTITY_MIN_KG:
+                return False, f"Min weight is {int(QUANTITY_MIN_KG*1000)}g"
+            if val > QUANTITY_MAX_KG:
+                return False, f"Max weight is {QUANTITY_MAX_KG}kg"
+            return True, ""
+        else:
+            if not val.is_integer():
+                return False, "Quantity must be an integer"
+            if val < QUANTITY_MIN_UNIT:
+                return False, f"Minimum is {QUANTITY_MIN_UNIT}"
+            if val > QUANTITY_MAX_UNIT:
+                return False, f"Maximum is {QUANTITY_MAX_UNIT}"
+            return True, ""
+    except (ValueError, TypeError):
+        return False, "Quantity must be a number"
 
 
 def validate_unit_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX):

@@ -217,6 +217,13 @@ The Manual Entry dialog allows users to manually input product information when 
 - **Size**: MinimumExpanding, height 50px
 - **Font**: 12pt, bold, Verdana
 
+## Read-Only Unit Field & Label Styling
+
+- The unit field (`manualUnitLineEdit`) is read-only and filled programmatically based on product selection.
+- The corresponding label (`manualUnitFieldLbl`) uses a custom QSS property (e.g., `readonly-label`) for distinct styling (gray color, italic, etc.).
+- The property is set in the controller, and QSS rules ensure consistent appearance for read-only fields and labels.
+- This improves clarity for users, indicating which fields are not editable.
+
 ## Usage Example (Refactored Dec 2025)
 
 

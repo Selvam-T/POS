@@ -104,6 +104,28 @@ QPushButton:focus {
 }
 
 /* =========================================================
+   VEGETABLE SLOT BUTTONS
+   ========================================================= */
+
+/* Use *= (contains) and remove the comma between attributes */
+QPushButton[objectName*="vegEButton"][state="active"] {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #096926, stop:1 #3d994a);
+    border: 1px solid #015c0a;
+    color: white;
+}
+
+QPushButton[objectName*="vegEButton"][state="active"]:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #76ae3b, stop:1 #2d783c);
+}
+
+QPushButton[objectName*="vegEButton"][state="unused"] {
+    background-color: #f6e4e4;
+    color: #525050;
+    border: 1px solid #b7adad;
+}
+
+
+/* =========================================================
    STATUS LABELS (DYNAMIC PROPERTIES)
    ========================================================= */
 
@@ -148,6 +170,25 @@ QLineEdit, QComboBox {
 
 QLineEdit:focus, QComboBox:focus {
     border: 1px solid #2196f3;
+}
+
+/* Styling the read-only LineEdit */
+QLabel[objectName$="FieldLbl"] {
+    color: #05425f;
+    font-size: 10.5pt;
+    font-weight: 600;
+}
+
+/* 2. State-specific style (Overrides base because it's more specific) */
+QLabel[objectName$="FieldLbl"][readOnly="true"] {
+    color: #066686 !important;
+}
+
+/* 3. Read-Only LineEdit */
+QLineEdit:read-only {
+    background-color: #f5f5f5;
+    color: #066686; 
+    border: 1px solid #dcdcdc;
 }
 
 /* ComboBox Dropdown Arrow */
@@ -245,3 +286,73 @@ QGroupBox::title {
     color: #05425f;
     padding: 0 4px 0 4px;
 }
+
+/* =============================================================
+     vegEntryFrame FRAME AND ITS CHILDREN (to be review)
+    ============================================================= */
+
+/* --- Sales Frame Container --- */
+QFrame#vegEntryFrame {
+    font-family: Tahoma, Verdana;
+}
+
+/* --- Sales Label --- */
+QLabel#salesLabel {
+    font-size: 14pt;
+    qproperty-alignment: 'AlignCenter';
+    min-height: 30px;
+    max-height: 30px;
+    padding: 0px;
+}
+
+/* --- Sales Table --- */
+/* Alternating row colors are set programmatically in Python due to embedded widgets. */
+QTableWidget#salesTable {
+    border: 1px solid #4317ab;
+    font-size: 10pt;
+    font-weight: bold;
+    background-color: #e4e4e4;
+    gridline-color: rgba(0, 0, 0, 0.2);
+}
+
+QTableWidget#salesTable QHeaderView::section {
+    background-color: #4682b4;
+    color: white;
+    border: 1px solid rgba(0,0,0,0.2);
+    font-size: 10pt;
+    font-weight: bold;
+}
+
+QTableWidget::item:selected { background-color: transparent; }
+
+/* 4. Table Styling */
+QWidget#vegEntryDialog QTableWidget#vegEntryTable {
+    background-color: #FFFFFF; /* Pure White */
+    alternate-background-color: #F4F6F7; /* Very faint grey-blue for rows */
+    gridline-color: #EAEDED; /* Subtle grid lines */
+    selection-background-color: #D6EAF8; /* When a row is selected */
+    selection-color: #000000;
+    font-size: 10pt;
+    color: #2C3E50;
+    border: 1px solid #BDC3C7; /* Define the outer border of the table */
+}
+
+/* 5. Table Header Styling */
+QWidget#vegEntryDialog QHeaderView::section {
+    background-color: #34495E; /* Dark Slate Blue/Grey */
+    color: white;
+    padding: 4px;
+    border: none; /* Cleaner look without borders between headers */
+    border-right: 1px solid #2C3E50; /* Subtle separator */
+    border-bottom: 2px solid #2C3E50; /* Anchor the header to the table */
+    font-size: 10pt;
+    font-weight: bold;
+    font-family: "Verdana";
+}
+
+/* Optional: Style the top-left corner button of the table */
+QWidget#vegEntryDialog QTableCornerButton::section {
+    background-color: #34495E;
+    border: none;
+}
+

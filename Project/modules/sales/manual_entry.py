@@ -32,12 +32,21 @@ def open_manual_entry_dialog(parent):
     unit_dis = dlg.findChild(QLineEdit, 'manualUnitLineEdit')
     status_lbl = dlg.findChild(QLabel, 'manualStatusLabel')
     btn_ok = dlg.findChild(QPushButton, 'btnManualOk')
+    unit_lbl = dlg.findChild(QLabel, 'manualUnitFieldLbl')
+
+    # Mark the label as read-only for styling
+    unit_lbl.setProperty("readOnly", "true")
+
+    # Refresh style to ensure the property selector applies
+    unit_lbl.style().unpolish(unit_lbl)
+    unit_lbl.style().polish(unit_lbl)
+    unit_lbl.update()
     
-    # Updated names to match QSS selectors (Fixed Issue 2)
+    # Updated names to match QSS selectors
     close_btn = dlg.findChild(QPushButton, 'customCloseBtn') 
     cancel_btn = dlg.findChild(QPushButton, 'btnManualCancel')
 
-    # --- 3. Setup Completer (Fixed Issue 3) ---
+    # --- 3. Setup Completer  ---
     product_names = [rec[0] for rec in PRODUCT_CACHE.values() if rec[0]]
     completer = input_handler.setup_name_search_lineedit(name_in, product_names)
 

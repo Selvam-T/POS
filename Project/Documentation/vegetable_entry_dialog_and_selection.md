@@ -37,7 +37,7 @@ This document describes the workflow for the Vegetable Entry dialog, where users
  2. **Duplicate handling:** If same EACH item clicked again, INCREMENTS quantity by 1
 
 ### Button Grid (16 Buttons)
-- **Buttons:** `btnVeg01` to `btnVeg16` mapped to Veg01-Veg16 product codes
+- **Buttons:** `btnVeg01` to `vegEButton16` mapped to Veg01-Veg16 product codes
 - **Enabled buttons:** Show product name from database (fetched via `get_product_info()`)
 - **Disabled buttons:** Display "Not Used" when no product configured for slot
 
@@ -157,13 +157,28 @@ self.dialog_wrapper.open_dialog_scanner_blocked(
 - Dialog-specific styles are loaded from `assets/sales.qss` and applied to the dialog.
 - Styles for buttons, labels, and table headers are modularized for maintainability.
 
-## Recent Changes (Dec 2025)
 
-- **Unit-aware behavior:** KG items read-only with weighing, EACH items editable with counts
-- **Duplicate handling:** EACH increments quantity, KG adds weights
-- **Clean architecture:** Unit detection from PRODUCT_CACHE (3-tuple with unit)
-- **Transfer preservation:** Editable flag preserved when moving to sales table
-- **Mixed table support:** Uses `set_table_rows()` for per-row editable states
+## Recent Changes (Jan 2026)
+
+### Technical Improvements
+
+**Shared Logic Layer (table_operations.py):**
+- Centralized Data Scraping: `get_sales_data` is now the single source of truth, using `input_handler.handle_quantity_input` for all quantity extraction and validation (including the 9999 limit).
+- Status Label Binding: Added `bind_status_label` to allow the table to report errors directly to the dialog’s status bar using the `ui_feedback` system.
+- Validation-Locked Focus: The Enter key now triggers validation; if the value is invalid (0, empty, or non-numeric), an error is shown and focus is forced back to the cell for correction.
+- Refactored Row Addition: `_add_product_row` now leverages `get_sales_data`, removing double-read logic.
+
+**Controller Layer (vegetable_entry.py):**
+- Universal Button Neutralization: All QPushButton widgets have their `autoDefault` and `default` properties stripped to prevent ghost clicks when pressing Enter in a text field.
+- Elimination of Double-Reads: Manual UI scraping in `_handle_ok_all` is replaced by a single call to `get_sales_data()`.
+- Validation Guard: Data extraction in `_handle_ok_all` is wrapped in a try...except block; dialog only closes if all rows are valid.
+- Standardized Feedback: All status messages use `ui_feedback.set_status_label` for consistent QSS styling.
+- Wiring Correction: OK button signal now correctly passes the status label, preventing silent crashes.
+
+### Summary of Improvements
+- **UI Stability:** Enter key no longer closes the dialog prematurely or triggers unintended buttons.
+- **Code Maintainability:** UI reading logic is centralized in table_operations, business logic in vegetable_entry.
+- **User Experience:** Real-time error messages appear in the status bar if a user attempts to OK an empty or zero-quantity table.
 
 ## Quick Reference
 

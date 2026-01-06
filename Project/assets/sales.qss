@@ -191,31 +191,31 @@ QWidget#vegEntryDialog QPushButton#removeBtn:pressed {
 
 /* 2. Specific Button Exceptions */
 
-QWidget#vegEntryDialog QPushButton#btnVegOk {
+QWidget#vegEntryDialog QPushButton#btnVegEOk {
     background-color: #27AE60; 
     border: 1px solid #1E8449;
 }
-QWidget#vegEntryDialog QPushButton#btnVegOk:hover {
+QWidget#vegEntryDialog QPushButton#btnVegEOk:hover {
     background-color: #2ECC71;
 }
-QWidget#vegEntryDialog QPushButton#btnVegOk:pressed {
+QWidget#vegEntryDialog QPushButton#btnVegEOk:pressed {
     background-color: #196F3D;
 }
 
-QWidget#vegEntryDialog QPushButton#btnVegCancel {
+QWidget#vegEntryDialog QPushButton#btnVegECancel {
     background-color: #C0392B; 
     border: 1px solid #922B21;
 }
-QWidget#vegEntryDialog QPushButton#btnVegCancel:hover {
+QWidget#vegEntryDialog QPushButton#btnVegECancel:hover {
     background-color: #E74C3C;
 }
-QWidget#vegEntryDialog QPushButton#btnVegCancel:pressed {
+QWidget#vegEntryDialog QPushButton#btnVegECancel:pressed {
     background-color: #922B21;
 }
 
 /* 3. Message Label Styling */
-QWidget#vegEntryDialog QLabel#vegEntryMessage1,
-QWidget#vegEntryDialog QLabel#vegEntryMessage2 {
+QWidget#vegEntryDialog QLabel#vegEFieldLbl,
+QWidget#vegEntryDialog QLabel#vegEStatusLabel {
     font-size: 11pt;
     margin-left: 5px;
     color: #2C3E50; /* Dark Grey text for readability */
