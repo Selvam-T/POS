@@ -115,7 +115,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tabAdd">
       <attribute name="title">
@@ -174,7 +174,7 @@
           <number>10</number>
          </property>
          <property name="verticalSpacing">
-          <number>15</number>
+          <number>20</number>
          </property>
          <item row="0" column="0">
           <widget class="QLabel" name="addProductCodeFieldLbl">
@@ -211,13 +211,47 @@
           </widget>
          </item>
          <item row="2" column="0">
+          <widget class="QLabel" name="addSellingPriceFieldLbl">
+           <property name="text">
+            <string>Selling Price*</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="addSellingPriceLineEdit">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>40</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="addCostPriceFieldLbl">
+           <property name="text">
+            <string>Cost Price</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="addCostPriceLineEdit">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>40</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
           <widget class="QLabel" name="addCategoryFieldLbl">
            <property name="text">
             <string>Category</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
+         <item row="4" column="1">
           <widget class="QComboBox" name="addCategoryComboBox">
            <property name="minimumSize">
             <size>
@@ -245,30 +279,6 @@
              <string>Apparel</string>
             </property>
            </item>
-          </widget>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="addCostPriceFieldLbl">
-           <property name="text">
-            <string>Cost Price</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QLineEdit" name="addCostPriceLineEdit">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>40</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="addSellingPriceFieldLbl">
-           <property name="text">
-            <string>Selling Price*</string>
-           </property>
           </widget>
          </item>
          <item row="5" column="0">
@@ -303,16 +313,6 @@
          </item>
          <item row="6" column="1">
           <widget class="QLineEdit" name="addSupplierLineEdit">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>40</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QLineEdit" name="addSellingPriceLineEdit">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -448,7 +448,7 @@
           <number>10</number>
          </property>
          <property name="verticalSpacing">
-          <number>5</number>
+          <number>15</number>
          </property>
          <item row="0" column="0">
           <widget class="QLabel" name="searchSubLbl">
@@ -460,14 +460,14 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
+         <item row="1" column="0">
           <widget class="QLabel" name="removeProductCodeFieldLbl">
            <property name="text">
             <string>Product Code - </string>
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
+         <item row="1" column="1">
           <widget class="QLineEdit" name="removeProductCodeLineEdit">
            <property name="minimumSize">
             <size>
@@ -477,14 +477,14 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="2" column="0">
           <widget class="QLabel" name="removeSearchFieldLbl">
            <property name="text">
             <string>Product Name - </string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="2" column="1">
           <widget class="QComboBox" name="removeSearchComboBox">
            <property name="minimumSize">
             <size>
@@ -494,31 +494,46 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="removeProductNameFieldLbl">
-           <property name="text">
-            <string>Product Name</string>
+         <item row="3" column="0">
+          <spacer name="verticalSpacer_8">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
            </property>
-          </widget>
-         </item>
-         <item row="5" column="1">
-          <widget class="QLineEdit" name="removeProductNameLineEdit">
-           <property name="minimumSize">
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
             <size>
-             <width>0</width>
-             <height>40</height>
+             <width>20</width>
+             <height>15</height>
             </size>
            </property>
-          </widget>
+          </spacer>
          </item>
-         <item row="6" column="0">
+         <item row="3" column="1">
+          <spacer name="verticalSpacer_9">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>15</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="4" column="0">
           <widget class="QLabel" name="removeCategoryFieldLbl">
            <property name="text">
             <string>Category</string>
            </property>
           </widget>
          </item>
-         <item row="6" column="1">
+         <item row="4" column="1">
           <widget class="QLineEdit" name="removeCategoryLineEdit">
            <property name="minimumSize">
             <size>
@@ -528,14 +543,14 @@
            </property>
           </widget>
          </item>
-         <item row="7" column="0">
+         <item row="5" column="0">
           <widget class="QLabel" name="removeCostPriceFieldLbl">
            <property name="text">
             <string>Cost Price</string>
            </property>
           </widget>
          </item>
-         <item row="7" column="1">
+         <item row="5" column="1">
           <widget class="QLineEdit" name="removeCostPriceLineEdit">
            <property name="minimumSize">
             <size>
@@ -545,14 +560,14 @@
            </property>
           </widget>
          </item>
-         <item row="8" column="0">
+         <item row="6" column="0">
           <widget class="QLabel" name="removeSellingPriceFieldLbl">
            <property name="text">
             <string>Selling Price</string>
            </property>
           </widget>
          </item>
-         <item row="8" column="1">
+         <item row="6" column="1">
           <widget class="QLineEdit" name="removeSellingPriceLineEdit">
            <property name="minimumSize">
             <size>
@@ -562,14 +577,14 @@
            </property>
           </widget>
          </item>
-         <item row="9" column="0">
+         <item row="7" column="0">
           <widget class="QLabel" name="removeUnitFieldLbl">
            <property name="text">
             <string>Unit</string>
            </property>
           </widget>
          </item>
-         <item row="9" column="1">
+         <item row="7" column="1">
           <widget class="QLineEdit" name="removeUnitLineEdit">
            <property name="minimumSize">
             <size>
@@ -582,14 +597,14 @@
            </property>
           </widget>
          </item>
-         <item row="10" column="0">
+         <item row="8" column="0">
           <widget class="QLabel" name="removeSupplierFieldLbl">
            <property name="text">
             <string>Supplier</string>
            </property>
           </widget>
          </item>
-         <item row="10" column="1">
+         <item row="8" column="1">
           <widget class="QLineEdit" name="removeSupplierLineEdit">
            <property name="minimumSize">
             <size>
@@ -602,14 +617,14 @@
            </property>
           </widget>
          </item>
-         <item row="11" column="0">
+         <item row="9" column="0">
           <widget class="QLabel" name="removeLastUpdatedFieldLbl">
            <property name="text">
             <string>Last updated</string>
            </property>
           </widget>
          </item>
-         <item row="11" column="1">
+         <item row="9" column="1">
           <widget class="QLineEdit" name="removeLastUpdatedLineEdit">
            <property name="minimumSize">
             <size>
@@ -618,70 +633,6 @@
             </size>
            </property>
           </widget>
-         </item>
-         <item row="1" column="0">
-          <spacer name="verticalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>10</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="1" column="1">
-          <spacer name="verticalSpacer_7">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Fixed</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>10</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="4" column="0">
-          <spacer name="verticalSpacer_8">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Expanding</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>10</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="4" column="1">
-          <spacer name="verticalSpacer_9">
-           <property name="orientation">
-            <enum>Qt::Vertical</enum>
-           </property>
-           <property name="sizeType">
-            <enum>QSizePolicy::Expanding</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>20</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
          </item>
         </layout>
        </item>
@@ -836,7 +787,7 @@
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>10</height>
+             <height>5</height>
             </size>
            </property>
           </spacer>
@@ -852,7 +803,7 @@
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>10</height>
+             <height>5</height>
             </size>
            </property>
           </spacer>
@@ -947,14 +898,14 @@
            </property>
           </widget>
          </item>
-         <item row="8" column="0">
+         <item row="10" column="0">
           <widget class="QLabel" name="updateCategoryFieldLbl">
            <property name="text">
             <string>Category</string>
            </property>
           </widget>
          </item>
-         <item row="8" column="1">
+         <item row="10" column="1">
           <widget class="QComboBox" name="updateCategoryComboBox">
            <property name="minimumSize">
             <size>
@@ -981,14 +932,14 @@
            </property>
           </widget>
          </item>
-         <item row="10" column="0">
+         <item row="8" column="0">
           <widget class="QLabel" name="updateSellingPriceFieldLbl">
            <property name="text">
             <string>Selling Price *</string>
            </property>
           </widget>
          </item>
-         <item row="10" column="1">
+         <item row="8" column="1">
           <widget class="QLineEdit" name="updateSellingPriceLineEdit">
            <property name="minimumSize">
             <size>
@@ -1069,7 +1020,7 @@
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>10</height>
+             <height>5</height>
             </size>
            </property>
           </spacer>
@@ -1085,7 +1036,7 @@
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>10</height>
+             <height>5</height>
             </size>
            </property>
           </spacer>
@@ -1182,7 +1133,6 @@
   <tabstop>btnAddCancel</tabstop>
   <tabstop>removeProductCodeLineEdit</tabstop>
   <tabstop>removeSearchComboBox</tabstop>
-  <tabstop>removeProductNameLineEdit</tabstop>
   <tabstop>removeCategoryLineEdit</tabstop>
   <tabstop>removeCostPriceLineEdit</tabstop>
   <tabstop>removeSellingPriceLineEdit</tabstop>
