@@ -1,5 +1,5 @@
 from typing import List, Dict, Any, Optional
-from PyQt5.QtCore import Qt, QEvent, QObject, QRegularExpression
+from PyQt5.QtCore import Qt, QEvent, QObject
 from PyQt5.QtWidgets import (
     QWidget,
     QTableWidget,
@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QHeaderView
 )
-from PyQt5.QtGui import QColor, QBrush, QRegularExpressionValidator
+from PyQt5.QtGui import QColor, QBrush
 from functools import partial
 from config import ROW_COLOR_EVEN, ROW_COLOR_ODD, ROW_COLOR_DELETE_HIGHLIGHT, ICON_DELETE
 from modules.db_operation import get_product_info, show_temp_status
@@ -156,6 +156,8 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         qty_edit.setAlignment(Qt.AlignCenter)
 
         if editable:
+            from PyQt5.QtGui import QRegularExpressionValidator
+            from PyQt5.QtCore import QRegularExpression
             regex = QRegularExpression(r"^[1-9][0-9]{0,3}$")
             validator = QRegularExpressionValidator(regex, qty_edit)
             qty_edit.setValidator(validator)    
@@ -320,6 +322,9 @@ def bind_status_label(table: QTableWidget, label: QLabel) -> None:
     """Binds a status label to the table so internal validation can show errors."""
     table._status_label = label
 
+def bind_next_focus_widget(table: QTableWidget, widget: QWidget) -> None:
+    """Tells the table which widget to jump to after a successful edit."""
+    table._next_focus_widget = widget
 
 def _highlight_row_by_button(table: QTableWidget, btn: QPushButton) -> None:
     """Find the row containing the button and highlight it.
@@ -372,27 +377,24 @@ def _install_row_focus_behavior(editor: QLineEdit, table: QTableWidget, row: int
         # Some line edit variants may not have returnPressed; editingFinished is sufficient
         pass
 
+# table_operations.py
 def _on_qty_commit(editor: QLineEdit, table: QTableWidget) -> None:
     from modules.ui_utils import input_handler, ui_feedback
     
+    # 1. update the Total column (Col 5)
+    # and the grand total label at the bottom.
+    _recalc_from_editor(editor, table)
+
+    # 2. STATUS CLEARING: If the user fixed an error, wipe the red label.
     status_lbl = getattr(table, '_status_label', None)
-    
     try:
+        # Check if the input is now valid
         input_handler.handle_quantity_input(editor, unit_type='unit')
-        
-        # Success: Clear previous errors and move focus
         if status_lbl:
             ui_feedback.clear_status_label(status_lbl)
-            
-        table.setFocus(Qt.OtherFocusReason)
-        editor.clearFocus()
-    except ValueError as e:
-        # Failure: Show the error message and keep focus
-        if status_lbl:
-            ui_feedback.set_status_label(status_lbl, str(e), ok=False)
-            
-        editor.setFocus()
-        editor.selectAll()
+    except ValueError:
+        # If it's still invalid (empty), we don't clear the error.
+        pass
 
 
 # ----------------- Grand total helpers -----------------

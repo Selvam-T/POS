@@ -119,8 +119,8 @@ QPushButton[objectName*="vegEButton"][state="active"]:hover {
 }
 
 QPushButton[objectName*="vegEButton"][state="unused"] {
-    background-color: #f6e4e4;
-    color: #525050;
+    background-color: #f6f1f1;
+    color: #afacac;
     border: 1px solid #b7adad;
 }
 

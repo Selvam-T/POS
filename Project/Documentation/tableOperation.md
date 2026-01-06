@@ -57,13 +57,19 @@ This module provides generic table operations for product tables in the POS syst
 - Can be added via barcode scan or manual entry
 - Quantity cells are EDITABLE
 - **Quantity Display**: Integer only (e.g., "5" with unit "ea")
-- **Validation**: 
+**Validation**: 
     - **Regex Validator (2026 Update):** Uses `QRegularExpressionValidator` with the pattern `^[1-9][0-9]{0,3}$`.
         - The first digit must be 1-9, so '0' is instantly blocked and cannot appear.
         - Only allows 1-4 digit positive integers (1-9999).
         - Letters, symbols, and leading zeros are instantly rejected.
         - User can press '0' as much as they want, but it is swallowed and never appears.
         - This solves the "0" problem and prevents invalid input at the source.
+
+### Centralized Keyboard Orchestration (2026 Model)
+- **No Manual Focus Management:** All focus, Enter key, and navigation logic is now handled by the FieldCoordinator (see focus_utils.md).
+- **Dynamic Focus Binding:** Table logic is generic; controllers use `bind_next_focus_widget` to define post-edit focus flow.
+- **No setFocus/cell selection in Table:** All focus jumps and error trapping are delegated to the FieldCoordinator, preventing focus conflicts.
+- **Dynamic Registration:** For runtime-created widgets (e.g., new table rows), controllers must register each new qtyInput with the FieldCoordinator to ensure Enter key behavior.
 
 ## Advanced Features
 

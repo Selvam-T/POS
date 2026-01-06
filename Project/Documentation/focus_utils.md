@@ -1,16 +1,22 @@
 
-# FieldCoordinator & Coordination Layer Documentation
+
+# FieldCoordinator & Centralized Keyboard Orchestration
 
 ## Purpose
-FieldCoordinator is the heart of the Centralized Relationship Coordinator architecture. It manages all cross-widget relationships, focus navigation, and UI feedback in a declarative, rules-based manner for PyQt5 dialogs.
+FieldCoordinator is now the Primary Event Interceptor and Keyboard Orchestrator for dialogs. It manages all cross-widget relationships, focus navigation, and UI feedback in a declarative, rules-based manner for PyQt5 dialogs, and globally intercepts keyboard events for registered widgets.
 
-## Key Concepts
-- **Declarative Links:** Define all widget relationships up front using `add_link`, not scattered signal connections.
+
+## Key Concepts (2026 Update)
+- **Global Enter-Key Hijacking:** The eventFilter now intercepts Return/Enter keys for all registered widgets. By returning True, it prevents QDialog from performing native Accept or "Ghost Click" behaviors.
+- **Smart Swallowing:** If Enter is pressed on an empty field, the Coordinator highlights the field and refuses to move focus, trapping the user until a valid value is entered.
+- **Simple Jump Support:** Widgets can be linked to a next_focus target for Enter navigation, even without a lookup function.
+- **Button Triggering:** If Enter is pressed while a QPushButton is focused, the Coordinator manually triggers obj.click(), ensuring Enter-to-Submit works even with dialog defaults disabled.
+- **Declarative Links:** Define all widget relationships up front using `add_link`.
 - **Signal Intelligence:** Listens only to user-driven signals (e.g., `textEdited`), not programmatic changes.
 - **Reverse Action:** Clearing a source widget clears all mapped targets and resets status.
 - **Infinite Loop Prevention:** Blocks signals during programmatic updates to avoid feedback loops.
-- **Focus Navigation:** Handles auto-jump to next field or triggers custom actions on Enter.
 - **UI Feedback:** Integrates with `ui_feedback.py` and QSS for consistent status coloring.
+
 
 ## Usage Pattern
 1. **Instantiate:**
@@ -28,14 +34,24 @@ FieldCoordinator is the heart of the Centralized Relationship Coordinator archit
        status_label=status_lbl,
        on_sync=update_placeholder
    )
+   # For simple jumps (no lookup):
+   coord.add_link(
+       source=qty_in,
+       target_map={},
+       lookup_fn=None,
+       next_focus=btn_ok
+   )
    ```
-3. **Final Validation:**
+3. **Dynamic Registration:**
+   For widgets created at runtime (e.g., table rows), register each new widget with the coordinator as soon as it is created.
+4. **Final Validation:**
    Use pure input_handler getters in your OK handler for final data extraction and validation.
 
+
 ## add_link Parameters
-- `source`: The user-editable widget (QLineEdit/QComboBox).
+- `source`: The user-editable widget (QLineEdit/QComboBox/QPushButton).
 - `target_map`: Dict mapping data keys to widgets to fill.
-- `lookup_fn`: Stateless function returning a dict or None.
+- `lookup_fn`: Stateless function returning a dict or None (optional for simple jumps).
 - `next_focus`: Widget or function to trigger on Enter.
 - `status_label`: QLabel for status feedback (QSS property + re-polish).
 - `on_sync`: Optional hook after sync (e.g., update placeholders).
@@ -53,11 +69,22 @@ coord.add_link(
 )
 ```
 
+
 ## Integration & Best Practices
-- All cross-widget logic must be declared via FieldCoordinator.
+- All cross-widget and keyboard logic must be declared via FieldCoordinator.
 - Input handlers must remain pure (no widget manipulation).
 - UI feedback and styling are handled via QSS properties and re-polish (see ui_feedback.py).
-- For new dialogs, always follow the three-step implementation guide in the Centralized Relationship Coordinator documentation.
+- For new dialogs, always follow the three-step implementation guide in the Centralized Keyboard Orchestration documentation.
+
+## Enter Key Workflow (2026 Model)
+
+| Action                | Character Logic      | Enter Key Logic         | Result                                 |
+|-----------------------|---------------------|-------------------------|----------------------------------------|
+| Typing '0' or 'a'     | Swallowed by Regex  | N/A                    | Character never appears                |
+| Enter on Empty Box    | N/A                 | Swallowed by Coordinator| Focus stays; Box highlights            |
+| Enter on Valid Qty    | N/A                 | Jump by Coordinator     | Focus moves to OK Button               |
+| Enter on OK Button    | N/A                 | Click by Coordinator    | _handle_ok_all validates & closes      |
+| Enter on Veg Button   | N/A                 | Click by Coordinator    | Row added; Focus jumps to OK           |
 
 ## See Also
 - [centralized_relationship_coordinator.md](centralized_relationship_coordinator.md)

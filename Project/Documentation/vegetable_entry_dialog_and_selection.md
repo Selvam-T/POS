@@ -158,27 +158,41 @@ self.dialog_wrapper.open_dialog_scanner_blocked(
 - Styles for buttons, labels, and table headers are modularized for maintainability.
 
 
+
 ## Recent Changes (Jan 2026)
 
-### Technical Improvements
+### Centralized Keyboard Orchestration & UI Architecture
 
-**Shared Logic Layer (table_operations.py):**
-- Centralized Data Scraping: `get_sales_data` is now the single source of truth, using `input_handler.handle_quantity_input` for all quantity extraction and validation (including the 9999 limit).
-- Status Label Binding: Added `bind_status_label` to allow the table to report errors directly to the dialog’s status bar using the `ui_feedback` system.
-- Validation-Locked Focus: The Enter key now triggers validation; if the value is invalid (0, empty, or non-numeric), an error is shown and focus is forced back to the cell for correction.
-- Refactored Row Addition: `_add_product_row` now leverages `get_sales_data`, removing double-read logic.
+**FieldCoordinator (focus_utils.py):**
+- Now acts as the global event interceptor for all registered widgets in the dialog.
+- **Enter-Key Hijacking:** Intercepts Return/Enter keys and prevents QDialog from performing native Accept or "Ghost Click" behaviors.
+- **Smart Swallowing:** If Enter is pressed on an empty field, the Coordinator highlights the field and refuses to move focus, trapping the user until a valid value is entered.
+- **Simple Jump Support:** Supports next_focus jumps even without a lookup function.
+- **Button Triggering:** If Enter is pressed on a QPushButton, manually triggers obj.click() for Enter-to-Submit.
+- **Dynamic Registration:** Controllers must register new qtyInput widgets with the coordinator as soon as they are created (e.g., after adding a vegetable row).
 
-**Controller Layer (vegetable_entry.py):**
-- Universal Button Neutralization: All QPushButton widgets have their `autoDefault` and `default` properties stripped to prevent ghost clicks when pressing Enter in a text field.
-- Elimination of Double-Reads: Manual UI scraping in `_handle_ok_all` is replaced by a single call to `get_sales_data()`.
-- Validation Guard: Data extraction in `_handle_ok_all` is wrapped in a try...except block; dialog only closes if all rows are valid.
-- Standardized Feedback: All status messages use `ui_feedback.set_status_label` for consistent QSS styling.
-- Wiring Correction: OK button signal now correctly passes the status label, preventing silent crashes.
+**table_operations.py:**
+- **Regex Validation:** Uses QRegularExpressionValidator (pattern `^[1-9][0-9]{0,3}$`) for quantity input, blocking '0', letters, and symbols at the source.
+- **No Manual Focus Management:** All setFocus, clearFocus, and selection logic removed; focus is managed by the FieldCoordinator.
+- **bind_next_focus_widget:** Allows controllers to define post-edit focus flow without hardcoding logic in the table layer.
 
-### Summary of Improvements
-- **UI Stability:** Enter key no longer closes the dialog prematurely or triggers unintended buttons.
-- **Code Maintainability:** UI reading logic is centralized in table_operations, business logic in vegetable_entry.
-- **User Experience:** Real-time error messages appear in the status bar if a user attempts to OK an empty or zero-quantity table.
+**vegetable_entry.py:**
+- **Global Button Neutralization:** Recursively strips autoDefault and default from all buttons to prevent ghost clicks.
+- **Speed-of-Sale Optimization:** Focus flow automatically shifts to OK ALL after a vegetable is selected or quantity is edited, supporting rapid workflows.
+
+**menu.qss:**
+- **Selector Precision:** Uses *= (contains) for vegEButton selectors, ensuring all 16 buttons are styled.
+- **State-Based Styling:** [state="active"] and [state="unused"] properties allow dynamic visual feedback for vegetable slots.
+
+### Final Workflow Summary
+
+| Action                | Character Logic      | Enter Key Logic         | Result                                 |
+|-----------------------|---------------------|-------------------------|----------------------------------------|
+| Typing '0' or 'a'     | Swallowed by Regex  | N/A                    | Character never appears                |
+| Enter on Empty Box    | N/A                 | Swallowed by Coordinator| Focus stays; Box highlights            |
+| Enter on Valid Qty    | N/A                 | Jump by Coordinator     | Focus moves to OK Button               |
+| Enter on OK Button    | N/A                 | Click by Coordinator    | _handle_ok_all validates & closes      |
+| Enter on Veg Button   | N/A                 | Click by Coordinator    | Row added; Focus jumps to OK           |
 
 ## Quick Reference
 
