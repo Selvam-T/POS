@@ -29,8 +29,8 @@ def veg_slots() -> int:
 
 
 def _default_mapping(n: int) -> Dict[str, Dict[str, str]]:
-    # veg1..vegN initialized to unused
-    return {f"veg{i}": {"state": "unused", "label": "unused"} for i in range(1, n + 1)}
+    # veg1..vegN initialized to empty
+    return {f"veg{i}": {"state": "empty", "label": "empty"} for i in range(1, n + 1)}
 
 
 def _validate_mapping(mapping: Dict[str, Any], n: int) -> Tuple[bool, str]:
@@ -44,7 +44,7 @@ def _validate_mapping(mapping: Dict[str, Any], n: int) -> Tuple[bool, str]:
                 return False, f"Invalid entry for {k}"
             state = entry.get("state")
             label = entry.get("label")
-            if state not in ("custom", "unused"):
+            if state not in ("custom", "empty"):
                 return False, f"Invalid state for {k}: {state}"
             if not isinstance(label, str):
                 return False, f"Invalid label for {k}"

@@ -333,7 +333,7 @@ class MainLoader(QMainWindow):
             vegetable_rows = getattr(dlg, 'vegetable_rows', None)
             manual_result = getattr(dlg, 'manual_entry_result', None)
             if vegetable_rows:
-                print(f"[main.py] Received vegetable_rows: {vegetable_rows}")
+                # print(f"[main.py] Received vegetable_rows: {vegetable_rows}")
                 new_rows = []
                 for row in vegetable_rows:
                     row_copy = dict(row)
@@ -418,7 +418,7 @@ class MainLoader(QMainWindow):
                 if not found_match:
                     existing_rows.append(new_row)
 
-            print(f"[main.py] FINAL rows to set_table_rows: {existing_rows}")
+            # print(f"[main.py] FINAL rows to set_table_rows: {existing_rows}")
             set_table_rows(self.sales_table, existing_rows)
         except Exception as e:
             import traceback

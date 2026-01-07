@@ -39,7 +39,7 @@ This document describes the workflow for the Vegetable Entry dialog, where users
 ### Button Grid (16 Buttons)
 - **Buttons:** `btnVeg01` to `vegEButton16` mapped to Veg01-Veg16 product codes
 - **Enabled buttons:** Show product name from database (fetched via `get_product_info()`)
-- **Disabled buttons:** Display "Not Used" when no product configured for slot
+- **Disabled buttons:** Display "empty" when no product configured for slot
 
 ### Table (vegEntryTable) - 7 Columns
 - **Columns:** `['No.', 'Product', 'Quantity', '', 'Unit Price', 'Total', 'Del']`
@@ -182,7 +182,7 @@ self.dialog_wrapper.open_dialog_scanner_blocked(
 
 **menu.qss:**
 - **Selector Precision:** Uses *= (contains) for vegEButton selectors, ensuring all 16 buttons are styled.
-- **State-Based Styling:** [state="active"] and [state="unused"] properties allow dynamic visual feedback for vegetable slots.
+- **State-Based Styling:** [state="active"] and [state="empty"] properties allow dynamic visual feedback for vegetable slots.
 
 ### Final Workflow Summary
 

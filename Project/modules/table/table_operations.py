@@ -408,7 +408,7 @@ def bind_total_label(table: QTableWidget, label: QLabel) -> None:
         # Attach dynamically; PyQt widgets allow Python attributes
         table._total_label = label  # type: ignore[attr-defined]
     except Exception:
-        # Fallback via Qt dynamic property (not used by QSS here)
+        # Fallback via Qt dynamic property (empty by QSS here)
         try:
             table.setProperty('_total_label', label)
         except Exception:

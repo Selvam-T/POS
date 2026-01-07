@@ -136,7 +136,7 @@ Product Management and scanner flow integration:
     - While Product dialog is open, all scans fill the Product Code field in the dialog (no Manual Entry auto-open).
     - In Sales frame, if a scanned code isn’t found: opens Product Management in ADD mode with the code prefilled.
     - After a successful ADD from that flow, the new item is automatically inserted into the sales table as if it were scanned again.
-- Cleanup: Removed noisy debug prints across scanner, sales table, and main window. Retired unused helpers.
+- Cleanup: Removed noisy debug prints across scanner, sales table, and main window. Retired empty helpers.
 
 Docs: Created `Documentation/product_management.md`; updated `README.md` to reflect new flows and link to the doc.
 

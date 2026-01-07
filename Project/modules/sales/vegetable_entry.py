@@ -30,7 +30,7 @@ def open_vegetable_entry_dialog(parent):
         coord = FieldCoordinator(dlg)
         dlg._coord = coord 
     except Exception as e:
-        print(f'Failed to load UI: {e}'); return None
+        return None
     
     for btn in dlg.findChildren(QPushButton):
         btn.setAutoDefault(False)
@@ -76,8 +76,8 @@ def open_vegetable_entry_dialog(parent):
             unit = details.get('unit', 'Each') if details else 'Each'
             btn.clicked.connect(partial(_handle_vegetable_button_click, dlg, status_lbl, vtable, veg_code, product_name, unit_price, unit))
         else:
-            btn.setText('Not Used'); btn.setEnabled(False)
-            btn.setFocusPolicy(Qt.NoFocus); btn.setProperty('state', 'unused')
+            btn.setText('empty'); btn.setEnabled(False)
+            btn.setFocusPolicy(Qt.NoFocus); btn.setProperty('state', 'empty')
         
         btn.style().unpolish(btn); btn.style().polish(btn)
 
