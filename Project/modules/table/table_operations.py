@@ -213,10 +213,15 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         lay.addWidget(btn, 0, Qt.AlignCenter)
         table.setCellWidget(r, 6, container)
 
+
     try:
         _update_total_value(table)
     except Exception:
         pass
+
+    # Always scroll to the last row if there are any rows
+    if table.rowCount() > 0:
+        table.scrollToBottom()
 
 
 def _recalc_from_editor(editor: QLineEdit, table: QTableWidget) -> None:
@@ -611,6 +616,9 @@ def _add_product_row(table: QTableWidget, product_code: str, product_name: str,
     
     # 3. Rebuild the table
     set_table_rows(table, current_data, status_bar)
+    # Scroll to the last row after adding
+    if table.rowCount() > 0:
+        table.scrollToBottom()
 
 
 def get_sales_data(table: QTableWidget) -> List[Dict[str, Any]]:

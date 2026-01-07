@@ -302,13 +302,12 @@ QGroupBox::title {
 }
 
 /* =============================================================
-     vegEntryFrame FRAME AND ITS CHILDREN (to be review)
+     vegEntryTable
     ============================================================= */
 
-/* --- vegEntryTable --- */
-
 /* 1. Table Header Styling */
-QWidget#vegEntryDialog QHeaderView::section {
+QWidget#vegEntryDialog QHeaderView::section,
+QTableWidget#salesTable QHeaderView::section  {
     font-size: 10pt;
     font-weight: bold;
     font-family: "Verdana";
@@ -321,8 +320,9 @@ QWidget#vegEntryDialog QHeaderView::section {
 }
 
 /* 2. Table Styling */
-QWidget#vegEntryDialog QTableWidget#vegEntryTable {
-    font-size: 11pt;
+QWidget#vegEntryDialog QTableWidget#vegEntryTable,
+QWidget#SalesFrame QTableWidget#salesTable {
+    font-size: 10pt;
     font-weight: bold;
     color: #434d44;
     gridline-color: #bec1c8;
