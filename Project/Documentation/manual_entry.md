@@ -1,28 +1,30 @@
 # Manual Entry Dialog Documentation
 # January 2026 Update
 
-## UI Changes
+## January 2026: Keyboard, Focus, and Feedback Finalization
 
-The Manual Entry dialog now includes a custom frameless title bar (`customTitleBar` QFrame) at the top, matching the structure and widget names used in `vegetable_menu.ui`:
+### Unified Event Interception & Focus Optimization
+- **Enter-to-Click:** The FieldCoordinator detects focus on QPushButton (including the Close button). Pressing Enter manually triggers `obj.click()`, ensuring consistent behavior across all button types.
+- **Ghost Click Elimination:** All buttons have `autoDefault` and `default` stripped. The Coordinator swallows and redirects Enter events, eliminating the "Enter triggers Veg01" bug.
+- **Dynamic Tab Order:** After selecting a product or entering a valid quantity, focus jumps to the OK button, enabling rapid dialog completion.
+- **Dynamic Registration:** New input widgets (e.g., quantity fields) are registered with the FieldCoordinator as they are created at runtime.
 
-- `customTitleBar` (QFrame)
-    - `customTitleLayout` (QHBoxLayout)
-        - `horizontalSpacer_1` (QSpacer)
-        - `customTitle` (QLabel, displays dialog title)
-        - `horizontalSpacer_2` (QSpacer)
-        - `customCloseBtn` (QPushButton, closes dialog)
+### Advanced Keyboard Swallowing & Validation
+- **Regex Bouncer:** Uses `QRegularExpressionValidator` (`^[1-9][0-9]{0,3}$`) to block '0' and non-digits from quantity fields at the source.
+- **Empty-Field Trap:** The FieldCoordinator swallows Enter on empty fields, forcing the user to enter a value before moving focus.
 
-This provides a consistent look and feel across dialogs and supports a frameless, modern UI. The close button is now always available in the custom title bar.
+### Visual & UI Polish
+- **Conditional Borders:** QSS uses `:focus:!read-only` logic. Only editable fields show a highlight border; read-only fields remain visually locked.
+- **Focus Visibility:** CSS specificity fixes ensure focus borders are visible on active fields and the custom title bar's Close button.
+- **Table Outline Cleanup:** Dotted focus rectangles on table rows are disabled via `outline: 0` for a modern look.
 
-## Controller Status
+### Cross-Window Feedback
+- **Status Bar Integration:** Dialogs now set a `main_status_msg` property before closing. The Main Window displays this message in the status bar, providing final confirmation of success or cancellation.
 
-The manual entry controller logic is a work in progress and will be updated to follow the integration pattern used in `vegetable_menu.py`. This includes:
+---
+**All enhancements are now fully implemented in both manual_entry and vegetable_entry dialogs.**
 
-- Dialog lifecycle management via `DialogWrapper` (overlay, scanner blocking, centering, focus restoration)
-- Widget lookup and event wiring for custom title bar controls
-- Consistent input validation and error handling
-
-Refer to `modules/menu/vegetable_menu.py` for the latest controller structure and integration approach. Manual entry will adopt similar patterns for UI loading, widget access, and event handling.
+---
 
 
 ## Overview

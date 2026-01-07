@@ -177,6 +177,11 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>btnLogoutCancel</tabstop>
+  <tabstop>btnLogoutOk</tabstop>
+  <tabstop>customCloseBtn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

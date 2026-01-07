@@ -51,6 +51,11 @@ def open_vegetable_entry_dialog(parent):
     cancel_btn = dlg.findChild(QPushButton, 'btnVegECancel')
     close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
 
+    # This allows Enter key to work on dialog buttons
+    for btn in [ok_btn, cancel_btn, close_btn]:
+        if btn:
+            coord.add_link(btn)
+
     if vtable:
         setup_sales_table(vtable)
         bind_status_label(vtable, status_lbl)
@@ -65,6 +70,9 @@ def open_vegetable_entry_dialog(parent):
     for i in range(1, 17):
         btn = dlg.findChild(QPushButton, f'vegEButton{i}')
         if not btn: continue
+
+        # This allows Enter key to work on vegEButtons
+        coord.add_link(btn)
         
         veg_code = f'Veg{i:02d}'
         found, product_name, unit_price, _ = get_product_info(veg_code)
@@ -81,10 +89,16 @@ def open_vegetable_entry_dialog(parent):
         
         btn.style().unpolish(btn); btn.style().polish(btn)
 
-    if ok_btn: ok_btn.clicked.connect(lambda: _handle_ok_all(dlg, vtable, status_lbl))
-    if cancel_btn: cancel_btn.clicked.connect(dlg.reject)
-    if close_btn: close_btn.clicked.connect(dlg.reject)
+    def handle_cancel():
+        # Set the message for the main window to find later
+        dlg.main_status_msg = "Vegetable entry cancelled."
+        dlg.reject()
 
+    if ok_btn: ok_btn.clicked.connect(lambda: _handle_ok_all(dlg, vtable, status_lbl))
+    if cancel_btn: cancel_btn.clicked.connect(handle_cancel)
+    if close_btn: close_btn.clicked.connect(handle_cancel)
+
+    cancel_btn.setFocus()
     return dlg
 
 def _handle_vegetable_button_click(dlg, msg_label, vtable, code, name, price, unit):
@@ -148,6 +162,8 @@ def _handle_ok_all(dlg, vtable, status_lbl):
             rows_to_transfer.append({'product_code': code, 'product_name': row['product_name'], 'quantity': row['quantity'], 'unit_price': row['unit_price'], 'unit': row['unit'], 'editable': row['editable']})
 
         dlg.vegetable_rows = rows_to_transfer
+        count = len(rows_to_transfer)
+        dlg.main_status_msg = f"Success: {count} vegetable(s) added to sale."
         dlg.accept()
     except ValueError as e:
         ui_feedback.set_status_label(status_lbl, str(e), ok=False)

@@ -26,3 +26,19 @@ def clear_status_label(label: QLabel) -> bool:
     label.style().unpolish(label)
     label.style().polish(label)
     return True
+
+# helper function to target the Main Window’s status bar
+
+def show_main_status(parent, message: str, is_error: bool = False, duration: int = 3000):
+    """Finds the Main Window status bar and shows a message."""
+    from PyQt5.QtWidgets import QMainWindow
+    
+    # Walk up the parent tree to find the QMainWindow
+    win = parent
+    while win and not isinstance(win, QMainWindow):
+        win = win.parent()
+        
+    if win and win.statusBar():
+        color = "red" if is_error else "green"
+        win.statusBar().setStyleSheet(f"color: {color}; font-weight: bold;")
+        win.statusBar().showMessage(message, duration)

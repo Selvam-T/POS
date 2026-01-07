@@ -464,11 +464,11 @@
  </widget>
  <tabstops>
   <tabstop>manualProductCodeLineEdit</tabstop>
-  <tabstop>customCloseBtn</tabstop>
   <tabstop>manualNameSearchLineEdit</tabstop>
   <tabstop>manualQuantityLineEdit</tabstop>
   <tabstop>btnManualOk</tabstop>
   <tabstop>btnManualCancel</tabstop>
+  <tabstop>customCloseBtn</tabstop>
  </tabstops>
  <resources/>
  <connections/>

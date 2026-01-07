@@ -1,6 +1,7 @@
 """Unified dialog wrapper for all modal dialogs."""
 from PyQt5.QtWidgets import QDialog
 from PyQt5.QtCore import QTimer
+from modules.ui_utils import ui_feedback
 
 
 class DialogWrapper:
@@ -193,7 +194,17 @@ class DialogWrapper:
             self._setup_dialog_geometry(dlg, width_ratio, height_ratio)
             dlg.finished.connect(self._create_cleanup(on_finish))
             self._last_dialog = dlg  # Store reference for callbacks
-            dlg.exec_()
+            #dlg.exec_()
+            
+            result = dlg.exec_()
+
+            # Check if the dialog set a message for the main status bar
+            msg = getattr(dlg, 'main_status_msg', None)
+
+            if msg:
+                # Use our new feedback helper
+                is_error = (result == QDialog.Rejected)
+                ui_feedback.show_main_status(self.main, msg, is_error=is_error)
 
         except Exception as e:
             self._hide_overlay()

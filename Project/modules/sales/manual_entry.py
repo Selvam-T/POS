@@ -117,12 +117,14 @@ def open_manual_entry_dialog(parent):
                 'unit': unit_dis.text(),
                 'unit_price': float(name_in.property('last_price') or 0)
             }
+            dlg.main_status_msg = f"Success: {name_in.text()} added to sale."
             dlg.accept()
         except ValueError as e:
             ui_feedback.set_status_label(status_lbl, str(e), ok=False)
 
     # Close/Cancel logic
     def handle_close():
+        dlg.main_status_msg = "Manual entry cancelled."
         dlg.reject() # DialogWrapper handles overlay and focus
 
     if close_btn:
@@ -132,5 +134,8 @@ def open_manual_entry_dialog(parent):
 
     btn_ok.clicked.connect(handle_ok)
     
+    # SET INITIAL FOCUS
+    code_in.setFocus()
+
     dlg._coord = coord 
     return dlg

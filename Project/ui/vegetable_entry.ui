@@ -126,6 +126,9 @@
        <height>250</height>
       </size>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::ClickFocus</enum>
+     </property>
      <property name="editTriggers">
       <set>QAbstractItemView::NoEditTriggers</set>
      </property>
@@ -444,6 +447,28 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>vegEButton1</tabstop>
+  <tabstop>vegEButton2</tabstop>
+  <tabstop>vegEButton3</tabstop>
+  <tabstop>vegEButton4</tabstop>
+  <tabstop>vegEButton5</tabstop>
+  <tabstop>vegEButton6</tabstop>
+  <tabstop>vegEButton7</tabstop>
+  <tabstop>vegEButton8</tabstop>
+  <tabstop>vegEButton9</tabstop>
+  <tabstop>vegEButton10</tabstop>
+  <tabstop>vegEButton11</tabstop>
+  <tabstop>vegEButton12</tabstop>
+  <tabstop>vegEButton13</tabstop>
+  <tabstop>vegEButton14</tabstop>
+  <tabstop>vegEButton15</tabstop>
+  <tabstop>vegEButton16</tabstop>
+  <tabstop>btnVegEOk</tabstop>
+  <tabstop>btnVegECancel</tabstop>
+  <tabstop>customCloseBtn</tabstop>
+  <tabstop>vegEntryTable</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
