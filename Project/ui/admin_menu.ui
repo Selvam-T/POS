@@ -189,7 +189,7 @@
       <enum>QTabWidget::North</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -728,12 +728,12 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>tabWidget</tabstop>
   <tabstop>adminCurPwdCodeLineEdit</tabstop>
   <tabstop>adminToolBtn</tabstop>
   <tabstop>adminNewPwdCodeLineEdit</tabstop>
   <tabstop>btnAdminOk</tabstop>
   <tabstop>btnAdminCancel</tabstop>
+  <tabstop>tabWidget</tabstop>
   <tabstop>staffCurPwdCodeLineEdit</tabstop>
   <tabstop>staffQToolBtn</tabstop>
   <tabstop>staffNewPwdCodeLineEdit</tabstop>

@@ -198,10 +198,16 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         # Col 6: Remove button
         btn = QPushButton()
         btn.setObjectName('removeBtn')
-        btn.setIcon(QIcon(ICON_DELETE))
-        btn.setIconSize(QSize(36, 36))
-        btn.setAttribute(Qt.WA_StyledBackground, True)
-        btn.setAutoFillBackground(False)
+        btn.setText('X')
+        btn.setStyleSheet(
+            f"QPushButton {{ "
+            f"background-color: {row_color.name()}; "
+            f"font-size: 14pt; "
+            f"font-weight: bold; "
+            f"color: red; "
+            f"border: 3px solid red; "
+            f"}}"
+        )
         btn.pressed.connect(partial(_highlight_row_by_button, table, btn))
         btn.clicked.connect(partial(_remove_by_button, table, btn))
 

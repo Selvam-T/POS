@@ -91,6 +91,7 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         qty_edit.setProperty('numeric_value', float(qty_val))
         qty_edit.setReadOnly(not editable)
         qty_edit.setAlignment(Qt.AlignCenter)
+        qty_edit.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
 
         if editable:
             from PyQt5.QtGui import QRegularExpressionValidator

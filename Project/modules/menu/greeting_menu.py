@@ -25,9 +25,6 @@ GREETING_STRINGS = [
 def open_greeting_dialog(parent=None):
     """Open the Greeting message selection dialog.
     
-    DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
-    This function only creates and returns the QDialog.
-    
     Selected greeting stored in dlg.greeting_result attribute (or None if cancelled).
     
     Args:
@@ -81,4 +78,6 @@ def open_greeting_dialog(parent=None):
     dlg.finished.connect(_store_greeting)
     
     # Return QDialog for DialogWrapper to execute
+
+    combo.setFocus()
     return dlg

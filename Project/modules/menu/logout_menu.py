@@ -16,9 +16,6 @@ _QSS_PATH = os.path.join(_ASSETS_DIR, 'menu.qss')
 
 def open_logout_dialog(host_window):
     """Open the Logout confirmation dialog as a modal using ui/logout_menu.ui.
-    
-    DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
-    This function only creates and returns the QDialog.
 
     Args:
         host_window: The main window instance
@@ -96,6 +93,7 @@ def open_logout_dialog(host_window):
             btn_ok.clicked.connect(dlg.accept)
         except Exception:
             pass
+    btn_cancel.setFocus()
     return dlg
 
     

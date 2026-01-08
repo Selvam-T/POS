@@ -59,13 +59,16 @@ QLineEdit#qtyInput[error="true"] {
 
 /* --- Remove Button --- */
 QPushButton#removeBtn {
-    background-color: transparent; /* Transparent to show row color */
+    background-color: #d33f12;
     border: 5px solid #d33f12;
+    font-weight: bold;
+    font-size: 20px;
+    color: white;
     border-radius: 2px;
-    min-width: 30px;
-    max-width: 30px;
-    min-height: 28px;
-    max-height: 28px;
+    min-width: 33px;
+    max-width: 33px;
+    min-height: 26px;
+    max-height: 26px;
     padding: 0px;
 }
 QPushButton#removeBtn:hover {

@@ -179,8 +179,8 @@
  </widget>
  <tabstops>
   <tabstop>btnLogoutCancel</tabstop>
-  <tabstop>btnLogoutOk</tabstop>
   <tabstop>customCloseBtn</tabstop>
+  <tabstop>btnLogoutOk</tabstop>
  </tabstops>
  <resources/>
  <connections/>
