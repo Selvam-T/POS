@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QLabel
+from PyQt5.QtCore import QTimer
 
-def set_status_label(label: QLabel, message: str, ok: bool) -> bool:
+def set_status_label(label: QLabel, message: str, ok: bool, duration: int = 3000) -> bool:
     """Sets status message and triggers QSS property change."""
     if label is None:
         return False
@@ -14,6 +15,12 @@ def set_status_label(label: QLabel, message: str, ok: bool) -> bool:
     # Re-polish tells Qt to re-read the CSS for this specific widget
     label.style().unpolish(label)
     label.style().polish(label)
+
+    # Only clear success messages automatically. 
+    # Errors usually stay until the user interacts again.
+    if ok and duration > 0:
+        # Use singleShot to call clear_status_label after the duration
+        QTimer.singleShot(duration, lambda: clear_status_label(label))
     
     return ok
 
@@ -40,5 +47,5 @@ def show_main_status(parent, message: str, is_error: bool = False, duration: int
         
     if win and win.statusBar():
         color = "red" if is_error else "green"
-        win.statusBar().setStyleSheet(f"color: {color}; font-weight: bold;")
+        win.statusBar().setStyleSheet(f"color: {color};")
         win.statusBar().showMessage(message, duration)

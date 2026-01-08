@@ -163,7 +163,7 @@ def _handle_ok_all(dlg, vtable, status_lbl):
 
         dlg.vegetable_rows = rows_to_transfer
         count = len(rows_to_transfer)
-        dlg.main_status_msg = f"Success: {count} vegetable(s) added to sale."
+        dlg.main_status_msg = f"{count} vegetable/s added to sale."
         dlg.accept()
     except ValueError as e:
         ui_feedback.set_status_label(status_lbl, str(e), ok=False)

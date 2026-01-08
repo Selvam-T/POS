@@ -175,13 +175,9 @@ class BarcodeManager(QObject):
                         'inputProductName', 'inputSellingPrice',
                         'inputSupplier', 'inputCostPrice',
                         'inputQuantity', 'inputUnitPrice',
+                        # vegetable menu dialog fields:
                         'vegMCostPriceLineEdit', 'vegMProductNameLineEdit',
                         'vegMSellingPriceLineEdit', 'vegMSupplierLineEdit',
-                        'addProductNameLineEdit', 'addCostPriceLineEdit',
-                        'addSellingPriceLineEdit', 'addSupplierLineEdit',
-                        'updateProductNameLineEdit', 'updateCostPriceLineEdit',
-                        'updateSellingPriceLineEdit', 'updateSupplierLineEdit',
-                        'removeSearchComboLineEdit', 'updateSearchComboLineEdit',
                         # Manual entry dialog fields:
                         'manualProductCodeLineEdit', 'manualNameSearchLineEdit', 'manualQuantityLineEdit'
                     )

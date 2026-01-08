@@ -47,8 +47,8 @@ class FieldCoordinator(QObject):
 
         if link['status_label']:
             if is_clear: ui_feedback.clear_status_label(link['status_label'])
-            elif result: ui_feedback.set_status_label(link['status_label'], "✓ Match Found", ok=True)
-            else: ui_feedback.set_status_label(link['status_label'], "⚠ Not Found", ok=False)
+            elif result: ui_feedback.set_status_label(link['status_label'], "Match Found", ok=True)
+            else: ui_feedback.set_status_label(link['status_label'], "Not Found", ok=False)
 
         if link['on_sync']: link['on_sync'](result)
         if not is_clear and result and link.get('auto_jump'): self._move_focus(link['next'])
@@ -86,7 +86,7 @@ class FieldCoordinator(QObject):
                         self._move_focus(link['next'])
                     else:
                         if link['status_label']:
-                            ui_feedback.set_status_label(link['status_label'], "⚠ Invalid Entry", ok=False)
+                            ui_feedback.set_status_label(link['status_label'], "Invalid Entry", ok=False)
                         if hasattr(obj, 'selectAll'): obj.selectAll()
                 else:
                     # Simple focus jump (Now only happens if val is NOT empty)

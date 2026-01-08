@@ -9,7 +9,7 @@ class DialogWrapper:
 
     # Dialog size ratios (width_ratio, height_ratio) as fraction of main window
     DIALOG_RATIOS = {
-        'vegetable_entry': (0.5, 0.8),
+        'vegetable_entry': (0.5, 0.9),
         'manual_entry': (0.4, 0.3),
         'logout_menu': (0.25, 0.25),
         'admin_menu': (0.4, 0.3),

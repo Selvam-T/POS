@@ -117,7 +117,7 @@ def open_manual_entry_dialog(parent):
                 'unit': unit_dis.text(),
                 'unit_price': float(name_in.property('last_price') or 0)
             }
-            dlg.main_status_msg = f"Success: {name_in.text()} added to sale."
+            dlg.main_status_msg = f"{name_in.text()} added to sale."
             dlg.accept()
         except ValueError as e:
             ui_feedback.set_status_label(status_lbl, str(e), ok=False)

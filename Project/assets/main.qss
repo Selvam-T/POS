@@ -6,6 +6,11 @@ QMainWindow {
   font-family: 'Dubai', Helvetica, sans-serif;
 }
 
+QStatusBar#statusbar {
+  font-family: 'Dubai', Helvetica, sans-serif;
+  font-size: 14pt;
+}
+
 /* =============================================================
    COMMON BUTTON FONT
    Apply a unified font to all QPushButtons
@@ -27,6 +32,7 @@ QLabel#labelCompany {
 QLabel#labelDate,
 QLabel#labelDayTime {
   font-size: 12pt;
+  font-weight: regular;
 }
 
 /* Explicit padding so header text offsets are visible regardless of widget margins */
