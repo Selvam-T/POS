@@ -127,7 +127,7 @@ class MainLoader(QMainWindow):
             on_finish=self._add_items_to_sales_table
         )
 
-    def open_manual_panel(self):
+    def open_manual_entry_dialog(self):
         """Open Manual Product Entry panel."""
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_manual_entry_dialog, 
@@ -143,7 +143,7 @@ class MainLoader(QMainWindow):
         """Open View Hold panel."""
         self.dialog_wrapper.open_dialog_scanner_blocked(launch_viewhold_dialog, dialog_key='view_hold')
 
-    def open_cancelsale_panel(self):
+    def open_cancelsale_dialog(self):
         """Open Cancel Sale confirmation dialog."""
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_cancelsale_dialog,

@@ -75,7 +75,7 @@ def setup_sales_frame(main_window, UI_DIR):
                 manual_btn = sales_widget.findChild(QPushButton, 'manualBtn')
                 if manual_btn is not None:
                     manual_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-                    manual_btn.clicked.connect(main_window.open_manual_panel)
+                    manual_btn.clicked.connect(main_window.open_manual_entry_dialog)
 
             receipt_container = sales_widget.findChild(QWidget, 'receiptContainer')
             if receipt_container is not None:
@@ -87,7 +87,7 @@ def setup_sales_frame(main_window, UI_DIR):
                 cancelsale_btn = sales_widget.findChild(QPushButton, 'cancelsaleBtn')
                 if cancelsale_btn is not None:
                     cancelsale_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-                    cancelsale_btn.clicked.connect(main_window.open_cancelsale_panel)
+                    cancelsale_btn.clicked.connect(main_window.open_cancelsale_dialog)
                 onhold_btn = sales_widget.findChild(QPushButton, 'onholdBtn')
                 if onhold_btn is not None:
                     onhold_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)

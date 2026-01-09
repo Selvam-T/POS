@@ -12,8 +12,6 @@ _ASSETS_DIR = os.path.join(_PROJECT_DIR, 'assets')
 _QSS_PATH = os.path.join(_ASSETS_DIR, 'menu.qss')
 
 
-
-
 def open_logout_dialog(host_window):
     """Open the Logout confirmation dialog as a modal using ui/logout_menu.ui.
 

@@ -20,7 +20,7 @@ class DialogWrapper:
         'vegetable_menu': (0.32, 0.7),
         'on_hold': (0.7, 0.7),
         'view_hold': (0.7, 0.7),
-        'cancel_sale': (0.7, 0.7),
+        'cancel_sale': (0.25, 0.25),
     }
 
     def __init__(self, main_window):

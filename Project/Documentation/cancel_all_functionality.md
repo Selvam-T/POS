@@ -41,7 +41,7 @@ def open_cancel_sale_dialog(parent=None):
 
 **Dialog Launcher:**
 ```python
-def open_cancelsale_panel(self):
+def open_cancelsale_dialog(self):
     """Open Cancel Sale confirmation dialog."""
     self.dialog_wrapper.open_dialog_scanner_blocked(
         launch_cancelsale_dialog,
@@ -102,7 +102,7 @@ Placeholder comment exists in code for future implementation.
 
 ```python
 # ========== Sales Frame Dialog Handlers ==========
-def open_cancelsale_panel(self): ...
+def open_cancelsale_dialog(self): ...
 
 # ========== Post-Dialog Action Handlers ==========
 def _clear_sales_table(self): ...

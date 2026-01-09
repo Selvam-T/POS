@@ -78,7 +78,7 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
   - **Data normalization:** Converts different dialog result formats (`vegetable_rows` property vs. `manual_entry_result` attribute) to unified row structure.
   - **Smart merging:** Handles duplicate detection and quantity merging for vegetable items (EACH: increment count, KG: add weights).
   - **Simple callbacks:** Dialog launchers use `on_finish=lambda: self._add_items_to_sales_table('vegetable')` instead of 100+ line inline functions.
-  - **Maintainability:** Eliminates ~200 lines of duplicated code across `open_vegetable_entry_dialog()` and `open_manual_panel()`.
+  - **Maintainability:** Eliminates ~200 lines of duplicated code across `open_vegetable_entry_dialog()` and `open_manual_entry_dialog()`.
 
 - **Window and Application Behavior:**
   - Disables the main window's close (X) button to enforce logout flow.
