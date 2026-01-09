@@ -24,17 +24,18 @@ The Cancel All feature provides a safe way for users to clear the entire sales t
 **File:** `modules/sales/cancel_sale.py`
 
 ```python
-def open_cancel_sale_dialog(parent=None):
+def open_cancel_sale_dialog(host_window):
     """Open Cancel Sale confirmation dialog.
-    
+    If the UI file fails to load, logs error and shows a minimal fallback dialog.
     Returns:
         QDialog with Accepted/Rejected status based on user choice
     """
 ```
 
-- Simple confirmation dialog with two buttons: `btnCancel` and `btnConfirm`
-- Returns `QDialog.Accepted` if user confirms, `QDialog.Rejected` if canceled
-- No data processing logic - purely a user confirmation interface
+- Loads UI from `cancel_sale.ui` if available; otherwise, logs error and shows fallback dialog.
+- Fallback dialog includes a confirmation message and two styled buttons (Cancel, Yes, Clear All).
+- Error is logged to `log/error.log` with timestamp using shared logger.
+- Statusbar notification is shown to inform user when fallback is used.
 
 ### Main Window Handler
 **File:** `main.py`
@@ -130,8 +131,10 @@ def _perform_logout(self): ...
 
 ## Related Files
 
+
 - `ui/cancel_sale.ui` - Dialog UI definition
-- `modules/sales/cancel_sale.py` - Dialog controller
+- `modules/sales/cancel_sale.py` - Dialog controller and fallback logic
+- `modules/ui_utils/error_logger.py` - Shared error logger
 - `main.py` - Dialog launcher and post-action handler
 - `modules/sales/sales_frame_setup.py` - Button wiring (line ~90)
 - `modules/table/table_operations.py` - `recompute_total()` function

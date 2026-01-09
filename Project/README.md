@@ -41,9 +41,12 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - Always-on cache diagnostics per scan; optional debug toggles to log focus path and cache lookups
 
 ✅ **Error Handling**
-- Status bar notifications for invalid products
-- Graceful fallback when database unavailable
- - Windows-console-safe logging (ASCII only)
+
+- Status bar notifications for invalid products and dialog errors
+- Graceful fallback when database or dialog UI files are unavailable
+- Dialogs (e.g., Cancel Sale) use a minimal fallback if UI file is missing, with clear messaging and styled buttons
+- All dialog/UI errors are logged to `log/error.log` with timestamp using a shared logger
+- Windows-console-safe logging (ASCII only)
 
 ✅ **Consistent Dialog Button Styling**
 - All dialog action buttons now use standardized object names:
@@ -311,16 +314,18 @@ See `Project_Journal.md` for detailed architecture documentation, design decisio
 
 ## Documentation
 
+
 - **README.md** (this file) - Setup guide and usage instructions
 - **Project_Journal.md** - Complete development documentation with:
-  - Widget hierarchy and parent-child relationships
-  - Design decisions and rationale
-  - Implementation details
-  - Code examples and technical explanations
-  - Development history
- - Scanner input architecture: see Documentation/scanner_input_infocus.md for focus-first routing, modal block, and debug guidance.
- - Logout dialog and custom title bar: see Documentation/logout_and_titlebar.md for styling and behavior details.
- - Admin Settings dialog: see Documentation/admin_settings.md for structure, wiring, and QSS hooks.
+   - Widget hierarchy and parent-child relationships
+   - Design decisions and rationale
+   - Implementation details
+   - Code examples and technical explanations
+   - Development history
+- **error_logging_and_fallback.md** - Error logging and fallback dialog documentation
+- Scanner input architecture: see Documentation/scanner_input_infocus.md for focus-first routing, modal block, and debug guidance.
+- Logout dialog and custom title bar: see Documentation/logout_and_titlebar.md for styling and behavior details.
+- Admin Settings dialog: see Documentation/admin_settings.md for structure, wiring, and QSS hooks.
 
 ## Troubleshooting
 

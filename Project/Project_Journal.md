@@ -27,16 +27,18 @@ Quality gates: PASS (syntax/import). Manual validation: scanning adds rows incre
 
 ---
  
-## Update Summary (November 5, 2025, later)
 
-Logout flow and custom title bar:
+## Update Summary (January 9, 2026)
 
-    - `QFrame#customTitleBar` for the title area background
-    - `QPushButton#customCloseBtn` for the big X (font size, hover/pressed)
+Error logging and fallback dialog improvements:
 
-Docs: Updated README (features, usage, project structure) and added `Documentation/logout_and_titlebar.md` explaining the frameless rationale, styling selectors, alpha color formats, and how to apply the pattern to other dialogs.
+- Added shared error logger (`modules/ui_utils/error_logger.py`) for consistent, timestamped error logging to `log/error.log`.
+- Updated Cancel Sale dialog controller to use fallback dialog if UI file is missing, with clear messaging and styled buttons.
+- Fallback dialog logs error and shows statusbar notification using `show_main_status()`.
+- Minimal button styling ensures visibility even if QSS is not applied.
+- Documentation updated: see `Documentation/error_logging_and_fallback.md` and revised `cancel_all_functionality.md`.
 
-Quality gates: PASS (quick syntax check). Manual verification: Logout opens centered with dim overlay; Cancel returns; Yes, Logout stops scanner and quits; main window X/Alt+F4 ignored unless allowed by logout.
+Quality gates: PASS (manual test). Verified fallback dialog appears and logs error if UI is missing; statusbar message shown; error log includes timestamp.
 
  
 ## Update Summary (November 4, 2025)
