@@ -35,7 +35,7 @@ def open_vegetable_entry_dialog(parent, main_sales_table):
         dlg_max.exec_()
         return None
     if main_sales_table.rowCount() >= MAX_TABLE_ROWS:
-        dlg_max = open_max_rows_dialog(parent, f"Maximum of {MAX_TABLE_ROWS} items reached. Hold or Pay to continue.")
+        dlg_max = open_max_rows_dialog(parent, f"Maximum of {MAX_TABLE_ROWS} items reached. Hold current sale or PAY to continue")
         dlg_max.exec_()
         return None
 

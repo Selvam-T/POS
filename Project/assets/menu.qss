@@ -34,7 +34,7 @@ QPushButton#customCloseBtn {
     font-weight: bold;
 }
 
-/* Focus Style: Change the transparent border to purple */
+/* Focus Style */
 QPushButton#customCloseBtn:focus {
     border: 2px solid #d0741e;
     border-radius: 10px; 

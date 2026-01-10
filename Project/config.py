@@ -1,3 +1,4 @@
+import os
 # Dialog size ratios (width_ratio, height_ratio) as fraction of main window
 DIALOG_RATIOS = {
 	'vegetable_entry': (0.5, 0.9),
@@ -12,9 +13,12 @@ DIALOG_RATIOS = {
 	'on_hold': (0.7, 0.7),
 	'view_hold': (0.7, 0.7),
 	'cancel_sale': (0.25, 0.25),
+    'MaxRowsDialog': (0.25, 0.25)
 }
+
 # Maximum allowed rows in active sales table
-MAX_TABLE_ROWS = 3  # Set to 3 for testing; set to 50 for production
+MAX_TABLE_ROWS = 50
+
 # Greeting message options
 GREETING_STRINGS = [
 	"Happy Deepavali !",
@@ -29,7 +33,6 @@ GREETING_STRINGS = [
 	"Happy Good Friday !",
 	"Thanks for shopping with us!"
 ]
-import os
 
 # Table row colors
 ROW_COLOR_EVEN = '#add8e6'      # Even row color
