@@ -320,3 +320,23 @@ The Manual Entry dialog allows users to manually input product information when 
 
 **Last Updated**: December 12, 2025  
 **Status**: In Development
+
+---
+
+## Global Row Limit Guards (Jan 2026)
+
+### Pre-Entry Guard
+- Before the Manual Entry dialog opens, the code checks if the main sales table has reached `MAX_TABLE_ROWS`.
+- If the table is full, a modal dialog informs the user and the entry dialog is not opened.
+- This prevents unnecessary dialog launches and provides immediate feedback.
+
+### In-Entry Guard
+- While the dialog is open, any attempt to add a new row checks the combined total of rows in the main sales table and the dialog.
+- If adding a row would exceed `MAX_TABLE_ROWS`, a modal dialog informs the user and the addition is blocked.
+- This ensures the global limit is never exceeded, regardless of entry method or dialog state.
+
+### Dialog Wrapper Handling
+- The dialog wrapper now handles cases where the dialog returns `None` (e.g., when the table is full or the parent is misconfigured) without error.
+- Overlay and scanner state are restored cleanly, and no error is shown to the user.
+
+---

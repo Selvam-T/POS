@@ -10,7 +10,7 @@ except Exception:
     # Fallbacks if config is not yet updated; keep things working during dev
     BASE_DIR = Path(__file__).resolve().parents[2]  # .../POS/Project
     APPDATA_DIR = str(BASE_DIR / 'AppData')
-    VEG_SLOTS = 14
+    VEG_SLOTS = 16
 
 
 def _ensure_appdata_dir() -> Path:

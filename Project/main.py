@@ -122,7 +122,7 @@ class MainLoader(QMainWindow):
     def open_vegetable_entry_dialog(self):
         """Open Add Vegetable panel."""
         self.dialog_wrapper.open_dialog_scanner_blocked(
-            launch_vegetable_entry_dialog, 
+            lambda parent: launch_vegetable_entry_dialog(parent, self.sales_table),
             dialog_key='vegetable_entry',
             on_finish=self._add_items_to_sales_table
         )

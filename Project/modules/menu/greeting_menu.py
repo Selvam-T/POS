@@ -8,19 +8,9 @@ UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
 
-GREETING_STRINGS = [
-    "Happy Deepavali !",
-    "Happy New Year !!!",
-    "Merry Christmas !",
-    "Gōng xǐ fā cái !",
-    "Selamat Hari Raya !",
-    "Happy Vesak Day !",
-    "Selamat Hari Raya Haji !",
-    "Majulah Singapura !",
-    "Happy Labor Day !",
-    "Happy Good Friday !",
-    "Thanks for shopping with us!"
-]
+
+# Import greeting strings from config
+from config import GREETING_STRINGS
 
 def open_greeting_dialog(parent=None):
     """Open the Greeting message selection dialog.

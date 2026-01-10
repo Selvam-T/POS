@@ -186,14 +186,14 @@
       <item>
        <widget class="QPushButton" name="cancelsaleBtn">
         <property name="text">
-         <string>Cancel All</string>
+         <string>Cancel Sales</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="onholdBtn">
         <property name="text">
-         <string>On Hold</string>
+         <string>Hold Sales</string>
         </property>
        </widget>
       </item>

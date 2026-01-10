@@ -120,6 +120,32 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
 
 ---
 
+## Global Row Limit Guards (Jan 2026)
+
+### Overview
+To robustly enforce the global `MAX_TABLE_ROWS` limit for the sales table, the following guard mechanisms are implemented for all entry dialogs (vegetable, manual, barcode, etc.):
+
+#### 1. Pre-Entry Guard
+- Before opening any entry dialog (e.g., vegetable or manual entry), the code checks if the main sales table is already at the row limit.
+- If the table is full, a modal dialog informs the user and the entry dialog is not opened.
+- This prevents unnecessary dialog launches and provides immediate feedback.
+
+#### 2. In-Entry Guard
+- While an entry dialog is open, any attempt to add a new row checks the combined total of rows in the main sales table and the entry dialog.
+- If adding a row would exceed `MAX_TABLE_ROWS`, a modal dialog informs the user and the addition is blocked.
+- This ensures the global limit is never exceeded, regardless of entry method or dialog state.
+
+#### 3. Dialog Wrapper Handling
+- The unified `DialogWrapper` now gracefully handles cases where an entry dialog returns `None` (e.g., when the table is full or the parent is misconfigured).
+- No error is shown to the user in these cases; the overlay and scanner state are restored cleanly.
+- This prevents confusing error messages like "Expected QDialog, got <class 'NoneType'>" and ensures a smooth user experience.
+
+#### 4. Consistency
+- These guards are implemented in both `open_vegetable_entry_dialog` and `open_manual_entry_dialog`, and should be used in any future entry dialogs.
+- All dialog launches in `main.py` and related modules use the wrapper, ensuring consistent enforcement and feedback.
+
+---
+
 ## File Structure Reference
 
 - `main.py` — Main application loader and orchestrator

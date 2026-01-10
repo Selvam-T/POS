@@ -93,6 +93,15 @@ def setup_sales_table(table: QTableWidget) -> None:
 
 
 def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: Optional[QStatusBar] = None) -> None:
+
+    from config import MAX_TABLE_ROWS
+    from modules.ui_utils.max_rows_dialog import open_max_rows_dialog
+    # Block if trying to load more than allowed rows
+    if len(rows) > MAX_TABLE_ROWS:
+        dlg = open_max_rows_dialog(table.window(), f"Max {MAX_TABLE_ROWS} items. Hold or PAY to continue.")
+        dlg.exec_()
+        return
+
     """
     Display logic only: Rebuilds the table from the provided canonical data rows.
     Does not mutate or merge data. All logic for merging, canonicalization, and data updates
@@ -494,31 +503,29 @@ def get_total(table: QTableWidget) -> float:
 
 def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Optional[QStatusBar] = None) -> None:
     """
-    Process barcode scanned for sales table.
+    Process barcode scanned for sales table with Global Max Row Limit enforcement.
     
-    Args:
-        table: QTableWidget to update
-        barcode: Scanned barcode/product code
-        status_bar: Optional QStatusBar to show messages
-        
     Logic:
-        1. Look up product from barcode in cache
-        2. Check if product already exists in table
-           - If exists: increment quantity by 1
-           - If new: add new row with quantity 1
-        3. Recalculate totals
-        4. Show status message (success/not found)
+        1. Look up product in database/cache.
+        2. Check if product already exists in the table (by name and unit).
+        3. If NEW product: Check if table.rowCount() >= MAX_TABLE_ROWS.
+           - If full: Show max_rows_dialog and abort.
+           - If not full: Add new row.
+        4. If EXISTING product: Increment quantity (regardless of MAX_TABLE_ROWS).
+        5. Handle KG vs EACH item feedback.
     """
+    from config import MAX_TABLE_ROWS
+    from modules.ui_utils.max_rows_dialog import open_max_rows_dialog
+    from modules.table.unit_helpers import canonicalize_unit
+
     if not barcode:
         return
         
     if status_bar:
         show_temp_status(status_bar, f"Scanned: {barcode}", 3000)
     
-    # Look up product in cache (includes unit type)
-    from modules.table.unit_helpers import canonicalize_unit
+    # 1. Database Lookup
     found, product_name, unit_price, unit = get_product_info(barcode)
-    from modules.table.unit_helpers import canonicalize_unit
     unit_canon = canonicalize_unit(unit)
 
     if not found:
@@ -526,28 +533,56 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
             show_temp_status(status_bar, f"Product '{barcode}' not found in database", 5000)
         return
 
-    is_kg_item = (unit_canon == 'Kg')
-
+    # 2. Check for Duplicate (Is this product already in the table?)
     existing_row = find_product_in_table(table, barcode, unit_canon)
 
+    # 3. GLOBAL LIMIT ENFORCEMENT
+    # If the product is NOT in the table, and we are at the limit, block the addition.
+    if existing_row is None and table.rowCount() >= MAX_TABLE_ROWS:
+        dlg = open_max_rows_dialog(
+            table.window(), 
+            f"Maximum of {MAX_TABLE_ROWS} items reached. Hold current sale or PAY to continue."
+        )
+        dlg.exec_()
+        return
+
+    # 4. Handle Logic based on Product Type and Existence
+    is_kg_item = (unit_canon == 'Kg')
+
     if existing_row is not None:
+        # PRODUCT EXISTS: Increment quantity
         qty_container = table.cellWidget(existing_row, 2)
         if qty_container:
             editor = qty_container.findChild(QLineEdit, 'qtyInput')
+            
+            # EACH items (editable) get incremented
             if editor and not editor.isReadOnly():
                 increment_row_quantity(table, existing_row)
                 if status_bar:
                     show_temp_status(status_bar, f"Added {product_name} (quantity updated)", 3000)
             else:
+                # KG items (read-only) require the scale/vegetable entry
                 if status_bar:
                     show_temp_status(status_bar, f"KG item - use Vegetable Entry to weigh", 3000)
         return
     else:
+        # PRODUCT IS NEW: (Limit check passed above)
         if is_kg_item:
+            # KG items cannot be added via simple barcode scan (needs weight)
             if status_bar:
                 show_temp_status(status_bar, f"{product_name} is KG item - use Vegetable Entry to weigh", 5000)
         else:
-            _add_product_row(table, barcode, product_name, unit_price, unit_canon, quantity=1, status_bar=status_bar, editable=True)
+            # EACH item: Safe to add as a new row
+            _add_product_row(
+                table, 
+                barcode, 
+                product_name, 
+                unit_price, 
+                unit_canon, 
+                quantity=1, 
+                status_bar=status_bar, 
+                editable=True
+            )
             if status_bar:
                 show_temp_status(status_bar, f"Added {product_name}", 3000)
 

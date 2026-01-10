@@ -71,23 +71,34 @@ def open_logout_dialog(host_window):
         except Exception:
             pass
     else:
+        # Log error (shared logger)
+        try:
+            from modules.ui_utils.error_logger import log_error
+            log_error('Failed to load logout_menu.ui, using fallback dialog.')
+        except Exception:
+            pass
         # Simple fallback content
-        info = QLabel('Are you sure you want to logout?')
+        info = QLabel('Logout?')
+        info.setStyleSheet('QLabel { color: blue; font-size: 16px; font-weight: bold; }')
         info.setWordWrap(True)
         layout.setContentsMargins(16, 16, 16, 16)
         layout.addWidget(info)
+        info2 = QLabel('( ui failed to load)')
+        layout.addWidget(info2)
         row = QWidget()
         from PyQt5.QtWidgets import QHBoxLayout
         hl = QHBoxLayout(row)
         hl.addStretch(1)
         btn_cancel = QPushButton('Cancel')
         btn_ok = QPushButton('Yes, Logout !')
+        # Minimal style for buttons
+        btn_cancel.setStyleSheet('QPushButton { background-color: #d32f2f; color: #fff; font-size: 16px; min-width: 100px; min-height: 40px; }')
+        btn_ok.setStyleSheet('QPushButton { background-color: #388e3c; color: #fff; font-size: 16px; min-width: 100px; min-height: 40px; }')
         hl.addWidget(btn_cancel)
         hl.addWidget(btn_ok)
         layout.addWidget(row)
         try:
             btn_cancel.clicked.connect(dlg.reject)
-            # btn_ok.clicked.connect(lambda: (dlg.accept(), host_window._perform_logout()))
             btn_ok.clicked.connect(dlg.accept)
         except Exception:
             pass

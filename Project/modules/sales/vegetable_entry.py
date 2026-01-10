@@ -21,7 +21,24 @@ from modules.table.table_operations import (
 def weight_simulation() -> int:
     return 600
 
-def open_vegetable_entry_dialog(parent):
+def open_vegetable_entry_dialog(parent, main_sales_table):
+    """
+    Opens the vegetable entry dialog.
+    Enforces MAX_TABLE_ROWS before opening.
+    """
+    from config import MAX_TABLE_ROWS
+    from modules.ui_utils.max_rows_dialog import open_max_rows_dialog
+
+    # GUARD: Check if main table is already full before allowing entry
+    if main_sales_table is None:
+        dlg_max = open_max_rows_dialog(parent, "Internal error: main_sales_table is not available.")
+        dlg_max.exec_()
+        return None
+    if main_sales_table.rowCount() >= MAX_TABLE_ROWS:
+        dlg_max = open_max_rows_dialog(parent, f"Maximum of {MAX_TABLE_ROWS} items reached. Hold or Pay to continue.")
+        dlg_max.exec_()
+        return None
+
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     veg_ui = os.path.join(BASE_DIR, 'ui', 'vegetable_entry.ui')
     
@@ -29,6 +46,8 @@ def open_vegetable_entry_dialog(parent):
         dlg = uic.loadUi(veg_ui)
         coord = FieldCoordinator(dlg)
         dlg._coord = coord 
+        # Store reference to main table for row limit checks during addition
+        dlg._main_sales_table = main_sales_table 
     except Exception as e:
         return None
     
@@ -64,14 +83,13 @@ def open_vegetable_entry_dialog(parent):
 
     # Link OK button to coordinator so Enter clicks it when focused
     if ok_btn:
-        coord.add_link(ok_btn, next_focus=None) # Registers it for the eventFilter
+        coord.add_link(ok_btn, next_focus=None) 
 
     # Initialize Veg Buttons
     for i in range(1, 17):
         btn = dlg.findChild(QPushButton, f'vegEButton{i}')
         if not btn: continue
 
-        # This allows Enter key to work on vegEButtons
         coord.add_link(btn)
         
         veg_code = f'Veg{i:02d}'
@@ -90,7 +108,6 @@ def open_vegetable_entry_dialog(parent):
         btn.style().unpolish(btn); btn.style().polish(btn)
 
     def handle_cancel():
-        # Set the message for the main window to find later
         dlg.main_status_msg = "Vegetable entry cancelled."
         dlg.reject()
 
@@ -125,18 +142,45 @@ def _handle_vegetable_button_click(dlg, msg_label, vtable, code, name, price, un
     if ok_btn: ok_btn.setFocus()
 
 def _add_vegetable_row(dlg, vtable, name, quantity, price, editable):
+    """
+    Adds/Updates a row in the vegetable entry table.
+    Ensures combined (Main Table + Veg Table) row count <= MAX_TABLE_ROWS.
+    """
+    from config import MAX_TABLE_ROWS
+    from modules.ui_utils.max_rows_dialog import open_max_rows_dialog
+
     current_data = get_sales_data(vtable)
     target_unit = canonicalize_unit("Kg" if not editable else "Each")
     
-    found = False
+    found_in_veg_dialog = False
     for row in current_data:
+        # Check if product already exists in the dialog's table to update quantity
         if (row['product_name'].strip().lower() == name.strip().lower() and row['unit'] == target_unit):
             row['quantity'] += (1.0 if editable else quantity)
-            found = True; break
+            found_in_veg_dialog = True
+            break
             
-    if not found:
-        current_data.append({'product_name': name, 'quantity': quantity, 'unit_price': price, 'unit': target_unit, 'editable': editable})
+    if not found_in_veg_dialog:
+        # GLOBAL LIMIT CHECK: 
+        # Combined rows = existing in main table + current rows in vegetable dialog
+        main_table_count = dlg._main_sales_table.rowCount()
+        veg_table_count = vtable.rowCount()
+        
+        if (main_table_count + veg_table_count) >= MAX_TABLE_ROWS:
+            dlg_max = open_max_rows_dialog(dlg, f"Adding this item would exceed the global limit of {MAX_TABLE_ROWS} items.")
+            dlg_max.exec_()
+            return
+
+        # If limit not reached, append the new row
+        current_data.append({
+            'product_name': name, 
+            'quantity': quantity, 
+            'unit_price': price, 
+            'unit': target_unit, 
+            'editable': editable
+        })
     
+    # Refresh the vegetable dialog table
     set_table_rows(vtable, current_data)
 
     # CRITICAL: Register the new table editors with the Coordinator

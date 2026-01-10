@@ -7,6 +7,20 @@ from modules.ui_utils import input_handler, ui_feedback
 from modules.db_operation.database import PRODUCT_CACHE  # Added for completer data
 
 def open_manual_entry_dialog(parent):
+    from config import MAX_TABLE_ROWS
+    from modules.ui_utils.max_rows_dialog import open_max_rows_dialog
+
+    # GUARD: Check if main table is already full
+    main_sales_table = getattr(parent, 'sales_table', None)
+    if main_sales_table is None:
+        dlg = open_max_rows_dialog(parent, "Internal error: main_sales_table is not available.")
+        dlg.exec_()
+        return None
+    if main_sales_table.rowCount() >= MAX_TABLE_ROWS:
+        dlg = open_max_rows_dialog(parent, f"Maximum of {MAX_TABLE_ROWS} items reached. Cannot add more.")
+        dlg.exec_()
+        return None
+    
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     UI_DIR = os.path.join(BASE_DIR, 'ui')
     manual_ui = os.path.join(UI_DIR, 'manual_entry.ui')
@@ -16,7 +30,7 @@ def open_manual_entry_dialog(parent):
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
     dlg.setModal(True)
 
-    # --- 1. Apply menu.qss Styling (Fixed Issue 1) ---
+    # --- 1. Apply menu.qss Styling ---
     try:
         qss_path = os.path.join(BASE_DIR, 'assets', 'menu.qss')
         if os.path.exists(qss_path):

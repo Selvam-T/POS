@@ -7,21 +7,8 @@ from modules.ui_utils import ui_feedback
 class DialogWrapper:
     """Manages dialog execution, cleanup, and post-exec callbacks."""
 
-    # Dialog size ratios (width_ratio, height_ratio) as fraction of main window
-    DIALOG_RATIOS = {
-        'vegetable_entry': (0.5, 0.9),
-        'manual_entry': (0.4, 0.3),
-        'logout_menu': (0.25, 0.25),
-        'admin_menu': (0.4, 0.3),
-        'history_menu': (0.4, 0.4),
-        'reports_menu': (0.7, 0.7),
-        'greeting_menu': (0.3, 0.3),
-        'product_menu': (0.5, 0.7),
-        'vegetable_menu': (0.32, 0.7),
-        'on_hold': (0.7, 0.7),
-        'view_hold': (0.7, 0.7),
-        'cancel_sale': (0.25, 0.25),
-    }
+    # Dialog size ratios are now imported from config.py
+    from config import DIALOG_RATIOS
 
     def __init__(self, main_window):
         """Initialize wrapper with reference to main window.
@@ -166,21 +153,19 @@ class DialogWrapper:
         **kwargs
     ):
         """Unified wrapper for dialogs with scanner input blocked.
-        
-        Dialog size is calculated based on ratios of main window dimensions,
-        with minimumSize from .ui file enforced as safety floor.
-        
-        Args:
-            dialog_func: Function that returns QDialog instance.
-            dialog_key: Optional key to lookup ratios in DIALOG_RATIOS. If None, uses defaults (0.5, 0.5).
-            on_finish: Optional callback after dialog closes (e.g., _perform_logout).
-            *args, **kwargs: Arguments to pass to dialog_func.
+        Handles None return (e.g., max rows reached) gracefully.
         """
         self._show_overlay()
         self._block_scanner()
 
         try:
             dlg = dialog_func(self.main, *args, **kwargs)
+
+            if dlg is None:
+                # Dialog intentionally not shown (e.g., max rows reached)
+                self._hide_overlay()
+                self._unblock_scanner()
+                return
 
             if not isinstance(dlg, QDialog):
                 raise ValueError(f"Expected QDialog, got {type(dlg)}")
@@ -194,8 +179,6 @@ class DialogWrapper:
             self._setup_dialog_geometry(dlg, width_ratio, height_ratio)
             dlg.finished.connect(self._create_cleanup(on_finish))
             self._last_dialog = dlg  # Store reference for callbacks
-            #dlg.exec_()
-            
             result = dlg.exec_()
 
             # Check if the dialog set a message for the main status bar
