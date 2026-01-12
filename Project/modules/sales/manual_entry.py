@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QDialog, QLineEdit, QPushButton, QLabel
 from PyQt5.QtCore import Qt
 from modules.ui_utils.focus_utils import FieldCoordinator
 from modules.ui_utils import input_handler, ui_feedback
-from modules.db_operation.database import PRODUCT_CACHE  # Added for completer data
+from modules.db_operation.product_crud import PRODUCT_CACHE  # Added for completer data
 
 def open_manual_entry_dialog(parent):
     from config import MAX_TABLE_ROWS

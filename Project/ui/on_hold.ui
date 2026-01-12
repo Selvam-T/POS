@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>OnHoldDialog</class>
- <widget class="QDialog" name="OnHoldDialog">
+ <class>holdsalesDialog</class>
+ <widget class="QDialog" name="holdsalesDialog">
   <property name="windowTitle">
    <string>Put Sale On Hold</string>
   </property>

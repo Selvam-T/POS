@@ -371,3 +371,55 @@ QPushButton#removeBtn:pressed {
     background-color: rgba(255, 0, 0, 0.3);
     border: 5px solid #990000;
 }
+
+/* -------------------------------------------------------------------
+   QRadioButton: Base Text Style
+------------------------------------------------------------------- */
+QRadioButton {
+    font-size: 14px;
+    font-weight: bold;
+    color: #2c3e50;
+    spacing: 8px; /* Space between indicator and text */
+    outline: none; /* Removes the dotted focus line */
+}
+
+/* -------------------------------------------------------------------
+   The Indicator (The Circle)
+------------------------------------------------------------------- */
+QRadioButton::indicator {
+    width: 18px;            /* Inner width */
+    height: 18px;           /* Inner height */
+    border-radius: 11px;    /* Radius = (Width + 2*Border) / 2. Here: (18+4)/2 = 11 */
+    border: 2px solid #bdc3c7; /* Gray Ring */
+    background-color: white;   /* White Background */
+}
+
+/* Hover State */
+QRadioButton::indicator:hover {
+    border-color: #3498db;  /* Blue Ring on Hover */
+}
+
+/* -------------------------------------------------------------------
+   Checked State (The Dot Effect)
+   We use a gradient to draw a blue dot in the center of a white circle
+------------------------------------------------------------------- */
+QRadioButton::indicator:checked {
+    border: 2px solid #3498db; /* Blue Ring */
+    
+    /* This creates the Dot. 
+       cx/cy: Center point. 
+       radius: Size of dot (0.4 = 40% of size). 
+       stop 0-0.5: Blue. stop 0.6-1.0: Transparent (White bg shows through).
+    */
+    background-color: qradialgradient(
+        spread: pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
+        stop:0 #3498db, 
+        stop:0.6 #3498db,
+        stop:0.7 transparent
+    );
+}
+
+/* Optional: Pressed state for click feedback */
+QRadioButton::indicator:pressed {
+    background-color: #ecf0f1;
+}

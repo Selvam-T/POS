@@ -1,9 +1,14 @@
+
 # Database Administration for Anumani POS
+
+**Version:** 1.2
+**Last Updated:** January 10, 2026
+
 
 This folder contains all database administration scripts for the Anumani POS system.
 
 **⚠️ These scripts are for DATABASE ADMINISTRATION ONLY**
-- Creating database and tables
+- Creating database and tables (Product_list, receipts, receipt_items, receipt_payments)
 - Schema migrations
 - Bulk data imports
 - Database verification
@@ -11,6 +16,7 @@ This folder contains all database administration scripts for the Anumani POS sys
 **NOT part of the POS application** (which only performs CRUD operations).
 
 ---
+
 
 ## 📁 File Structure
 
@@ -21,10 +27,11 @@ Database_admin/
 ├── data/
 │   └── products.csv           # Product data for import
 ├── create_database.py         # Step 1: Create database file
-├── create_tables.py           # Step 2: Create tables
+├── create_product_list_table.py # Step 2: Create Product_list table
 ├── import_products.py         # Step 3: Import product data
 ├── verify_db.py              # Verify database
 ├── migrate_schema.py         # Schema migration template
+├── create_cash_outflows_table.py # Create cash_outflows table
 └── README.md                 # This file
 ```
 
@@ -32,32 +39,217 @@ Database_admin/
 
 ## 🚀 Quick Start - Database Setup
 
+
 ### **Step 1: Create Database**
 ```bash
 python create_database.py
 ```
 Creates the `Anumani.db` file in the `../db/` folder.
 
-### **Step 2: Create Tables**
-```bash
-python create_tables.py
-```
-Creates the `Product_list` table with the following schema:
 
+
+### **Step 2: Create Tables**
+#### Product_list Table
+```bash
+python create_product_list_table.py
 ```
-┌──────────────────┬──────────┬──────────┬─────────────────┐
-│ Column           │ Type     │ Nullable │ Constraint      │
-├──────────────────┼──────────┼──────────┼─────────────────┤
-│ product_code     │ TEXT     │ NOT NULL │ PRIMARY KEY (UNIQUE) │
-│ name             │ TEXT     │ NOT NULL │                 │
-│ category         │ TEXT     │ NULL     │                 │
-│ supplier         │ TEXT     │ NULL     │                 │
-│ selling_price    │ REAL     │ NOT NULL │                 │
-│ cost_price       │ REAL     │ NULL     │                 │
-│ unit             │ TEXT     │ NULL     │                 │
-│ last_updated     │ TEXT     │ NULL     │                 │
-└──────────────────┴──────────┴──────────┴─────────────────┘
+Schema:
+| Column        | Type   | Nullable | Constraint      |
+|-------------- |--------|----------|----------------|
+| product_code  | TEXT   | NOT NULL | PRIMARY KEY (UNIQUE) |
+| name          | TEXT   | NOT NULL |                |
+| category      | TEXT   | NULL     |                |
+| supplier      | TEXT   | NULL     |                |
+| selling_price | REAL   | NOT NULL |                |
+| cost_price    | REAL   | NULL     |                |
+| unit          | TEXT   | NULL     |                |
+| last_updated  | TEXT   | NULL     |                |
+
+#### Hold Sales & View Hold Tables
+#### Cash Outflows Table
+```bash
+python create_cash_outflows_table.py
 ```
+Creates:
+##### cash_outflows
+| Column        | Type     | Nullable | Constraint/Index                                  |
+|--------------|----------|----------|---------------------------------------------------|
+| outflow_id   | INTEGER  | NOT NULL | PRIMARY KEY AUTOINCREMENT                         |
+| outflow_type | TEXT     | NOT NULL | CHECK(outflow_type IN ('REFUND_OUT','VENDOR_OUT'))|
+| amount       | REAL     | NOT NULL | CHECK(amount > 0)                                 |
+| created_at   | TEXT     | NOT NULL |                                                   |
+| cashier_name | TEXT     | NOT NULL |                                                   |
+| note         | TEXT     | NULL     | Free text (reason/details)                        |
+
+Indexes:
+- Index on created_at
+- Index on outflow_type
+
+**Purpose:**
+- Tracks all cash leaving the drawer/account that is not reliably tied to receipts or paid sales items.
+- REFUND_OUT: Refunds/voids (including manual item-level refunds not recorded against receipt_items)
+- VENDOR_OUT: Vendor/supplier payments
+- Keeps workflow simple and reporting accurate by not forcing links to receipts/products/vendors (details go in note).
+
+**Reporting:**
+- Net cash flow for a period:
+	net = total paid sales (cash in) − total cash_outflows (refunds + vendor payments)
+
+```bash
+python create_receipt_tables.py
+```
+Creates:
+##### receipts
+| Column         | Type     | Nullable | Constraint/Index                                  |
+|---------------|----------|----------|---------------------------------------------------|
+| receipt_id    | INTEGER  | NOT NULL | PRIMARY KEY AUTOINCREMENT                         |
+| receipt_no    | TEXT     | NOT NULL | UNIQUE (format: YYYYMMDD-####, max ####=9999)     |
+| customer_name | TEXT     | NULL     | Required for Hold; empty for normal paid          |
+| cashier_name  | TEXT     | NOT NULL |                                                   |
+| status        | TEXT     | NOT NULL | CHECK(status IN ('PAID','UNPAID','CANCELLED'))    |
+| grand_total   | REAL     | NOT NULL |                                                   |
+| created_at    | TEXT     | NOT NULL | Index optional                                    |
+| paid_at       | TEXT     | NULL     | Index optional                                    |
+| cancelled_at  | TEXT     | NULL     | Index optional                                    |
+| note          | TEXT     | NULL     | Only UNPAID/CANCELLED used by policy              |
+
+Indexes:
+- UNIQUE index on receipt_no
+- Optional: index on created_at, paid_at, status
+
+##### receipt_items
+| Column        | Type     | Nullable | Constraint/Index                                  |
+|--------------|----------|----------|---------------------------------------------------|
+| item_id      | INTEGER  | NOT NULL | PRIMARY KEY AUTOINCREMENT                         |
+| receipt_id   | INTEGER  | NOT NULL | Index, Foreign Key to receipts(receipt_id)        |
+| line_no      | INTEGER  | NOT NULL | UNIQUE(receipt_id, line_no)                       |
+| product_code | TEXT     | NOT NULL |                                                   |
+| product_name | TEXT     | NOT NULL |                                                   |
+| category     | TEXT     | NULL     |                                                   |
+| qty          | REAL     | NOT NULL |                                                   |
+| unit         | TEXT     | NOT NULL |                                                   |
+| unit_price   | REAL     | NOT NULL |                                                   |
+| line_total   | REAL     | NOT NULL |                                                   |
+
+Indexes:
+- UNIQUE(receipt_id, line_no)
+- Index on receipt_id
+
+##### receipt_payments
+| Column        | Type     | Nullable | Constraint/Index                                  |
+|--------------|----------|----------|---------------------------------------------------|
+| payment_id   | INTEGER  | NOT NULL | PRIMARY KEY AUTOINCREMENT                         |
+| receipt_id   | INTEGER  | NOT NULL | Index, Foreign Key to receipts(receipt_id)        |
+| payment_type | TEXT     | NOT NULL | CHECK(payment_type IN ('NETS','CASH','PAYNOW','OTHER')) |
+| amount       | REAL     | NOT NULL | CHECK(amount > 0)                                 |
+| created_at   | TEXT     | NOT NULL |                                                   |
+
+Indexes:
+- Index on receipt_id
+
+#### Additional Tables for Hold Sales and View Hold
+
+You can create the following tables for Hold Sales and View Hold features:
+
+##### 1. receipts
+| Column         | Type     | Nullable | Constraint/Index                                  |
+|---------------|----------|----------|---------------------------------------------------|
+| receipt_id    | INTEGER  | NOT NULL | PRIMARY KEY AUTOINCREMENT                         |
+| receipt_no    | TEXT     | NOT NULL | UNIQUE (format: YYYYMMDD-####, max ####=9999)     |
+| customer_name | TEXT     | NULL     | Required for Hold; empty for normal paid          |
+| cashier_name  | TEXT     | NOT NULL |                                                   |
+| status        | TEXT     | NOT NULL | CHECK(status IN ('PAID','UNPAID','CANCELLED'))    |
+| grand_total   | REAL     | NOT NULL |                                                   |
+| created_at    | TEXT     | NOT NULL | Index optional                                    |
+| paid_at       | TEXT     | NULL     | Index optional                                    |
+| cancelled_at  | TEXT     | NULL     | Index optional                                    |
+| note          | TEXT     | NULL     | Only UNPAID/CANCELLED used by policy              |
+
+Indexes:
+- UNIQUE index on receipt_no
+- Optional: index on created_at, paid_at, status
+
+##### 2. receipt_items
+| Column        | Type     | Nullable | Constraint/Index                                  |
+|--------------|----------|----------|---------------------------------------------------|
+| item_id      | INTEGER  | NOT NULL | PRIMARY KEY AUTOINCREMENT                         |
+| receipt_id   | INTEGER  | NOT NULL | Index, Foreign Key to receipts(receipt_id)        |
+| line_no      | INTEGER  | NOT NULL | UNIQUE(receipt_id, line_no)                       |
+| product_code | TEXT     | NOT NULL |                                                   |
+| product_name | TEXT     | NOT NULL |                                                   |
+| category     | TEXT     | NULL     |                                                   |
+| qty          | REAL     | NOT NULL |                                                   |
+| unit         | TEXT     | NOT NULL |                                                   |
+| unit_price   | REAL     | NOT NULL |                                                   |
+| line_total   | REAL     | NOT NULL |                                                   |
+
+Indexes:
+- UNIQUE(receipt_id, line_no)
+- Index on receipt_id
+
+##### 3. receipt_payments
+| Column        | Type     | Nullable | Constraint/Index                                  |
+|--------------|----------|----------|---------------------------------------------------|
+| payment_id   | INTEGER  | NOT NULL | PRIMARY KEY AUTOINCREMENT                         |
+| receipt_id   | INTEGER  | NOT NULL | Index, Foreign Key to receipts(receipt_id)        |
+| payment_type | TEXT     | NOT NULL | CHECK(payment_type IN ('NETS','CASH','PAYNOW','OTHER')) |
+| amount       | REAL     | NOT NULL | CHECK(amount > 0)                                 |
+| created_at   | TEXT     | NOT NULL |                                                   |
+
+Indexes:
+- Index on receipt_id
+
+
+
+To create these tables, run:
+```bash
+python create_receipt_tables.py
+```
+and for cash outflows:
+```bash
+python create_cash_outflows_table.py
+```
+
+---
+
+## How to Query Tables and Columns from Command Line
+
+To list all tables in your database, use:
+
+```bash
+sqlite3 "C:\Users\SELVAM\OneDrive\Desktop\POS\db\Anumani.db" "SELECT name FROM sqlite_master WHERE type='table';"
+```
+
+To list all columns in a specific table (e.g., receipts), use:
+
+```bash
+sqlite3 "C:\Users\SELVAM\OneDrive\Desktop\POS\db\Anumani.db" "PRAGMA table_info(receipts);"
+```
+
+Replace receipts with any table name to see its columns.
+
+---
+
+
+## What is sqlite_sequence?
+
+sqlite_sequence is an internal table automatically created by SQLite when you use AUTOINCREMENT on any INTEGER PRIMARY KEY column. It keeps track of the last used value for AUTOINCREMENT fields in your tables (like receipt_id, item_id, payment_id). You do not need to manage or modify it; SQLite uses it to ensure unique values for those columns.
+
+### Columns in sqlite_sequence
+
+| Column | Type | Description |
+|--------|------|-------------|
+| name   | TEXT | The name of the table with an AUTOINCREMENT column |
+| seq    | INTEGER | The last used AUTOINCREMENT value for that table |
+
+If you query PRAGMA table_info(sqlite_sequence); you will see:
+| cid | name | type | notnull | dflt_value | pk |
+|-----|------|------|---------|------------|----|
+| 0   | name |      | 0       |            | 0  |
+| 1   | seq  |      | 0       |            | 0  |
+
+If sqlite_sequence is empty, it means no rows have been inserted into any AUTOINCREMENT table yet, so SQLite has not recorded any values. The table will populate automatically as you add rows to tables with AUTOINCREMENT columns.
+
 
 ### **Step 3: Import Products**
 
@@ -82,6 +274,7 @@ python import_products.py --overwrite
 
 ---
 
+
 ## 🔍 Verification
 
 Check database status:
@@ -96,6 +289,7 @@ Shows:
 
 ---
 
+
 ## 🔄 Schema Migration
 
 For schema changes (rename columns, add columns, etc.):
@@ -106,6 +300,7 @@ For schema changes (rename columns, add columns, etc.):
 ⚠️ **Always backup your database before migrations!**
 
 ---
+
 
 ## ⚙️ Configuration
 
@@ -118,6 +313,7 @@ CSV_FILE_PATH=data/products.csv   # CSV import file
 ```
 
 ---
+
 
 ## 📋 CSV Format Requirements
 
@@ -137,11 +333,12 @@ Your `products.csv` must have these columns. Only `product_code` is unique (prim
 
 ---
 
+
 ## 🎯 Usage Notes
 
 ### **First-Time Setup**
 1. Run `create_database.py`
-2. Run `create_tables.py`
+2. Run `create_product_list_table.py`
 3. Place `products.csv` in `data/` folder
 4. Run `import_products.py`
 5. Verify with `verify_db.py`
@@ -214,5 +411,5 @@ For more details, see the `Product_list` table schema and the application logic 
 
 ---
 
-**Version:** 1.1  
-**Last Updated:** December 31, 2025
+**Version:** 1.2  
+**Last Updated:** January 10, 2026

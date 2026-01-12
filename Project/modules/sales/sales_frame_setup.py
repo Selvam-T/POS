@@ -88,10 +88,10 @@ def setup_sales_frame(main_window, UI_DIR):
                 if cancelsale_btn is not None:
                     cancelsale_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
                     cancelsale_btn.clicked.connect(main_window.open_cancelsale_dialog)
-                onhold_btn = sales_widget.findChild(QPushButton, 'onholdBtn')
-                if onhold_btn is not None:
-                    onhold_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-                    onhold_btn.clicked.connect(main_window.open_onhold_panel)
+                holdsales_btn = sales_widget.findChild(QPushButton, 'holdSalesBtn')
+                if holdsales_btn is not None:
+                    holdsales_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+                    holdsales_btn.clicked.connect(main_window.open_hold_sales_dialog)
                 viewhold_btn = sales_widget.findChild(QPushButton, 'viewholdBtn')
                 if viewhold_btn is not None:
                     viewhold_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)

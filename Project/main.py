@@ -43,7 +43,7 @@ from modules.menu.vegetable_menu import open_vegetable_menu_dialog as launch_veg
 # --- Sales frame dialog controllers ---
 from modules.sales.vegetable_entry import open_vegetable_entry_dialog as launch_vegetable_entry_dialog
 from modules.sales.manual_entry import open_manual_entry_dialog as launch_manual_entry_dialog
-from modules.sales.on_hold import open_on_hold_dialog as launch_onhold_dialog
+from modules.sales.hold_sales import open_hold_sales_dialog as launch_hold_sales_dialog
 from modules.sales.view_hold import open_view_hold_dialog as launch_viewhold_dialog
 from modules.sales.cancel_sale import open_cancel_sale_dialog as launch_cancelsale_dialog
 
@@ -135,9 +135,9 @@ class MainLoader(QMainWindow):
             on_finish=self._add_items_to_sales_table
         )
 
-    def open_onhold_panel(self):
+    def open_hold_sales_dialog(self):
         """Open On Hold panel."""
-        self.dialog_wrapper.open_dialog_scanner_blocked(launch_onhold_dialog, dialog_key='on_hold')
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_hold_sales_dialog, dialog_key='hold_sales')
 
     def open_viewhold_panel(self):
         """Open View Hold panel."""

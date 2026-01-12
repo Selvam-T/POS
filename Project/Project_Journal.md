@@ -325,7 +325,7 @@ salesFrame (QFrame)
     └── receiptContainer (QWidget) - [stretch=2]
         └── receiptLayout (QHBoxLayout)
             ├── cancelsaleBtn (QPushButton) - "Cancel Sale"
-            ├── onholdBtn (QPushButton) - "On Hold"
+            ├── holdSalesBtn (QPushButton) - "On Hold"
             └── viewholdBtn (QPushButton) - "View Hold"
         └── Height: 4.0em, buttons expand vertically
 ```
@@ -551,7 +551,7 @@ def get_row_color(row: int) -> QColor:
 
 ### Architecture: Preloaded Product Cache
 
-**File:** `modules/db_operation/database.py`
+**File:** `modules/db_operation/product_crud.py`
 
 **Database Details:**
 - **Path:** `../db/Anumani.db` (one level above Project folder)
@@ -1177,7 +1177,7 @@ def handle_barcode_scanned(table, barcode, status_bar):
 
 **Database Module Reorganization:**
 - Created `modules/db_operation/` folder
-- Moved `database.py` to `modules/db_operation/database.py`
+- Moved `product_crud.py` to `modules/db_operation/product_crud.py`
 - Created `__init__.py` with proper exports
 - Updated import path in `salesTable.py`: `from modules.db_operation import ...`
 - Fixed database path calculation for new folder depth

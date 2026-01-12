@@ -1,7 +1,7 @@
 """
 Database operations module for POS system.
 """
-from .database import (
+from .product_crud import (
     PRODUCT_CACHE,
     load_product_cache,
     get_product_info,

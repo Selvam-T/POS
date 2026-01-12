@@ -115,9 +115,9 @@ QPushButton#manualBtn { background-color: purple; }
 QPushButton#manualBtn:hover { background-color: #5e0e5e; }
 QPushButton#manualBtn:pressed { background-color: #3c003c; }
 
-/* --- Receipt Action Buttons (cancelsaleBtn, onholdBtn, viewholdBtn) --- */
+/* --- Receipt Action Buttons (cancelsaleBtn, holdSalesBtn, viewholdBtn) --- */
 QPushButton#cancelsaleBtn,
-QPushButton#onholdBtn,
+QPushButton#holdSalesBtn,
 QPushButton#viewholdBtn {
     border-radius: 18px;
     padding: 12px 20px;
@@ -127,9 +127,9 @@ QPushButton#viewholdBtn {
 QPushButton#cancelsaleBtn { background-color: #660600; }
 QPushButton#cancelsaleBtn:hover { background-color: #7a0800; }
 QPushButton#cancelsaleBtn:pressed { background-color: #4b0400; }
-QPushButton#onholdBtn { background-color: #998900; }
-QPushButton#onholdBtn:hover { background-color: #b3a300; }
-QPushButton#onholdBtn:pressed { background-color: #7a6f00; }
+QPushButton#holdSalesBtn { background-color: #998900; }
+QPushButton#holdSalesBtn:hover { background-color: #b3a300; }
+QPushButton#holdSalesBtn:pressed { background-color: #7a6f00; }
 QPushButton#viewholdBtn { background-color: #006699; }
 QPushButton#viewholdBtn:hover { background-color: #0077b3; }
 QPushButton#viewholdBtn:pressed { background-color: #004d73; }

@@ -7,7 +7,7 @@ This document describes the workflow for the Vegetable Entry dialog, where users
 - **UI File:** `ui/vegetable_entry.ui` — layout for the entry dialog (16 button grid, table, OK/CANCEL controls).
 - **Logic:** `modules/sales/vegetable_entry.py` — controller for dialog, table setup, button selection, unit-based behavior, and duplicate handling.
 - **Settings:** `modules/wrappers/settings.py` — manages vegetable label configuration and persistence (used by the Vegetable Menu editor).
-- **Database:** `modules/db_operation/database.py` — provides product info with canonical unit ("Kg"/"Each") from PRODUCT_CACHE. All units are canonicalized before any operation.
+- **Database:** `modules/db_operation/product_crud.py` — provides product info with canonical unit ("Kg"/"Each") from PRODUCT_CACHE. All units are canonicalized before any operation.
 
 ## Dialog Layout
 

@@ -191,7 +191,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="onholdBtn">
+       <widget class="QPushButton" name="holdSalesBtn">
         <property name="text">
          <string>Hold Sales</string>
         </property>

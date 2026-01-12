@@ -83,7 +83,7 @@ Project/
 └── modules/
    ├── db_operation/
    │   ├── __init__.py
-   │   └── database.py         # Database connection & product cache
+   │   └── product_crud.py         # Database connection & product cache
    ├── devices/
    │   ├── __init__.py         # Exports BarcodeScanner
    │   └── scanner.py          # Barcode scanner integration (pynput)

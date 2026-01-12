@@ -10,8 +10,8 @@ DIALOG_RATIOS = {
 	'greeting_menu': (0.3, 0.3),
 	'product_menu': (0.5, 0.7),
 	'vegetable_menu': (0.32, 0.7),
-	'on_hold': (0.7, 0.7),
-	'view_hold': (0.7, 0.7),
+	'hold_sales': (0.4, 0.4),
+	'view_hold': (0.5, 0.7),
 	'cancel_sale': (0.25, 0.25),
     'MaxRowsDialog': (0.25, 0.25)
 }
