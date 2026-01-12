@@ -13,7 +13,8 @@ from config import (
     ROW_COLOR_EVEN, ROW_COLOR_ODD, ROW_COLOR_DELETE_HIGHLIGHT, 
     ICON_DELETE, MAX_TABLE_ROWS
 )
-from modules.db_operation import get_product_info, show_temp_status
+from modules.db_operation import get_product_info
+from modules.ui_utils.ui_feedback import show_temp_status
 
 # =========================================================
 # SECTION 1: UI INITIALIZATION & THEME

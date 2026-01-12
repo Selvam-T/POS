@@ -77,9 +77,7 @@ def get_coordinator_lookup(value: str, source_type: str = 'code') -> dict | None
     Standardized lookup engine for the FieldCoordinator.
     Maps Cache/DB records into a clean dictionary.
     """
-    from modules.db_operation.product_crud import PRODUCT_CACHE
-    # Dynamic import to avoid circular dependency
-    from modules.db_operation.product_crud import _norm
+    from modules.db_operation.product_cache import PRODUCT_CACHE, _norm
     
     val_norm = _norm(value)
     if not val_norm:
@@ -112,7 +110,7 @@ def get_coordinator_lookup(value: str, source_type: str = 'code') -> dict | None
 
 def product_name_search_suggestions(search_text: str) -> list:
     """Returns list of product names for QCompleter."""
-    from modules.db_operation.product_crud import PRODUCT_CACHE
+    from modules.db_operation.product_cache import PRODUCT_CACHE
     if not search_text:
         return []
     st = search_text.strip().lower()

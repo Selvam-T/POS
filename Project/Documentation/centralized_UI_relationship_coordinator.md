@@ -14,7 +14,7 @@ The Centralized Relationship Coordinator is a rules-based design pattern for PyQ
 - **Feedback Layer (modules/ui_utils/ui_feedback.py):** Updates widget status properties and triggers style re-polish to reflect QSS changes.
 - **Coordination Layer (modules/ui_utils/focus_utils.py):** FieldCoordinator manages all widget relationships, focus, and reverse actions. Uses user-driven signals only.
 - **Service Layer (modules/ui_utils/input_handler.py):** Stateless, pure functions for data lookup and validation. No widget manipulation.
-- **Data Layer (modules/db_operation/product_crud.py):** Product cache and normalization. Ensures consistent data and display.
+- **Data Layer (modules/db_operation/):** Product cache and SQL repository. `product_cache.py` provides fast lookups; `products_repo.py` is SQL-only.
 
 ## 3. The Interaction Flow ("Life of a Keypress")
 1. User types in a widget.

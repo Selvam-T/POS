@@ -30,7 +30,7 @@ from modules.db_operation import (
     add_product, update_product, delete_product, refresh_product_cache,
     get_product_full, PRODUCT_CACHE
 )
-from modules.db_operation.product_crud import _to_camel_case
+from modules.db_operation.product_cache import _to_camel_case
 import modules.db_operation as dbop
 from modules.table import handle_barcode_scanned
 

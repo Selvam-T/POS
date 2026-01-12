@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QLabel, QStatusBar
 from PyQt5.QtCore import QTimer
 
 def set_status_label(label: QLabel, message: str, ok: bool, duration: int = 3000) -> bool:
@@ -49,3 +49,13 @@ def show_main_status(parent, message: str, is_error: bool = False, duration: int
         color = "red" if is_error else "green"
         win.statusBar().setStyleSheet(f"color: {color};")
         win.statusBar().showMessage(message, duration)
+
+
+def show_temp_status(status_bar: QStatusBar, message: str, duration_ms: int = 3000) -> None:
+    """Small helper for transient messages on a QStatusBar."""
+    if status_bar is None:
+        return
+    try:
+        status_bar.showMessage(message or "", int(duration_ms))
+    except Exception:
+        pass

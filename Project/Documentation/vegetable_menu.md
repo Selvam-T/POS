@@ -128,7 +128,7 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
 6. Selling Price must be a valid number
 7. Cost Price (if provided) must be a valid number
 8. Supplier is optional
-9. **PRODUCT_CACHE update:** On save, cache updated with `{code: (name, price, unit)}` 3-tuple
+9. **PRODUCT_CACHE update:** On save, `refresh_product_cache()` reloads cache into `{PRODUCT_CODE: (name, price, unit)}` 3-tuple.
 
 ## Example Workflow
 1. User opens dialog

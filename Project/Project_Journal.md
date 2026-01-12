@@ -551,7 +551,7 @@ def get_row_color(row: int) -> QColor:
 
 ### Architecture: Preloaded Product Cache
 
-**File:** `modules/db_operation/product_crud.py`
+**Module:** `modules/db_operation/` (see `product_cache.py`, `products_repo.py`, `db.py`)
 
 **Database Details:**
 - **Path:** `../db/Anumani.db` (one level above Project folder)
@@ -574,14 +574,13 @@ def get_row_color(row: int) -> QColor:
 
 **Global Cache Structure:**
 ```python
-PRODUCT_CACHE: Dict[str, Dict[str, any]] = {
-    'product_code': {
-        'name': 'Product Name',
-        'price': 12.50
-    },
-    # ... 22,337 entries
+PRODUCT_CACHE: Dict[str, Tuple[str, float, str]] = {
+    'PRODUCT_CODE': ('Display Name', 12.50, 'Each'),
+    # ... N entries
 }
 ```
+
+**Normalization:** cache keys are normalized with `strip().upper()`.
 
 **Loading Process:**
 ```python
@@ -1177,9 +1176,12 @@ def handle_barcode_scanned(table, barcode, status_bar):
 
 **Database Module Reorganization:**
 - Created `modules/db_operation/` folder
-- Moved `product_crud.py` to `modules/db_operation/product_crud.py`
-- Created `__init__.py` with proper exports
-- Updated import path in `salesTable.py`: `from modules.db_operation import ...`
+- (Historical) Moved `product_crud.py` under `modules/db_operation/` and adjusted imports
+- (Current) `product_crud.py` was later retired in favor of:
+    - `db.py` (connections/transactions)
+    - `products_repo.py` (SQL-only repository)
+    - `product_cache.py` (in-memory `PRODUCT_CACHE` + `get_product_info()`)
+    - `__init__.py` (public facade + compatibility wrappers)
 - Fixed database path calculation for new folder depth
 
 **Database Connection:**

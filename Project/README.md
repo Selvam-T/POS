@@ -83,7 +83,9 @@ Project/
 └── modules/
    ├── db_operation/
    │   ├── __init__.py
-   │   └── product_crud.py         # Database connection & product cache
+   │   ├── db.py                   # Shared sqlite plumbing (path/conn/transaction)
+   │   ├── products_repo.py        # Product_list SQL-only repository
+   │   └── product_cache.py        # App-wide in-memory PRODUCT_CACHE + fast lookups
    ├── devices/
    │   ├── __init__.py         # Exports BarcodeScanner
    │   └── scanner.py          # Barcode scanner integration (pynput)
@@ -306,7 +308,7 @@ Notes:
 
 ### Product Management Documentation
 
-See `Documentation/product_management.md` for in-depth behavior, rationale, and integration details.
+See `Documentation/product_menu.md` for in-depth behavior, rationale, and integration details.
 
 ### Adding New Features
 
@@ -323,6 +325,7 @@ See `Project_Journal.md` for detailed architecture documentation, design decisio
    - Code examples and technical explanations
    - Development history
 - **error_logging_and_fallback.md** - Error logging and fallback dialog documentation
+- Database layer architecture: see Documentation/db_operation.md for `modules/db_operation` structure and public API.
 - Scanner input architecture: see Documentation/scanner_input_infocus.md for focus-first routing, modal block, and debug guidance.
 - Logout dialog and custom title bar: see Documentation/logout_and_titlebar.md for styling and behavior details.
 - Admin Settings dialog: see Documentation/admin_settings.md for structure, wiring, and QSS hooks.

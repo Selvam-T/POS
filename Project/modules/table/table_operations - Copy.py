@@ -14,7 +14,8 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QColor, QBrush
 from functools import partial
 from config import ROW_COLOR_EVEN, ROW_COLOR_ODD, ROW_COLOR_DELETE_HIGHLIGHT, ICON_DELETE
-from modules.db_operation import get_product_info, show_temp_status
+from modules.db_operation import get_product_info
+from modules.ui_utils.ui_feedback import show_temp_status
 
 
 def get_row_color(row: int) -> QColor:

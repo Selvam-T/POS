@@ -1,5 +1,3 @@
-# Import _to_camel_case for use in this module
-from modules.db_operation.product_crud import _to_camel_case
 """Vegetable Management dialog controller for POS system.
 
 Manages 16 vegetable slots (Veg01-Veg16) with database integration.
@@ -17,7 +15,7 @@ from modules.db_operation import (
     get_product_info, get_product_full, add_product, 
     delete_product, refresh_product_cache
 )
-from modules.db_operation.product_crud import DB_PATH
+from modules.db_operation.product_cache import _to_camel_case
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
@@ -161,7 +159,7 @@ def open_vegetable_menu_dialog(host_window):
         
         if found and details.get('name'):
             # Populate fields with existing data
-            from modules.db_operation.product_crud import _to_camel_case
+            from modules.db_operation.product_cache import _to_camel_case
             if input_product_name is not None:
                 input_product_name.setText(_to_camel_case(details.get('name', '')))
             if input_selling_price is not None:
@@ -237,7 +235,7 @@ def open_vegetable_menu_dialog(host_window):
             code = f'Veg{i:02d}'
             found, details = get_product_full(code)
             if found and details.get('name'):
-                from modules.db_operation.product_crud import _to_camel_case
+                from modules.db_operation.product_cache import _to_camel_case
                 vegetables.append({
                     'code': code,
                     'name': _to_camel_case(details['name']),
@@ -260,7 +258,7 @@ def open_vegetable_menu_dialog(host_window):
             delete_product(f'Veg{i:02d}')
         
         # Insert sorted vegetables sequentially
-        from modules.db_operation.product_crud import _to_camel_case
+        from modules.db_operation.product_cache import _to_camel_case
         for i, veg in enumerate(sorted_vegs, start=1):
             now_str = QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss')
             from modules.table.unit_helpers import canonicalize_unit
