@@ -185,14 +185,23 @@ class DialogWrapper:
             msg = getattr(dlg, 'main_status_msg', None)
 
             if msg:
-                # Use our new feedback helper
-                is_error = (result == QDialog.Rejected)
-                ui_feedback.show_main_status(self.main, msg, is_error=is_error)
+                # Allow dialogs to override severity/duration (e.g., Cancel as non-error).
+                is_error = getattr(dlg, 'main_status_is_error', (result == QDialog.Rejected))
+                duration = getattr(dlg, 'main_status_duration', None)
+                try:
+                    ui_feedback.show_main_status(self.main, msg, is_error=bool(is_error), duration=int(duration) if duration is not None else 4000)
+                except Exception:
+                    ui_feedback.show_main_status(self.main, msg, is_error=bool(is_error))
 
         except Exception as e:
             self._hide_overlay()
             self._unblock_scanner()
-            print(f'Dialog failed: {e}')
+            try:
+                import traceback
+                from modules.ui_utils.error_logger import log_error
+                log_error(f"Dialog failed: {e}\n{traceback.format_exc()}")
+            except Exception:
+                pass
 
     def open_dialog_scanner_enabled(self, dialog_func, dialog_key=None, **kwargs):
         """Wrapper for dialogs that allow scanner input (e.g., product_menu).
@@ -214,6 +223,11 @@ class DialogWrapper:
         try:
             dlg = dialog_func(self.main, **kwargs)
 
+            if dlg is None:
+                # Dialog intentionally not shown (e.g., UI load failure)
+                self._hide_overlay()
+                return
+
             if not isinstance(dlg, QDialog):
                 raise ValueError(f"Expected QDialog, got {type(dlg)}")
 
@@ -234,8 +248,23 @@ class DialogWrapper:
                 QTimer.singleShot(10, _restore)
 
             dlg.finished.connect(_product_cleanup)
-            dlg.exec_()
+            result = dlg.exec_()
+
+            # Optional main status message (same convention as scanner_blocked)
+            msg = getattr(dlg, 'main_status_msg', None)
+            if msg:
+                is_error = getattr(dlg, 'main_status_is_error', (result == QDialog.Rejected))
+                duration = getattr(dlg, 'main_status_duration', None)
+                try:
+                    ui_feedback.show_main_status(self.main, msg, is_error=bool(is_error), duration=int(duration) if duration is not None else 4000)
+                except Exception:
+                    ui_feedback.show_main_status(self.main, msg, is_error=bool(is_error))
 
         except Exception as e:
             self._hide_overlay()
-            print(f'Product dialog failed: {e}')
+            try:
+                import traceback
+                from modules.ui_utils.error_logger import log_error
+                log_error(f"Product dialog failed: {e}\n{traceback.format_exc()}")
+            except Exception:
+                pass

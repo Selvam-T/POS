@@ -16,6 +16,22 @@ DIALOG_RATIOS = {
     'MaxRowsDialog': (0.25, 0.25)
 }
 
+# Product Categories
+PRODUCT_CATEGORIES = [
+    'Alcohol',
+	'Beverages',
+	'Bread & Bakery',
+	'Canned & Packaged Foods',
+	'Dairy Products',
+	'Frozen Foods',
+	'Household Supplies',
+	'Personal Care',
+	'Snacks & Confectionery',
+	'Tobacco',
+	'Vegetables',
+	'Other'
+]
+
 # Maximum allowed rows in active sales table
 MAX_TABLE_ROWS = 50
 
@@ -61,10 +77,10 @@ COMPANY_NAME = 'Anumani Trading Pte Ltd'
 _BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DB_PATH = os.path.join(os.path.dirname(_BASE_DIR), 'db', 'Anumani.db')
 
-# Debug flags
-DEBUG_SCANNER_FOCUS = True
+# Debug flags (disabled; console logging removed)
+DEBUG_SCANNER_FOCUS = False
 DEBUG_FOCUS_CHANGES = False
-DEBUG_CACHE_LOOKUP = True
+DEBUG_CACHE_LOOKUP = False
 
 # Writable app data directory and feature constants
 APPDATA_DIR = os.path.join(_BASE_DIR, 'AppData')

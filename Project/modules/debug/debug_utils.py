@@ -1,7 +1,6 @@
-"""
-debug_utils.py - Utility functions for focus/widget debugging in the POS system.
-"""
-from PyQt5.QtWidgets import QWidget, QApplication
+"""debug_utils.py - legacy debug helpers (console output removed)."""
+
+from PyQt5.QtWidgets import QWidget
 
 def describe_widget(w: QWidget) -> str:
     try:
@@ -16,33 +15,5 @@ def describe_widget(w: QWidget) -> str:
         return '<unknown>'
 
 def debug_print_focus(context: str, barcode: str = '', main_window=None):
-    """
-    Print detailed focus/widget chain for debugging scanner and focus issues.
-    """
-    try:
-        app = QApplication.instance()
-        aw = app.activeWindow() if app else None
-        fw = app.focusWidget() if app else None
-        # Build parent chain from focus widget up to window
-        chain = []
-        cur = fw
-        seen = 0
-        while cur is not None and seen < 10:  # limit to avoid accidental loops
-            chain.append(describe_widget(cur))
-            cur = cur.parent()
-            seen += 1
-        chain_str = ' -> '.join(reversed(chain)) if chain else 'None'
-        win_title = ''
-        try:
-            if aw and hasattr(aw, 'windowTitle'):
-                win_title = aw.windowTitle()
-        except Exception:
-            pass
-        print('[Scanner][Focus]',
-              f"context={context}",
-              f"barcode='{barcode}'",
-              f"activeWindow={describe_widget(aw)}",
-              f"windowTitle='{win_title}'",
-              f"focusPath={chain_str}")
-    except Exception as _e:
-        print('[Scanner][Focus] debug failed:', _e)
+    """No-op: console debug output removed."""
+    return

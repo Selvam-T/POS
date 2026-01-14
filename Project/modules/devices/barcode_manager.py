@@ -26,32 +26,7 @@ class BarcodeManager(QObject):
         Handle barcode scanned event. Routes barcode to appropriate handler based on current context.
         """
         parent = self.parent()
-        try:
-            from config import DEBUG_SCANNER_FOCUS, DEBUG_CACHE_LOOKUP
-            if DEBUG_SCANNER_FOCUS and hasattr(parent, '_debug_print_focus'):
-                parent._debug_print_focus(context='on_barcode_scanned', barcode=barcode)
-        except Exception:
-            pass
         barcode = (barcode or '').strip()
-        try:
-            from modules.db_operation import get_product_info, PRODUCT_CACHE
-            found, product_name, unit_price, _ = get_product_info(barcode)
-            if DEBUG_CACHE_LOOKUP:
-                raw = barcode
-                norm = (raw or '').strip().upper()
-                found_key = None
-                if norm in PRODUCT_CACHE:
-                    found_key = norm
-                elif raw in PRODUCT_CACHE:
-                    found_key = raw
-                elif (raw or '').lower() in PRODUCT_CACHE:
-                    found_key = (raw or '').lower()
-                elif (raw or '').upper() in PRODUCT_CACHE:
-                    found_key = (raw or '').upper()
-                cache_size = len(PRODUCT_CACHE)
-                print('[Scanner][Cache]', f"code='{raw}'", f"norm='{norm}'", f"found={'yes' if found else 'no'}", f"key='{found_key}'", f"name='{product_name}'", f"price={unit_price:.2f}", f"cacheSize={cache_size}")
-        except Exception as _e:
-            print('[Scanner][Cache] debug failed:', _e)
 
         # Generalized barcode override logic for all dialogs with *ProductCodeLineEdit
         try:
@@ -263,12 +238,6 @@ class BarcodeManager(QObject):
             parent = self.parent()
             fw = QApplication.instance().focusWidget() if QApplication.instance() else None
             self._cleanup_scanner_leak(fw, barcode)
-            try:
-                from config import DEBUG_SCANNER_FOCUS
-                if DEBUG_SCANNER_FOCUS and hasattr(parent, '_describe_widget'):
-                    print('[Scanner][Ignore]', f"reason='{reason}'", 'focus=', parent._describe_widget(fw))
-            except Exception:
-                pass
         except Exception:
             pass
     def install_event_filter(self, app_or_widget):

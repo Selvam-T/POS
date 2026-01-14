@@ -55,9 +55,6 @@ from config import (
     ICON_GREETING,
     ICON_HISTORY,
     ICON_LOGOUT,
-    DEBUG_SCANNER_FOCUS,
-    DEBUG_FOCUS_CHANGES,
-    DEBUG_CACHE_LOOKUP,
 )
 from modules.date_time.info_section import InfoSectionController
 
@@ -73,7 +70,11 @@ def load_qss(app):
             with open(qss_path, 'r', encoding='utf-8') as f:
                 app.setStyleSheet(f.read())
         except Exception as e:
-            print('Failed to load QSS:', e)
+            try:
+                from modules.ui_utils.error_logger import log_error
+                log_error(f"Failed to load QSS: {e}")
+            except Exception:
+                pass
 
 class MainLoader(QMainWindow):
     # ========== Menu Frame Dialog Handlers ==========
@@ -307,7 +308,11 @@ class MainLoader(QMainWindow):
                     except Exception:
                         pass
         except Exception as e:
-            print('Failed to wire menu buttons:', e)
+            try:
+                from modules.ui_utils.error_logger import log_error
+                log_error(f"Failed to wire menu buttons: {e}")
+            except Exception:
+                pass
 
     # ========== Post-Dialog Action Handlers ==========
     def _add_items_to_sales_table(self):
@@ -333,7 +338,6 @@ class MainLoader(QMainWindow):
             vegetable_rows = getattr(dlg, 'vegetable_rows', None)
             manual_result = getattr(dlg, 'manual_entry_result', None)
             if vegetable_rows:
-                # print(f"[main.py] Received vegetable_rows: {vegetable_rows}")
                 new_rows = []
                 for row in vegetable_rows:
                     row_copy = dict(row)
@@ -417,12 +421,14 @@ class MainLoader(QMainWindow):
 
                 if not found_match:
                     existing_rows.append(new_row)
-
-            # print(f"[main.py] FINAL rows to set_table_rows: {existing_rows}")
             set_table_rows(self.sales_table, existing_rows)
         except Exception as e:
-            import traceback
-            traceback.print_exc()
+            try:
+                import traceback
+                from modules.ui_utils.error_logger import log_error
+                log_error(traceback.format_exc())
+            except Exception:
+                pass
 
     def _clear_sales_table(self):
         """Clear all items from sales table and reset total to zero.
@@ -453,9 +459,12 @@ class MainLoader(QMainWindow):
             #     if input_widget:
             #         input_widget.clear()
         except Exception as e:
-            print(f'Failed to clear sales table: {e}')
-            import traceback
-            traceback.print_exc()
+            try:
+                import traceback
+                from modules.ui_utils.error_logger import log_error
+                log_error(f"Failed to clear sales table: {e}\n{traceback.format_exc()}")
+            except Exception:
+                pass
 
     def _perform_logout(self):
         """Perform logout action: stop devices and close app."""
@@ -501,6 +510,19 @@ class MainLoader(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     load_qss(app)
+
+    # Load product cache once at startup so name/code lookups and completers
+    # can rely on in-memory PRODUCT_CACHE during runtime.
+    try:
+        from modules.db_operation import load_product_cache, PRODUCT_CACHE
+        load_product_cache()
+    except Exception as e:
+        try:
+            from modules.ui_utils.error_logger import log_error
+            log_error(f"Failed to load PRODUCT_CACHE: {e}")
+        except Exception:
+            pass
+
     window = MainLoader()
     """window.show()"""
     window.showMaximized()

@@ -3,8 +3,9 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QLineEdit, QPushButton, QLabel
 from PyQt5.QtCore import Qt
 from modules.ui_utils.focus_utils import FieldCoordinator
-from modules.ui_utils import input_handler, ui_feedback
-from modules.db_operation import PRODUCT_CACHE  # Added for completer data
+from modules.ui_utils import input_handler, ui_feedback, error_logger
+from modules.db_operation import PRODUCT_CACHE, load_product_cache  # Added for completer data
+from modules.menu.dialog_utils import set_dialog_info
 
 def open_manual_entry_dialog(parent):
     from config import MAX_TABLE_ROWS
@@ -37,7 +38,10 @@ def open_manual_entry_dialog(parent):
             with open(qss_path, 'r', encoding='utf-8') as f:
                 dlg.setStyleSheet(f.read())
     except Exception as e:
-        print(f"Failed to load menu.qss: {e}")
+        try:
+            error_logger.log_error(f"Failed to load menu.qss: {e}")
+        except Exception:
+            pass
 
     # 2. Widgets
     code_in = dlg.findChild(QLineEdit, 'manualProductCodeLineEdit')
@@ -45,8 +49,12 @@ def open_manual_entry_dialog(parent):
     qty_in = dlg.findChild(QLineEdit, 'manualQuantityLineEdit')
     unit_dis = dlg.findChild(QLineEdit, 'manualUnitLineEdit')
     status_lbl = dlg.findChild(QLabel, 'manualStatusLabel')
-    btn_ok = dlg.findChild(QPushButton, 'btnManualOk')
     unit_lbl = dlg.findChild(QLabel, 'manualUnitFieldLbl')
+
+    # dialog button widgets
+    btn_ok = dlg.findChild(QPushButton, 'btnManualOk')
+    close_btn = dlg.findChild(QPushButton, 'customCloseBtn') 
+    cancel_btn = dlg.findChild(QPushButton, 'btnManualCancel')
 
     # Mark the label as read-only for styling
     unit_lbl.setProperty("readOnly", "true")
@@ -56,11 +64,14 @@ def open_manual_entry_dialog(parent):
     unit_lbl.style().polish(unit_lbl)
     unit_lbl.update()
     
-    # Updated names to match QSS selectors
-    close_btn = dlg.findChild(QPushButton, 'customCloseBtn') 
-    cancel_btn = dlg.findChild(QPushButton, 'btnManualCancel')
 
     # --- 3. Setup Completer  ---
+    try:
+        if not PRODUCT_CACHE:
+            load_product_cache()
+    except Exception:
+        pass
+
     product_names = [rec[0] for rec in PRODUCT_CACHE.values() if rec[0]]
     completer = input_handler.setup_name_search_lineedit(name_in, product_names)
 
@@ -131,14 +142,14 @@ def open_manual_entry_dialog(parent):
                 'unit': unit_dis.text(),
                 'unit_price': float(name_in.property('last_price') or 0)
             }
-            dlg.main_status_msg = f"{name_in.text()} added to sale."
+            set_dialog_info(dlg, f"{name_in.text()} added to sale.")
             dlg.accept()
         except ValueError as e:
             ui_feedback.set_status_label(status_lbl, str(e), ok=False)
 
     # Close/Cancel logic
     def handle_close():
-        dlg.main_status_msg = "Manual entry cancelled."
+        set_dialog_info(dlg, "Manual entry cancelled.")
         dlg.reject() # DialogWrapper handles overlay and focus
 
     if close_btn:

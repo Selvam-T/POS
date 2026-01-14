@@ -106,8 +106,7 @@ QPushButton[objectName$="Del"]:pressed {
 /* --- Focus State --- */
 QPushButton:focus {
     outline: none;
-    /* Keeps your purple focus, but adjusted thickness to prevent "jumping" */
-    border: 2px solid #d0741e;
+    border: 2px solid #c99e76;
 }
 
 /* =========================================================
@@ -186,22 +185,15 @@ QLineEdit:focus, QComboBox:focus {
     border: 1px solid #2196f3;
 }
 
-/* Styling the read-only LineEdit */
-QLabel[objectName$="FieldLbl"] {
-    color: #05425f;
-    font-size: 10.5pt;
-    font-weight: 600;
-}
-
-/* 2. State-specific style (Overrides base because it's more specific) */
+/* 1. State-specific style (Overrides base because it's more specific) */
 QLabel[objectName$="FieldLbl"][readOnly="true"] {
-    color: #066686 !important;
+    color: #7b7c7d !important;
 }
 
-/* 3. Read-Only LineEdit */
+/* 2. Read-Only LineEdit */
 QLineEdit:read-only {
     background-color: #f5f5f5;
-    color: #066686; 
+    color: #7b7c7d; 
     border: 1px solid #dcdcdc;
 }
 
@@ -235,7 +227,7 @@ QToolButton::icon {
 
 /* Field labels */
 QLabel[objectName$="FieldLbl"] {
-    color: #05425f;
+    color: #5c5e5f;
     font-size: 10.5pt;
     font-weight: 600;
 }

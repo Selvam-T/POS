@@ -1,7 +1,10 @@
 # Vegetable Menu Dialog Documentation
 
 ## Overview
-The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product information including name, unit of measure, pricing, and supplier details. It allows selecting from up to 16 predefined vegetable slots and updating their properties.
+Vegetable Menu is the admin-style dialog for managing the reserved vegetable slots `Veg01`–`Veg16`.
+
+It is DB-backed (not JSON-backed) and follows the centralized dialog pattern:
+`input_handler` → `input_validation` → `ui_feedback`, with focus/navigation and field synchronization managed by `FieldCoordinator`.
 
 ## UI Structure
 
@@ -25,25 +28,25 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
 ### Input Fields Grid
 
 
-**Row 0: Vegetable Selection**
+**Vegetable Selection**
 - `vegMChooseLabel`: "Choose Vegetable * :"
-- `vegMChooseComboBox`: Dropdown with "Select vegetable to update" placeholder + 16 vegetable slots
+- `vegMChooseComboBox`: Dropdown with placeholder + 16 vegetable slots (names populated from `PRODUCT_CACHE`)
 
 **Row 1: Spacer**
 - `gridRowSpacer`: Fixed 40px height spacer between selection and fields
 
 
-**Row 2: Product Code**
+**Product Code**
 - `vegMProductCodeLabel`: "Product code :"
-- `vegMProductCodeLineEdit`: Read-only QLineEdit
+- `vegMProductCodeLineEdit`: Read-only QLineEdit (filled based on chosen slot)
 
 
-**Row 3: Product Name** (Required)
+**Product Name** (Required)
 - `vegMProductNameLabel`: "Product Name * :"
-- `vegMProductNameLineEdit`: Editable, placeholder "Enter product name"
+- `vegMProductNameLineEdit`: Editable
 
 
-**Row 4: Unit** (Required)
+**Unit** (Required)
 - `vegMUnitLabel`: "Unit * :"
 - `vegMUnitComboBox`: Dropdown with options:
   - "Select Unit" (default)
@@ -51,9 +54,9 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
   - "EACH"
 
 
-**Row 5: Selling Price** (Required)
+**Selling Price** (Required)
 - `vegMSellingPriceLabel`: "Selling Price * :"
-- `vegMSellingPriceLineEdit`: Editable, placeholder "Enter selling price"
+- `vegMSellingPriceLineEdit`: Editable
 
 
 **Row 6: Cost Price** (Optional)
@@ -65,9 +68,8 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
 - `vegMSupplierLabel`: "Supplier :"
 - `vegMSupplierLineEdit`: Editable, placeholder "Optional"
 
-### Error Display
-- `lblError`: Center-aligned label for validation messages
-- Surrounded by vertical spacers (15px each)
+### Status / Error Display
+- `vegMStatusLabel`: Uses `ui_feedback` status properties for QSS-driven success/error styles.
 
 ### Button Layout
 - **Horizontal layout with 10px spacing**
@@ -77,16 +79,9 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
 
 ## Key Features
 
-### Unit Selection Logic
-- **KG mode:** Vegetable entry expects weight from weighing scale (simulated 600g), quantity cells READ-ONLY
-- **EACH mode:** Vegetable entry does not expect scale reading, uses editable piece count
-- **Standardized units:** Only canonical units "Kg" or "Each" are allowed and stored. All entry points (menu, barcode, dialogs) canonicalize units before saving or merging.
-- **Canonicalization:** All unit strings are converted to canonical form ("Kg" or "Each") using `canonicalize_unit()` before any database, cache, or table operation.
-- **Dropdown options:** Only "Kg" and "Each" are available for selection.
-- **Database and cache:** All units are stored as "Kg" or "Each" (never mixed case or synonyms).
-- **Default handling:** Empty/NULL units default to "Each".
-- **Merging and display:** All merging and duplicate logic uses canonical units. Table display logic (unit column, editable state) is handled by `set_table_rows()`.
-- **Behavior:** KG items are always read-only in the table; EACH items are always editable.
+### Slot Semantics
+- Slots are reserved product codes: `Veg01`–`Veg16`.
+- The dialog rewrites these slots after every update by sorting vegetables A–Z and reassigning sequentially.
 
 ### Required vs Optional Fields
 - **Required (marked with *):**
@@ -107,28 +102,28 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
 
 ## Implementation Notes
 
-### Controller (`vegetable_menu.py`)
-- Loads UI from `vegetable_menu.ui`
-- Populates `comboVegetable` from vegetable data source
-- Handles vegetable selection to populate fields
-- Validates required fields before accepting
-- Saves updated vegetable data
-- Emits `configChanged` signal on successful save
+### Controller
+Implemented in `modules/menu/vegetable_menu.py`.
+
+Key behaviors:
+- Uses `FieldCoordinator` to synchronize slot selection → form fields and to control Enter-to-next navigation.
+- Performs input parsing/validation via `input_handler` and `input_validation`.
+- Uses `ui_feedback` for all status/error display.
+- Uses opt-in `placeholder_mode='reactive'` on the slot link so placeholders show only when a synced field is empty.
+- Uses `coord.register_validator(...)` so an error clears automatically when the offending field becomes valid.
 
 ### Data Persistence
-- Loads vegetable configurations from `AppData/vegetables.json` (or similar)
-- Saves using functions from `modules/wrappers/settings.py`
+- Reads via `get_product_full(code)`.
+- Writes via `delete_product(code)` and `add_product(...)`.
+- `PRODUCT_CACHE` is updated in-place by the DB layer during these operations.
 
-### Validation Rules
-1. Vegetable must be selected (not "Select vegetable to update")
-2. Product Name must not be empty
-3. Unit must be selected (KG or EACH, not "Select Unit")
-4. **Unit normalization:** Input case-insensitive, stored uppercase in database
-5. **Unit defaults:** Empty/NULL units default to EACH
-6. Selling Price must be a valid number
-7. Cost Price (if provided) must be a valid number
-8. Supplier is optional
-9. **PRODUCT_CACHE update:** On save, `refresh_product_cache()` reloads cache into `{PRODUCT_CODE: (name, price, unit)}` 3-tuple.
+### Validation Rules (current)
+- Slot must be selected.
+- Product name is required.
+- Unit must not be "Select Unit".
+- Selling price is required and must be a valid number.
+- Cost price is optional; when provided it must be a valid number.
+- Supplier is optional and must pass `validate_supplier` rules.
 
 ## Example Workflow
 1. User opens dialog
@@ -140,12 +135,13 @@ The `VegetableMenuDialog` is a PyQt5 dialog for editing vegetable product inform
 7. Dialog emits `configChanged` and closes
 
 ## Related Files
-- **UI:** `ui/vegetable_menu.ui`
-- **Controller:** `modules/menu/vegetable_menu.py`
-- **Styles:** `assets/menu.qss`
-- **Config:** `config.py` (VEG_SLOTS constant)
-- **Data:** `AppData/vegetables.json`
+- UI: `ui/vegetable_menu.ui`
+- Controller: `modules/menu/vegetable_menu.py`
+- Coordinator: `modules/ui_utils/focus_utils.py`
+- Validation: `modules/ui_utils/input_handler.py`, `modules/ui_utils/input_validation.py`
+- Feedback: `modules/ui_utils/ui_feedback.py`
+- Styles: `assets/menu.qss`
 
 ---
 
-*Last updated: December 18, 2025*
+*Last updated: January 14, 2026*

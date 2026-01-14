@@ -484,16 +484,6 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
-          <widget class="QComboBox" name="removeSearchComboBox">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>40</height>
-            </size>
-           </property>
-          </widget>
-         </item>
          <item row="3" column="0">
           <spacer name="verticalSpacer_8">
            <property name="orientation">
@@ -633,6 +623,9 @@
             </size>
            </property>
           </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLineEdit" name="removeNameSearchLineEdit"/>
          </item>
         </layout>
        </item>
@@ -829,16 +822,6 @@
           <widget class="QLabel" name="updateSearchFieldLbl">
            <property name="text">
             <string>Product Name -</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
-          <widget class="QComboBox" name="updateSearchComboBox">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>40</height>
-            </size>
            </property>
           </widget>
          </item>
@@ -1041,6 +1024,9 @@
            </property>
           </spacer>
          </item>
+         <item row="3" column="1">
+          <widget class="QLineEdit" name="updateNameSearchLineEdit"/>
+         </item>
         </layout>
        </item>
        <item>
@@ -1124,15 +1110,15 @@
  <tabstops>
   <tabstop>addProductCodeLineEdit</tabstop>
   <tabstop>addProductNameLineEdit</tabstop>
-  <tabstop>addCategoryComboBox</tabstop>
-  <tabstop>addCostPriceLineEdit</tabstop>
   <tabstop>addSellingPriceLineEdit</tabstop>
+  <tabstop>addCostPriceLineEdit</tabstop>
+  <tabstop>addCategoryComboBox</tabstop>
   <tabstop>addUnitLineEdit</tabstop>
   <tabstop>addSupplierLineEdit</tabstop>
   <tabstop>btnAddOk</tabstop>
   <tabstop>btnAddCancel</tabstop>
   <tabstop>removeProductCodeLineEdit</tabstop>
-  <tabstop>removeSearchComboBox</tabstop>
+  <tabstop>removeNameSearchLineEdit</tabstop>
   <tabstop>removeCategoryLineEdit</tabstop>
   <tabstop>removeCostPriceLineEdit</tabstop>
   <tabstop>removeSellingPriceLineEdit</tabstop>
@@ -1142,11 +1128,11 @@
   <tabstop>btnRemoveOk</tabstop>
   <tabstop>btnRemoveCancel</tabstop>
   <tabstop>updateProductCodeLineEdit</tabstop>
-  <tabstop>updateSearchComboBox</tabstop>
+  <tabstop>updateNameSearchLineEdit</tabstop>
   <tabstop>updateProductNameLineEdit</tabstop>
-  <tabstop>updateCategoryComboBox</tabstop>
-  <tabstop>updateCostPriceLineEdit</tabstop>
   <tabstop>updateSellingPriceLineEdit</tabstop>
+  <tabstop>updateCostPriceLineEdit</tabstop>
+  <tabstop>updateCategoryComboBox</tabstop>
   <tabstop>updateUnitLineEdit</tabstop>
   <tabstop>updateSupplierLineEdit</tabstop>
   <tabstop>updateLastUpdatedLineEdit</tabstop>

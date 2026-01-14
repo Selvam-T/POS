@@ -3,10 +3,26 @@ Simple test script to verify barcode scanner is working.
 Run this and scan a barcode to see if it's detected.
 """
 
+import datetime
+import os
 import sys
+from pathlib import Path
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget
 from PyQt5.QtCore import Qt
 from modules.devices import BarcodeScanner
+
+
+def _test_log(message: str) -> None:
+    try:
+        root = Path(__file__).resolve().parents[1]
+        log_dir = root / "log"
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_file = log_dir / "tools.log"
+        ts = datetime.datetime.now().isoformat(timespec="seconds")
+        with log_file.open("a", encoding="utf-8") as f:
+            f.write(f"[{ts}] test_scanner: {message}{os.linesep}")
+    except Exception:
+        pass
 
 
 class ScannerTest(QMainWindow):
@@ -31,15 +47,15 @@ class ScannerTest(QMainWindow):
         layout.addWidget(self.result)
         
         # Initialize scanner
-        print("Initializing scanner...")
+        _test_log("Initializing scanner...")
         self.scanner = BarcodeScanner()
         self.scanner.barcode_scanned.connect(self.on_barcode)
         self.scanner.start()
-        print("Scanner started. Scan a barcode now!")
+        _test_log("Scanner started. Scan a barcode now!")
         
     def on_barcode(self, barcode):
         """Called when barcode is scanned"""
-        print(f"BARCODE RECEIVED: {barcode}")
+        _test_log(f"BARCODE RECEIVED: {barcode}")
         self.label.setText("Last scanned barcode:")
         self.result.setText(barcode)
         self.result.setStyleSheet("font-size: 20pt; color: green; padding: 10px; font-weight: bold;")

@@ -77,7 +77,14 @@ def get_coordinator_lookup(value: str, source_type: str = 'code') -> dict | None
     Standardized lookup engine for the FieldCoordinator.
     Maps Cache/DB records into a clean dictionary.
     """
-    from modules.db_operation.product_cache import PRODUCT_CACHE, _norm
+    from modules.db_operation.product_cache import PRODUCT_CACHE, _norm, load_product_cache
+
+    # Ensure cache is populated (one-time DB hit only if cache is empty).
+    if not PRODUCT_CACHE:
+        try:
+            load_product_cache()
+        except Exception:
+            return None
     
     val_norm = _norm(value)
     if not val_norm:

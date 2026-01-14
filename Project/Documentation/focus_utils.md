@@ -16,6 +16,12 @@ FieldCoordinator is now the Primary Event Interceptor and Keyboard Orchestrator 
 - **Reverse Action:** Clearing a source widget clears all mapped targets and resets status.
 - **Infinite Loop Prevention:** Blocks signals during programmatic updates to avoid feedback loops.
 - **UI Feedback:** Integrates with `ui_feedback.py` and QSS for consistent status coloring.
+- **Standardized Status + Auto-Clear (Opt-in):**
+   - `coord.set_error(source_widget, msg, status_label=lbl)` records the error source.
+   - `coord.register_validator(widget, validate_fn, status_label=lbl)` clears the *last* error once the source widget becomes valid.
+   - `coord.set_ok(msg, status_label=lbl)` shows success and clears remembered error state.
+   - `coord.clear_status(lbl)` clears the label and resets remembered error state.
+- **Reactive Placeholders (Opt-in):** `add_link(..., placeholder_mode='reactive')` hides placeholders initially and shows them only for targets that remain empty after sync.
 
 
 ## Usage Pattern
@@ -55,6 +61,19 @@ FieldCoordinator is now the Primary Event Interceptor and Keyboard Orchestrator 
 - `next_focus`: Widget or function to trigger on Enter.
 - `status_label`: QLabel for status feedback (QSS property + re-polish).
 - `on_sync`: Optional hook after sync (e.g., update placeholders).
+- `placeholder_mode`: Optional placeholder behavior; use `'reactive'` for sync-driven placeholders.
+
+## Validator Auto-Clear Pattern (Optional)
+Use this for “error clears after correction” behavior.
+
+```python
+coord.set_error(name_edit, 'Error: Product name is required', status_label=status_lbl)
+coord.register_validator(
+   name_edit,
+   lambda: input_handler.handle_product_name_input(name_edit),
+   status_label=status_lbl
+)
+```
 
 ## Example
 ```python

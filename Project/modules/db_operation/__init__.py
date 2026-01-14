@@ -12,8 +12,29 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional, Tuple
 
-from .product_cache import PRODUCT_CACHE, load_product_cache, refresh_product_cache, get_product_info
+from .product_cache import (
+    PRODUCT_CACHE,
+    load_product_cache,
+    refresh_product_cache,
+    get_product_info,
+    upsert_cache_item,
+    remove_cache_item,
+)
 from . import products_repo
+
+
+def get_product_slim(product_code: str) -> Tuple[bool, str, float, str]:
+        """Fast DB lookup for basic fields without loading PRODUCT_CACHE.
+
+        Returns:
+            (found, name, selling_price, unit)
+        """
+        row = products_repo.get_product_slim(product_code)
+        if not row:
+                return False, '', 0.0, 'EACH'
+        name, price, unit = row
+        unit_val = unit or 'EACH'
+        return True, str(name or ''), float(price or 0.0), str(unit_val)
 
 
 def get_product_full(product_code: str) -> Tuple[bool, Dict[str, Any]]:
@@ -62,9 +83,20 @@ def add_product(
             cost_price=float(cost_price or 0.0),
             unit=unit,
         )
+        # Keep in-memory cache consistent with DB (in-place update)
+        try:
+            upsert_cache_item(product_code, name, float(selling_price or 0.0), unit)
+        except Exception:
+            # Best-effort; UI may still call refresh_product_cache()
+            pass
         return True, 'OK'
     except Exception as e:
-        return False, str(e)
+        msg = str(e)
+        if 'UNIQUE constraint failed' in msg and 'Product_list.name' in msg:
+            return False, 'Product name already exists.'
+        if 'UNIQUE constraint failed' in msg and 'Product_list.product_code' in msg:
+            return False, 'Product code already exists.'
+        return False, msg
 
 
 def update_product(
@@ -87,16 +119,33 @@ def update_product(
             cost_price=float(cost_price or 0.0),
             unit=unit,
         )
-        return (True, 'OK') if updated else (False, 'Product not found')
+        if not updated:
+            return False, 'Product not found'
+        # Keep in-memory cache consistent with DB (in-place update)
+        try:
+            upsert_cache_item(product_code, name, float(selling_price or 0.0), unit)
+        except Exception:
+            pass
+        return True, 'OK'
     except Exception as e:
-        return False, str(e)
+        msg = str(e)
+        if 'UNIQUE constraint failed' in msg and 'Product_list.name' in msg:
+            return False, 'Product name already exists.'
+        return False, msg
 
 
 def delete_product(product_code: str) -> Tuple[bool, str]:
     """Delete a product row. Returns (ok, message)."""
     try:
         deleted = products_repo.delete_product(product_code)
-        return (True, 'OK') if deleted else (False, 'Product not found')
+        if not deleted:
+            return False, 'Product not found'
+        # Keep in-memory cache consistent with DB (in-place update)
+        try:
+            remove_cache_item(product_code)
+        except Exception:
+            pass
+        return True, 'OK'
     except Exception as e:
         return False, str(e)
 
@@ -107,6 +156,7 @@ __all__ = [
     'refresh_product_cache',
     'get_product_info',
     'get_product_full',
+    'get_product_slim',
     'add_product',
     'update_product',
     'delete_product',

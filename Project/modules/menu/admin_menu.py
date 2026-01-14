@@ -2,6 +2,7 @@ import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QPushButton, QLineEdit, QToolButton, QLabel
+from modules.ui_utils.error_logger import log_error
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
@@ -26,13 +27,19 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
     """
     ui_path = os.path.join(UI_DIR, 'admin_menu.ui')
     if not os.path.exists(ui_path):
-        print('admin_menu.ui missing at', ui_path)
+        try:
+            log_error(f"admin_menu.ui missing at {ui_path}")
+        except Exception:
+            pass
         return None
 
     try:
         content = uic.loadUi(ui_path)
     except Exception as e:
-        print('Failed to load admin_menu.ui:', e)
+        try:
+            log_error(f"Failed to load admin_menu.ui: {e}")
+        except Exception:
+            pass
         return None
 
     # If the .ui root is already a QDialog use it; else wrap
@@ -57,7 +64,10 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
             with open(QSS_PATH, 'r', encoding='utf-8') as f:
                 dlg.setStyleSheet(f.read())
         except Exception as e:
-            print(f'Failed to load menu.qss: {e}')
+            try:
+                log_error(f"Failed to load menu.qss: {e}")
+            except Exception:
+                pass
     
     # Wire custom window titlebar X button to close dialog
     custom_close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
@@ -129,22 +139,6 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
 
     _wire_eye('btnToggleAdminCurrent','adminCurrentPassword')
     _wire_eye('btnToggleStaffCurrent','staffCurrentPassword')
-
-    # Simple stub save actions (placeholder: print values)
-    def _stub_save(which: str):
-        try:
-            if which == 'admin':
-                cur = dlg.findChild(QLineEdit,'adminCurrentPassword')
-                new = dlg.findChild(QLineEdit,'adminNewPassword')
-            elif which == 'staff':
-                cur = dlg.findChild(QLineEdit,'staffCurrentPassword')
-                new = dlg.findChild(QLineEdit,'staffNewPassword')
-            else:
-                cur = dlg.findChild(QLineEdit,'currentEmailLineEdit')
-                new = dlg.findChild(QLineEdit,'newEmailLineEdit')
-            print(f"[AdminSettings][{which}] current={cur.text() if cur else ''} new={new.text() if new else ''}")
-        except Exception:
-            pass
 
     # Wire Save and Cancel buttons to close window and exit
     def _close_and_exit():

@@ -3,6 +3,7 @@ import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QPushButton, QComboBox, QLineEdit, QLabel, QWidget
+from modules.ui_utils.error_logger import log_error
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
@@ -54,7 +55,10 @@ def open_history_dialog(host_window, *args, **kwargs):
             with open(QSS_PATH, 'r', encoding='utf-8') as f:
                 dlg.setStyleSheet(f.read())
         except Exception as e:
-            print(f'Failed to load menu.qss: {e}')
+            try:
+                log_error(f"Failed to load menu.qss: {e}")
+            except Exception:
+                pass
 
     # Titlebar close (optional)
     try:

@@ -33,7 +33,11 @@ def open_cancel_sale_dialog(host_window):
             with open(_QSS_PATH, 'r', encoding='utf-8') as f:
                 dlg.setStyleSheet(f.read())
         except Exception as e:
-            print(f'Failed to load menu.qss: {e}')
+            try:
+                from modules.ui_utils.error_logger import log_error
+                log_error(f"Failed to load menu.qss: {e}")
+            except Exception:
+                pass
     
     from modules.ui_utils.ui_feedback import show_main_status
 

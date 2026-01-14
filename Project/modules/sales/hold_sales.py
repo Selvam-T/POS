@@ -3,7 +3,7 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QLineEdit, QPushButton, QLabel
 from PyQt5.QtCore import Qt
 from modules.ui_utils.focus_utils import FieldCoordinator
-from modules.ui_utils import input_handler, ui_feedback
+from modules.ui_utils import input_handler, ui_feedback, error_logger
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
@@ -24,7 +24,10 @@ def open_hold_sales_dialog(parent=None):
             with open(qss_path, 'r', encoding='utf-8') as f:
                 dlg.setStyleSheet(f.read())
     except Exception as e:
-        print(f"Failed to load menu.qss: {e}")
+        try:
+            error_logger.log_error(f"Failed to load menu.qss: {e}")
+        except Exception:
+            pass
     
     # 2. Widgets
     name_in = dlg.findChild(QLineEdit, 'holdSalesCustomerLineEdit') 

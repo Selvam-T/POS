@@ -6,6 +6,7 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import QVBoxLayout, QSizePolicy, QPushButton, QWidget, QTableWidget, QLabel
 from PyQt5.QtGui import QFontMetrics
 from modules.table import setup_sales_table
+from modules.ui_utils.error_logger import log_error
 
 def setup_sales_frame(main_window, UI_DIR):
     """
@@ -29,7 +30,10 @@ def setup_sales_frame(main_window, UI_DIR):
                     sales_widget.setStyleSheet(qss_content)
                     sales_placeholder.setStyleSheet(qss_content)
             except Exception as e:
-                print('Failed to load sales.qss:', e)
+                try:
+                    log_error(f"Failed to load sales.qss: {e}")
+                except Exception:
+                    pass
         sales_layout = sales_placeholder.layout()
         if sales_layout is None:
             sales_layout = QVBoxLayout(sales_placeholder)

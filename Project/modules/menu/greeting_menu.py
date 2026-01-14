@@ -1,6 +1,7 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QComboBox, QPushButton
 import os
+from modules.ui_utils.error_logger import log_error
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
@@ -25,7 +26,10 @@ def open_greeting_dialog(parent=None):
     """
     ui_path = os.path.join(UI_DIR, 'greeting_menu.ui')
     if not os.path.exists(ui_path):
-        print('greeting_menu.ui not found at', ui_path)
+        try:
+            log_error(f"greeting_menu.ui not found at {ui_path}")
+        except Exception:
+            pass
         raise FileNotFoundError(f'greeting_menu.ui not found at {ui_path}')
     dlg = uic.loadUi(ui_path)
     from PyQt5.QtCore import Qt
@@ -39,7 +43,10 @@ def open_greeting_dialog(parent=None):
             with open(QSS_PATH, 'r', encoding='utf-8') as f:
                 dlg.setStyleSheet(f.read())
         except Exception as e:
-            print(f'Failed to load menu.qss: {e}')
+            try:
+                log_error(f"Failed to load menu.qss: {e}")
+            except Exception:
+                pass
     
     all_widgets = dlg.findChildren(QComboBox)
     combo = all_widgets[0] if all_widgets else None
