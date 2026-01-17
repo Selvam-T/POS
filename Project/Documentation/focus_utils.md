@@ -23,6 +23,36 @@ FieldCoordinator is now the Primary Event Interceptor and Keyboard Orchestrator 
    - `coord.clear_status(lbl)` clears the label and resets remembered error state.
 - **Reactive Placeholders (Opt-in):** `add_link(..., placeholder_mode='reactive')` hides placeholders initially and shows them only for targets that remain empty after sync.
 
+## Opt-in Helpers (Jan 2026)
+These helpers are additive and do not affect existing dialogs unless used.
+
+- **Initial Focus + Tab Landing:** `set_initial_focus(...)`
+   - Selects a `QTabWidget` tab (by index or tab text) then focuses a given widget.
+- **Focus Lock / Unlock (Gate):** `FocusGate`
+   - Temporarily sets `Qt.NoFocus` on a group of widgets and restores original focus policy later.
+- **Lightweight Focus Toggle:** `set_focus_enabled(...)`
+   - Simple function to toggle `Qt.NoFocus` using a caller-owned remember-map.
+
+### Example: land on a tab and lock fields until first input
+```python
+from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, set_initial_focus
+
+coord = FieldCoordinator(dlg)
+dlg._coord = coord
+
+# 1) Land on a specific tab + field
+set_initial_focus(dlg, tab_widget=tabs, tab_name='ADD', first_widget=code_in)
+
+# 2) Lock all other fields until code is accepted
+gate = FocusGate([name_in, price_in, unit_combo, ok_btn])
+gate.lock()
+
+def _unlock_rest():
+      gate.unlock()
+
+coord.add_link(source=code_in, lookup_fn=lookup_code, next_focus=lambda: (_unlock_rest(), name_in.setFocus()))
+```
+
 
 ## Usage Pattern
 1. **Instantiate:**

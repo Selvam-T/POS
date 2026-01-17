@@ -29,6 +29,11 @@ The Centralized Relationship Coordinator is a rules-based design pattern for PyQ
 - **Step 2:** Define links between widgets using `add_link`.
 - **Step 3:** Use pure input_handler getters for final validation in your OK handler.
 
+### Optional: standardized focus landing and focus gating
+These are opt-in helpers in `modules/ui_utils/focus_utils.py` that do not change existing dialog behavior unless used:
+- `set_initial_focus(...)` — select a `QTabWidget` tab (by index or name) and focus a specific widget on open.
+- `FocusGate` / `set_focus_enabled(...)` — lock a group of widgets to `Qt.NoFocus` until a prerequisite field is accepted.
+
 ## 5. Benefits Summary
 - **Bug Reduction:** No more infinite update loops.
 - **Speed:** Auto-jump and declarative logic make dialogs fast and user-friendly.

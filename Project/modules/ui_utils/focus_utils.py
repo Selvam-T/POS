@@ -1,4 +1,9 @@
-"""Centralized focus/relationship coordinator for PyQt dialogs."""
+"""Centralized focus/relationship coordinator for PyQt dialogs.
+
+This module intentionally keeps its existing public behavior stable.
+New helpers added below are opt-in and do not affect existing dialogs
+unless they explicitly call them.
+"""
 
 from PyQt5.QtCore import QObject, Qt, QEvent
 from PyQt5.QtWidgets import QLineEdit, QComboBox, QPushButton
@@ -235,3 +240,180 @@ class FieldCoordinator(QObject):
                 return True 
                 
         return super().eventFilter(obj, event)
+
+
+# =========================================================
+# OPT-IN HELPERS (do not change existing behavior)
+# =========================================================
+
+def set_initial_focus(
+    dlg,
+    *,
+    tab_widget=None,
+    tab_index: int | None = None,
+    tab_name: str | None = None,
+    first_widget=None,
+    select_all: bool = True,
+) -> bool:
+    """Best-effort initial focus helper.
+
+    - If tab_widget is provided, selects a tab by index or by tab text.
+    - Focuses first_widget and optionally selectAll() for line edits.
+
+    Returns True if it likely focused something.
+    """
+    focused = False
+
+    # 1) Activate tab (optional)
+    try:
+        if tab_widget is not None:
+            if tab_index is not None:
+                tab_widget.setCurrentIndex(int(tab_index))
+            elif tab_name is not None:
+                name = str(tab_name)
+                for i in range(tab_widget.count()):
+                    try:
+                        if str(tab_widget.tabText(i)) == name:
+                            tab_widget.setCurrentIndex(i)
+                            break
+                    except Exception:
+                        continue
+    except Exception:
+        pass
+
+    # 2) Focus widget (optional)
+    try:
+        if first_widget is not None:
+            first_widget.setFocus(Qt.OtherFocusReason)
+            focused = True
+            if select_all and hasattr(first_widget, 'selectAll'):
+                try:
+                    first_widget.selectAll()
+                except Exception:
+                    pass
+    except Exception:
+        pass
+
+    return focused
+
+
+class FocusGate:
+    """Remembers and toggles focusability for a group of widgets.
+
+    Goal: "lock" widgets so they cannot receive focus until unlocked.
+    This only affects focus policy (and optionally enabled/readOnly).
+
+    This is opt-in and does not integrate automatically with FieldCoordinator.
+    """
+
+    def __init__(
+        self,
+        widgets,
+        *,
+        lock_enabled: bool = False,
+        lock_read_only: bool = False,
+    ):
+        self._widgets = [w for w in (widgets or []) if w is not None]
+        self._orig_focus_policy = {}
+        self._orig_enabled = {}
+        self._orig_read_only = {}
+        self._lock_enabled = bool(lock_enabled)
+        self._lock_read_only = bool(lock_read_only)
+        self._remembered = False
+
+    def remember(self) -> None:
+        if self._remembered:
+            return
+        for w in self._widgets:
+            try:
+                self._orig_focus_policy[w] = w.focusPolicy()
+            except Exception:
+                pass
+            try:
+                self._orig_enabled[w] = w.isEnabled()
+            except Exception:
+                pass
+            # Some widgets (e.g., QLineEdit) support readOnly
+            try:
+                if hasattr(w, 'isReadOnly') and callable(getattr(w, 'isReadOnly')):
+                    self._orig_read_only[w] = bool(w.isReadOnly())
+            except Exception:
+                pass
+        self._remembered = True
+
+    def lock(self) -> None:
+        """Prevent widgets from receiving focus."""
+        self.remember()
+        for w in self._widgets:
+            try:
+                w.setFocusPolicy(Qt.NoFocus)
+            except Exception:
+                pass
+            if self._lock_enabled:
+                try:
+                    w.setEnabled(False)
+                except Exception:
+                    pass
+            if self._lock_read_only and isinstance(w, QLineEdit):
+                try:
+                    w.setReadOnly(True)
+                except Exception:
+                    pass
+
+    def unlock(self) -> None:
+        """Restore original focusability (and optional enabled/readOnly state)."""
+        self.remember()
+        for w in self._widgets:
+            try:
+                w.setFocusPolicy(self._orig_focus_policy.get(w, Qt.StrongFocus))
+            except Exception:
+                pass
+            if self._lock_enabled:
+                try:
+                    w.setEnabled(self._orig_enabled.get(w, True))
+                except Exception:
+                    pass
+            if self._lock_read_only and isinstance(w, QLineEdit):
+                try:
+                    w.setReadOnly(self._orig_read_only.get(w, False))
+                except Exception:
+                    pass
+
+    def set_locked(self, locked: bool) -> None:
+        if locked:
+            self.lock()
+        else:
+            self.unlock()
+
+
+def set_focus_enabled(widgets, enabled: bool, *, remember: dict | None = None) -> dict:
+    """Lightweight helper: toggle focusPolicy for widgets.
+
+    - When enabled=False: sets Qt.NoFocus
+    - When enabled=True: restores remembered policy (if provided) else Qt.StrongFocus
+
+    Returns the remember-map to allow callers to persist it.
+    """
+    store = remember if isinstance(remember, dict) else {}
+    ws = [w for w in (widgets or []) if w is not None]
+
+    if enabled:
+        for w in ws:
+            try:
+                w.setFocusPolicy(store.get(w, Qt.StrongFocus))
+            except Exception:
+                pass
+        return store
+
+    # disabling
+    for w in ws:
+        try:
+            if w not in store:
+                store[w] = w.focusPolicy()
+        except Exception:
+            pass
+        try:
+            w.setFocusPolicy(Qt.NoFocus)
+        except Exception:
+            pass
+    return store

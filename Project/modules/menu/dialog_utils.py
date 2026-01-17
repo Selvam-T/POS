@@ -1,12 +1,15 @@
-"""
-Shared dialog utilities for menu dialogs.
+"""Shared dialog utilities for menu dialogs.
+
+This module keeps existing helpers stable.
+New helpers added below are opt-in and do not affect existing dialogs
+unless they explicitly call them.
 """
 import os
 import traceback
 from typing import Optional
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QDialog
+from PyQt5.QtWidgets import QDialog, QVBoxLayout
 
 from modules.ui_utils.error_logger import log_error
 from modules.ui_utils import ui_feedback
@@ -111,3 +114,107 @@ def report_exception(host_window, where: str, exc: Exception, *, user_message: O
         report_to_statusbar(host_window, short, is_error=True, duration=duration)
 
     return None
+
+
+# =========================================================
+# OPT-IN HELPERS (do not change existing behavior)
+# =========================================================
+
+def build_dialog_from_ui(
+    ui_path: str,
+    *,
+    host_window=None,
+    dialog_name: str = "Dialog",
+    qss_path: Optional[str] = None,
+    frameless: bool = True,
+    application_modal: bool = True,
+) -> Optional[QDialog]:
+    """Standardized dialog builder.
+
+    - Loads UI strictly (returns None on load failure)
+    - Wraps non-QDialog roots inside a QDialog container
+    - Applies common modality + frameless flags
+    - Applies QSS best-effort
+
+    Opt-in: existing dialogs can keep using uic.loadUi/load_ui_strict.
+    """
+    content = load_ui_strict(ui_path, host_window=host_window, dialog_name=dialog_name)
+    if content is None:
+        return None
+
+    if isinstance(content, QDialog):
+        dlg = content
+    else:
+        dlg = QDialog(host_window)
+        lay = QVBoxLayout(dlg)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(content)
+
+    try:
+        if host_window is not None:
+            dlg.setParent(host_window)
+    except Exception:
+        pass
+
+    try:
+        dlg.setModal(True)
+        if application_modal:
+            from PyQt5.QtCore import Qt
+            dlg.setWindowModality(Qt.ApplicationModal)
+        if frameless:
+            from PyQt5.QtCore import Qt
+            dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
+    except Exception:
+        pass
+
+    if qss_path and os.path.exists(qss_path):
+        try:
+            with open(qss_path, 'r', encoding='utf-8') as f:
+                dlg.setStyleSheet(f.read())
+        except Exception as e:
+            try:
+                log_error(f"{dialog_name}: failed to load qss ({qss_path}): {e}")
+            except Exception:
+                pass
+
+    return dlg
+
+
+def require_widgets(
+    root,
+    required: dict,
+    *,
+    hard_fail: bool = True,
+) -> dict:
+    """Resolve required widgets by (type, objectName).
+
+    required format: {"key": (WidgetClass, "objectName")}
+    Returns: {"key": widget}
+
+    If hard_fail=True and any required widget is missing, raises ValueError.
+    """
+    found = {}
+    missing = []
+
+    for key, spec in (required or {}).items():
+        try:
+            cls, obj_name = spec
+        except Exception:
+            cls, obj_name = None, None
+
+        w = None
+        try:
+            if root is not None and cls is not None and obj_name:
+                w = root.findChild(cls, obj_name)
+        except Exception:
+            w = None
+
+        if w is None:
+            missing.append(str(obj_name or key))
+        else:
+            found[key] = w
+
+    if missing and hard_fail:
+        raise ValueError(f"Missing required widgets: {', '.join(missing)}")
+
+    return found
