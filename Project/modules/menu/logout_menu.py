@@ -2,7 +2,7 @@ import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QPushButton, QLabel, QDialog
-from modules.menu.dialog_utils import center_dialog_relative_to, load_ui_strict
+from modules.ui_utils.dialog_utils import center_dialog_relative_to, load_ui_strict
 from modules.ui_utils.error_logger import log_error
 
 # Compute project root and UI directory relative to this file

@@ -40,7 +40,7 @@ from modules.ui_utils.focus_utils import FieldCoordinator
 from modules.ui_utils import input_handler
 from modules.ui_utils import error_logger
 
-from modules.menu.dialog_utils import load_ui_strict, report_exception
+from modules.ui_utils.dialog_utils import load_ui_strict, report_exception
 
 # Derive project base dir from this file location: modules/menu -> modules -> Project
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

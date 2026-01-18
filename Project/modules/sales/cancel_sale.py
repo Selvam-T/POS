@@ -2,7 +2,7 @@ import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QPushButton, QLabel, QDialog
-from modules.menu.dialog_utils import center_dialog_relative_to
+from modules.ui_utils.dialog_utils import center_dialog_relative_to
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')

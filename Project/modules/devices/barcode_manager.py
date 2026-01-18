@@ -97,6 +97,11 @@ class BarcodeManager(QObject):
 
         try:
             from modules.table import handle_barcode_scanned
+            try:
+                from modules.table.table_operations import get_product_info
+                found, _, _, _ = get_product_info(barcode)
+            except Exception:
+                found = True
             if not found:
                 # Product not found - open Product Management in ADD mode with code prefilled
                 if status_bar and hasattr(status_bar, 'showMessage'):

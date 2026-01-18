@@ -1,9 +1,13 @@
-"""Shared dialog utilities for menu dialogs.
+"""Shared dialog utilities.
 
-This module keeps existing helpers stable.
+This module centralizes common helpers used by dialog controllers across the app
+(menu dialogs and sales dialogs).
+
+Existing helpers are kept stable.
 New helpers added below are opt-in and do not affect existing dialogs
 unless they explicitly call them.
 """
+
 import os
 import traceback
 from typing import Optional
@@ -35,6 +39,7 @@ def set_dialog_info(dlg, message: str, *, duration: int = 4000) -> None:
 
 def set_dialog_error(dlg, message: str, *, duration: int = 5000) -> None:
     set_dialog_main_status(dlg, message, is_error=True, duration=duration)
+
 
 def center_dialog_relative_to(dlg: QDialog, host) -> None:
     """Center dlg relative to host window."""

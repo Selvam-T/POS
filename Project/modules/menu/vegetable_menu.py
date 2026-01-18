@@ -10,7 +10,7 @@ from modules.ui_utils.error_logger import log_error
 from modules.ui_utils.focus_utils import FieldCoordinator
 from modules.ui_utils import input_handler, input_validation, ui_feedback
 
-from modules.menu.dialog_utils import load_ui_strict, report_exception
+from modules.ui_utils.dialog_utils import load_ui_strict, report_exception
 
 from modules.db_operation import PRODUCT_CACHE, get_product_full, get_product_slim, add_product, delete_product
 from modules.db_operation.product_cache import _to_camel_case, _norm
