@@ -146,6 +146,25 @@ def validate_price(value, price_type: str = "price"):
 	return validate_unit_price(value)
 
 
+def validate_optional_price(value, price_type: str = "price"):
+	"""Optional price validator.
+
+	- Empty values are accepted (ok=True)
+	- Non-empty values must pass the same numeric/min/max rules as validate_unit_price
+	"""
+	if value is None or str(value).strip() == "":
+		return True, ""
+	try:
+		val = float(value)
+		if val < UNIT_PRICE_MIN:
+			return False, f"Minimum {price_type.lower()} is {UNIT_PRICE_MIN}"
+		if val > UNIT_PRICE_MAX:
+			return False, f"Maximum {price_type.lower()} is {UNIT_PRICE_MAX}"
+		return True, ""
+	except (ValueError, TypeError):
+		return False, f"{price_type} must be a number"
+
+
 def validate_password(value):
 	if not isinstance(value, str):
 		return False, "Password must be a string"

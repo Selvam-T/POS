@@ -1,26 +1,43 @@
 from PyQt5.QtWidgets import QLabel, QStatusBar
 from PyQt5.QtCore import QTimer
+import weakref
 
 def set_status_label(label: QLabel, message: str, ok: bool, duration: int = 3000) -> bool:
     """Sets status message and triggers QSS property change."""
     if label is None:
         return False
 
-    label.setText(message or "")
+    try:
+        label.setText(message or "")
+    except RuntimeError:
+        # Label got deleted (dialog closed) before update.
+        return False
     
     # Apply the property defined in dialog.qss
     status_val = "success" if ok else "error"
-    label.setProperty("status", status_val)
+    try:
+        label.setProperty("status", status_val)
+    except RuntimeError:
+        return False
 
     # Re-polish tells Qt to re-read the CSS for this specific widget
-    label.style().unpolish(label)
-    label.style().polish(label)
+    try:
+        label.style().unpolish(label)
+        label.style().polish(label)
+    except RuntimeError:
+        return False
 
     # Only clear success messages automatically. 
     # Errors usually stay until the user interacts again.
     if ok and duration > 0:
-        # Use singleShot to call clear_status_label after the duration
-        QTimer.singleShot(duration, lambda: clear_status_label(label))
+        # Use singleShot with a weakref so we don't touch deleted widgets.
+        ref = weakref.ref(label)
+        def _clear_later():
+            lbl = ref()
+            if lbl is None:
+                return
+            clear_status_label(lbl)
+        QTimer.singleShot(duration, _clear_later)
     
     return ok
 
@@ -28,11 +45,15 @@ def clear_status_label(label: QLabel) -> bool:
     """Clears text and resets the QSS property."""
     if label is None:
         return False
-    label.setText("")
-    label.setProperty("status", "none")
-    label.style().unpolish(label)
-    label.style().polish(label)
-    return True
+    try:
+        label.setText("")
+        label.setProperty("status", "none")
+        label.style().unpolish(label)
+        label.style().polish(label)
+        return True
+    except RuntimeError:
+        # Safe no-op if the Qt object has been deleted.
+        return False
 
 # helper function to target the Main Window’s status bar
 

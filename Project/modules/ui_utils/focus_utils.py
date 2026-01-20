@@ -5,7 +5,7 @@ New helpers added below are opt-in and do not affect existing dialogs
 unless they explicitly call them.
 """
 
-from PyQt5.QtCore import QObject, Qt, QEvent
+from PyQt5.QtCore import QObject, Qt, QEvent, QTimer
 from PyQt5.QtWidgets import QLineEdit, QComboBox, QPushButton
 from modules.ui_utils import ui_feedback
 
@@ -17,6 +17,7 @@ class FieldCoordinator(QObject):
         self._validators = {}
         self._last_error_source = None
         self._last_error_label = None
+        self._live_timers = {}
 
     def set_error(self, source_widget, message: str, status_label=None) -> bool:
         """Show an error on status_label and remember the source widget."""
@@ -127,6 +128,10 @@ class FieldCoordinator(QObject):
         auto_jump=False,
         placeholder_mode=None,
         swallow_empty: bool = True,
+        validate_fn=None,
+        live_lookup: bool = False,
+        live_min_chars: int = 0,
+        live_debounce_ms: int = 180,
     ):
         """Register relationship (lookup optional for simple focus-jumps).
 
@@ -144,6 +149,10 @@ class FieldCoordinator(QObject):
             'auto_jump': auto_jump,
             'reactive_placeholders': reactive_placeholders,
             'swallow_empty': bool(swallow_empty),
+            'validate_fn': validate_fn,
+            'live_lookup': bool(live_lookup),
+            'live_min_chars': int(live_min_chars or 0),
+            'live_debounce_ms': int(live_debounce_ms or 0),
         }
 
         # Opt-in: hide placeholders at rest; only show when targets stay empty after sync.
@@ -152,7 +161,51 @@ class FieldCoordinator(QObject):
                 self._set_reactive_placeholder(_w, show=False)
         
         if isinstance(source, QLineEdit):
+            # Default behavior: sync on user typing + finish-editing.
+            # Opt-in behavior (live_lookup=True): sync debounced on textChanged to
+            # support cases where focus doesn't change (e.g., clicking a NoFocus button).
             source.textEdited.connect(lambda: self._sync_fields(source))
+            source.editingFinished.connect(lambda: self._sync_fields(source))
+
+            link = self.links[source]
+            if link.get('lookup') and link.get('live_lookup'):
+                # One timer per source widget.
+                timer = QTimer(source)
+                timer.setSingleShot(True)
+                self._live_timers[source] = timer
+
+                def _fire_live():
+                    try:
+                        txt = (source.text() or '').strip()
+                    except Exception:
+                        txt = ''
+
+                    min_chars = int(link.get('live_min_chars') or 0)
+                    if txt and len(txt) < min_chars:
+                        # Don't spam lookups or show 'Not Found' while still typing.
+                        return
+                    self._sync_fields(source)
+
+                def _schedule_live(_t=None):
+                    try:
+                        delay = int(link.get('live_debounce_ms') or 0)
+                    except Exception:
+                        delay = 0
+                    if delay <= 0:
+                        _fire_live()
+                        return
+                    try:
+                        timer.stop()
+                        timer.timeout.disconnect()
+                    except Exception:
+                        pass
+                    try:
+                        timer.timeout.connect(_fire_live)
+                    except Exception:
+                        pass
+                    timer.start(delay)
+
+                source.textChanged.connect(_schedule_live)
         elif isinstance(source, QComboBox):
             source.activated.connect(lambda: self._sync_fields(source))
             
@@ -232,13 +285,39 @@ class FieldCoordinator(QObject):
                 link = self.links[obj]
                 # Get the value regardless of whether we are doing a lookup
                 val = obj.text().strip() if hasattr(obj, 'text') else obj.currentText()
+
+                # Optional: validate on Enter (primarily for simple focus-jump links)
+                validate_fn = link.get('validate_fn')
                 
                 # --- THE SWALLOW LOGIC ---
                 # If the box is empty, we "swallow" the Enter key and stay here.
                 if not val and link.get('swallow_empty', True):
+                    # If a validate_fn exists, run it so the user sees the proper
+                    # validation message even when the field is empty.
+                    if callable(validate_fn) and link.get('status_label'):
+                        try:
+                            validate_fn()
+                        except ValueError as e:
+                            self.set_error(obj, str(e), status_label=link.get('status_label'))
+                        except Exception:
+                            pass
                     if hasattr(obj, 'selectAll'):
                         obj.selectAll()
                     return True # Returns True but DOES NOT call _move_focus
+
+                # If this is a simple focus jump link with validate_fn, validate before moving.
+                if callable(validate_fn) and not link.get('lookup'):
+                    try:
+                        validate_fn()
+                    except ValueError as e:
+                        if link.get('status_label'):
+                            self.set_error(obj, str(e), status_label=link.get('status_label'))
+                        if hasattr(obj, 'selectAll'):
+                            obj.selectAll()
+                        return True
+                    except Exception:
+                        # Best-effort: if validation throws unexpectedly, block the jump.
+                        return True
                 
                 # If there is a lookup function, validate/sync
                 if link['lookup']:

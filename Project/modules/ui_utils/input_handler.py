@@ -14,6 +14,17 @@ def _raise_if_invalid(result):
         raise ValueError(err or "Invalid input")
     return True
 
+
+def _to_camel_case(text: str) -> str:
+    """Best-effort display casing (matches db_operation.product_cache behavior)."""
+    s = (text or "").strip()
+    if not s:
+        return ""
+    for ch in ("_", "-", "\t"):
+        s = s.replace(ch, " ")
+    parts = [p for p in s.split(" ") if p]
+    return " ".join([p[:1].upper() + p[1:].lower() if p else "" for p in parts])
+
 # =========================================================
 # SECTION 2: PURE GETTERS (EXTRACT + VALIDATE)
 # These are used by 'OK' buttons to grab final clean data.
@@ -32,6 +43,19 @@ def handle_quantity_input(line_edit: QLineEdit, unit_type: str = 'unit') -> floa
 def handle_price_input(line_edit: QLineEdit, price_type: str = "price") -> float:
     text = line_edit.text().strip()
     _raise_if_invalid(input_validation.validate_price(text, price_type))
+    return float(text)
+
+
+def handle_price_input_optional(line_edit: QLineEdit, price_type: str = "price") -> float | None:
+    """Optional numeric price.
+
+    Returns:
+        None when blank, otherwise a validated float.
+    """
+    text = (line_edit.text() or '').strip()
+    _raise_if_invalid(input_validation.validate_optional_price(text, price_type))
+    if not text:
+        return None
     return float(text)
 
 def handle_email_input(line_edit: QLineEdit) -> str:
@@ -58,6 +82,27 @@ def handle_category_input_combo(combo_box: QComboBox) -> str:
     category = combo_box.currentText().strip()
     _raise_if_invalid(input_validation.validate_category(category))
     return category
+
+
+def handle_category_input_combo_default_other(combo_box: QComboBox, *, default: str = "Other") -> str:
+    """Category is optional; if not selected/blank, default to 'Other'."""
+    try:
+        category = (combo_box.currentText() or '').strip()
+    except Exception:
+        category = ''
+    if not category:
+        category = str(default)
+    _raise_if_invalid(input_validation.validate_category(category))
+    return category
+
+
+def handle_product_code_input(line_edit: QLineEdit) -> str:
+    code_raw = (line_edit.text() or '').strip()
+    _raise_if_invalid(input_validation.validate_product_code_format(code_raw))
+    # Canonicalize for storage/display consistency.
+    code = _to_camel_case(code_raw) or code_raw
+    _raise_if_invalid(input_validation.validate_product_code_format(code))
+    return code
 
 def handle_veg_choose_combo(combo_box: QComboBox) -> str:
     """Returns selected vegetable slot (no strict validation)."""
@@ -127,7 +172,13 @@ def product_name_search_suggestions(search_text: str) -> list:
 # SECTION 4: UI HELPERS
 # =========================================================
 
-def setup_name_search_lineedit(line_edit: QLineEdit, product_names: list, *, on_selected=None):
+def setup_name_search_lineedit(
+    line_edit: QLineEdit,
+    product_names: list,
+    *,
+    on_selected=None,
+    trigger_on_finish: bool = True,
+):
     """Initializes QCompleter on a LineEdit.
 
     Args:
@@ -178,11 +229,12 @@ def setup_name_search_lineedit(line_edit: QLineEdit, product_names: list, *, on_
             except Exception:
                 pass
 
-        # Manual exact typing + focus-out
-        try:
-            line_edit.editingFinished.connect(lambda: _call(line_edit.text() or ""))
-        except Exception:
-            pass
+        # Manual exact typing + focus-out (optional; some dialogs want explicit commit only)
+        if trigger_on_finish:
+            try:
+                line_edit.editingFinished.connect(lambda: _call(line_edit.text() or ""))
+            except Exception:
+                pass
 
     return completer
 
