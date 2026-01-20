@@ -183,6 +183,13 @@ def get_sales_data(table: QTableWidget) -> List[Dict[str, Any]]:
         })
     return rows
 
+def is_transaction_active(table_widget) -> bool:
+    """Step 0 Helper: Returns True if there are items in the sales table."""
+    try:
+        return table_widget is not None and table_widget.rowCount() > 0
+    except Exception:
+        return False
+    
 # =========================================================
 # SECTION 3: MATH & TOTALS
 # =========================================================
@@ -387,3 +394,4 @@ def _add_product_row(table: QTableWidget, product_code: str, name: str, price: f
     data = get_sales_data(table)
     data.append({'product_name': name, 'quantity': 1, 'unit_price': price, 'unit': unit, 'editable': True})
     set_table_rows(table, data)
+

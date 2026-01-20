@@ -1,304 +1,174 @@
 # Product Menu (Product Management Dialog)
 
-Updated: December 30, 2025
+Updated: January 2026
 
-This doc replaces the legacy `product_menu.md`. It documents the current **product_menu controller** behavior and the design decisions we agreed on so far.
-
----
-
-## Purpose
-
-The Product Menu is a modal dialog used to manage the product table via **ADD / REMOVE / UPDATE** operations. It integrates with:
-
-- Database CRUD functions (`modules.db_operation`)
-- In-memory cache (`PRODUCT_CACHE`) kept in sync after CRUD
-- Barcode scanner routing (`BarcodeManager` override path)
-- Sales table flow (re-process scan after a successful ADD when opened from sales)
-
----
-
-## Entry Routes (2 ways to open)
-
-### Route A — From Menu Frame (admin/product management)
-- Opens Product Menu with **ADD / REMOVE / UPDATE tabs enabled**.
-- Lands on **ADD tab** by default.
-- User can switch tabs freely.
-
-### Route B — From Sales Frame (missing barcode)
-Triggered when the cashier scans a barcode that **is not found** in `PRODUCT_CACHE`.
-- Product Menu opens in **ADD mode** with the scanned code prefilled.
-- **REMOVE / UPDATE tabs are disabled** (business rule).
-- After successful ADD, the barcode is re-processed into the sales table so the item appears in the transaction.
-
----
-
-
-# Product Menu (Product Management Dialog)
-
-Updated: January 2, 2026
-
-This doc replaces the legacy `product_menu.md`. It documents the current **product_menu controller** behavior and the design decisions implemented as of January 2026.
+This document describes the current Product Menu controller behavior after the refactor to the standardized dialog pipeline.
 
 ---
 
 ## Purpose
 
-The Product Menu is a modal dialog used to manage the product table via **ADD / REMOVE / UPDATE** operations. It integrates with:
+Product Menu is a modal dialog used to manage products via **ADD / REMOVE / UPDATE** operations.
+It integrates with:
 
-- Database CRUD functions (`modules.db_operation`)
-- In-memory cache (`PRODUCT_CACHE`) kept in sync after CRUD
-- Barcode scanner routing (`BarcodeManager` override path)
-- Sales table flow (re-process scan after a successful ADD when opened from sales)
+- Database CRUD (`modules.db_operation`) and the in-memory cache (`PRODUCT_CACHE`)
+- Barcode scanning via a temporary `BarcodeManager` override while the dialog is open
 
----
+Primary implementation:
 
-## Canonical Unit Handling (2026 Update)
-
-- **All product units are canonicalized to either "Kg" or "Each" at every entry point** (manual, barcode, dialog, CRUD).
-- The UI, database, and cache never store or display non-canonical units.
-- All entry points (menu, barcode, dialogs) canonicalize units before saving or merging using `canonicalize_unit()`.
-- Only "Kg" or "Each" are valid and stored in the database, cache, and all table operations.
+- Controller: `modules/menu/product_menu.py` (`open_dialog_scanner_enabled`)
+- UI: `ui/product_menu.ui`
 
 ---
 
-## Entry Routes (2 ways to open)
+## Standardized Pipeline (implementation pattern)
 
-### Route A — From Menu Frame (admin/product management)
-- Opens Product Menu with **ADD / REMOVE / UPDATE tabs enabled**.
-- Lands on **ADD tab** by default.
-- User can switch tabs freely.
+Product Menu follows the dialog pipeline used across the app:
 
-### Route B — From Sales Frame (missing barcode)
-Triggered when the cashier scans a barcode that **is not found** in `PRODUCT_CACHE`.
-- Product Menu opens in **ADD mode** with the scanned code prefilled.
-- **REMOVE / UPDATE tabs are disabled** (business rule).
-- After successful ADD, the barcode is re-processed into the sales table so the item appears in the transaction.
+1. Build dialog from UI via `build_dialog_from_ui(...)`.
+2. Resolve widgets with `require_widgets(...)` (hard fail if required widgets are missing).
+3. Configure read-only/display-only fields (`setReadOnly(True)` + `Qt.NoFocus`).
+4. Wire relationships + Enter navigation using `FieldCoordinator`.
+5. Apply gating using `FocusGate(lock_enabled=True)`.
+6. OK/Cancel handlers validate + write using DB operation functions.
 
 ---
 
-## Modal + Scanner Behavior (how it works)
+## Entry / Opening Behavior
 
-### Launcher
-Product Menu is launched via:
+The constructor supports two optional knobs:
 
-- `dialog_wrapper.open_dialog_scanner_enabled()`
+- `initial_mode`: may choose the initial tab (`add`/`remove`/`update`) when allowed.
+- `initial_code`: when provided, the dialog always lands on **ADD** and prefills the ADD code.
 
-### Barcode routing
-- `BarcodeManager` receives a scan string.
-- If a modal override is installed, it calls the override.
-- The override places the barcode into the currently active tab’s `*ProductCodeLineEdit`.
+If there is an active sale transaction (`sale_lock=True`):
 
-### Allowed typing while modal is open (whitelist)
-Because the app uses modal scanner behavior in multiple places, `BarcodeManager.eventFilter()` whitelists “allowed input widgets” even during modal-block scenarios.
-For Product Menu we whitelist:
-- ADD: name/cost/sell/supplier line edits
-- UPDATE: name/cost/sell/supplier line edits
-- REMOVE/UPDATE search combo’s **internal lineEdit** (for typing product-name search)
+- REMOVE and UPDATE tabs are disabled.
 
-> Note: scanner input is not the same as “keyboard typing”. Both are key events. If you allow a widget to accept scanner input, it will accept typing too.
+Landing rules:
+
+- Default landing tab is **ADD**.
+- Landing focus goes to the active tab’s Product Code field.
 
 ---
 
-## Focus Rules
+## Reserved Vegetable Codes (veg01–veg16)
 
-### Landing focus
-- Always land on **ADD tab**.
-- Focus should land on **ADD ProductCode**.
+Product Menu enforces the reserved vegetable code range in all relevant paths:
 
-### Tab-change focus
-Whenever user switches tabs:
-- Focus lands on that tab’s `*ProductCodeLineEdit`.
+- ADD: entering `veg01` … `veg16` is blocked.
+- REMOVE/UPDATE lookup: reserved veg codes are rejected as “Reserved vegetable code”.
 
-### Scan in ADD tab: exists vs not exists
-When a barcode is set into `addProductCodeLineEdit`:
-
-- **If code already exists in `PRODUCT_CACHE`:**
-  - Show error in ADD status label
-  - Keep focus in `addProductCodeLineEdit`
-  - Select all text so Backspace clears quickly
-
-- **If code does NOT exist:**
-  - Prefill the code
-  - Move focus to `addProductNameLineEdit` so user can continue data entry
+This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_product(...)` boundary.
 
 ---
 
-## UI Structure
+## Category Source of Truth
 
-UI file:
-- `ui/product_menu.ui`
-
-Tab widget:
-- `tabWidget` (ADD=0, REMOVE=1, UPDATE=2)
-
-Search combos (REMOVE/UPDATE):
-- removeSearchComboBox, updateSearchComboBox
-
-Status labels:
-- addStatusLabel, removeStatusLabel, updateStatusLabel
-
-Product code line edits:
-- addProductCodeLineEdit, removeProductCodeLineEdit, updateProductCodeLineEdit
+- Categories are sourced from `config.PRODUCT_CATEGORIES`.
+- The first combo item is treated as a UI-provided placeholder (from the `.ui`).
+- The controller clears/rebuilds the combo and appends config categories.
 
 ---
 
-## Field Editability Rules
+## Markup Calculation
 
-### ADD tab
-Editable + validated:
-- ProductCode (keyboard + scanner)
-- ProductName
-- Category (combo, selection only)
-- CostPrice (optional numeric)
-- SellingPrice (mandatory numeric)
-- Supplier
-- Unit (dropdown, only "Kg" or "Each"; always canonicalized before save)
+Markup is computed (display-only) from Selling Price and Cost Price:
 
-### REMOVE tab
-Editable:
-- Search product name combo (editable typing + completer)
-- ProductCode (keyboard + scanner)
+- Both empty → markup empty
+- Only one of (sell/cost) present → markup shows `NA`
+- Both present and cost $> 0$ → markup is $((sell - cost)/cost) * 100$ shown as `X.Y%`
+- Any parse/edge failure → markup empty
 
-Display-only (readOnly + NoFocus for consistent UI):
-- ProductName
-- Category
-- CostPrice
-- SellingPrice
-- Unit
-- Supplier
-- LastUpdated
-
-### UPDATE tab
-Editable:
-- Search product name combo (editable typing + completer)
-- ProductCode (keyboard + scanner)
-- ProductName
-- Category (combo selection)
-- CostPrice
-- SellingPrice
-- Supplier
-- Unit (dropdown, only "Kg" or "Each"; always canonicalized before save)
-
-Display-only:
-- LastUpdated: display-only (set by DB and reflected in UI)
+Markup recalculates on `textChanged` for sell/cost.
 
 ---
 
-## Mandatory Fields & Validation
+## ADD Tab (gated input)
 
-Validation is performed in the controller using:
+### Focus denial until valid Product Code
 
-- `from modules.ui_utils import input_validation`
+ADD input fields are gated behind a valid code using `FocusGate(lock_enabled=True)`.
+
+Code must be:
+
+- non-empty
+- length $\ge 4$
+- not a reserved veg code (`veg01`–`veg16`)
+- not already present in `PRODUCT_CACHE`
+
+While gated/locked:
+
+- ADD fields are disabled and cannot be edited.
+- UI placeholders and UI-provided default texts are hidden (then restored on unlock).
+- Category combo is blanked.
+
+When code becomes valid:
+
+- gate unlocks and focus advances into the first ADD field.
+
+### Enter-to-next navigation
+
+ADD uses `FieldCoordinator.add_link(..., swallow_empty=...)` to:
+
+- prevent Enter from closing the dialog
+- enforce required fields (swallow Enter on empty)
+- jump field-to-field when valid
+
+---
+
+## REMOVE Tab (lookup + read-only display)
+
+REMOVE supports two lookup sources:
+
+- code search: `removeProductCodeLineEdit`
+- name search: `removeNameSearchLineEdit` (QCompleter-backed)
 
 Rules:
-- In all tabs, **ProductCode** is mandatory.
-- If **ProductName** and **SellingPrice** are editable in the tab, they are mandatory too.
-  - (REMOVE tab displays name/price as read-only, so those are not validated there.)
-- **Unit** is always validated and canonicalized to "Kg" or "Each" before any save or update.
 
-Status/error propagation:
-- `input_validation` returns True/False (+ error text).
-- The controller sets the tab’s `*StatusLabel` to show errors.
+- The two sources are mutually exclusive: typing in one clears the other and clears the displayed mapped fields.
+- Display fields are read-only + `Qt.NoFocus`.
 
 ---
 
-## Status Label Feedback (Red/Green)
+## UPDATE Tab (lookup-gated editing + no-op protection)
 
-Status labels are updated via:
+UPDATE supports two lookup sources:
 
-- `from modules.ui_utils import ui_feedback`
+- code search: `updateProductCodeLineEdit`
+- name search: `updateNameSearchLineEdit` (QCompleter-backed)
 
-Convention:
-- Success → green message
-- Error → red message
-- Clear → empty message
+### Mutual exclusivity
 
-This is implemented in `ui_feedback.py` so every modal dialog can reuse the same behavior.
+Typing in one source clears the other source and clears stale mapped display fields.
 
----
+### Lock until lookup succeeds
 
-## Search Combo Behavior (REMOVE / UPDATE)
+The editable UPDATE widgets (name/sell/cost/category/supplier/OK) start locked via `FocusGate(lock_enabled=True)`.
 
-Combobox role:
-- Editable selection of product names for search.
-- Typing triggers QCompleter suggestions:
-  - case-insensitive
-  - substring matching
+- On lookup failure: fields clear, category is blank (no selection), gate remains locked.
+- On lookup success: fields populate, category is applied, gate unlocks.
 
-Dropdown source:
-- unique + sorted product names extracted from `PRODUCT_CACHE`
+### Update only if changed
 
-Selection behavior:
-- If user selects a product name from the combobox:
-  - controller writes corresponding code into `*ProductCodeLineEdit`
-  - controller populates the rest of the fields from `get_product_full(code)`
-
-Scan/manual code entry behavior:
-- If `*ProductCodeLineEdit` matches a product code:
-  - controller populates the rest of the fields
-  - controller does **not** back-fill the search combobox selection (placeholder remains)
-
----
-
-## Data Sources & Population
-
-### Primary source for lookups
-- `PRODUCT_CACHE` is considered authoritative during runtime and always stores canonical units ("Kg" or "Each").
-- Full record for display is loaded using:
-  - `get_product_full(code)`
-
-### When fields are populated
-- REMOVE/UPDATE: when code is set/changed (scan or manual), loaders populate other fields.
-- REMOVE/UPDATE: when a search selection is made, code is set and loaders run.
-
----
-
-## CRUD Operations
-
-### ADD
-When OK is clicked and mandatory fields pass:
-1. The unit is canonicalized to either "Kg" or "Each" using `canonicalize_unit()` before saving.
-2. Create record in DB (`add_product(...)`) including `last_updated` timestamp formatted as `yyyy-MM-dd HH:mm:ss`, with canonical unit only.
-3. Refresh in-memory cache (`refresh_product_cache()`), which will now only contain canonical units.
-4. Show green confirmation in ADD status label
-5. Close dialog
-
-Sales-frame route special case:
-- After ADD succeeds, the controller immediately calls:
-  - `modules.table.handle_barcode_scanned(...)`
-  so the newly-added product appears in the transaction.
-
-### REMOVE
+After a successful lookup, the loaded values are snapshotted.
 When OK is clicked:
-1. Delete record in DB (`delete_product(code)`)
-2. Refresh cache (`refresh_product_cache()`)
-3. Show green confirmation
-4. Close dialog
 
-### UPDATE
-When OK is clicked:
-1. The unit is canonicalized to either "Kg" or "Each" using `canonicalize_unit()` before saving.
-2. Update record in DB (`update_product(...)`)
-3. Refresh cache (`refresh_product_cache()`)
-4. Update UI last_updated display (DB is responsible for persistence)
-5. Show green confirmation
-6. Close dialog
+- If no editable fields changed, the dialog closes without writing.
+- If fields changed, `update_product(...)` is called.
 
 ---
 
-## Related Files
+## Name Search (QCompleter) and Sync
 
-- `modules/menu/product_menu.py` (controller)
-- `ui/product_menu.ui` (layout + widget names)
-- `assets/menu.qss` (dialog styling)
-- `modules/db_operation/*` (CRUD + cache)
-- `modules/table.py` (sales table scan handler)
-- `modules/devices/barcode_manager.py` (override routing, modal blocking, whitelist)
-- `modules/ui_utils/input_validation.py` (validation helpers)
-- `modules/ui_utils/ui_feedback.py` (status label red/green helpers)
+Name search uses `input_handler.setup_name_search_lineedit(...)`.
+Because QCompleter selection does not always emit the same “user typing” signals, the setup attaches an `on_selected` hook that explicitly triggers coordinator sync.
 
 ---
 
-## Known Issues (tracking)
-- REMOVE/UPDATE search dropdown population is under investigation and may not appear even when cache is non-empty.
-  We parked this issue to revisit later.
+## Barcode Scans While Dialog Is Open
+
+Product Menu installs a temporary barcode override on the host window’s `barcode_manager`.
+
+- The override writes the scanned code into the active tab’s code field.
+- It then triggers a lookup sync so mapped fields update immediately.

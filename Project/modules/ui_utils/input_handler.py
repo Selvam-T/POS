@@ -127,13 +127,63 @@ def product_name_search_suggestions(search_text: str) -> list:
 # SECTION 4: UI HELPERS
 # =========================================================
 
-def setup_name_search_lineedit(line_edit: QLineEdit, product_names: list):
-    """Initializes QCompleter on a LineEdit."""
+def setup_name_search_lineedit(line_edit: QLineEdit, product_names: list, *, on_selected=None):
+    """Initializes QCompleter on a LineEdit.
+
+    Args:
+        line_edit: QLineEdit to attach the completer.
+        product_names: list of names.
+        on_selected: optional callback invoked when the user selects a completer
+            option (or finishes editing). This is useful to trigger downstream
+            mapping/sync logic (e.g., FieldCoordinator) because QCompleter sets
+            text programmatically (textChanged) and does not emit textEdited.
+
+            Supported call signatures:
+              - on_selected(text: str, line_edit: QLineEdit)
+              - on_selected(text: str)
+              - on_selected()
+
+    Returns:
+        The QCompleter instance.
+    """
     completer = QCompleter(product_names)
     completer.setCaseSensitivity(Qt.CaseInsensitive)
     completer.setFilterMode(Qt.MatchContains)
     completer.setCompletionMode(QCompleter.PopupCompletion)
     line_edit.setCompleter(completer)
+
+    if callable(on_selected):
+        def _call(text: str = ""):
+            try:
+                on_selected(text, line_edit)
+                return
+            except TypeError:
+                pass
+            try:
+                on_selected(text)
+                return
+            except TypeError:
+                pass
+            try:
+                on_selected()
+            except Exception:
+                pass
+
+        # Completer selection
+        try:
+            completer.activated[str].connect(lambda text: _call(text))
+        except Exception:
+            try:
+                completer.activated.connect(lambda _=None: _call(line_edit.text() or ""))
+            except Exception:
+                pass
+
+        # Manual exact typing + focus-out
+        try:
+            line_edit.editingFinished.connect(lambda: _call(line_edit.text() or ""))
+        except Exception:
+            pass
+
     return completer
 
 def search_combo_box(combo_box: QComboBox, search_text: str) -> list:

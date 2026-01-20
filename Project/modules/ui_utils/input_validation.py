@@ -1,26 +1,23 @@
 """Centralized validators. All functions return (ok, err)."""
 
-import re
-
-QUANTITY_MIN_KG = 0.005   
-QUANTITY_MAX_KG = 25.0
-QUANTITY_MIN_UNIT = 1
-QUANTITY_MAX_UNIT = 9999
-
-UNIT_PRICE_MIN = 0.1
-UNIT_PRICE_MAX = 5000
-
-TOTAL_PRICE_MIN = 0
-TOTAL_PRICE_MAX = 10000
-
-GRAND_TOTAL_MIN = 0
-GRAND_TOTAL_MAX = 100000
-
-STRING_MAX_LENGTH = 15
-PASSWORD_MIN_LENGTH = 8
-
-EMAIL_REGEX = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w+$")
-ALPHANUMERIC_REGEX = re.compile(r"^[A-Za-z0-9 ]+$")
+from config import (
+	PRODUCT_CODE_MIN_LEN,
+	PRODUCT_CODE_MAX_LEN,
+	QUANTITY_MIN_KG,
+	QUANTITY_MAX_KG,
+	QUANTITY_MIN_UNIT,
+	QUANTITY_MAX_UNIT,
+	UNIT_PRICE_MIN,
+	UNIT_PRICE_MAX,
+	TOTAL_PRICE_MIN,
+	TOTAL_PRICE_MAX,
+	GRAND_TOTAL_MIN,
+	GRAND_TOTAL_MAX,
+	STRING_MAX_LENGTH,
+	PASSWORD_MIN_LENGTH,
+	EMAIL_REGEX,
+	ALPHANUMERIC_REGEX,
+)
 
 
 def validate_quantity(value, unit_type='unit'):
@@ -220,10 +217,6 @@ def exists_in_memory_cache(value, cache_lookup_func):
 	return True, ""
 
 
-PRODUCT_CODE_MIN_LEN = 4
-PRODUCT_CODE_MAX_LEN = 30
-
-
 def validate_product_code_format(value, digits_only=False,
 							min_len=PRODUCT_CODE_MIN_LEN,
 							max_len=PRODUCT_CODE_MAX_LEN):
@@ -283,3 +276,24 @@ def validate_cost_price(value, min_val=0.0, max_val=UNIT_PRICE_MAX):
 
 def validate_selling_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX):
 	return validate_unit_price(value, min_val=min_val, max_val=max_val)
+
+def is_reserved_vegetable_code(code: str) -> bool:
+    """
+    Checks if a product code falls within the reserved vegetable range (veg01-veg16).
+    This is used to prevent editing of vegetable items within the standard Product Menu.
+    """
+    if not code:
+        return False
+    
+    s = str(code).strip().lower()
+    # Check if starts with 'veg' and has a numeric suffix
+    if s.startswith('veg') and len(s) >= 4:
+        try:
+            # Extract digits after 'veg'
+            suffix = s[3:]
+            if suffix.isdigit():
+                num = int(suffix)
+                return 1 <= num <= 16
+        except (ValueError, TypeError):
+            return False
+    return False

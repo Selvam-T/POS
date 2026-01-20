@@ -204,34 +204,17 @@ class DialogWrapper:
                 pass
 
     def open_dialog_scanner_enabled(self, dialog_func, dialog_key=None, **kwargs):
-        """Wrapper for dialogs that allow scanner input (e.g., product_menu).
-        
-        Product dialog:
-        - Does NOT block scanner (allows barcode input in product code field)
-        - Resets barcode override on close
-        - Uses timer-deferred focus restoration
-        - Dialog size calculated based on ratios of main window dimensions
-        
-        Args:
-            dialog_func: Function that returns QDialog (product dialog).
-            dialog_key: Optional key to lookup ratios in DIALOG_RATIOS. If None, uses defaults (0.5, 0.5).
-            **kwargs: Arguments to pass to dialog_func.
-        """
         self._show_overlay()
-        # Note: scanner is NOT blocked for product menu
+        # SHIELD: Block the scanner from reaching the main window
+        self._block_scanner() 
 
         try:
             dlg = dialog_func(self.main, **kwargs)
-
             if dlg is None:
-                # Dialog intentionally not shown (e.g., UI load failure)
                 self._hide_overlay()
+                self._unblock_scanner()
                 return
 
-            if not isinstance(dlg, QDialog):
-                raise ValueError(f"Expected QDialog, got {type(dlg)}")
-
-            # Get ratios from mapping, or use defaults if key not found
             if dialog_key and dialog_key in self.DIALOG_RATIOS:
                 width_ratio, height_ratio = self.DIALOG_RATIOS[dialog_key]
             else:
@@ -241,30 +224,22 @@ class DialogWrapper:
 
             def _product_cleanup(_):
                 self._hide_overlay()
+                self._unblock_scanner() # REMOVE SHIELD
                 self._clear_scanner_override()
-                # Timer-deferred focus restoration (handles overlay hide event processing)
-                def _restore():
-                    self._restore_focus()
-                QTimer.singleShot(10, _restore)
+                from PyQt5.QtCore import QTimer
+                QTimer.singleShot(10, self._restore_focus)
 
             dlg.finished.connect(_product_cleanup)
             result = dlg.exec_()
-
-            # Optional main status message (same convention as scanner_blocked)
+            
             msg = getattr(dlg, 'main_status_msg', None)
             if msg:
                 is_error = getattr(dlg, 'main_status_is_error', (result == QDialog.Rejected))
-                duration = getattr(dlg, 'main_status_duration', None)
-                try:
-                    ui_feedback.show_main_status(self.main, msg, is_error=bool(is_error), duration=int(duration) if duration is not None else 4000)
-                except Exception:
-                    ui_feedback.show_main_status(self.main, msg, is_error=bool(is_error))
+                ui_feedback.show_main_status(self.main, msg, is_error=bool(is_error))
 
         except Exception as e:
             self._hide_overlay()
-            try:
-                import traceback
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"Product dialog failed: {e}\n{traceback.format_exc()}")
-            except Exception:
-                pass
+            self._unblock_scanner()
+            import traceback
+            from modules.ui_utils.error_logger import log_error
+            log_error(f"Product dialog failed: {e}\n{traceback.format_exc()}")

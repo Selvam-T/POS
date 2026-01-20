@@ -115,7 +115,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tabAdd">
       <attribute name="title">
@@ -191,6 +191,9 @@
              <height>40</height>
             </size>
            </property>
+           <property name="placeholderText">
+            <string>-- Scan or Type Barcode --</string>
+           </property>
           </widget>
          </item>
          <item row="1" column="0">
@@ -207,6 +210,9 @@
              <width>0</width>
              <height>40</height>
             </size>
+           </property>
+           <property name="placeholderText">
+            <string>-- Enter Product Name --</string>
            </property>
           </widget>
          </item>
@@ -225,6 +231,9 @@
              <height>40</height>
             </size>
            </property>
+           <property name="placeholderText">
+            <string>-- Enter Selling Price --</string>
+           </property>
           </widget>
          </item>
          <item row="3" column="0">
@@ -242,6 +251,9 @@
              <height>40</height>
             </size>
            </property>
+           <property name="placeholderText">
+            <string>-- Optional --</string>
+           </property>
           </widget>
          </item>
          <item row="5" column="0">
@@ -258,6 +270,12 @@
              <width>0</width>
              <height>40</height>
             </size>
+           </property>
+           <property name="currentText">
+            <string>Other</string>
+           </property>
+           <property name="placeholderText">
+            <string>-- Optional --</string>
            </property>
            <item>
             <property name="text">
@@ -296,9 +314,6 @@
              <height>40</height>
             </size>
            </property>
-           <property name="text">
-            <string>EACH</string>
-           </property>
            <property name="readOnly">
             <bool>true</bool>
            </property>
@@ -319,6 +334,9 @@
              <height>40</height>
             </size>
            </property>
+           <property name="placeholderText">
+            <string>-- Optional --</string>
+           </property>
           </widget>
          </item>
          <item row="4" column="0">
@@ -329,7 +347,11 @@
           </widget>
          </item>
          <item row="4" column="1">
-          <widget class="QLineEdit" name="addMarkupLineEdit"/>
+          <widget class="QLineEdit" name="addMarkupLineEdit">
+           <property name="placeholderText">
+            <string>-- Auto calculated --</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -485,6 +507,9 @@
              <height>40</height>
             </size>
            </property>
+           <property name="placeholderText">
+            <string>-- Scan or Type Barcode --</string>
+           </property>
           </widget>
          </item>
          <item row="2" column="0">
@@ -635,7 +660,11 @@
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QLineEdit" name="removeNameSearchLineEdit"/>
+          <widget class="QLineEdit" name="removeNameSearchLineEdit">
+           <property name="placeholderText">
+            <string>-- or Search Product Name --</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </item>
@@ -826,6 +855,9 @@
              <height>40</height>
             </size>
            </property>
+           <property name="placeholderText">
+            <string>-- Scan or Type Barcode --</string>
+           </property>
           </widget>
          </item>
          <item row="3" column="0">
@@ -906,6 +938,9 @@
              <height>40</height>
             </size>
            </property>
+           <property name="placeholderText">
+            <string>-- Select to Update --</string>
+           </property>
           </widget>
          </item>
          <item row="9" column="0">
@@ -958,7 +993,7 @@
             </size>
            </property>
            <property name="text">
-            <string>EACH</string>
+            <string/>
            </property>
            <property name="readOnly">
             <bool>true</bool>
@@ -1035,7 +1070,11 @@
           </spacer>
          </item>
          <item row="3" column="1">
-          <widget class="QLineEdit" name="updateNameSearchLineEdit"/>
+          <widget class="QLineEdit" name="updateNameSearchLineEdit">
+           <property name="placeholderText">
+            <string>-- or Search Product Name --</string>
+           </property>
+          </widget>
          </item>
          <item row="10" column="0">
           <widget class="QLabel" name="updateMarkupFieldLbl">

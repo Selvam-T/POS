@@ -139,37 +139,27 @@ class BarcodeManager(QObject):
             now = time.time()
             try:
                 if getattr(self, '_modalBlockScanner', False):
-                    # Check if focus is on an editable input widget
                     app = QApplication.instance()
                     fw = app.focusWidget() if app else None
-                    obj_name = ''
+                    modal = app.activeModalWidget() if app else None
+
+                    # If a modal dialog is actually active and has focus, allow normal typing.
+                    # The goal of modal-block is to prevent scanner/keyboard input leaking to
+                    # the *main window* while dialogs are open, not to block dialog typing.
                     try:
-                        obj_name = fw.objectName() if fw is not None else ''
-                    except Exception:
-                        obj_name = ''
-                    
-                    # Allow input in specific editable fields or QPushButton even during modal block
-                    from PyQt5.QtWidgets import QPushButton
-                    is_allowed_input = obj_name in (
-                        'qtyInput', 'productCodeLineEdit', 'refundInput',
-                        'inputProductName', 'inputSellingPrice',
-                        'inputSupplier', 'inputCostPrice',
-                        'inputQuantity', 'inputUnitPrice',
-                        # vegetable menu dialog fields:
-                        'vegMCostPriceLineEdit', 'vegMProductNameLineEdit',
-                        'vegMSellingPriceLineEdit', 'vegMSupplierLineEdit',
-                        # Manual entry dialog fields:
-                        'manualProductCodeLineEdit', 'manualNameSearchLineEdit', 'manualQuantityLineEdit'
-                    )
-                    # Also allow if the focused widget is a QPushButton
-                    if fw is not None:
-                        try:
-                            from PyQt5.QtWidgets import QPushButton
-                            if isinstance(fw, QPushButton):
-                                is_allowed_input = True
-                        except Exception:
+                        if modal is not None and fw is not None and fw.window() is modal:
                             pass
-                    if not is_allowed_input:
+                        else:
+                            text = ''
+                            try:
+                                text = event.text() or ''
+                            except Exception:
+                                text = ''
+                            is_printable = len(text) == 1 and (31 < ord(text) < 127)
+                            if is_printable or k in (Qt.Key_Return, Qt.Key_Enter):
+                                return True
+                    except Exception:
+                        # Conservative fallback: block printable input while modal-block is enabled.
                         text = ''
                         try:
                             text = event.text() or ''
@@ -191,7 +181,10 @@ class BarcodeManager(QObject):
                 except Exception:
                     obj_name = ''
                 is_qty = (obj_name == 'qtyInput')
-                is_allowed = (obj_name in ('productCodeLineEdit', 'refundInput')) and not is_qty
+                is_allowed = (
+                    (obj_name in ('productCodeLineEdit', 'refundInput'))
+                    or obj_name.endswith('ProductCodeLineEdit')
+                ) and not is_qty
                 text = ''
                 try:
                     text = event.text() or ''

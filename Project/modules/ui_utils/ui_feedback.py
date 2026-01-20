@@ -8,7 +8,7 @@ def set_status_label(label: QLabel, message: str, ok: bool, duration: int = 3000
 
     label.setText(message or "")
     
-    # Apply the property defined in menu.qss
+    # Apply the property defined in dialog.qss
     status_val = "success" if ok else "error"
     label.setProperty("status", status_val)
 

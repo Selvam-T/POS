@@ -18,7 +18,7 @@ from modules.db_operation.product_cache import _to_camel_case, _norm
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
+QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
 
 # Vegetable slot count
 VEG_SLOTS = 16
@@ -54,7 +54,7 @@ def open_vegetable_menu_dialog(host_window):
                 dlg.setStyleSheet(f.read())
         except Exception as e:
             try:
-                log_error(f"Failed to load menu.qss: {e}")
+                log_error(f"Failed to load dialog.qss: {e}")
             except Exception:
                 pass
 

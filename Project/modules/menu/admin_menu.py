@@ -8,7 +8,7 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
+QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
 
 
 def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool = True):
@@ -65,7 +65,7 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
                 dlg.setStyleSheet(f.read())
         except Exception as e:
             try:
-                log_error(f"Failed to load menu.qss: {e}")
+                log_error(f"Failed to load dialog.qss: {e}")
             except Exception:
                 pass
     

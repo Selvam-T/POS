@@ -1,4 +1,5 @@
 import os
+import re
 # Dialog size ratios (width_ratio, height_ratio) as fraction of main window
 DIALOG_RATIOS = {
 	'vegetable_entry': (0.5, 0.9),
@@ -18,6 +19,7 @@ DIALOG_RATIOS = {
 
 # Product Categories
 PRODUCT_CATEGORIES = [
+    '--Select Category--',
     'Alcohol',
 	'Beverages',
 	'Bread & Bakery',
@@ -85,3 +87,30 @@ DEBUG_CACHE_LOOKUP = False
 # Writable app data directory and feature constants
 APPDATA_DIR = os.path.join(_BASE_DIR, 'AppData')
 VEG_SLOTS = 16
+
+# =========================================================
+# Validation / Input Constraints (moved from input_validation.py)
+# =========================================================
+
+PRODUCT_CODE_MIN_LEN = 4
+PRODUCT_CODE_MAX_LEN = 30
+
+QUANTITY_MIN_KG = 0.005
+QUANTITY_MAX_KG = 25.0
+QUANTITY_MIN_UNIT = 1
+QUANTITY_MAX_UNIT = 9999
+
+UNIT_PRICE_MIN = 0.1
+UNIT_PRICE_MAX = 5000
+
+TOTAL_PRICE_MIN = 0
+TOTAL_PRICE_MAX = 10000
+
+GRAND_TOTAL_MIN = 0
+GRAND_TOTAL_MAX = 100000
+
+STRING_MAX_LENGTH = 15
+PASSWORD_MIN_LENGTH = 8
+
+EMAIL_REGEX = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w+$")
+ALPHANUMERIC_REGEX = re.compile(r"^[A-Za-z0-9 ]+$")

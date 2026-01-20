@@ -7,7 +7,7 @@ from modules.ui_utils.dialog_utils import center_dialog_relative_to
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 _ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-_QSS_PATH = os.path.join(_ASSETS_DIR, 'menu.qss')
+_QSS_PATH = os.path.join(_ASSETS_DIR, 'dialog.qss')
 
 
 def open_cancel_sale_dialog(host_window):
@@ -35,7 +35,7 @@ def open_cancel_sale_dialog(host_window):
         except Exception as e:
             try:
                 from modules.ui_utils.error_logger import log_error
-                log_error(f"Failed to load menu.qss: {e}")
+                log_error(f"Failed to load dialog.qss: {e}")
             except Exception:
                 pass
     

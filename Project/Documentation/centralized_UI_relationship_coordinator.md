@@ -10,7 +10,7 @@ The Centralized Relationship Coordinator is a rules-based design pattern for PyQ
 - **Separation of Concerns:** Business logic (Database), Validation logic (Rules), and UI logic (Focus/Styles) are kept in isolated layers.
 
 ## 2. The Architectural Layers
-- **Presentation Layer (assets/menu.qss):** Uses dynamic QSS properties for status and error coloring. Styling changes require only QSS edits.
+- **Presentation Layer (assets/dialog.qss):** Uses dynamic QSS properties for status and error coloring. Styling changes require only QSS edits.
 - **Feedback Layer (modules/ui_utils/ui_feedback.py):** Updates widget status properties and triggers style re-polish to reflect QSS changes.
 - **Coordination Layer (modules/ui_utils/focus_utils.py):** FieldCoordinator manages all widget relationships, focus, and reverse actions. Uses user-driven signals only.
 - **Service Layer (modules/ui_utils/input_handler.py):** Stateless, pure functions for data lookup and validation. No widget manipulation.

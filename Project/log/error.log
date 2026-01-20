@@ -1,0 +1,36 @@
+2026-01-19T13:08:03.428836 - Product dialog failed: Missing required widgets: ['removeCategoryLineEdit', 'removeCostPriceLineEdit', 'removeSellingPriceLineEdit', 'removeUnitLineEdit', 'removeSupplierLineEdit', 'removeLastUpdatedLineEdit']
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\wrappers\dialog_wrapper.py", line 224, in open_dialog_scanner_enabled
+    dlg = dialog_func(self.main, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\menu\product_menu.py", line 32, in open_dialog_scanner_enabled
+    widgets = require_widgets(dlg, {
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\ui_utils\dialog_utils.py", line 223, in require_widgets
+    raise ValueError(f"Missing required widgets: {', '.join(missing)}")
+ValueError: Missing required widgets: ['removeCategoryLineEdit', 'removeCostPriceLineEdit', 'removeSellingPriceLineEdit', 'removeUnitLineEdit', 'removeSupplierLineEdit', 'removeLastUpdatedLineEdit']
+
+2026-01-19T13:08:05.132763 - Product dialog failed: Missing required widgets: ['removeCategoryLineEdit', 'removeCostPriceLineEdit', 'removeSellingPriceLineEdit', 'removeUnitLineEdit', 'removeSupplierLineEdit', 'removeLastUpdatedLineEdit']
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\wrappers\dialog_wrapper.py", line 224, in open_dialog_scanner_enabled
+    dlg = dialog_func(self.main, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\menu\product_menu.py", line 32, in open_dialog_scanner_enabled
+    widgets = require_widgets(dlg, {
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\ui_utils\dialog_utils.py", line 223, in require_widgets
+    raise ValueError(f"Missing required widgets: {', '.join(missing)}")
+ValueError: Missing required widgets: ['removeCategoryLineEdit', 'removeCostPriceLineEdit', 'removeSellingPriceLineEdit', 'removeUnitLineEdit', 'removeSupplierLineEdit', 'removeLastUpdatedLineEdit']
+
+2026-01-19T13:08:05.384993 - Product dialog failed: Missing required widgets: ['removeCategoryLineEdit', 'removeCostPriceLineEdit', 'removeSellingPriceLineEdit', 'removeUnitLineEdit', 'removeSupplierLineEdit', 'removeLastUpdatedLineEdit']
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\wrappers\dialog_wrapper.py", line 224, in open_dialog_scanner_enabled
+    dlg = dialog_func(self.main, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\menu\product_menu.py", line 32, in open_dialog_scanner_enabled
+    widgets = require_widgets(dlg, {
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\ui_utils\dialog_utils.py", line 223, in require_widgets
+    raise ValueError(f"Missing required widgets: {', '.join(missing)}")
+ValueError: Missing required widgets: ['removeCategoryLineEdit', 'removeCostPriceLineEdit', 'removeSellingPriceLineEdit', 'removeUnitLineEdit', 'removeSupplierLineEdit', 'removeLastUpdatedLineEdit']
+

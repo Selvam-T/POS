@@ -23,15 +23,32 @@ FieldCoordinator is now the Primary Event Interceptor and Keyboard Orchestrator 
    - `coord.clear_status(lbl)` clears the label and resets remembered error state.
 - **Reactive Placeholders (Opt-in):** `add_link(..., placeholder_mode='reactive')` hides placeholders initially and shows them only for targets that remain empty after sync.
 
+## Enter Navigation Details
+
+`FieldCoordinator.add_link(..., swallow_empty=...)` controls how Enter behaves on each field:
+
+- `swallow_empty=True` (default): Enter on an empty field is swallowed and focus stays put.
+- `swallow_empty=False`: Enter is allowed to advance to `next_focus` even if the field is empty.
+
+This allows “required” vs “optional” fields to share the same navigation mechanism without dialog-level default buttons closing the dialog.
+
 ## Opt-in Helpers (Jan 2026)
 These helpers are additive and do not affect existing dialogs unless used.
 
 - **Initial Focus + Tab Landing:** `set_initial_focus(...)`
    - Selects a `QTabWidget` tab (by index or tab text) then focuses a given widget.
 - **Focus Lock / Unlock (Gate):** `FocusGate`
-   - Temporarily sets `Qt.NoFocus` on a group of widgets and restores original focus policy later.
+   - Locks a group of widgets so they cannot be focused until unlocked.
+   - Optional behavior:
+     - `lock_enabled=True` disables widgets while locked (prevents typing/clicking).
+     - `lock_read_only=True` forces `QLineEdit` read-only while locked.
 - **Lightweight Focus Toggle:** `set_focus_enabled(...)`
    - Simple function to toggle `Qt.NoFocus` using a caller-owned remember-map.
+
+- **Mutual Exclusivity (Source Fields):** `enforce_exclusive_lineedits(a, b, ...)`
+   - When the user starts entering text into one source field, the other is cleared.
+   - Uses `textChanged`, so it also works when scanners/programmatic `setText(...)` are involved.
+   - Designed for “code search vs name search” UX clarity.
 
 ### Example: land on a tab and lock fields until first input
 ```python
@@ -44,7 +61,7 @@ dlg._coord = coord
 set_initial_focus(dlg, tab_widget=tabs, tab_name='ADD', first_widget=code_in)
 
 # 2) Lock all other fields until code is accepted
-gate = FocusGate([name_in, price_in, unit_combo, ok_btn])
+gate = FocusGate([name_in, price_in, unit_combo, ok_btn], lock_enabled=True)
 gate.lock()
 
 def _unlock_rest():
@@ -92,6 +109,7 @@ coord.add_link(source=code_in, lookup_fn=lookup_code, next_focus=lambda: (_unloc
 - `status_label`: QLabel for status feedback (QSS property + re-polish).
 - `on_sync`: Optional hook after sync (e.g., update placeholders).
 - `placeholder_mode`: Optional placeholder behavior; use `'reactive'` for sync-driven placeholders.
+- `swallow_empty`: Controls Enter behavior for empty fields (required vs optional).
 
 ## Validator Auto-Clear Pattern (Optional)
 Use this for “error clears after correction” behavior.
@@ -136,7 +154,7 @@ coord.add_link(
 | Enter on Veg Button   | N/A                 | Click by Coordinator    | Row added; Focus jumps to OK           |
 
 ## See Also
-- [centralized_relationship_coordinator.md](centralized_relationship_coordinator.md)
+- [centralized_UI_relationship_coordinator.md](centralized_UI_relationship_coordinator.md)
 - [input_handler.md](input_handler.md)
 - [manual_entry.md](manual_entry.md)
 - ui_feedback.py

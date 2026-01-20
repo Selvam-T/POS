@@ -60,7 +60,7 @@ def open_vegetable_entry_dialog(parent, main_sales_table):
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
 
     # Styling
-    qss_path = os.path.join(BASE_DIR, 'assets', 'menu.qss')
+    qss_path = os.path.join(BASE_DIR, 'assets', 'dialog.qss')
     if os.path.exists(qss_path):
         with open(qss_path, 'r', encoding='utf-8') as f: dlg.setStyleSheet(f.read())
 

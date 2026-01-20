@@ -31,15 +31,15 @@ def open_manual_entry_dialog(parent):
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
     dlg.setModal(True)
 
-    # --- 1. Apply menu.qss Styling ---
+    # --- 1. Apply dialog.qss Styling ---
     try:
-        qss_path = os.path.join(BASE_DIR, 'assets', 'menu.qss')
+        qss_path = os.path.join(BASE_DIR, 'assets', 'dialog.qss')
         if os.path.exists(qss_path):
             with open(qss_path, 'r', encoding='utf-8') as f:
                 dlg.setStyleSheet(f.read())
     except Exception as e:
         try:
-            error_logger.log_error(f"Failed to load menu.qss: {e}")
+            error_logger.log_error(f"Failed to load dialog.qss: {e}")
         except Exception:
             pass
 
@@ -73,7 +73,6 @@ def open_manual_entry_dialog(parent):
         pass
 
     product_names = [rec[0] for rec in PRODUCT_CACHE.values() if rec[0]]
-    completer = input_handler.setup_name_search_lineedit(name_in, product_names)
 
     # 4. Side-Effect: Placeholder Update & Price Storage
     def on_sync_data(result):
@@ -111,10 +110,13 @@ def open_manual_entry_dialog(parent):
         on_sync=on_sync_data,
         auto_jump=True
     )
-    
-    # Trigger coordinator when completer is chosen
-    if completer:
-        completer.activated.connect(lambda: coord._sync_fields(name_in))
+
+    # Completer: trigger coordinator on selection / editingFinished
+    input_handler.setup_name_search_lineedit(
+        name_in,
+        product_names,
+        on_selected=lambda _text=None, _le=None: coord._sync_fields(name_in),
+    )
 
     # Link Quantity -> OK Button
     coord.add_link(

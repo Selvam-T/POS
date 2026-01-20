@@ -18,7 +18,7 @@ The function should **construct and wire** the dialog and then return it.
 The dialog wrapper is responsible for executing it.
 
 ### 1) Strict UI load (UI-load fallback boundary)
-Use `modules/menu/dialog_utils.py`:
+Use `modules/ui_utils/dialog_utils.py`:
 - `load_ui_strict(ui_path, host_window=..., dialog_name=...)`
 
 If it returns `None`, return `None` from the dialog constructor.

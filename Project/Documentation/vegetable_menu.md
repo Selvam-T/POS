@@ -11,7 +11,7 @@ It is DB-backed (not JSON-backed) and follows the centralized dialog pattern:
 ### Dialog Properties
 - **Size:** 600x600 (minimum 400x450)
 - **Layout:** `QVBoxLayout` with zero margins
-- **Style:** Applied from `menu.qss` under `QDialog#VegetableMenuDialog` section
+- **Style:** Applied from `dialog.qss` under `QDialog#VegetableMenuDialog` section
 
 ### Title Bar (`customTitleBar`)
 - Custom frame with horizontal layout
@@ -98,7 +98,7 @@ It is DB-backed (not JSON-backed) and follows the centralized dialog pattern:
 - Focus: Brighter yellow (#FFF9C4), blue border (#4682B4)
 - Read-only: Gray background (#f5f5f5)
 - Buttons: Green (ACCEPT) and red (CANCEL) with hover/pressed states
-- All styling defined in `assets/menu.qss`
+- All styling defined in `assets/dialog.qss`
 
 ## Implementation Notes
 
@@ -140,7 +140,7 @@ Key behaviors:
 - Coordinator: `modules/ui_utils/focus_utils.py`
 - Validation: `modules/ui_utils/input_handler.py`, `modules/ui_utils/input_validation.py`
 - Feedback: `modules/ui_utils/ui_feedback.py`
-- Styles: `assets/menu.qss`
+- Styles: `assets/dialog.qss`
 
 ---
 

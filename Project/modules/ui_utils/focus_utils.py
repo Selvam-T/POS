@@ -116,8 +116,24 @@ class FieldCoordinator(QObject):
         except Exception:
             pass
 
-    def add_link(self, source, target_map=None, lookup_fn=None, next_focus=None, status_label=None, on_sync=None, auto_jump=False, placeholder_mode=None):
-        """Register relationship (lookup optional for simple focus-jumps)."""
+    def add_link(
+        self,
+        source,
+        target_map=None,
+        lookup_fn=None,
+        next_focus=None,
+        status_label=None,
+        on_sync=None,
+        auto_jump=False,
+        placeholder_mode=None,
+        swallow_empty: bool = True,
+    ):
+        """Register relationship (lookup optional for simple focus-jumps).
+
+        swallow_empty controls Enter behavior:
+        - True (default): empty field swallows Enter and stays put
+        - False: empty field allows Enter to advance to next_focus
+        """
         reactive_placeholders = (placeholder_mode == 'reactive')
         self.links[source] = {
             'targets': target_map or {},
@@ -127,6 +143,7 @@ class FieldCoordinator(QObject):
             'on_sync': on_sync,
             'auto_jump': auto_jump,
             'reactive_placeholders': reactive_placeholders,
+            'swallow_empty': bool(swallow_empty),
         }
 
         # Opt-in: hide placeholders at rest; only show when targets stay empty after sync.
@@ -218,7 +235,7 @@ class FieldCoordinator(QObject):
                 
                 # --- THE SWALLOW LOGIC ---
                 # If the box is empty, we "swallow" the Enter key and stay here.
-                if not val:
+                if not val and link.get('swallow_empty', True):
                     if hasattr(obj, 'selectAll'):
                         obj.selectAll()
                     return True # Returns True but DOES NOT call _move_focus
@@ -417,3 +434,78 @@ def set_focus_enabled(widgets, enabled: bool, *, remember: dict | None = None) -
         except Exception:
             pass
     return store
+
+
+def enforce_exclusive_lineedits(
+    a: QLineEdit,
+    b: QLineEdit,
+    *,
+    on_switch_to_a=None,
+    on_switch_to_b=None,
+    clear_status_label=None,
+) -> bool:
+    """Opt-in: make two source line-edits mutually exclusive.
+
+    Behavior:
+    - When the user starts entering a non-empty value in A, and B already has text,
+      B is cleared (with signals blocked), and on_switch_to_a is called.
+    - Symmetric for switching to B.
+
+    Notes:
+    - Uses textChanged so it works for scanner/programmatic setText too.
+    - Has no effect unless this function is called.
+    """
+    if not isinstance(a, QLineEdit) or not isinstance(b, QLineEdit):
+        return False
+
+    state = {'busy': False}
+
+    def _safe_text(le: QLineEdit) -> str:
+        try:
+            return (le.text() or '').strip()
+        except Exception:
+            return ''
+
+    def _clear(le: QLineEdit) -> None:
+        try:
+            le.blockSignals(True)
+            le.setText('')
+        except Exception:
+            pass
+        finally:
+            try:
+                le.blockSignals(False)
+            except Exception:
+                pass
+
+    def _maybe_switch(active: QLineEdit, other: QLineEdit, on_switch) -> None:
+        if state['busy']:
+            return
+        if not _safe_text(active):
+            return
+        if not _safe_text(other):
+            return
+
+        state['busy'] = True
+        try:
+            _clear(other)
+            if clear_status_label is not None:
+                try:
+                    ui_feedback.clear_status_label(clear_status_label)
+                except Exception:
+                    pass
+            if callable(on_switch):
+                try:
+                    on_switch()
+                except Exception:
+                    pass
+        finally:
+            state['busy'] = False
+
+    try:
+        a.textChanged.connect(lambda _t=None: _maybe_switch(a, b, on_switch_to_a))
+        b.textChanged.connect(lambda _t=None: _maybe_switch(b, a, on_switch_to_b))
+    except Exception:
+        return False
+
+    return True

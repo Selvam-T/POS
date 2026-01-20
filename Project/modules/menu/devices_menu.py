@@ -8,7 +8,7 @@ from modules.ui_utils.error_logger import log_error
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-QSS_PATH = os.path.join(ASSETS_DIR, 'menu.qss')
+QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
 
 
 
@@ -56,7 +56,7 @@ def open_history_dialog(host_window, *args, **kwargs):
                 dlg.setStyleSheet(f.read())
         except Exception as e:
             try:
-                log_error(f"Failed to load menu.qss: {e}")
+                log_error(f"Failed to load dialog.qss: {e}")
             except Exception:
                 pass
 

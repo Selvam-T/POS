@@ -20,11 +20,11 @@ Native title bars are drawn by the OS (Windows) and can’t be recolored with Qt
   - Close button: `QPushButton#customCloseBtn`
 - Loader/controller: `modules/menu/logout_menu.py` → `open_logout_dialog(host_window)`
   - The main menu button in `main.py` calls this function.
-- Styles: `assets/menu.qss`
+- Styles: `assets/dialog.qss`
 
 ## Styling (QSS)
 
-Selectors you can customize in `assets/menu.qss`:
+Selectors you can customize in `assets/dialog.qss`:
 
 ```css
 /* Dialog background */

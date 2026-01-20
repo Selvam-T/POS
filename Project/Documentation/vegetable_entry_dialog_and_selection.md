@@ -182,7 +182,7 @@ self.dialog_wrapper.open_dialog_scanner_blocked(
 - **Global Button Neutralization:** Recursively strips autoDefault and default from all buttons to prevent ghost clicks.
 - **Speed-of-Sale Optimization:** Focus flow automatically shifts to OK ALL after a vegetable is selected or quantity is edited, supporting rapid workflows.
 
-**menu.qss:**
+**dialog.qss:**
 - **Selector Precision:** Uses *= (contains) for vegEButton selectors, ensuring all 16 buttons are styled.
 - **State-Based Styling:** [state="active"] and [state="empty"] properties allow dynamic visual feedback for vegetable slots.
 

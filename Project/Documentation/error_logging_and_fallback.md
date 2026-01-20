@@ -20,7 +20,7 @@ The current architecture has two complementary layers:
 Fallback behavior is dialog-specific. Some dialogs show an explicit fallback dialog; others choose to abort opening and show a StatusBar message.
 
 ### Standardized UI-load fallback
-For menu-style dialogs, `modules/menu/dialog_utils.py` provides `load_ui_strict(...)`:
+For menu-style dialogs, `modules/ui_utils/dialog_utils.py` provides `load_ui_strict(...)`:
 - Missing `.ui` or load failure → logs to `error.log`
 - Best-effort StatusBar message via `report_to_statusbar(...)`
 - Returns `None` so the caller can **hard-fail** (return `None`) or **soft-disable** a feature.
@@ -35,7 +35,7 @@ Dialogs can set a post-close message using:
 ## Implementation Details
 Core modules:
 - `modules/ui_utils/error_logger.py` — `log_error(...)`
-- `modules/menu/dialog_utils.py` — `load_ui_strict(...)`, `report_exception(...)`, `set_dialog_info(...)`
+- `modules/ui_utils/dialog_utils.py` — `load_ui_strict(...)`, `report_exception(...)`, `set_dialog_info(...)`
 - `modules/wrappers/dialog_wrapper.py` — dialog lifecycle, overlay/scanner, focus restore, post-close StatusBar messages
 - `modules/ui_utils/ui_feedback.py` — StatusBar and label feedback helpers
 

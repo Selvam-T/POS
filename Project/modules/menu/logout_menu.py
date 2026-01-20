@@ -10,7 +10,7 @@ _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 _PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))  # .../Project
 _UI_DIR = os.path.join(_PROJECT_DIR, 'ui')
 _ASSETS_DIR = os.path.join(_PROJECT_DIR, 'assets')
-_QSS_PATH = os.path.join(_ASSETS_DIR, 'menu.qss')
+_QSS_PATH = os.path.join(_ASSETS_DIR, 'dialog.qss')
 
 
 def open_logout_dialog(host_window):
@@ -42,7 +42,7 @@ def open_logout_dialog(host_window):
                 dlg.setStyleSheet(f.read())
         except Exception as e:
             try:
-                log_error(f"Failed to load menu.qss: {e}")
+                log_error(f"Failed to load dialog.qss: {e}")
             except Exception:
                 pass
     
