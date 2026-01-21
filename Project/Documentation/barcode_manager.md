@@ -1,115 +1,99 @@
-# BarcodeManager — Documentation
+# BarcodeManager — Current Behavior (Jan 2026)
 
-## Overview
+This document describes the **current** behavior of `BarcodeManager` in `modules/devices/barcode_manager.py`, and clarifies how it differs from the legacy implementation described in `Documentation/barcode_managerOLD.md` / `POS temp/barcode_managerOLD.py`.
 
-`BarcodeManager` (located in `modules/devices/barcode_manager.py`) is the central component responsible for all barcode scanner integration, event filtering, and scanner-related logic in the ANUMANI POS System. It abstracts away the complexities of scanner input, modal blocking, and focus management, providing a clean interface for the main application and dialogs.
+## Purpose
 
----
+`BarcodeManager` centralizes scanner behavior:
 
-## Key Responsibilities
+- Routes scanned barcodes to the right destination (sales table, refund input, product code fields)
+- Prevents scan “leaks” (first-character wedge leakage) via best-effort cleanup
+- Provides **fail-safe gating** when modal dialogs are open
+- Suppresses Enter/Return during scan bursts to avoid triggering default buttons
 
-- **Scanner Event Filtering:**
-  - Installs itself as a global event filter to intercept and process all barcode scanner input events.
-  - Detects scan bursts and routes barcode data to the appropriate handlers.
+## Core Concepts
 
-- **Modal Scanner Blocking:**
-  - Provides methods to temporarily block scanner input during modal dialogs or critical UI operations.
-  - **Input Whitelist for Modal Dialogs:** Allows keyboard input in specific editable fields during modals (see Whitelisted Fields below).
-  - Ensures that scanner input does not interfere with dialogs or data entry when the UI is in a modal state.
-  - Automatically unblocks scanner input when dialogs are closed.
+### 1) Modal block (fail-safe gating)
 
-## Whitelisted Fields for Modal Input
+`_modalBlockScanner` is a *global safety guard* used while modal dialogs are open.
 
-### Generalized Product Code Field Detection (2025-12-30)
+- When enabled, barcode scans are prevented from reaching the main-window routing (e.g., sales table add).
+- The event filter is designed to stop keystrokes from leaking into the main window while still allowing normal typing inside the active modal dialog.
 
-Barcode scanning is now allowed in any field whose `objectName` ends with `ProductCodeLineEdit` (e.g., `addProductCodeLineEdit`, `removeProductCodeLineEdit`, `updateProductCodeLineEdit`, etc.). This convention applies across all dialogs that support barcode entry.
+This is typically toggled by `DialogWrapper`:
 
----
+- `_start_scanner_modal_block()` when opening most dialogs
+- `_end_scanner_modal_block()` on dialog close
 
-## Design Notes and Expected Behavior (2025-12-30)
+### 2) Barcode override (dialog-owned routing)
 
-**1. Barcode override and scanning in product code fields:**
-- The barcode override logic is generalized: barcode scanning is allowed in any field whose `objectName` ends with `ProductCodeLineEdit` across all dialogs, not just specific fields or search combos.
-- This ensures that barcode scans are always accepted in product code entry fields, as long as the naming convention is followed.
-- Expected behavior: Users can scan barcodes into any product code field in any dialog, and the scan will be processed correctly.
+Dialogs that want to “own” scans temporarily (notably Product Menu) install an override:
 
-**2. Manual typing in product code widgets:**
-- Manual typing is allowed in all product code widgets (e.g., addProductCodeLineEdit) by default.
-- The event filter only blocks manual typing when `_modalBlockScanner` is explicitly set to `True` (e.g., during certain modal dialogs that require blocking input).
-- In normal operation (such as the ADD tab of product_menu), `_modalBlockScanner` is `False`, so users can freely type in product code fields.
-- Expected behavior: Users can always type product codes manually in these fields unless a modal block is specifically activated.
+- `set_barcode_override(callable)`
+- `clear_barcode_override()`
 
-This design ensures both barcode scanning and manual entry are supported in product code fields, providing a consistent and user-friendly experience.
+**Override is checked first** in `on_barcode_scanned()`.
 
-**Editable Fields:**
-- Any `QLineEdit` whose `objectName` ends with `ProductCodeLineEdit` (for product code entry in any dialog)
-- `qtyInput` — Quantity input in manual entry and vegetable entry dialogs
-- `refundInput` — Refund amount input
-- Other fields as needed for manual entry (see code for full list)
+Current gating rule:
 
-**Purpose:**
-- Prevents barcode scanner leaks while allowing barcode entry only in the correct product code field for each dialog
-- Automatically supports new dialogs as long as they follow the naming convention
-- Reduces code duplication and improves maintainability
+- Override is allowed to consume a scan only when the focused widget’s `objectName` ends with `ProductCodeLineEdit`.
+- Otherwise the scan is rejected and any leaked character is cleaned up (best-effort), and the dialog may show an error in a status label.
 
-**Implementation:**
-- BarcodeManager checks the focused widget's `objectName` using `.endswith('ProductCodeLineEdit')` to determine if barcode input is allowed
-- If focus is not in a product code field, barcode input is blocked, the leaked character is cleaned up, and an error message is shown in the dialog's status label (if present)
+This makes Product Menu scanner behavior both:
 
-- **Barcode Override Handling:**
-  - Supports barcode override logic, allowing certain dialogs or UI states to temporarily take exclusive control of scanner input.
-  - Ensures that override logic is safely installed and removed as dialogs open and close.
+- **usable** (scan into the code field)
+- **safe** (scan cannot accidentally add to the sale while a modal is up)
 
-- **Scanner Cleanup and Lifecycle:**
-  - Manages scanner resource initialization and cleanup.
-  - Ensures that scanner event filters and overrides are properly removed on application exit or logout.
+### 3) Focus-based routing (no override)
 
----
+If no override consumes the scan, `BarcodeManager` applies routing rules:
+
+- If `_modalBlockScanner` is enabled: ignore scan + cleanup leak
+- If focus is `qtyInput`: ignore scan + cleanup leak
+- If focus is `refundInput`: write barcode into `refundInput`
+- Otherwise: treat as a sales-table barcode
+  - If product not found: open Product Menu in ADD mode with `initial_code`
+  - If product found: add to sales table via `handle_barcode_scanned(...)`
+
+### 4) Scan-burst key suppression
+
+Barcode scanners often send fast key bursts (HID wedge). `BarcodeManager`:
+
+- Suppresses Enter/Return briefly during scanner activity
+- During an active burst window, swallows printable keys unless the focused widget is allowed
+
+Allowed during burst:
+
+- `refundInput`
+- any widget whose `objectName` ends with `ProductCodeLineEdit`
+
+## Leak Cleanup
+
+`_cleanup_scanner_leak(...)` attempts to remove a leaked first character from common editable widgets (e.g., `QLineEdit`, `QTextEdit`, `QPlainTextEdit`) when a scan is rejected.
 
 ## Integration Points
 
-- **Main Window (`main.py`):**
-  - Instantiates `BarcodeManager` and installs it as an event filter for the application or main window.
-  - Delegates all scanner blocking, override, and cleanup logic to `BarcodeManager`.
-  - No scanner logic remains in `main.py` — all related helpers and state are now encapsulated in `BarcodeManager`.
+- Main window creates `BarcodeManager` and installs its event filter on the app.
+- `DialogWrapper.open_dialog_scanner_blocked(...)` uses modal block to protect the main window.
+- Product Menu installs a temporary override and is expected to clear it on close (the wrapper also clears it as a safety net).
 
-- **Dialogs and Panels:**
-  - Use the unified dialog wrapper (`open_dialog_wrapper`) to automatically block/unblock scanner input via `BarcodeManager` during modal dialogs.
-  - Dialogs that require exclusive scanner input can use the override mechanism provided by `BarcodeManager`.
+## Notes on Legacy (barcode_managerOLD)
 
----
+The legacy code path (see `Documentation/barcode_managerOLD.md` / `POS temp/barcode_managerOLD.py`) is **not safe to restore** as-is.
 
-## Example Usage
+Key issues:
 
-```python
-# In main.py
-self.barcode_manager = BarcodeManager(self)
-app = QApplication.instance()
-if app is not None:
-    self.barcode_manager.install_event_filter(app)
-else:
-    self.barcode_manager.install_event_filter(self)
+- **Brittle modal typing allow-list:** it relied on a hardcoded list of widget names to permit typing during modal block. New dialogs could break unexpectedly unless manually added.
+- **Incorrect/unfinished “found” logic:** the legacy `on_barcode_scanned()` referenced `found` without ensuring it was computed, making “product not found → open product menu” unreliable.
+- **Weaker convention support:** it did not consistently support the newer `*ProductCodeLineEdit` naming convention in the scan-burst allow-list.
 
-# In dialog wrapper
-if not is_product_menu:
-    self.barcode_manager._start_scanner_modal_block()
-# ...
-self.barcode_manager._end_scanner_modal_block()
-```
+The current implementation replaces the brittle allow-list approach with “allow typing inside the active modal dialog; block leaks to the main window” and uses naming conventions for product-code fields.
 
----
+## Recommended Conventions
 
-## Extensibility
+- Any dialog that should accept barcode scans in a product code field should name that field with `objectName` ending in `ProductCodeLineEdit`.
+- Keep scanner usage inside modals either:
+  - override-based (Product Menu), or
+  - blocked entirely (most dialogs)
 
-- To add new scanner-related features, extend `BarcodeManager` rather than adding logic to `main.py` or dialogs.
-- For custom scanner handling in a dialog, use the override mechanism to temporarily redirect scanner input.
-
----
-
-### Changelog
-
-- **2025-12-30:** Barcode scan logic generalized to allow scanning in any field whose objectName ends with `ProductCodeLineEdit`. No need to hardcode field names for each dialog. Error feedback and cleanup are handled generically.
-
----
-
-_Last updated: December 30, 2025_
+If you want a third mode (“blocked modal, but allow scans directly into focused `*ProductCodeLineEdit` without overrides”), implement it explicitly in `on_barcode_scanned()` rather than reverting to the legacy manager.

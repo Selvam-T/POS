@@ -174,6 +174,39 @@ The Manual Entry dialog allows users to manually input product information when 
    - Scanner blocking/unblocking managed automatically
    - Dialog centering and focus restoration handled by wrapper
 
+## Scanner/Keyboard Behavior Under open_dialog_scanner_blocked()
+
+Manual Entry is launched via `DialogWrapper.open_dialog_scanner_blocked()`, which enables a modal scanner block and overlay so the main window cannot accidentally receive scan input while the dialog is open. Within the dialog, behavior is produced by the combination of:
+
+- `DialogWrapper` (overlay + modal block + cleanup/focus restore)
+- `BarcodeManager` (scan-burst key swallowing + leak cleanup)
+
+Widget behavior summary:
+
+1. **manualProductCodeLineEdit**
+    - Accepts both keyboard typing and scanner keystrokes.
+    - Works with the “product code field” convention (`*ProductCodeLineEdit`), so scan-burst characters are allowed to land here.
+    - Once text changes, the dialog’s `FieldCoordinator` mapping updates Name/Unit when the lookup succeeds.
+
+2. **manualNameSearchLineEdit**
+    - Accepts normal keyboard typing for name search and QCompleter selection.
+    - Scanner bursts are not permitted here, so burst characters are swallowed; a rare first-character leak may briefly trigger the dropdown before cleanup removes it.
+
+3. **manualUnitLineEdit** (read-only)
+    - Does not accept keyboard edits.
+    - Scanner input is not permitted; any leakage is best-effort cleaned.
+    - Value is filled programmatically via coordinator mapping.
+
+4. **manualQuantityLineEdit**
+    - Accepts keyboard typing.
+    - Scanner bursts are swallowed here (not a permitted scan target); if any first character leaks, it is cleaned up best-effort.
+
+5. **OK / Cancel / X Close buttons**
+    - Scanner input does not leak to the main window while the dialog is open.
+    - Enter/Return is briefly suppressed during scan activity to avoid accidental button activation.
+
+On dialog close, the wrapper restores focus to the main window (sales table) in a gated, consistent way.
+
 ## Styling (sales.qss)
 
 ### Dialog Background

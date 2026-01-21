@@ -17,7 +17,7 @@ DIALOG_RATIOS = {
     'MaxRowsDialog': (0.25, 0.25)
 }
 
-# Product Categories
+# Product Categories (Don't exceed 25 Characters)
 PRODUCT_CATEGORIES = [
     '--Select Category--',
     'Alcohol',
@@ -93,7 +93,7 @@ VEG_SLOTS = 16
 # =========================================================
 
 PRODUCT_CODE_MIN_LEN = 4
-PRODUCT_CODE_MAX_LEN = 30
+PRODUCT_CODE_MAX_LEN = 15
 
 QUANTITY_MIN_KG = 0.005
 QUANTITY_MAX_KG = 25.0
@@ -109,8 +109,18 @@ TOTAL_PRICE_MAX = 10000
 GRAND_TOTAL_MIN = 0
 GRAND_TOTAL_MAX = 100000
 
-STRING_MAX_LENGTH = 20
+# STRING LENGTH for product name validate_product_name, category, note
+STRING_MAX_LENGTH = 40
 PASSWORD_MIN_LENGTH = 8
 
 EMAIL_REGEX = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w+$")
 ALPHANUMERIC_REGEX = re.compile(r"^[A-Za-z0-9 ]+$")
+
+# ALTERNATIVE: Field-specific configurations (not implemented yet with validate_field)
+STRING_CONFIG = {
+    'product_code': {'min_len': 4, 'max_len': 14, 'required': True},
+    'product_name': {'min_len': 4, 'max_len': 40, 'required': True},
+    'supplier': {'min_len': 0, 'max_len': 15, 'required': False},  
+    'notes': {'min_len': 0, 'max_len': 25, 'required': False}, 
+    'category': {'min_len': 4, 'max_len': 25, 'required': True}
+}

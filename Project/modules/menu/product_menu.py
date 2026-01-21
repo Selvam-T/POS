@@ -3,12 +3,12 @@ from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel, QComboBox, QTabWidge
 from PyQt5.QtCore import Qt, QTimer, QDateTime
 
 from modules.ui_utils.dialog_utils import (
-    build_dialog_from_ui, require_widgets, set_dialog_info, set_dialog_error
+    build_dialog_from_ui, require_widgets, set_dialog_info
 )
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 from modules.ui_utils import input_handler, ui_feedback
 from modules.db_operation import (
-    PRODUCT_CACHE, get_product_full, add_product, update_product, delete_product
+    get_product_full, add_product, update_product, delete_product
 )
 import modules.db_operation as dbop
 from modules.db_operation.product_cache import PRODUCT_CODE_DISPLAY
@@ -240,8 +240,6 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
             uniq.append(n)
         return uniq
 
-    names = _names_from_cache()
-
     def _refresh_name_completers() -> None:
         """Refresh REMOVE/UPDATE name completers from the current PRODUCT_CACHE.
 
@@ -393,19 +391,7 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
         except Exception:
             pass
 
-    def _rem_lookup(val: str):
-        return _lookup_product(val)
-
-    def _rem_lookup_by_name(val: str):
-        code = _lookup_code_by_name(val)
-        if not code:
-            return None, "No match"
-        return _lookup_product(code)
-
-    def _upd_lookup(val: str):
-        return _lookup_product(val)
-
-    def _upd_lookup_by_name(val: str):
+    def _lookup_product_by_name(val: str):
         code = _lookup_code_by_name(val)
         if not code:
             return None, "No match"
@@ -439,7 +425,7 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
     coord.add_link(
         source=widgets['rem_code'],
         target_map=rem_targets_from_code,
-        lookup_fn=_rem_lookup,
+        lookup_fn=_lookup_product,
         next_focus=widgets['rem_ok'],
         status_label=widgets['rem_status'],
         auto_jump=True,
@@ -447,7 +433,7 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
     coord.add_link(
         source=widgets['rem_name'],
         target_map=rem_targets_from_name,
-        lookup_fn=_rem_lookup_by_name,
+        lookup_fn=_lookup_product_by_name,
         next_focus=widgets['rem_ok'],
         status_label=widgets['rem_status'],
         auto_jump=False,
@@ -455,7 +441,7 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
     coord.add_link(
         source=widgets['upd_code'],
         target_map=upd_targets_from_code,
-        lookup_fn=_upd_lookup,
+        lookup_fn=_lookup_product,
         next_focus=widgets['upd_name'],
         status_label=widgets['upd_status'],
         on_sync=_on_upd_sync,
@@ -464,7 +450,7 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
     coord.add_link(
         source=widgets['upd_search'],
         target_map=upd_targets_from_name,
-        lookup_fn=_upd_lookup_by_name,
+        lookup_fn=_lookup_product_by_name,
         next_focus=widgets['upd_cancel'],
         status_label=widgets['upd_status'],
         on_sync=_on_upd_sync,
@@ -520,7 +506,7 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
         except Exception:
             txt = ''
         try:
-            result, _err = _rem_lookup_by_name(txt)
+            result, _err = _lookup_product_by_name(txt)
         except Exception:
             result = None
         _sync_source(widgets['rem_name'])
@@ -536,7 +522,7 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
         except Exception:
             txt = ''
         try:
-            result, _err = _upd_lookup_by_name(txt)
+            result, _err = _lookup_product_by_name(txt)
         except Exception:
             result = None
         _sync_source(widgets['upd_search'])
@@ -796,6 +782,44 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
     widgets['tabs'].currentChanged.connect(_focus_code_for_tab)
 
     # --- OK/Cancel Handlers ---
+    def _focus_widget(w, select_all: bool = False) -> None:
+        if w is None:
+            return
+        try:
+            w.setFocus()
+        except Exception:
+            return
+        if select_all and isinstance(w, QLineEdit):
+            try:
+                w.selectAll()
+            except Exception:
+                pass
+
+    def _try_value(getter_fn, *, status_label: QLabel, focus_widget=None, select_all: bool = False):
+        try:
+            return True, getter_fn()
+        except ValueError as e:
+            ui_feedback.set_status_label(status_label, str(e), ok=False)
+            _focus_widget(focus_widget, select_all=select_all)
+            return False, None
+
+    def _resolve_category_for_save(combo: QComboBox, *, status_label: QLabel) -> str | None:
+        # UX rule: keep placeholder visible; at save time store canonical 'Other'
+        # when placeholder/blank.
+        try:
+            idx = combo.currentIndex()
+        except Exception:
+            idx = -1
+        if idx <= 0:
+            return 'Other'
+
+        ok, cat = _try_value(
+            lambda: input_handler.handle_category_input_combo(combo),
+            status_label=status_label,
+            focus_widget=combo,
+        )
+        return cat if ok else None
+
     def _finalize(mode: str, code: str, name: str) -> None:
         verb = {'add': 'added', 'rem': 'removed', 'upd': 'updated'}.get(mode, mode)
         ui_feedback.set_status_label(widgets[f'{mode}_status'], f"Success: {name} {verb}", ok=True)
@@ -806,78 +830,62 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
 
     def do_add():
         # OK-time boundary validation (final safety)
-        try:
-            code = input_handler.handle_product_code_input(widgets['add_code'])
-        except ValueError as e:
-            ui_feedback.set_status_label(widgets['add_status'], str(e), ok=False)
-            widgets['add_code'].setFocus()
+        ok, code = _try_value(
+            lambda: input_handler.handle_product_code_input(widgets['add_code']),
+            status_label=widgets['add_status'],
+            focus_widget=widgets['add_code'],
+        )
+        if not ok:
             return
 
         # Product Menu-specific rule: reserved veg codes cannot be created as products.
         if is_reserved_vegetable_code(code):
             ui_feedback.set_status_label(widgets['add_status'], "Not allowed. Edit Vegetables in Vegetable menu", ok=False)
-            widgets['add_code'].setFocus()
-            try:
-                widgets['add_code'].selectAll()
-            except Exception:
-                pass
+            _focus_widget(widgets['add_code'], select_all=True)
             return
 
         # Re-check uniqueness at the boundary (user may click OK without triggering gate updates)
         if _product_code_exists(code):
             ui_feedback.set_status_label(widgets['add_status'], "Error: Product Code already exists.", ok=False)
-            widgets['add_code'].setFocus()
-            try:
-                widgets['add_code'].selectAll()
-            except Exception:
-                pass
+            _focus_widget(widgets['add_code'], select_all=True)
             return
 
-        try:
-            name = input_handler.handle_product_name_input(widgets['add_name'])
-        except ValueError as e:
-            ui_feedback.set_status_label(widgets['add_status'], str(e), ok=False)
-            widgets['add_name'].setFocus()
+        ok, name = _try_value(
+            lambda: input_handler.handle_product_name_input(widgets['add_name']),
+            status_label=widgets['add_status'],
+            focus_widget=widgets['add_name'],
+        )
+        if not ok:
             return
 
-        try:
-            sell_value = input_handler.handle_price_input(widgets['add_sell'], price_type='Selling price')
-        except ValueError as e:
-            ui_feedback.set_status_label(widgets['add_status'], str(e), ok=False)
-            widgets['add_sell'].setFocus()
+        ok, sell_value = _try_value(
+            lambda: input_handler.handle_price_input(widgets['add_sell'], price_type='Selling price'),
+            status_label=widgets['add_status'],
+            focus_widget=widgets['add_sell'],
+        )
+        if not ok:
             return
 
-        try:
-            cost_opt = input_handler.handle_price_input_optional(widgets['add_cost'], price_type='Cost price')
-        except ValueError as e:
-            ui_feedback.set_status_label(widgets['add_status'], str(e), ok=False)
-            widgets['add_cost'].setFocus()
+        ok, cost_opt = _try_value(
+            lambda: input_handler.handle_price_input_optional(widgets['add_cost'], price_type='Cost price'),
+            status_label=widgets['add_status'],
+            focus_widget=widgets['add_cost'],
+        )
+        if not ok:
             return
         cost_value = float(cost_opt or 0.0)
 
-        try:
-            supplier = input_handler.handle_supplier_input(widgets['add_supp'])
-        except ValueError as e:
-            ui_feedback.set_status_label(widgets['add_status'], str(e), ok=False)
-            widgets['add_supp'].setFocus()
+        ok, supplier = _try_value(
+            lambda: input_handler.handle_supplier_input(widgets['add_supp']),
+            status_label=widgets['add_status'],
+            focus_widget=widgets['add_supp'],
+        )
+        if not ok:
             return
 
-        # Category UX rule:
-        # - Keep placeholder visible if user didn't select.
-        # - Only at save time: store canonical 'Other' when placeholder/blank.
-        try:
-            idx = widgets['add_cat'].currentIndex()
-        except Exception:
-            idx = -1
-        if idx <= 0:
-            cat = 'Other'
-        else:
-            try:
-                cat = input_handler.handle_category_input_combo(widgets['add_cat'])
-            except ValueError as e:
-                ui_feedback.set_status_label(widgets['add_status'], str(e), ok=False)
-                widgets['add_cat'].setFocus()
-                return
+        cat = _resolve_category_for_save(widgets['add_cat'], status_label=widgets['add_status'])
+        if cat is None:
+            return
 
         # Unit: show/save 'Each' by default (field is read-only).
         unit = canonicalize_unit((widgets['add_unit'].text() or 'Each'))
@@ -904,65 +912,56 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
         else: ui_feedback.set_status_label(widgets['rem_status'], msg, ok=False)
 
     def do_upd():
-        try:
-            code = input_handler.handle_product_code_input(widgets['upd_code'])
-        except ValueError as e:
-            ui_feedback.set_status_label(widgets['upd_status'], str(e), ok=False)
-            widgets['upd_code'].setFocus()
+        ok, code = _try_value(
+            lambda: input_handler.handle_product_code_input(widgets['upd_code']),
+            status_label=widgets['upd_status'],
+            focus_widget=widgets['upd_code'],
+        )
+        if not ok:
             return
 
         # Product Menu-specific rule for UPDATE lookups as well.
         if is_reserved_vegetable_code(code):
             ui_feedback.set_status_label(widgets['upd_status'], "Reserved vegetable code", ok=False)
-            widgets['upd_code'].setFocus()
-            try:
-                widgets['upd_code'].selectAll()
-            except Exception:
-                pass
+            _focus_widget(widgets['upd_code'], select_all=True)
             return
 
-        try:
-            name = input_handler.handle_product_name_input(widgets['upd_name'])
-        except ValueError as e:
-            ui_feedback.set_status_label(widgets['upd_status'], str(e), ok=False)
-            widgets['upd_name'].setFocus()
+        ok, name = _try_value(
+            lambda: input_handler.handle_product_name_input(widgets['upd_name']),
+            status_label=widgets['upd_status'],
+            focus_widget=widgets['upd_name'],
+        )
+        if not ok:
             return
 
-        try:
-            sell_value = input_handler.handle_price_input(widgets['upd_sell'], price_type='Selling price')
-        except ValueError as e:
-            ui_feedback.set_status_label(widgets['upd_status'], str(e), ok=False)
-            widgets['upd_sell'].setFocus()
+        ok, sell_value = _try_value(
+            lambda: input_handler.handle_price_input(widgets['upd_sell'], price_type='Selling price'),
+            status_label=widgets['upd_status'],
+            focus_widget=widgets['upd_sell'],
+        )
+        if not ok:
             return
 
-        try:
-            cost_opt = input_handler.handle_price_input_optional(widgets['upd_cost'], price_type='Cost price')
-        except ValueError as e:
-            ui_feedback.set_status_label(widgets['upd_status'], str(e), ok=False)
-            widgets['upd_cost'].setFocus()
+        ok, cost_opt = _try_value(
+            lambda: input_handler.handle_price_input_optional(widgets['upd_cost'], price_type='Cost price'),
+            status_label=widgets['upd_status'],
+            focus_widget=widgets['upd_cost'],
+        )
+        if not ok:
             return
         cost_value = float(cost_opt or 0.0)
 
-        try:
-            cur_supplier = input_handler.handle_supplier_input(widgets['upd_supplier'])
-        except ValueError as e:
-            ui_feedback.set_status_label(widgets['upd_status'], str(e), ok=False)
-            widgets['upd_supplier'].setFocus()
+        ok, cur_supplier = _try_value(
+            lambda: input_handler.handle_supplier_input(widgets['upd_supplier']),
+            status_label=widgets['upd_status'],
+            focus_widget=widgets['upd_supplier'],
+        )
+        if not ok:
             return
 
-        try:
-            idx = widgets['upd_cat'].currentIndex()
-        except Exception:
-            idx = -1
-        if idx <= 0:
-            cat = 'Other'
-        else:
-            try:
-                cat = input_handler.handle_category_input_combo(widgets['upd_cat'])
-            except ValueError as e:
-                ui_feedback.set_status_label(widgets['upd_status'], str(e), ok=False)
-                widgets['upd_cat'].setFocus()
-                return
+        cat = _resolve_category_for_save(widgets['upd_cat'], status_label=widgets['upd_status'])
+        if cat is None:
+            return
 
         # Unit is read-only in UPDATE; preserve loaded unit.
         unit = canonicalize_unit((widgets['upd_unit'].text() or 'Each'))

@@ -1,0 +1,417 @@
+/* =============================
+   DIALOG BACKGROUND
+   ============================= */
+QDialog {
+    background-color: #ffffff;
+    border-top: 1px solid #eeeeee;
+    border-left: 1px solid #eeeeee;
+    border-bottom: 4px solid #d1d1d1;
+    border-right: 2px solid #d1d1d1;
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+
+
+/* =========================================================
+   TITLE BAR STYLING
+   ========================================================= */
+QFrame#customTitleBar {
+    background-color: #ffffff;
+    min-height: 40px;
+}
+
+QLabel#customTitle {
+    color: #222222;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+QPushButton#customCloseBtn {
+    color: #18042f;
+    background: transparent;
+    border: 2px solid transparent; /* Reserve space for the focus border */
+    font-size: 40px;
+    font-weight: bold;
+}
+
+/* Focus Style */
+QPushButton#customCloseBtn:focus {
+    border: 2px solid #d0741e;
+    border-radius: 10px; 
+    outline: none;
+}
+
+/* =============================
+   BUTTON ACTION STYLES
+   ============================= */
+QPushButton {
+    color: white;
+    font-size: 12pt;
+    font-weight: 600;
+    padding: 8px 24px;
+    border-radius: 6px;
+}
+
+/* OK Button */
+QPushButton[objectName$="Ok"] {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #4facfe, stop:1 #0062ff);
+    border: 1px solid #0046b3;
+}
+
+QPushButton[objectName$="Ok"]:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #90caf9, stop:1 #2196f3);
+}
+
+QPushButton[objectName$="Ok"]:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #1565c0, stop:1 #2196f3);
+    padding-top: 10px;
+}
+
+/* Cancel Button */
+QPushButton[objectName$="Cancel"] {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #bdc3c7, stop:1 #6c757d);
+    border: 1px solid #495057;
+}
+
+QPushButton[objectName$="Cancel"]:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #d1d9e2, stop:1 #9ea8b7);
+}
+
+QPushButton[objectName$="Cancel"]:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #7a828f, stop:1 #9ea8b7); /* Softer gray */
+    padding-top: 10px;
+}
+
+/* Delete Button */
+QPushButton[objectName$="Del"] {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #ff5f6d, stop:1 #d90429);
+    border: 1px solid #99031c;
+}
+
+QPushButton[objectName$="Del"]:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #ff8a80, stop:1 #f44336);
+}
+
+QPushButton[objectName$="Del"]:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #b71c1c, stop:1 #f44336);
+    padding-top: 10px;
+}
+
+/* --- Focus State --- */
+QPushButton:focus {
+    outline: none;
+    border: 2px solid #c99e76;
+}
+
+/* =========================================================
+   VEGETABLE SLOT BUTTONS
+   ========================================================= */
+
+/* Use *= (contains) and remove the comma between attributes */
+QPushButton[objectName*="vegEButton"][state="active"] {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #096926, stop:1 #3d994a);
+    border: 1px solid #015c0a;
+    color: white;
+}
+
+QPushButton[objectName*="vegEButton"][state="active"]:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #76ae3b, stop:1 #2d783c);
+}
+
+QPushButton[objectName*="vegEButton"][state="empty"] {
+    background-color: #f6f1f1;
+    color: #afacac;
+    font-weight: 300;
+    border: 1px solid #b7adad;
+}
+
+/* Specifically target active vegetable buttons when they have focus */
+QPushButton[objectName*="vegEButton"][state="active"]:focus {
+    border: 2px solid #d0741e;
+    outline: none;
+}
+
+
+/* =========================================================
+   STATUS LABELS (DYNAMIC PROPERTIES)
+   ========================================================= */
+
+/* Default look for all status labels */
+QLabel[objectName$="StatusLabel"] {
+    color: #4b5563; /* Neutral Gray-Blue */
+    padding: 6px 10px;
+    font-size: 10pt;
+    font-weight: 500;
+    background: transparent;
+    border: 1px solid transparent;
+}
+
+/* Success State - Triggered by .setProperty("status", "success") */
+QLabel[status="success"] {
+    color: #166534; /* Dark Green */
+    background-color: #f0fdf4; /* Light Green Tint */
+    border: 1px solid #bbf7d0;
+    border-radius: 4px;
+}
+
+/* Error State - Triggered by .setProperty("status", "error") */
+QLabel[status="error"] {
+    color: #991b1b; /* Dark Red */
+    background-color: #fef2f2; /* Light Red Tint */
+    border: 1px solid #fecaca;
+    border-radius: 4px;
+}
+
+/* =========================================================
+   COMMON INPUT WIDGETS
+   ========================================================= */
+
+QLineEdit, QComboBox {
+    background-color: #ffffff;
+    color: #222222;
+    border: 1px solid #c7cdd6;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 12pt;
+}
+
+QLineEdit:focus, QComboBox:focus {
+    border: 1px solid #2196f3;
+}
+
+/* 1. State-specific style (Overrides base because it's more specific) */
+QLabel[objectName$="FieldLbl"][readOnly="true"] {
+    color: #7b7c7d !important;
+}
+
+/* 2. Read-Only LineEdit */
+QLineEdit:read-only {
+    background-color: #f5f5f5;
+    color: #7b7c7d; 
+    border: 1px solid #dcdcdc;
+}
+
+/* ComboBox Dropdown Arrow */
+QComboBox::down-arrow {
+    image: url(assets/icons/down_arrow.svg);
+    width: 22px;
+    height: 22px;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+    border-left: 1px solid #c7cdd6;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+/* ToolButton SVG Icon */
+QToolButton {
+    border: none;
+    background: transparent;
+}
+
+QToolButton::icon {
+    image: url(assets/icons/eye.svg);
+    width: 22px;
+    height: 22px;
+}
+
+/* Field labels */
+QLabel[objectName$="FieldLbl"] {
+    color: #5c5e5f;
+    font-size: 10.5pt;
+    font-weight: 600;
+}
+
+/* Header Label */
+QLabel[objectName$="HeaderLabel"] {
+    font-size: 14pt;
+    font-weight: 500;
+    color: #222222;
+}
+
+QLabel[objectName$="userHeaderLabel"] {
+    color: #0eec1d;
+}
+
+/* TabWidget */
+QTabWidget::pane {
+    border: 1px solid #c7cdd6;
+    background: #ffffff;
+    border-radius: 4px;
+}
+
+QTabBar::tab {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #f8f9fa, stop:1 #e9ecef); /* Sharper contrast for visible gradient */
+    color: #2c2b2b;
+    padding: 12px 22px;
+    margin-right: 4px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    font-size: 11pt;
+    font-weight: 500;
+    min-width: 152px;
+    letter-spacing: 0.75px;
+}
+
+QTabBar::tab:selected {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #4facfe, stop:1 #0062ff);
+    color: white;
+    font-weight: 600;
+    letter-spacing: 0.75px;
+    border-bottom: 2px solid #0062ff; /* Visual indicator */
+}
+
+QTabBar::tab:hover:!selected {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #e3f2fd, stop:1 #bbdefb); /* Brighter for visibility */
+    color: #0062ff; /* Text color change on hover */
+}
+
+/* GroupBox with inline title */
+QGroupBox {
+    font-size: 8pt;
+    font-weight: 600;
+    border: 1px solid #c7cdd6;
+    border-radius: 4px;
+    margin-top: 8px;
+    padding-top: 12px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    color: #05425f;
+    padding: 0 4px 0 4px;
+}
+
+/* =============================================================
+     vegEntryTable
+    ============================================================= */
+
+/* 1. Table Header Styling */
+QWidget#vegEntryDialog QHeaderView::section,
+QTableWidget#salesTable QHeaderView::section  {
+    font-size: 10pt;
+    font-weight: bold;
+    font-family: "Verdana";
+    background-color: #34495E;
+    color: white;
+    padding: 4px;
+    border: none; /* Cleaner look without borders between headers */
+    border-right: 1px solid #2C3E50; /* Subtle separator */
+    border-bottom: 2px solid #2C3E50; /* Anchor the header to the table */
+}
+
+/* 2. Table Styling */
+QWidget#vegEntryDialog QTableWidget#vegEntryTable,
+QWidget#SalesFrame QTableWidget#salesTable {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #434d44;
+    gridline-color: #bec1c8;
+    border: 1px solid #b7adad;; /* outer border of table */
+}
+
+/* 3. Alternating row colors are set programmatically in Python due to embedded widgets. */
+
+/* 4. --- Quantity Input Field --- */
+
+QLineEdit#qtyInput {
+    font-size: 11pt;
+    font-weight: bold;
+    border-radius: 8px;
+    border: 2px solid #4682b4;
+}
+
+/* --- EACH Items: Border changes ONLY when focused AND editable --- */
+QLineEdit#qtyInput:focus:!read-only {
+    border: 4px solid orange;
+    background-color: gray; /* alternating row color overrides bg */
+}
+
+/* --- KG Items: Styling for non-editable rows --- */
+QLineEdit#qtyInput:read-only {
+    background-color: transparent; /* alternating row color overrides bg */
+    border: 2px solid #4682b4;
+}
+
+/* 5. --- Del Button --- */
+QPushButton#removeBtn {
+    background-color: transparent; /* Transparent to show row color */
+    border: 5px solid #d33f12;
+    border-radius: 2px;
+    min-width: 30px;
+    max-width: 30px;
+    min-height: 28px;
+    max-height: 28px;
+    padding: 0px;
+}
+QPushButton#removeBtn:hover {
+    background-color: rgba(255, 0, 0, 0.15);
+    border: 5px solid red;
+}
+QPushButton#removeBtn:pressed {
+    background-color: rgba(255, 0, 0, 0.3);
+    border: 5px solid #990000;
+}
+
+/* -------------------------------------------------------------------
+   QRadioButton: Base Text Style
+------------------------------------------------------------------- */
+QRadioButton {
+    font-size: 14px;
+    font-weight: bold;
+    color: #2c3e50;
+    spacing: 8px; /* Space between indicator and text */
+    outline: none; /* Removes the dotted focus line */
+}
+
+/* -------------------------------------------------------------------
+   The Indicator (The Circle)
+------------------------------------------------------------------- */
+QRadioButton::indicator {
+    width: 18px;            /* Inner width */
+    height: 18px;           /* Inner height */
+    border-radius: 11px;    /* Radius = (Width + 2*Border) / 2. Here: (18+4)/2 = 11 */
+    border: 2px solid #bdc3c7; /* Gray Ring */
+    background-color: white;   /* White Background */
+}
+
+/* Hover State */
+QRadioButton::indicator:hover {
+    border-color: #3498db;  /* Blue Ring on Hover */
+}
+
+/* -------------------------------------------------------------------
+   Checked State (The Dot Effect)
+   We use a gradient to draw a blue dot in the center of a white circle
+------------------------------------------------------------------- */
+QRadioButton::indicator:checked {
+    border: 2px solid #3498db; /* Blue Ring */
+    
+    /* This creates the Dot. 
+       cx/cy: Center point. 
+       radius: Size of dot (0.4 = 40% of size). 
+       stop 0-0.5: Blue. stop 0.6-1.0: Transparent (White bg shows through).
+    */
+    background-color: qradialgradient(
+        spread: pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
+        stop:0 #3498db, 
+        stop:0.6 #3498db,
+        stop:0.7 transparent
+    );
+}
+
+/* Optional: Pressed state for click feedback */
+QRadioButton::indicator:pressed {
+    background-color: #ecf0f1;
+}

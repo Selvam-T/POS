@@ -316,3 +316,19 @@ def is_reserved_vegetable_code(code: str) -> bool:
         except (ValueError, TypeError):
             return False
     return False
+
+# To replace PRODUCT_CODE, PRODUCT_NAME, SUPPLIER, CATEGORY, NOTES validation functions with STRING_CONFIG
+def validate_field(value, required=True, min_len=0, max_len=0, field_name="Field"):
+    if value is None:
+        value = ""
+    s = str(value).strip()
+    length = len(s)
+    if required and length < min_len:
+        return False, f"{field_name} is required and must be at least {min_len} characters"
+    if not required and length == 0:
+        return True, ""
+    if length < min_len:
+        return False, f"{field_name} must be at least {min_len} characters"
+    if max_len > 0 and length > max_len:
+        return False, f"{field_name} must be at most {max_len} characters"
+    return True, ""
