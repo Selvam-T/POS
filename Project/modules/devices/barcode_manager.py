@@ -34,16 +34,28 @@ class BarcodeManager(QObject):
             override = getattr(self, '_barcodeOverride', None)
             fw = QApplication.instance().focusWidget() if QApplication.instance() else None
             obj_name = fw.objectName() if fw and hasattr(fw, 'objectName') else ''
+            # During fast scans, focus may change before the Enter suffix arrives (e.g., auto-lookup
+            # logic moves focus to an OK button). Track the scan-start focus to keep overrides usable.
+            scan_start_name = getattr(self, '_scanStartObjName', '') or ''
+            scan_started_in_code = bool(scan_start_name.endswith('ProductCodeLineEdit'))
+            focus_in_code = bool(obj_name.endswith('ProductCodeLineEdit'))
             # Allow scan only if focus is in a product code field (endswith convention)
             if callable(override):
-                if obj_name.endswith('ProductCodeLineEdit'):
+                if focus_in_code or scan_started_in_code:
                     handled = False
                     try:
                         handled = override(barcode)
                     except Exception:
                         handled = False
                     if handled:
+                        # Best-effort cleanup on both current focus and scan-start widget.
                         self._cleanup_scanner_leak(fw, barcode)
+                        try:
+                            start_w = getattr(self, '_scanStartWidget', None)
+                            if start_w is not None and start_w is not fw:
+                                self._cleanup_scanner_leak(start_w, barcode)
+                        except Exception:
+                            pass
                         return  # accepted by dialog
                 else:
                     # Clean up the leaked char, keep focus, show error
@@ -122,13 +134,24 @@ class BarcodeManager(QObject):
         Swallow Enter/Return keys briefly during scanner activity to avoid triggering default buttons
         """
         import time
-        parent = self.parent()
         now = time.time()
+        # Capture focus at the start of a burst. This is used later if focus shifts mid-scan.
+        try:
+            if now > getattr(self, '_scannerActiveUntil', 0.0):
+                from PyQt5.QtWidgets import QApplication
+                app = QApplication.instance()
+                fw = app.focusWidget() if app else None
+                self._scanStartWidget = fw
+                self._scanStartObjName = fw.objectName() if fw and hasattr(fw, 'objectName') else ''
+                self._scanStartTs = now
+        except Exception:
+            pass
         prev = getattr(self, '_scannerPrevTs', 0.0) or 0.0
         dt = when_ts - prev if prev > 0 else None
         if dt is not None and dt <= 0.08:
-            self._scannerActiveUntil = max(getattr(self, '_scannerActiveUntil', 0.0), now + 0.25)
-            self._suppressEnterUntil = max(getattr(self, '_suppressEnterUntil', 0.0), now + 0.15)
+            # Extend windows long enough for typical 12–14 digit scans + Enter suffix.
+            self._scannerActiveUntil = max(getattr(self, '_scannerActiveUntil', 0.0), now + 0.90)
+            self._suppressEnterUntil = max(getattr(self, '_suppressEnterUntil', 0.0), now + 0.90)
         self._scannerPrevTs = when_ts
     def eventFilter(self, obj, event):
         import time
@@ -205,7 +228,9 @@ class BarcodeManager(QObject):
                 from PyQt5.QtWidgets import QLineEdit
                 if isinstance(fw, QLineEdit):
                     txt = fw.text() or ''
-                    if txt.endswith(ch) and len(txt) <= 3:
+                    # Best-effort: remove a trailing leaked first character.
+                    # Do not restrict by length; long fields (e.g., prices) must be cleaned too.
+                    if txt.endswith(ch):
                         fw.setText(txt[:-1])
                     return
             except Exception:
@@ -215,7 +240,7 @@ class BarcodeManager(QObject):
                 from PyQt5.QtGui import QTextCursor
                 if isinstance(fw, (QTextEdit, QPlainTextEdit)):
                     t = fw.toPlainText()
-                    if t.endswith(ch) and len(t) <= 3:
+                    if t.endswith(ch):
                         if isinstance(fw, QTextEdit):
                             cur = fw.textCursor()
                             cur.movePosition(QTextCursor.End)

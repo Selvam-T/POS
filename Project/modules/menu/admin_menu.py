@@ -11,7 +11,7 @@ ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
 
 
-def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool = True):
+def launch_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool = True):
     """Open the Admin Settings dialog (ui/admin_menu.ui) as a modal.
     
     DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
@@ -199,3 +199,7 @@ def open_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool =
 
     # Return QDialog for DialogWrapper to execute
     return dlg
+
+
+# Backward-compatible alias (older imports/call-sites).
+open_admin_dialog = launch_admin_dialog

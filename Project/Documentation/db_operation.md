@@ -50,8 +50,8 @@ In-memory cache used for fast barcode/product_code lookup.
 
 - `PRODUCT_CACHE: Dict[str, Tuple[str, float, str]]`
   - Shape: `{PRODUCT_CODE: (display_name, selling_price, display_unit)}`
-  - Key normalization: `strip().upper()`
-  - Display normalization: Title Case via `_to_camel_case`
+  - Key canonicalization: `strip().upper()` (via `modules/ui_utils/canonicalization.py: canonicalize_product_code()`)
+  - Display normalization (legacy cleanup on load): Title Case via `canonicalize_title_text()`
   - Unit safety: blank/NULL units default to `Each`
 
 - `load_product_cache()` / `refresh_product_cache()`
@@ -63,7 +63,7 @@ In-memory cache used for fast barcode/product_code lookup.
 
 - Helpers (internal but imported by some UI code):
   - `_norm()` (uppercase normalization)
-  - `_to_camel_case()` (display formatting)
+  - `_to_camel_case()` (display formatting; alias to `canonicalize_title_text()`)
 
 ## Public Facade (`modules/db_operation/__init__.py`)
 

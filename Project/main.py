@@ -33,12 +33,12 @@ from modules.sales.sales_frame_setup import setup_sales_frame
 from modules.devices.barcode_manager import BarcodeManager
 from modules.wrappers.dialog_wrapper import DialogWrapper
 # --- Menu frame dialog controllers ---
-from modules.menu.logout_menu import open_logout_dialog as launch_logout_dialog
-from modules.menu.admin_menu import open_admin_dialog as launch_admin_dialog
+from modules.menu.logout_menu import launch_logout_dialog
+from modules.menu.admin_menu import launch_admin_dialog
 from modules.menu.history_menu import open_history_dialog as launch_history_dialog
 from modules.menu.reports_menu import open_reports_dialog as launch_reports_dialog
 from modules.menu.greeting_menu import open_greeting_dialog as launch_greeting_dialog
-from modules.menu.product_menu import open_dialog_scanner_enabled as launch_product_dialog
+from modules.menu.product_menu import launch_product_dialog
 from modules.menu.vegetable_menu import open_vegetable_menu_dialog as launch_vegetable_menu_dialog
 # --- Sales frame dialog controllers ---
 from modules.sales.vegetable_entry import open_vegetable_entry_dialog as launch_vegetable_entry_dialog
@@ -101,7 +101,7 @@ class MainLoader(QMainWindow):
                 kwargs['initial_mode'] = 'add'
 
             # The dialog_wrapper will handle the overlay and execution
-            self.dialog_wrapper.open_dialog_scanner_enabled(
+            self.dialog_wrapper.open_dialog_scanner_blocked(
                 launch_product_dialog, 
                 dialog_key='product_menu', 
                 **kwargs

@@ -96,7 +96,7 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
   - `open_dialog_wrapper()` is the single entry point for all modal dialogs and panels, ensuring consistent overlay/scanner handling and sizing.
   - Dialog and panel functions are imported and aliased for clarity, e.g.:
     ```python
-    from modules.menu.logout_menu import open_logout_dialog as launch_logout_dialog
+    from modules.menu.logout_menu import launch_logout_dialog
     from modules.sales.vegetable_entry import open_vegetable_entry_dialog as launch_vegetable_entry_dialog
     ```
   - Example usage:

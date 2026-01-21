@@ -22,7 +22,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 UI_PATH = os.path.join(BASE_DIR, 'ui', 'product_menu.ui')
 QSS_PATH = os.path.join(BASE_DIR, 'assets', 'dialog.qss')
 
-def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=None):
+def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     from modules.table.table_operations import is_transaction_active
     sale_lock = is_transaction_active(getattr(main_window, 'sales_table', None))
 
@@ -140,11 +140,23 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
             return
         try:
             placeholder = ""
+            # Prefer config placeholder (first item) so UI never defaults to a real category (e.g. 'Other').
             try:
-                if combo.count() > 0:
-                    placeholder = combo.itemText(0) or ""
+                if isinstance(PRODUCT_CATEGORIES, (list, tuple)) and len(PRODUCT_CATEGORIES) > 0:
+                    cfg0 = (PRODUCT_CATEGORIES[0] or '').strip()
+                    # Only treat it as a placeholder if it looks like one.
+                    if cfg0.startswith('--') and cfg0.endswith('--'):
+                        placeholder = cfg0
             except Exception:
                 placeholder = ""
+
+            # Fallback to whatever the .ui provided.
+            if not placeholder:
+                try:
+                    if combo.count() > 0:
+                        placeholder = (combo.itemText(0) or '').strip()
+                except Exception:
+                    placeholder = ""
 
             combo.blockSignals(True)
             combo.clear()
@@ -372,6 +384,14 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
             return
         s = (value or '').strip()
         if not s:
+            try:
+                combo.setCurrentIndex(0)
+            except Exception:
+                pass
+            return
+        # Project convention: DB/cache stores 'Other' when user didn't pick a category.
+        # Keep the placeholder visible instead of showing 'Other' as if it was chosen.
+        if s.strip().lower() == 'other':
             try:
                 combo.setCurrentIndex(0)
             except Exception:
@@ -804,14 +824,14 @@ def open_dialog_scanner_enabled(main_window, initial_mode=None, initial_code=Non
             return False, None
 
     def _resolve_category_for_save(combo: QComboBox, *, status_label: QLabel) -> str | None:
-        # UX rule: keep placeholder visible; at save time store canonical 'Other'
-        # when placeholder/blank.
+        # Category is optional.
+        # If the placeholder/blank is selected, treat it as "not selected" and store an empty string.
         try:
             idx = combo.currentIndex()
         except Exception:
             idx = -1
         if idx <= 0:
-            return 'Other'
+            return ''
 
         ok, cat = _try_value(
             lambda: input_handler.handle_category_input_combo(combo),

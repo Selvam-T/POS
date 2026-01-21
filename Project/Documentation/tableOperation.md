@@ -139,12 +139,13 @@ bind_total_label(sales_table, total_label)  # total_label is a QLabel instance
 
 ## Case-Insensitive Product Lookup and Normalization
 
-- **Cache keys:** `PRODUCT_CACHE` keys are normalized to uppercase (`strip().upper()`).
-- **Display strings:** names/units are stored in display-friendly Title Case via `_to_camel_case`.
+- **Cache keys:** `PRODUCT_CACHE` keys are canonicalized to uppercase (`strip().upper()`).
+- **Display strings:** names/units are stored in display-friendly Title Case during cache load (legacy cleanup).
 - Code lookups are case-insensitive because input is normalized before cache access.
 
 ### Technical Details
-- Normalization helpers live in `modules/db_operation/product_cache.py`.
+- Canonicalization helpers live in `modules/ui_utils/canonicalization.py`.
+- New DB writes should be canonicalized at the UI input boundary (see `modules/ui_utils/input_handler.py`).
 
 ## Integration
 - The sales table is set up and bound to the total label in `modules/sales/sales_frame_setup.py`.

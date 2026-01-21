@@ -220,8 +220,8 @@ For a deep dive into the exact routing rules, protections, and debug options, se
    - Tip: Use 6‑digit hex `#RRGGBB` (or 8-digit `#ffRRGGBB`) for opaque colors. `#AARRGGBB` with a low AA will appear washed out.
 
 Controller location and wiring:
-- Controller function: `modules/menu/logout_menu.py` → `open_logout_dialog(host_window)`
-- The menu button in `main.py` calls `open_logout_dialog(self)` when `logoutBtn` is clicked.
+- Controller function: `modules/menu/logout_menu.py` → `launch_logout_dialog(host_window)`
+- The menu button in `main.py` calls `launch_logout_dialog(self)` when `logoutBtn` is clicked.
 
 ### Sales-in-progress restrictions
 

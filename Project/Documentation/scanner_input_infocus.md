@@ -20,9 +20,12 @@ This document explains how barcode scanner input is handled across the POS UI to
 - Focus-based routing with override
   - Default: scans go to the sales table handler.
   - Payment: when `refundInput` is focused, scan fills that field.
-  - Product dialog: installs a temporary barcode override that accepts scans only when `productCodeLineEdit` is focused; otherwise ignores and cleans leaks.
+  - Product dialog: installs a temporary barcode override that accepts scans when `*ProductCodeLineEdit` is focused.
+    - If focus shifts mid-scan (e.g., auto-lookup moves focus), the override still accepts the scan if the scan burst started in a `*ProductCodeLineEdit`.
+    - Otherwise it ignores and cleans leaks.
 - Leak cleanup fallback
   - If a first character leaks into a disallowed field (HID wedge limitation), we remove it best-effort from QLineEdit/QTextEdit family widgets.
+  - Current rule: if the focused widget’s text ends with the first character of the scanned barcode, that trailing character is removed (no length threshold, no timing dependency).
 - Enter/Return control
   - During scan bursts, Enter is briefly suppressed to avoid clicking default buttons.
   - In Product dialog, Enter on line edits behaves like Tab to advance focus instead of clicking a button; action buttons are non-default unless focused.

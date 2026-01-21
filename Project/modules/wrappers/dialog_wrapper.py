@@ -136,6 +136,9 @@ class DialogWrapper:
         def _cleanup(result):
             self._hide_overlay()
             self._unblock_scanner()
+            # Fail-safe: never allow a dialog-installed barcode override to leak
+            # back into the main window after the dialog closes.
+            self._clear_scanner_override()
             self._restore_focus()
             # Only call on_finish if dialog was accepted (e.g., OK pressed)
             if on_finish and result == QDialog.Accepted:
@@ -165,6 +168,7 @@ class DialogWrapper:
                 # Dialog intentionally not shown (e.g., max rows reached)
                 self._hide_overlay()
                 self._unblock_scanner()
+                self._clear_scanner_override()
                 return
 
             if not isinstance(dlg, QDialog):
@@ -196,50 +200,10 @@ class DialogWrapper:
         except Exception as e:
             self._hide_overlay()
             self._unblock_scanner()
+            self._clear_scanner_override()
             try:
                 import traceback
                 from modules.ui_utils.error_logger import log_error
                 log_error(f"Dialog failed: {e}\n{traceback.format_exc()}")
             except Exception:
                 pass
-
-    def open_dialog_scanner_enabled(self, dialog_func, dialog_key=None, **kwargs):
-        self._show_overlay()
-        # SHIELD: Block the scanner from reaching the main window
-        self._block_scanner() 
-
-        try:
-            dlg = dialog_func(self.main, **kwargs)
-            if dlg is None:
-                self._hide_overlay()
-                self._unblock_scanner()
-                return
-
-            if dialog_key and dialog_key in self.DIALOG_RATIOS:
-                width_ratio, height_ratio = self.DIALOG_RATIOS[dialog_key]
-            else:
-                width_ratio, height_ratio = 0.5, 0.5
-
-            self._setup_dialog_geometry(dlg, width_ratio, height_ratio)
-
-            def _product_cleanup(_):
-                self._hide_overlay()
-                self._unblock_scanner() # REMOVE SHIELD
-                self._clear_scanner_override()
-                from PyQt5.QtCore import QTimer
-                QTimer.singleShot(10, self._restore_focus)
-
-            dlg.finished.connect(_product_cleanup)
-            result = dlg.exec_()
-            
-            msg = getattr(dlg, 'main_status_msg', None)
-            if msg:
-                is_error = getattr(dlg, 'main_status_is_error', (result == QDialog.Rejected))
-                ui_feedback.show_main_status(self.main, msg, is_error=bool(is_error))
-
-        except Exception as e:
-            self._hide_overlay()
-            self._unblock_scanner()
-            import traceback
-            from modules.ui_utils.error_logger import log_error
-            log_error(f"Product dialog failed: {e}\n{traceback.format_exc()}")

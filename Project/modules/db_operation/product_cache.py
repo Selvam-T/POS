@@ -16,6 +16,7 @@ so this module preserves that tuple shape.
 from typing import Dict, Optional, Tuple
 
 from . import products_repo
+from modules.ui_utils.canonicalization import canonicalize_product_code, canonicalize_title_text
 
 
 # {normalized_product_code: (name, selling_price, unit)}
@@ -27,8 +28,8 @@ PRODUCT_CODE_DISPLAY: Dict[str, str] = {}
 
 
 def _norm(s: Optional[str]) -> str:
-        """Normalize product code / barcode for cache keys."""
-        return (s or "").strip().upper()
+    """Normalize product code / barcode for cache keys."""
+    return canonicalize_product_code(s)
 
 
 def _to_camel_case(text: Optional[str]) -> str:
@@ -36,15 +37,7 @@ def _to_camel_case(text: Optional[str]) -> str:
     Convert to Title/Camel-ish case for display consistency.
     Keeps simple separators and trims whitespace.
     """
-    s = (text or "").strip()
-    if not s:
-        return ""
-    # replace common separators with space
-    for ch in ("_", "-", "\t"):
-        s = s.replace(ch, " ")
-    # collapse whitespace
-    parts = [p for p in s.split(" ") if p]
-    return " ".join([p[:1].upper() + p[1:].lower() if p else "" for p in parts])
+    return canonicalize_title_text(text)
 
 
 def load_product_cache() -> Dict[str, Tuple[str, float, str]]:
@@ -59,9 +52,8 @@ def load_product_cache() -> Dict[str, Tuple[str, float, str]]:
         key = _norm(product_code)
         if not key:
             continue
-        # Store a display casing for code (canonical "camel/title-ish"), while keeping
-        # cache keys normalized for fast case-insensitive lookup.
-        PRODUCT_CODE_DISPLAY[key] = _to_camel_case(product_code) or str(product_code or '').strip()
+        # Store canonical display code (matches cache key + storage canonicalization).
+        PRODUCT_CODE_DISPLAY[key] = key
         unit_disp = _to_camel_case(unit) or _to_camel_case('Each')
         PRODUCT_CACHE[key] = (
             _to_camel_case(name),
@@ -105,14 +97,15 @@ def upsert_cache_item(product_code: str, name: str, selling_price: float, unit: 
     """
     Update/add one item in cache (call after product add/update).
     """
-    unit_disp = _to_camel_case(unit) or _to_camel_case('Each')
+    # IMPORTANT: do not re-canonicalize here.
+    # Writes should already be canonicalized at the input boundary.
     key = _norm(product_code)
-    PRODUCT_CODE_DISPLAY[key] = _to_camel_case(product_code) or str(product_code or '').strip()
-    PRODUCT_CACHE[key] = (
-        _to_camel_case(name),
-        float(selling_price),
-        unit_disp,
-    )
+    if not key:
+        return
+    PRODUCT_CODE_DISPLAY[key] = key
+    name_disp = (name or '').strip()
+    unit_disp = (unit or '').strip() or 'Each'
+    PRODUCT_CACHE[key] = (name_disp, float(selling_price), unit_disp)
 
 
 def remove_cache_item(product_code: str) -> None:

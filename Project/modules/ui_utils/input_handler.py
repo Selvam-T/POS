@@ -2,6 +2,10 @@ from __future__ import annotations
 from PyQt5.QtWidgets import QCompleter, QLineEdit, QComboBox, QLabel
 from PyQt5.QtCore import Qt
 from modules.ui_utils import input_validation, ui_feedback
+from modules.ui_utils.canonicalization import (
+    canonicalize_product_code,
+    canonicalize_title_text,
+)
 
 # =========================================================
 # SECTION 1: INTERNAL HELPERS
@@ -16,14 +20,8 @@ def _raise_if_invalid(result):
 
 
 def _to_camel_case(text: str) -> str:
-    """Best-effort display casing (matches db_operation.product_cache behavior)."""
-    s = (text or "").strip()
-    if not s:
-        return ""
-    for ch in ("_", "-", "\t"):
-        s = s.replace(ch, " ")
-    parts = [p for p in s.split(" ") if p]
-    return " ".join([p[:1].upper() + p[1:].lower() if p else "" for p in parts])
+    """Backward-compatible alias."""
+    return canonicalize_title_text(text)
 
 # =========================================================
 # SECTION 2: PURE GETTERS (EXTRACT + VALIDATE)
@@ -31,7 +29,7 @@ def _to_camel_case(text: str) -> str:
 # =========================================================
 
 def handle_product_name_input(line_edit: QLineEdit) -> str:
-    name = line_edit.text().strip()
+    name = canonicalize_title_text(line_edit.text())
     _raise_if_invalid(input_validation.validate_product_name(name))
     return name
 
@@ -69,7 +67,7 @@ def handle_password_input(line_edit: QLineEdit) -> str:
     return password
 
 def handle_supplier_input(line_edit: QLineEdit) -> str:
-    supplier = line_edit.text().strip()
+    supplier = canonicalize_title_text(line_edit.text())
     _raise_if_invalid(input_validation.validate_supplier(supplier))
     return supplier
 
@@ -97,10 +95,7 @@ def handle_category_input_combo_default_other(combo_box: QComboBox, *, default: 
 
 
 def handle_product_code_input(line_edit: QLineEdit) -> str:
-    code_raw = (line_edit.text() or '').strip()
-    _raise_if_invalid(input_validation.validate_product_code_format(code_raw))
-    # Canonicalize for storage/display consistency.
-    code = _to_camel_case(code_raw) or code_raw
+    code = canonicalize_product_code(line_edit.text())
     _raise_if_invalid(input_validation.validate_product_code_format(code))
     return code
 

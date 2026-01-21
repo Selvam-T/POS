@@ -179,7 +179,7 @@ The Manual Entry dialog allows users to manually input product information when 
 Manual Entry is launched via `DialogWrapper.open_dialog_scanner_blocked()`, which enables a modal scanner block and overlay so the main window cannot accidentally receive scan input while the dialog is open. Within the dialog, behavior is produced by the combination of:
 
 - `DialogWrapper` (overlay + modal block + cleanup/focus restore)
-- `BarcodeManager` (scan-burst key swallowing + leak cleanup)
+- `BarcodeManager` (scan-burst key swallowing + leak cleanup; leak cleanup is length-independent)
 
 Widget behavior summary:
 

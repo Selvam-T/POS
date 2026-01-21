@@ -109,7 +109,7 @@ TOTAL_PRICE_MAX = 10000
 GRAND_TOTAL_MIN = 0
 GRAND_TOTAL_MAX = 100000
 
-# STRING LENGTH for product name validate_product_name, category, note
+# STRING LENGTH for product_name, category, supplier, note
 STRING_MAX_LENGTH = 40
 PASSWORD_MIN_LENGTH = 8
 

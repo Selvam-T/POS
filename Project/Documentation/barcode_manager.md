@@ -36,7 +36,8 @@ Dialogs that want to “own” scans temporarily (notably Product Menu) install 
 
 Current gating rule:
 
-- Override is allowed to consume a scan only when the focused widget’s `objectName` ends with `ProductCodeLineEdit`.
+- Override is allowed to consume a scan when the focused widget’s `objectName` ends with `ProductCodeLineEdit`.
+- Additionally, if focus shifts mid-scan (e.g., auto-lookup moves focus to a button), the override is still allowed if the scan burst **started** in a `*ProductCodeLineEdit`.
 - Otherwise the scan is rejected and any leaked character is cleaned up (best-effort), and the dialog may show an error in a status label.
 
 This makes Product Menu scanner behavior both:
@@ -70,6 +71,13 @@ Allowed during burst:
 ## Leak Cleanup
 
 `_cleanup_scanner_leak(...)` attempts to remove a leaked first character from common editable widgets (e.g., `QLineEdit`, `QTextEdit`, `QPlainTextEdit`) when a scan is rejected.
+
+Current rule (Jan 2026):
+
+- If the focused widget’s text ends with the first character of the scanned barcode, it is removed (best-effort).
+- This applies regardless of the existing value length (no `len<=3` restriction) and does not depend on a timing window.
+
+Rationale: some widgets (e.g., price fields) often contain longer values; leak cleanup must remain effective even when the field already has content.
 
 ## Integration Points
 

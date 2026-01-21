@@ -18,7 +18,7 @@ Native title bars are drawn by the OS (Windows) and can’t be recolored with Qt
   - Title bar frame: `QFrame#customTitleBar`
   - Title text label: `QLabel#customTitle` (hidden by default to show only the big X)
   - Close button: `QPushButton#customCloseBtn`
-- Loader/controller: `modules/menu/logout_menu.py` → `open_logout_dialog(host_window)`
+- Loader/controller: `modules/menu/logout_menu.py` → `launch_logout_dialog(host_window)`
   - The main menu button in `main.py` calls this function.
 - Styles: `assets/dialog.qss`
 

@@ -21,10 +21,10 @@ This document describes the Admin Settings dialog, its UI structure, access rule
   - Footer info: `QLabel#infoLabel` (e.g., "Only Admin can modify settings")
   - Footer action: `QPushButton#closeButton` (closes dialog)
 - Controller: `modules/menu/admin_menu.py`
-  - Entry point: `open_admin_dialog(host_window, current_user='Admin', is_admin=True)`
+  - Entry point: `launch_admin_dialog(host_window, current_user='Admin', is_admin=True)`
   - Loads the .ui, applies frameless flags, centers the dialog, wires buttons, and toggles password field visibility.
 - Wiring: `main.py`
-  - The right-side menu button `adminBtn` calls `open_admin_dialog(self, current_user='Admin', is_admin=True)`.
+  - The right-side menu button `adminBtn` calls `launch_admin_dialog(self, current_user='Admin', is_admin=True)`.
 
 ## UI Details
 
@@ -97,8 +97,8 @@ QDialog#AdminDialog { /* dialog background, padding */ }
 
 - The right-side menu should only enable the Admin button for the Admin user. In development, we pass `is_admin=True` by default.
 - In production, determine the logged-in role and call:
-  - Admin: `open_admin_dialog(self, current_user='Admin', is_admin=True)`
-  - Staff: Either hide/disable the Admin button, or call `open_admin_dialog(self, current_user='Staff', is_admin=False)` to show a read-only view.
+  - Admin: `launch_admin_dialog(self, current_user='Admin', is_admin=True)`
+  - Staff: Either hide/disable the Admin button, or call `launch_admin_dialog(self, current_user='Staff', is_admin=False)` to show a read-only view.
 
 ## Integration Checklist
 
