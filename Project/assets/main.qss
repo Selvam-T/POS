@@ -7,7 +7,7 @@ QMainWindow {
 }
 
 QStatusBar#statusbar {
-  font-family: 'Dubai', Helvetica, sans-serif;
+  font-family: 'consolas', 'Dubai', Helvetica, sans-serif;
   font-size: 14pt;
 }
 

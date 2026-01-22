@@ -172,3 +172,29 @@ Product Menu installs a temporary barcode override on the host window’s `barco
 
 - The override writes the scanned code into the active tab’s code field.
 - It then triggers a lookup sync so mapped fields update immediately.
+
+---
+
+## Error handling: hard-fail vs soft-fail
+
+Product Menu follows the shared policy in `Documentation/error_logging_and_fallback.md`.
+
+### Soft-fail (handled)
+
+- Validation failures: shown only in the dialog status label; dialog remains open.
+- DB CRUD returns `(ok=False, msg)`: logged to `log/error.log`, shown in dialog status label, and queued as a **post-close** StatusBar error.
+
+### DB success + refresh failure (success-with-warning)
+
+After a successful DB write (ADD/REMOVE/UPDATE), Product Menu refreshes cache/completers best-effort.
+
+- Dialog-local status label shows **success**.
+- If refresh fails: a **warning** is queued for the StatusBar and displayed **after the dialog closes**.
+- StatusBar precedence rule: warning/error overrides success info.
+
+### Hard-fail (unexpected)
+
+Unexpected exceptions that escape Product Menu are handled by `DialogWrapper`:
+- overlay/scanner cleanup is performed
+- details are logged to `log/error.log`
+- a short StatusBar error hint is shown after cleanup

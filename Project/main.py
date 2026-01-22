@@ -531,12 +531,15 @@ def main():
     app = QApplication(sys.argv)
     load_qss(app)
 
+    cache_load_failed = False
+
     # Load product cache once at startup so name/code lookups and completers
     # can rely on in-memory PRODUCT_CACHE during runtime.
     try:
         from modules.db_operation import load_product_cache, PRODUCT_CACHE
         load_product_cache()
     except Exception as e:
+        cache_load_failed = True
         try:
             from modules.ui_utils.error_logger import log_error
             log_error(f"Failed to load PRODUCT_CACHE: {e}")
@@ -552,6 +555,14 @@ def main():
         window.activateWindow()
     except Exception:
         pass
+
+    # If cache load failed earlier, surface it once the status bar exists.
+    if cache_load_failed:
+        try:
+            from modules.ui_utils import ui_feedback
+            ui_feedback.show_main_status(window, 'Error: Failed to load product list (search may be limited)', is_error=True, duration=6000)
+        except Exception:
+            pass
     sys.exit(app.exec_())
 
 

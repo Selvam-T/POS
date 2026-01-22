@@ -168,6 +168,11 @@ QLabel[status="error"] {
     border-radius: 4px;
 }
 
+/* Default look for all SubLbl -- it is applied from somewhere hidden, I can't find
+QLabel[objectName$="SubLbl"] {
+    color: #710b0b !important;
+}*/
+
 /* =========================================================
    COMMON INPUT WIDGETS
    ========================================================= */
@@ -375,9 +380,8 @@ QRadioButton {
     outline: none; /* Removes the dotted focus line */
 }
 
-/* -------------------------------------------------------------------
-   The Indicator (The Circle)
-------------------------------------------------------------------- */
+/*   The Indicator (The Circle) */
+
 QRadioButton::indicator {
     width: 18px;            /* Inner width */
     height: 18px;           /* Inner height */
@@ -391,10 +395,7 @@ QRadioButton::indicator:hover {
     border-color: #3498db;  /* Blue Ring on Hover */
 }
 
-/* -------------------------------------------------------------------
-   Checked State (The Dot Effect)
-   We use a gradient to draw a blue dot in the center of a white circle
-------------------------------------------------------------------- */
+/*   Checked State (The Dot Effect) */
 QRadioButton::indicator:checked {
     border: 2px solid #3498db; /* Blue Ring */
     

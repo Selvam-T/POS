@@ -48,6 +48,14 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - All dialog/UI errors are logged to `log/error.log` with timestamp using a shared logger
 - Windows-console-safe logging (ASCII only)
 
+### Hard-fail vs Soft-fail (quick rules)
+
+- **Hard-fail (unexpected exception):** caught by `DialogWrapper`; overlay/scanner is cleaned up; details go to `log/error.log`; a short StatusBar hint is shown.
+- **Soft-fail (handled failure):** validation errors and DB CRUD failures are handled inside the dialog; users see dialog-local status immediately, and a StatusBar message is queued **post-close** when appropriate.
+- **Success-with-warning:** if DB write succeeds but a post-success refresh (cache/completers) fails, show success in the dialog label but show the warning in the StatusBar after close (warning/error takes precedence).
+
+See details: `Documentation/error_logging_and_fallback.md`, `Documentation/dialog_pipeline.md`, `Documentation/dialog_utils.md`.
+
 ✅ **Consistent Dialog Button Styling**
 - All dialog action buttons now use standardized object names:
     - Constructive: ends with `Ok` (e.g., `btnAdminOk`, `btnVegMOk`)

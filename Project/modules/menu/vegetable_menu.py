@@ -10,7 +10,7 @@ from modules.ui_utils.error_logger import log_error
 from modules.ui_utils.focus_utils import FieldCoordinator
 from modules.ui_utils import input_handler, input_validation, ui_feedback
 
-from modules.ui_utils.dialog_utils import load_ui_strict, report_exception
+from modules.ui_utils.dialog_utils import load_ui_strict, report_exception_post_close, set_dialog_main_status_max
 
 from modules.db_operation import PRODUCT_CACHE, get_product_full, get_product_slim, add_product, delete_product
 from modules.db_operation.product_cache import _to_camel_case, _norm
@@ -190,11 +190,13 @@ def open_vegetable_menu_dialog(host_window):
                             name = _to_camel_case(db_name)
                     except Exception as e:
                         if not db_error_reported:
-                            report_exception(
-                                host_window,
+                            report_exception_post_close(
+                                dlg,
                                 'VegetableMenu: get_product_slim(Veg01..Veg16)',
                                 e,
-                                user_message='Error: Failed to load vegetable names'
+                                user_message='Warning: Failed to load vegetable names',
+                                level='warning',
+                                duration=5000,
                             )
                             db_error_reported = True
                         break
@@ -250,7 +252,14 @@ def open_vegetable_menu_dialog(host_window):
         try:
             found, details = get_product_full(code)
         except Exception as e:
-            report_exception(host_window, f'VegetableMenu: get_product_full({code})', e, user_message='Error: Failed to load vegetable details')
+            report_exception_post_close(
+                dlg,
+                f'VegetableMenu: get_product_full({code})',
+                e,
+                user_message='Error: Failed to load vegetable details',
+                level='error',
+                duration=5000,
+            )
             return out, 'DB error'
         if found and details and details.get('name'):
             out['_found'] = True
@@ -368,7 +377,14 @@ def open_vegetable_menu_dialog(host_window):
             try:
                 found, details = get_product_full(code)
             except Exception as e:
-                report_exception(host_window, f'VegetableMenu: get_product_full({code})', e, user_message='Error: DB read failed')
+                report_exception_post_close(
+                    dlg,
+                    f'VegetableMenu: get_product_full({code})',
+                    e,
+                    user_message='Warning: DB read failed',
+                    level='warning',
+                    duration=5000,
+                )
                 continue
             if found and details.get('name'):
                 vegetables.append({
@@ -395,17 +411,32 @@ def open_vegetable_menu_dialog(host_window):
         # Rewrite Veg01–Veg16
         try:
             for i in range(1, VEG_SLOTS + 1):
-                delete_product(f'Veg{i:02d}')
+                ok, msg = delete_product(f'Veg{i:02d}')
+                # "Product not found" is expected for empty slots.
+                if not ok and str(msg or '').strip().lower() != 'product not found':
+                    try:
+                        log_error(f"VegetableMenu rewrite delete failed (Veg{i:02d}): {msg}")
+                    except Exception:
+                        pass
+                    set_dialog_main_status_max(dlg, 'Error: Failed to rewrite vegetables', level='error', duration=5000)
+                    return False, str(msg)
         except Exception as e:
-            report_exception(host_window, 'VegetableMenu: delete_product(Veg01..Veg16)', e, user_message='Error: Failed to rewrite vegetables')
-            raise
+            report_exception_post_close(
+                dlg,
+                'VegetableMenu: delete_product(Veg01..Veg16)',
+                e,
+                user_message='Error: Failed to rewrite vegetables',
+                level='error',
+                duration=5000,
+            )
+            return False, str(e)
         
         # Insert sorted vegetables sequentially
         try:
             for i, veg in enumerate(sorted_vegs, start=1):
                 now_str = QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss')
                 from modules.table.unit_helpers import canonicalize_unit
-                add_product(
+                ok, msg = add_product(
                     product_code=f'Veg{i:02d}',
                     name=_to_camel_case(veg['name']),
                     selling_price=veg['price'],
@@ -415,11 +446,26 @@ def open_vegetable_menu_dialog(host_window):
                     unit=canonicalize_unit(veg.get('unit', 'Kg')),
                     last_updated=now_str
                 )
+                if not ok:
+                    try:
+                        log_error(f"VegetableMenu rewrite add failed (Veg{i:02d}): {msg}")
+                    except Exception:
+                        pass
+                    set_dialog_main_status_max(dlg, 'Error: Failed to rewrite vegetables', level='error', duration=5000)
+                    return False, str(msg)
         except Exception as e:
-            report_exception(host_window, 'VegetableMenu: add_product(Veg01..Veg16)', e, user_message='Error: Failed to rewrite vegetables')
-            raise
+            report_exception_post_close(
+                dlg,
+                'VegetableMenu: add_product(Veg01..Veg16)',
+                e,
+                user_message='Error: Failed to rewrite vegetables',
+                level='error',
+                duration=5000,
+            )
+            return False, str(e)
         
         # Cache updates in-place via delete_product/add_product.
+        return True, 'OK'
 
     # Handlers
     def on_add_clicked():
@@ -533,11 +579,11 @@ def open_vegetable_menu_dialog(host_window):
         else:
             vegetables.append(new_veg)
         
-        try:
-            sort_and_update_database(vegetables)
+        ok, msg = sort_and_update_database(vegetables)
+        if ok:
             dlg.accept()
-        except Exception as e:
-            show_error(f'Error: {e}')
+            return
+        show_error(f'Error: {msg}')
 
     def on_remove_clicked():
         clear_error()
@@ -557,7 +603,14 @@ def open_vegetable_menu_dialog(host_window):
         try:
             found, db_name, _price, _unit = get_product_slim(str(selected_code))
         except Exception as e:
-            report_exception(host_window, f'VegetableMenu: get_product_slim({selected_code})', e, user_message='Error: Failed to read vegetable')
+            report_exception_post_close(
+                dlg,
+                f'VegetableMenu: get_product_slim({selected_code})',
+                e,
+                user_message='Error: Failed to read vegetable',
+                level='error',
+                duration=5000,
+            )
             show_error('Error: Failed to read vegetable', source=combo_vegetable)
             if combo_vegetable is not None:
                 combo_vegetable.setFocus()
@@ -577,11 +630,11 @@ def open_vegetable_menu_dialog(host_window):
         # Remove the selected vegetable
         vegetables = [v for v in vegetables if v['code'] != selected_code]
         
-        try:
-            sort_and_update_database(vegetables)
+        ok, msg = sort_and_update_database(vegetables)
+        if ok:
             dlg.accept()
-        except Exception as e:
-            show_error(f'Error: {e}')
+            return
+        show_error(f'Error: {msg}')
 
     def on_cancel_clicked():
         dlg.reject()

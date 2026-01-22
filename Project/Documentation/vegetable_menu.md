@@ -117,6 +117,18 @@ Key behaviors:
 - Writes via `delete_product(code)` and `add_product(...)`.
 - `PRODUCT_CACHE` is updated in-place by the DB layer during these operations.
 
+### Error handling and messaging
+
+Vegetable Menu uses dialog-local status (`vegMStatusLabel`) for immediate user feedback.
+
+Additional routing:
+
+- DB exceptions are logged to `log/error.log` and queued as **post-close** StatusBar messages.
+- Rewrite failures (delete/add returning `(ok=False, msg)`) are logged, and a post-close StatusBar error is queued.
+- While the modal is open, the dialog avoids showing StatusBar messages directly (overlay UX).
+
+See: `Documentation/error_logging_and_fallback.md` for hard-fail vs soft-fail definitions.
+
 ### Validation Rules (current)
 - Slot must be selected.
 - Product name is required.
@@ -144,4 +156,4 @@ Key behaviors:
 
 ---
 
-*Last updated: January 14, 2026*
+*Last updated: January 22, 2026*

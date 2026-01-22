@@ -140,6 +140,9 @@ To robustly enforce the global `MAX_TABLE_ROWS` limit for the sales table, the f
 - No error is shown to the user in these cases; the overlay and scanner state are restored cleanly.
 - This prevents confusing error messages like "Expected QDialog, got <class 'NoneType'>" and ensures a smooth user experience.
 
+Additional behavior:
+- If a dialog throws an unexpected exception (hard-fail), `DialogWrapper` logs details to `log/error.log` and shows a short StatusBar hint after overlay/scanner cleanup.
+
 #### 4. Consistency
 - These guards are implemented in both `open_vegetable_entry_dialog` and `open_manual_entry_dialog`, and should be used in any future entry dialogs.
 - All dialog launches in `main.py` and related modules use the wrapper, ensuring consistent enforcement and feedback.
@@ -159,10 +162,11 @@ To robustly enforce the global `MAX_TABLE_ROWS` limit for the sales table, the f
 
 ## See Also
 
-- `dialog_wrapper.md` (if present): Details on the unified dialog launching standard
+- `Documentation/dialog_pipeline.md`: Details on the unified dialog launching standard
+- `Documentation/error_logging_and_fallback.md`: Hard-fail vs soft-fail and StatusBar policy
 - `Project_Journal.md`: In-depth development notes and rationale
 - `Documentation/scanner_input_infocus.md`: Barcode scanner routing and debug options
 - `Documentation/logout_and_titlebar.md`: Logout dialog and custom title bar
 
 ---
-_Last updated: December 2, 2025_
+_Last updated: January 22, 2026_

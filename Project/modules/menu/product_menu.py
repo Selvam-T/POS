@@ -3,10 +3,15 @@ from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel, QComboBox, QTabWidge
 from PyQt5.QtCore import Qt, QTimer, QDateTime
 
 from modules.ui_utils.dialog_utils import (
-    build_dialog_from_ui, require_widgets, set_dialog_info
+    build_dialog_from_ui,
+    require_widgets,
+    set_dialog_main_status_max,
+    report_exception_post_close,
+    log_and_set_post_close,
 )
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 from modules.ui_utils import input_handler, ui_feedback
+from modules.ui_utils.error_logger import log_error
 from modules.db_operation import (
     get_product_full, add_product, update_product, delete_product
 )
@@ -230,8 +235,44 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     try:
         if not (dbop.PRODUCT_CACHE or {}):
             dbop.load_product_cache()
-    except Exception:
-        pass
+    except Exception as e:
+        report_exception_post_close(
+            dlg,
+            'ProductMenu: load_product_cache() for completers',
+            e,
+            user_message='Warning: Failed to load product list (suggestions may be limited)',
+            level='warning',
+            duration=5000,
+        )
+
+    def _post_db_success_refresh(where: str) -> None:
+        """After DB CRUD succeeds, best-effort refresh cache + completers.
+
+        This must never block or revert the DB operation; it only keeps UI
+        suggestions and cache-consumers in sync.
+        """
+        try:
+            dbop.refresh_product_cache()
+        except Exception as e:
+            report_exception_post_close(
+                dlg,
+                f'ProductMenu: refresh_product_cache() after {where}',
+                e,
+                user_message='Warning: Product list may be outdated (restart if needed)',
+                level='warning',
+                duration=5000,
+            )
+        try:
+            _refresh_name_completers()
+        except Exception as e:
+            report_exception_post_close(
+                dlg,
+                f'ProductMenu: refresh name completers after {where}',
+                e,
+                user_message='Warning: Search suggestions not updated',
+                level='warning',
+                duration=4000,
+            )
 
     def _names_from_cache() -> list:
         out = []
@@ -287,8 +328,15 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 on_selected=_upd_selected,
                 trigger_on_finish=False,
             )
-        except Exception:
-            pass
+        except Exception as e:
+            report_exception_post_close(
+                dlg,
+                'ProductMenu: _refresh_name_completers()',
+                e,
+                user_message='Warning: Search suggestions not updated',
+                level='warning',
+                duration=4000,
+            )
 
     # --- Lookup engine (single normalized shape) ---
     def _lookup_code_by_name(name: str) -> str | None:
@@ -843,7 +891,8 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     def _finalize(mode: str, code: str, name: str) -> None:
         verb = {'add': 'added', 'rem': 'removed', 'upd': 'updated'}.get(mode, mode)
         ui_feedback.set_status_label(widgets[f'{mode}_status'], f"Success: {name} {verb}", ok=True)
-        set_dialog_info(dlg, f"Product {name} {verb}.")
+        # Success is info-level and must not override any warning/error set earlier.
+        set_dialog_main_status_max(dlg, f"Product {name} {verb}.", level='info', duration=4000)
         if mode == 'add' and initial_code:
             QTimer.singleShot(10, lambda: handle_barcode_scanned(main_window.sales_table, code, main_window.statusBar()))
         QTimer.singleShot(500, dlg.accept)
@@ -920,16 +969,36 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             unit,
             QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss'),
         )
-        if ok: _finalize('add', code, name)
-        else: ui_feedback.set_status_label(widgets['add_status'], msg, ok=False)
+        if ok:
+            _post_db_success_refresh('ADD')
+            _finalize('add', code, name)
+        else:
+            log_and_set_post_close(
+                dlg,
+                f"ProductMenu ADD failed (code={code})",
+                str(msg),
+                user_message=f"Error: {msg}",
+                level='error',
+                duration=5000,
+            )
+            ui_feedback.set_status_label(widgets['add_status'], msg, ok=False)
 
     def do_rem():
         code = widgets['rem_code'].text()
         ok, msg = delete_product(code)
         if ok:
-            _refresh_name_completers()
+            _post_db_success_refresh('REMOVE')
             _finalize('rem', code, "Product")
-        else: ui_feedback.set_status_label(widgets['rem_status'], msg, ok=False)
+        else:
+            log_and_set_post_close(
+                dlg,
+                f"ProductMenu REMOVE failed (code={code})",
+                str(msg),
+                user_message=f"Error: {msg}",
+                level='error',
+                duration=5000,
+            )
+            ui_feedback.set_status_label(widgets['rem_status'], msg, ok=False)
 
     def do_upd():
         ok, code = _try_value(
@@ -1006,9 +1075,18 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
 
         ok, msg = update_product(code, name, sell_value, cat, cur_supplier, cost_value, unit)
         if ok:
-            _refresh_name_completers()
+            _post_db_success_refresh('UPDATE')
             _finalize('upd', code, name)
-        else: ui_feedback.set_status_label(widgets['upd_status'], msg, ok=False)
+        else:
+            log_and_set_post_close(
+                dlg,
+                f"ProductMenu UPDATE failed (code={code})",
+                str(msg),
+                user_message=f"Error: {msg}",
+                level='error',
+                duration=5000,
+            )
+            ui_feedback.set_status_label(widgets['upd_status'], msg, ok=False)
 
     # Auto-clear validation errors once the user corrects the last error source.
     coord.register_validator(

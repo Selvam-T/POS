@@ -207,3 +207,9 @@ class DialogWrapper:
                 log_error(f"Dialog failed: {e}\n{traceback.format_exc()}")
             except Exception:
                 pass
+
+            # Best-effort user hint (after cleanup so it doesn't show under a modal overlay).
+            try:
+                ui_feedback.show_main_status(self.main, 'Error: Dialog failed (see error.log)', is_error=True, duration=6000)
+            except Exception:
+                pass

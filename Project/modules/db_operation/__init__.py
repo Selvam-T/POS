@@ -86,9 +86,13 @@ def add_product(
         # Keep in-memory cache consistent with DB (in-place update)
         try:
             upsert_cache_item(product_code, name, float(selling_price or 0.0), unit)
-        except Exception:
-            # Best-effort; UI may still call refresh_product_cache()
-            pass
+        except Exception as e:
+            # Best-effort; UI may still call refresh_product_cache().
+            try:
+                from modules.ui_utils.error_logger import log_error
+                log_error(f"add_product: cache upsert failed for {product_code}: {e}")
+            except Exception:
+                pass
         return True, 'OK'
     except Exception as e:
         msg = str(e)
@@ -124,8 +128,12 @@ def update_product(
         # Keep in-memory cache consistent with DB (in-place update)
         try:
             upsert_cache_item(product_code, name, float(selling_price or 0.0), unit)
-        except Exception:
-            pass
+        except Exception as e:
+            try:
+                from modules.ui_utils.error_logger import log_error
+                log_error(f"update_product: cache upsert failed for {product_code}: {e}")
+            except Exception:
+                pass
         return True, 'OK'
     except Exception as e:
         msg = str(e)
@@ -143,8 +151,12 @@ def delete_product(product_code: str) -> Tuple[bool, str]:
         # Keep in-memory cache consistent with DB (in-place update)
         try:
             remove_cache_item(product_code)
-        except Exception:
-            pass
+        except Exception as e:
+            try:
+                from modules.ui_utils.error_logger import log_error
+                log_error(f"delete_product: cache remove failed for {product_code}: {e}")
+            except Exception:
+                pass
         return True, 'OK'
     except Exception as e:
         return False, str(e)

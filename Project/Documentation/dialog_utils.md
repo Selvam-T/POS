@@ -11,6 +11,7 @@ These helpers support the standardized dialog pipeline used by menu dialogs and 
 
 - Consistent `.ui` loading behavior (hard-fail boundary)
 - Consistent error logging + StatusBar messaging
+- Avoid StatusBar messages while a modal dialog is still open (prefer post-close intent)
 - Consistent dialog construction (wrap non-QDialog roots, apply modality, apply QSS)
 - Consistent widget binding (fail fast when required widgets are missing)
 
@@ -36,6 +37,20 @@ Dialogs can request a StatusBar message after they close using:
 
 The execution wrapper (`DialogWrapper`) reads these attributes after `exec_()` and displays them.
 
+### Modal-safe StatusBar policy
+
+When a modal dialog is open, the overlay is active and the StatusBar is visually “behind” the modal.
+To keep UX consistent:
+
+- Prefer setting **post-close** StatusBar intent on the dialog (via `set_dialog_*` helpers).
+- Avoid calling `report_to_statusbar(...)` from inside modal dialog handlers.
+
+For exception scenarios during a modal dialog, use the **post-close** exception helper:
+- `report_exception_post_close(...)`
+
+For handled (non-exception) failures (e.g., DB CRUD returning `(ok=False, msg)`), use:
+- `log_and_set_post_close(...)`
+
 ---
 
 ## API Reference
@@ -54,9 +69,20 @@ Convenience wrapper around `set_dialog_main_status(..., is_error=False)`.
 
 Convenience wrapper around `set_dialog_main_status(..., is_error=True)`.
 
+### `set_dialog_main_status_max(dlg, message, *, level='info', is_error=None, duration=4000)`
+
+Sets the dialog’s post-close StatusBar intent only if the new message is **at least as severe** as the existing one.
+
+Severity precedence:
+- `error` > `warning` > `info`
+
+This supports the rule: “failure/warning takes precedence over success in the StatusBar”.
+
 ### `report_to_statusbar(host_window, message, *, is_error=True, duration=4000)`
 
 Best-effort StatusBar helper (delegates to `ui_feedback.show_main_status`).
+
+Note: This shows **immediately**. Use sparingly from modal dialog code.
 
 ### `center_dialog_relative_to(dlg, host)`
 
@@ -74,9 +100,27 @@ Strict `.ui` loader:
 Standardized exception routing:
 
 - logs detailed exception + traceback
-- shows a short StatusBar message (best-effort)
+- shows a short StatusBar message (best-effort, immediate)
 
 This is intended for unexpected DB/UI failures where users need a quick hint but developers need full traceback.
+
+### `report_exception_post_close(dlg, where, exc, *, user_message, level='error', duration=5000)`
+
+Modal-safe exception routing:
+
+- logs detailed exception + traceback to `log/error.log`
+- sets a post-close StatusBar intent on the dialog (so `DialogWrapper` shows it after `exec_()` returns)
+
+### `log_exception_only(where, exc)`
+
+Logs a detailed exception + traceback to `log/error.log` without StatusBar messaging.
+
+### `log_and_set_post_close(dlg, where, details, *, user_message, level='error', duration=5000)`
+
+For non-exception failures (typically DB functions returning `(ok=False, msg)`):
+
+- logs to `log/error.log`
+- sets post-close StatusBar intent on the dialog (severity precedence honored)
 
 ---
 

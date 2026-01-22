@@ -121,6 +121,126 @@ def report_exception(host_window, where: str, exc: Exception, *, user_message: O
     return None
 
 
+def _status_severity(*, level: str, is_error: Optional[bool] = None) -> int:
+    """Internal: map status level to a comparable severity."""
+    lvl = (level or '').strip().lower()
+    if lvl == 'error':
+        return 2
+    if lvl == 'warning':
+        return 1
+    if is_error:
+        return 2
+    return 0
+
+
+def set_dialog_main_status_max(
+    dlg,
+    message: str,
+    *,
+    level: str = 'info',
+    is_error: Optional[bool] = None,
+    duration: int = 4000,
+) -> None:
+    """Set dialog's post-close StatusBar message only if it is >= current severity.
+
+    This is opt-in and does not change existing behavior unless a dialog calls it.
+    Precedence rule:
+    - error > warning > info
+    """
+    if dlg is None:
+        return
+
+    try:
+        new_sev = _status_severity(level=level, is_error=is_error)
+    except Exception:
+        new_sev = 0
+
+    cur_sev = None
+    try:
+        cur_sev = getattr(dlg, '_main_status_severity', None)
+    except Exception:
+        cur_sev = None
+
+    if cur_sev is None:
+        try:
+            cur_is_error = bool(getattr(dlg, 'main_status_is_error', False))
+            cur_msg = getattr(dlg, 'main_status_msg', None)
+            cur_sev = 2 if (cur_is_error and cur_msg) else (0 if cur_msg else 0)
+        except Exception:
+            cur_sev = 0
+
+    if int(new_sev) < int(cur_sev):
+        return
+
+    try:
+        dlg._main_status_severity = int(new_sev)
+    except Exception:
+        pass
+
+    if is_error is None:
+        is_error = (str(level or '').strip().lower() == 'error')
+
+    set_dialog_main_status(dlg, message, is_error=bool(is_error), duration=duration)
+
+
+def log_exception_only(where: str, exc: Exception) -> None:
+    """Log exception details to error.log without touching the StatusBar."""
+    where_txt = (where or 'Error').strip()
+    try:
+        tb = traceback.format_exc()
+    except Exception:
+        tb = ''
+
+    try:
+        msg = f"{where_txt}: {exc!r}"
+        if tb and 'Traceback' in tb:
+            msg = msg + "\n" + tb
+        log_error(msg)
+    except Exception:
+        pass
+
+
+def report_exception_post_close(
+    dlg,
+    where: str,
+    exc: Exception,
+    *,
+    user_message: str,
+    level: str = 'error',
+    duration: int = 5000,
+) -> None:
+    """Log exception details and set a post-close StatusBar message intent on dlg.
+
+    Use this for failures that happen during modal dialogs where we don't want
+    to show StatusBar messages while the modal is still open.
+    """
+    log_exception_only(where, exc)
+    try:
+        set_dialog_main_status_max(dlg, (user_message or f"Error: {where}").strip(), level=level, duration=duration)
+    except Exception:
+        pass
+
+
+def log_and_set_post_close(
+    dlg,
+    where: str,
+    details: str,
+    *,
+    user_message: str,
+    level: str = 'error',
+    duration: int = 5000,
+) -> None:
+    """Log a handled (non-exception) failure and set post-close StatusBar intent."""
+    try:
+        log_error(f"{(where or 'Error').strip()}: {details}")
+    except Exception:
+        pass
+    try:
+        set_dialog_main_status_max(dlg, (user_message or f"Error: {where}").strip(), level=level, duration=duration)
+    except Exception:
+        pass
+
+
 # =========================================================
 # OPT-IN HELPERS (do not change existing behavior)
 # =========================================================
