@@ -88,27 +88,23 @@ class MainLoader(QMainWindow):
 
     def open_product_menu_dialog(self, **kwargs):
         """Open Product Management panel with Step 0 Sale-Active check."""
-        try:
+        # Standardize hard-fail handling: keep all launch-time work inside
+        # DialogWrapper's try/except boundary.
+        def _open(main_window):
             from modules.table.table_operations import is_transaction_active
-            
-            # Check if any items are currently in the sales table
-            # This determines if the user is allowed to Switch tabs (Remove/Update)
-            sale_active = is_transaction_active(getattr(self, 'sales_table', None))
-            
-            # If a sale is active, we force the initial_mode to 'add' 
-            # (unless specifically requested otherwise) to protect the transaction.
-            if sale_active:
-                kwargs['initial_mode'] = 'add'
 
-            # The dialog_wrapper will handle the overlay and execution
-            self.dialog_wrapper.open_dialog_scanner_blocked(
-                launch_product_dialog, 
-                dialog_key='product_menu', 
-                **kwargs
-            )
-        except Exception as e:
-            from modules.ui_utils.error_logger import log_error
-            log_error(f"Failed to launch product menu: {e}")
+            local_kwargs = dict(kwargs or {})
+
+            # Protect an active transaction: force initial_mode='add'
+            if is_transaction_active(getattr(main_window, 'sales_table', None)):
+                local_kwargs['initial_mode'] = 'add'
+
+            return launch_product_dialog(main_window, **local_kwargs)
+
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            _open,
+            dialog_key='product_menu',
+        )
         
     def open_admin_menu_dialog(self):
         """Open Admin dialog."""

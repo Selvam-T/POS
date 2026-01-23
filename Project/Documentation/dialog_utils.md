@@ -25,7 +25,7 @@ These helpers support the standardized dialog pipeline used by menu dialogs and 
 
 - If the `.ui` file is missing or fails to load:
   - details are logged via `log_error(...)`
-  - a short StatusBar error is shown (best-effort) when a host window is provided
+  - a short StatusBar error is **deferred** when a host window is provided (so it isn’t hidden under a modal overlay)
   - `None` is returned so the caller can hard-fail
 
 ### Post-close StatusBar messages
@@ -44,6 +44,10 @@ To keep UX consistent:
 
 - Prefer setting **post-close** StatusBar intent on the dialog (via `set_dialog_*` helpers).
 - Avoid calling `report_to_statusbar(...)` from inside modal dialog handlers.
+
+UI-load failures are a special case:
+- `load_ui_strict(...)` queues a pending main-window StatusBar message.
+- `DialogWrapper` flushes it if the controller returns `None`.
 
 For exception scenarios during a modal dialog, use the **post-close** exception helper:
 - `report_exception_post_close(...)`
@@ -94,6 +98,8 @@ Strict `.ui` loader:
 
 - missing/invalid `.ui` → logs and returns `None`
 - success → returns the loaded root widget
+
+If `host_window` is provided, UI-load failures will queue a pending StatusBar message for the wrapper to display after overlay cleanup.
 
 ### `report_exception(host_window, where, exc, *, user_message=None, duration=5000)`
 

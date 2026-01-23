@@ -74,8 +74,15 @@ def load_ui_strict(ui_path: str, *, host_window=None, dialog_name: str = "Dialog
             log_error(msg)
         except Exception:
             pass
+        # Defer user notification to the wrapper when possible so it isn't
+        # hidden under a modal overlay.
         if host_window is not None:
-            report_to_statusbar(host_window, f"Error: {msg}", is_error=True)
+            try:
+                host_window._pending_main_status_msg = f"Error: {msg}"
+                host_window._pending_main_status_is_error = True
+                host_window._pending_main_status_duration = 6000
+            except Exception:
+                pass
         return None
 
     try:
@@ -87,7 +94,12 @@ def load_ui_strict(ui_path: str, *, host_window=None, dialog_name: str = "Dialog
         except Exception:
             pass
         if host_window is not None:
-            report_to_statusbar(host_window, f"Error: {dialog_name} UI load failed", is_error=True)
+            try:
+                host_window._pending_main_status_msg = f"Error: {dialog_name} UI load failed"
+                host_window._pending_main_status_is_error = True
+                host_window._pending_main_status_duration = 6000
+            except Exception:
+                pass
         return None
 
 

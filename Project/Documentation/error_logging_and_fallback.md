@@ -28,10 +28,11 @@ Fallback behavior is dialog-specific. Some dialogs show an explicit fallback dia
 ### Standardized UI-load fallback
 For menu-style dialogs, `modules/ui_utils/dialog_utils.py` provides `load_ui_strict(...)`:
 - Missing `.ui` or load failure → logs to `error.log`
-- Best-effort StatusBar message via `report_to_statusbar(...)`
+- Best-effort StatusBar message (deferred and flushed by `DialogWrapper`)
 - Returns `None` so the caller can **hard-fail** (return `None`) or **soft-disable** a feature.
 
-Note: UI-load failures happen *before* the modal dialog is shown, so an immediate StatusBar hint is OK.
+Note: UI-load failures can still occur during an “open dialog” flow while the overlay is enabled.
+To avoid StatusBar messages being hidden under the modal overlay, UI-load notifications are queued and displayed by `DialogWrapper` after cleanup.
 
 ### Post-close StatusBar messages
 Dialogs can set a post-close message using:

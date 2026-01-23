@@ -169,6 +169,26 @@ class DialogWrapper:
                 self._hide_overlay()
                 self._unblock_scanner()
                 self._clear_scanner_override()
+                # If a controller deferred a status message (e.g., UI missing),
+                # surface it now that the overlay has been removed.
+                try:
+                    msg = getattr(self.main, '_pending_main_status_msg', None)
+                    if msg:
+                        is_error = bool(getattr(self.main, '_pending_main_status_is_error', True))
+                        duration = getattr(self.main, '_pending_main_status_duration', 6000)
+                        ui_feedback.show_main_status(self.main, msg, is_error=is_error, duration=int(duration) if duration is not None else 6000)
+                except Exception:
+                    pass
+                finally:
+                    try:
+                        if hasattr(self.main, '_pending_main_status_msg'):
+                            delattr(self.main, '_pending_main_status_msg')
+                        if hasattr(self.main, '_pending_main_status_is_error'):
+                            delattr(self.main, '_pending_main_status_is_error')
+                        if hasattr(self.main, '_pending_main_status_duration'):
+                            delattr(self.main, '_pending_main_status_duration')
+                    except Exception:
+                        pass
                 return
 
             if not isinstance(dlg, QDialog):
@@ -179,6 +199,17 @@ class DialogWrapper:
                 width_ratio, height_ratio = self.DIALOG_RATIOS[dialog_key]
             else:
                 width_ratio, height_ratio = 0.5, 0.5
+
+            # Optional convention: dialogs may provide a barcode override handler.
+            # Wrapper installs it (best-effort) and cleanup always clears it.
+            try:
+                handler = getattr(dlg, 'barcode_override_handler', None)
+                if callable(handler):
+                    bm = getattr(self.main, 'barcode_manager', None)
+                    if bm is not None and hasattr(bm, 'set_barcode_override'):
+                        bm.set_barcode_override(handler)
+            except Exception:
+                pass
 
             self._setup_dialog_geometry(dlg, width_ratio, height_ratio)
             dlg.finished.connect(self._create_cleanup(on_finish))

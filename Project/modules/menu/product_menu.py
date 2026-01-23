@@ -11,7 +11,6 @@ from modules.ui_utils.dialog_utils import (
 )
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 from modules.ui_utils import input_handler, ui_feedback
-from modules.ui_utils.error_logger import log_error
 from modules.db_operation import (
     get_product_full, add_product, update_product, delete_product
 )
@@ -31,7 +30,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     from modules.table.table_operations import is_transaction_active
     sale_lock = is_transaction_active(getattr(main_window, 'sales_table', None))
 
-    dlg = build_dialog_from_ui(UI_PATH, host_window=main_window, qss_path=QSS_PATH)
+    dlg = build_dialog_from_ui(UI_PATH, host_window=main_window, dialog_name='Product menu', qss_path=QSS_PATH)
     if not dlg: return None
 
     widgets = require_widgets(dlg, {
@@ -702,11 +701,34 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 return True
         return False
 
+    _ADD_CODE_ERR_RESERVED = "Not allowed. Edit Vegetables in Vegetable menu"
+    _ADD_CODE_ERR_EXISTS = "Error: Product Code already exists."
+
+    def _validate_add_product_code_policy(code: str):
+        """Shared boundary check for Product Menu ADD codes.
+
+        Used in both:
+        - live gating (to lock/unlock fields)
+        - OK-time validation (final safety)
+
+        Returns: (ok, reason, message)
+        reason is one of: 'reserved', 'exists', or None.
+        """
+        s = (code or '').strip()
+        if not s:
+            return True, None, None
+        if is_reserved_vegetable_code(s):
+            return False, 'reserved', _ADD_CODE_ERR_RESERVED
+        if _product_code_exists(s):
+            return False, 'exists', _ADD_CODE_ERR_EXISTS
+        return True, None, None
+
     def _update_add_gate(*_):
         code = (widgets['add_code'].text() or '').strip()
-        is_reserved = is_reserved_vegetable_code(code)
-        exists = _product_code_exists(code)
-        valid = (len(code) >= 4) and (not is_reserved) and (not exists)
+        ok_policy, reason, msg = _validate_add_product_code_policy(code)
+        is_reserved = (reason == 'reserved')
+        exists = (reason == 'exists')
+        valid = (len(code) >= 4) and ok_policy
 
         _set_add_inputs_enabled(valid)
         if valid:
@@ -723,10 +745,10 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 except Exception:
                     pass
 
-        if is_reserved:
-            ui_feedback.set_status_label(widgets['add_status'], "Not allowed. Edit Vegetables in Vegetable menu", ok=False)
-        elif exists:
-            ui_feedback.set_status_label(widgets['add_status'], "Error: Product Code already exists.", ok=False)
+        if is_reserved and msg:
+            ui_feedback.set_status_label(widgets['add_status'], msg, ok=False)
+        elif exists and msg:
+            ui_feedback.set_status_label(widgets['add_status'], msg, ok=False)
             try:
                 widgets['add_code'].selectAll()
             except Exception:
@@ -907,15 +929,10 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         if not ok:
             return
 
-        # Product Menu-specific rule: reserved veg codes cannot be created as products.
-        if is_reserved_vegetable_code(code):
-            ui_feedback.set_status_label(widgets['add_status'], "Not allowed. Edit Vegetables in Vegetable menu", ok=False)
-            _focus_widget(widgets['add_code'], select_all=True)
-            return
-
-        # Re-check uniqueness at the boundary (user may click OK without triggering gate updates)
-        if _product_code_exists(code):
-            ui_feedback.set_status_label(widgets['add_status'], "Error: Product Code already exists.", ok=False)
+        # Re-check policy at the boundary (user may click OK without triggering gate updates)
+        ok_policy, _, msg = _validate_add_product_code_policy(code)
+        if not ok_policy:
+            ui_feedback.set_status_label(widgets['add_status'], msg or 'Invalid product code', ok=False)
             _focus_widget(widgets['add_code'], select_all=True)
             return
 
@@ -1112,7 +1129,16 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
 
     # Connections
     widgets['add_ok'].clicked.connect(do_add); widgets['rem_ok'].clicked.connect(do_rem); widgets['upd_ok'].clicked.connect(do_upd)
-    widgets['add_cancel'].clicked.connect(dlg.reject); widgets['rem_cancel'].clicked.connect(dlg.reject); widgets['upd_cancel'].clicked.connect(dlg.reject); widgets['close_btn'].clicked.connect(dlg.reject)
+
+    def _cancel_close() -> None:
+        # Info-level so it won't override any warning/error queued earlier.
+        set_dialog_main_status_max(dlg, 'Product menu closed.', level='info', duration=3000)
+        dlg.reject()
+
+    widgets['add_cancel'].clicked.connect(_cancel_close)
+    widgets['rem_cancel'].clicked.connect(_cancel_close)
+    widgets['upd_cancel'].clicked.connect(_cancel_close)
+    widgets['close_btn'].clicked.connect(_cancel_close)
 
     # Barcode Override
     def barcode_override(barcode):
@@ -1123,8 +1149,11 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             _sync_source(le)
         return True
 
-    bm = getattr(main_window, 'barcode_manager', None)
-    if bm: bm.set_barcode_override(barcode_override)
+    # Wrapper convention: provide the handler; DialogWrapper installs/clears it.
+    try:
+        dlg.barcode_override_handler = barcode_override
+    except Exception:
+        pass
 
     # Initialization
     if sale_lock:
