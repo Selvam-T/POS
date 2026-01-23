@@ -5,6 +5,8 @@ New helpers added below are opt-in and do not affect existing dialogs
 unless they explicitly call them.
 """
 
+import unicodedata
+
 from PyQt5.QtCore import QObject, Qt, QEvent, QTimer
 from PyQt5.QtWidgets import QLineEdit, QComboBox, QPushButton
 from modules.ui_utils import ui_feedback
@@ -211,11 +213,35 @@ class FieldCoordinator(QObject):
             
         source.installEventFilter(self)
 
+    @staticmethod
+    def _clean_lookup_text(text: str) -> str:
+        """Normalize text used for lookups.
+
+        Barcode scanners sometimes inject non-printable control characters
+        (e.g., ASCII GS/RS) that are not removed by .strip(). These cause cache/DB
+        lookups to fail even when the visible text looks correct.
+
+        We remove Unicode category "C*" characters and then strip whitespace.
+        """
+        s = '' if text is None else str(text)
+        try:
+            s = ''.join(ch for ch in s if not unicodedata.category(ch).startswith('C'))
+        except Exception:
+            # Best-effort fallback: keep original string
+            pass
+        return s.strip()
+
     def _sync_fields(self, source):
         link = self.links[source]
         if not link['lookup']: return # Skip if it's just a focus jump link
 
-        val = source.text().strip() if hasattr(source, 'text') else source.currentText()
+        if hasattr(source, 'text'):
+            val = self._clean_lookup_text(source.text())
+        else:
+            try:
+                val = (source.currentText() or '').strip()
+            except Exception:
+                val = ''
         if not val:
             self._apply_state(source, None, is_clear=True)
             return
@@ -284,7 +310,13 @@ class FieldCoordinator(QObject):
             if obj in self.links:
                 link = self.links[obj]
                 # Get the value regardless of whether we are doing a lookup
-                val = obj.text().strip() if hasattr(obj, 'text') else obj.currentText()
+                if hasattr(obj, 'text'):
+                    val = self._clean_lookup_text(obj.text())
+                else:
+                    try:
+                        val = (obj.currentText() or '').strip()
+                    except Exception:
+                        val = ''
 
                 # Optional: validate on Enter (primarily for simple focus-jump links)
                 validate_fn = link.get('validate_fn')

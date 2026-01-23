@@ -9,6 +9,7 @@ from modules.ui_utils.dialog_utils import (
     report_exception_post_close,
     log_and_set_post_close,
 )
+from modules.ui_utils.canonicalization import canonicalize_product_code
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 from modules.ui_utils import input_handler, ui_feedback
 from modules.db_operation import (
@@ -355,17 +356,17 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         return None
 
     def _lookup_product(code: str):
-        code = (code or '').strip()
-        if not code:
+        raw = str(code) if code is not None else ''
+        code_norm = canonicalize_product_code(raw)
+        if not code_norm:
             return None, "Empty code"
-        if is_reserved_vegetable_code(code):
+        if is_reserved_vegetable_code(code_norm):
             return None, "Reserved vegetable code"
-        found, pdata = get_product_full(code)
+        found, pdata = get_product_full(code_norm)
         if not found:
             return None, "Product not found"
         # Prefer display casing from cache map.
-        key = (code or '').strip().upper()
-        code_disp = PRODUCT_CODE_DISPLAY.get(key) or (pdata.get('product_code') or code)
+        code_disp = PRODUCT_CODE_DISPLAY.get(code_norm) or (pdata.get('product_code') or code_norm)
         return {
             'code': code_disp,
             'name_search': pdata.get('name') or '',
@@ -693,13 +694,13 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             pass
 
     def _product_code_exists(code: str) -> bool:
-        s = (code or '').strip().lower()
-        if not s:
+        key = canonicalize_product_code(code)
+        if not key:
             return False
-        for k in (dbop.PRODUCT_CACHE or {}).keys():
-            if (k or '').strip().lower() == s:
-                return True
-        return False
+        try:
+            return key in (dbop.PRODUCT_CACHE or {})
+        except Exception:
+            return False
 
     _ADD_CODE_ERR_RESERVED = "Not allowed. Edit Vegetables in Vegetable menu"
     _ADD_CODE_ERR_EXISTS = "Error: Product Code already exists."
@@ -714,7 +715,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         Returns: (ok, reason, message)
         reason is one of: 'reserved', 'exists', or None.
         """
-        s = (code or '').strip()
+        s = canonicalize_product_code(code)
         if not s:
             return True, None, None
         if is_reserved_vegetable_code(s):
@@ -724,11 +725,12 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         return True, None, None
 
     def _update_add_gate(*_):
-        code = (widgets['add_code'].text() or '').strip()
+        code = widgets['add_code'].text() or ''
         ok_policy, reason, msg = _validate_add_product_code_policy(code)
         is_reserved = (reason == 'reserved')
         exists = (reason == 'exists')
-        valid = (len(code) >= 4) and ok_policy
+        code_norm = canonicalize_product_code(code)
+        valid = (len(code_norm) >= 4) and ok_policy
 
         _set_add_inputs_enabled(valid)
         if valid:

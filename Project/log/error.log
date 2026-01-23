@@ -4,3 +4,6 @@ Traceback (most recent call last):
     raise RuntimeError('POS_DEBUG_PRODUCTMENU_REFRESH_FAIL=1')
 RuntimeError: POS_DEBUG_PRODUCTMENU_REFRESH_FAIL=1
 
+2026-01-23T17:11:09.677545 - ProductMenu ADD failed (code=5028197552916): Product name already exists.
+2026-01-23T17:14:14.481915 - ProductMenu REMOVE failed (code=): Product not found
+2026-01-23T17:14:33.540195 - ProductMenu REMOVE failed (code=): Product not found
