@@ -272,7 +272,7 @@
             </size>
            </property>
            <property name="currentText">
-            <string>Other</string>
+            <string/>
            </property>
            <property name="placeholderText">
             <string>-- Optional --</string>
@@ -1171,6 +1171,7 @@
   <tabstop>addProductNameLineEdit</tabstop>
   <tabstop>addSellingPriceLineEdit</tabstop>
   <tabstop>addCostPriceLineEdit</tabstop>
+  <tabstop>addMarkupLineEdit</tabstop>
   <tabstop>addCategoryComboBox</tabstop>
   <tabstop>addUnitLineEdit</tabstop>
   <tabstop>addSupplierLineEdit</tabstop>
@@ -1191,6 +1192,7 @@
   <tabstop>updateProductNameLineEdit</tabstop>
   <tabstop>updateSellingPriceLineEdit</tabstop>
   <tabstop>updateCostPriceLineEdit</tabstop>
+  <tabstop>updateMarkupLineEdit</tabstop>
   <tabstop>updateCategoryComboBox</tabstop>
   <tabstop>updateUnitLineEdit</tabstop>
   <tabstop>updateSupplierLineEdit</tabstop>

@@ -230,9 +230,11 @@ class BarcodeManager(QObject):
                     txt = fw.text() or ''
                     # Best-effort: remove a trailing leaked first character.
                     # Do not restrict by length; long fields (e.g., prices) must be cleaned too.
-                    if txt.endswith(ch):
-                        fw.setText(txt[:-1])
-                    return
+                    if len(txt) > len(barcode):
+                        ch = barcode[0]
+                        if txt.endswith(ch):
+                            fw.setText(txt[:-1])
+                            return
             except Exception:
                 pass
             try:

@@ -496,7 +496,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         lookup_fn=_lookup_product,
         next_focus=widgets['rem_ok'],
         status_label=widgets['rem_status'],
-        auto_jump=True,
+        auto_jump=False,
     )
     coord.add_link(
         source=widgets['rem_name'],
@@ -510,10 +510,10 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         source=widgets['upd_code'],
         target_map=upd_targets_from_code,
         lookup_fn=_lookup_product,
-        next_focus=widgets['upd_name'],
+        next_focus=widgets['upd_cancel'],
         status_label=widgets['upd_status'],
         on_sync=_on_upd_sync,
-        auto_jump=True,
+        auto_jump=False,
     )
     coord.add_link(
         source=widgets['upd_search'],
@@ -733,13 +733,8 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         valid = (len(code_norm) >= 4) and ok_policy
 
         _set_add_inputs_enabled(valid)
-        if valid:
-            if widgets['add_code'].hasFocus():
-                try:
-                    widgets['add_name'].setFocus()
-                except Exception:
-                    pass
-        else:
+        
+        if not valid:
             # Clear gated fields when relocking.
             for k in ['add_name', 'add_sell', 'add_cost', 'add_supp', 'add_markup', 'add_unit']:
                 try:
