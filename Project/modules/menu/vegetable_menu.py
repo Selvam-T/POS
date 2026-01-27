@@ -501,7 +501,7 @@ def open_vegetable_menu_dialog(host_window):
             return
 
         try:
-            price = input_handler.handle_price_input(input_selling_price, price_type='Selling price')
+            price = input_handler.handle_selling_price(input_selling_price, price_type='Selling price')
         except ValueError as e:
             show_error(f'Error: {e}', source=input_selling_price)
             if input_selling_price is not None:
@@ -698,7 +698,7 @@ def open_vegetable_menu_dialog(host_window):
         if isinstance(input_selling_price, QLineEdit):
             coord.register_validator(
                 input_selling_price,
-                lambda: input_handler.handle_price_input(input_selling_price, price_type='Selling price'),
+                lambda: input_handler.handle_selling_price(input_selling_price, price_type='Selling price'),
                 status_label=lbl_error
             )
         if isinstance(input_supplier, QLineEdit):

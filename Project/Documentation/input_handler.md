@@ -16,7 +16,7 @@ Reusable input handling functions for dialogs and widgets in the POS system. Thi
 - handle_email_input(line_edit: QLineEdit) -> str
 - handle_password_input(line_edit: QLineEdit) -> str
 - handle_unit_input_combo(combo_box: QComboBox) -> str
-- handle_price_input(line_edit: QLineEdit, price_type: str = "price") -> float
+- handle_selling_price(line_edit: QLineEdit, price_type: str = "price") -> float
 - handle_supplier_input(line_edit: QLineEdit) -> str
 - handle_category_input_line(line_edit: QLineEdit) -> str
 - handle_category_input_combo(combo_box: QComboBox) -> str

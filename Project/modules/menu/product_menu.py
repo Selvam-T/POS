@@ -720,6 +720,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             return True, None, None
         if is_reserved_vegetable_code(s):
             return False, 'reserved', _ADD_CODE_ERR_RESERVED
+        #if _product_code_exists(s):
         if _product_code_exists(s):
             return False, 'exists', _ADD_CODE_ERR_EXISTS
         return True, None, None
@@ -781,7 +782,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         next_focus=widgets['add_cost'],
         status_label=widgets['add_status'],
         swallow_empty=True,
-        validate_fn=lambda: input_handler.handle_price_input(widgets['add_sell'], price_type='Selling price'),
+        validate_fn=lambda: input_handler.handle_selling_price(widgets['add_sell'], price_type='Selling price'),
     )
 
     coord.add_link(
@@ -791,7 +792,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         next_focus=widgets['add_supp'],
         status_label=widgets['add_status'],
         swallow_empty=False,
-        validate_fn=lambda: input_handler.handle_price_input_optional(
+        validate_fn=lambda: input_handler.handle_cost_price(
             widgets['add_cost'], 
             price_type='Cost price'
         ),
@@ -832,7 +833,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         next_focus=widgets['upd_cost'],
         status_label=widgets['upd_status'],
         swallow_empty=True,
-        validate_fn=lambda: input_handler.handle_price_input(widgets['upd_sell'], price_type='Selling price'),
+        validate_fn=lambda: input_handler.handle_selling_price(widgets['upd_sell'], price_type='Selling price'),
     )
     coord.add_link(
         source=widgets['upd_cost'],
@@ -841,7 +842,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         next_focus=widgets['upd_cat'],
         status_label=widgets['upd_status'],
         swallow_empty=False,
-        validate_fn=lambda: input_handler.handle_price_input_optional(
+        validate_fn=lambda: input_handler.handle_cost_price(
             widgets['upd_cost'], 
             price_type='Cost price'
         ),
@@ -964,7 +965,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             return
 
         ok, sell_value = _try_value(
-            lambda: input_handler.handle_price_input(widgets['add_sell'], price_type='Selling price'),
+            lambda: input_handler.handle_selling_price(widgets['add_sell'], price_type='Selling price'),
             status_label=widgets['add_status'],
             focus_widget=widgets['add_sell'],
         )
@@ -972,7 +973,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             return
 
         ok, cost_opt = _try_value(
-            lambda: input_handler.handle_price_input_optional(widgets['add_cost'], price_type='Cost price'),
+            lambda: input_handler.handle_cost_price(widgets['add_cost'], price_type='Cost price'),
             status_label=widgets['add_status'],
             focus_widget=widgets['add_cost'],
         )
@@ -1061,7 +1062,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             return
 
         ok, sell_value = _try_value(
-            lambda: input_handler.handle_price_input(widgets['upd_sell'], price_type='Selling price'),
+            lambda: input_handler.handle_selling_price(widgets['upd_sell'], price_type='Selling price'),
             status_label=widgets['upd_status'],
             focus_widget=widgets['upd_sell'],
         )
@@ -1069,7 +1070,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             return
 
         ok, cost_opt = _try_value(
-            lambda: input_handler.handle_price_input_optional(widgets['upd_cost'], price_type='Cost price'),
+            lambda: input_handler.handle_cost_price(widgets['upd_cost'], price_type='Cost price'),
             status_label=widgets['upd_status'],
             focus_widget=widgets['upd_cost'],
         )
@@ -1133,7 +1134,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     )
     coord.register_validator(
         widgets['add_sell'],
-        lambda: input_handler.handle_price_input(widgets['add_sell'], price_type='Selling price'),
+        lambda: input_handler.handle_selling_price(widgets['add_sell'], price_type='Selling price'),
         status_label=widgets['add_status'],
     )
     coord.register_validator(
@@ -1143,7 +1144,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     )
     coord.register_validator(
         widgets['upd_sell'],
-        lambda: input_handler.handle_price_input(widgets['upd_sell'], price_type='Selling price'),
+        lambda: input_handler.handle_selling_price(widgets['upd_sell'], price_type='Selling price'),
         status_label=widgets['upd_status'],
     )
 

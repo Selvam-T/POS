@@ -48,7 +48,7 @@ Flow validators (format + existence rule):
 
 ### Prices
 - `validate_unit_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX)` → numeric + min/max.
-- `validate_price(value, price_type="price")` → mandatory wrapper around `validate_unit_price`.
+- `validate_selling_price(value, price_type="price")` → mandatory wrapper around `validate_unit_price`.
 - `validate_selling_price(value, ...)` → uses `validate_unit_price` (range enforced).
 - `validate_cost_price(value, ...)` → optional (empty allowed) else numeric + range.
 - `validate_total_price(value)`, `validate_grand_total(value)` → numeric + range.

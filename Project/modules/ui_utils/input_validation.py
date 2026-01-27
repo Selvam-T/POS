@@ -42,18 +42,6 @@ def validate_quantity(value, unit_type='unit'):
         return False, "Quantity must be a number"
 
 
-def validate_unit_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX):
-	try:
-		val = float(value)
-		if val < min_val:
-			return False, f"Minimum unit price is {min_val}"
-		if val > max_val:
-			return False, f"Maximum unit price is {max_val}"
-		return True, ""
-	except (ValueError, TypeError):
-		return False, "Unit price must be a number"
-
-
 def validate_total_price(value):
 	try:
 		val = float(value)
@@ -94,22 +82,18 @@ def validate_string(value):
 
 
 def validate_product_name(value):
-	if value is None:
-		return False, "Product name is required"
-	s = str(value).strip()
-	if not s:
-		return False, "Product name is required"
-	if len(s) > STRING_MAX_LENGTH:
-		return False, f"Product name must be at most {STRING_MAX_LENGTH} characters"
-	if not any(c.isalpha() for c in s):
-		return False, "Name must contain at least one letter (A-Z)"
-	return True, ""
+    ok, err = validate_string(value)
+    if not ok:
+        return ok, err
+    
+    s = str(value).strip()
+    if not any(c.isalpha() for c in s):
+        return False, "Name must contain at least one letter (A-Z)"
+        
+    return True, ""
 
 def validate_product_name_for_add(value, name_exists_func):
-    """
-    Checks alpha requirements AND prevents duplicate names in the database.
-    Comparison via name_exists_func should be case-insensitive.
-    """
+
     ok, err = validate_product_name(value)
     if not ok:
         return False, err
@@ -154,32 +138,36 @@ def validate_unit(value):
 		return False, "Unit must be selected"
 	return True, ""
 
+#--- 1. selling price/ cost price start ---
+def validate_unit_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX, price_type="Price"):
+    
+    try:
+        val = float(value)
+        # Ensure constants are floats to avoid comparison errors
+        f_min = float(min_val)
+        f_max = float(max_val)
 
-def validate_price(value, price_type: str = "price"):
-	if value is None or str(value).strip() == "":
-		return False, f"{price_type} is required"
-	return validate_unit_price(value)
+        if val < f_min:
+            return False, f"Minimum {price_type.lower()} is {f_min}"
+        if val > f_max:
+            return False, f"Maximum {price_type.lower()} is {f_max}"
+        return True, ""
+    except (ValueError, TypeError):
+        return False, f"{price_type} must be a number"
+	
+def validate_selling_price(value, price_type="Selling price"):
+    if value is None or str(value).strip() == "":
+        return False, f"{price_type} is required"
+    return validate_unit_price(value, price_type=price_type)
 
+def validate_cost_price(value, price_type="Cost price"):
+    if value is None or str(value).strip() == "":
+        return True, ""
+    # If not empty, use the same numeric logic
+    return validate_unit_price(value, price_type=price_type)
 
-def validate_optional_price(value, price_type: str = "price"):
-	"""Optional price validator.
-
-	- Empty values are accepted (ok=True)
-	- Non-empty values must pass the same numeric/min/max rules as validate_unit_price
-	"""
-	if value is None or str(value).strip() == "":
-		return True, ""
-	try:
-		val = float(value)
-		if val < UNIT_PRICE_MIN:
-			return False, f"Minimum {price_type.lower()} is {UNIT_PRICE_MIN}"
-		if val > UNIT_PRICE_MAX:
-			return False, f"Maximum {price_type.lower()} is {UNIT_PRICE_MAX}"
-		return True, ""
-	except (ValueError, TypeError):
-		return False, f"{price_type} must be a number"
-
-
+#--- 1. selling price/ cost price end ---
+	
 def validate_password(value):
 	if not isinstance(value, str):
 		return False, "Password must be a string"
@@ -250,7 +238,7 @@ def exists_in_memory_cache(value, cache_lookup_func):
 		return False, "Value does not exist in memory cache"
 	return True, ""
 
-
+# 2. product code ----------
 def validate_product_code_format(value, digits_only=False,
 							min_len=PRODUCT_CODE_MIN_LEN,
 							max_len=PRODUCT_CODE_MAX_LEN):
@@ -267,49 +255,17 @@ def validate_product_code_format(value, digits_only=False,
 		return False, "Product code must contain digits only"
 	return True, ""
 
+def product_code_exists(code):
+    """
+    Shared utility: Checks if a code exists in the memory cache.
+    Standardizes the input to UPPERCASE before checking.
+    """
+    from modules.ui_utils.canonicalization import canonicalize_product_code
+    from modules.db_operation.product_cache import PRODUCT_CACHE
+    
+    target = canonicalize_product_code(code)
+    return target in PRODUCT_CACHE
 
-def validate_product_code_for_add(value, code_exists_func,
-							 digits_only=False,
-							 min_len=PRODUCT_CODE_MIN_LEN,
-							 max_len=PRODUCT_CODE_MAX_LEN):
-	ok, err = validate_product_code_format(value, digits_only=digits_only, min_len=min_len, max_len=max_len)
-	if not ok:
-		return False, err
-	code = str(value).strip()
-	if code_exists_func and code_exists_func(code):
-		return False, "Product code already exists"
-	return True, ""
-
-
-def validate_product_code_for_lookup(value, code_exists_func,
-							 digits_only=False,
-							 min_len=PRODUCT_CODE_MIN_LEN,
-							 max_len=PRODUCT_CODE_MAX_LEN):
-	ok, err = validate_product_code_format(value, digits_only=digits_only, min_len=min_len, max_len=max_len)
-	if not ok:
-		return False, err
-	code = str(value).strip()
-	if code_exists_func and not code_exists_func(code):
-		return False, "Product not found"
-	return True, ""
-
-
-def validate_cost_price(value, min_val=0.0, max_val=UNIT_PRICE_MAX):
-	if value is None or str(value).strip() == "":
-		return True, ""  # optional field
-	try:
-		val = float(value)
-		if val < min_val:
-			return False, f"Minimum cost price is {min_val}"
-		if val > max_val:
-			return False, f"Maximum cost price is {max_val}"
-		return True, ""
-	except (ValueError, TypeError):
-		return False, "Cost price must be a number"
-
-
-def validate_selling_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX):
-	return validate_unit_price(value, min_val=min_val, max_val=max_val)
 
 def is_reserved_vegetable_code(code: str) -> bool:
     """
@@ -332,18 +288,4 @@ def is_reserved_vegetable_code(code: str) -> bool:
             return False
     return False
 
-# To replace PRODUCT_CODE, PRODUCT_NAME, SUPPLIER, CATEGORY, NOTES validation functions with STRING_CONFIG
-def validate_field(value, required=True, min_len=0, max_len=0, field_name="Field"):
-    if value is None:
-        value = ""
-    s = str(value).strip()
-    length = len(s)
-    if required and length < min_len:
-        return False, f"{field_name} is required and must be at least {min_len} characters"
-    if not required and length == 0:
-        return True, ""
-    if length < min_len:
-        return False, f"{field_name} must be at least {min_len} characters"
-    if max_len > 0 and length > max_len:
-        return False, f"{field_name} must be at most {max_len} characters"
-    return True, ""
+# 2. product code end ----------

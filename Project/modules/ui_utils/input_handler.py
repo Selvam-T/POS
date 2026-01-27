@@ -38,20 +38,20 @@ def handle_quantity_input(line_edit: QLineEdit, unit_type: str = 'unit') -> floa
     _raise_if_invalid(input_validation.validate_quantity(text, unit_type=unit_type))
     return float(text)
 
-def handle_price_input(line_edit: QLineEdit, price_type: str = "price") -> float:
+def handle_selling_price(line_edit: QLineEdit, price_type: str = "price") -> float:
     text = line_edit.text().strip()
-    _raise_if_invalid(input_validation.validate_price(text, price_type))
+    _raise_if_invalid(input_validation.validate_selling_price(text, price_type))
     return float(text)
 
 
-def handle_price_input_optional(line_edit: QLineEdit, price_type: str = "price") -> float | None:
+def handle_cost_price(line_edit: QLineEdit, price_type: str = "price") -> float | None:
     """Optional numeric price.
 
     Returns:
         None when blank, otherwise a validated float.
     """
     text = (line_edit.text() or '').strip()
-    _raise_if_invalid(input_validation.validate_optional_price(text, price_type))
+    _raise_if_invalid(input_validation.validate_cost_price(text, price_type))
     if not text:
         return None
     return float(text)
