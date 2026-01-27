@@ -82,14 +82,15 @@ def handle_category_input_combo(combo_box: QComboBox) -> str:
     return category
 
 
-def handle_category_input_combo_default_other(combo_box: QComboBox, *, default: str = "Other") -> str:
-    """Category is optional; if not selected/blank, default to 'Other'."""
+def handle_category_input_combo_default_other(combo_box: QComboBox, *, default: str = "") -> str:
     try:
         category = (combo_box.currentText() or '').strip()
     except Exception:
         category = ''
+    
     if not category:
-        category = str(default)
+        return ""
+        
     _raise_if_invalid(input_validation.validate_category(category))
     return category
 
@@ -130,28 +131,32 @@ def get_coordinator_lookup(value: str, source_type: str = 'code') -> dict | None
     if not val_norm:
         return None
 
+    # Helper to map the cache record to a clean dictionary
+    def _map(code, rec):
+        return {
+            'code': code,
+            'name': rec[0],
+            'price': rec[1],
+            'unit': rec[2] if rec[2] else "", # Ensure empty if null/empty in DB
+            'cost': rec[3] if len(rec) > 3 else "" # Added support for Cost Price
+        }
+    
     # 1. Search by Code
     if source_type == 'code':
-        if val_norm in PRODUCT_CACHE:
-            rec = PRODUCT_CACHE[val_norm]
-            return {
-                'code': val_norm,
-                'name': rec[0],
-                'price': rec[1],
-                'unit': rec[2]
-            }
+        # Gateway B: Standardize the input before searching
+        key = canonicalize_product_code(value) 
+        if key in PRODUCT_CACHE:
+            rec = PRODUCT_CACHE[key]
+            return {'code': key, 'name': rec[0], 'price': rec[1], 'unit': rec[2]}
             
     # 2. Search by Name
     else:
-        search_name = value.strip().lower()
+        # Gateway B: Standardize the input before searching
+        target_name = canonicalize_title_text(value)
         for code, rec in PRODUCT_CACHE.items():
-            if rec[0] and rec[0].strip().lower() == search_name:
-                return {
-                    'code': code,
-                    'name': rec[0],
-                    'price': rec[1],
-                    'unit': rec[2]
-                }
+            # Standardized Target vs Standardized Cache Item
+            if rec[0] == target_name:
+                return {'code': code, 'name': rec[0], 'price': rec[1], 'unit': rec[2]}
     
     return None
 

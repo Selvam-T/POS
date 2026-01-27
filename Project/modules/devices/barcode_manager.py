@@ -10,6 +10,11 @@ from modules.devices.scanner import BarcodeScanner
 class BarcodeManager(QObject):
     """
     Manages barcode scanner events, routing, and modal blocking for the application.
+    
+    Barcode scan leak prevention strategy:
+    - At the start of a scanner burst, _on_scanner_activity() snapshots the current text of the focused widget.
+    - If a scan is routed to a forbidden widget, eventFilter() restores the widget's text to the snapshot, wiping any leaked characters.
+    - Only allowed widgets (e.g., product code fields) accept the scan; all others are protected from unwanted input.
     """
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -131,21 +136,35 @@ class BarcodeManager(QObject):
 
     def _on_scanner_activity(self, when_ts: float):
         """
-        Swallow Enter/Return keys briefly during scanner activity to avoid triggering default buttons
+        Swallow Enter/Return keys briefly during scanner activity to avoid triggering default buttons.
+        
+        Also takes a snapshot of the focused widget's text at the very start of a scanner burst.
+        This snapshot is used to restore the widget if a scan is later rejected (forbidden field).
         """
         import time
         now = time.time()
-        # Capture focus at the start of a burst. This is used later if focus shifts mid-scan.
-        try:
-            if now > getattr(self, '_scannerActiveUntil', 0.0):
-                from PyQt5.QtWidgets import QApplication
+        
+        # This block triggers at the very START of a new barcode burst
+        if now > getattr(self, '_scannerActiveUntil', 0.0):
+            try:
+                from PyQt5.QtWidgets import QApplication, QLineEdit, QTextEdit, QPlainTextEdit
                 app = QApplication.instance()
                 fw = app.focusWidget() if app else None
+                
                 self._scanStartWidget = fw
                 self._scanStartObjName = fw.objectName() if fw and hasattr(fw, 'objectName') else ''
                 self._scanStartTs = now
-        except Exception:
-            pass
+                
+                # We save the text BEFORE the scanner types into it
+                self._preScanText = None
+                if fw:
+                    if isinstance(fw, QLineEdit):
+                        self._preScanText = fw.text()
+                    elif isinstance(fw, (QTextEdit, QPlainTextEdit)):
+                        self._preScanText = fw.toPlainText()
+            except Exception:
+                self._preScanText = None
+        # timing logic to detect fast scanner input
         prev = getattr(self, '_scannerPrevTs', 0.0) or 0.0
         dt = when_ts - prev if prev > 0 else None
         if dt is not None and dt <= 0.08:
@@ -153,11 +172,35 @@ class BarcodeManager(QObject):
             self._scannerActiveUntil = max(getattr(self, '_scannerActiveUntil', 0.0), now + 0.90)
             self._suppressEnterUntil = max(getattr(self, '_suppressEnterUntil', 0.0), now + 0.90)
         self._scannerPrevTs = when_ts
+
+    def _restore_pre_scan_text(self, fw):
+        """
+        Rolls back a widget to its state before the current scan burst started.
+        Used to wipe any leaked scanner characters from forbidden widgets.
+        """
+        try:
+            from PyQt5.QtWidgets import QLineEdit, QTextEdit, QPlainTextEdit
+            # Get the saved text from the snapshot taken in _on_scanner_activity
+            saved = getattr(self, '_preScanText', None)
+            
+            if fw is not None and saved is not None:
+                if isinstance(fw, QLineEdit):
+                    fw.setText(saved)
+                elif isinstance(fw, (QTextEdit, QPlainTextEdit)):
+                    if isinstance(fw, QTextEdit):
+                        fw.setHtml(saved) if '<' in saved else fw.setPlainText(saved)
+                    else:
+                        fw.setPlainText(saved)
+        except Exception:
+            pass
+
     def eventFilter(self, obj, event):
         import time
         from PyQt5.QtCore import QEvent, Qt
         from PyQt5.QtWidgets import QApplication
         if event.type() == QEvent.KeyPress:
+            # Barcode scan leak prevention:
+            # If a forbidden widget receives scanner input during a scan burst, restore its text to the pre-scan snapshot.
             k = event.key()
             now = time.time()
             try:
@@ -166,94 +209,83 @@ class BarcodeManager(QObject):
                     fw = app.focusWidget() if app else None
                     modal = app.activeModalWidget() if app else None
 
-                    # If a modal dialog is actually active and has focus, allow normal typing.
-                    # The goal of modal-block is to prevent scanner/keyboard input leaking to
-                    # the *main window* while dialogs are open, not to block dialog typing.
                     try:
                         if modal is not None and fw is not None and fw.window() is modal:
                             pass
                         else:
-                            text = ''
-                            try:
-                                text = event.text() or ''
-                            except Exception:
-                                text = ''
+                            text = event.text() or ''
                             is_printable = len(text) == 1 and (31 < ord(text) < 127)
                             if is_printable or k in (Qt.Key_Return, Qt.Key_Enter):
+                                # --- RESTORATION POINT 1: Modal Blocking ---
+                                # If a scan leaks while a modal is open, wipe it.
+                                self._restore_pre_scan_text(fw)
                                 return True
                     except Exception:
-                        # Conservative fallback: block printable input while modal-block is enabled.
-                        text = ''
-                        try:
-                            text = event.text() or ''
-                        except Exception:
-                            text = ''
+                        text = event.text() or ''
                         is_printable = len(text) == 1 and (31 < ord(text) < 127)
                         if is_printable or k in (Qt.Key_Return, Qt.Key_Enter):
+                            self._restore_pre_scan_text(fw) # Wipes leak
                             return True
             except Exception:
                 pass
+
             if k in (Qt.Key_Return, Qt.Key_Enter) and now <= getattr(self, '_suppressEnterUntil', 0.0):
                 return True
+
             if now <= getattr(self, '_scannerActiveUntil', 0.0):
                 app = QApplication.instance()
                 fw = app.focusWidget() if app else None
-                obj_name = ''
-                try:
-                    obj_name = fw.objectName() if fw is not None else ''
-                except Exception:
-                    obj_name = ''
-                is_qty = (obj_name == 'qtyInput')
+                
+                # Get the object name safely
+                obj_name = fw.objectName() if fw and hasattr(fw, 'objectName') else ''
+
+                # Only these fields are permitted to receive scanner input.
                 is_allowed = (
-                    (obj_name in ('productCodeLineEdit', 'refundInput'))
+                    obj_name in ('productCodeLineEdit', 'refundInput')
                     or obj_name.endswith('ProductCodeLineEdit')
-                ) and not is_qty
-                text = ''
-                try:
-                    text = event.text() or ''
-                except Exception:
-                    text = ''
+                )
+                
+                text = event.text() or ''
                 is_printable = len(text) == 1 and (31 < ord(text) < 127)
+                
+                # If it's a scanner-typed character and NOT an allowed field, wipe and block.
                 if is_printable and not is_allowed:
+                    self._restore_pre_scan_text(fw) # Roll back to original text
                     return True
+
         from PyQt5.QtCore import QObject
         return super().eventFilter(obj, event)
+    
     def _cleanup_scanner_leak(self, fw, barcode):
         try:
             if fw is None or not barcode:
                 return
-            ch = barcode[0]
-            name = getattr(fw, 'objectName', lambda: '')()
-            try:
-                from PyQt5.QtWidgets import QLineEdit
-                if isinstance(fw, QLineEdit):
-                    txt = fw.text() or ''
-                    # Best-effort: remove a trailing leaked first character.
-                    # Do not restrict by length; long fields (e.g., prices) must be cleaned too.
-                    if len(txt) > len(barcode):
-                        ch = barcode[0]
-                        if txt.endswith(ch):
-                            fw.setText(txt[:-1])
-                            return
-            except Exception:
-                pass
-            try:
-                from PyQt5.QtWidgets import QTextEdit, QPlainTextEdit
-                from PyQt5.QtGui import QTextCursor
-                if isinstance(fw, (QTextEdit, QPlainTextEdit)):
-                    t = fw.toPlainText()
-                    if t.endswith(ch):
-                        if isinstance(fw, QTextEdit):
-                            cur = fw.textCursor()
-                            cur.movePosition(QTextCursor.End)
-                            cur.deletePreviousChar()
-                            fw.setTextCursor(cur)
-                        else:
-                            fw.setPlainText(t[:-1])
-                            fw.moveCursor(QTextCursor.End)
+            
+            ch = barcode[0] # The first digit of the scan
+            
+            from PyQt5.QtWidgets import QLineEdit, QTextEdit, QPlainTextEdit
+
+            if isinstance(fw, QLineEdit):
+                txt = fw.text() or ''
+                # Only check if the text ends with the leaked character
+                if txt.endswith(ch):
+                    fw.setText(txt[:-1])
                     return
-            except Exception:
-                pass
+
+            elif isinstance(fw, (QTextEdit, QPlainTextEdit)):
+                t = fw.toPlainText() or ''
+                if t.endswith(ch):
+                    # For TextEdits, we remove the last char
+                    if isinstance(fw, QTextEdit):
+                        from PyQt5.QtGui import QTextCursor
+                        cur = fw.textCursor()
+                        cur.movePosition(QTextCursor.End)
+                        cur.deletePreviousChar()
+                        fw.setTextCursor(cur)
+                    else:
+                        fw.setPlainText(t[:-1])
+                        fw.moveCursor(QTextCursor.End)
+                    return
         except Exception:
             pass
 

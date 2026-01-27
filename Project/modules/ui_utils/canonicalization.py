@@ -21,4 +21,5 @@ def canonicalize_title_text(text: Optional[str]) -> str:
         s = s.replace(ch, " ")
 
     parts = [p for p in s.split(" ") if p]
-    return " ".join([p[:1].upper() + p[1:].lower() if p else "" for p in parts])
+    # return " ".join([p[:1].upper() + p[1:].lower() if p else "" for p in parts])
+    return " ".join([p[0].upper() + p[1:].lower() for p in parts if p])

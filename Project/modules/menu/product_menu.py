@@ -256,7 +256,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         except Exception as e:
             report_exception_post_close(
                 dlg,
-                f'ProductMenu: refresh_product_cache() after {where}',
+                f'Product Menu: refresh_product_cache() after {where}',
                 e,
                 user_message='Warning: Product list may be outdated (restart if needed)',
                 level='warning',
@@ -267,7 +267,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         except Exception as e:
             report_exception_post_close(
                 dlg,
-                f'ProductMenu: refresh name completers after {where}',
+                f'Product Menu: refresh name completers after {where}',
                 e,
                 user_message='Warning: Search suggestions not updated',
                 level='warning',
@@ -783,6 +783,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         swallow_empty=True,
         validate_fn=lambda: input_handler.handle_price_input(widgets['add_sell'], price_type='Selling price'),
     )
+
     coord.add_link(
         source=widgets['add_cost'],
         target_map=None,
@@ -790,7 +791,12 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         next_focus=widgets['add_supp'],
         status_label=widgets['add_status'],
         swallow_empty=False,
+        validate_fn=lambda: input_handler.handle_price_input_optional(
+            widgets['add_cost'], 
+            price_type='Cost price'
+        ),
     )
+
     coord.add_link(
         source=widgets['add_supp'],
         target_map=None,
@@ -835,7 +841,12 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         next_focus=widgets['upd_cat'],
         status_label=widgets['upd_status'],
         swallow_empty=False,
+        validate_fn=lambda: input_handler.handle_price_input_optional(
+            widgets['upd_cost'], 
+            price_type='Cost price'
+        ),
     )
+
     coord.add_link(
         source=widgets['upd_cat'],
         target_map=None,
@@ -908,12 +919,23 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         return cat if ok else None
 
     def _finalize(mode: str, code: str, name: str) -> None:
-        verb = {'add': 'added', 'rem': 'removed', 'upd': 'updated'}.get(mode, mode)
-        ui_feedback.set_status_label(widgets[f'{mode}_status'], f"Success: {name} {verb}", ok=True)
-        # Success is info-level and must not override any warning/error set earlier.
-        set_dialog_main_status_max(dlg, f"Product {name} {verb}.", level='info', duration=4000)
+        # Update verbs to be more professional
+        verb_map = {'add': 'Added', 'rem': 'Deleted', 'upd': 'Updated'}
+        verb = verb_map.get(mode, 'Processed')
+        
+        # Natural phrasing: "Product [Name] Deleted"
+        display_msg = f"Product '{name}' {verb}"
+        
+        # Use the coordinator for consistency (it clears error states automatically)
+        ui_feedback.set_status_label(widgets[f'{mode}_status'], display_msg, ok=True)
+        
+        # Set the main window status (post-close message)
+        set_dialog_main_status_max(dlg, display_msg, level='info', duration=4000)
+        
         if mode == 'add' and initial_code:
+            # If we added a product via a "Not Found" scan, add it to sales table immediately
             QTimer.singleShot(10, lambda: handle_barcode_scanned(main_window.sales_table, code, main_window.statusBar()))
+        
         QTimer.singleShot(500, dlg.accept)
 
     def do_add():
@@ -989,7 +1011,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         else:
             log_and_set_post_close(
                 dlg,
-                f"ProductMenu ADD failed (code={code})",
+                f"Product Menu ADD failed (code={code})",
                 str(msg),
                 user_message=f"Error: {msg}",
                 level='error',
@@ -999,14 +1021,15 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
 
     def do_rem():
         code = widgets['rem_code'].text()
+        name = widgets['rem_name'].text().strip() or "Product"
         ok, msg = delete_product(code)
         if ok:
             _post_db_success_refresh('REMOVE')
-            _finalize('rem', code, "Product")
+            _finalize('rem', code, name)
         else:
             log_and_set_post_close(
                 dlg,
-                f"ProductMenu REMOVE failed (code={code})",
+                f"Product Menu REMOVE failed (code={code})",
                 str(msg),
                 user_message=f"Error: {msg}",
                 level='error',
@@ -1094,7 +1117,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         else:
             log_and_set_post_close(
                 dlg,
-                f"ProductMenu UPDATE failed (code={code})",
+                f"Product Menu UPDATE failed (code={code})",
                 str(msg),
                 user_message=f"Error: {msg}",
                 level='error',

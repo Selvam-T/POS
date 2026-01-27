@@ -19,7 +19,6 @@ from config import (
 	ALPHANUMERIC_REGEX,
 )
 
-
 def validate_quantity(value, unit_type='unit'):
     if value is None or str(value).strip() == "":
         return False, "Quantity is required"
@@ -102,8 +101,24 @@ def validate_product_name(value):
 		return False, "Product name is required"
 	if len(s) > STRING_MAX_LENGTH:
 		return False, f"Product name must be at most {STRING_MAX_LENGTH} characters"
+	if not any(c.isalpha() for c in s):
+		return False, "Name must contain at least one letter (A-Z)"
 	return True, ""
 
+def validate_product_name_for_add(value, name_exists_func):
+    """
+    Checks alpha requirements AND prevents duplicate names in the database.
+    Comparison via name_exists_func should be case-insensitive.
+    """
+    ok, err = validate_product_name(value)
+    if not ok:
+        return False, err
+    
+    name = str(value).strip()
+    if name_exists_func and name_exists_func(name):
+        return False, "Product name already exists"
+        
+    return True, ""
 
 def validate_supplier(value):
 	if value is None:
@@ -298,17 +313,17 @@ def validate_selling_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX
 
 def is_reserved_vegetable_code(code: str) -> bool:
     """
-    Checks if a product code falls within the reserved vegetable range (veg01-veg16).
+    Checks if a product code falls within the reserved vegetable range (VEG1-VEG16).
     This is used to prevent editing of vegetable items within the standard Product Menu.
     """
     if not code:
         return False
     
-    s = str(code).strip().lower()
-    # Check if starts with 'veg' and has a numeric suffix
-    if s.startswith('veg') and len(s) >= 4:
+    s = str(code).strip().upper()
+    # Check if starts with 'VEG' and has a numeric suffix
+    if s.startswith('VEG') and len(s) >= 4:
         try:
-            # Extract digits after 'veg'
+            # Extract digits after 'VEG'
             suffix = s[3:]
             if suffix.isdigit():
                 num = int(suffix)

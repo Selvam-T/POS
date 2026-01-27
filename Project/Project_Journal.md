@@ -580,7 +580,7 @@ PRODUCT_CACHE: Dict[str, Tuple[str, float, str]] = {
 }
 ```
 
-**Normalization:** cache keys are normalized with `strip().upper()`.
+**Normalization:** Product codes are always normalized to UPPER CASE, and product names/other strings to CamelCase, both when loaded into PRODUCT_CACHE and when user input is compared. Legacy DB data is normalized at cache load and input time.
 
 **Loading Process:**
 ```python

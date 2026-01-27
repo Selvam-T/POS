@@ -48,15 +48,18 @@ def load_product_cache() -> Dict[str, Tuple[str, float, str]]:
     PRODUCT_CACHE.clear()
     PRODUCT_CODE_DISPLAY.clear()
     rows = products_repo.list_products_slim()
+
     for product_code, name, selling_price, unit in rows:
         key = _norm(product_code)
         if not key:
             continue
+
         # Store canonical display code (matches cache key + storage canonicalization).
         PRODUCT_CODE_DISPLAY[key] = key
+        name_disp = _to_camel_case(name)
         unit_disp = _to_camel_case(unit) or _to_camel_case('Each')
         PRODUCT_CACHE[key] = (
-            _to_camel_case(name),
+            name_disp,
             float(selling_price),
             unit_disp,
         )

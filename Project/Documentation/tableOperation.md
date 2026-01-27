@@ -35,7 +35,7 @@ This module provides generic table operations for product tables in the POS syst
 
 ### Canonical Unit Handling (2026 Update)
 **PRODUCT_CACHE** stores: `{PRODUCT_CODE: (display_name, price, display_unit)}`
-- **Cache keys**: normalized to `strip().upper()` for stable barcode/product_code matching.
+- **Cache keys**: product codes are always normalized to UPPER CASE for stable barcode/product_code matching, and other strings (names, units) are normalized to CamelCase. Legacy DB data is normalized at cache load, and user input is normalized at lookup time for reliable comparison.
 - **Unit values**: always non-empty. Blank/NULL units are defaulted to `Each` when loading the cache.
 - `get_product_info(code)` returns `(found, name, price, unit)`.
 

@@ -92,7 +92,7 @@ def open_vegetable_entry_dialog(parent, main_sales_table):
 
         coord.add_link(btn)
         
-        veg_code = f'Veg{i:02d}'
+        veg_code = f'VEG{i:02d}'
         found, product_name, unit_price, _ = get_product_info(veg_code)
         
         if found:

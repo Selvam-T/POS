@@ -1,14 +1,2 @@
-2026-01-22T17:07:11.717342 - ProductMenu: refresh_product_cache() after ADD: RuntimeError('POS_DEBUG_PRODUCTMENU_REFRESH_FAIL=1')
-Traceback (most recent call last):
-  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\menu\product_menu.py", line 258, in _post_db_success_refresh
-    raise RuntimeError('POS_DEBUG_PRODUCTMENU_REFRESH_FAIL=1')
-RuntimeError: POS_DEBUG_PRODUCTMENU_REFRESH_FAIL=1
 
-2026-01-23T17:11:09.677545 - ProductMenu ADD failed (code=5028197552916): Product name already exists.
-2026-01-23T17:14:14.481915 - ProductMenu REMOVE failed (code=): Product not found
-2026-01-23T17:14:33.540195 - ProductMenu REMOVE failed (code=): Product not found
-2026-01-25T14:05:13.086982 - ProductMenu ADD failed (code=TTTX): Product name already exists.
-2026-01-25T14:16:54.875105 - ProductMenu UPDATE failed (code=TEST): Product name already exists.
-2026-01-25T14:17:46.120519 - ProductMenu ADD failed (code=TEST): Product name already exists.
-2026-01-25T14:22:08.843415 - ProductMenu REMOVE failed (code=): Product not found
-2026-01-25T16:06:35.807099 - ProductMenu ADD failed (code=5028197552916): Product name already exists.
+

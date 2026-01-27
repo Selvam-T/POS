@@ -29,13 +29,13 @@ def veg_slots() -> int:
 
 
 def _default_mapping(n: int) -> Dict[str, Dict[str, str]]:
-    # veg1..vegN initialized to empty
-    return {f"veg{i}": {"state": "empty", "label": "empty"} for i in range(1, n + 1)}
+    # VEG1..VEGN initialized to empty
+    return {f"VEG{i}": {"state": "empty", "label": "empty"} for i in range(1, n + 1)}
 
 
 def _validate_mapping(mapping: Dict[str, Any], n: int) -> Tuple[bool, str]:
     try:
-        keys = [f"veg{i}" for i in range(1, n + 1)]
+        keys = [f"VEG{i}" for i in range(1, n + 1)]
         for k in keys:
             if k not in mapping:
                 return False, f"Missing key: {k}"

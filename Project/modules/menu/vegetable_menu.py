@@ -160,7 +160,7 @@ def open_vegetable_menu_dialog(host_window):
         # on any DB/cache work. We fill real names lazily (below).
         _slot_indices = {}
         for i in range(1, VEG_SLOTS + 1):
-            code = f'Veg{i:02d}'
+            code = f'VEG{i:02d}'
             placeholder = f'VEGETABLE {i}'
             combo_vegetable.addItem(placeholder, userData=code)
             _slot_indices[code] = combo_vegetable.count() - 1
@@ -170,7 +170,7 @@ def open_vegetable_menu_dialog(host_window):
                 return
             db_error_reported = False
             for i in range(1, VEG_SLOTS + 1):
-                code = f'Veg{i:02d}'
+                code = f'VEG{i:02d}'
                 idx = _slot_indices.get(code)
                 if idx is None:
                     continue
@@ -192,7 +192,7 @@ def open_vegetable_menu_dialog(host_window):
                         if not db_error_reported:
                             report_exception_post_close(
                                 dlg,
-                                'VegetableMenu: get_product_slim(Veg01..Veg16)',
+                                'VegetableMenu: get_product_slim(VEG01..VEG16)',
                                 e,
                                 user_message='Warning: Failed to load vegetable names',
                                 level='warning',
@@ -345,7 +345,7 @@ def open_vegetable_menu_dialog(host_window):
             return False
         sel_norm = _norm(selected_code)
         for i in range(1, VEG_SLOTS + 1):
-            code = f'Veg{i:02d}'
+            code = f'VEG{i:02d}'
             if _norm(code) == sel_norm:
                 continue
             other_name = None
@@ -373,7 +373,7 @@ def open_vegetable_menu_dialog(host_window):
         """Returns list of dicts with vegetable data from cache."""
         vegetables = []
         for i in range(1, VEG_SLOTS + 1):
-            code = f'Veg{i:02d}'
+            code = f'VEG{i:02d}'
             try:
                 found, details = get_product_full(code)
             except Exception as e:
@@ -399,7 +399,7 @@ def open_vegetable_menu_dialog(host_window):
         return vegetables
 
     def sort_and_update_database(vegetables_list):
-        """Sort vegetables A-Z and rewrite Veg01-Veg16 in the DB.
+        """Sort vegetables A-Z and rewrite VEG01-VEG16 in the DB.
 
         Cache note: PRODUCT_CACHE is kept in sync in-memory because we call
         modules.db_operation.delete_product() and add_product() for each slot,
@@ -408,14 +408,14 @@ def open_vegetable_menu_dialog(host_window):
         # Sort A–Z
         sorted_vegs = sorted(vegetables_list, key=lambda v: v['name'].casefold())
         
-        # Rewrite Veg01–Veg16
+        # Rewrite VEG01–VEG16
         try:
             for i in range(1, VEG_SLOTS + 1):
-                ok, msg = delete_product(f'Veg{i:02d}')
+                ok, msg = delete_product(f'VEG{i:02d}')
                 # "Product not found" is expected for empty slots.
                 if not ok and str(msg or '').strip().lower() != 'product not found':
                     try:
-                        log_error(f"VegetableMenu rewrite delete failed (Veg{i:02d}): {msg}")
+                        log_error(f"VegetableMenu rewrite delete failed (VEG{i:02d}): {msg}")
                     except Exception:
                         pass
                     set_dialog_main_status_max(dlg, 'Error: Failed to rewrite vegetables', level='error', duration=5000)
@@ -423,7 +423,7 @@ def open_vegetable_menu_dialog(host_window):
         except Exception as e:
             report_exception_post_close(
                 dlg,
-                'VegetableMenu: delete_product(Veg01..Veg16)',
+                'VegetableMenu: delete_product(VEG01..VEG16)',
                 e,
                 user_message='Error: Failed to rewrite vegetables',
                 level='error',
@@ -437,7 +437,7 @@ def open_vegetable_menu_dialog(host_window):
                 now_str = QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss')
                 from modules.table.unit_helpers import canonicalize_unit
                 ok, msg = add_product(
-                    product_code=f'Veg{i:02d}',
+                    product_code=f'VEG{i:02d}',
                     name=_to_camel_case(veg['name']),
                     selling_price=veg['price'],
                     category=_to_camel_case(veg.get('category', 'Vegetable')),
@@ -448,7 +448,7 @@ def open_vegetable_menu_dialog(host_window):
                 )
                 if not ok:
                     try:
-                        log_error(f"VegetableMenu rewrite add failed (Veg{i:02d}): {msg}")
+                        log_error(f"VegetableMenu rewrite add failed (VEG{i:02d}): {msg}")
                     except Exception:
                         pass
                     set_dialog_main_status_max(dlg, 'Error: Failed to rewrite vegetables', level='error', duration=5000)
@@ -456,7 +456,7 @@ def open_vegetable_menu_dialog(host_window):
         except Exception as e:
             report_exception_post_close(
                 dlg,
-                'VegetableMenu: add_product(Veg01..Veg16)',
+                'VegetableMenu: add_product(VEG01..VEG16)',
                 e,
                 user_message='Error: Failed to rewrite vegetables',
                 level='error',
@@ -618,7 +618,7 @@ def open_vegetable_menu_dialog(host_window):
 
         if not found or not str(db_name).strip():
             # Extract placeholder number for error message
-            placeholder_num = str(selected_code).replace('Veg', '').lstrip('0')
+            placeholder_num = str(selected_code).replace('VEG', '').lstrip('0')
             show_error(f'Error: No vegetable added for VEGETABLE {placeholder_num}', source=combo_vegetable)
             if combo_vegetable is not None:
                 combo_vegetable.setFocus()

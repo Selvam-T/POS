@@ -89,6 +89,7 @@ Markup recalculates on `textChanged` for sell/cost.
 ### Focus denial until valid Product Code
 
 ADD input fields are gated behind a valid code using `FocusGate(lock_enabled=True)`.
+All product codes are normalized to UPPER CASE, and product names/other strings to CamelCase, both when loaded into PRODUCT_CACHE and when user input is compared. Legacy DB data is normalized at cache load and input time.
 
 Code must be:
 
