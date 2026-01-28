@@ -53,6 +53,7 @@ Flow validators (format + existence rule):
 - `validate_cost_price(value, ...)` → optional (empty allowed) else numeric + range.
 - `validate_total_price(value)`, `validate_grand_total(value)` → numeric + range.
 
+
 ### Unit / Supplier / Category
 - `validate_unit(value)`
   - Placeholder `"Select Unit"` is invalid.
@@ -61,6 +62,19 @@ Flow validators (format + existence rule):
   - Optional; if provided must be alphanumeric (spaces allowed) and within max length.
 - `validate_category(value)`
   - Optional (placeholder/empty allowed); max length enforced if provided.
+
+#### Why validate category if it's a dropdown?
+Even though category is usually selected from a non-editable dropdown (QComboBox), validation is still enforced for these reasons:
+
+1. **The "Editable" Safety Net**
+   - In PyQt, it's easy to accidentally set the ComboBox to editable in the .ui file. If that happens, users could type arbitrarily long strings. Without validation, this could crash the database (e.g., exceeding VARCHAR limits).
+2. **Consistency in the "OK" Handler**
+   - The input extraction/validation pattern (Extract → Validate → Return) is consistent for all fields. This avoids special-case logic for categories in dialog handlers.
+3. **Database Integrity (The final gate)**
+   - The validator acts as a contract between UI and DB, ensuring the string length is always safe, regardless of UI source.
+
+**When could you remove it?**
+If you are 100% certain the ComboBox will never be editable and your PRODUCT_CATEGORIES list is pre-validated, you could skip validation. However, keeping it is considered defensive programming: it costs almost nothing and prevents future UI changes from breaking your database.
 
 ### Email / Password
 - “New” format validators:

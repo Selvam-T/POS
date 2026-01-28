@@ -114,13 +114,13 @@ STRING_MAX_LENGTH = 40
 PASSWORD_MIN_LENGTH = 8
 
 EMAIL_REGEX = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w+$")
-ALPHANUMERIC_REGEX = re.compile(r"^[A-Za-z0-9 ]+$")
+ALPHANUMERIC_REGEX = re.compile(r"^[A-Za-z0-9 \-']+$")
 
 # ALTERNATIVE: Field-specific configurations (not implemented yet with validate_field)
 STRING_CONFIG = {
     'product_code': {'min_len': 4, 'max_len': 14, 'required': True},
     'product_name': {'min_len': 4, 'max_len': 40, 'required': True},
-    'supplier': {'min_len': 0, 'max_len': 15, 'required': False},  
+    'supplier': {'min_len': 3, 'max_len': 15, 'required': False},  
     'notes': {'min_len': 0, 'max_len': 25, 'required': False}, 
-    'category': {'min_len': 4, 'max_len': 25, 'required': True}
+    'category': {'min_len': 4, 'max_len': 25, 'required': False}
 }

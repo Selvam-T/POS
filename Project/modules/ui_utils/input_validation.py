@@ -1,8 +1,6 @@
 """Centralized validators. All functions return (ok, err)."""
 
 from config import (
-	PRODUCT_CODE_MIN_LEN,
-	PRODUCT_CODE_MAX_LEN,
 	QUANTITY_MIN_KG,
 	QUANTITY_MAX_KG,
 	QUANTITY_MIN_UNIT,
@@ -17,6 +15,7 @@ from config import (
 	PASSWORD_MIN_LENGTH,
 	EMAIL_REGEX,
 	ALPHANUMERIC_REGEX,
+	STRING_CONFIG,
 )
 
 def validate_quantity(value, unit_type='unit'):
@@ -80,94 +79,6 @@ def validate_string(value):
 		return False, f"Maximum length is {STRING_MAX_LENGTH} characters"
 	return True, ""
 
-
-def validate_product_name(value):
-    ok, err = validate_string(value)
-    if not ok:
-        return ok, err
-    
-    s = str(value).strip()
-    if not any(c.isalpha() for c in s):
-        return False, "Name must contain at least one letter (A-Z)"
-        
-    return True, ""
-
-def validate_product_name_for_add(value, name_exists_func):
-
-    ok, err = validate_product_name(value)
-    if not ok:
-        return False, err
-    
-    name = str(value).strip()
-    if name_exists_func and name_exists_func(name):
-        return False, "Product name already exists"
-        
-    return True, ""
-
-def validate_supplier(value):
-	if value is None:
-		return True, ""
-	s = str(value).strip()
-	if not s:
-		return True, ""
-	if not ALPHANUMERIC_REGEX.match(s):
-		return False, "Supplier must be alphanumeric"
-	if len(s) > STRING_MAX_LENGTH:
-		return False, f"Supplier must be at most {STRING_MAX_LENGTH} characters"
-	return True, ""
-
-
-def validate_category(value):
-	if value is None:
-		return True, ""
-	s = str(value).strip()
-	if not s:
-		return True, ""
-	if len(s) > STRING_MAX_LENGTH:
-		return False, f"Category must be at most {STRING_MAX_LENGTH} characters"
-	return True, ""
-
-
-def validate_unit(value):
-	if value is None:
-		return False, "Unit is required"
-	s = str(value).strip()
-	if not s:
-		return False, "Unit is required"
-	if s.lower() == "select unit":
-		return False, "Unit must be selected"
-	return True, ""
-
-#--- 1. selling price/ cost price start ---
-def validate_unit_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX, price_type="Price"):
-    
-    try:
-        val = float(value)
-        # Ensure constants are floats to avoid comparison errors
-        f_min = float(min_val)
-        f_max = float(max_val)
-
-        if val < f_min:
-            return False, f"Minimum {price_type.lower()} is {f_min}"
-        if val > f_max:
-            return False, f"Maximum {price_type.lower()} is {f_max}"
-        return True, ""
-    except (ValueError, TypeError):
-        return False, f"{price_type} must be a number"
-	
-def validate_selling_price(value, price_type="Selling price"):
-    if value is None or str(value).strip() == "":
-        return False, f"{price_type} is required"
-    return validate_unit_price(value, price_type=price_type)
-
-def validate_cost_price(value, price_type="Cost price"):
-    if value is None or str(value).strip() == "":
-        return True, ""
-    # If not empty, use the same numeric logic
-    return validate_unit_price(value, price_type=price_type)
-
-#--- 1. selling price/ cost price end ---
-	
 def validate_password(value):
 	if not isinstance(value, str):
 		return False, "Password must be a string"
@@ -238,22 +149,39 @@ def exists_in_memory_cache(value, cache_lookup_func):
 		return False, "Value does not exist in memory cache"
 	return True, ""
 
-# 2. product code ----------
-def validate_product_code_format(value, digits_only=False,
-							min_len=PRODUCT_CODE_MIN_LEN,
-							max_len=PRODUCT_CODE_MAX_LEN):
-	if value is None:
-		return False, "Product code is required"
-	s = str(value).strip()
-	if not s:
-		return False, "Product code is required"
-	if len(s) < min_len:
-		return False, f"Product code must be at least {min_len} characters"
-	if len(s) > max_len:
-		return False, f"Product code must be at most {max_len} characters"
-	if digits_only and not s.isdigit():
-		return False, "Product code must contain digits only"
-	return True, ""
+# --- Generalized string validator using STRING_CONFIG
+def _validate_config_string(value, field_key, display_name):
+    """Internal helper to enforce STRING_CONFIG rules."""
+    config = STRING_CONFIG.get(field_key)
+    s = str(value or "").strip()
+    
+    # 1. Required Check
+    if not s:
+        if config['required']:
+            return False, f"{display_name} is required"
+        return True, "" # Valid if optional and empty
+
+    # 2. Length Checks
+    if len(s) < config['min_len']:
+        return False, f"{display_name} must be at least {config['min_len']} characters"
+    if len(s) > config['max_len']:
+        return False, f"{display_name} must be at most {config['max_len']} characters"
+        
+    return True, ""
+
+# --- end of _validate_config_string
+
+# 1. product code ----------
+
+def validate_product_code_format(value):
+    # 1. Enforce Config (Required, Min 4, Max 14)
+    ok, err = _validate_config_string(value, 'product_code', "Product code")
+    if not ok: return False, err
+    
+    # 2. Specific Rule: Product codes are usually Alphanumeric
+    if not ALPHANUMERIC_REGEX.match(str(value).strip()):
+        return False, "Product code contains invalid characters"
+    return True, ""
 
 def product_code_exists(code):
     """
@@ -288,4 +216,105 @@ def is_reserved_vegetable_code(code: str) -> bool:
             return False
     return False
 
-# 2. product code end ----------
+# 1. product code end ----------
+
+# 2. product name ----------
+
+def product_name_exists(name: str, exclude_code: str = None) -> bool:
+    """
+    Utility: Checks if a name is already taken in the cache.
+    """
+    from modules.ui_utils.canonicalization import canonicalize_title_text
+    from modules.db_operation.product_cache import PRODUCT_CACHE
+    
+    target = canonicalize_title_text(name)
+    
+    for code, rec in (PRODUCT_CACHE or {}).items():
+        if rec[0] == target:
+            # If we are in UPDATE mode, don't count the current product as a duplicate
+            if exclude_code and code == exclude_code:
+                continue
+            return True
+    return False
+
+def validate_product_name(value: str, exclude_code: str = None):
+    ok, err = _validate_config_string(value, 'product_name', "Product name")
+    if not ok:
+        return False, err
+    
+    # Requirement: Must contain at least one letter (A-Z)
+    if not any(c.isalpha() for c in str(value)):
+        return False, "Product name must contain at least one letter"
+	
+    if product_name_exists(value, exclude_code=exclude_code):
+        return False, "Product name already exists"
+	
+    return True, ""
+
+# 2. product name end ----------
+
+#--- 3. selling price/ cost price start ---
+def validate_unit_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX, price_type="Price"):
+    
+    try:
+        val = float(value)
+        # Ensure constants are floats to avoid comparison errors
+        f_min = float(min_val)
+        f_max = float(max_val)
+
+        if val < f_min:
+            return False, f"Minimum {price_type.lower()} is {f_min}"
+        if val > f_max:
+            return False, f"Maximum {price_type.lower()} is {f_max}"
+        return True, ""
+    except (ValueError, TypeError):
+        return False, f"{price_type} must be a number"
+	
+def validate_selling_price(value, price_type="Selling price"):
+    if value is None or str(value).strip() == "":
+        return False, f"{price_type} is required"
+    return validate_unit_price(value, price_type=price_type)
+
+def validate_cost_price(value, price_type="Cost price"):
+    if value is None or str(value).strip() == "":
+        return True, ""
+    # If not empty, use the same numeric logic
+    return validate_unit_price(value, price_type=price_type)
+
+#--- 3. selling price/ cost price end ---
+
+#--- 4. category start ---
+
+def validate_category(value):
+    # Standard check: Required, Min 4, Max 25 (handles combo placeholder as empty)
+    return _validate_config_string(value, 'category', "Category")
+
+#--- 4. category end ---
+
+#--- 5. unit start ---
+
+def validate_unit(value):
+	if value is None:
+		return False, "Unit is required"
+	s = str(value).strip()
+	if not s:
+		return False, "Unit is required"
+	if s.lower() == "select unit":
+		return False, "Unit must be selected"
+	return True, ""
+
+#--- 5. unit end ---
+
+#--- 6. supplier start ---
+
+def validate_supplier(value):
+    ok, err = _validate_config_string(value, 'supplier', "Supplier")
+    if not ok:
+        return False, err
+    
+    # Requirement: If provided, must match Alphanumeric Regex
+    s = str(value or "").strip()
+    if s and not ALPHANUMERIC_REGEX.match(s):
+        return False, "Only Alphanumeric characters are allowed"
+    return True, ""	
+#--- 6. supplier end ---

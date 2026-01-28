@@ -28,43 +28,30 @@ def _to_camel_case(text: str) -> str:
 # These are used by 'OK' buttons to grab final clean data.
 # =========================================================
 
-def handle_product_name_input(line_edit: QLineEdit) -> str:
-    name = canonicalize_title_text(line_edit.text())
-    _raise_if_invalid(input_validation.validate_product_name(name))
-    return name
+def handle_product_code_input(line_edit: QLineEdit) -> str:
+    code = canonicalize_product_code(line_edit.text())
+    _raise_if_invalid(input_validation.validate_product_code_format(code))
+    return code
 
-def handle_quantity_input(line_edit: QLineEdit, unit_type: str = 'unit') -> float:
-    text = line_edit.text().strip()
-    _raise_if_invalid(input_validation.validate_quantity(text, unit_type=unit_type))
-    return float(text)
+
+def handle_product_name_input(line_edit: QLineEdit, exclude_code: str = None) -> str:
+    name = canonicalize_title_text(line_edit.text())
+    #_raise_if_invalid(input_validation.validate_product_name(name))
+    _raise_if_invalid(input_validation.validate_product_name(name, exclude_code=exclude_code))
+    return name
 
 def handle_selling_price(line_edit: QLineEdit, price_type: str = "price") -> float:
     text = line_edit.text().strip()
     _raise_if_invalid(input_validation.validate_selling_price(text, price_type))
     return float(text)
 
-
 def handle_cost_price(line_edit: QLineEdit, price_type: str = "price") -> float | None:
-    """Optional numeric price.
 
-    Returns:
-        None when blank, otherwise a validated float.
-    """
     text = (line_edit.text() or '').strip()
     _raise_if_invalid(input_validation.validate_cost_price(text, price_type))
     if not text:
         return None
     return float(text)
-
-def handle_email_input(line_edit: QLineEdit) -> str:
-    email = line_edit.text().strip()
-    _raise_if_invalid(input_validation.validate_email(email))
-    return email
-
-def handle_password_input(line_edit: QLineEdit) -> str:
-    password = line_edit.text()
-    _raise_if_invalid(input_validation.validate_password(password))
-    return password
 
 def handle_supplier_input(line_edit: QLineEdit) -> str:
     supplier = canonicalize_title_text(line_edit.text())
@@ -94,11 +81,10 @@ def handle_category_input_combo_default_other(combo_box: QComboBox, *, default: 
     _raise_if_invalid(input_validation.validate_category(category))
     return category
 
-
-def handle_product_code_input(line_edit: QLineEdit) -> str:
-    code = canonicalize_product_code(line_edit.text())
-    _raise_if_invalid(input_validation.validate_product_code_format(code))
-    return code
+def handle_quantity_input(line_edit: QLineEdit, unit_type: str = 'unit') -> float:
+    text = line_edit.text().strip()
+    _raise_if_invalid(input_validation.validate_quantity(text, unit_type=unit_type))
+    return float(text)
 
 def handle_veg_choose_combo(combo_box: QComboBox) -> str:
     """Returns selected vegetable slot (no strict validation)."""
@@ -107,6 +93,16 @@ def handle_veg_choose_combo(combo_box: QComboBox) -> str:
 def handle_greeting_combo(combo_box: QComboBox) -> str:
     """Returns selected greeting (no strict validation)."""
     return combo_box.currentText().strip()
+
+def handle_email_input(line_edit: QLineEdit) -> str:
+    email = line_edit.text().strip()
+    _raise_if_invalid(input_validation.validate_email(email))
+    return email
+
+def handle_password_input(line_edit: QLineEdit) -> str:
+    password = line_edit.text()
+    _raise_if_invalid(input_validation.validate_password(password))
+    return password
 
 # =========================================================
 # SECTION 3: SEARCH ENGINES (COORDINATOR SUPPORT)
