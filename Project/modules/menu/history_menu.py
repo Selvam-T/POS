@@ -11,7 +11,7 @@ UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
 
-def open_history_dialog(host_window, *args, **kwargs):
+def launch_history_dialog(host_window, *args, **kwargs):
     """Open History dialog (ui/history_menu.ui) as a modal frameless panel.
     DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
     This function only creates and returns the QDialog.

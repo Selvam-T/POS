@@ -9,7 +9,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 view_hold = os.path.join(UI_DIR, 'view_hold.ui')
 
-def open_view_hold_dialog(parent=None):
+def launch_viewhold_dialog(parent=None):
     
     dlg = uic.loadUi(view_hold)
     

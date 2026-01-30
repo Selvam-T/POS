@@ -75,11 +75,11 @@ def setup_sales_frame(main_window, UI_DIR):
                 veg_btn = sales_widget.findChild(QPushButton, 'vegBtn')
                 if veg_btn is not None:
                     veg_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-                    veg_btn.clicked.connect(main_window.open_vegetable_entry_dialog)
+                    veg_btn.clicked.connect(main_window.launch_vegetable_entry_dialog)
                 manual_btn = sales_widget.findChild(QPushButton, 'manualBtn')
                 if manual_btn is not None:
                     manual_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-                    manual_btn.clicked.connect(main_window.open_manual_entry_dialog)
+                    manual_btn.clicked.connect(main_window.launch_manual_entry_dialog)
 
             receipt_container = sales_widget.findChild(QWidget, 'receiptContainer')
             if receipt_container is not None:
@@ -95,7 +95,7 @@ def setup_sales_frame(main_window, UI_DIR):
                 holdsales_btn = sales_widget.findChild(QPushButton, 'holdSalesBtn')
                 if holdsales_btn is not None:
                     holdsales_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-                    holdsales_btn.clicked.connect(main_window.open_hold_sales_dialog)
+                    holdsales_btn.clicked.connect(main_window.launch_hold_sales_dialog)
                 viewhold_btn = sales_widget.findChild(QPushButton, 'viewholdBtn')
                 if viewhold_btn is not None:
                     viewhold_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)

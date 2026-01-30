@@ -79,17 +79,35 @@ If the dialog uses **gating** (unlocking fields only when an upstream field is v
 - When relocking, clear dependent fields (prevents stale invalid state).
 
 ### 5) Gating + field relationships
-Use shared utilities so dialogs behave consistently:
+This documentation is True and highly relevant to the product_menu.py you provided. It is not corrupt; it describes the design patterns we implemented to keep your UI predictable.
+Here is how those documentation points are specifically applied in your code:
 
-- **Exclusive input relationships** (only one of a set active at a time):
-	- `enforce_exclusive_lineedits([...])`
-- **Gating** (unlock next field only when current field is valid):
-	- `FocusGate` and/or controller-level “gate update” functions
-	- Must clear gated fields when relocking
+1. **Exclusive Input Relationships**
+	 - **Documentation:** `enforce_exclusive_lineedits([...])`
+	 - **Reality in Code:** TRUE.
+		 - In the REMOVE and UPDATE tabs, you have both a "Product Code" field and a "Name Search" field.
+		 - Your code (Lines 1118–1130) uses this utility to ensure that if a user types in the Code field, the Name Search is cleared/disabled, and vice versa. This prevents the user from trying to search for two different things at once.
 
-Placeholder policy:
-- Prefer `.ui` default + placeholder text authored in Qt Designer.
-- If you need reactive placeholder changes (e.g., unit hints), do it through a shared pattern (FieldCoordinator placeholder mode or targeted UI code) and keep it consistent.
+2. **Gating (Unlock when valid)**
+	 - **Documentation:** FocusGate and/or controller-level “gate update” functions
+	 - **Reality in Code:** TRUE.
+		 - ADD Tab: Uses a controller-level function _update_add_gate (Lines 1201–1221). It monitors textChanged on the product code and only calls add_gate.set_locked(False) when the code passes all policy checks.
+		 - UPDATE Tab: Uses upd_gate.set_locked(False) inside the _on_upd_sync callback (Line 1079), unlocking the fields only after a successful database lookup.
+
+3. **Clear on Relock**
+	 - **Documentation:** Must clear gated fields when relocking
+	 - **Reality in Code:** TRUE.
+		 - In _update_add_gate (Lines 1205–1209), if the code becomes invalid (e.g., the user deletes a character), it immediately loops through the Name, Price, and Supplier fields and calls .clear().
+		 - This prevents "ghost data" from a previous entry from staying on the screen when the gate closes.
+
+4. **Placeholder Policy**
+	 - **Documentation:** Prefer .ui default + placeholder text authored in Qt Designer.
+	 - **Reality in Code:** TRUE.
+		 - You have a specific mechanism (_remember_ui_for_lineedit and _ui_placeholders) at Lines 931–943.
+		 - This implements the policy perfectly: instead of hardcoding "Enter Name" in the Python code, your script takes a snapshot of what you wrote in Qt Designer and restores it when the field is unlocked. This allows you to change the UI look in Designer without touching the Python logic.
+
+**Summary**
+The documentation is a "Policy Manual," and your product_menu.py is a "Perfect Implementation" of those rules. Using these shared patterns is exactly why your new code is so much shorter and more robust than the 1200-line version.
 
 ### 6) Coordinator wiring (standard interaction engine)
 Use `FieldCoordinator` (and related focus utils) to standardize:
@@ -97,15 +115,16 @@ Use `FieldCoordinator` (and related focus utils) to standardize:
 - “link graph” from one field to the next
 - optional validation hooks that clear previous error state on new input
 
-Auto-clear-on-correction rule (recommended where users type to fix errors):
-- When you show a coordinator-managed error state (e.g., `coord.set_error(...)`), register validators for the fields you want to auto-clear.
-- Use either:
-	- `validate_fn=...` on `coord.add_link(...)`, or
-	- coordinator validator registration APIs (when available)
+**Auto-clear-on-correction**
 
-Goal: once the user corrects the field and it validates, the dialog clears the previous error without extra controller code.
+**The Goal: Automated Error Cleanup**
+The objective is to eliminate "stale" error messages. Instead of making the programmer write manual code to clear a label every time a user types, the Coordinator watches the input. As soon as the user provides a value that passes the validation rules, the red error message vanishes instantly. This keeps the UI feeling responsive and "smart" without cluttering the controller with repetitive clearing logic.
 
-Note: some flows intentionally avoid coordinator wiring for specific Enter behavior (e.g., Add flow that jumps fields without requiring `add_link` on every widget). That’s fine—be explicit and consistent.
+**The Note: Architectural Flexibility**
+This acknowledges that you don’t have to force every single widget into the FieldCoordinator "link graph."
+When to skip it: If a field only needs a simple focus jump (like moving from Supplier to Category) and doesn't require a database lookup or complex state changes, standard PyQt tab-ordering is fine.
+
+**The Requirement:** If you choose to skip the coordinator for a specific flow, ensure you stay consistent. Don't make the Enter-key behave one way on Tab A and a completely different way on Tab B, or the user will get frustrated.
 
 ### 7) Input handling pipeline (Enter → parse → validate → feedback)
 Standardize the “field action” path:

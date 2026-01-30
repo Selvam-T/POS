@@ -140,7 +140,7 @@ dlg.accept()
 ### Main Window Processing (Refactored Dec 2025)
 The main window uses a unified handler to process dialog results:
 ```python
-# From main.py: open_vegetable_entry_dialog()
+# From main.py: launch_vegetable_entry_dialog()
 self.dialog_wrapper.open_dialog_scanner_blocked(
     launch_vegetable_entry_dialog, 
     dialog_key='vegetable_entry',
@@ -218,6 +218,6 @@ self.dialog_wrapper.open_dialog_scanner_blocked(
 
 ## Quick Reference
 
-- Entry dialog: `modules/sales/vegetable_entry.py: open_vegetable_entry_dialog`
+- Entry dialog: `modules/sales/vegetable_entry.py: launch_vegetable_entry_dialog`
 - Stylesheet: `assets/sales.qss`
 - UI file: `ui/vegetable_entry.ui`

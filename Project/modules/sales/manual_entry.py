@@ -7,7 +7,7 @@ from modules.ui_utils import input_handler, ui_feedback, error_logger
 from modules.db_operation import PRODUCT_CACHE, load_product_cache  # Added for completer data
 from modules.ui_utils.dialog_utils import set_dialog_info
 
-def open_manual_entry_dialog(parent):
+def launch_manual_entry_dialog(parent):
     from config import MAX_TABLE_ROWS
     from modules.ui_utils.max_rows_dialog import open_max_rows_dialog
 

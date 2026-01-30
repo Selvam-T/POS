@@ -13,7 +13,7 @@ QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
 # Import greeting strings from config
 from config import GREETING_STRINGS
 
-def open_greeting_dialog(parent=None):
+def launch_greeting_dialog(parent=None):
     """Open the Greeting message selection dialog.
     
     Selected greeting stored in dlg.greeting_result attribute (or None if cancelled).

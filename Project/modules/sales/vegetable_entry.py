@@ -21,7 +21,7 @@ from modules.table.table_operations import (
 def weight_simulation() -> int:
     return 600
 
-def open_vegetable_entry_dialog(parent, main_sales_table):
+def launch_vegetable_entry_dialog(parent, main_sales_table):
     """
     Opens the vegetable entry dialog.
     Enforces MAX_TABLE_ROWS before opening.

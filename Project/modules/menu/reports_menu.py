@@ -11,7 +11,7 @@ UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
 
-def open_reports_dialog(host_window):
+def launch_reports_dialog(host_window):
     """Open Reports dialog (ui/reports_menu.ui) as a modal frameless panel.
     
     DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.

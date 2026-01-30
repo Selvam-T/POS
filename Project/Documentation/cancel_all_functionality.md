@@ -24,7 +24,7 @@ The Cancel All feature provides a safe way for users to clear the entire sales t
 **File:** `modules/sales/cancel_sale.py`
 
 ```python
-def open_cancel_sale_dialog(host_window):
+def launch_cancelsale_dialog(host_window):
     """Open Cancel Sale confirmation dialog.
     If the UI file fails to load, logs error and shows a minimal fallback dialog.
     Returns:

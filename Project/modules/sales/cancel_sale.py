@@ -10,7 +10,7 @@ _ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 _QSS_PATH = os.path.join(_ASSETS_DIR, 'dialog.qss')
 
 
-def open_cancel_sale_dialog(host_window):
+def launch_cancelsale_dialog(host_window):
     cancel_sale_ui = os.path.join(UI_DIR, 'cancel_sale.ui')
 
     # Load UI content

@@ -181,14 +181,14 @@ Quality gates: PASS (no syntax errors after integration; application runs with n
 
 - Added standalone .ui files earlier (now updated) with an `underConstructionLabel` centered beneath the header.
 - Created `modules/menu/placeholder_menus.py` providing:
-    - `open_reports_dialog(host_window)`
+    - `launch_reports_dialog(host_window)`
     - `open_devices_dialog(host_window)`
-    - `open_greeting_dialog(host_window)`
+    - `launch_greeting_dialog(host_window)`
     Each loads its corresponding `.ui` as a frameless modal, applies dim overlay, centers, and wires Close buttons + drag move on the custom title bar.
 - Updated `main.py` menu button wiring:
-    - `reportsBtn` → `open_reports_dialog`
+    - `reportsBtn` → `launch_reports_dialog`
     - `deviceBtn` → `open_devices_dialog`
-    - `greetingBtn` → `open_greeting_dialog`
+    - `greetingBtn` → `launch_greeting_dialog`
     Removed prior generic hardwired fallback dialog for these buttons (no more temporary message-based dialogs). Unknown buttons (none expected) are now disabled instead of spawning a generic dialog.
 - Ensures consistent migration path: every right-side menu button now opens a .ui-based dialog (Admin, Reports, Vegetable, Product, Greeting, Device, Logout).
 

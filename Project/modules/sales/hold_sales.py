@@ -9,7 +9,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 hold_sales = os.path.join(UI_DIR, 'hold_sales.ui')
 
-def open_hold_sales_dialog(parent=None):
+def launch_hold_sales_dialog(parent=None):
     
     dlg = uic.loadUi(hold_sales)
     

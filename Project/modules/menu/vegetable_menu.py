@@ -25,7 +25,7 @@ VEG_SLOTS = 16
 DEFAULT_VEG_CATEGORY = 'Vegetable'
 
 
-def open_vegetable_menu_dialog(host_window):
+def launch_vegetable_menu_dialog(host_window):
     """Create the dialog; DialogWrapper owns showing/cleanup/focus restore."""
     ui_path = os.path.join(UI_DIR, 'vegetable_menu.ui')
     content = load_ui_strict(ui_path, host_window=host_window, dialog_name='Vegetable menu')

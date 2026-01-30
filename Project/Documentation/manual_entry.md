@@ -48,7 +48,7 @@ The Manual Entry dialog allows users to manually input product information when 
 
 ### Python Module
 - **File**: `modules/sales/manual_entry.py`
-- **Function**: `open_manual_entry_dialog(parent)`
+- **Function**: `launch_manual_entry_dialog(parent)`
 - **Returns**: Dictionary with product data or None
 
 ### Styling
@@ -123,7 +123,7 @@ The Manual Entry dialog allows users to manually input product information when 
 
 **Button Behavior**: Buttons expand equally to fill available horizontal space, positioned towards right side with leading spacer.
 
-## Function: `open_manual_entry_dialog(parent)`
+## Function: `launch_manual_entry_dialog(parent)`
 
 ### Parameters
 - `parent`: Parent window (typically the main sales window)
