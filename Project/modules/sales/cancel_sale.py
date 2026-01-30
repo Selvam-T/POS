@@ -1,111 +1,121 @@
 import os
-from PyQt5 import uic
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QWidget
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QVBoxLayout, QWidget, QPushButton, QLabel, QDialog
-from modules.ui_utils.dialog_utils import center_dialog_relative_to
+from PyQt5.QtGui import QFont
+from modules.ui_utils.dialog_utils import (
+    build_dialog_from_ui, 
+    require_widgets, 
+    set_dialog_main_status_max,
+    set_dialog_error
+)
+from modules.ui_utils.error_logger import log_error
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-UI_DIR = os.path.join(BASE_DIR, 'ui')
-_ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-_QSS_PATH = os.path.join(_ASSETS_DIR, 'dialog.qss')
-
+# Paths
+_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
+UI_PATH = os.path.join(_PROJECT_DIR, 'ui', 'cancel_sale.ui')
+QSS_PATH = os.path.join(_PROJECT_DIR, 'assets', 'dialog.qss')
 
 def launch_cancelsale_dialog(host_window):
-    cancel_sale_ui = os.path.join(UI_DIR, 'cancel_sale.ui')
+    """
+    Standardized Cancel Sale dialog.
+    Returns a QDialog. If accepted, the caller clears the sales table.
+    """
+    # 1. Attempt standard pipeline load
+    dlg = build_dialog_from_ui(
+        UI_PATH, 
+        host_window=host_window, 
+        dialog_name='Cancel Sale', 
+        qss_path=QSS_PATH
+    )
 
-    # Load UI content
-    content = None
-    if os.path.exists(cancel_sale_ui):
+    # --- BRANCH A: UI LOADED SUCCESSFULLY ---
+    if dlg is not None:
         try:
-            content = uic.loadUi(cancel_sale_ui)
-        except Exception:
-            content = None
+            widgets = require_widgets(dlg, {
+                'ok_btn': (QPushButton, 'btnCancelAllOk'),
+                'cancel_btn': (QPushButton, 'btnCancelAllCancel'),
+                'close_btn': (QPushButton, 'customCloseBtn')
+            })
 
-    # Use QDialog as the dialog container
-    dlg = QDialog(host_window)
-    dlg.setModal(True)
-    dlg.setObjectName('CancelAllDialogContainer')
-    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-    
-    # Apply stylesheet
-    if os.path.exists(_QSS_PATH):
-        try:
-            with open(_QSS_PATH, 'r', encoding='utf-8') as f:
-                dlg.setStyleSheet(f.read())
+            def _handle_abort():
+                set_dialog_main_status_max(dlg, "Sale cancellation aborted.", level='info')
+                dlg.reject()
+
+            def _handle_confirm():
+                set_dialog_main_status_max(dlg, "Current sale cleared.", level='info')
+                dlg.accept()
+
+            widgets['ok_btn'].clicked.connect(_handle_confirm)
+            widgets['cancel_btn'].clicked.connect(_handle_abort)
+            widgets['close_btn'].clicked.connect(_handle_abort)
+            
+            # Safety: Focus CANCEL by default
+            widgets['cancel_btn'].setFocus()
+            return dlg
+            
         except Exception as e:
-            try:
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"Failed to load dialog.qss: {e}")
-            except Exception:
-                pass
-    
-    from modules.ui_utils.ui_feedback import show_main_status
+            log_error(f"Cancel Sale UI mapping failed, falling back: {e}")
+            # Fall through to programmatic fallback if widgets are missing/renamed
 
-    # Wire custom window titlebar X button to close dialog
-    if content is not None:
-        custom_close_btn = content.findChild(QPushButton, 'customCloseBtn')
-        if custom_close_btn is not None:
-            custom_close_btn.clicked.connect(dlg.reject)
+    # --- BRANCH B: PROGRAMMATIC FALLBACK (250x250) ---
+    dlg = QDialog(host_window)
+    dlg.setFixedSize(350, 250)
+    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
+    dlg.setModal(True)
 
-        # Set dialog size and embed content
-        layout = QVBoxLayout(dlg)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(content)
-        # Wire UI-based buttons to dialog result (no business logic here)
-        try:
-            container = content
-            btn_cancel = container.findChild(QPushButton, 'btnCancelAllCancel')
-            btn_ok = container.findChild(QPushButton, 'btnCancelAllOk')
-            btn_x = container.findChild(QPushButton, 'customCloseBtn')
-            if btn_cancel is not None:
-                btn_cancel.clicked.connect(dlg.reject)
-            if btn_ok is not None:
-                btn_ok.clicked.connect(dlg.accept)
-            if btn_x is not None:
-                btn_x.clicked.connect(dlg.reject)
-        except Exception:
-            pass
-        btn_cancel.setFocus()
-        return dlg
+    # Standard 16pt Bold Font
+    f = QFont()
+    f.setPointSize(16)
+    f.setBold(True)
+    dlg.setFont(f)
 
-    # --- Fallback: UI failed to load ---
-    # Log error (shared logger)
-    try:
-        from modules.ui_utils.error_logger import log_error
-        log_error('Failed to load cancel_sale.ui, using fallback dialog.')
-    except Exception:
-        pass
-    # Show statusbar message
-    try:
-        show_main_status(host_window, 'Cancel Sale dialog fallback loaded.', True, 5000)
-    except Exception:
-        pass
-
-    # Build fallback dialog content
     layout = QVBoxLayout(dlg)
-    layout.setContentsMargins(16, 16, 16, 16)
-    info = QLabel('clear all transactions?')
-    info.setStyleSheet('QLabel { color: blue; font-size: 16px; font-weight: bold; }')
-    info.setWordWrap(True)
+    layout.setContentsMargins(20, 20, 20, 20)
+    layout.setSpacing(10)
+
+    # 1. Labels
+    info = QLabel('CLEAR SALES TABLE?')
+    info.setAlignment(Qt.AlignCenter)
+    info.setStyleSheet("font-size: 16pt; color: #991b1b;; font-weight: bold;")
     layout.addWidget(info)
-    info2 = QLabel('( ui failed to load)')
+
+    info2 = QLabel("UI failure. Check Error log.")
+    info2.setAlignment(Qt.AlignCenter)
+    info2.setStyleSheet("font-size: 12pt; color: #4b5563; font-weight: bold;")
     layout.addWidget(info2)
-    row = QWidget()
-    from PyQt5.QtWidgets import QHBoxLayout
-    hl = QHBoxLayout(row)
-    hl.addStretch(1)
-    btn_cancel = QPushButton('Cancel')
-    btn_ok = QPushButton('Yes, Clear All')
-    # Minimal style for buttons
-    btn_cancel.setStyleSheet('QPushButton { background-color: #d32f2f; color: #fff; font-size: 16px; min-width: 100px; min-height: 40px; }')
-    btn_ok.setStyleSheet('QPushButton { background-color: #388e3c; color: #fff; font-size: 16px; min-width: 100px; min-height: 40px; }')
-    hl.addWidget(btn_cancel)
+
+    # 2. Buttons Row
+    btn_row = QWidget()
+    hl = QHBoxLayout(btn_row)
+    hl.setContentsMargins(0, 0, 0, 0)
+    
+    btn_cancel = QPushButton('CANCEL')
+    btn_ok = QPushButton('CLEAR ALL')
+
+    # Standard fallback button styles
+    btn_style = "font-size: 16pt; font-weight: bold; min-height: 60px; color: white; border-radius: 4px;"
+    btn_cancel.setStyleSheet(f"background-color: #d32f2f; {btn_style}") # Red
+    btn_ok.setStyleSheet(f"background-color: #388e3c; {btn_style}")     # Green
+
     hl.addWidget(btn_ok)
-    layout.addWidget(row)
-    try:
-        btn_cancel.clicked.connect(dlg.reject)
-        btn_ok.clicked.connect(dlg.accept)
-    except Exception:
-        pass
+    hl.addWidget(btn_cancel)
+    layout.addWidget(btn_row)
+
+    # 3. Actions & Status Bar
+    def _fallback_abort():
+        set_dialog_main_status_max(dlg, "Sale cancellation aborted.", level='info')
+        dlg.reject()
+
+    def _fallback_confirm():
+        set_dialog_main_status_max(dlg, "Current sale cleared.", level='info')
+        dlg.accept()
+
+    btn_cancel.clicked.connect(_fallback_abort)
+    btn_ok.clicked.connect(_fallback_confirm)
+
+    # Notify user that UI was missing via Main Window Status Bar
+    set_dialog_error(dlg, "Error: Cancel Sale UI missing. Used emergency fallback.")
+    
     btn_cancel.setFocus()
     return dlg

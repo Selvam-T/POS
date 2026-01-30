@@ -59,12 +59,12 @@ def launch_logout_dialog(host_window):
     layout.setSpacing(10)
 
     # 1. Labels (Centered & Bold)
-    info = QLabel('Logout Failed to load.')
+    info = QLabel('Logout.')
     info.setAlignment(Qt.AlignCenter)
     info.setStyleSheet("font-size: 16pt; color: #991b1b;; font-weight: bold;")
     layout.addWidget(info)
 
-    info2 = QLabel("Check Error log.")
+    info2 = QLabel("UI failure. Check Error log.")
     info2.setAlignment(Qt.AlignCenter)
     info2.setStyleSheet("font-size: 12pt; color: #4b5563; font-weight: bold;")
     layout.addWidget(info2)
