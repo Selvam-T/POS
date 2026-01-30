@@ -130,6 +130,21 @@ For non-exception failures (typically DB functions returning `(ok=False, msg)`):
 
 ---
 
+
+## Fallback Error Dialog Helper
+
+### `build_error_fallback_dialog(host_window, dialog_name, qss_path=None) -> QDialog`
+
+Builds a standardized, themed error dialog programmatically (no .ui file required). This is used as a fallback when a dialog's .ui file fails to load, ensuring the user always sees a clear error message and can close the dialog. The fallback dialog propagates an error message to the main window status bar on close. As of January 2026, `product_menu.py` and other dialogs may call this function if their .ui fails to load.
+
+**Features:**
+- 250x250 modal dialog, bold 16pt font
+- QSS applied if provided
+- Prominent error message and close button
+- Sets a post-close error message for the main window status bar
+
+---
+
 ## Opt-in Builder Helpers
 
 ### `build_dialog_from_ui(ui_path, *, host_window=None, dialog_name='Dialog', qss_path=None, frameless=True, application_modal=True) -> QDialog | None`

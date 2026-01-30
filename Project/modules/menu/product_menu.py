@@ -31,8 +31,13 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     from modules.table.table_operations import is_transaction_active
     sale_lock = is_transaction_active(getattr(main_window, 'sales_table', None))
 
+    # 1. Attempt to load the real UI
     dlg = build_dialog_from_ui(UI_PATH, host_window=main_window, dialog_name='Product menu', qss_path=QSS_PATH)
-    if not dlg: return None
+    
+    # 2. If load failed, return the standardized fallback immediately
+    if not dlg:
+        from modules.ui_utils.dialog_utils import build_error_fallback_dialog
+        return build_error_fallback_dialog(main_window, "Product Menu", QSS_PATH)
 
     widgets = require_widgets(dlg, {
         'tabs': (QTabWidget, 'tabWidget'),

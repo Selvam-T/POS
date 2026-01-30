@@ -355,3 +355,69 @@ def require_widgets(
         raise ValueError(f"Missing required widgets: {', '.join(missing)}")
 
     return found
+
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
+from PyQt5.QtCore import Qt
+
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
+
+def build_error_fallback_dialog(host_window, dialog_name: str, qss_path: str = None) -> QDialog:
+    """
+    Standardized 'Emergency' dialog (250x250).
+    Bold 16pt font. Propagates error to MainWindow Status Bar on close.
+    """
+    dlg = QDialog(host_window)
+    dlg.setObjectName("FallbackErrorDialog")
+    dlg.setModal(True)
+    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
+    
+    # 1. Size Constraints
+    dlg.setFixedSize(250, 250)
+    
+    # 2. Font Setup (16pt Bold)
+    f = QFont()
+    f.setPointSize(16)
+    f.setBold(True)
+    dlg.setFont(f)
+
+    # 3. Apply QSS
+    if qss_path and os.path.exists(qss_path):
+        try:
+            with open(qss_path, 'r', encoding='utf-8') as f_qss:
+                dlg.setStyleSheet(f_qss.read())
+        except Exception: pass
+
+    layout = QVBoxLayout(dlg)
+    layout.setContentsMargins(20, 20, 20, 20)
+    layout.setSpacing(10)
+
+    # 4. Error Message
+    # Using inline style to ensure Bold 16pt is strictly followed
+    msg = QLabel(f"{dialog_name}<br>failed to load.")
+    msg.setWordWrap(True)
+    msg.setAlignment(Qt.AlignCenter)
+    msg.setStyleSheet("font-size: 16pt; font-weight: bold; color: #991b1b;")
+    layout.addWidget(msg)
+
+    sub_msg = QLabel("Check error log.")
+    sub_msg.setAlignment(Qt.AlignCenter)
+    sub_msg.setStyleSheet("font-size: 12pt; font-weight: bold; color: #4b5563;")
+    layout.addWidget(sub_msg)
+
+    # 5. Close Button
+    btn_close = QPushButton("CLOSE")
+    btn_close.setMinimumHeight(60) # Larger hit area for 250x250 window
+    btn_close.setObjectName("errorOk") # Triggers QSS styling
+    btn_close.setStyleSheet("font-size: 16pt; font-weight: bold;")
+    btn_close.clicked.connect(dlg.reject)
+    layout.addWidget(btn_close)
+
+    # 6. Status Bar Propagation
+    # This prepares the message that the Main Window will show AFTER this dialog closes.
+    from modules.ui_utils.dialog_utils import set_dialog_error
+    set_dialog_error(dlg, f"Error: Standard UI for {dialog_name} is missing or corrupted.")
+
+    btn_close.setFocus()
+    return dlg
