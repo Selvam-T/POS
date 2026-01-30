@@ -1,10 +1,2 @@
-2026-01-30T15:44:08.463669 - Product menu: UI not found (C:\Users\SELVAM\OneDrive\Desktop\POS\Project\ui\product_menu.ui)
-2026-01-30T15:53:18.064590 - Logout: UI not found (C:\Users\SELVAM\OneDrive\Desktop\POS\Project\ui\logout_menu.ui)
-2026-01-30T15:53:43.865860 - Logout: UI not found (C:\Users\SELVAM\OneDrive\Desktop\POS\Project\ui\logout_menu.ui)
-2026-01-30T16:01:45.428886 - Logout: UI not found (C:\Users\SELVAM\OneDrive\Desktop\POS\Project\ui\logout_menu.ui)
-2026-01-30T16:02:16.928005 - Logout: UI not found (C:\Users\SELVAM\OneDrive\Desktop\POS\Project\ui\logout_menu.ui)
-2026-01-30T16:02:38.572478 - Logout: UI not found (C:\Users\SELVAM\OneDrive\Desktop\POS\Project\ui\logout_menu.ui)
-2026-01-30T16:04:45.736222 - Logout: UI not found (C:\Users\SELVAM\OneDrive\Desktop\POS\Project\ui\logout_menu.ui)
-2026-01-30T16:04:57.271443 - Logout: UI not found (C:\Users\SELVAM\OneDrive\Desktop\POS\Project\ui\logout_menu.ui)
-2026-01-30T16:05:13.484235 - Logout: UI not found (C:\Users\SELVAM\OneDrive\Desktop\POS\Project\ui\logout_menu.ui)
-2026-01-30T16:05:22.954210 - Logout: UI not found (C:\Users\SELVAM\OneDrive\Desktop\POS\Project\ui\logout_menu.ui)
+2026-01-30T21:59:14.666318 - DB Error (ADD Product TEST): unable to open database file
+2026-01-30T21:59:14.666318 - Product Menu ADD failed (code=TEST): unable to open database file

@@ -259,6 +259,10 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         try:
             dbop.refresh_product_cache()
         except Exception as e:
+            # Log the technical failure
+            from modules.ui_utils.error_logger import log_error
+            log_error(f"Cache Refresh Failed after {where}: {e}")
+            # Notify user after dialog closes
             report_exception_post_close(
                 dlg,
                 f'Product Menu: refresh_product_cache() after {where}',
@@ -334,6 +338,10 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 trigger_on_finish=False,
             )
         except Exception as e:
+            # update error logger
+            from modules.ui_utils.error_logger import log_error
+            log_error(f"UI Search Suggestion Error: {e}")
+            # display to user after dialog closes
             report_exception_post_close(
                 dlg,
                 'ProductMenu: _refresh_name_completers()',
@@ -991,6 +999,19 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             dbop.refresh_product_cache()
             _finalize('add', code, name)
         else:
+            # ERROR LOGGING
+            from modules.ui_utils.error_logger import log_error
+            log_error(f"DB Error (ADD Product {code}): {db_msg}")
+            # STATUSBAR feedback after dialog closes
+            log_and_set_post_close(
+                dlg,
+                f"Product Menu ADD failed (code={code})",
+                str(db_msg),
+                user_message=f"Error: {db_msg}",
+                level='error',
+                duration=5000,
+            )
+            # IMMEDIATE feedback in dialog
             ui_feedback.set_status_label(widgets['add_status'], db_msg, ok=False)
 
     def do_rem():
@@ -1001,6 +1022,10 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             _post_db_success_refresh('REMOVE')
             _finalize('rem', code, name)
         else:
+            # ERROR LOGGING
+            from modules.ui_utils.error_logger import log_error
+            log_error(f"DB Error (REMOVE Product {code}): {msg}")
+            # STATUSBAR feedback after dialog closes
             log_and_set_post_close(
                 dlg,
                 f"Product Menu REMOVE failed (code={code})",
@@ -1009,6 +1034,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 level='error',
                 duration=5000,
             )
+            # IMMEDIATE feedback in dialog
             ui_feedback.set_status_label(widgets['rem_status'], msg, ok=False)
 
     def do_upd():
@@ -1061,6 +1087,19 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             dbop.refresh_product_cache()
             _finalize('upd', code, name)
         else:
+            # ERROR LOGGING
+            from modules.ui_utils.error_logger import log_error
+            log_error(f"DB Error (UPDATE Product {code}): {db_msg}")
+            # STATUSBAR feedback after dialog closes
+            log_and_set_post_close(
+                dlg,
+                f"Product Menu UPDATE failed (code={code})",
+                str(db_msg),
+                user_message=f"Error: {db_msg}",
+                level='error',
+                duration=5000,
+            )
+            # IMMEDIATE feedback in dialog
             ui_feedback.set_status_label(widgets['upd_status'], db_msg, ok=False)
 
     # Auto-clear validation errors once the user corrects the last error source.
