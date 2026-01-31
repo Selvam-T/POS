@@ -172,7 +172,25 @@ def launch_manual_entry_dialog(parent):
         widgets['close_btn'].clicked.connect(do_cancel)
 
     # --- SECTION 4: INITIALIZATION ---
+    def barcode_override(barcode):
+        """
+        Directly injects the scanned barcode into the code field.
+        Bypasses the keyboard buffer to prevent all leaked characters.
+        """
+        le = widgets['code']
+        if le:
+            # Overwrite widget text with the clean, complete barcode
+            le.setText(barcode)
+            # Manually trigger the coordinator to map Name and Unit
+            coord._sync_fields(le)
+        return True # Tells BarcodeManager the scan was handled
 
+    # Attach to the dialog so DialogWrapper can install it
+    try:
+        dlg.barcode_override_handler = barcode_override
+    except Exception:
+        pass
+    
     # Focus code field by default
     widgets['code'].setFocus()
     return dlg
@@ -251,5 +269,6 @@ def _create_manual_entry_fallback_ui(parent):
     layout.addLayout(btns)
 
     return dlg, widgets
+
 
     

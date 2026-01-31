@@ -208,7 +208,6 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 markup_le.setText("")
                 return
             if only_sell:
-                sell = float(sell_txt)
                 markup_le.setText("NA")
                 return
             if only_cost:
@@ -502,6 +501,12 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             _upd_loaded['supplier'] = (result.get('supplier') or '').strip()
         except Exception:
             pass
+
+        _calculate_markup(
+            sell_le=widgets['upd_sell'], 
+            cost_le=widgets['upd_cost'], 
+            markup_le=widgets['upd_markup']
+        )
 
     coord.add_link(
         source=widgets['rem_code'],
