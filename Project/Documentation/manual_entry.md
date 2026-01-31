@@ -1,30 +1,31 @@
 # Manual Entry Dialog Documentation
-# January 2026 Update
 
-## January 2026: Keyboard, Focus, and Feedback Finalization
+# January 2026: Pipeline Refactor & Modern Controller Design
 
-### Unified Event Interception & Focus Optimization
-- **Enter-to-Click:** The FieldCoordinator detects focus on QPushButton (including the Close button). Pressing Enter manually triggers `obj.click()`, ensuring consistent behavior across all button types.
-- **Ghost Click Elimination:** All buttons have `autoDefault` and `default` stripped. The Coordinator swallows and redirects Enter events, eliminating the "Enter triggers Veg01" bug.
-- **Dynamic Tab Order:** After selecting a product or entering a valid quantity, focus jumps to the OK button, enabling rapid dialog completion.
-- **Dynamic Registration:** New input widgets (e.g., quantity fields) are registered with the FieldCoordinator as they are created at runtime.
+The manual entry dialog controller has been fully refactored to use a declarative, pipeline-based architecture, matching the Product Menu and other modern dialogs. All legacy/manual widget setup, direct findChild calls, and procedural focus/validation logic have been removed. The new design is:
 
-### Advanced Keyboard Swallowing & Validation
-- **Regex Bouncer:** Uses `QRegularExpressionValidator` (`^[1-9][0-9]{0,3}$`) to block '0' and non-digits from quantity fields at the source.
-- **Empty-Field Trap:** The FieldCoordinator swallows Enter on empty fields, forcing the user to enter a value before moving focus.
+## Key Design Features
 
-### Visual & UI Polish
-- **Conditional Borders:** QSS uses `:focus:!read-only` logic. Only editable fields show a highlight border; read-only fields remain visually locked.
-- **Focus Visibility:** CSS specificity fixes ensure focus borders are visible on active fields and the custom title bar's Close button.
-- **Table Outline Cleanup:** Dotted focus rectangles on table rows are disabled via `outline: 0` for a modern look.
+- **Declarative UI Construction:** Uses `build_dialog_from_ui` for dialog creation and `require_widgets` for all widget resolution. If a widget is missing, the app fails fast and clearly during development.
+- **Gating (FocusGate):** The Quantity and OK button are locked by default and only enabled after a valid product lookup. The gate manages both functional and visual state (readOnly, gray background via QSS).
+- **Exclusive Inputs:** `enforce_exclusive_lineedits` ensures that typing in Product Code clears and locks Name Search, and vice versa, preventing ambiguous input.
+- **Coordinator-Driven Logic:** All field relationships, validation, and focus jumps are handled by the FieldCoordinator. Casing (UPPER for code, Title for name) is enforced in the coordinator links.
+- **Focus & Placeholder Management:** Focus starts on Product Code and moves to Quantity after a valid lookup. The Quantity placeholder is reactive (e.g., "Enter weight" for KG, "Enter Quantity" for EACH).
+- **Data Persistence:** The price is cached in the Quantity widget at lookup time, so the OK click is fast and safe.
+- **Fallback UI:** If the .ui file is missing, a programmatic fallback dialog is shown, styled for visual consistency and with clear error messaging.
+- **Status Messaging:** Uses `set_dialog_info` and `set_dialog_error` to provide post-close feedback to the main window, both for success and fallback/error cases.
+- **No Local Product Cache:** The controller trusts that the product cache is loaded at app startup; no local checks or reloads are performed.
+- **No Manual ReadOnly/Styling:** All readOnly and label styling is handled via the .ui file or QSS, not in the controller.
 
-### Cross-Window Feedback
-- **Status Bar Integration:** Dialogs now set a `main_status_msg` property before closing. The Main Window displays this message in the status bar, providing final confirmation of success or cancellation.
+## Summary
 
----
-**All enhancements are now fully implemented in both manual_entry and vegetable_entry dialogs.**
+The manual entry dialog is now:
+- Shorter and easier to read
+- More robust and maintainable
+- Consistent with the rest of the POS dialog system
+- Free of legacy/manual widget setup and procedural logic
 
----
+All intelligence is now declarative and pipeline-driven, ensuring a predictable, testable, and user-friendly experience.
 
 
 ## Overview
@@ -262,40 +263,41 @@ On dialog close, the wrapper restores focus to the main window (sales table) in 
 ## Usage Example (Refactored Dec 2025)
 
 
-1. **Load UI**
-    - Loads `manual_entry.ui` from UI directory
-    - Handles missing file gracefully
+## Pipeline Refactor (Jan 2026)
 
-2. **Create Dialog**
-    - Creates QDialog with modal behavior
-    - Sets window title: "Manual Product Input"
-    - Window flags: Dialog | CustomizeWindowHint | WindowTitleHint | WindowCloseButtonHint
-    - Removes min/max buttons, keeps title bar and close button
+The manual entry dialog now follows the same declarative, robust pipeline as the Product Menu:
 
-3. **Apply Styling**
-    - Loads `sales.qss` and applies stylesheet
-    - Includes specific styles for manual entry dialog
+1. **Builder & Widget Resolution**
+    - Uses `build_dialog_from_ui` to construct the dialog, replacing manual QDialog and layout setup.
+    - All widgets are resolved in a single `require_widgets` call. If a widget is missing from the .ui, the app fails loudly during development.
 
-4. **Input Validation & Focus Behavior**
-    - Product Name: Cannot be empty. After selection (dropdown or Enter), focus jumps to Quantity.
-    - Product Code: After valid entry, focus jumps to Quantity.
-    - Quantity: Must be a valid positive number. Pressing Enter here submits the form if all fields are valid.
-    - All fields: Pressing Enter triggers immediate validation and focus advancement.
+2. **Gating (The "Shield")**
+    - A FocusGate is defined for `manualQuantityLineEdit`, `manualUnitLineEdit`, and `btnManualOk`.
+    - The gate is locked by default. The on_sync callback in the FieldCoordinator unlocks the gate only when a valid product lookup occurs.
+    - The gate manages the readOnly state of the Quantity field, ensuring it turns gray when locked (via QSS).
 
-5. **Store Result**
-    - On success, stores result as dialog attribute: `dlg.manual_entry_result = {...}`
-    - Result structure: `{'product_name': str, 'quantity': float, 'unit_price': float}`
-    - Dialog accepts (OK)
+3. **Exclusive Inputs (Dual Search)**
+    - `enforce_exclusive_lineedits` is applied to the Product Code and Name Search fields. Typing in one clears and locks the other, preventing ambiguous input.
 
-6. **Overlay & Scanner Management** (Handled by DialogWrapper)
-    - DialogWrapper handles dimming overlay activation/deactivation
-    - Scanner blocking/unblocking managed automatically
-    - Dialog centering and focus restoration handled by wrapper
-        }]
-        
-        # Merge with existing rows and rebuild table
-        # ... (see main.py for full implementation)
-```
+4. **Standardized Interaction**
+    - Casing is enforced: Product Code is UPPERCASE, Name Search is Title Case, handled in the coordinator links.
+    - Focus is managed with `QTimer.singleShot` to start on Product Code and move to Quantity after a valid lookup.
+
+5. **Redundancy Cleanup**
+    - Manual `setProperty("readOnly", "true")` calls on labels are removed; these are now handled via the .ui file or QSS.
+    - The local PRODUCT_CACHE load check is removed; the app startup ensures cache is ready.
+
+6. **Data Persistence**
+    - The price is cached in the Quantity widget at lookup time, so the final OK click is fast and safe.
+
+7. **Placeholder Policy**
+    - The Quantity placeholder is reactive: e.g., "Enter Weight" for KG items, "Enter Quantity" for EACH.
+
+8. **Standardized Cleanup**
+    - All manual findChild and layout code is gone, replaced by the pipeline's `build_dialog_from_ui` and `require_widgets`.
+
+**Summary:**
+The dialog is now shorter, easier to read, and matches the Product Menu Update tab in behavior and robustness. All intelligence is declarative, not manual.
 
 ## Integration Points (Refactored Dec 2025)
 

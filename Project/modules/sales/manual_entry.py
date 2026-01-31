@@ -1,168 +1,255 @@
 import os
-from PyQt5 import uic
-from PyQt5.QtWidgets import QDialog, QLineEdit, QPushButton, QLabel
-from PyQt5.QtCore import Qt
-from modules.ui_utils.focus_utils import FieldCoordinator
-from modules.ui_utils import input_handler, ui_feedback, error_logger
-from modules.db_operation import PRODUCT_CACHE, load_product_cache  # Added for completer data
-from modules.ui_utils.dialog_utils import set_dialog_info
+from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel
+from PyQt5.QtCore import Qt, QTimer
+
+from modules.ui_utils.dialog_utils import (
+    build_dialog_from_ui, 
+    require_widgets, 
+    set_dialog_info
+)
+from modules.ui_utils.canonicalization import canonicalize_product_code
+from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
+from modules.ui_utils import input_handler, ui_feedback
+import modules.db_operation as dbop
+
+# Paths
+_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+_PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
+UI_PATH = os.path.join(_PROJECT_DIR, 'ui', 'manual_entry.ui')
+QSS_PATH = os.path.join(_PROJECT_DIR, 'assets', 'dialog.qss')
 
 def launch_manual_entry_dialog(parent):
+    # 1. Guards
     from config import MAX_TABLE_ROWS
-    from modules.ui_utils.max_rows_dialog import open_max_rows_dialog
-
-    # GUARD: Check if main table is already full
     main_sales_table = getattr(parent, 'sales_table', None)
-    if main_sales_table is None:
-        dlg = open_max_rows_dialog(parent, "Internal error: main_sales_table is not available.")
-        dlg.exec_()
+    if main_sales_table is None or main_sales_table.rowCount() >= MAX_TABLE_ROWS:
+        from modules.ui_utils.max_rows_dialog import open_max_rows_dialog
+        msg = "Table full" if main_sales_table else "Internal Error"
+        open_max_rows_dialog(parent, msg).exec_()
         return None
-    if main_sales_table.rowCount() >= MAX_TABLE_ROWS:
-        dlg = open_max_rows_dialog(parent, f"Maximum of {MAX_TABLE_ROWS} items reached. Cannot add more.")
-        dlg.exec_()
-        return None
+
+    # 2. Build Dialog
+    dlg = build_dialog_from_ui(UI_PATH, host_window=parent, dialog_name='Manual Entry', qss_path=QSS_PATH)
+
+    if dlg:
+        # PATH A: Extract widgets from loaded .ui
+        widgets = require_widgets(dlg, {
+            'code': (QLineEdit, 'manualProductCodeLineEdit'),
+            'name_srch': (QLineEdit, 'manualNameSearchLineEdit'),
+            'qty': (QLineEdit, 'manualQuantityLineEdit'),
+            'unit': (QLineEdit, 'manualUnitLineEdit'),
+            'status': (QLabel, 'manualStatusLabel'),
+            'ok_btn': (QPushButton, 'btnManualOk'),
+            'cancel_btn': (QPushButton, 'btnManualCancel'),
+            'close_btn': (QPushButton, 'customCloseBtn'),
+        })
+    else:
+        # PATH B: Build programmatic fallback
+        dlg, widgets = _create_manual_entry_fallback_ui(parent)
+        # Notify user/admin
+        from modules.ui_utils.dialog_utils import set_dialog_error
+        set_dialog_error(dlg, "Error: Manual Entry UI missing. Using fallback.")
+
+    # --- SECTION 1: GATING & UI STATE ---
     
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    UI_DIR = os.path.join(BASE_DIR, 'ui')
-    manual_ui = os.path.join(UI_DIR, 'manual_entry.ui')
-    dlg = uic.loadUi(manual_ui)
+    # Unit is always read-only (display only)
+    widgets['unit'].setReadOnly(True)
+    widgets['unit'].setFocusPolicy(Qt.NoFocus)
+
+    # Gate logic: Lock Qty and OK button until product is identified
+    gate = FocusGate([widgets['qty'], widgets['ok_btn']], lock_enabled=True)
     
-    # Ensure custom frameless window
-    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-    dlg.setModal(True)
-
-    # --- 1. Apply dialog.qss Styling ---
-    try:
-        qss_path = os.path.join(BASE_DIR, 'assets', 'dialog.qss')
-        if os.path.exists(qss_path):
-            with open(qss_path, 'r', encoding='utf-8') as f:
-                dlg.setStyleSheet(f.read())
-    except Exception as e:
-        try:
-            error_logger.log_error(f"Failed to load dialog.qss: {e}")
-        except Exception:
-            pass
-
-    # 2. Widgets
-    code_in = dlg.findChild(QLineEdit, 'manualProductCodeLineEdit')
-    name_in = dlg.findChild(QLineEdit, 'manualNameSearchLineEdit')
-    qty_in = dlg.findChild(QLineEdit, 'manualQuantityLineEdit')
-    unit_dis = dlg.findChild(QLineEdit, 'manualUnitLineEdit')
-    status_lbl = dlg.findChild(QLabel, 'manualStatusLabel')
-    unit_lbl = dlg.findChild(QLabel, 'manualUnitFieldLbl')
-
-    # dialog button widgets
-    btn_ok = dlg.findChild(QPushButton, 'btnManualOk')
-    close_btn = dlg.findChild(QPushButton, 'customCloseBtn') 
-    cancel_btn = dlg.findChild(QPushButton, 'btnManualCancel')
-
-    # Mark the label as read-only for styling
-    unit_lbl.setProperty("readOnly", "true")
-
-    # Refresh style to ensure the property selector applies
-    unit_lbl.style().unpolish(unit_lbl)
-    unit_lbl.style().polish(unit_lbl)
-    unit_lbl.update()
-    
-
-    # --- 3. Setup Completer  ---
-    try:
-        if not PRODUCT_CACHE:
-            load_product_cache()
-    except Exception:
-        pass
-
-    product_names = [rec[0] for rec in PRODUCT_CACHE.values() if rec[0]]
-
-    # 4. Side-Effect: Placeholder Update & Price Storage
-    def on_sync_data(result):
-        # Update Placeholder
-        if result and result.get('unit', '').lower() == 'kg':
-            qty_in.setPlaceholderText('Enter 500g as 0.5 or 1Kg as 1')
+    def _set_gate_state(enabled: bool, result: dict = None):
+        gate.set_locked(not enabled)
+        if enabled and result:
+            # Setup Quantity Placeholder based on unit
+            is_kg = (result.get('unit', '').lower() == 'kg')
+            widgets['qty'].setPlaceholderText('Enter weight (e.g. 0.5)' if is_kg else 'Enter Quantity')
+            # Store price for the OK handler
+            widgets['qty'].setProperty('unit_price', result.get('price', 0))
         else:
-            qty_in.setPlaceholderText('Enter Quantity')
-        
-        # Store price on widget so handle_ok can access it
-        if result:
-            name_in.setProperty('last_price', result.get('price', 0))
+            widgets['qty'].clear()
+            widgets['qty'].setPlaceholderText('')
 
-    # 5. Setup Coordinator
+    _set_gate_state(False) # Initial state
+
+    # --- SECTION 2: COORDINATOR (Cross-Mapping) ---
+
     coord = FieldCoordinator(dlg)
-    
+
+    def _on_sync(result):
+        _set_gate_state(bool(result), result)
+
     # Link Code -> Name/Unit
     coord.add_link(
-        source=code_in,
-        target_map={'name': name_in, 'unit': unit_dis},
+        source=widgets['code'],
+        target_map={'name': widgets['name_srch'], 'unit': widgets['unit']},
         lookup_fn=lambda val: input_handler.get_coordinator_lookup(val, 'code'),
-        next_focus=qty_in,
-        status_label=status_lbl,
-        on_sync=on_sync_data,
-        auto_jump=False
+        next_focus=widgets['qty'],
+        status_label=widgets['status'],
+        on_sync=_on_sync
     )
 
-    # Link Name -> Code/Unit
+    # Link Name Search -> Code/Unit
     coord.add_link(
-        source=name_in,
-        target_map={'code': code_in, 'unit': unit_dis},
+        source=widgets['name_srch'],
+        target_map={'code': widgets['code'], 'unit': widgets['unit']},
         lookup_fn=lambda val: input_handler.get_coordinator_lookup(val, 'name'),
-        next_focus=qty_in,
-        status_label=status_lbl,
-        on_sync=on_sync_data,
-        auto_jump=True
+        next_focus=widgets['qty'],
+        status_label=widgets['status'],
+        on_sync=_on_sync
     )
 
-    # Completer: trigger coordinator on selection / editingFinished
-    input_handler.setup_name_search_lineedit(
-        name_in,
-        product_names,
-        on_selected=lambda _text=None, _le=None: coord._sync_fields(name_in),
-    )
-
-    # Link Quantity -> OK Button
     coord.add_link(
-        source=qty_in,
-        target_map={},
-        lookup_fn=lambda val: {"val": val} if val else None,
-        next_focus=lambda: btn_ok.click()
+        source=widgets['qty'],
+        next_focus=widgets['ok_btn'],
+        status_label=widgets['status'],
+        swallow_empty=True,  # Don't move to OK if Qty is empty
+        validate_fn=lambda: input_handler.handle_quantity_input(
+            widgets['qty'], 
+            unit_type='kg' if widgets['unit'].text().lower() == 'kg' else 'unit'
+        )
     )
 
-    # 6. Finish logic
-    def handle_ok():
-        unit_type = unit_dis.text().strip().lower()
-        expected_type = 'kg' if unit_type == 'kg' else 'unit'
-        
-        try:
-            qty = input_handler.handle_quantity_input(qty_in, unit_type=expected_type)
-            # Validation for empty product
-            if not code_in.text() or not name_in.text():
-                raise ValueError("Please select a valid product first.")
+    # Search Exclusivity (Type in code -> clear name, vice versa)
+    enforce_exclusive_lineedits(
+        widgets['code'], widgets['name_srch'],
+        on_switch_to_a=lambda: _set_gate_state(False),
+        on_switch_to_b=lambda: _set_gate_state(False)
+    )
 
+    # Name search suggestions
+    product_names = [rec[0] for rec in (dbop.PRODUCT_CACHE or {}).values() if rec[0]]
+    input_handler.setup_name_search_lineedit(
+        widgets['name_srch'], product_names,
+        on_selected=lambda: coord._sync_fields(widgets['name_srch'])
+    )
+
+    # Auto-clear-on-correction: Clears the red error once the user types a valid qty
+    coord.register_validator(
+        widgets['qty'],
+        lambda: input_handler.handle_quantity_input(
+            widgets['qty'], 
+            unit_type='kg' if widgets['unit'].text().lower() == 'kg' else 'unit'
+        ),
+        status_label=widgets['status']
+    )
+
+    # --- SECTION 3: EXECUTION ---
+
+    def do_ok():
+        try:
+            # 1. Validate Product Selection
+            if not widgets['code'].text() or not widgets['name_srch'].text():
+                raise ValueError("Select a product first")
+
+            # 2. Validate Quantity
+            u_type = 'kg' if widgets['unit'].text().lower() == 'kg' else 'unit'
+            qty = input_handler.handle_quantity_input(widgets['qty'], unit_type=u_type)
+
+            # 3. Prepare Result for Sales Table
             dlg.manual_entry_result = {
-                'product_code': code_in.text(),
-                'product_name': name_in.text(),
+                'product_code': widgets['code'].text(),
+                'product_name': widgets['name_srch'].text(),
                 'quantity': qty,
-                'unit': unit_dis.text(),
-                'unit_price': float(name_in.property('last_price') or 0)
+                'unit': widgets['unit'].text(),
+                'unit_price': float(widgets['qty'].property('unit_price') or 0),
+                'editable': True # Ensure it can be edited in the table
             }
-            set_dialog_info(dlg, f"{name_in.text()} added to sale.")
+            set_dialog_info(dlg, f"{widgets['name_srch'].text()} of {qty} {widgets['unit'].text()} added. ")
             dlg.accept()
         except ValueError as e:
-            ui_feedback.set_status_label(status_lbl, str(e), ok=False)
+            ui_feedback.set_status_label(widgets['status'], str(e), ok=False)
 
-    # Close/Cancel logic
-    def handle_close():
+    def do_cancel():
         set_dialog_info(dlg, "Manual entry cancelled.")
-        dlg.reject() # DialogWrapper handles overlay and focus
+        dlg.reject()
 
-    if close_btn:
-        close_btn.clicked.connect(handle_close)
-    if cancel_btn:
-        cancel_btn.clicked.connect(handle_close)
+    # Connections
+    widgets['ok_btn'].clicked.connect(do_ok)
+    widgets['cancel_btn'].clicked.connect(do_cancel)
+    if widgets.get('close_btn') is not None:
+        widgets['close_btn'].clicked.connect(do_cancel)
 
-    btn_ok.clicked.connect(handle_ok)
-    
-    # SET INITIAL FOCUS
-    code_in.setFocus()
+    # --- SECTION 4: INITIALIZATION ---
 
-    dlg._coord = coord 
+    # Focus code field by default
+    widgets['code'].setFocus()
     return dlg
+
+def _create_manual_entry_fallback_ui(parent):
+    """Generates the QDialog and the widgets dictionary manually."""
+    from PyQt5.QtWidgets import QDialog, QVBoxLayout, QGridLayout, QLabel, QLineEdit, QPushButton, QHBoxLayout
+    from PyQt5.QtGui import QFont
+
+    dlg = QDialog(parent)
+    dlg.setFixedSize(500, 400)
+    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
+    dlg.setModal(True)
+
+    f_base = QFont(); f_base.setPointSize(12); f_base.setBold(True)
+    dlg.setFont(f_base)
+
+    layout = QVBoxLayout(dlg)
+    
+    dlg.setStyleSheet("background-color: beige;")
+    # Title
+    header = QLabel("MANUAL ENTRY (FALLBACK)")
+    header.setAlignment(Qt.AlignCenter)
+    header.setStyleSheet("font-size: 16pt; color: #991b1b;; font-weight: bold;")
+    layout.addWidget(header)
+
+    info = QLabel("UI failure. Check Error log.")
+    info.setAlignment(Qt.AlignCenter)
+    info.setStyleSheet("font-size: 12pt; color: #4b5563; font-weight: bold;")
+    layout.addWidget(info)
+
+    # Grid
+    grid = QGridLayout()
+    widgets = {
+        'code': QLineEdit(), 'name_srch': QLineEdit(), 
+        'unit': QLineEdit(), 'qty': QLineEdit(),
+        'status': QLabel(""), 'ok_btn': QPushButton("ADD"), 
+        'cancel_btn': QPushButton("CANCEL"), 'close_btn': None 
+    }
+    codelbl = QLabel("Code:")
+    codelbl.setStyleSheet("font-size: 12pt; color: #4b5563;")
+    grid.addWidget(codelbl, 0, 0); 
+    widgets['code'].setStyleSheet("font-size: 12pt; color: #4b5563;")
+    grid.addWidget(widgets['code'], 0, 1)
+
+    namelbl = QLabel("Name:")
+    namelbl.setStyleSheet("font-size: 12pt; color: #4b5563;")
+    grid.addWidget(namelbl, 1, 0); 
+    widgets['name_srch'].setStyleSheet("font-size: 12pt; color: #4b5563;")
+    grid.addWidget(widgets['name_srch'], 1, 1)
+
+    unitlbl = QLabel("Unit:")
+    unitlbl.setStyleSheet("font-size: 12pt; color: #4b5563;")
+    grid.addWidget(unitlbl, 2, 0); 
+    widgets['unit'].setStyleSheet("font-size: 12pt; color: #4b5563;")
+    grid.addWidget(widgets['unit'], 2, 1)
+
+    qtylbl = QLabel("Qty:")
+    qtylbl.setStyleSheet("font-size: 12pt; color: #4b5563;")
+    grid.addWidget(qtylbl, 3, 0);  
+    widgets['qty'].setStyleSheet("font-size: 12pt; color: #4b5563;")
+    grid.addWidget(widgets['qty'], 3, 1)
+    layout.addLayout(grid)
+
+    # Status
+    widgets['status'].setStyleSheet("color: red; font-size: 10pt;")
+    widgets['status'].setAlignment(Qt.AlignCenter)
+    layout.addWidget(widgets['status'])
+
+    # Buttons
+    btns = QHBoxLayout()
+    btn_style = "font-size: 16pt; font-weight: bold; min-height: 60px; color: white; border-radius: 4px;"
+    widgets['ok_btn'].setStyleSheet(f"background-color: #388e3c; {btn_style}")
+    widgets['cancel_btn'].setStyleSheet(f"background-color: #d32f2f; {btn_style}")
+    btns.addWidget(widgets['ok_btn']); btns.addWidget(widgets['cancel_btn'])
+    layout.addLayout(btns)
+
+    return dlg, widgets
+
+    

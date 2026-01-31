@@ -23,19 +23,19 @@ The Cancel All feature provides a safe way for users to clear the entire sales t
 ### Dialog Controller
 **File:** `modules/sales/cancel_sale.py`
 
-```python
-def launch_cancelsale_dialog(host_window):
-    """Open Cancel Sale confirmation dialog.
-    If the UI file fails to load, logs error and shows a minimal fallback dialog.
-    Returns:
-        QDialog with Accepted/Rejected status based on user choice
-    """
-```
+The controller now follows modern safety and UI standards:
 
-- Loads UI from `cancel_sale.ui` if available; otherwise, logs error and shows fallback dialog.
-- Fallback dialog includes a confirmation message and two styled buttons (Cancel, Yes, Clear All).
-- Error is logged to `log/error.log` with timestamp using shared logger.
-- Statusbar notification is shown to inform user when fallback is used.
+- **Safety First:** In both the Designer UI and the programmatic fallback, the "NO / CANCEL" button is focused by default. This protects the user from accidentally clearing a large transaction with an unintentional "Enter" keypress.
+- **Information Persistence:** The fallback dialog uses `set_dialog_error`, ensuring that after the dialog closes, the Main Window alerts the admin that the .ui file is missing.
+- **Visual Consistency:** The fallback dialog matches the exact geometry (350x250) and typography (16pt Bold) of the shared error system for a consistent look.
+- **Separation of Concerns:** The controller only handles the confirmation result (Accepted/Rejected). The Main Window remains responsible for the actual `table.clear()` logic, keeping the code modular and clean.
+- **Removed Legacy Boilerplate:** Manual `uic.loadUi` calls and `os.path.exists` checks have been eliminated, reducing clutter and improving maintainability.
+
+**How it works:**
+- Loads UI from `cancel_sale.ui` if available; otherwise, shows a visually consistent fallback dialog and logs the error.
+- Fallback dialog includes a confirmation message and two styled buttons (Cancel/No, Yes/Clear All), with Cancel focused by default.
+- Error is logged to `log/error.log` with timestamp using the shared logger.
+- Statusbar notification is shown to inform the user when fallback is used.
 
 ### Main Window Handler
 **File:** `main.py`
