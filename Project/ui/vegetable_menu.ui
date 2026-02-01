@@ -340,7 +340,7 @@
           </size>
          </property>
          <property name="placeholderText">
-          <string>-- As per Vegetable selection --</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -635,7 +635,7 @@
           <string>-- Optional --</string>
          </property>
         </widget>
-       </item> 
+       </item>
       </layout>
      </item>
      <item>
@@ -769,7 +769,6 @@
  </widget>
  <tabstops>
   <tabstop>vegMChooseComboBox</tabstop>
-  <tabstop>vegMProductCodeLineEdit</tabstop>
   <tabstop>vegMProductNameLineEdit</tabstop>
   <tabstop>vegMUnitComboBox</tabstop>
   <tabstop>vegMSellingPriceLineEdit</tabstop>
@@ -779,6 +778,9 @@
   <tabstop>btnVegMDel</tabstop>
   <tabstop>btnVegMCancel</tabstop>
   <tabstop>customCloseBtn</tabstop>
+  <tabstop>vegMProductCodeLineEdit</tabstop>
+  <tabstop>vegMCategoryLineEdit</tabstop>
+  <tabstop>vegMMarkupLineEdit</tabstop>
  </tabstops>
  <resources/>
  <connections/>

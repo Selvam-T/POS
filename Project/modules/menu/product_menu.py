@@ -144,7 +144,6 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     _configure_readonly_lineedit(widgets['add_unit'])
 
     # Category combos: config-only categories, with a first-item placeholder.
-    # Placeholder text must come from the .ui (no hardcoded strings here).
     def _init_category_combo(combo: QComboBox) -> None:
         if combo is None:
             return
@@ -195,44 +194,8 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     _init_category_combo(widgets['add_cat'])
     _init_category_combo(widgets['upd_cat'])
 
-    # --- Markup Logic (fixed wiring) ---
-    def _calculate_markup(*, sell_le: QLineEdit, cost_le: QLineEdit, markup_le: QLineEdit) -> None:
-        
-        try:
-            sell_txt = (sell_le.text() or '').strip()
-            cost_txt = (cost_le.text() or '').strip()
-            both_empty = not sell_txt and not cost_txt
-            only_sell = sell_txt and not cost_txt
-            only_cost = not sell_txt and cost_txt
-            if both_empty:
-                markup_le.setText("")
-                return
-            if only_sell:
-                markup_le.setText("NA")
-                return
-            if only_cost:
-                cost = float(cost_txt)
-                markup_le.setText("NA")
-                return
-            sell = float(sell_txt)
-            cost = float(cost_txt)
-            if cost > 0:
-                pct = ((sell - cost) / cost) * 100.0
-                markup_le.setText(f"{pct:.1f}%")
-            else:
-                markup_le.setText("")
-        except Exception:
-            markup_le.setText("")
-
-    def _wire_markup(*, sell_le: QLineEdit, cost_le: QLineEdit, markup_le: QLineEdit) -> None:
-        def _recalc(_text=None):
-            _calculate_markup(sell_le=sell_le, cost_le=cost_le, markup_le=markup_le)
-        sell_le.textChanged.connect(_recalc)
-        cost_le.textChanged.connect(_recalc)
-        _recalc()
-
-    _wire_markup(sell_le=widgets['add_sell'], cost_le=widgets['add_cost'], markup_le=widgets['add_markup'])
-    _wire_markup(sell_le=widgets['upd_sell'], cost_le=widgets['upd_cost'], markup_le=widgets['upd_markup'])
+    input_handler.wire_markup_logic(widgets['add_sell'], widgets['add_cost'], widgets['add_markup'])
+    input_handler.wire_markup_logic(widgets['upd_sell'], widgets['upd_cost'], widgets['upd_markup'])
 
     # --- Search Setup ---
     # Ensure we have a full cache so completers include all products.
@@ -502,11 +465,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         except Exception:
             pass
 
-        _calculate_markup(
-            sell_le=widgets['upd_sell'], 
-            cost_le=widgets['upd_cost'], 
-            markup_le=widgets['upd_markup']
-        )
+        input_handler.calculate_markup_widgets(widgets['upd_sell'], widgets['upd_cost'], widgets['upd_markup'])
 
     coord.add_link(
         source=widgets['rem_code'],

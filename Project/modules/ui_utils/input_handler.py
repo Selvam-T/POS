@@ -239,3 +239,41 @@ def search_combo_box(combo_box: QComboBox, search_text: str) -> list:
     st = search_text.strip().lower()
     return [combo_box.itemText(i) for i in range(combo_box.count()) 
             if st in combo_box.itemText(i).lower()]
+
+def calculate_markup_widgets(sell_le, cost_le, markup_le) -> None:
+    try:
+        if not sell_le or not cost_le or not markup_le:
+            return
+
+        sell_txt = sell_le.text().strip()
+        cost_txt = cost_le.text().strip()
+        
+        # 1. BOTH EMPTY (Startup/Locked state) -> Clear the widget
+        if not sell_txt and not cost_txt:
+            markup_le.setText("")
+            return
+
+        # 2. EITHER MISSING (User is typing or data is partial) -> Display NA
+        if not sell_txt or not cost_txt:
+            markup_le.setText("NA")
+            return
+
+        # 3. BOTH PRESENT -> Calculate percentage
+        sell, cost = float(sell_txt), float(cost_txt)
+        if cost > 0:
+            markup_le.setText(f"{((sell - cost) / cost * 100):.1f}%")
+        else:
+            markup_le.setText("NA")
+            
+    except Exception:
+        markup_le.setText("") # Graceful fail for invalid numeric input
+
+def wire_markup_logic(sell_le, cost_le, markup_le) -> None:
+    """Standardizes signal connections for markup."""
+    def _recalc():
+        calculate_markup_widgets(sell_le, cost_le, markup_le)
+    
+    # Connect to changes
+    sell_le.textChanged.connect(_recalc)
+    cost_le.textChanged.connect(_recalc)
+    _recalc() # Initial run

@@ -190,7 +190,7 @@ def launch_manual_entry_dialog(parent):
         dlg.barcode_override_handler = barcode_override
     except Exception:
         pass
-    
+
     # Focus code field by default
     widgets['code'].setFocus()
     return dlg
