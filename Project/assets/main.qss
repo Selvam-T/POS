@@ -44,14 +44,15 @@ QLabel#labelDayTime { padding-right: 20px; }
    PAYMENT FRAME AND ITS CHILDREN
    ============================================================= */
 
-/* --- Payment Frame Container --- */
+/* --- 1. Payment Frame Container --- */
 QFrame#paymentFrame {
   background-color: #ffe8cc;
   border: 1px solid #333333;
   border-radius: 8px;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
-/* --- Payment Label --- */
+/* --- 2. Payment Label --- */
 QLabel#paymentLabel {
   font-size: 14pt;
   qproperty-alignment: 'AlignCenter';
@@ -60,79 +61,94 @@ QLabel#paymentLabel {
   padding: 0px;
 }
 
-/* --- Payment Method Buttons --- */
-QPushButton#cashBtn,
-QPushButton#netsBtn,
-QPushButton#paynowBtn,
-QPushButton#voucherBtn {
+/* --- 3. PayLayout --- */
+*[objectName*="PayFrame"] {
+    border: 2px solid blue;
+    border-radius: 8px;
+}
+
+*[objectName*="TtlPayLabel"],
+*[objectName*="ValPayLabel"] {
+    font-family: Tahoma;
+    font-size: 18px;
+    font-weight: bold;
+    color: navy;
+}
+
+*[objectName*="TtlPayLabel"] {
+    background-color: beige;;
+}
+*[objectName*="ValPayLabel"] {
+    background-color: white;  
+}
+
+/* 4. Payment mode select buttons */
+
+*[objectName*="PaySlcBtn"] {
   border-radius: 8px;
-  padding: 12px 16px;
-  color: white;
-}
-QPushButton#cashBtn { background-color: #2e7d32; }
-QPushButton#cashBtn:hover { background-color: #256528; }
-QPushButton#cashBtn:pressed { background-color: #1b4d1e; }
-QPushButton#netsBtn { background-color: #0a3d91; }
-QPushButton#netsBtn:hover { background-color: #0d4fab; }
-QPushButton#netsBtn:pressed { background-color: #08326d; }
-QPushButton#paynowBtn { background-color: #6a1b9a; }
-QPushButton#paynowBtn:hover { background-color: #8320c0; }
-QPushButton#paynowBtn:pressed { background-color: #4d1373; }
-QPushButton#voucherBtn { background-color: #d4af37; color: black; }
-QPushButton#voucherBtn:hover { background-color: #e0c04a; }
-QPushButton#voucherBtn:pressed { background-color: #b89628; }
-
-/* --- Tick and Clear Buttons --- */
-QPushButton#tickBtn {
-  background-color: #2e7d32;
-  color: white;
-  border-radius: 18px;
-  width: 36px;
-  height: 36px;
-}
-QPushButton#tickBtn:hover { background-color: #256528; }
-QPushButton#tickBtn:pressed { background-color: #1b4d1e; }
-
-QPushButton#clearBtn {
-  background-color: red;
-  color: white;
-  border-radius: 18px;
-  width: 36px;
-  height: 36px;
-}
-QPushButton#clearBtn:hover { background-color: #cc0000; }
-QPushButton#clearBtn:pressed { background-color: #990000; }
-
-/* --- Refund Button --- */
-QPushButton#refundBtn {
-  background-color: #d32f2f;
-  color: white;
-  border-radius: 10px;
-  font-weight: bold;
-  width: 120px;
-  height: 110px;
-}
-QPushButton#refundBtn:hover { background-color: #b71c1c; }
-QPushButton#refundBtn:pressed { background-color: #8c1616; }
-
-/* --- Refund Input Fields --- */
-QLineEdit#refundInput {
-  border: 1px solid #aaaaaa;
-  border-radius: 6px;
-  padding: 8px;
-  background-color: white;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 20px;
+  min-width: 98px;
+  max-width: 98px;
+  min-height: 24px;
+  max-height: 24px;
 }
 
-/* --- Payment Input Fields Error State --- */
-QLineEdit#cashInput[error="true"],
-QLineEdit#netsInput[error="true"],
-QLineEdit#paynowInput[error="true"],
-QLineEdit#voucherInput[error="true"] {
-  border: 3px solid red;
-  background-color: #ffcccc;
+QPushButton#cashPaySlcBtn    { background-color: #2e7d32;;  color: white;}
+QPushButton#cashPaySlcBtn:hover { background-color: #256528; }
+QPushButton#cashPaySlcBtn:pressed { background-color: #1b4d1e; }
+QPushButton#netsPaySlcBtn    { background-color: #0a3d91;  color: white;}
+QPushButton#netsPaySlcBtn:hover { background-color: #0d4fab; }
+QPushButton#netsPaySlcBtn:pressed { background-color: #08326d; }
+QPushButton#paynowPaySlcBtn  { background-color: #6a1b9a;  color: white;}
+QPushButton#paynowPaySlcBtn:hover { background-color: #8320c0; }
+QPushButton#paynowPaySlcBtn:pressed { background-color: #4d1373; }
+QPushButton#voucherPaySlcBtn { background-color: #d4af37;  color: black;}
+QPushButton#voucherPaySlcBtn:hover { background-color: #e0c04a; }
+QPushButton#voucherPaySlcBtn:pressed { background-color: #b89628; }
+
+
+/* 5. Operation buttons */
+#payPayOpsBtn    { background-color: #1976D2; color: white; font-Size: 18px;}  
+#printPayOpsBtn  { background-color: #0288D1; color: white; font-Size: 18px; } 
+#resetPayOpsBtn  { background-color: #D32F2F; color: white; font-Size: 18px; }
+
+#payPayOpsBtn, #printPayOpsBtn, #resetPayOpsBtn {
+    min-width: 120px;
+    min-height: 60px;
+    max-width: 120px;
+    max-height: 60px;
+    border-radius: 8px;
 }
 
-QLabel#refundAmountLabel { font-weight: bold; }
+/* 6. Keypad */
+#keypadFrame QPushButton {
+    min-width: 80px;
+    max-width: 80px;
+    min-height: 80px;
+    max-height: 80px;
+    font-size: 18px;
+    border-radius: 8px;
+}
+
+/* Numbers / decimals / 00 */
+*[objectName*="keyNumBtn"] {   /* or objectName*="num" / "00" / "decimal" */
+    background-color: #B0BEC5;
+    color: white;
+}
+
+/* Fast actions: enter, backspace, tab, clear */
+*[objectName*="keyFastBtn"] {
+    background-color: #FF9800;
+    color: white;
+}
+
+/* Dollar presets: $10 $50 $100 */
+*[objectName*="keyDolBtn"] {
+    background-color: #455A64;
+    color: white;
+}
 
 /* =============================================================
    MENU FRAME (RIGHT SIDEBAR)
