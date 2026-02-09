@@ -124,7 +124,8 @@ QPushButton#voucherPaySlcBtn:pressed { background-color: #b89628; }
 /* 6. tender */
 
 *[objectName*="TtlLabel"],
-*[objectName*="ValLineEdit"] {
+*[objectName*="ValLineEdit"],
+*[objectName*="PayLineEdit"] {
     font-family: Tahoma;
     font-size: 18px;
     font-weight: bold;
@@ -184,6 +185,11 @@ QPushButton#voucherPaySlcBtn:pressed { background-color: #b89628; }
 
 #keyVendorBtn { 
   background-color: #919eb0;
+}
+
+QLabel#payStatusLabel {
+  font-size: 18px;
+  font-weight: bold;
 }
 
 /* =============================================================

@@ -66,6 +66,13 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
   - Sets up icons, tooltips, and fallback text for menu buttons.
   - Cancel All button opens confirmation dialog; on confirm, clears all sales table rows and resets total to $0.00.
 
+- **ReceiptContext Gating (Feb 2026):**
+  - `receipt_context` keys: `active_receipt_id`, `source`, `status`.
+  - `manual_entry` and `vegetable_menu` launchers are blocked when `source == HOLD_LOADED` (held receipts are read-only).
+  - `hold_sales` launcher requires sales table rows > 0, `active_receipt_id is None`, and `source == ACTIVE_SALE`.
+  - `view_hold` launcher requires sales table rows == 0, `active_receipt_id is None`, and payment total effectively zero; otherwise a status hint is shown.
+  - Cancel All still requires an active sale (table rows) as before.
+
 - **Sales Table Management:**
   - Loads and configures the sales table, binds the total label, and manages row operations.
   - **Unit-aware editable states:** KG items have read-only quantity cells, EACH items have editable quantity cells.

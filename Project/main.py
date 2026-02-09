@@ -130,6 +130,14 @@ class MainLoader(QMainWindow):
 
     def launch_vegetable_menu_dialog(self):
         """Open Vegetable Management dialog."""
+        ctx = getattr(self, 'receipt_context', {}) or {}
+        if ctx.get('source') == 'HOLD_LOADED':
+            from modules.ui_utils.ui_feedback import show_temp_status
+            sb = getattr(self, 'statusbar', None)
+            if sb:
+                show_temp_status(sb, "Vegetable menu disabled for held receipts.", 3000)
+            return
+
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_vegetable_menu_dialog,
             dialog_key='vegetable_menu'
@@ -147,6 +155,13 @@ class MainLoader(QMainWindow):
 
     def launch_manual_entry_dialog(self):
         """Open Manual Product Entry panel."""
+        ctx = getattr(self, 'receipt_context', {})
+        if (ctx or {}).get('source') == 'HOLD_LOADED':
+            from modules.ui_utils.ui_feedback import show_temp_status
+            sb = getattr(self, 'statusbar', None)
+            if sb:
+                show_temp_status(sb, "Manual entry disabled for held receipts.", 3000)
+            return
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_manual_entry_dialog, 
             dialog_key='manual_entry',
@@ -155,10 +170,53 @@ class MainLoader(QMainWindow):
 
     def launch_hold_sales_dialog(self):
         """Open On Hold panel."""
+        from modules.ui_utils.ui_feedback import show_temp_status
+
+        ctx = getattr(self, 'receipt_context', {}) or {}
+        sales_table = getattr(self, 'sales_table', None)
+
+        # Require active sale rows, no active_receipt_id, and source ACTIVE_SALE
+        if (
+            sales_table is None or
+            sales_table.rowCount() <= 0 or
+            ctx.get('active_receipt_id') is not None or
+            ctx.get('source') != 'ACTIVE_SALE'
+        ):
+            sb = getattr(self, 'statusbar', None)
+            if sb:
+                show_temp_status(sb, "On Hold is available only for an active sale.", 3000)
+            return
+
         self.dialog_wrapper.open_dialog_scanner_blocked(launch_hold_sales_dialog, dialog_key='hold_sales')
 
     def open_viewhold_panel(self):
         """Open View Hold panel."""
+        from modules.ui_utils.ui_feedback import show_temp_status
+
+        sales_table = getattr(self, 'sales_table', None)
+        ctx = getattr(self, 'receipt_context', {}) or {}
+
+        # Allow view-hold only when no active sale rows and no active receipt id
+        if sales_table is None or sales_table.rowCount() > 0 or ctx.get('active_receipt_id') is not None:
+            sb = getattr(self, 'statusbar', None)
+            if sb:
+                show_temp_status(sb, "View Hold is available only when no sale is in progress.", 3000)
+            return
+
+        # Optional extra guard: ensure payment frame is effectively empty (total 0)
+        pay_label = self.findChild(QLabel, 'totalValPayLabel')
+        if pay_label is not None:
+            text = (pay_label.text() or '').strip()
+            try:
+                pay_total = float(text.replace(',', '')) if text else 0.0
+            except ValueError:
+                pay_total = 0.0
+            if pay_total != 0.0:
+                sb = getattr(self, 'statusbar', None)
+                if sb:
+                    show_temp_status(sb, "Clear payment before viewing holds.", 3000)
+                return
+
         self.dialog_wrapper.open_dialog_scanner_blocked(launch_viewhold_dialog, dialog_key='view_hold')
 
     def open_cancelsale_dialog(self):
@@ -354,6 +412,9 @@ class MainLoader(QMainWindow):
 
     def _on_sale_total_changed(self, total: float) -> None:
         print(f"Sale total changed: {total:.2f}")
+        panel = getattr(self, 'payment_panel_controller', None)
+        if panel is not None:
+            panel.set_payment_default(total)
 
     def _on_hold_requested(self) -> None:
         print("Hold requested via sales frame signal")
@@ -371,14 +432,45 @@ class MainLoader(QMainWindow):
         ctx['source'] = 'ACTIVE_SALE'
         ctx['status'] = 'NONE'
         print(f"ReceiptContext reset: {ctx}")
+        panel = getattr(self, 'payment_panel_controller', None)
+        if panel is not None:
+            panel.clear_payment_frame()
 
     def _on_payment_requested(self, payment_split: dict) -> None:
         print(f"Payment requested: {payment_split}")
+        if self.pay_current_receipt(payment_split):
+            panel = getattr(self, 'payment_panel_controller', None)
+            if panel is not None:
+                panel.notify_payment_success()
 
     def _on_payment_success(self) -> None:
         ctx = self.receipt_context
-        ctx['status'] = 'PAID'
+        ctx['active_receipt_id'] = None
+        ctx['source'] = 'ACTIVE_SALE'
+        ctx['status'] = 'NONE'
         print(f"Payment success: {ctx}")
+        self._clear_sales_table_force()
+        panel = getattr(self, 'payment_panel_controller', None)
+        if panel is not None:
+            panel.clear_payment_frame()
+
+    def pay_current_receipt(self, payment_split: dict) -> bool:
+        """Entry point for processing the current receipt payment (DB stub)."""
+        ctx = self.receipt_context
+        receipt_id = ctx.get('active_receipt_id')
+        try:
+            if receipt_id is None:
+                print("Creating paid receipt and payment records (stub).")
+            else:
+                print(f"Marking receipt {receipt_id} as PAID and inserting payments (stub).")
+            return True
+        except Exception as e:
+            try:
+                from modules.ui_utils.error_logger import log_error
+                log_error(f"Payment processing failed: {e}")
+            except Exception:
+                pass
+            return False
 
     # ========== Post-Dialog Action Handlers ==========
     def _add_items_to_sales_table(self):
@@ -529,6 +621,21 @@ class MainLoader(QMainWindow):
                 import traceback
                 from modules.ui_utils.error_logger import log_error
                 log_error(f"Failed to clear sales table: {e}\n{traceback.format_exc()}")
+            except Exception:
+                pass
+
+    def _clear_sales_table_force(self):
+        """Clear sales table without dialog checks (used after payment success)."""
+        if not hasattr(self, 'sales_table'):
+            return
+        try:
+            self.sales_table.setRowCount(0)
+            from modules.table import recompute_total
+            recompute_total(self.sales_table)
+        except Exception as e:
+            try:
+                from modules.ui_utils.error_logger import log_error
+                log_error(f"Failed to force-clear sales table: {e}")
             except Exception:
                 pass
 
