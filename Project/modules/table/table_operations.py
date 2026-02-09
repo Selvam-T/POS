@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Callable
 from functools import partial
 
 from PyQt5.QtCore import Qt, QEvent, QObject, QSize, QRegularExpression
@@ -243,6 +243,13 @@ def recompute_total(table: QTableWidget) -> float:
     label = getattr(table, '_total_label', None)
     if isinstance(label, QLabel):
         label.setText(f"$ {total:.2f}")
+    listeners = getattr(table, '_total_listeners', None)
+    if listeners:
+        for callback in listeners:
+            try:
+                callback(total)
+            except Exception:
+                pass
     return total
 
 def _update_total_value(table: QTableWidget) -> None:
@@ -293,6 +300,14 @@ def bind_next_focus_widget(table: QTableWidget, widget: QWidget) -> None:
 def bind_total_label(table: QTableWidget, label: QLabel) -> None:
     table._total_label = label
     recompute_total(table)
+
+def add_total_listener(table: QTableWidget, listener: Callable[[float], None]) -> None:
+    """Register a callback to receive total updates."""
+    listeners = getattr(table, '_total_listeners', None)
+    if listeners is None:
+        listeners = []
+        table._total_listeners = listeners
+    listeners.append(listener)
 
 def get_total(table: QTableWidget) -> float:
     return float(getattr(table, '_current_total', 0.0))

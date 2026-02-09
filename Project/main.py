@@ -30,6 +30,7 @@ from PyQt5.QtGui import QFontMetrics, QIcon
 
 from modules.table import setup_sales_table, handle_barcode_scanned, bind_total_label
 from modules.sales.sales_frame_setup import setup_sales_frame
+from modules.payment.payment_panel import setup_payment_panel
 from modules.devices.barcode_manager import BarcodeManager
 from modules.wrappers.dialog_wrapper import DialogWrapper
 # --- Menu frame dialog controllers ---
@@ -161,7 +162,16 @@ class MainLoader(QMainWindow):
         self.dialog_wrapper.open_dialog_scanner_blocked(launch_viewhold_dialog, dialog_key='view_hold')
 
     def open_cancelsale_dialog(self):
-        """Open Cancel Sale confirmation dialog."""
+        """Open Cancel Sale confirmation dialog, only if there is an active sale."""
+        from modules.table.table_operations import is_transaction_active
+        from modules.ui_utils.ui_feedback import show_temp_status
+
+        sales_table = getattr(self, 'sales_table', None)
+        if not is_transaction_active(sales_table):
+            sb = getattr(self, 'statusbar', None)
+            if sb:
+                show_temp_status(sb, "No active sale to cancel.", 3000)
+            return
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_cancelsale_dialog,
             dialog_key='cancel_sale',
@@ -175,6 +185,11 @@ class MainLoader(QMainWindow):
         self.dialog_wrapper = DialogWrapper(self)
         main_ui = os.path.join(UI_DIR, 'main_window.ui')
         uic.loadUi(main_ui, self)
+        self.receipt_context = {
+            'active_receipt_id': None,
+            'source': 'ACTIVE_SALE',
+            'status': 'NONE',
+        }
         # Remove the window close button (X) to force using Logout
         try:
             flags = self.windowFlags()
@@ -209,22 +224,13 @@ class MainLoader(QMainWindow):
             pass
 
         # Insert sales_frame.ui into placeholder named 'salesFrame'
-        setup_sales_frame(self, UI_DIR)
+        self.sales_frame_controller = setup_sales_frame(self, UI_DIR)
+        if self.sales_frame_controller is not None:
+            self._wire_sales_frame_signals()
 
-        # Insert payment_frame.ui into placeholder named 'paymentFrame'
-        payment_placeholder = getattr(self, 'paymentFrame', None)
-        payment_ui = os.path.join(UI_DIR, 'payment_frame.ui')
-        if payment_placeholder is not None and os.path.exists(payment_ui):
-            payment_widget = uic.loadUi(payment_ui)
-            payment_layout = payment_placeholder.layout()
-            if payment_layout is None:
-                payment_layout = QVBoxLayout(payment_placeholder)
-                payment_placeholder.setLayout(payment_layout)
-            try:
-                payment_layout.setContentsMargins(8, 8, 8, 8)
-            except Exception:
-                pass
-            payment_layout.addWidget(payment_widget)
+        self.payment_panel_controller = setup_payment_panel(self, UI_DIR)
+        if self.payment_panel_controller is not None:
+            self._wire_payment_panel_signals()
 
         # Insert menu_frame.ui into placeholder named 'menuFrame'
         menu_placeholder = getattr(self, 'menuFrame', None)
@@ -329,6 +335,50 @@ class MainLoader(QMainWindow):
                 log_error(f"Failed to wire menu buttons: {e}")
             except Exception:
                 pass
+
+    def _wire_sales_frame_signals(self):
+        frame = getattr(self, 'sales_frame_controller', None)
+        if frame is None:
+            return
+        frame.saleTotalChanged.connect(self._on_sale_total_changed)
+        frame.holdRequested.connect(self._on_hold_requested)
+        frame.viewHoldLoaded.connect(self._on_view_hold_loaded)
+        frame.cancelRequested.connect(self._on_cancel_requested)
+
+    def _wire_payment_panel_signals(self):
+        panel = getattr(self, 'payment_panel_controller', None)
+        if panel is None:
+            return
+        panel.payRequested.connect(self._on_payment_requested)
+        panel.paymentSuccess.connect(self._on_payment_success)
+
+    def _on_sale_total_changed(self, total: float) -> None:
+        print(f"Sale total changed: {total:.2f}")
+
+    def _on_hold_requested(self) -> None:
+        print("Hold requested via sales frame signal")
+
+    def _on_view_hold_loaded(self, receipt_id: int, total: float) -> None:
+        ctx = self.receipt_context
+        ctx['active_receipt_id'] = receipt_id
+        ctx['source'] = 'HOLD_LOADED'
+        ctx['status'] = 'UNPAID'
+        print(f"ReceiptContext updated for hold load: {ctx}")
+
+    def _on_cancel_requested(self) -> None:
+        ctx = self.receipt_context
+        ctx['active_receipt_id'] = None
+        ctx['source'] = 'ACTIVE_SALE'
+        ctx['status'] = 'NONE'
+        print(f"ReceiptContext reset: {ctx}")
+
+    def _on_payment_requested(self, payment_split: dict) -> None:
+        print(f"Payment requested: {payment_split}")
+
+    def _on_payment_success(self) -> None:
+        ctx = self.receipt_context
+        ctx['status'] = 'PAID'
+        print(f"Payment success: {ctx}")
 
     # ========== Post-Dialog Action Handlers ==========
     def _add_items_to_sales_table(self):

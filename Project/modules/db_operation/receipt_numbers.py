@@ -44,17 +44,8 @@ def next_receipt_no(for_date: Optional[date] = None, *, conn: Optional[sqlite3.C
     try:
         with transaction(c):
             c.execute(_COUNTER_TABLE_SQL)
-            row = c.execute("SELECT counter FROM receipt_counters WHERE date = ?", (day,)).fetchone()
-            current = int(row["counter"]) if row else 0
-            nxt = current + 1
-            if nxt > 9999:
-                raise ValueError("Receipt counter exceeded 9999 for date %s" % day)
-
-            if row:
-                c.execute("UPDATE receipt_counters SET counter = ? WHERE date = ?", (nxt, day))
-            else:
-                c.execute("INSERT INTO receipt_counters(date, counter) VALUES (?, ?)", (day, nxt))
-
+            nxt = 1
+            c.execute("INSERT OR REPLACE INTO receipt_counters (date, counter) VALUES (?, ?)", (day, nxt))          
             return f"{day}-{nxt:04d}"
     finally:
         if own:

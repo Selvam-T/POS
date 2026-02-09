@@ -4,24 +4,28 @@
 **Location:** `modules/sales/sales_frame_setup.py`
 
 ## Purpose
-This module encapsulates the setup logic for the sales frame UI in the POS application. It is responsible for loading the `sales_frame.ui` file, inserting it into the main window's placeholder, and wiring up the main sales table widget and total value label for use throughout the application.
+This module encapsulates the sales frame controller that loads `sales_frame.ui`, mounts it into the placeholder on `MainLoader`, configures the table/total widgets, and exposes signals so the rest of the app can react to sales-frame actions without digging into the UI internals.
 
 ## Refactor Overview
-The logic for setting up the sales frame UI has been refactored out of `main.py` and placed in this module. This improves modularity and maintainability by isolating all sales frame UI setup in one place.
+The sales frame setup moved out of `main.py` and is now embodied by the `SalesFrame` `QObject` controller exported from this module. It still handles loading the UI, applying the sales stylesheet, wiring the add/receipt buttons, and saving the table reference on `main_window`, but it additionally emits signals so `MainLoader` can drive payment/hold workflows from a shared `ReceiptContext`.
 
 ## Usage
-- The function `setup_sales_frame(main_window, UI_DIR)` should be called from the `MainLoader` class in `main.py`.
-- It expects:
-  - `main_window`: The main application window instance (typically `self` in `MainLoader`).
-  - `UI_DIR`: The directory path where UI files are stored.
-- This function will:
-  - Load the `sales_frame.ui` file.
-  - Insert the loaded widget into the `salesFrame` placeholder in the main window.
-  - Set `main_window.sales_table` to the main sales table widget for later use (e.g., focus management, data updates).
-  - **Bind the `totalValue` label to the sales table for automatic total updates.**
+- Call `SalesFrame` via `setup_sales_frame(main_window, UI_DIR)` from `MainLoader`.
+- `main_window` should be the `MainLoader` instance; `UI_DIR` points to the `ui/` folder.
+- The returned `SalesFrame` object is stored (e.g., `self.sales_frame_controller`) so you can connect to its signals.
+- The controller still loads `sales_frame.ui`, inserts it into the `salesFrame` placeholder, and keeps `main_window.sales_table` populated for any legacy usages.
+- `totalValue` is bound via `bind_total_label`, and we now also register `add_total_listener` so the controller can emit `saleTotalChanged` whenever the total changes.
 
-## Total Value Binding
-After the sales table is set up, the `totalValue` label (a `QLabel` in the UI) is automatically bound to the table using `bind_total_label`. This ensures the displayed total is always up to date as products are added, removed, or quantities changed.
+## Signals & communication
+`SalesFrame` publishes the following signals for `MainLoader` to consume:
+* `saleTotalChanged(float)` – emitted each time the grand total changes.
+* `holdRequested()` – fired when `holdSalesBtn` is clicked.
+* `viewHoldLoaded(int receipt_id, float total)` – helper for future view-hold logic; call `notify_hold_loaded` to emit it from elsewhere.
+* `cancelRequested()` – emitted when the cancel button is pressed (before the cancel dialog is shown).
+
+`MainLoader` listens to these signals and updates the shared `ReceiptContext` accordingly; logging is currently used to surface the updates before the database layer is wired in.
+
+The total listener mentioned above keeps `saleTotalChanged` in sync with `bind_total_label` so the controller doesn't need to duplicate total math.
 
 ## Canonical Unit Handling and Robust Merging (2026 Update)
 

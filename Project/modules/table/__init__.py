@@ -13,6 +13,7 @@ from .table_operations import (
     find_product_in_table,
     increment_row_quantity,
     set_table_rows,
+    add_total_listener,
 )
 __all__ = [
     'setup_sales_table',
@@ -21,6 +22,7 @@ __all__ = [
     'bind_total_label',
     'recompute_total',
     'get_total',
+    'add_total_listener',
     'handle_barcode_scanned',
     'find_product_in_table',
     'increment_row_quantity',
