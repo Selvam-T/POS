@@ -64,6 +64,7 @@ UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 
 
+# Load and apply the main stylesheet if it exists.
 def load_qss(app):
     qss_path = os.path.join(ASSETS_DIR, 'main.qss')
     if os.path.exists(qss_path):
@@ -78,165 +79,8 @@ def load_qss(app):
                 pass
 
 class MainLoader(QMainWindow):
-    # ========== Menu Frame Dialog Handlers ==========
-    def open_logout_menu_dialog(self):
-        """Open Logout dialog."""
-        self.dialog_wrapper.open_dialog_scanner_blocked(
-            launch_logout_dialog,
-            dialog_key='logout_menu',
-            on_finish=lambda: self._perform_logout()
-        )
-
-    def open_product_menu_dialog(self, **kwargs):
-        """Open Product Management panel with Step 0 Sale-Active check."""
-        # Standardize hard-fail handling: keep all launch-time work inside
-        # DialogWrapper's try/except boundary.
-        def _open(main_window):
-            from modules.table.table_operations import is_transaction_active
-
-            local_kwargs = dict(kwargs or {})
-
-            # Protect an active transaction: force initial_mode='add'
-            if is_transaction_active(getattr(main_window, 'sales_table', None)):
-                local_kwargs['initial_mode'] = 'add'
-
-            return launch_product_dialog(main_window, **local_kwargs)
-
-        self.dialog_wrapper.open_dialog_scanner_blocked(
-            _open,
-            dialog_key='product_menu',
-        )
-        
-    def open_admin_menu_dialog(self):
-        """Open Admin dialog."""
-        self.dialog_wrapper.open_dialog_scanner_blocked(
-            launch_admin_dialog,
-            dialog_key='admin_menu',
-            current_user='Admin',
-            is_admin=True
-        )
-    def open_greeting_menu_dialog(self):
-        """Open Greeting dialog."""
-        self.dialog_wrapper.open_dialog_scanner_blocked(launch_greeting_dialog, dialog_key='greeting_menu')
-        """self.dialog_wrapper.open_dialog_scanner_blocked(launch_greeting_dialog)"""
-
-    def open_history_menu_dialog(self):
-        """Open Receipt History dialog."""
-        self.dialog_wrapper.open_dialog_scanner_blocked(launch_history_dialog, dialog_key='history_menu')
-
-    def open_reports_menu_dialog(self):
-        """Open Reports dialog."""
-        self.dialog_wrapper.open_dialog_scanner_blocked(launch_reports_dialog, dialog_key='reports_menu')
-
-    def launch_vegetable_menu_dialog(self):
-        """Open Vegetable Management dialog."""
-        ctx = getattr(self, 'receipt_context', {}) or {}
-        if ctx.get('source') == 'HOLD_LOADED':
-            from modules.ui_utils.ui_feedback import show_temp_status
-            sb = getattr(self, 'statusbar', None)
-            if sb:
-                show_temp_status(sb, "Vegetable menu disabled for held receipts.", 3000)
-            return
-
-        self.dialog_wrapper.open_dialog_scanner_blocked(
-            launch_vegetable_menu_dialog,
-            dialog_key='vegetable_menu'
-        )
-
-    # ========== Sales Frame Dialog Handlers ==========
-
-    def launch_vegetable_entry_dialog(self):
-        """Open Add Vegetable panel."""
-        self.dialog_wrapper.open_dialog_scanner_blocked(
-            lambda parent: launch_vegetable_entry_dialog(parent, self.sales_table),
-            dialog_key='vegetable_entry',
-            on_finish=self._add_items_to_sales_table
-        )
-
-    def launch_manual_entry_dialog(self):
-        """Open Manual Product Entry panel."""
-        ctx = getattr(self, 'receipt_context', {})
-        if (ctx or {}).get('source') == 'HOLD_LOADED':
-            from modules.ui_utils.ui_feedback import show_temp_status
-            sb = getattr(self, 'statusbar', None)
-            if sb:
-                show_temp_status(sb, "Manual entry disabled for held receipts.", 3000)
-            return
-        self.dialog_wrapper.open_dialog_scanner_blocked(
-            launch_manual_entry_dialog, 
-            dialog_key='manual_entry',
-            on_finish=self._add_items_to_sales_table
-        )
-
-    def launch_hold_sales_dialog(self):
-        """Open On Hold panel."""
-        from modules.ui_utils.ui_feedback import show_temp_status
-
-        ctx = getattr(self, 'receipt_context', {}) or {}
-        sales_table = getattr(self, 'sales_table', None)
-
-        # Require active sale rows, no active_receipt_id, and source ACTIVE_SALE
-        if (
-            sales_table is None or
-            sales_table.rowCount() <= 0 or
-            ctx.get('active_receipt_id') is not None or
-            ctx.get('source') != 'ACTIVE_SALE'
-        ):
-            sb = getattr(self, 'statusbar', None)
-            if sb:
-                show_temp_status(sb, "On Hold is available only for an active sale.", 3000)
-            return
-
-        self.dialog_wrapper.open_dialog_scanner_blocked(launch_hold_sales_dialog, dialog_key='hold_sales')
-
-    def open_viewhold_panel(self):
-        """Open View Hold panel."""
-        from modules.ui_utils.ui_feedback import show_temp_status
-
-        sales_table = getattr(self, 'sales_table', None)
-        ctx = getattr(self, 'receipt_context', {}) or {}
-
-        # Allow view-hold only when no active sale rows and no active receipt id
-        if sales_table is None or sales_table.rowCount() > 0 or ctx.get('active_receipt_id') is not None:
-            sb = getattr(self, 'statusbar', None)
-            if sb:
-                show_temp_status(sb, "View Hold is available only when no sale is in progress.", 3000)
-            return
-
-        # Optional extra guard: ensure payment frame is effectively empty (total 0)
-        pay_label = self.findChild(QLabel, 'totalValPayLabel')
-        if pay_label is not None:
-            text = (pay_label.text() or '').strip()
-            try:
-                pay_total = float(text.replace(',', '')) if text else 0.0
-            except ValueError:
-                pay_total = 0.0
-            if pay_total != 0.0:
-                sb = getattr(self, 'statusbar', None)
-                if sb:
-                    show_temp_status(sb, "Clear payment before viewing holds.", 3000)
-                return
-
-        self.dialog_wrapper.open_dialog_scanner_blocked(launch_viewhold_dialog, dialog_key='view_hold')
-
-    def open_cancelsale_dialog(self):
-        """Open Cancel Sale confirmation dialog, only if there is an active sale."""
-        from modules.table.table_operations import is_transaction_active
-        from modules.ui_utils.ui_feedback import show_temp_status
-
-        sales_table = getattr(self, 'sales_table', None)
-        if not is_transaction_active(sales_table):
-            sb = getattr(self, 'statusbar', None)
-            if sb:
-                show_temp_status(sb, "No active sale to cancel.", 3000)
-            return
-        self.dialog_wrapper.open_dialog_scanner_blocked(
-            launch_cancelsale_dialog,
-            dialog_key='cancel_sale',
-            on_finish=lambda: self._clear_sales_table()
-        )
-
     # ========== Initialization ==========
+    # Initialize the main loader, controllers, and wiring.
     def __init__(self):
         super().__init__()
         self.overlay_manager = OverlayManager(self)
@@ -394,6 +238,218 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
 
+    # Stop devices and close the app when logging out.
+    def _perform_logout(self):
+        """Perform logout action: stop devices and close app."""
+        # Stop scanner if running
+        try:
+            if getattr(self, 'scanner', None) is not None:
+                self.scanner.stop()
+        except Exception:
+            pass
+        # Allow closing and quit
+        try:
+            self._allow_close = True
+        except Exception:
+            pass
+        try:
+            # Prefer closing the main window; app will quit due to no top-level windows
+            self.close()
+        except Exception:
+            try:
+                QApplication.instance().quit()
+            except Exception:
+                pass
+
+    # Block closing unless logout has granted permission.
+    def closeEvent(self, event):
+        try:
+            if not getattr(self, '_allow_close', False):
+                # Show hint in status bar
+                try:
+                    sb = getattr(self, 'statusbar', None)
+                    if sb is not None:
+                        sb.showMessage('Use the Logout button in the menu to exit.', 3000)
+                except Exception:
+                    pass
+                event.ignore()
+                return
+        except Exception:
+            pass
+        super().closeEvent(event)
+
+    # ========== Menu Frame Dialog Handlers ==========
+    # Trigger logout dialog via the dialog wrapper.
+    def open_logout_menu_dialog(self):
+        """Open Logout dialog."""
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            launch_logout_dialog,
+            dialog_key='logout_menu',
+            on_finish=lambda: self._perform_logout()
+        )
+
+    # Open the product management dialog with sale guards.
+    def open_product_menu_dialog(self, **kwargs):
+        """Open Product Management panel with Step 0 Sale-Active check."""
+        # Standardize hard-fail handling: keep all launch-time work inside
+        # DialogWrapper's try/except boundary.
+        def _open(main_window):
+            from modules.table.table_operations import is_transaction_active
+
+            local_kwargs = dict(kwargs or {})
+
+            # Protect an active transaction: force initial_mode='add'
+            if is_transaction_active(getattr(main_window, 'sales_table', None)):
+                local_kwargs['initial_mode'] = 'add'
+
+            return launch_product_dialog(main_window, **local_kwargs)
+
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            _open,
+            dialog_key='product_menu',
+        )
+        
+    # Launch the admin menu dialog with admin context.
+    def open_admin_menu_dialog(self):
+        """Open Admin dialog."""
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            launch_admin_dialog,
+            dialog_key='admin_menu',
+            current_user='Admin',
+            is_admin=True
+        )
+    # Show the greeting menu dialog.
+    def open_greeting_menu_dialog(self):
+        """Open Greeting dialog."""
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_greeting_dialog, dialog_key='greeting_menu')
+        """self.dialog_wrapper.open_dialog_scanner_blocked(launch_greeting_dialog)"""
+
+    # Display the receipt history dialog.
+    def open_history_menu_dialog(self):
+        """Open Receipt History dialog."""
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_history_dialog, dialog_key='history_menu')
+
+    # Open the reports dialog for analytics.
+    def open_reports_menu_dialog(self):
+        """Open Reports dialog."""
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_reports_dialog, dialog_key='reports_menu')
+
+    # Launch the vegetable management dialog when allowed.
+    def launch_vegetable_menu_dialog(self):
+        """Open Vegetable Management dialog."""
+        ctx = getattr(self, 'receipt_context', {}) or {}
+        if ctx.get('source') == 'HOLD_LOADED':
+            from modules.ui_utils.ui_feedback import show_temp_status
+            sb = getattr(self, 'statusbar', None)
+            if sb:
+                show_temp_status(sb, "Vegetable menu disabled for held receipts.", 3000)
+            return
+
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            launch_vegetable_menu_dialog,
+            dialog_key='vegetable_menu'
+        )
+
+    # ========== Sales Frame Dialog Handlers ==========
+
+    # Request the vegetable entry dialog and merge its results.
+    def launch_vegetable_entry_dialog(self):
+        """Open Add Vegetable panel."""
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            lambda parent: launch_vegetable_entry_dialog(parent, self.sales_table),
+            dialog_key='vegetable_entry',
+            on_finish=self._add_items_to_sales_table
+        )
+
+    # Present manual entry dialog unless sale is held.
+    def launch_manual_entry_dialog(self):
+        """Open Manual Product Entry panel."""
+        ctx = getattr(self, 'receipt_context', {})
+        if (ctx or {}).get('source') == 'HOLD_LOADED':
+            from modules.ui_utils.ui_feedback import show_temp_status
+            sb = getattr(self, 'statusbar', None)
+            if sb:
+                show_temp_status(sb, "Manual entry disabled for held receipts.", 3000)
+            return
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            launch_manual_entry_dialog, 
+            dialog_key='manual_entry',
+            on_finish=self._add_items_to_sales_table
+        )
+
+    # Open the hold sales dialog for active transactions.
+    def launch_hold_sales_dialog(self):
+        """Open On Hold panel."""
+        from modules.ui_utils.ui_feedback import show_temp_status
+
+        ctx = getattr(self, 'receipt_context', {}) or {}
+        sales_table = getattr(self, 'sales_table', None)
+
+        # Require active sale rows, no active_receipt_id, and source ACTIVE_SALE
+        if (
+            sales_table is None or
+            sales_table.rowCount() <= 0 or
+            ctx.get('active_receipt_id') is not None or
+            ctx.get('source') != 'ACTIVE_SALE'
+        ):
+            sb = getattr(self, 'statusbar', None)
+            if sb:
+                show_temp_status(sb, "On Hold is available only for an active sale.", 3000)
+            return
+
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_hold_sales_dialog, dialog_key='hold_sales')
+
+    # Display the view hold panel when no sale is running.
+    def open_viewhold_panel(self):
+        """Open View Hold panel."""
+        from modules.ui_utils.ui_feedback import show_temp_status
+
+        sales_table = getattr(self, 'sales_table', None)
+        ctx = getattr(self, 'receipt_context', {}) or {}
+
+        # Allow view-hold only when no active sale rows and no active receipt id
+        if sales_table is None or sales_table.rowCount() > 0 or ctx.get('active_receipt_id') is not None:
+            sb = getattr(self, 'statusbar', None)
+            if sb:
+                show_temp_status(sb, "View Hold is available only when no sale is in progress.", 3000)
+            return
+
+        # Optional extra guard: ensure payment frame is effectively empty (total 0)
+        pay_label = self.findChild(QLabel, 'totalValPayLabel')
+        if pay_label is not None:
+            text = (pay_label.text() or '').strip()
+            try:
+                pay_total = float(text.replace(',', '')) if text else 0.0
+            except ValueError:
+                pay_total = 0.0
+            if pay_total != 0.0:
+                sb = getattr(self, 'statusbar', None)
+                if sb:
+                    show_temp_status(sb, "Clear payment before viewing holds.", 3000)
+                return
+
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_viewhold_dialog, dialog_key='view_hold')
+
+    # Prompt cancel sale dialog only when a sale exists.
+    def open_cancelsale_dialog(self):
+        """Open Cancel Sale confirmation dialog, only if there is an active sale."""
+        from modules.table.table_operations import is_transaction_active
+        from modules.ui_utils.ui_feedback import show_temp_status
+
+        sales_table = getattr(self, 'sales_table', None)
+        if not is_transaction_active(sales_table):
+            sb = getattr(self, 'statusbar', None)
+            if sb:
+                show_temp_status(sb, "No active sale to cancel.", 3000)
+            return
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            launch_cancelsale_dialog,
+            dialog_key='cancel_sale',
+            on_finish=lambda: self._clear_sales_table()
+        )
+
+    # ========== Signal Wiring ==========
+    # Connect sales frame signals to this window.
     def _wire_sales_frame_signals(self):
         frame = getattr(self, 'sales_frame_controller', None)
         if frame is None:
@@ -401,8 +457,8 @@ class MainLoader(QMainWindow):
         frame.saleTotalChanged.connect(self._on_sale_total_changed)
         frame.holdRequested.connect(self._on_hold_requested)
         frame.viewHoldLoaded.connect(self._on_view_hold_loaded)
-        frame.cancelRequested.connect(self._on_cancel_requested)
 
+    # Connect payment panel signals to handlers.
     def _wire_payment_panel_signals(self):
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is None:
@@ -410,15 +466,25 @@ class MainLoader(QMainWindow):
         panel.payRequested.connect(self._on_payment_requested)
         panel.paymentSuccess.connect(self._on_payment_success)
 
+    def _reset_receipt_context(self) -> None:
+        ctx = self.receipt_context
+        ctx['active_receipt_id'] = None
+        ctx['source'] = 'ACTIVE_SALE'
+        ctx['status'] = 'NONE'
+
+    # ========== Signal Handlers ==========
+    # Update payment defaults when sale total updates.
     def _on_sale_total_changed(self, total: float) -> None:
         print(f"Sale total changed: {total:.2f}")
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:
             panel.set_payment_default(total)
 
+    # Handle hold requests from the sales frame.
     def _on_hold_requested(self) -> None:
         print("Hold requested via sales frame signal")
 
+    # Update receipt context when a held sale is loaded.
     def _on_view_hold_loaded(self, receipt_id: int, total: float) -> None:
         ctx = self.receipt_context
         ctx['active_receipt_id'] = receipt_id
@@ -426,16 +492,15 @@ class MainLoader(QMainWindow):
         ctx['status'] = 'UNPAID'
         print(f"ReceiptContext updated for hold load: {ctx}")
 
+    # Reset receipt context when cancellation is requested.
     def _on_cancel_requested(self) -> None:
-        ctx = self.receipt_context
-        ctx['active_receipt_id'] = None
-        ctx['source'] = 'ACTIVE_SALE'
-        ctx['status'] = 'NONE'
-        print(f"ReceiptContext reset: {ctx}")
+        self._reset_receipt_context()
+        print(f"ReceiptContext reset: {self.receipt_context}")
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:
             panel.clear_payment_frame()
 
+    # Process payment requests from the payment panel.
     def _on_payment_requested(self, payment_split: dict) -> None:
         print(f"Payment requested: {payment_split}")
         if self.pay_current_receipt(payment_split):
@@ -443,17 +508,17 @@ class MainLoader(QMainWindow):
             if panel is not None:
                 panel.notify_payment_success()
 
+    # Clear state after successful payment completion.
     def _on_payment_success(self) -> None:
-        ctx = self.receipt_context
-        ctx['active_receipt_id'] = None
-        ctx['source'] = 'ACTIVE_SALE'
-        ctx['status'] = 'NONE'
-        print(f"Payment success: {ctx}")
+        self._reset_receipt_context()
+        print(f"Payment success: {self.receipt_context}")
         self._clear_sales_table_force()
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:
             panel.clear_payment_frame()
 
+    # ========== Payment Processing ==========
+    # Process the current receipt payment payload (stub).
     def pay_current_receipt(self, payment_split: dict) -> bool:
         """Entry point for processing the current receipt payment (DB stub)."""
         ctx = self.receipt_context
@@ -473,6 +538,7 @@ class MainLoader(QMainWindow):
             return False
 
     # ========== Post-Dialog Action Handlers ==========
+    # Merge items returned by dialogs into the sales table.
     def _add_items_to_sales_table(self):
         """Unified handler to add items from dialogs to sales table.
         Reads dialog results (vegetable_rows or manual_entry_result), normalizes to row format,
@@ -588,6 +654,7 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
 
+    # Clear table rows and reset payment panel after cancel.
     def _clear_sales_table(self):
         """Clear all items from sales table and reset total to zero.
         
@@ -608,14 +675,14 @@ class MainLoader(QMainWindow):
             # Recompute total (will set to 0.00 and update label)
             from modules.table import recompute_total
             recompute_total(self.sales_table)
-            
-            # Future: When payment frame is implemented, reset it here
-            # Example:
-            # payment_inputs = ['cashInput', 'netsInput', 'paynowInput', 'voucherInput']
-            # for input_name in payment_inputs:
-            #     input_widget = self.findChild(QLineEdit, input_name)
-            #     if input_widget:
-            #         input_widget.clear()
+
+            # Reset receipt context now that cancel is confirmed
+            self._reset_receipt_context()
+
+            # Reset payment panel to default after cancel-all
+            panel = getattr(self, 'payment_panel_controller', None)
+            if panel is not None:
+                panel.clear_payment_frame()
         except Exception as e:
             try:
                 import traceback
@@ -624,6 +691,7 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
 
+    # Empty the sales table without dialog confirmation.
     def _clear_sales_table_force(self):
         """Clear sales table without dialog checks (used after payment success)."""
         if not hasattr(self, 'sales_table'):
@@ -639,47 +707,8 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
 
-    def _perform_logout(self):
-        """Perform logout action: stop devices and close app."""
-        # Stop scanner if running
-        try:
-            if getattr(self, 'scanner', None) is not None:
-                self.scanner.stop()
-        except Exception:
-            pass
-        # Allow closing and quit
-        try:
-            self._allow_close = True
-        except Exception:
-            pass
-        try:
-            # Prefer closing the main window; app will quit due to no top-level windows
-            self.close()
-        except Exception:
-            try:
-                QApplication.instance().quit()
-            except Exception:
-                pass
 
-    # ========== Window Lifecycle ==========
-    # Block closing via X/Alt+F4 unless allowed by logout
-    def closeEvent(self, event):
-        try:
-            if not getattr(self, '_allow_close', False):
-                # Show hint in status bar
-                try:
-                    sb = getattr(self, 'statusbar', None)
-                    if sb is not None:
-                        sb.showMessage('Use the Logout button in the menu to exit.', 3000)
-                except Exception:
-                    pass
-                event.ignore()
-                return
-        except Exception:
-            pass
-        super().closeEvent(event)
-
-
+# Bootstrap the QApplication and launch the main window.
 def main():
     app = QApplication(sys.argv)
     load_qss(app)

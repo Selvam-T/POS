@@ -135,7 +135,6 @@ class SalesFrame(QObject):
         self.saleTotalChanged.emit(total)
 
     def _on_cancel_clicked(self) -> None:
-        self.cancelRequested.emit()
         self._main_window.open_cancelsale_dialog()
 
     def _on_hold_requested(self) -> None:

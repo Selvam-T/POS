@@ -65,6 +65,7 @@ def _clear_sales_table(self):
 2. Clears all rows: `self.sales_table.setRowCount(0)`
 3. Resets total to $0.00 via `recompute_total(self.sales_table)`
 4. Updates bound `totalValue` label automatically
+5. Clears the payment panel via `payment_panel_controller.clear_payment_frame()` to reset totals, inputs, highlights, status, and disable pay/tender widgets
 
 ---
 
@@ -76,13 +77,7 @@ def _clear_sales_table(self):
 - **Product menu:** REMOVE/UPDATE tabs re-enable (no longer blocked by active sale)
 
 ### Future Considerations:
-When payment frame is implemented, `_clear_sales_table()` should also:
-- Clear payment input fields (CASH, NETS, PAYNOW, VOUCHER)
-- Reset transaction ID/state
-- Clear change calculation
-- Reset payment validation states
-
-Placeholder comment exists in code for future implementation.
+- ReceiptContext reset is handled in the sales-frame signal path (`_on_cancel_requested`). If you want the dialog path to also reset `receipt_context`, mirror that call inside `_clear_sales_table()`.
 
 ---
 
