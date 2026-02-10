@@ -7,10 +7,8 @@ from config import (
 	QUANTITY_MAX_UNIT,
 	UNIT_PRICE_MIN,
 	UNIT_PRICE_MAX,
-	TOTAL_PRICE_MIN,
-	TOTAL_PRICE_MAX,
-	GRAND_TOTAL_MIN,
-	GRAND_TOTAL_MAX,
+	PAID_MIN,
+	PAID_MAX,
 	STRING_MAX_LENGTH,
 	PASSWORD_MIN_LENGTH,
 	EMAIL_REGEX,
@@ -39,31 +37,6 @@ def validate_quantity(value, unit_type='unit'):
             return True, ""
     except (ValueError, TypeError):
         return False, "Quantity must be a number"
-
-
-def validate_total_price(value):
-	try:
-		val = float(value)
-		if val < TOTAL_PRICE_MIN:
-			return False, f"Minimum total price is {TOTAL_PRICE_MIN}"
-		if val > TOTAL_PRICE_MAX:
-			return False, f"Maximum total price is {TOTAL_PRICE_MAX}"
-		return True, ""
-	except (ValueError, TypeError):
-		return False, "Total price must be a number"
-
-
-def validate_grand_total(value):
-	try:
-		val = float(value)
-		if val < GRAND_TOTAL_MIN:
-			return False, f"Minimum grand total is {GRAND_TOTAL_MIN}"
-		if val > GRAND_TOTAL_MAX:
-			return False, f"Maximum grand total is {GRAND_TOTAL_MAX}"
-		return True, ""
-	except (ValueError, TypeError):
-		return False, "Grand total must be a number"
-
 
 def validate_table_quantity(value):
 	return validate_quantity(value, unit_type='unit')
@@ -318,3 +291,11 @@ def validate_supplier(value):
         return False, "Only Alphanumeric characters are allowed"
     return True, ""	
 #--- 6. supplier end ---
+
+#--- 7. tender amount start ---
+def validate_tender_amount(value, price_type="Tender amount"):
+    if value is None or str(value).strip() == "":
+        return True, ""
+    # If not empty, use the same numeric logic
+    return validate_unit_price(value, min_val=PAID_MIN, max_val=PAID_MAX, price_type=price_type)
+#--- 7. tender amount end ---

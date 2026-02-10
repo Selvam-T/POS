@@ -21,7 +21,6 @@ The sales frame setup moved out of `main.py` and is now embodied by the `SalesFr
 * `saleTotalChanged(float)` – emitted each time the grand total changes.
 * `holdRequested()` – fired when `holdSalesBtn` is clicked.
 * `viewHoldLoaded(int receipt_id, float total)` – helper for future view-hold logic; call `notify_hold_loaded` to emit it from elsewhere.
-* `cancelRequested()` – emitted when the cancel button is pressed (before the cancel dialog is shown).
 
 `MainLoader` listens to these signals and updates the shared `ReceiptContext` accordingly; logging is currently used to surface the updates before the database layer is wired in.
 

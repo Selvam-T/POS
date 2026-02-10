@@ -15,7 +15,6 @@ The payment frame is controlled by `PaymentPanel` and is responsible for allocat
 
 **Incoming (wired in MainLoader)**
 - `saleTotalChanged(total: float)` → `set_payment_default(total)`
-- `cancelRequested()` → `clear_payment_frame()`
 
 ## Data Rules
 - **Voucher** is integer-only.

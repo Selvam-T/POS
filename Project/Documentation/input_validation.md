@@ -18,8 +18,6 @@ from modules.ui_utils import input_validation
   - Unit: min `1` and must be integer
   - Max `9999`
 - Unit/Selling price: min `0.1`, max `5000`
-- Total price: min `0`, max `10000`
-- Grand total: min `0`, max `100000`
 - String fields: max length `15`
 - Password: min length `8`
 
@@ -51,7 +49,7 @@ Flow validators (format + existence rule):
 - `validate_selling_price(value, price_type="price")` → mandatory wrapper around `validate_unit_price`.
 - `validate_selling_price(value, ...)` → uses `validate_unit_price` (range enforced).
 - `validate_cost_price(value, ...)` → optional (empty allowed) else numeric + range.
-- `validate_total_price(value)`, `validate_grand_total(value)` → numeric + range.
+<!-- Total/grand total validators were removed because totals are derived from the table rows and are not validated via shared helpers. -->
 
 
 ### Unit / Supplier / Category

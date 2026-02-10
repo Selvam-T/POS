@@ -18,7 +18,6 @@ class SalesFrame(QObject):
     saleTotalChanged = pyqtSignal(float)
     holdRequested = pyqtSignal()
     viewHoldLoaded = pyqtSignal(int, float)
-    cancelRequested = pyqtSignal()
 
     def __init__(self, main_window, placeholder, ui_path):
         super().__init__()
