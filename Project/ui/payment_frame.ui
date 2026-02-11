@@ -103,7 +103,7 @@
            <number>1</number>
           </property>
           <property name="text">
-           <string>$100</string>
+           <string/>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -159,7 +159,7 @@
            </size>
           </property>
           <property name="text">
-           <string>$100</string>
+           <string/>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -286,6 +286,9 @@
          <height>40</height>
         </size>
        </property>
+       <property name="text">
+        <string>-- Allocate Payable Balance --</string>
+       </property>
       </widget>
      </item>
      <item row="0" column="3" rowspan="2">
@@ -316,6 +319,9 @@
          <width>300</width>
          <height>40</height>
         </size>
+       </property>
+       <property name="text">
+        <string>-- Allocate Payable Balance --</string>
        </property>
       </widget>
      </item>
@@ -353,6 +359,9 @@
          <height>40</height>
         </size>
        </property>
+       <property name="text">
+        <string>-- Allocate Payable Balance --</string>
+       </property>
       </widget>
      </item>
      <item row="5" column="1">
@@ -362,6 +371,9 @@
          <width>300</width>
          <height>40</height>
         </size>
+       </property>
+       <property name="text">
+        <string>-- Enter Tendered Amount --</string>
        </property>
       </widget>
      </item>
@@ -406,6 +418,9 @@
          <width>300</width>
          <height>40</height>
         </size>
+       </property>
+       <property name="text">
+        <string>-- Allocate Payable Balance --</string>
        </property>
       </widget>
      </item>

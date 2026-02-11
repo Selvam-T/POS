@@ -227,7 +227,7 @@ def validate_product_name(value: str, exclude_code: str = None):
 # 2. product name end ----------
 
 #--- 3. selling price/ cost price start ---
-def validate_unit_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX, price_type="Price"):
+def validate_unit_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX, asset_type="Price"):
     
     try:
         val = float(value)
@@ -236,23 +236,23 @@ def validate_unit_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX, p
         f_max = float(max_val)
 
         if val < f_min:
-            return False, f"Minimum {price_type.lower()} is {f_min}"
+            return False, f"Minimum {asset_type.lower()} is {f_min}"
         if val > f_max:
-            return False, f"Maximum {price_type.lower()} is {f_max}"
+            return False, f"Maximum {asset_type.lower()} is {f_max}"
         return True, ""
     except (ValueError, TypeError):
-        return False, f"{price_type} must be a number"
+        return False, f"{asset_type} must be a number"
 	
 def validate_selling_price(value, price_type="Selling price"):
     if value is None or str(value).strip() == "":
         return False, f"{price_type} is required"
-    return validate_unit_price(value, price_type=price_type)
+    return validate_unit_price(value, asset_type=price_type)
 
 def validate_cost_price(value, price_type="Cost price"):
     if value is None or str(value).strip() == "":
         return True, ""
     # If not empty, use the same numeric logic
-    return validate_unit_price(value, price_type=price_type)
+    return validate_unit_price(value, asset_type=price_type)
 
 #--- 3. selling price/ cost price end ---
 
@@ -293,9 +293,9 @@ def validate_supplier(value):
 #--- 6. supplier end ---
 
 #--- 7. tender amount start ---
-def validate_tender_amount(value, price_type="Tender amount"):
+def validate_currency(value, asset_type="Tender amount"):
     if value is None or str(value).strip() == "":
         return True, ""
     # If not empty, use the same numeric logic
-    return validate_unit_price(value, min_val=PAID_MIN, max_val=PAID_MAX, price_type=price_type)
+    return validate_unit_price(value, min_val=PAID_MIN, max_val=PAID_MAX, asset_type=asset_type)
 #--- 7. tender amount end ---

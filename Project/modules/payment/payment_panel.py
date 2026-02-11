@@ -1,8 +1,8 @@
-"""payment_panel.py - Controller that wires the payment frame UI into the POS flow."""
+"""Controller wiring the payment frame UI into the POS flow."""
 import os
 from PyQt5 import uic
 from PyQt5.QtCore import QObject, pyqtSignal, Qt, QEvent
-from PyQt5.QtWidgets import QVBoxLayout, QWidget, QPushButton, QLineEdit, QLabel, QFrame
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QLineEdit, QLabel, QFrame
 
 from modules.ui_utils import ui_feedback
 from modules.ui_utils.error_logger import log_error
@@ -12,26 +12,30 @@ class PaymentPanel(QObject):
     payRequested = pyqtSignal(dict)
     paymentSuccess = pyqtSignal()
 
+    # Initialization and wiring
     def __init__(self, main_window, placeholder, ui_path):
         super().__init__()
         self._main_window = main_window
         self._placeholder = placeholder
         self.widget = uic.loadUi(ui_path)
         self._widgets = {}
+        self._placeholders = {}
+        self._unalloc_title_default = "Balance to Allocate"
         self._last_pay_select_method = None
         self._last_unalloc = 0.0
-        self._has_balance_error = False
-        self._has_unalloc_warning = False
+        self._has_validation_error = False
+        self._validation_message = ""
         self._attach_to_placeholder()
         self._cache_widgets()
         self._wire_buttons()
         self._wire_inputs()
         self.clear_payment_frame()
 
+    # Public API
     def notify_payment_success(self) -> None:
-        """Emit the payment success signal when payment processing completes."""
         self.paymentSuccess.emit()
 
+    # Layout and wiring helpers
     def _attach_to_placeholder(self) -> None:
         layout = self._placeholder.layout()
         if layout is None:
@@ -44,32 +48,11 @@ class PaymentPanel(QObject):
             pass
         layout.addWidget(self.widget)
 
-    def _wire_buttons(self) -> None:
-        pay_btn = self.widget.findChild(QPushButton, 'payPayOpsBtn')
-        if pay_btn is not None:
-            pay_btn.clicked.connect(self.handle_pay_clicked)
-
-        reset_btn = self.widget.findChild(QPushButton, 'resetPayOpsBtn')
-        if reset_btn is not None:
-            reset_btn.clicked.connect(self.reset_payment_grid_to_default)
-
-        # Note: printPayOpsBtn exists in UI; wiring is intentionally omitted until print workflow is defined.
-
-        pay_select_buttons = {
-            'cash': 'cashPaySlcBtn',
-            'nets': 'netsPaySlcBtn',
-            'paynow': 'paynowPaySlcBtn',
-            'voucher': 'voucherPaySlcBtn',
-        }
-        for method, btn_name in pay_select_buttons.items():
-            btn = self.widget.findChild(QPushButton, btn_name)
-            if btn is not None:
-                btn.clicked.connect(lambda _=None, m=method: self.handle_pay_select(m))
-
     def _cache_widgets(self) -> None:
         self._widgets = {
             'total_label': self.widget.findChild(QLabel, 'totalValPayLabel'),
             'unalloc_label': self.widget.findChild(QLabel, 'unallocValPayLabel'),
+            'unalloc_title': self.widget.findChild(QLabel, 'unallocTtlPayLabel'),
             'unalloc_frame': self.widget.findChild(QFrame, 'unallocPayFrame'),
             'status_label': self.widget.findChild(QLabel, 'payStatusLabel'),
             'cash': self.widget.findChild(QLineEdit, 'cashPayLineEdit'),
@@ -89,6 +72,35 @@ class PaymentPanel(QObject):
         if balance is not None:
             balance.setReadOnly(True)
 
+        for key in ('cash', 'nets', 'paynow', 'voucher', 'tender'):
+            widget = self._widgets.get(key)
+            if widget is not None:
+                self._placeholders[key] = widget.placeholderText()
+
+        title = self._widgets.get('unalloc_title')
+        if title is not None and title.text().strip():
+            self._unalloc_title_default = title.text().strip()
+
+    def _wire_buttons(self) -> None:
+        pay_btn = self.widget.findChild(QPushButton, 'payPayOpsBtn')
+        if pay_btn is not None:
+            pay_btn.clicked.connect(self.handle_pay_clicked)
+
+        reset_btn = self.widget.findChild(QPushButton, 'resetPayOpsBtn')
+        if reset_btn is not None:
+            reset_btn.clicked.connect(self.reset_payment_grid_to_default)
+
+        pay_select_buttons = {
+            'cash': 'cashPaySlcBtn',
+            'nets': 'netsPaySlcBtn',
+            'paynow': 'paynowPaySlcBtn',
+            'voucher': 'voucherPaySlcBtn',
+        }
+        for method, btn_name in pay_select_buttons.items():
+            btn = self.widget.findChild(QPushButton, btn_name)
+            if btn is not None:
+                btn.clicked.connect(lambda _=None, m=method: self.handle_pay_select(m))
+
     def _wire_inputs(self) -> None:
         pay_fields = self._pay_field_order()
         for field in pay_fields:
@@ -96,49 +108,15 @@ class PaymentPanel(QObject):
                 continue
             field.textChanged.connect(self.recalc_unalloc_and_ui)
             field.installEventFilter(self)
+            field.editingFinished.connect(self._validate_currency_field)
 
         tender = self._widgets.get('tender')
         if tender is not None:
             tender.textChanged.connect(self.recalc_cash_balance_and_ui)
             tender.textChanged.connect(self.update_pay_button_state)
+            tender.editingFinished.connect(self._validate_currency_field)
 
-    def eventFilter(self, obj, event):
-        if event.type() == QEvent.KeyPress and event.key() in (Qt.Key_Return, Qt.Key_Enter):
-            if obj in self._pay_field_order():
-                if self._last_unalloc > 0:
-                    self.focus_jump_next_pay_field(obj)
-                    return True
-        return super().eventFilter(obj, event)
-
-    def handle_pay_clicked(self) -> None:
-        self.recalc_unalloc_and_ui()
-        self.recalc_cash_balance_and_ui()
-        if not self._is_payment_valid():
-            self.update_pay_button_state()
-            return
-
-        payload = self._collect_payment_split()
-        payload['total'] = self._get_total_amount()
-        payload['tender'] = self._get_float_value(self._widgets.get('tender'))
-        payload['change'] = self._get_float_value(self._widgets.get('balance'))
-        self.payRequested.emit(payload)
-
-    def _collect_payment_split(self) -> dict:
-        fields = {
-            'cash': 'cashPayLineEdit',
-            'nets': 'netsPayLineEdit',
-            'voucher': 'voucherPayLineEdit',
-            'paynow': 'paynowPayLineEdit',
-        }
-        payload = {}
-        for key, field_name in fields.items():
-            widget = self.widget.findChild(QLineEdit, field_name)
-            if key == 'voucher':
-                payload[key] = self._parse_int(widget.text() if widget is not None else '')
-            else:
-                payload[key] = self._parse_amount(widget.text() if widget is not None else '')
-        return payload
-
+    # Parsing and formatting helpers
     @staticmethod
     def _parse_amount(value: str) -> float:
         try:
@@ -155,26 +133,13 @@ class PaymentPanel(QObject):
         except ValueError:
             return 0
 
-    def _pay_field_order(self):
-        return [
-            self._widgets.get('nets'),
-            self._widgets.get('paynow'),
-            self._widgets.get('voucher'),
-            self._widgets.get('cash'),
-        ]
+    @staticmethod
+    def _format_money(amount: float) -> str:
+        return f"${amount:.2f}"
 
-    def _get_total_amount(self) -> float:
-        label = self._widgets.get('total_label')
-        return self._parse_amount(label.text() if label is not None else '')
-
-    def _get_unalloc_amount(self) -> float:
-        label = self._widgets.get('unalloc_label')
-        return self._parse_amount(label.text() if label is not None else '')
-
-    def _get_float_value(self, widget: QLineEdit) -> float:
-        if widget is None:
-            return 0.0
-        return self._parse_amount(widget.text())
+    @staticmethod
+    def _format_number(amount: float) -> str:
+        return f"{amount:.2f}"
 
     def _set_line_text(self, widget: QLineEdit, text: str) -> None:
         if widget is None:
@@ -188,15 +153,38 @@ class PaymentPanel(QObject):
             return
         widget.setText(text)
 
-    @staticmethod
-    def _format_money(amount: float) -> str:
-        return f"${amount:.2f}"
+    # Field accessors
+    def _pay_field_order(self):
+        return [
+            self._widgets.get('nets'),
+            self._widgets.get('paynow'),
+            self._widgets.get('voucher'),
+            self._widgets.get('cash'),
+        ]
 
-    @staticmethod
-    def _format_number(amount: float) -> str:
-        return f"{amount:.2f}"
+    def _get_total_amount(self) -> float:
+        label = self._widgets.get('total_label')
+        return self._parse_amount(label.text() if label is not None else '')
 
+    def _get_float_value(self, widget: QLineEdit) -> float:
+        if widget is None:
+            return 0.0
+        return self._parse_amount(widget.text())
+
+    def _get_validated_amount(self, widget: QLineEdit) -> float:
+        if widget is None:
+            return 0.0
+        try:
+            from modules.ui_utils import input_handler
+            return input_handler.handle_currency_input(widget)
+        except Exception:
+            return self._parse_amount(widget.text())
+
+    # Public API
     def set_payment_default(self, total: float) -> None:
+        if total <= 0:
+            self.clear_payment_frame()
+            return
         self._set_label_text(self._widgets.get('total_label'), self._format_money(total))
         self._set_line_text(self._widgets.get('cash'), self._format_number(total))
         self._set_line_text(self._widgets.get('nets'), "")
@@ -221,22 +209,24 @@ class PaymentPanel(QObject):
         self._set_line_text(self._widgets.get('voucher'), "")
         self._set_line_text(self._widgets.get('tender'), "")
         self._set_line_text(self._widgets.get('balance'), "")
+        self._last_unalloc = 0.0
         self._clear_unalloc_highlight()
         self._clear_status()
-        self._has_balance_error = False
-        self._has_unalloc_warning = False
+        self._has_validation_error = False
         self._set_tender_visibility(False)
+        self.update_readonly_policy()
         self.update_pay_button_state()
 
     def reset_payment_grid_to_default(self) -> None:
         total = self._get_total_amount()
         self.set_payment_default(total)
 
+    # Calculations and state updates
     def recalc_unalloc_and_ui(self) -> None:
         total = self._get_total_amount()
-        cash = self._get_float_value(self._widgets.get('cash'))
-        nets = self._get_float_value(self._widgets.get('nets'))
-        paynow = self._get_float_value(self._widgets.get('paynow'))
+        cash = self._get_validated_amount(self._widgets.get('cash'))
+        nets = self._get_validated_amount(self._widgets.get('nets'))
+        paynow = self._get_validated_amount(self._widgets.get('paynow'))
         voucher = float(self._parse_int(self._widgets.get('voucher').text() if self._widgets.get('voucher') else ''))
 
         unalloc = total - (cash + nets + paynow + voucher)
@@ -246,56 +236,50 @@ class PaymentPanel(QObject):
         self._update_unalloc_ui(unalloc)
         self.update_readonly_policy()
         self.recalc_cash_balance_and_ui()
+        self._update_placeholders(unalloc, cash)
+        self._refresh_status(cash, self._get_validated_amount(self._widgets.get('tender')), unalloc)
         self.update_pay_button_state()
 
-    def _update_unalloc_ui(self, unalloc: float) -> None:
-        if unalloc > 0:
-            self._apply_unalloc_highlight(True)
-            self._has_unalloc_warning = True
-        else:
-            self._apply_unalloc_highlight(False)
-            self._has_unalloc_warning = False
-
-        if self._has_balance_error:
-            self._set_status("Cash tender is less than cash amount.", is_error=True)
-        elif unalloc > 0:
-            self._set_status("Balance remains to allocate.", is_error=True)
-        elif unalloc < 0:
-            self._set_status("Over-allocated payment amount.", is_error=True)
-        else:
-            self._clear_status()
-
-    def update_readonly_policy(self) -> None:
-        unalloc = self._last_unalloc
-        for field in self._pay_field_order():
-            if field is None:
-                continue
-            if unalloc == 0:
-                val = self._parse_amount(field.text())
-                field.setReadOnly(val <= 0)
-            else:
-                field.setReadOnly(False)
-
     def recalc_cash_balance_and_ui(self) -> None:
-        cash = self._get_float_value(self._widgets.get('cash'))
+        cash = self._get_validated_amount(self._widgets.get('cash'))
         tender_widget = self._widgets.get('tender')
 
         if cash <= 0:
             self._set_tender_visibility(False)
             self._set_line_text(self._widgets.get('balance'), self._format_number(0.0))
-            self._has_balance_error = False
             self._update_unalloc_ui(self._last_unalloc)
+            self._update_placeholders(self._last_unalloc, cash)
             return
 
         self._set_tender_visibility(True)
-        tender = self._get_float_value(tender_widget)
+        tender = self._get_validated_amount(tender_widget)
         balance = tender - cash
         self._set_line_text(self._widgets.get('balance'), self._format_number(balance))
-        if balance < 0:
-            self._has_balance_error = True
-        else:
-            self._has_balance_error = False
         self._update_unalloc_ui(self._last_unalloc)
+        self._update_placeholders(self._last_unalloc, cash)
+        self._refresh_status(cash, tender, self._last_unalloc)
+
+    def update_readonly_policy(self) -> None:
+        unalloc = self._last_unalloc
+        cash_field = self._widgets.get('cash')
+        cash_val = self._get_validated_amount(cash_field)
+
+        for key, field in zip(('nets', 'paynow', 'voucher', 'cash'), self._pay_field_order()):
+            if field is None:
+                continue
+            current_val = self._parse_amount(field.text()) if key != 'voucher' else float(self._parse_int(field.text()))
+            locked = unalloc <= 0 and current_val == 0
+            field.setReadOnly(locked)
+            field.setFocusPolicy(Qt.NoFocus if locked else Qt.StrongFocus)
+            field.setEnabled(not locked)
+            if locked and field.hasFocus():
+                self.focus_jump_next_pay_field(field)
+
+        tender = self._widgets.get('tender')
+        if tender is not None:
+            tender_locked = cash_val <= 0
+            tender.setReadOnly(tender_locked)
+            tender.setFocusPolicy(Qt.NoFocus if tender_locked else Qt.StrongFocus)
 
     def update_pay_button_state(self) -> None:
         pay_btn = self._widgets.get('pay_button')
@@ -304,14 +288,12 @@ class PaymentPanel(QObject):
 
         total = self._get_total_amount()
         unalloc = self._last_unalloc
-        cash = self._get_float_value(self._widgets.get('cash'))
-        tender = self._get_float_value(self._widgets.get('tender'))
+        cash = self._get_validated_amount(self._widgets.get('cash'))
+        tender = self._get_validated_amount(self._widgets.get('tender'))
 
-        # Reset enabled only when there is a non-zero total
         if reset_btn is not None:
             reset_btn.setEnabled(total > 0)
 
-        # Print enabled only when total is zero/empty
         if print_btn is not None:
             print_btn.setEnabled(total <= 0)
 
@@ -322,12 +304,130 @@ class PaymentPanel(QObject):
         status = ctx.get('status')
         status_ok = status in ('NONE', 'UNPAID')
 
-        can_pay = total > 0 and unalloc == 0 and status_ok
+        can_pay = total > 0 and unalloc == 0 and status_ok and not self._has_validation_error
         if cash > 0:
             can_pay = can_pay and tender >= cash
 
         pay_btn.setEnabled(can_pay)
 
+    def _update_placeholders(self, unalloc: float, cash: float) -> None:
+        for key in ('cash', 'nets', 'paynow', 'voucher'):
+            field = self._widgets.get(key)
+            if field is None:
+                continue
+            has_value = bool(field.text().strip()) and self._parse_amount(field.text()) > 0
+            show = unalloc > 0 and not has_value
+            placeholder = self._placeholders.get(key, "") if show else ""
+            field.setPlaceholderText(placeholder)
+
+        tender = self._widgets.get('tender')
+        if tender is not None:
+            tender_has_val = bool(tender.text().strip()) and self._parse_amount(tender.text()) > 0
+            show_tender_ph = cash > 0 and not tender_has_val
+            tender.setPlaceholderText(self._placeholders.get('tender', "") if show_tender_ph else "")
+
+    def _refresh_status(self, cash: float, tender: float, unalloc: float) -> None:
+        if self._has_validation_error:
+            self._set_status(self._validation_message or "Invalid amount.", is_error=True)
+            return
+        if cash > 0 and tender < cash:
+            self._set_status("Cash tender is less than cash amount.", is_error=True)
+            return
+        if unalloc > 0:
+            self._set_status("Balance remains to allocate.", is_error=True)
+            return
+        if unalloc < 0:
+            self._set_status("Over-allocated payment amount.", is_error=True)
+            return
+        self._clear_status()
+
+    def _run_validation_pass(self) -> None:
+        try:
+            from modules.ui_utils import input_handler
+            for field in (self._widgets.get('cash'), self._widgets.get('nets'), self._widgets.get('paynow'), self._widgets.get('tender')):
+                if field is None:
+                    continue
+                if not (field.text() or '').strip():
+                    continue
+                input_handler.handle_currency_input(field)
+            self._has_validation_error = False
+            self._validation_message = ""
+        except Exception as exc:
+            self._has_validation_error = True
+            self._validation_message = str(exc) if str(exc) else "Invalid amount."
+
+    def _validate_currency_field(self) -> None:
+        self._run_validation_pass()
+        self._refresh_status(
+            self._get_validated_amount(self._widgets.get('cash')),
+            self._get_validated_amount(self._widgets.get('tender')),
+            self._last_unalloc,
+        )
+        self.update_pay_button_state()
+
+    # Navigation
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.KeyPress and event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            if obj in self._pay_field_order() or obj == self._widgets.get('tender'):
+                cash = self._get_validated_amount(self._widgets.get('cash'))
+                tender = self._get_validated_amount(self._widgets.get('tender'))
+                unalloc = self._last_unalloc
+                self._handle_enter_navigation(obj, cash, tender, unalloc)
+                return True
+        return super().eventFilter(obj, event)
+
+    def _handle_enter_navigation(self, current, cash: float, tender: float, unalloc: float) -> None:
+        cash_field = self._widgets.get('cash')
+        tender_field = self._widgets.get('tender')
+        pay_btn = self._widgets.get('pay_button')
+
+        if current == cash_field:
+            if cash > 0 and unalloc == 0:
+                tender = self._get_validated_amount(tender_field)
+                if tender_field is not None and tender < cash:
+                    tender_field.setFocus()
+                    tender_field.selectAll()
+                    return
+                if pay_btn is not None:
+                    pay_btn.setFocus()
+                return
+            if unalloc > 0:
+                self.focus_jump_next_pay_field(current)
+                return
+        elif current in self._pay_field_order():
+            if unalloc == 0:
+                if pay_btn is not None:
+                    pay_btn.setFocus()
+                return
+            self.focus_jump_next_pay_field(current)
+            return
+        elif current == tender_field:
+            if tender < cash:
+                current.selectAll()
+                return
+            if tender > cash and unalloc > 0:
+                self.focus_jump_next_pay_field()
+                return
+            if tender >= cash and unalloc == 0:
+                if pay_btn is not None:
+                    pay_btn.setFocus()
+                return
+
+    def focus_jump_next_pay_field(self, current=None) -> None:
+        fields = [f for f in self._pay_field_order() if f is not None and f.isEnabled() and not f.isReadOnly()]
+        if not fields:
+            return
+        try:
+            idx = fields.index(current)
+        except ValueError:
+            idx = -1
+        for offset in range(1, len(fields) + 1):
+            target = fields[(idx + offset) % len(fields)]
+            target.setFocus()
+            target.selectAll()
+            break
+
+    # Actions
     def handle_pay_select(self, method: str) -> None:
         field_map = {
             'cash': self._widgets.get('cash'),
@@ -345,38 +445,80 @@ class PaymentPanel(QObject):
             return
 
         self._last_pay_select_method = method
-        field.blockSignals(True)
-        field.clear()
-        field.blockSignals(False)
-        self.recalc_unalloc_and_ui()
-
-        remaining = self._last_unalloc
-        if method == 'voucher':
-            remaining_val = int(round(remaining))
-            self._set_line_text(field, str(max(remaining_val, 0)))
-        else:
-            self._set_line_text(field, self._format_number(max(remaining, 0.0)))
-
-        self.recalc_unalloc_and_ui()
-        field.setFocus()
-        field.selectAll()
-
-    def focus_jump_next_pay_field(self, current=None) -> None:
-        fields = [f for f in self._pay_field_order() if f is not None]
-        if not fields:
-            return
-        try:
-            idx = fields.index(current)
-        except ValueError:
-            idx = -1
-        for offset in range(1, len(fields) + 1):
-            target = fields[(idx + offset) % len(fields)]
-            if target.isReadOnly() or not target.isEnabled():
+        total = self._get_total_amount()
+        for key, le in field_map.items():
+            if le is None:
                 continue
-            target.setFocus()
-            target.selectAll()
-            break
+            le.blockSignals(True)
+            if key == method:
+                if key == 'voucher':
+                    self._set_line_text(le, str(int(round(total))))
+                else:
+                    self._set_line_text(le, self._format_number(total))
+            else:
+                le.clear()
+            le.blockSignals(False)
 
+        self.recalc_unalloc_and_ui()
+
+        if method == 'cash':
+            tender = self._widgets.get('tender')
+            if tender is not None:
+                tender.setFocus()
+                tender.selectAll()
+            else:
+                pay_btn = self._widgets.get('pay_button')
+                if pay_btn is not None:
+                    pay_btn.setFocus()
+        else:
+            pay_btn = self._widgets.get('pay_button')
+            if pay_btn is not None:
+                pay_btn.setFocus()
+
+    def handle_pay_clicked(self) -> None:
+        self.recalc_unalloc_and_ui()
+        self.recalc_cash_balance_and_ui()
+        if not self._is_payment_valid():
+            self.update_pay_button_state()
+            return
+
+        payload = self._collect_payment_split()
+        payload['total'] = self._get_total_amount()
+        payload['tender'] = self._get_validated_amount(self._widgets.get('tender'))
+        payload['change'] = self._get_float_value(self._widgets.get('balance'))
+        self.payRequested.emit(payload)
+
+    def _collect_payment_split(self) -> dict:
+        fields = {
+            'cash': 'cashPayLineEdit',
+            'nets': 'netsPayLineEdit',
+            'voucher': 'voucherPayLineEdit',
+            'paynow': 'paynowPayLineEdit',
+        }
+        payload = {}
+        for key, field_name in fields.items():
+            widget = self.widget.findChild(QLineEdit, field_name)
+            if key == 'voucher':
+                payload[key] = self._parse_int(widget.text() if widget is not None else '')
+            else:
+                payload[key] = self._parse_amount(widget.text() if widget is not None else '')
+        return payload
+
+    def _is_payment_valid(self) -> bool:
+        total = self._get_total_amount()
+        if total <= 0:
+            return False
+        if self._last_unalloc != 0:
+            return False
+        if self._has_validation_error:
+            return False
+        cash = self._get_validated_amount(self._widgets.get('cash'))
+        tender = self._get_validated_amount(self._widgets.get('tender'))
+        if cash > 0 and tender < cash:
+            return False
+        return True
+
+    # UI helpers
     def _set_tender_visibility(self, enabled: bool) -> None:
         for key in ('tender_label', 'tender', 'balance_label', 'balance'):
             widget = self._widgets.get(key)
@@ -386,22 +528,33 @@ class PaymentPanel(QObject):
         if not enabled:
             self._set_line_text(self._widgets.get('tender'), "")
 
-    def _apply_unalloc_highlight(self, active: bool) -> None:
+    def _apply_unalloc_highlight(self, active: bool, unalloc: float = 0.0) -> None:
+        title = self._widgets.get('unalloc_title')
         label = self._widgets.get('unalloc_label')
-        frame = self._widgets.get('unalloc_frame')
         if active:
+            if title is not None:
+                color = "red" if unalloc > 0 else "green" if unalloc < 0 else ""
+                title.setStyleSheet(f"color: {color};" if color else "")
             if label is not None:
-                label.setStyleSheet("background-color: #fff2cc; border: 3px solid #ff9800;")
-            if frame is not None:
-                frame.setStyleSheet("border: 3px solid #ff9800; background-color: #fff7e6;")
+                label.setStyleSheet("background-color: yellow;")
         else:
+            if title is not None:
+                title.setStyleSheet("")
             if label is not None:
                 label.setStyleSheet("")
-            if frame is not None:
-                frame.setStyleSheet("")
 
     def _clear_unalloc_highlight(self) -> None:
-        self._apply_unalloc_highlight(False)
+        self._apply_unalloc_highlight(False, 0.0)
+
+    def _update_unalloc_ui(self, unalloc: float) -> None:
+        # Highlight whenever unalloc is non-zero; update title to show over-allocation
+        self._apply_unalloc_highlight(unalloc != 0, unalloc)
+        title = self._widgets.get('unalloc_title')
+        if title is not None:
+            if unalloc < 0:
+                title.setText("Over Allocated")
+            else:
+                title.setText(self._unalloc_title_default)
 
     def _set_status(self, message: str, is_error: bool = False) -> None:
         label = self._widgets.get('status_label')
@@ -414,18 +567,6 @@ class PaymentPanel(QObject):
         if label is None:
             return
         ui_feedback.clear_status_label(label)
-
-    def _is_payment_valid(self) -> bool:
-        total = self._get_total_amount()
-        if total <= 0:
-            return False
-        if self._last_unalloc != 0:
-            return False
-        cash = self._get_float_value(self._widgets.get('cash'))
-        tender = self._get_float_value(self._widgets.get('tender'))
-        if cash > 0 and tender < cash:
-            return False
-        return True
 
 
 def setup_payment_panel(main_window, UI_DIR):
