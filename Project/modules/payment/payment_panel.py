@@ -14,6 +14,7 @@ class PaymentPanel(QObject):
 
     # Initialization and wiring
     def __init__(self, main_window, placeholder, ui_path):
+        # Initialize payment panel state, load UI, and wire controls/events.
         super().__init__()
         self._main_window = main_window
         self._placeholder = placeholder
@@ -35,10 +36,12 @@ class PaymentPanel(QObject):
 
     # Public API
     def notify_payment_success(self) -> None:
+        # Emit payment success signal for downstream workflow updates.
         self.paymentSuccess.emit()
 
     # Layout and wiring helpers
     def _attach_to_placeholder(self) -> None:
+        # Attach the loaded payment widget into the host placeholder layout.
         layout = self._placeholder.layout()
         if layout is None:
             layout = QVBoxLayout(self._placeholder)
@@ -51,6 +54,7 @@ class PaymentPanel(QObject):
         layout.addWidget(self.widget)
 
     def _cache_widgets(self) -> None:
+        # Cache UI child widgets and defaults for fast repeated access.
         self._widgets = {
             'total_label': self.widget.findChild(QLabel, 'totalValPayLabel'),
             'unalloc_label': self.widget.findChild(QLabel, 'unallocValPayLabel'),
@@ -73,6 +77,7 @@ class PaymentPanel(QObject):
         balance = self._widgets.get('balance')
         if balance is not None:
             balance.setReadOnly(True)
+            balance.setFocusPolicy(Qt.NoFocus)
 
         for key in ('cash', 'nets', 'paynow', 'voucher', 'tender'):
             widget = self._widgets.get(key)
@@ -84,6 +89,7 @@ class PaymentPanel(QObject):
             self._unalloc_title_default = title.text().strip()
 
     def _wire_buttons(self) -> None:
+        # Connect operation/select button signals and key event handling.
         # Enter key activation for ops buttons
         for btn_name, handler in [
             ('payPayOpsBtn', self.handle_pay_clicked),
@@ -113,16 +119,13 @@ class PaymentPanel(QObject):
                 btn.clicked.connect(lambda _=None, m=method: self.handle_pay_select(m))
 
     def _wire_inputs(self) -> None:
+        # Connect field change/validation handlers and install line-edit event filters.
         pay_fields = self._pay_field_order()
         for field in pay_fields:
             if field is None:
                     continue
             field.textChanged.connect(self.recalc_unalloc_and_ui)
             field.textChanged.connect(lambda _=None, f=field: self._clear_validation_error(f))
-            try:
-                field.installEventFilter(self)
-            except Exception:
-                pass
             field.editingFinished.connect(self._validate_currency_field)
 
         tender = self._widgets.get('tender')
@@ -131,14 +134,17 @@ class PaymentPanel(QObject):
             tender.textChanged.connect(self.update_pay_button_state)
             tender.textChanged.connect(lambda _=None, f=tender: self._clear_validation_error(f))
             tender.editingFinished.connect(self._validate_currency_field)
+
+        for field in self._lineedit_state_widgets():
             try:
-                tender.installEventFilter(self)
+                field.installEventFilter(self)
             except Exception:
                 pass
 
     # Parsing and formatting helpers
     @staticmethod
     def _parse_amount(value: str) -> float:
+        # Parse currency-like text into float, returning 0.0 on invalid input.
         try:
             stripped = value.strip().replace('$', '').replace(',', '')
             return float(stripped) if stripped else 0.0
@@ -147,6 +153,7 @@ class PaymentPanel(QObject):
 
     @staticmethod
     def _parse_int(value: str) -> int:
+        # Parse digits from text into int, returning 0 on invalid/empty input.
         try:
             stripped = ''.join(ch for ch in str(value or '') if ch.isdigit())
             return int(stripped) if stripped else 0
@@ -155,18 +162,22 @@ class PaymentPanel(QObject):
 
     @staticmethod
     def _format_money(amount: float) -> str:
+        # Format amount as a display currency string with a dollar sign.
         return f"${amount:.2f}"
 
     @staticmethod
     def _format_number(amount: float) -> str:
+        # Format amount as a plain two-decimal numeric string.
         return f"{amount:.2f}"
 
     @staticmethod
     def _round_currency(amount: float) -> float:
+        # Round to currency precision and normalize near-zero values to 0.0.
         amt = round(amount, 2)
         return 0.0 if abs(amt) < 0.005 else amt
 
     def _set_line_text(self, widget: QLineEdit, text: str) -> None:
+        # Set line-edit text without emitting connected text-change signals.
         if widget is None:
             return
         widget.blockSignals(True)
@@ -174,12 +185,14 @@ class PaymentPanel(QObject):
         widget.blockSignals(False)
 
     def _set_label_text(self, widget: QLabel, text: str) -> None:
+        # Set label text safely when widget exists.
         if widget is None:
             return
         widget.setText(text)
 
     # Field accessors
     def _pay_field_order(self):
+        # Return the ordered payment entry fields used for navigation.
         return [
             self._widgets.get('nets'),
             self._widgets.get('paynow'),
@@ -188,15 +201,18 @@ class PaymentPanel(QObject):
         ]
 
     def _get_total_amount(self) -> float:
+        # Read and parse the payable total from the total label.
         label = self._widgets.get('total_label')
         return self._parse_amount(label.text() if label is not None else '')
 
     def _get_float_value(self, widget: QLineEdit) -> float:
+        # Parse and return a float value from a line edit.
         if widget is None:
             return 0.0
         return self._parse_amount(widget.text())
 
     def _get_validated_amount(self, widget: QLineEdit) -> float:
+        # Validate and parse a currency field using shared input handlers.
         if widget is None:
             return 0.0
         try:
@@ -206,19 +222,22 @@ class PaymentPanel(QObject):
             return self._parse_amount(widget.text())
 
     def _get_validated_voucher(self, widget: QLineEdit) -> int:
+        # Validate and parse voucher input as integer units.
         if widget is None:
             return 0
         try:
             from modules.ui_utils import input_handler
             return input_handler.handle_voucher_input(widget)
         except Exception:
-            return self._parse_int(widget.text())
+            return 0
 
     # Public API
     def set_payment_default(self, total: float) -> None:
+        # Reset payment split to default values for the provided total.
         if total <= 0:
             self.clear_payment_frame()
             return
+        self._reset_validation_feedback()
         self._set_label_text(self._widgets.get('total_label'), self._format_money(total))
         self._set_line_text(self._widgets.get('cash'), self._format_number(total))
         self._set_line_text(self._widgets.get('nets'), "")
@@ -226,7 +245,6 @@ class PaymentPanel(QObject):
         self._set_line_text(self._widgets.get('voucher'), "")
         self._set_line_text(self._widgets.get('tender'), "")
         self._last_pay_select_method = None
-        self._clear_status()
         self.recalc_unalloc_and_ui()
         self.update_pay_button_state()
         tender = self._widgets.get('tender')
@@ -235,6 +253,8 @@ class PaymentPanel(QObject):
             tender.selectAll()
 
     def clear_payment_frame(self) -> None:
+        # Clear all payment fields/state and return the panel to idle defaults.
+        self._reset_validation_feedback()
         self._set_label_text(self._widgets.get('total_label'), self._format_money(0.0))
         self._set_label_text(self._widgets.get('unalloc_label'), self._format_money(0.0))
         self._set_line_text(self._widgets.get('cash'), "")
@@ -245,18 +265,19 @@ class PaymentPanel(QObject):
         self._set_line_text(self._widgets.get('balance'), "")
         self._last_unalloc = 0.0
         self._clear_unalloc_highlight()
-        self._clear_status()
-        self._has_validation_error = False
         self._set_tender_visibility(False)
         self.update_readonly_policy()
         self.update_pay_button_state()
 
     def reset_payment_grid_to_default(self) -> None:
+        # Reapply default split behavior using the current total amount.
+        self._reset_validation_feedback()
         total = self._get_total_amount()
         self.set_payment_default(total)
 
     # Calculations and state updates
     def recalc_unalloc_and_ui(self) -> None:
+        # Recompute unallocated amount and refresh dependent UI/interactivity.
         total = self._get_total_amount()
         cash = self._get_validated_amount(self._widgets.get('cash'))
         nets = self._get_validated_amount(self._widgets.get('nets'))
@@ -275,12 +296,13 @@ class PaymentPanel(QObject):
         self.update_pay_button_state()
 
     def recalc_cash_balance_and_ui(self) -> None:
+        # Recompute tender-change balance and refresh related cash UI state.
         cash = self._get_validated_amount(self._widgets.get('cash'))
         tender_widget = self._widgets.get('tender')
 
         if cash <= 0:
             self._set_tender_visibility(False)
-            self._set_line_text(self._widgets.get('balance'), self._format_number(0.0))
+            self._set_line_text(self._widgets.get('balance'), "")
             self._update_unalloc_ui(self._last_unalloc)
             self._update_placeholders(self._last_unalloc, cash)
             return
@@ -294,6 +316,7 @@ class PaymentPanel(QObject):
         self._refresh_status(cash, tender, self._last_unalloc)
 
     def update_readonly_policy(self) -> None:
+        # Lock/unlock entry fields based on allocation and cash/tender rules.
         unalloc = self._last_unalloc
         cash_field = self._widgets.get('cash')
         cash_val = self._get_validated_amount(cash_field)
@@ -301,8 +324,8 @@ class PaymentPanel(QObject):
         for key, field in zip(('nets', 'paynow', 'voucher', 'cash'), self._pay_field_order()):
             if field is None:
                 continue
-            current_val = self._parse_amount(field.text()) if key != 'voucher' else float(self._get_validated_voucher(field))
-            locked = unalloc <= 0 and current_val == 0
+            has_raw_text = bool(field.text().strip())
+            locked = unalloc <= 0 and not has_raw_text
             field.setReadOnly(locked)
             field.setFocusPolicy(Qt.NoFocus if locked else Qt.StrongFocus)
             field.setEnabled(not locked)
@@ -315,7 +338,10 @@ class PaymentPanel(QObject):
             tender.setReadOnly(tender_locked)
             tender.setFocusPolicy(Qt.NoFocus if tender_locked else Qt.StrongFocus)
 
+        self._refresh_lineedit_visuals()
+
     def update_pay_button_state(self) -> None:
+        # Enable or disable payment actions according to business constraints.
         pay_btn = self._widgets.get('pay_button')
         reset_btn = self._widgets.get('reset_button')
         print_btn = self._widgets.get('print_button')
@@ -347,6 +373,7 @@ class PaymentPanel(QObject):
             btn.setEnabled(total > 0)
 
     def _update_placeholders(self, unalloc: float, cash: float) -> None:
+        # Show contextual placeholders only where user guidance is needed.
         for key in ('cash', 'nets', 'paynow', 'voucher'):
             field = self._widgets.get(key)
             if field is None:
@@ -363,6 +390,7 @@ class PaymentPanel(QObject):
             tender.setPlaceholderText(self._placeholders.get('tender', "") if show_tender_ph else "")
 
     def _refresh_status(self, cash: float, tender: float, unalloc: float) -> None:
+        # Update status label with highest-priority validation/payment message.
         if self._has_validation_error:
             self._set_status(self._validation_message or "Invalid amount.", is_error=True)
             return
@@ -378,6 +406,7 @@ class PaymentPanel(QObject):
         self._clear_status()
 
     def _run_validation_pass(self) -> None:
+        # Validate all populated payment fields and record first validation failure.
         try:
             from modules.ui_utils import input_handler
             for field in (self._widgets.get('cash'), self._widgets.get('nets'), self._widgets.get('paynow'), self._widgets.get('tender')):
@@ -399,11 +428,13 @@ class PaymentPanel(QObject):
                     raise
             self._has_validation_error = False
             self._validation_message = ""
+            self._clear_all_validation_marks()
         except Exception as exc:
             self._has_validation_error = True
             self._validation_message = str(exc) if str(exc) else "Invalid amount."
 
     def _validate_currency_field(self) -> None:
+        # Run validation pipeline after editing and refresh status/button state.
         self._run_validation_pass()
         self._refresh_status(
             self._get_validated_amount(self._widgets.get('cash')),
@@ -414,9 +445,14 @@ class PaymentPanel(QObject):
 
     # Navigation
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.FocusIn:
-            if obj in self._pay_field_order() or obj == self._widgets.get('tender'):
-                self._clear_validation_error(obj)
+        # Intercept focus/enter-key events for validation-aware navigation behavior.
+        if isinstance(obj, QLineEdit) and self._is_state_managed_lineedit(obj):
+            if event.type() == QEvent.FocusIn:
+                if obj in self._pay_field_order() or obj == self._widgets.get('tender'):
+                    self._clear_validation_error(obj)
+                self._refresh_lineedit_visuals()
+            elif event.type() == QEvent.FocusOut:
+                self._refresh_lineedit_visuals()
 
         if event.type() == QEvent.KeyPress and event.key() in (Qt.Key_Return, Qt.Key_Enter):
             if isinstance(obj, QPushButton) and obj.isEnabled():
@@ -458,6 +494,7 @@ class PaymentPanel(QObject):
         return super().eventFilter(obj, event)
 
     def _handle_enter_navigation(self, current, cash: float, tender: float, unalloc: float) -> None:
+        # Route focus on Enter based on current field and payment completion state.
         cash_field = self._widgets.get('cash')
         tender_field = self._widgets.get('tender')
         pay_btn = self._widgets.get('pay_button')
@@ -497,6 +534,7 @@ class PaymentPanel(QObject):
     
 
     def focus_jump_next_pay_field(self, current=None) -> None:
+            # Move focus to the next editable payment field in navigation order.
         fields = [f for f in self._pay_field_order() if f is not None and f.isEnabled() and not f.isReadOnly()]
         if not fields:
             return
@@ -512,6 +550,7 @@ class PaymentPanel(QObject):
 
     # Actions
     def handle_pay_select(self, method: str) -> None:
+        # Apply one-tap full allocation to a selected payment method.
         field_map = {
             'cash': self._widgets.get('cash'),
             'nets': self._widgets.get('nets'),
@@ -559,6 +598,7 @@ class PaymentPanel(QObject):
                 pay_btn.setFocus()
 
     def handle_pay_clicked(self) -> None:
+        # Validate payment state and emit finalized payment payload when valid.
         self.recalc_unalloc_and_ui()
         self.recalc_cash_balance_and_ui()
         if not self._is_payment_valid():
@@ -572,6 +612,7 @@ class PaymentPanel(QObject):
         self.payRequested.emit(payload)
 
     def _collect_payment_split(self) -> dict:
+        # Build normalized payment split values from UI fields.
         fields = {
             'cash': 'cashPayLineEdit',
             'nets': 'netsPayLineEdit',
@@ -588,6 +629,7 @@ class PaymentPanel(QObject):
         return payload
 
     def _is_payment_valid(self) -> bool:
+        # Check whether current payment values satisfy all completion rules.
         total = self._get_total_amount()
         if total <= 0:
             return False
@@ -603,6 +645,7 @@ class PaymentPanel(QObject):
 
     # UI helpers
     def _set_tender_visibility(self, enabled: bool) -> None:
+        # Toggle tender/change widgets together and clear tender input when hidden.
         for key in ('tender_label', 'tender', 'balance_label', 'balance'):
             widget = self._widgets.get(key)
             if widget is None:
@@ -612,6 +655,7 @@ class PaymentPanel(QObject):
             self._set_line_text(self._widgets.get('tender'), "")
 
     def _apply_unalloc_highlight(self, active: bool, unalloc: float = 0.0) -> None:
+        # Paint unallocated section highlight colors based on current allocation state.
         title = self._widgets.get('unalloc_title')
         label = self._widgets.get('unalloc_label')
         frame = self._widgets.get('unalloc_frame')
@@ -637,6 +681,7 @@ class PaymentPanel(QObject):
                 frame.setStyleSheet("")  # or restore original if stored
 
     def _clear_unalloc_highlight(self) -> None:
+        # Reset unallocated section highlight to its normal style.
         self._apply_unalloc_highlight(False, 0.0)
 
     def _update_unalloc_ui(self, unalloc: float) -> None:
@@ -652,28 +697,31 @@ class PaymentPanel(QObject):
                 title.setText(self._unalloc_title_default)
 
     def _set_status(self, message: str, is_error: bool = False) -> None:
+        # Display a status message in success or error style.
         label = self._widgets.get('status_label')
         if label is None:
             return
         ui_feedback.set_status_label(label, message, ok=not is_error)
 
     def _clear_status(self) -> None:
+        # Clear status label text and state styling.
         label = self._widgets.get('status_label')
         if label is None:
             return
         ui_feedback.clear_status_label(label)
 
     def _mark_widget_invalid(self, widget) -> None:
+        # Mark a line edit with validation error styling metadata.
         try:
             if isinstance(widget, QLineEdit):
                 self._last_invalid_widget = widget
                 widget.setProperty('validation', 'error')
-                widget.style().unpolish(widget)
-                widget.style().polish(widget)
+                self._refresh_lineedit_visuals()
         except Exception:
             pass
 
     def _clear_validation_error(self, widget=None) -> None:
+        # Clear current validation error state for the active invalid widget.
         if widget is not None and widget is not self._last_invalid_widget:
             return
         if self._has_validation_error:
@@ -683,14 +731,66 @@ class PaymentPanel(QObject):
         if isinstance(widget, QLineEdit):
             try:
                 widget.setProperty('validation', '')
-                widget.style().unpolish(widget)
-                widget.style().polish(widget)
+                self._refresh_lineedit_visuals()
             except Exception:
                 pass
         if widget is self._last_invalid_widget:
             self._last_invalid_widget = None
 
+    def _is_state_managed_lineedit(self, widget: QLineEdit) -> bool:
+        # Return True when a line edit participates in shared visual-state styling.
+        name = widget.objectName() if widget is not None else ""
+        return bool(name) and ('PayLineEdit' in name or 'ValLineEdit' in name)
+
+    def _lineedit_state_widgets(self):
+        # Collect all line edits that should receive shared visual-state updates.
+        return [
+            widget
+            for widget in self.widget.findChildren(QLineEdit)
+            if self._is_state_managed_lineedit(widget)
+        ]
+
+    def _resolve_lineedit_state(self, widget: QLineEdit) -> str:
+        # Compute widget visual state with priority: invalid, focused, disabled, enabled.
+        if widget is None:
+            return 'enabled'
+        if widget.property('validation') == 'error':
+            return 'invalid'
+        if widget.hasFocus():
+            return 'focused'
+        if (not widget.isEnabled()) or widget.isReadOnly() or widget.focusPolicy() == Qt.NoFocus:
+            return 'disabled'
+        return 'enabled'
+
+    def _apply_lineedit_state(self, widget: QLineEdit, state: str) -> None:
+        # Apply computed visual state property and refresh QSS rendering.
+        if widget is None:
+            return
+        widget.setProperty('visualState', state)
+        widget.style().unpolish(widget)
+        widget.style().polish(widget)
+
+    def _refresh_lineedit_visuals(self) -> None:
+        # Recompute and apply visual state for all managed line edits.
+        for widget in self._lineedit_state_widgets():
+            self._apply_lineedit_state(widget, self._resolve_lineedit_state(widget))
+
+    def _clear_all_validation_marks(self) -> None:
+        # Clear validation flags on all managed line edits and refresh visuals.
+        self._last_invalid_widget = None
+        for widget in self._lineedit_state_widgets():
+            widget.setProperty('validation', '')
+        self._refresh_lineedit_visuals()
+
+    def _reset_validation_feedback(self) -> None:
+        # Reset validation flags, message label, and invalid styling in one shared path.
+        self._has_validation_error = False
+        self._validation_message = ""
+        self._clear_status()
+        self._clear_all_validation_marks()
+
 def setup_payment_panel(main_window, UI_DIR):
+    # Create and return the payment panel controller when UI resources are available.
     payment_placeholder = getattr(main_window, 'paymentFrame', None)
     payment_ui = os.path.join(UI_DIR, 'payment_frame.ui')
     if payment_placeholder is None or not os.path.exists(payment_ui):

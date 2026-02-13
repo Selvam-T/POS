@@ -68,10 +68,6 @@ QLabel#paymentLabel {
     border: 3px solid #7e7f7e;
     border-radius: 10px;
 }
-QLineEdit[validation="error"] {
-  border: 2px solid #c62828;
-  background-color: #fff1f0;
-}
 
 *[objectName*="TtlPayLabel"],
 *[objectName*="ValPayLabel"] {
@@ -170,8 +166,7 @@ QPushButton#printPayOpsBtn:focus {
 /* 6. tender */
 
 *[objectName*="TtlLabel"],
-*[objectName*="ValLineEdit"],
-*[objectName*="PayLineEdit"] {
+*[objectName*="LineEdit"] {
     font-family: Tahoma;
     font-size: 18px;
     font-weight: bold;
@@ -184,12 +179,33 @@ QPushButton#printPayOpsBtn:focus {
     border-radius: 8px; 
 }
 
+*[objectName*="LineEdit"][visualState="invalid"],
+*[objectName*="LineEdit"][validation="error"] {
+  border: 2px solid #ff0000;
+  background-color: #ffc0cb;
+}
+
+*[objectName*="LineEdit"][visualState="focused"] {
+  border: 2px solid #0000ff;
+  background-color: #dbeafe;
+}
+
+*[objectName*="LineEdit"][visualState="disabled"] {
+  border: 1px solid #d1d5db;
+  background-color: #f3f4f6;
+}
+
+*[objectName*="LineEdit"][visualState="enabled"] {
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+}
+
 /* 7. Keypad */
 #keypadFrame QPushButton {
-    min-width: 110px;
-    max-width: 110px;
-    min-height: 90px;
-    max-height: 90px;
+    min-width: 100px;
+    max-width: 100px;
+    min-height: 80px;
+    max-height: 80px;
     font-size: 18px;
     font-weight: bold;
     border-radius: 8px;
@@ -221,8 +237,8 @@ QPushButton#printPayOpsBtn:focus {
 
 #keypadFrame #keyRefundBtn, 
 #keypadFrame #keyVendorBtn {
-    min-height: 180px;
-    max-height: 180px;
+    min-height: 160px;
+    max-height: 160px;
 }
 
 #keyRefundBtn  { 
@@ -241,17 +257,17 @@ QLabel#payStatusLabel {
 
 /* Success State - Triggered by .setProperty("status", "success") */
 QLabel[status="success"] {
-    color: #166534; /* Dark Green */
-    background-color: #f0fdf4; /* Light Green Tint */
-    border: 1px solid #bbf7d0;
+    color: #166534;
+    background-color: #F0FDF4;
+    border: 1px solid #DCFCE7;
     border-radius: 4px;
 }
 
 /* Error State - Triggered by .setProperty("status", "error") */
 QLabel[status="error"] {
-    color: #991b1b; /* Dark Red */
-    background-color: #fef2f2; /* Light Red Tint */
-    border: 1px solid #fecaca;
+    color: #991b1b;
+    background-color: #fef2f2;
+    border: 1px solid #f87171;
     border-radius: 4px;
 }
 
