@@ -86,10 +86,15 @@ def handle_quantity_input(line_edit: QLineEdit, unit_type: str = 'unit') -> floa
     _raise_if_invalid(input_validation.validate_quantity(text, unit_type=unit_type))
     return float(text)
 
-def handle_currency_input(line_edit: QLineEdit, asset_type: str = 'amount') -> float:
+def handle_currency_input(line_edit: QLineEdit, asset_type: str = 'Amount') -> float:
     text = line_edit.text().strip()
     _raise_if_invalid(input_validation.validate_currency(text, asset_type=asset_type))
     return float(text)
+
+def handle_voucher_input(line_edit: QLineEdit) -> int:
+    text = (line_edit.text() or '').strip()
+    _raise_if_invalid(input_validation.validate_voucher_amount(text))
+    return int(text) if text else 0
 
 def handle_veg_choose_combo(combo_box: QComboBox) -> str:
     """Returns selected vegetable slot (no strict validation)."""

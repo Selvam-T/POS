@@ -143,7 +143,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Balance to Allocate</string>
+           <string>Allocation Balanced</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -407,7 +407,8 @@
      <item row="2" column="3" rowspan="2">
       <widget class="QPushButton" name="printPayOpsBtn">
        <property name="text">
-        <string>PRINT RECEIPT</string>
+        <string>PRINT
+RECEIPT</string>
        </property>
       </widget>
      </item>
@@ -681,6 +682,43 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>cashPaySlcBtn</tabstop>
+  <tabstop>netsPaySlcBtn</tabstop>
+  <tabstop>paynowPaySlcBtn</tabstop>
+  <tabstop>voucherPaySlcBtn</tabstop>
+  <tabstop>tenderValLineEdit</tabstop>
+  <tabstop>payPayOpsBtn</tabstop>
+  <tabstop>printPayOpsBtn</tabstop>
+  <tabstop>resetPayOpsBtn</tabstop>
+  <tabstop>keyRefundBtn</tabstop>
+  <tabstop>keyVendorBtn</tabstop>
+  <tabstop>keyNumBtn7</tabstop>
+  <tabstop>keyNumBtn8</tabstop>
+  <tabstop>keyNumBtn9</tabstop>
+  <tabstop>keyDolBtn10</tabstop>
+  <tabstop>keyFastBtntab</tabstop>
+  <tabstop>keyNumBtn4</tabstop>
+  <tabstop>keyNumBtn5</tabstop>
+  <tabstop>keyNumBtn6</tabstop>
+  <tabstop>keyDolBtn50</tabstop>
+  <tabstop>keyFastBtnshftab</tabstop>
+  <tabstop>keyNumBtn1</tabstop>
+  <tabstop>keyNumBtn2</tabstop>
+  <tabstop>keyNumBtn3</tabstop>
+  <tabstop>keyDolBtn100</tabstop>
+  <tabstop>keyFastBtnclr</tabstop>
+  <tabstop>keyNumBtn00</tabstop>
+  <tabstop>keyNumBtn0</tabstop>
+  <tabstop>keyNumBtndot</tabstop>
+  <tabstop>keyFastBtnenter</tabstop>
+  <tabstop>keyFastBtnbksp</tabstop>
+  <tabstop>netsPayLineEdit</tabstop>
+  <tabstop>paynowPayLineEdit</tabstop>
+  <tabstop>voucherPayLineEdit</tabstop>
+  <tabstop>cashPayLineEdit</tabstop>
+  <tabstop>balanceValLineEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

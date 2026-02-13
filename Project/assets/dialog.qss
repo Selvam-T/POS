@@ -190,6 +190,11 @@ QLineEdit:focus, QComboBox:focus {
     border: 1px solid #2196f3;
 }
 
+QLineEdit[validation="error"] {
+    border: 2px solid #c62828;
+    background-color: #fff1f0;
+}
+
 /* 1. State-specific style (Overrides base because it's more specific) */
 QLabel[objectName$="FieldLbl"][readOnly="true"] {
     color: #7b7c7d !important;

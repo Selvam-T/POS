@@ -475,7 +475,6 @@ class MainLoader(QMainWindow):
     # ========== Signal Handlers ==========
     # Update payment defaults when sale total updates.
     def _on_sale_total_changed(self, total: float) -> None:
-        print(f"Sale total changed: {total:.2f}")
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:
             panel.set_payment_default(total)
@@ -502,7 +501,6 @@ class MainLoader(QMainWindow):
 
     # Process payment requests from the payment panel.
     def _on_payment_requested(self, payment_split: dict) -> None:
-        print(f"Payment requested: {payment_split}")
         if self.pay_current_receipt(payment_split):
             panel = getattr(self, 'payment_panel_controller', None)
             if panel is not None:

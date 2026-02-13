@@ -25,6 +25,8 @@ class PaymentPanel(QObject):
         self._last_unalloc = 0.0
         self._has_validation_error = False
         self._validation_message = ""
+        self._pay_select_buttons = {}
+        self._last_invalid_widget = None
         self._attach_to_placeholder()
         self._cache_widgets()
         self._wire_buttons()
@@ -82,39 +84,57 @@ class PaymentPanel(QObject):
             self._unalloc_title_default = title.text().strip()
 
     def _wire_buttons(self) -> None:
-        pay_btn = self.widget.findChild(QPushButton, 'payPayOpsBtn')
-        if pay_btn is not None:
-            pay_btn.clicked.connect(self.handle_pay_clicked)
+        # Enter key activation for ops buttons
+        for btn_name, handler in [
+            ('payPayOpsBtn', self.handle_pay_clicked),
+            ('resetPayOpsBtn', self.reset_payment_grid_to_default),
+            ('printPayOpsBtn', None),
+        ]:
+            btn = self.widget.findChild(QPushButton, btn_name)
+            if btn is not None:
+                if handler:
+                    btn.clicked.connect(handler)
+                try:
+                    btn.installEventFilter(self)
+                except Exception:
+                    pass
 
-        reset_btn = self.widget.findChild(QPushButton, 'resetPayOpsBtn')
-        if reset_btn is not None:
-            reset_btn.clicked.connect(self.reset_payment_grid_to_default)
-
-        pay_select_buttons = {
+        # Wire payment selection buttons
+        self._pay_select_buttons = {}
+        for method, btn_name in {
             'cash': 'cashPaySlcBtn',
             'nets': 'netsPaySlcBtn',
             'paynow': 'paynowPaySlcBtn',
             'voucher': 'voucherPaySlcBtn',
-        }
-        for method, btn_name in pay_select_buttons.items():
+        }.items():
             btn = self.widget.findChild(QPushButton, btn_name)
             if btn is not None:
+                self._pay_select_buttons[method] = btn
                 btn.clicked.connect(lambda _=None, m=method: self.handle_pay_select(m))
 
     def _wire_inputs(self) -> None:
         pay_fields = self._pay_field_order()
         for field in pay_fields:
             if field is None:
-                continue
+                    continue
             field.textChanged.connect(self.recalc_unalloc_and_ui)
-            field.installEventFilter(self)
+            field.textChanged.connect(lambda _=None, f=field: self._clear_validation_error(f))
+            try:
+                field.installEventFilter(self)
+            except Exception:
+                pass
             field.editingFinished.connect(self._validate_currency_field)
 
         tender = self._widgets.get('tender')
         if tender is not None:
             tender.textChanged.connect(self.recalc_cash_balance_and_ui)
             tender.textChanged.connect(self.update_pay_button_state)
+            tender.textChanged.connect(lambda _=None, f=tender: self._clear_validation_error(f))
             tender.editingFinished.connect(self._validate_currency_field)
+            try:
+                tender.installEventFilter(self)
+            except Exception:
+                pass
 
     # Parsing and formatting helpers
     @staticmethod
@@ -140,6 +160,11 @@ class PaymentPanel(QObject):
     @staticmethod
     def _format_number(amount: float) -> str:
         return f"{amount:.2f}"
+
+    @staticmethod
+    def _round_currency(amount: float) -> float:
+        amt = round(amount, 2)
+        return 0.0 if abs(amt) < 0.005 else amt
 
     def _set_line_text(self, widget: QLineEdit, text: str) -> None:
         if widget is None:
@@ -179,6 +204,15 @@ class PaymentPanel(QObject):
             return input_handler.handle_currency_input(widget)
         except Exception:
             return self._parse_amount(widget.text())
+
+    def _get_validated_voucher(self, widget: QLineEdit) -> int:
+        if widget is None:
+            return 0
+        try:
+            from modules.ui_utils import input_handler
+            return input_handler.handle_voucher_input(widget)
+        except Exception:
+            return self._parse_int(widget.text())
 
     # Public API
     def set_payment_default(self, total: float) -> None:
@@ -227,9 +261,9 @@ class PaymentPanel(QObject):
         cash = self._get_validated_amount(self._widgets.get('cash'))
         nets = self._get_validated_amount(self._widgets.get('nets'))
         paynow = self._get_validated_amount(self._widgets.get('paynow'))
-        voucher = float(self._parse_int(self._widgets.get('voucher').text() if self._widgets.get('voucher') else ''))
+        voucher = float(self._get_validated_voucher(self._widgets.get('voucher')))
 
-        unalloc = total - (cash + nets + paynow + voucher)
+        unalloc = self._round_currency(total - (cash + nets + paynow + voucher))
         self._last_unalloc = unalloc
         self._set_label_text(self._widgets.get('unalloc_label'), self._format_money(unalloc))
 
@@ -253,7 +287,7 @@ class PaymentPanel(QObject):
 
         self._set_tender_visibility(True)
         tender = self._get_validated_amount(tender_widget)
-        balance = tender - cash
+        balance = self._round_currency(tender - cash)
         self._set_line_text(self._widgets.get('balance'), self._format_number(balance))
         self._update_unalloc_ui(self._last_unalloc)
         self._update_placeholders(self._last_unalloc, cash)
@@ -267,7 +301,7 @@ class PaymentPanel(QObject):
         for key, field in zip(('nets', 'paynow', 'voucher', 'cash'), self._pay_field_order()):
             if field is None:
                 continue
-            current_val = self._parse_amount(field.text()) if key != 'voucher' else float(self._parse_int(field.text()))
+            current_val = self._parse_amount(field.text()) if key != 'voucher' else float(self._get_validated_voucher(field))
             locked = unalloc <= 0 and current_val == 0
             field.setReadOnly(locked)
             field.setFocusPolicy(Qt.NoFocus if locked else Qt.StrongFocus)
@@ -304,11 +338,13 @@ class PaymentPanel(QObject):
         status = ctx.get('status')
         status_ok = status in ('NONE', 'UNPAID')
 
-        can_pay = total > 0 and unalloc == 0 and status_ok and not self._has_validation_error
+        can_pay = total > 0 and unalloc <= 0 and status_ok and not self._has_validation_error
         if cash > 0:
             can_pay = can_pay and tender >= cash
 
         pay_btn.setEnabled(can_pay)
+        for btn in self._pay_select_buttons.values():
+            btn.setEnabled(total > 0)
 
     def _update_placeholders(self, unalloc: float, cash: float) -> None:
         for key in ('cash', 'nets', 'paynow', 'voucher'):
@@ -331,13 +367,13 @@ class PaymentPanel(QObject):
             self._set_status(self._validation_message or "Invalid amount.", is_error=True)
             return
         if cash > 0 and tender < cash:
-            self._set_status("Cash tender is less than cash amount.", is_error=True)
+            self._set_status("Cash tender < CASH payable.", is_error=True)
             return
-        if unalloc > 0:
-            self._set_status("Balance remains to allocate.", is_error=True)
-            return
+        '''if unalloc > 0:
+            self._set_status("Payable not fully allocated.", is_error=True)
+            return'''
         if unalloc < 0:
-            self._set_status("Over-allocated payment amount.", is_error=True)
+            self._set_status("Warning: Payment Over-allocation.", is_error=True)
             return
         self._clear_status()
 
@@ -349,7 +385,18 @@ class PaymentPanel(QObject):
                     continue
                 if not (field.text() or '').strip():
                     continue
-                input_handler.handle_currency_input(field)
+                try:
+                    input_handler.handle_currency_input(field)
+                except Exception:
+                    self._mark_widget_invalid(field)
+                    raise
+            voucher_field = self._widgets.get('voucher')
+            if voucher_field is not None and (voucher_field.text() or '').strip():
+                try:
+                    input_handler.handle_voucher_input(voucher_field)
+                except Exception:
+                    self._mark_widget_invalid(voucher_field)
+                    raise
             self._has_validation_error = False
             self._validation_message = ""
         except Exception as exc:
@@ -367,13 +414,47 @@ class PaymentPanel(QObject):
 
     # Navigation
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.KeyPress and event.key() in (Qt.Key_Return, Qt.Key_Enter):
+        if event.type() == QEvent.FocusIn:
             if obj in self._pay_field_order() or obj == self._widgets.get('tender'):
-                cash = self._get_validated_amount(self._widgets.get('cash'))
-                tender = self._get_validated_amount(self._widgets.get('tender'))
-                unalloc = self._last_unalloc
-                self._handle_enter_navigation(obj, cash, tender, unalloc)
+                self._clear_validation_error(obj)
+
+        if event.type() == QEvent.KeyPress and event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            if isinstance(obj, QPushButton) and obj.isEnabled():
+                obj.click()
                 return True
+
+            if obj in self._pay_field_order() or obj == self._widgets.get('tender'):
+                try:
+                    from modules.ui_utils import input_handler
+                    # only validate when there's content
+                    text = obj.text() if hasattr(obj, 'text') else ''
+                    if text and text.strip():
+                        if obj == self._widgets.get('voucher'):
+                            input_handler.handle_voucher_input(obj)
+                        else:
+                            input_handler.handle_currency_input(obj)
+                except Exception as exc:
+                    self._has_validation_error = True
+                    self._validation_message = str(exc) or "Invalid amount."
+                    self._mark_widget_invalid(obj)
+                    self._set_status(self._validation_message, is_error=True)
+                    try:
+                        obj.setFocus()
+                        if hasattr(obj, 'selectAll'):
+                            obj.selectAll()
+                    except Exception:
+                        pass
+                    return True
+
+                # valid — continue navigation
+                self._handle_enter_navigation(
+                    obj,
+                    self._get_validated_amount(self._widgets.get('cash')),
+                    self._get_validated_amount(self._widgets.get('tender')),
+                    self._last_unalloc,
+                )
+                return True
+
         return super().eventFilter(obj, event)
 
     def _handle_enter_navigation(self, current, cash: float, tender: float, unalloc: float) -> None:
@@ -382,7 +463,7 @@ class PaymentPanel(QObject):
         pay_btn = self._widgets.get('pay_button')
 
         if current == cash_field:
-            if cash > 0 and unalloc == 0:
+            if cash > 0 and unalloc <= 0:
                 tender = self._get_validated_amount(tender_field)
                 if tender_field is not None and tender < cash:
                     tender_field.setFocus()
@@ -395,7 +476,7 @@ class PaymentPanel(QObject):
                 self.focus_jump_next_pay_field(current)
                 return
         elif current in self._pay_field_order():
-            if unalloc == 0:
+            if unalloc <= 0:
                 if pay_btn is not None:
                     pay_btn.setFocus()
                 return
@@ -408,10 +489,12 @@ class PaymentPanel(QObject):
             if tender > cash and unalloc > 0:
                 self.focus_jump_next_pay_field()
                 return
-            if tender >= cash and unalloc == 0:
+            if tender >= cash and unalloc <= 0:
                 if pay_btn is not None:
                     pay_btn.setFocus()
                 return
+
+    
 
     def focus_jump_next_pay_field(self, current=None) -> None:
         fields = [f for f in self._pay_field_order() if f is not None and f.isEnabled() and not f.isReadOnly()]
@@ -499,7 +582,7 @@ class PaymentPanel(QObject):
         for key, field_name in fields.items():
             widget = self.widget.findChild(QLineEdit, field_name)
             if key == 'voucher':
-                payload[key] = self._parse_int(widget.text() if widget is not None else '')
+                payload[key] = self._get_validated_voucher(widget) if widget is not None else 0
             else:
                 payload[key] = self._parse_amount(widget.text() if widget is not None else '')
         return payload
@@ -508,7 +591,7 @@ class PaymentPanel(QObject):
         total = self._get_total_amount()
         if total <= 0:
             return False
-        if self._last_unalloc != 0:
+        if self._last_unalloc > 0:
             return False
         if self._has_validation_error:
             return False
@@ -531,17 +614,27 @@ class PaymentPanel(QObject):
     def _apply_unalloc_highlight(self, active: bool, unalloc: float = 0.0) -> None:
         title = self._widgets.get('unalloc_title')
         label = self._widgets.get('unalloc_label')
+        frame = self._widgets.get('unalloc_frame')
+
         if active:
             if title is not None:
-                color = "red" if unalloc > 0 else "green" if unalloc < 0 else ""
-                title.setStyleSheet(f"color: {color};" if color else "")
+                color = "red" if unalloc > 0 else "blue" if unalloc < 0 else ""
+                title.setStyleSheet(f"color: {color}; border: transparent;" if color else "border: transparent;")
             if label is not None:
-                label.setStyleSheet("background-color: yellow;")
+                label.setStyleSheet("background-color: yellow; border: transparent;")
+            if frame is not None:
+                frame.setStyleSheet("""
+                    background-color: orange;
+                    border: 3px solid orange;
+                    border-radius: 10px;
+                """)
         else:
             if title is not None:
-                title.setStyleSheet("")
+                title.setStyleSheet("border: transparent;")
             if label is not None:
-                label.setStyleSheet("")
+                label.setStyleSheet("border: transparent;")
+            if frame is not None:
+                frame.setStyleSheet("")  # or restore original if stored
 
     def _clear_unalloc_highlight(self) -> None:
         self._apply_unalloc_highlight(False, 0.0)
@@ -553,6 +646,8 @@ class PaymentPanel(QObject):
         if title is not None:
             if unalloc < 0:
                 title.setText("Over Allocated")
+            elif unalloc > 0:
+                title.setText("Allocate Remaining")
             else:
                 title.setText(self._unalloc_title_default)
 
@@ -568,6 +663,32 @@ class PaymentPanel(QObject):
             return
         ui_feedback.clear_status_label(label)
 
+    def _mark_widget_invalid(self, widget) -> None:
+        try:
+            if isinstance(widget, QLineEdit):
+                self._last_invalid_widget = widget
+                widget.setProperty('validation', 'error')
+                widget.style().unpolish(widget)
+                widget.style().polish(widget)
+        except Exception:
+            pass
+
+    def _clear_validation_error(self, widget=None) -> None:
+        if widget is not None and widget is not self._last_invalid_widget:
+            return
+        if self._has_validation_error:
+            self._has_validation_error = False
+            self._validation_message = ""
+            self._clear_status()
+        if isinstance(widget, QLineEdit):
+            try:
+                widget.setProperty('validation', '')
+                widget.style().unpolish(widget)
+                widget.style().polish(widget)
+            except Exception:
+                pass
+        if widget is self._last_invalid_widget:
+            self._last_invalid_widget = None
 
 def setup_payment_panel(main_window, UI_DIR):
     payment_placeholder = getattr(main_window, 'paymentFrame', None)

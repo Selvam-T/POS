@@ -7,8 +7,10 @@ from config import (
 	QUANTITY_MAX_UNIT,
 	UNIT_PRICE_MIN,
 	UNIT_PRICE_MAX,
-	PAID_MIN,
-	PAID_MAX,
+	CURRENCY_MIN,
+	CURRENCY_MAX,
+    VOUCHER_MIN,
+    VOUCHER_MAX,
 	STRING_MAX_LENGTH,
 	PASSWORD_MIN_LENGTH,
 	EMAIL_REGEX,
@@ -241,7 +243,7 @@ def validate_unit_price(value, min_val=UNIT_PRICE_MIN, max_val=UNIT_PRICE_MAX, a
             return False, f"Maximum {asset_type.lower()} is {f_max}"
         return True, ""
     except (ValueError, TypeError):
-        return False, f"{asset_type} must be a number"
+        return False, f"{asset_type} must be a number."
 	
 def validate_selling_price(value, price_type="Selling price"):
     if value is None or str(value).strip() == "":
@@ -293,9 +295,27 @@ def validate_supplier(value):
 #--- 6. supplier end ---
 
 #--- 7. tender amount start ---
-def validate_currency(value, asset_type="Tender amount"):
+def validate_currency(value, asset_type="Amount"):
     if value is None or str(value).strip() == "":
         return True, ""
     # If not empty, use the same numeric logic
-    return validate_unit_price(value, min_val=PAID_MIN, max_val=PAID_MAX, asset_type=asset_type)
+    return validate_unit_price(value, min_val=CURRENCY_MIN, max_val=CURRENCY_MAX, asset_type=asset_type)
 #--- 7. tender amount end ---
+
+#--- 8. voucher amount start ---
+def validate_voucher_amount(value):
+    if value is None or str(value).strip() == "":
+        return True, ""
+    s = str(value).strip()
+    if not s.isdigit():
+        return False, "Voucher must be an integer"
+    try:
+        val = int(s)
+    except ValueError:
+        return False, "Voucher must be an integer"
+    if val < VOUCHER_MIN:
+        return False, f"Minimum voucher value is {VOUCHER_MIN}"
+    if val > VOUCHER_MAX:
+        return False, f"Maximum voucher value is {VOUCHER_MAX}"
+    return True, ""
+#--- 8. voucher amount end ---

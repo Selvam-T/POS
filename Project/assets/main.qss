@@ -68,6 +68,10 @@ QLabel#paymentLabel {
     border: 3px solid #7e7f7e;
     border-radius: 10px;
 }
+QLineEdit[validation="error"] {
+  border: 2px solid #c62828;
+  background-color: #fff1f0;
+}
 
 *[objectName*="TtlPayLabel"],
 *[objectName*="ValPayLabel"] {
@@ -112,33 +116,56 @@ QPushButton#voucherPaySlcBtn:pressed { background-color: #b89628; }
 
 #payPayOpsBtn, #printPayOpsBtn, #resetPayOpsBtn {
     color: white;
-    font-size: 18px;
+    font-size: 20px;
+    font-weight: bold;
     border-radius: 8px;
     border: 1px solid transparent; /* Forces custom styling engine */
     min-width: 130px;
     min-height: 80px;
 }
 
-#payPayOpsBtn   { background-color: #4CAF50; }
-#printPayOpsBtn { background-color: #2196F3; }
-#resetPayOpsBtn { background-color: #F44336; }
+#payPayOpsBtn {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #66BB6A, stop:1 #4CAF50);
+    border: 1px solid #388E3C;
+}
+#payPayOpsBtn:hover {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #81C784, stop:1 #66BB6A);
+}
+#payPayOpsBtn:pressed {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #4CAF50, stop:1 #388E3C);
+}
 
-#payPayOpsBtn:hover   { background-color: #ecf4ed; }
-#printPayOpsBtn:hover   { background-color: #f0f2f4; }
-#resetPayOpsBtn:hover   { background-color: #faf7f7; }
+#printPayOpsBtn {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #42A5F5, stop:1 #2196F3);
+    border: 1px solid #1976D2;
+}
+#printPayOpsBtn:hover {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #64B5F6, stop:1 #42A5F5);
+}
+#printPayOpsBtn:pressed {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #2196F3, stop:1 #1976D2);
+}
 
-#payPayOpsBtn:pressed { background-color: #051006; }
-#printPayOpsBtn:pressed { background-color: #0d1319; }
-#resetPayOpsBtn:pressed { background-color: #140909; }
+#resetPayOpsBtn {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #EF5350, stop:1 #F44336);
+    border: 1px solid #D32F2F;
+}
+#resetPayOpsBtn:hover {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #E57373, stop:1 #EF5350);
+}
+#resetPayOpsBtn:pressed {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #F44336, stop:1 #D32F2F);
+}
 
-/*
-#payPayOpsBtn:hover   { background-color: #66BB6A; }
-#printPayOpsBtn:hover   { background-color: #42A5F5; }
-#resetPayOpsBtn:hover   { background-color: #EF5350; }
-
-#payPayOpsBtn:pressed { background-color: #388E3C; }
-#printPayOpsBtn:pressed { background-color: #1976D2; }
-#resetPayOpsBtn:pressed { background-color: #D32F2F; } */
+/* Focus highlight for payment operation buttons */
+QPushButton#payPayOpsBtn:focus,
+QPushButton#resetPayOpsBtn:focus,
+QPushButton#printPayOpsBtn:focus {
+    outline: none;
+    font-size: 24px;
+    border: 3px solid yellow;
+    border-radius: 8px;
+}
 
 /* 6. tender */
 
@@ -206,9 +233,26 @@ QPushButton#voucherPaySlcBtn:pressed { background-color: #b89628; }
   background-color: #919eb0;
 }
 
+/* 7. Status Label */
 QLabel#payStatusLabel {
   font-size: 18px;
   font-weight: bold;
+}
+
+/* Success State - Triggered by .setProperty("status", "success") */
+QLabel[status="success"] {
+    color: #166534; /* Dark Green */
+    background-color: #f0fdf4; /* Light Green Tint */
+    border: 1px solid #bbf7d0;
+    border-radius: 4px;
+}
+
+/* Error State - Triggered by .setProperty("status", "error") */
+QLabel[status="error"] {
+    color: #991b1b; /* Dark Red */
+    background-color: #fef2f2; /* Light Red Tint */
+    border: 1px solid #fecaca;
+    border-radius: 4px;
 }
 
 /* =============================================================
