@@ -29,10 +29,14 @@ from PyQt5.QtWidgets import QHeaderView
 from PyQt5.QtGui import QFontMetrics, QIcon
 
 from modules.table import setup_sales_table, handle_barcode_scanned, bind_total_label
+from modules.table.table_operations import get_sales_data
 from modules.sales.sales_frame_setup import setup_sales_frame
 from modules.payment.payment_panel import setup_payment_panel
 from modules.devices.barcode_manager import BarcodeManager
 from modules.wrappers.dialog_wrapper import DialogWrapper
+from modules.db_operation.db import get_conn, transaction, now_iso
+from modules.db_operation.receipt_numbers import next_receipt_no
+from modules.db_operation import PRODUCT_CACHE
 # --- Menu frame dialog controllers ---
 from modules.menu.logout_menu import launch_logout_dialog
 from modules.menu.admin_menu import launch_admin_dialog
@@ -516,23 +520,266 @@ class MainLoader(QMainWindow):
             panel.clear_payment_frame()
 
     # ========== Payment Processing ==========
-    # Process the current receipt payment payload (stub).
-    def pay_current_receipt(self, payment_split: dict) -> bool:
-        """Entry point for processing the current receipt payment (DB stub)."""
-        ctx = self.receipt_context
-        receipt_id = ctx.get('active_receipt_id')
+    def _show_main_status(self, message: str, duration_ms: int = 5000) -> None:
+        sb = getattr(self, 'statusbar', None) or self.statusBar()
+        if sb is not None:
+            try:
+                sb.showMessage(message, duration_ms)
+            except Exception:
+                pass
+
+    @staticmethod
+    def _table_columns(conn, table_name: str) -> set[str]:
         try:
-            if receipt_id is None:
-                print("Creating paid receipt and payment records (stub).")
+            rows = conn.execute(f"PRAGMA table_info({table_name})").fetchall()
+            return {str(r['name']) for r in rows}
+        except Exception:
+            return set()
+
+    @staticmethod
+    def _first_existing(columns: set[str], *candidates: str):
+        for name in candidates:
+            if name in columns:
+                return name
+        return None
+
+    @staticmethod
+    def _insert_row(conn, table_name: str, values: dict) -> int:
+        cols = list(values.keys())
+        placeholders = ", ".join("?" for _ in cols)
+        col_sql = ", ".join(cols)
+        sql = f"INSERT INTO {table_name} ({col_sql}) VALUES ({placeholders})"
+        cur = conn.execute(sql, tuple(values[c] for c in cols))
+        return int(cur.lastrowid or 0)
+
+    def _build_payment_rows(self, payment_split: dict) -> list[tuple[str, float]]:
+        rows = []
+        mapping = {
+            'cash': 'CASH',
+            'nets': 'NETS',
+            'paynow': 'PAYNOW',
+            'voucher': 'VOUCHER',
+        }
+        for key, ptype in mapping.items():
+            try:
+                amount = float(payment_split.get(key, 0.0) or 0.0)
+            except Exception:
+                amount = 0.0
+            if amount > 0:
+                rows.append((ptype, amount))
+        return rows
+
+    def _build_sale_items_snapshot(self) -> list[dict]:
+        sales_table = getattr(self, 'sales_table', None)
+        rows = get_sales_data(sales_table) if sales_table is not None else []
+
+        by_name: dict[str, str] = {}
+        try:
+            for code, rec in (PRODUCT_CACHE or {}).items():
+                if not rec:
+                    continue
+                name = str(rec[0] or '').strip()
+                if not name:
+                    continue
+                by_name.setdefault(name.lower(), str(code))
+        except Exception:
+            by_name = {}
+
+        out = []
+        for row in rows:
+            name = str(row.get('product_name') or row.get('product') or '').strip()
+            qty = float(row.get('quantity') or 0.0)
+            unit_price = float(row.get('unit_price') or 0.0)
+            out.append({
+                'product_code': by_name.get(name.lower(), ''),
+                'name': name,
+                'category': '',
+                'quantity': qty,
+                'unit': str(row.get('unit') or ''),
+                'price': unit_price,
+                'line_total': round(qty * unit_price, 2),
+            })
+        return out
+
+    def _insert_receipt_header_paid(self, conn, receipt_no: str, total: float, paid_at: str) -> int:
+        cols = self._table_columns(conn, 'receipts')
+        values = {}
+
+        key_col = self._first_existing(cols, 'receipt_no', 'receipt_number')
+        if key_col is not None:
+            values[key_col] = receipt_no
+
+        for candidate, value in (
+            ('grand_total', total),
+            ('total', total),
+            ('status', 'PAID'),
+            ('customer_name', ''),
+            ('cashier_name', ''),
+            ('notes', ''),
+            ('note', ''),
+            ('created_at', paid_at),
+            ('paid_at', paid_at),
+        ):
+            if candidate in cols:
+                values[candidate] = value
+
+        if key_col is None and 'id' not in cols and 'receipt_id' not in cols:
+            raise RuntimeError('receipts table missing receipt key columns')
+
+        return self._insert_row(conn, 'receipts', values)
+
+    def _mark_receipt_paid(self, conn, active_receipt_id, paid_at: str) -> str:
+        cols = self._table_columns(conn, 'receipts')
+        id_col = self._first_existing(cols, 'id', 'receipt_id')
+        no_col = self._first_existing(cols, 'receipt_no', 'receipt_number')
+
+        set_parts = []
+        params = []
+        if 'status' in cols:
+            set_parts.append("status = ?")
+            params.append('PAID')
+        if 'paid_at' in cols:
+            set_parts.append("paid_at = ?")
+            params.append(paid_at)
+        if not set_parts:
+            raise RuntimeError('receipts table has no updatable paid columns')
+
+        where_sql = None
+        if id_col is not None and isinstance(active_receipt_id, int):
+            where_sql = f"{id_col} = ?"
+            params.append(active_receipt_id)
+        elif no_col is not None:
+            where_sql = f"{no_col} = ? COLLATE NOCASE"
+            params.append(str(active_receipt_id))
+        elif id_col is not None:
+            where_sql = f"{id_col} = ?"
+            params.append(active_receipt_id)
+
+        if where_sql is None:
+            raise RuntimeError('Cannot resolve receipt identifier for held payment')
+
+        sql = f"UPDATE receipts SET {', '.join(set_parts)} WHERE {where_sql}"
+        cur = conn.execute(sql, tuple(params))
+        if cur.rowcount <= 0:
+            raise RuntimeError('Held receipt not found or already paid')
+
+        if no_col is None:
+            return str(active_receipt_id)
+
+        row = conn.execute(
+            f"SELECT {no_col} AS receipt_no FROM receipts WHERE {where_sql}",
+            tuple(params[-1:]),
+        ).fetchone()
+        if row and row['receipt_no']:
+            return str(row['receipt_no'])
+        return str(active_receipt_id)
+
+    def _insert_receipt_items(self, conn, receipt_no: str, receipt_db_id: int, items: list[dict]) -> None:
+        cols = self._table_columns(conn, 'receipt_items')
+        link_col = self._first_existing(cols, 'receipt_id', 'receipt_no', 'receipt_number')
+        if link_col is None:
+            raise RuntimeError('receipt_items table missing receipt link column')
+
+        for idx, item in enumerate(items, start=1):
+            values = {}
+            if link_col == 'receipt_id' and receipt_db_id:
+                values[link_col] = receipt_db_id
             else:
-                print(f"Marking receipt {receipt_id} as PAID and inserting payments (stub).")
+                values[link_col] = receipt_no
+
+            if 'line_no' in cols:
+                values['line_no'] = idx
+            if 'product_code' in cols:
+                values['product_code'] = item.get('product_code', '')
+
+            name_col = self._first_existing(cols, 'name', 'product_name')
+            if name_col is not None:
+                values[name_col] = item.get('name', '')
+
+            if 'category' in cols:
+                values['category'] = item.get('category', '')
+
+            qty_col = self._first_existing(cols, 'quantity', 'qty')
+            if qty_col is not None:
+                values[qty_col] = float(item.get('quantity', 0.0) or 0.0)
+
+            if 'unit' in cols:
+                values['unit'] = item.get('unit', '')
+
+            price_col = self._first_existing(cols, 'price', 'unit_price')
+            if price_col is not None:
+                values[price_col] = float(item.get('price', 0.0) or 0.0)
+
+            if 'line_total' in cols:
+                values['line_total'] = float(item.get('line_total', 0.0) or 0.0)
+
+            self._insert_row(conn, 'receipt_items', values)
+
+    def _insert_receipt_payments(self, conn, receipt_no: str, receipt_db_id: int, payment_rows: list[tuple[str, float]], paid_at: str) -> None:
+        cols = self._table_columns(conn, 'receipt_payments')
+        link_col = self._first_existing(cols, 'receipt_id', 'receipt_no', 'receipt_number')
+        if link_col is None:
+            raise RuntimeError('receipt_payments table missing receipt link column')
+
+        time_col = self._first_existing(cols, 'created_at', 'paid_at')
+
+        for ptype, amount in payment_rows:
+            values = {}
+            if link_col == 'receipt_id' and receipt_db_id:
+                values[link_col] = receipt_db_id
+            else:
+                values[link_col] = receipt_no
+
+            if 'payment_type' in cols:
+                values['payment_type'] = ptype
+            if 'amount' in cols:
+                values['amount'] = float(amount)
+            if time_col is not None:
+                values[time_col] = paid_at
+
+            self._insert_row(conn, 'receipt_payments', values)
+
+    def pay_current_receipt(self, payment_split: dict) -> bool:
+        """Process current payment with one atomic DB transaction."""
+        ctx = self.receipt_context
+        active_receipt_id = ctx.get('active_receipt_id')
+
+        try:
+            sales_items = self._build_sale_items_snapshot()
+            if not sales_items:
+                raise RuntimeError('No sale items to pay')
+
+            payment_rows = self._build_payment_rows(payment_split)
+            if not payment_rows:
+                raise RuntimeError('No payment entries to save')
+
+            total = float(payment_split.get('total', 0.0) or 0.0)
+            paid_at = now_iso()
+
+            receipt_no = None
+            with get_conn() as conn:
+                with transaction(conn):
+                    receipt_db_id = 0
+                    if active_receipt_id is None:
+                        receipt_no = next_receipt_no(conn=conn)
+                        receipt_db_id = self._insert_receipt_header_paid(conn, receipt_no, total, paid_at)
+                        self._insert_receipt_items(conn, receipt_no, receipt_db_id, sales_items)
+                    else:
+                        receipt_no = self._mark_receipt_paid(conn, active_receipt_id, paid_at)
+                        receipt_db_id = active_receipt_id if isinstance(active_receipt_id, int) else 0
+
+                    self._insert_receipt_payments(conn, receipt_no, receipt_db_id, payment_rows, paid_at)
+
+            self._show_main_status(f"Payment completed: {receipt_no}", 5000)
             return True
+
         except Exception as e:
             try:
                 from modules.ui_utils.error_logger import log_error
                 log_error(f"Payment processing failed: {e}")
             except Exception:
                 pass
+            self._show_main_status(f"Payment failed: {e}", 6000)
             return False
 
     # ========== Post-Dialog Action Handlers ==========
