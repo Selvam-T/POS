@@ -520,6 +520,7 @@ class MainLoader(QMainWindow):
             panel.clear_payment_frame()
 
     # ========== Payment Processing ==========
+    # Payment commit is performed here in one atomic DB transaction.
     def _show_main_status(self, message: str, duration_ms: int = 5000) -> None:
         sb = getattr(self, 'statusbar', None) or self.statusBar()
         if sb is not None:

@@ -72,6 +72,13 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
   - `hold_sales` launcher requires sales table rows > 0, `active_receipt_id is None`, and `source == ACTIVE_SALE`.
   - `view_hold` launcher requires sales table rows == 0, `active_receipt_id is None`, and payment total effectively zero; otherwise a status hint is shown.
   - Cancel All still requires an active sale (table rows) as before.
+ 
+  ### Payment commit (Feb 2026)
+
+  - The application finalizes payments in `main.py` to ensure all DB writes
+    (receipt counter, receipts header, receipt_items, receipt_payments) occur
+    inside a single atomic transaction. See `Documentation/payment_processing.md`
+    for full details and the distinction between new-sale vs held-receipt flows.
 
 - **Sales Table Management:**
   - Loads and configures the sales table, binds the total label, and manages row operations.

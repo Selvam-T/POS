@@ -57,3 +57,7 @@ unalloc = total - (nets + paynow + voucher + cash)
 
 ## Why shared focus helpers are not used here
 - `FieldCoordinator` / `FocusGate` provide generic Enter→next/validate/status and static gating used by other dialogs (e.g., vegetable_menu). Payment flow depends on live allocation math (unalloc, tender vs cash), per-method auto-fill/zeroing, and conditional tender visibility. These dynamic rules require bespoke branching on every change, so adopting the shared coordinator would still leave most custom logic duplicated. Currency validation remains shared via `input_handler` (and `input_validation`/`ui_feedback`).
+
+## See also
+
+- `Documentation/payment_processing.md` — detailed commit flow and distinction between new-sale and held-receipt paths; the DB commit is executed by `main.py`.

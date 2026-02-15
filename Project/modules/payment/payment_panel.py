@@ -1,4 +1,9 @@
-"""Controller wiring the payment frame UI into the POS flow."""
+"""Payment UI controller.
+
+Emits `payRequested` (payload) when payment is confirmed. Database
+finalization (atomic commit across receipts/items/payments) is handled by
+the application layer (`main.py`).
+"""
 import os
 from PyQt5 import uic
 from PyQt5.QtCore import QObject, pyqtSignal, Qt, QEvent
