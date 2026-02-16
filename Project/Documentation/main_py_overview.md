@@ -75,10 +75,12 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
  
   ### Payment commit (Feb 2026)
 
-  - The application finalizes payments in `main.py` to ensure all DB writes
-    (receipt counter, receipts header, receipt_items, receipt_payments) occur
-    inside a single atomic transaction. See `Documentation/payment_processing.md`
-    for full details and the distinction between new-sale vs held-receipt flows.
+  - `main.py` orchestrates payment completion and delegates persistence to
+    `modules/payment/sale_committer.py`.
+  - The service performs all DB writes (receipt counter, receipts header,
+    receipt_items, receipt_payments) in one atomic transaction.
+  - See `Documentation/payment_processing.md` for full details and the
+    new-sale vs held-receipt distinction.
 
 - **Sales Table Management:**
   - Loads and configures the sales table, binds the total label, and manages row operations.

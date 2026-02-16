@@ -9,8 +9,10 @@ Overview
 - UI layer (`modules/payment/payment_panel.py`): validates inputs and emits the
   `payRequested` signal with a normalized payment payload. It does not write
   to the database.
-- Application layer (`main.py`): listens for `payRequested` and executes the
-  multi-table DB commit inside one transaction using `modules/db_operation/db.transaction`.
+- Application layer (`main.py`): listens for `payRequested`, prepares payment
+  data, and delegates DB finalization to `modules/payment/sale_committer.py`.
+- Service layer (`modules/payment/sale_committer.py`): executes the multi-table
+  DB commit inside one transaction using `modules/db_operation/db.transaction`.
 
 Why the app layer performs DB commits
 -------------------------------------
@@ -86,3 +88,4 @@ References
 - `modules/db_operation/receipt_numbers.py` — `next_receipt_no` (now safe
   to call inside an existing transaction when passed `conn`).
 - `modules/db_operation/receipts_repo.py` — simple repo helpers used elsewhere.
+- `modules/payment/sale_committer.py` — dedicated atomic commit service.
