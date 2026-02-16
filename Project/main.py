@@ -36,6 +36,7 @@ from modules.payment.sale_committer import SaleCommitter
 from modules.devices.barcode_manager import BarcodeManager
 from modules.wrappers.dialog_wrapper import DialogWrapper
 from modules.db_operation import PRODUCT_CACHE
+from modules.ui_utils.dialog_utils import report_exception
 # --- Menu frame dialog controllers ---
 from modules.menu.logout_menu import launch_logout_dialog
 from modules.menu.admin_menu import launch_admin_dialog
@@ -95,6 +96,8 @@ class MainLoader(QMainWindow):
             'source': 'ACTIVE_SALE',
             'status': 'NONE',
         }
+        self._payment_in_progress = False
+        self._payment_busy_status_ms = 3000
         # Remove the window close button (X) to force using Logout
         try:
             flags = self.windowFlags()
@@ -572,8 +575,22 @@ class MainLoader(QMainWindow):
 
     def pay_current_receipt(self, payment_split: dict) -> bool:
         """Process current payment via SaleCommitter atomic service."""
+        if self._payment_in_progress:
+            self._show_main_status("Payment is already processing...", self._payment_busy_status_ms)
+            return False
+
         ctx = self.receipt_context
         active_receipt_id = ctx.get('active_receipt_id')
+        panel = getattr(self, 'payment_panel_controller', None)
+
+        self._payment_in_progress = True
+        if panel is not None:
+            try:
+                pay_btn = panel._widgets.get('pay_button')
+                if pay_btn is not None:
+                    pay_btn.setEnabled(False)
+            except Exception:
+                pass
 
         try:
             sales_items = self._build_sale_items_snapshot()
@@ -592,13 +609,22 @@ class MainLoader(QMainWindow):
             return True
 
         except Exception as e:
-            try:
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"Payment processing failed: {e}")
-            except Exception:
-                pass
-            self._show_main_status(f"Payment failed: {e}", 6000)
+            report_exception(
+                self,
+                "Payment processing",
+                e,
+                user_message="Payment failed. Please retry.",
+                duration=6000,
+            )
             return False
+
+        finally:
+            self._payment_in_progress = False
+            if panel is not None:
+                try:
+                    panel.update_pay_button_state()
+                except Exception:
+                    pass
 
     # ========== Post-Dialog Action Handlers ==========
     # Merge items returned by dialogs into the sales table.

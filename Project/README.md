@@ -51,10 +51,25 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 ### Hard-fail vs Soft-fail (quick rules)
 
 - **Hard-fail (unexpected exception):** caught by `DialogWrapper`; overlay/scanner is cleaned up; details go to `log/error.log`; a short StatusBar hint is shown.
-- **Soft-fail (handled failure):** validation errors and DB CRUD failures are handled inside the dialog; users see dialog-local status immediately, and a StatusBar message is queued **post-close** when appropriate.
+- **Soft-fail (handled failure):** validation/business-rule issues are handled in the active UI flow so users can correct and retry; payment DB commit failures are surfaced from `main.py` on the MainWindow StatusBar while preserving the current sale for retry/hold.
 - **Success-with-warning:** if DB write succeeds but a post-success refresh (cache/completers) fails, show success in the dialog label but show the warning in the StatusBar after close (warning/error takes precedence).
 
 See details: `Documentation/error_logging_and_fallback.md`, `Documentation/dialog_pipeline.md`, `Documentation/dialog_utils.md`.
+
+### Payment DB failure (quick operator steps)
+
+If PAY fails during DB CRUD commit:
+
+1. Read the status bar message and retry PAY once.
+2. If retry fails, place the sale on HOLD and continue the queue.
+3. Escalate to supervisor/IT and share `log/error.log` for traceback details.
+
+Current behavior:
+- Failed commit does **not** clear the sales table (sale is preserved for retry/hold).
+- PAY has a double-submit guard while commit is in progress.
+- Hard failures are reported via `dialog_utils.report_exception` (status bar + traceback logging).
+
+Deep-dive reference: `Documentation/payment_processing.md`.
 
 ✅ **Consistent Dialog Button Styling**
 - All dialog action buttons now use standardized object names:
