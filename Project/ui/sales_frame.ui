@@ -184,9 +184,9 @@
        <number>10</number>
       </property>
       <item>
-       <widget class="QPushButton" name="cancelsaleBtn">
+       <widget class="QPushButton" name="clearcartBtn">
         <property name="text">
-         <string>Cancel Sales</string>
+         <string>Clear Cart</string>
         </property>
        </widget>
       </item>

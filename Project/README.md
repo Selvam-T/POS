@@ -44,7 +44,7 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 
 - Status bar notifications for invalid products and dialog errors
 - Graceful fallback when database or dialog UI files are unavailable
-- Dialogs (e.g., Cancel Sale) use a minimal fallback if UI file is missing, with clear messaging and styled buttons
+- Dialogs (e.g., Clear Cart) use a minimal fallback if UI file is missing, with clear messaging and styled buttons
 - All dialog/UI errors are logged to `log/error.log` with timestamp using a shared logger
 - Windows-console-safe logging (ASCII only)
 

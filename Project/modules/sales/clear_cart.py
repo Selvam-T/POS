@@ -13,19 +13,19 @@ from modules.ui_utils.error_logger import log_error
 # Paths
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 _PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
-UI_PATH = os.path.join(_PROJECT_DIR, 'ui', 'cancel_sale.ui')
+UI_PATH = os.path.join(_PROJECT_DIR, 'ui', 'clear_cart.ui')
 QSS_PATH = os.path.join(_PROJECT_DIR, 'assets', 'dialog.qss')
 
-def launch_cancelsale_dialog(host_window):
+def launch_clearcart_dialog(host_window):
     """
-    Standardized Cancel Sale dialog.
+    Standardized Clear Cart dialog.
     Returns a QDialog. If accepted, the caller clears the sales table.
     """
     # 1. Attempt standard pipeline load
     dlg = build_dialog_from_ui(
         UI_PATH, 
         host_window=host_window, 
-        dialog_name='Cancel Sale', 
+        dialog_name='Clear Cart', 
         qss_path=QSS_PATH
     )
 
@@ -55,7 +55,7 @@ def launch_cancelsale_dialog(host_window):
             return dlg
             
         except Exception as e:
-            log_error(f"Cancel Sale UI mapping failed, falling back: {e}")
+            log_error(f"Clear Cart UI mapping failed, falling back: {e}")
             # Fall through to programmatic fallback if widgets are missing/renamed
 
     # --- BRANCH B: PROGRAMMATIC FALLBACK (250x250) ---
@@ -115,7 +115,7 @@ def launch_cancelsale_dialog(host_window):
     btn_ok.clicked.connect(_fallback_confirm)
 
     # Notify user that UI was missing via Main Window Status Bar
-    set_dialog_error(dlg, "Error: Cancel Sale UI missing. Used emergency fallback.")
+    set_dialog_error(dlg, "Error: Clear Cart UI missing. Used emergency fallback.")
     
     btn_cancel.setFocus()
     return dlg

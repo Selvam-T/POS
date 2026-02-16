@@ -99,10 +99,10 @@ class SalesFrame(QObject):
         receipt_container.setMinimumHeight(height)
         receipt_container.setMaximumHeight(height)
 
-        cancelsale_btn = receipt_container.findChild(QPushButton, 'cancelsaleBtn')
-        if cancelsale_btn is not None:
-            cancelsale_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
-            cancelsale_btn.clicked.connect(self._on_cancel_clicked)
+        clearcart_btn = receipt_container.findChild(QPushButton, 'clearcartBtn')
+        if clearcart_btn is not None:
+            clearcart_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+            clearcart_btn.clicked.connect(self._on_cancel_clicked)
 
         holdsales_btn = receipt_container.findChild(QPushButton, 'holdSalesBtn')
         if holdsales_btn is not None:
@@ -134,7 +134,7 @@ class SalesFrame(QObject):
         self.saleTotalChanged.emit(total)
 
     def _on_cancel_clicked(self) -> None:
-        self._main_window.open_cancelsale_dialog()
+        self._main_window.open_clearcart_dialog()
 
     def _on_hold_requested(self) -> None:
         self.holdRequested.emit()

@@ -33,7 +33,7 @@ Quality gates: PASS (syntax/import). Manual validation: scanning adds rows incre
 Error logging and fallback dialog improvements:
 
 - Added shared error logger (`modules/ui_utils/error_logger.py`) for consistent, timestamped error logging to `log/error.log`.
-- Updated Cancel Sale dialog controller to use fallback dialog if UI file is missing, with clear messaging and styled buttons.
+- Updated Clear Cart dialog controller to use fallback dialog if UI file is missing, with clear messaging and styled buttons.
 - Fallback dialog logs error and shows statusbar notification using `show_main_status()`.
 - Minimal button styling ensures visibility even if QSS is not applied.
 - Documentation updated: see `Documentation/error_logging_and_fallback.md` and revised `cancel_all_functionality.md`.
@@ -324,7 +324,7 @@ salesFrame (QFrame)
     │           └── Manual product entry
     └── receiptContainer (QWidget) - [stretch=2]
         └── receiptLayout (QHBoxLayout)
-            ├── cancelsaleBtn (QPushButton) - "Cancel Sale"
+            ├── clearcartBtn (QPushButton) - "Clear Cart"
             ├── holdSalesBtn (QPushButton) - "On Hold"
             └── viewholdBtn (QPushButton) - "View Hold"
         └── Height: 4.0em, buttons expand vertically

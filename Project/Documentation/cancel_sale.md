@@ -1,6 +1,6 @@
 # Cancel All Functionality Documentation
 
-**Location:** `modules/sales/cancel_sale.py` and `main.py`
+**Location:** `modules/sales/clear_cart.py` and `main.py`
 
 ## Overview
 
@@ -21,7 +21,7 @@ The Cancel All feature provides a safe way for users to clear the entire sales t
 ## Implementation Details
 
 ### Dialog Controller
-**File:** `modules/sales/cancel_sale.py`
+**File:** `modules/sales/clear_cart.py`
 
 The controller now follows modern safety and UI standards:
 
@@ -32,7 +32,7 @@ The controller now follows modern safety and UI standards:
 - **Removed Legacy Boilerplate:** Manual `uic.loadUi` calls and `os.path.exists` checks have been eliminated, reducing clutter and improving maintainability.
 
 **How it works:**
-- Loads UI from `cancel_sale.ui` if available; otherwise, shows a visually consistent fallback dialog and logs the error.
+- Loads UI from `clear_cart.ui` if available; otherwise, shows a visually consistent fallback dialog and logs the error.
 - Fallback dialog includes a confirmation message and two styled buttons (Cancel/No, Yes/Clear All), with Cancel focused by default.
 - Error is logged to `log/error.log` with timestamp using the shared logger.
 - Statusbar notification is shown to inform the user when fallback is used.
@@ -42,11 +42,11 @@ The controller now follows modern safety and UI standards:
 
 **Dialog Launcher:**
 ```python
-def open_cancelsale_dialog(self):
-    """Open Cancel Sale confirmation dialog."""
+def open_clearcart_dialog(self):
+    """Open Clear Cart confirmation dialog."""
     self.dialog_wrapper.open_dialog_scanner_blocked(
-        launch_cancelsale_dialog,
-        dialog_key='cancel_sale',
+        launch_clearcart_dialog,
+        dialog_key='clear_cart',
         on_finish=lambda: self._clear_sales_table()
     )
 ```
@@ -87,7 +87,7 @@ def _clear_sales_table(self):
 
 - **Scanner:** Blocked during dialog (prevents stray input)
 - **Overlay:** Dims background to indicate modal state
-- **Dialog key:** `'cancel_sale'` registered in wrapper
+- **Dialog key:** `'clear_cart'` registered in wrapper
 - **Size:** Default 70% width x 70% height (configured in dialog_wrapper.py)
 
 ---
@@ -98,7 +98,7 @@ def _clear_sales_table(self):
 
 ```python
 # ========== Sales Frame Dialog Handlers ==========
-def open_cancelsale_dialog(self): ...
+def open_clearcart_dialog(self): ...
 
 # ========== Post-Dialog Action Handlers ==========
 def _clear_sales_table(self): ...
@@ -109,7 +109,7 @@ def _perform_logout(self): ...
 - Needs access to `self.sales_table` (main window instance attribute)
 - Needs access to `self.dialog_wrapper._last_dialog` (to check result)
 - Operates on main window context (table, labels, future payment frame)
-- Cannot be in `cancel_sale.py` without tight coupling
+- Cannot be in `clear_cart.py` without tight coupling
 
 ---
 
@@ -127,8 +127,8 @@ def _perform_logout(self): ...
 ## Related Files
 
 
-- `ui/cancel_sale.ui` - Dialog UI definition
-- `modules/sales/cancel_sale.py` - Dialog controller and fallback logic
+- `ui/clear_cart.ui` - Dialog UI definition
+- `modules/sales/clear_cart.py` - Dialog controller and fallback logic
 - `modules/ui_utils/error_logger.py` - Shared error logger
 - `main.py` - Dialog launcher and post-action handler
 - `modules/sales/sales_frame_setup.py` - Button wiring (line ~90)

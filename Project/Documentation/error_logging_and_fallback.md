@@ -19,7 +19,7 @@ This doc also defines the shared terminology used across dialogs:
 - Each log entry includes an ISO 8601 timestamp for traceability.
 - Example log entry:
   ```
-  2026-01-09T14:23:45.123456 - Failed to load cancel_sale.ui, using fallback dialog.
+  2026-01-09T14:23:45.123456 - Failed to load clear_cart.ui, using fallback dialog.
   ```
 
 ## Fallback Dialogs
@@ -77,7 +77,7 @@ Opt-in module:
 - Maintains consistent UI/UX even when assets are missing or corrupted.
 
 ## See Also
-- `Documentation/cancel_all_functionality.md` for Cancel Sale dialog workflow
+- `Documentation/cancel_all_functionality.md` for Clear Cart dialog workflow
 - `README.md` for general error handling and fallback notes
 - `Project_Journal.md` for development history and rationale
 

@@ -1,7 +1,0 @@
-2026-02-15T12:16:11.711197 - Payment processing failed: cannot start a transaction within a transaction
-2026-02-15T12:17:10.746243 - Payment processing failed: cannot start a transaction within a transaction
-2026-02-15T12:54:31.005355 - Payment processing failed: CHECK constraint failed: payment_type IN ('NETS','CASH','PAYNOW','OTHER')
-2026-02-15T12:55:06.648793 - Payment processing failed: CHECK constraint failed: payment_type IN ('NETS','CASH','PAYNOW','OTHER')
-2026-02-15T12:55:23.448913 - Payment processing failed: CHECK constraint failed: payment_type IN ('NETS','CASH','PAYNOW','OTHER')
-2026-02-15T12:55:42.707700 - Payment processing failed: CHECK constraint failed: payment_type IN ('NETS','CASH','PAYNOW','OTHER')
-2026-02-15T12:55:57.855431 - Payment processing failed: CHECK constraint failed: payment_type IN ('NETS','CASH','PAYNOW','OTHER')

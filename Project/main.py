@@ -49,7 +49,7 @@ from modules.sales.vegetable_entry import launch_vegetable_entry_dialog
 from modules.sales.manual_entry import launch_manual_entry_dialog
 from modules.sales.hold_sales import launch_hold_sales_dialog
 from modules.sales.view_hold import launch_viewhold_dialog
-from modules.sales.cancel_sale import launch_cancelsale_dialog
+from modules.sales.clear_cart import launch_clearcart_dialog
 
 from config import (
     ICON_ADMIN,
@@ -433,9 +433,9 @@ class MainLoader(QMainWindow):
 
         self.dialog_wrapper.open_dialog_scanner_blocked(launch_viewhold_dialog, dialog_key='view_hold')
 
-    # Prompt cancel sale dialog only when a sale exists.
-    def open_cancelsale_dialog(self):
-        """Open Cancel Sale confirmation dialog, only if there is an active sale."""
+    # Prompt clear cart dialog only when a sale exists.
+    def open_clearcart_dialog(self):
+        """Open Clear Cart confirmation dialog, only if there is an active sale."""
         from modules.table.table_operations import is_transaction_active
         from modules.ui_utils.ui_feedback import show_temp_status
 
@@ -446,8 +446,8 @@ class MainLoader(QMainWindow):
                 show_temp_status(sb, "No active sale to cancel.", 3000)
             return
         self.dialog_wrapper.open_dialog_scanner_blocked(
-            launch_cancelsale_dialog,
-            dialog_key='cancel_sale',
+            launch_clearcart_dialog,
+            dialog_key='clear_cart',
             on_finish=lambda: self._clear_sales_table()
         )
 
@@ -745,9 +745,6 @@ class MainLoader(QMainWindow):
 
             self._clear_sales_table_core()
             self._reset_receipt_context()
-
-            # Debug: show the new receipt_context after clearing
-            print(f"ReceiptContext after clear: {self.receipt_context}")
 
             panel = getattr(self, 'payment_panel_controller', None)
             if panel is not None:
