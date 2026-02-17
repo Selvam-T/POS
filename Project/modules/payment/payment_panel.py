@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QLineEdit, QLabel, QFrame
 
 from modules.ui_utils import ui_feedback
 from modules.ui_utils.error_logger import log_error
+from modules.payment import receipt_generator
 
 
 class PaymentPanel(QObject):
@@ -99,7 +100,7 @@ class PaymentPanel(QObject):
         for btn_name, handler in [
             ('payPayOpsBtn', self.handle_pay_clicked),
             ('resetPayOpsBtn', self.reset_payment_grid_to_default),
-            ('printPayOpsBtn', None),
+            ('printPayOpsBtn', self.handle_print_clicked),
         ]:
             btn = self.widget.findChild(QPushButton, btn_name)
             if btn is not None:
@@ -194,6 +195,18 @@ class PaymentPanel(QObject):
         if widget is None:
             return
         widget.setText(text)
+
+    def _show_main_status(self, message: str, duration_ms: int = 5000) -> None:
+        # Forward status messages to the main window status bar when available.
+        mw = getattr(self, '_main_window', None)
+        if mw is None:
+            return
+        try:
+            show_status = getattr(mw, '_show_main_status', None)
+            if callable(show_status):
+                show_status(message, duration_ms)
+        except Exception:
+            pass
 
     # Field accessors
     def _pay_field_order(self):
@@ -615,6 +628,47 @@ class PaymentPanel(QObject):
         payload['tender'] = self._get_validated_amount(self._widgets.get('tender'))
         payload['change'] = self._get_float_value(self._widgets.get('balance'))
         self.payRequested.emit(payload)
+
+    def handle_print_clicked(self) -> None:
+        # Print the last completed receipt to console (v1 behavior).
+        ctx = getattr(self._main_window, 'receipt_context', {}) or {}
+        receipt_no = ctx.get('last_receipt_no')
+        if not receipt_no:
+            ui_feedback.show_main_status(self._main_window, "Receipt not found.", is_error=True)
+            return
+
+        try:
+            receipt_text = receipt_generator.generate_receipt_text(str(receipt_no))
+            print(receipt_text)
+            ui_feedback.show_main_status(
+                self._main_window,
+                f"Receipt {receipt_no} printed.",
+                is_error=False,
+            )
+            if "Receipt Status is UNKNOWN" in receipt_text:
+                log_error(f"Receipt status is UNKNOWN for receipt {receipt_no}.")
+                ui_feedback.show_main_status(
+                    self._main_window,
+                    "Receipt status is UNKNOWN.",
+                    is_error=True,
+                )
+        except ValueError:
+            log_error(f"Receipt not found for receipt {receipt_no}.")
+            ui_feedback.show_main_status(self._main_window, "Receipt not found.", is_error=True)
+        except RuntimeError:
+            log_error(f"Receipt data unavailable for receipt {receipt_no}.")
+            ui_feedback.show_main_status(
+                self._main_window,
+                "Receipt data unavailable.",
+                is_error=True,
+            )
+        except Exception as exc:
+            log_error(f"Receipt print failed: {exc}")
+            ui_feedback.show_main_status(
+                self._main_window,
+                "Receipt print failed.",
+                is_error=True,
+            )
 
     def _collect_payment_split(self) -> dict:
         # Build normalized payment split values from UI fields.

@@ -63,6 +63,12 @@ COMPANY_NAME = 'Anumani Trading Pte Ltd'
 ADDRESS_LINE_1 = "BLK 77 INDUS RD, #01-501"
 ADDRESS_LINE_2 = "INDUS GARDEN SINGAPORE"
 
+# Receipt formatting
+RECEIPT_DEFAULT_WIDTH = 48
+RECEIPT_QTY_WIDTH = 7
+RECEIPT_AMOUNT_WIDTH = 8  # $9999.99
+RECEIPT_GAP = 2
+
 # Database path (absolute)
 _BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DB_PATH = os.path.join(os.path.dirname(_BASE_DIR), 'db', 'Anumani.db')

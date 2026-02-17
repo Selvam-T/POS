@@ -101,6 +101,7 @@ class MainLoader(QMainWindow):
             'active_receipt_id': None,
             'source': 'ACTIVE_SALE',
             'status': 'NONE',
+            'last_receipt_no': None,
         }
         self._payment_in_progress = False
         self._payment_busy_status_ms = 3000
@@ -633,6 +634,8 @@ class MainLoader(QMainWindow):
                 payment_rows=payment_rows,
                 total=total,
             )
+
+            self.receipt_context['last_receipt_no'] = str(receipt_no)
 
             self._show_main_status(f"Payment completed: {receipt_no}", 5000)
             return True
