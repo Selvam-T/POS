@@ -11,6 +11,7 @@
 ## Signals
 **Outgoing**
 - `payRequested(payload: dict)` — emitted when Pay is clicked and the state is valid.
+	Payload includes payment splits plus `tender` and `change` (for CASH flows).
 - `paymentSuccess()` — emitted by `notify_payment_success()` after payment processing is confirmed.
 
 **Incoming (wired in MainLoader)**
@@ -23,6 +24,10 @@
 **Allocation formula:**
 ```
 unalloc = total - (nets + paynow + voucher + cash)
+```
+**Tender/change:**
+```
+change = tender - cash
 ```
 
 ## UI Behavior (current)
@@ -52,7 +57,8 @@ unalloc = total - (nets + paynow + voucher + cash)
 - `focus_jump_next_pay_field()` — cycle focus to the next editable pay field.
 
 ## Integration Notes
-- `MainLoader._on_payment_requested()` calls `pay_current_receipt(payment_split)` (stubbed).
+- `MainLoader._on_payment_requested()` calls `pay_current_receipt(payment_split)` and forwards `tender` with the split.
+- `SaleCommitter` persists `tendered` for CASH in `receipt_payments` (non-cash sets `tendered = amount`).
 - On success, `paymentSuccess` is emitted, the receipt context resets, sales table clears, and the payment frame resets.
 
 ## Why shared focus helpers are not used here

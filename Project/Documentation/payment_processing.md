@@ -7,12 +7,12 @@ commit/rollback) and handles both new sales and held (UNPAID) receipts.
 Overview
 --------
 - UI layer (`modules/payment/payment_panel.py`): validates inputs and emits the
-  `payRequested` signal with a normalized payment payload. It does not write
-  to the database.
+  `payRequested` signal with a normalized payment payload (including `tender`
+  for CASH). It does not write to the database.
 - Application layer (`main.py`): listens for `payRequested`, prepares payment
   data, applies a double-submit guard, and delegates DB finalization to
-  `modules/payment/sale_committer.py`.
-- Service layer (`modules/payment/sale_committer.py`): executes the multi-table
+  `modules/db_operation/sale_committer.py`.
+- Service layer (`modules/db_operation/sale_committer.py`): executes the multi-table
   DB commit inside one transaction using `modules/db_operation/db.transaction`.
 
 Why the app layer performs DB commits
@@ -50,7 +50,9 @@ High-level commit flow
      - Do not re-insert items (they were inserted when the sale was placed on
        hold).
    - Insert one or more `receipt_payments` rows representing each payment
-     method used (CASH, NETS, PAYNOW, VOUCHER, ...).
+     method used (CASH, NETS, PAYNOW, VOUCHER, ...). CASH rows store both
+     `amount` (applied to the receipt total) and `tendered` (cash received);
+     non-cash rows set `tendered = amount`.
 7. Commit: if all statements succeed the transaction commits; otherwise
    an exception rolls back all changes and the calling UI layer is informed.
 8. Finalize UI state: `_payment_in_progress` is cleared and pay-button state is
@@ -94,6 +96,7 @@ Testing recommendations
   - One row in `receipts` with status='PAID'
   - Two rows in `receipt_items` linked to that receipt
   - One or more rows in `receipt_payments` covering the grand total
+  - CASH rows include `tendered` and `amount` (change due = `tendered - amount`)
 - Held receipt path: create a hold (UNPAID), load it, then pay. Verify the
   existing `receipts` row shows `status='PAID'` and `paid_at` set; `receipt_items`
   unchanged; `receipt_payments` has new payment rows.
@@ -110,6 +113,5 @@ References
 - `modules/db_operation/db.py` — transaction helper (`BEGIN IMMEDIATE`).
 - `modules/db_operation/receipt_numbers.py` — `next_receipt_no` (now safe
   to call inside an existing transaction when passed `conn`).
-- `modules/db_operation/receipts_repo.py` — simple repo helpers used elsewhere.
-- `modules/payment/sale_committer.py` — dedicated atomic commit service.
+- `modules/db_operation/sale_committer.py` — dedicated atomic commit service.
 - `main.py` — payment orchestration, double-submit guard, and hard-fail routing.

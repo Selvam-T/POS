@@ -9,12 +9,12 @@ from PyQt5.QtGui import QFontDatabase
 def _tool_log(message: str) -> None:
     try:
         root = Path(__file__).resolve().parents[1]
-        log_dir = root / "log"
+        log_dir = root / "test scripts"
         log_dir.mkdir(parents=True, exist_ok=True)
-        log_file = log_dir / "tools.log"
-        ts = datetime.datetime.now().isoformat(timespec="seconds")
+        log_file = log_dir / "fonts_available.log"
+
         with log_file.open("a", encoding="utf-8") as f:
-            f.write(f"[{ts}] list_fonts: {message}{os.linesep}")
+            f.write(f"{message}{os.linesep}")
     except Exception:
         pass
 

@@ -32,7 +32,7 @@ from modules.table import setup_sales_table, handle_barcode_scanned, bind_total_
 from modules.table.table_operations import get_sales_data
 from modules.sales.sales_frame_setup import setup_sales_frame
 from modules.payment.payment_panel import setup_payment_panel
-from modules.payment.sale_committer import SaleCommitter
+from modules.db_operation.sale_committer import SaleCommitter
 from modules.devices.barcode_manager import BarcodeManager
 from modules.wrappers.dialog_wrapper import DialogWrapper
 from modules.db_operation import PRODUCT_CACHE
@@ -60,6 +60,7 @@ from config import (
     ICON_GREETING,
     ICON_HISTORY,
     ICON_LOGOUT,
+    GREETING_SELECTED,
 )
 from modules.date_time.info_section import InfoSectionController
 
@@ -327,8 +328,9 @@ class MainLoader(QMainWindow):
     # Show the greeting menu dialog.
     def open_greeting_menu_dialog(self):
         """Open Greeting dialog."""
-        self.dialog_wrapper.open_dialog_scanner_blocked(launch_greeting_dialog, dialog_key='greeting_menu')
-        """self.dialog_wrapper.open_dialog_scanner_blocked(launch_greeting_dialog)"""
+        selected = self.dialog_wrapper.open_dialog_scanner_blocked(launch_greeting_dialog, dialog_key='greeting_menu')
+        if selected is not None:
+            GREETING_SELECTED = selected
 
     # Display the receipt history dialog.
     def open_history_menu_dialog(self):
@@ -523,7 +525,7 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
 
-    def _build_payment_rows(self, payment_split: dict) -> list[tuple[str, float]]:
+    def _build_payment_rows(self, payment_split: dict) -> list[tuple[str, float, float]]:
         rows = []
         mapping = {
             'cash': 'CASH',
@@ -537,7 +539,14 @@ class MainLoader(QMainWindow):
             except Exception:
                 amount = 0.0
             if amount > 0:
-                rows.append((ptype, amount))
+                if key == 'cash':
+                    try:
+                        tendered = float(payment_split.get('tender', amount) or amount)
+                    except Exception:
+                        tendered = amount
+                else:
+                    tendered = amount
+                rows.append((ptype, amount, tendered))
         return rows
 
     def _build_sale_items_snapshot(self) -> list[dict]:

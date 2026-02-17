@@ -37,20 +37,6 @@ PRODUCT_CATEGORIES = [
 # Maximum allowed rows in active sales table
 MAX_TABLE_ROWS = 50
 
-# Greeting message options
-GREETING_STRINGS = [
-	"Happy Deepavali !",
-	"Happy New Year !!!",
-	"Merry Christmas !",
-	"Gōng xǐ fā cái !",
-	"Selamat Hari Raya !",
-	"Happy Vesak Day !",
-	"Selamat Hari Raya Haji !",
-	"Majulah Singapura !",
-	"Happy Labor Day !",
-	"Happy Good Friday !",
-	"Thanks for shopping with us!"
-]
 
 # Table row colors
 ROW_COLOR_EVEN = '#add8e6'      # Even row color
@@ -72,8 +58,10 @@ DATE_FMT = 'd MMM yyyy'
 DAY_FMT = 'ddd'
 TIME_FMT = 'hh : mm ap'
 
-# Company name for header
+# Company name for header and receipts
 COMPANY_NAME = 'Anumani Trading Pte Ltd'
+ADDRESS_LINE_1 = "BLK 77 INDUS RD, #01-501"
+ADDRESS_LINE_2 = "INDUS GARDEN SINGAPORE"
 
 # Database path (absolute)
 _BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -124,3 +112,21 @@ STRING_CONFIG = {
     'notes': {'min_len': 0, 'max_len': 25, 'required': False}, 
     'category': {'min_len': 4, 'max_len': 25, 'required': False}
 }
+
+# Greeting message options
+GREETING_STRINGS = [
+	"Happy Deepavali !",
+	"Happy New Year !!!",
+	"Merry Christmas !",
+	"Gōng xǐ fā cái !",
+	"Selamat Hari Raya !",
+	"Happy Vesak Day !",
+	"Selamat Hari Raya Haji !",
+	"Majulah Singapura !",
+	"Happy Labor Day !",
+	"Happy Good Friday !",
+	"Thanks for shopping with us!"
+]
+
+# Current greeting message (can be updated by admin)
+GREETING_SELECTED = "Thanks for shopping with us!"

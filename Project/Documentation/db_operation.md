@@ -67,6 +67,16 @@ In-memory cache used for fast barcode/product_code lookup.
   - `_norm()` (uppercase normalization)
   - `_to_camel_case()` (display formatting; alias to `canonicalize_title_text()`)
 
+### `modules/db_operation/sale_committer.py` (atomic receipt commits)
+
+Atomic, multi-table writer used to finalize payments. It inserts/updates:
+- `receipts` (header rows)
+- `receipt_items` (line items snapshot)
+- `receipt_payments` (payment split rows)
+
+Key entry point:
+- `SaleCommitter.commit_payment(...)` (single transaction; rollback on failure)
+
 ## Public Facade (`modules/db_operation/__init__.py`)
 
 Most of the app should import from `modules.db_operation` only.
@@ -79,6 +89,8 @@ Exports:
   - `update_product(...) -> (ok: bool, msg: str)`
   - `delete_product(...) -> (ok: bool, msg: str)`
   - `get_product_full(product_code) -> (found: bool, details: dict)`
+- Receipt commit service:
+  - `SaleCommitter`
 
 `get_product_full()` maps repo fields into the keys used by dialogs:
 - `price` comes from `selling_price`

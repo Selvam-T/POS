@@ -94,6 +94,7 @@ def create_receipt_tables(drop_existing=True):
             payment_id   INTEGER PRIMARY KEY AUTOINCREMENT,
             receipt_id   INTEGER NOT NULL,
             payment_type TEXT    NOT NULL CHECK(payment_type IN ('NETS','CASH','PAYNOW','OTHER')),
+            tendered     REAL    NOT NULL,
             amount       REAL    NOT NULL CHECK(amount > 0),
             created_at   TEXT    NOT NULL,
             FOREIGN KEY(receipt_id) REFERENCES receipts(receipt_id) ON DELETE CASCADE

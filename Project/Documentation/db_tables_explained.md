@@ -32,7 +32,8 @@ This table stores the specific products associated with a receipt, functioning a
 ### 3. Receipt_payments Table
 The **receipt_payments** table is designed to handle the complexities of payment processing, particularly when multiple methods are used.
 - **Multi-Type Support:** Allows a single receipt to be paid using various types, including CASH, NETS, PAYNOW, or OTHER.
-- **Structure:** Each entry records the receipt_id, the specific payment_type, and the amount allocated to that type.
+- **Structure:** Each entry records the receipt_id, the specific payment_type, the tendered amount, and the amount allocated to that type.
+- **Tendered vs Amount:** For CASH, `tendered` is the amount handed over by the customer and `amount` is the portion applied to the receipt total. Change due is `tendered - amount`. For non-cash types (NETS, PAYNOW, OTHER), `tendered` equals `amount`.
 - **Logic:** This table is only populated when a payment is actually processed; for "Hold Sales" (UNPAID status), no entries are made in this table until the customer returns to pay.
 
 ### 4. Cash_outflows Table
@@ -109,19 +110,16 @@ Below is a mapping of functions in `modules/db_operation/` related to each datab
 - No direct functions; this is an internal SQLite table, not managed by application code.
 
 **receipts**
-- modules/db_operation/receipts_repo.py:
-	- create_receipt
-	- mark_receipt_paid
-	- get_receipt_header
+- modules/db_operation/sale_committer.py:
+	- SaleCommitter.commit_payment (creates or marks receipts as PAID)
 
 **receipt_items**
-- modules/db_operation/receipts_repo.py:
-	- add_receipt_item
-	- list_receipt_items
+- modules/db_operation/sale_committer.py:
+	- SaleCommitter.commit_payment (inserts receipt_items rows)
 
 **receipt_payments**
-- modules/db_operation/receipts_repo.py:
-	- add_payment
+- modules/db_operation/sale_committer.py:
+	- SaleCommitter.commit_payment (inserts receipt_payments rows)
 
 **cash_outflows** (implemented as cash_movements)
 - modules/db_operation/cash_movements_repo.py:
