@@ -11,7 +11,7 @@ QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
 
 
 # Import greeting strings from config
-from config import GREETING_STRINGS
+import config
 
 def launch_greeting_dialog(parent=None):
     """Open the Greeting message selection dialog.
@@ -52,9 +52,12 @@ def launch_greeting_dialog(parent=None):
     combo = all_widgets[0] if all_widgets else None
     if combo is not None:
         combo.clear()
-        combo.addItems(GREETING_STRINGS)
-        default_index = GREETING_STRINGS.index('Thanks for shopping with us!')
-        combo.setCurrentIndex(default_index)
+        combo.addItems(config.GREETING_STRINGS)
+        default_greeting = config.GREETING_SELECTED or 'Thanks for shopping with us!'
+        if default_greeting in config.GREETING_STRINGS:
+            combo.setCurrentText(default_greeting)
+        else:
+            combo.setCurrentIndex(0)
     # Wire up close button
     close_btn: QPushButton = dlg.findChild(QPushButton, 'customCloseBtn')
     if close_btn:

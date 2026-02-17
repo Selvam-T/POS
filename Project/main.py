@@ -5,7 +5,9 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 import sys
 import os
 import time
+import config
 from modules.ui_utils.overlay_manager import OverlayManager
+from modules.ui_utils.greeting_state import load_greeting, save_greeting
 from PyQt5 import uic
 from PyQt5.QtWidgets import (
     QApplication,
@@ -60,13 +62,16 @@ from config import (
     ICON_GREETING,
     ICON_HISTORY,
     ICON_LOGOUT,
-    GREETING_SELECTED,
 )
 from modules.date_time.info_section import InfoSectionController
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
+
+_saved_greeting = load_greeting()
+if _saved_greeting:
+    config.GREETING_SELECTED = _saved_greeting
 
 
 # Load and apply the main stylesheet if it exists.
@@ -328,9 +333,24 @@ class MainLoader(QMainWindow):
     # Show the greeting menu dialog.
     def open_greeting_menu_dialog(self):
         """Open Greeting dialog."""
-        selected = self.dialog_wrapper.open_dialog_scanner_blocked(launch_greeting_dialog, dialog_key='greeting_menu')
-        if selected is not None:
-            GREETING_SELECTED = selected
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            launch_greeting_dialog,
+            dialog_key='greeting_menu',
+            on_finish=self._handle_greeting_selection
+        )
+
+    def _handle_greeting_selection(self) -> None:
+        dlg = getattr(self.dialog_wrapper, '_last_dialog', None)
+        if dlg is None:
+            return
+        selected = getattr(dlg, 'greeting_result', None)
+        if not selected:
+            return
+        config.GREETING_SELECTED = selected
+        try:
+            save_greeting(selected)
+        except Exception:
+            pass
 
     # Display the receipt history dialog.
     def open_history_menu_dialog(self):
