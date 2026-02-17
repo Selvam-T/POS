@@ -1,4 +1,13 @@
-2026-02-17T18:45:46.501347 - Receipt not found for receipt 20260217-0025.
-2026-02-17T18:46:21.728653 - Greeting fallback used for receipt 20260217-0026.
-2026-02-17T18:46:41.573396 - Greeting fallback used for receipt 20260217-0026.
-2026-02-17T18:49:35.890460 - Greeting fallback used for receipt 20260217-0027.
+2026-02-17T22:46:28.368668 - python-escpos import failed: No module named 'escpos'
+2026-02-17T22:51:56.923188 - python-escpos import failed: No module named 'escpos'
+2026-02-17T22:51:56.923967 - Printer send failed for receipt 20260217-0033.
+2026-02-17T22:53:39.873340 - python-escpos import failed: No module named 'escpos'
+2026-02-17T22:53:39.874376 - Printer send failed for receipt 20260217-0034.
+2026-02-17T22:54:29.458571 - python-escpos import failed: No module named 'escpos'
+2026-02-17T23:03:21.060545 - python-escpos import failed: No module named 'escpos'
+2026-02-17T23:08:26.212705 - python-escpos import failed: No module named 'escpos'
+2026-02-17T23:08:26.213748 - Printer send failed for receipt 20260217-0039.
+2026-02-18T05:39:35.225383 - python-escpos import failed: No module named 'escpos'
+2026-02-18T05:39:35.226380 - Printer send failed for receipt 20260218-0001.
+2026-02-18T06:19:50.266872 - python-escpos import failed: No module named 'escpos'
+2026-02-18T06:19:50.267916 - Printer send failed (device rejected / protocol error) for receipt 20260218-0002.

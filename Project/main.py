@@ -38,7 +38,7 @@ from modules.db_operation.sale_committer import SaleCommitter
 from modules.devices.barcode_manager import BarcodeManager
 from modules.wrappers.dialog_wrapper import DialogWrapper
 from modules.db_operation import PRODUCT_CACHE
-from modules.ui_utils.dialog_utils import report_exception
+from modules.ui_utils.dialog_utils import report_exception, report_to_statusbar
 # --- Menu frame dialog controllers ---
 from modules.menu.logout_menu import launch_logout_dialog
 from modules.menu.admin_menu import launch_admin_dialog
@@ -538,13 +538,6 @@ class MainLoader(QMainWindow):
 
     # ========== Payment Processing ==========
     # Orchestrates payment; atomic DB commit is delegated to SaleCommitter.
-    def _show_main_status(self, message: str, duration_ms: int = 5000) -> None:
-        sb = getattr(self, 'statusbar', None) or self.statusBar()
-        if sb is not None:
-            try:
-                sb.showMessage(message, duration_ms)
-            except Exception:
-                pass
 
     def _build_payment_rows(self, payment_split: dict) -> list[tuple[str, float, float]]:
         rows = []
@@ -606,7 +599,12 @@ class MainLoader(QMainWindow):
     def pay_current_receipt(self, payment_split: dict) -> bool:
         """Process current payment via SaleCommitter atomic service."""
         if self._payment_in_progress:
-            self._show_main_status("Payment is already processing...", self._payment_busy_status_ms)
+            report_to_statusbar(
+                self,
+                "Payment is already processing...",
+                is_error=False,
+                duration=self._payment_busy_status_ms,
+            )
             return False
 
         ctx = self.receipt_context
@@ -637,7 +635,12 @@ class MainLoader(QMainWindow):
 
             self.receipt_context['last_receipt_no'] = str(receipt_no)
 
-            self._show_main_status(f"Payment completed: {receipt_no}", 5000)
+            report_to_statusbar(
+                self,
+                f"Payment completed: {receipt_no}",
+                is_error=False,
+                duration=5000,
+            )
             return True
 
         except Exception as e:
@@ -860,11 +863,12 @@ def main():
 
     # If cache load failed earlier, surface it once the status bar exists.
     if cache_load_failed:
-        try:
-            from modules.ui_utils import ui_feedback
-            ui_feedback.show_main_status(window, 'Error: Failed to load product list (search may be limited)', is_error=True, duration=6000)
-        except Exception:
-            pass
+        report_to_statusbar(
+            window,
+            'Error: Failed to load product list (search may be limited)',
+            is_error=True,
+            duration=6000,
+        )
     sys.exit(app.exec_())
 
 

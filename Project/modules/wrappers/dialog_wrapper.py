@@ -1,7 +1,7 @@
 """Unified dialog wrapper for all modal dialogs."""
 from PyQt5.QtWidgets import QDialog
 from PyQt5.QtCore import QTimer
-from modules.ui_utils import ui_feedback
+from modules.ui_utils.dialog_utils import report_to_statusbar
 
 
 class DialogWrapper:
@@ -176,7 +176,12 @@ class DialogWrapper:
                     if msg:
                         is_error = bool(getattr(self.main, '_pending_main_status_is_error', True))
                         duration = getattr(self.main, '_pending_main_status_duration', 6000)
-                        ui_feedback.show_main_status(self.main, msg, is_error=is_error, duration=int(duration) if duration is not None else 6000)
+                        report_to_statusbar(
+                            self.main,
+                            msg,
+                            is_error=is_error,
+                            duration=int(duration) if duration is not None else 6000,
+                        )
                 except Exception:
                     pass
                 finally:
@@ -224,9 +229,14 @@ class DialogWrapper:
                 is_error = getattr(dlg, 'main_status_is_error', (result == QDialog.Rejected))
                 duration = getattr(dlg, 'main_status_duration', None)
                 try:
-                    ui_feedback.show_main_status(self.main, msg, is_error=bool(is_error), duration=int(duration) if duration is not None else 4000)
+                    report_to_statusbar(
+                        self.main,
+                        msg,
+                        is_error=bool(is_error),
+                        duration=int(duration) if duration is not None else 4000,
+                    )
                 except Exception:
-                    ui_feedback.show_main_status(self.main, msg, is_error=bool(is_error))
+                    report_to_statusbar(self.main, msg, is_error=bool(is_error), duration=4000)
 
         except Exception as e:
             self._hide_overlay()
@@ -241,6 +251,11 @@ class DialogWrapper:
 
             # Best-effort user hint (after cleanup so it doesn't show under a modal overlay).
             try:
-                ui_feedback.show_main_status(self.main, 'Error: Dialog failed (see error.log)', is_error=True, duration=6000)
+                report_to_statusbar(
+                    self.main,
+                    'Error: Dialog failed (see error.log)',
+                    is_error=True,
+                    duration=6000,
+                )
             except Exception:
                 pass

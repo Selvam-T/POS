@@ -61,9 +61,28 @@ change = tender - cash
 - `SaleCommitter` persists `tendered` for CASH in `receipt_payments` (non-cash sets `tendered = amount`).
 - On success, `paymentSuccess` is emitted, the receipt context resets, sales table clears, and the payment frame resets.
 
+## Receipt Printing (Network)
+- `handle_print_clicked()` in `modules/payment/payment_panel.py` always generates and prints receipt text to console (`print(receipt_text)`) for debug visibility.
+- Optional physical printing is gated by `ENABLE_PRINTER_PRINT` in `config.py`.
+- When enabled, the panel calls `modules/devices/printer.py::print_receipt(receipt_text, blocking=True)`.
+- With `blocking=True`, the return value is checked; on printer send failure, an error is logged and shown in the main status bar.
+- Network destination is sourced from `config.py`: `PRINTER_IP` and `PRINTER_PORT` (TM-T82x on TCP 9100).
+- The helper uses `python-escpos` `Network` transport and issues `text(...)` + `cut()`.
+
+### Why this design
+- Safety-first rollout: printer I/O can stay disabled (`ENABLE_PRINTER_PRINT = False`) while UI flow and receipt formatting continue to be verified via console output.
+- Separation of concerns: `PaymentPanel` remains a UI/controller; printer transport details are isolated in `modules/devices/printer.py`.
+- Toggle-friendly deployment: moving between development (no printer connected) and production (printer connected) only requires changing one config flag.
+
+### Blocking vs Non-blocking
+- Current print call is **blocking** (`blocking=True`) so the panel can show immediate success/failure in the status bar.
+- In blocking mode, the call waits for network send completion and returns final success/failure immediately; slow/unreachable printers may pause UI briefly.
+- In non-blocking mode (`blocking=False`), the function returns after starting a thread; final send outcome is asynchronous.
+
 ## Why shared focus helpers are not used here
 - `FieldCoordinator` / `FocusGate` provide generic Enter→next/validate/status and static gating used by other dialogs (e.g., vegetable_menu). Payment flow depends on live allocation math (unalloc, tender vs cash), per-method auto-fill/zeroing, and conditional tender visibility. These dynamic rules require bespoke branching on every change, so adopting the shared coordinator would still leave most custom logic duplicated. Currency validation remains shared via `input_handler` (and `input_validation`/`ui_feedback`).
 
 ## See also
 
 - `Documentation/payment_processing.md` — detailed commit flow and distinction between new-sale and held-receipt paths; the DB commit is executed by `main.py`.
+- `Documentation/printer.md` — printer helper transport details, cut behavior, and config keys.
