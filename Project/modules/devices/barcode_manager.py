@@ -122,7 +122,7 @@ class BarcodeManager(QObject):
             if not found:
                 # Product not found - open Product Management in ADD mode with code prefilled
                 if status_bar and hasattr(status_bar, 'showMessage'):
-                    status_bar.showMessage(f"⚠ Product '{barcode}' not found - Opening Product Management (ADD)", 3000)
+                    status_bar.showMessage(f"Product '{barcode}' not found - Opening Product Management (ADD)", 3000)
                 if hasattr(parent, 'open_product_menu_dialog'):
                     parent.open_product_menu_dialog(initial_mode='add', initial_code=barcode)
                 return
@@ -130,7 +130,7 @@ class BarcodeManager(QObject):
             if hasattr(parent, 'sales_table') and parent.sales_table is not None:
                 handle_barcode_scanned(parent.sales_table, barcode, status_bar)
             elif status_bar and hasattr(status_bar, 'showMessage'):
-                status_bar.showMessage(f"📷 Scanned: {barcode}", 3000)
+                status_bar.showMessage(f"Scanned: {barcode}", 3000)
         except Exception:
             pass
 

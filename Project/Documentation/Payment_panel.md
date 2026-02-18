@@ -61,6 +61,18 @@ change = tender - cash
 - `SaleCommitter` persists `tendered` for CASH in `receipt_payments` (non-cash sets `tendered = amount`).
 - On success, `paymentSuccess` is emitted, the receipt context resets, sales table clears, and the payment frame resets.
 
+## Cash Drawer (Network)
+- Drawer opening is **independent** of receipt-printing toggle.
+- Trigger point is in `main.py` after payment commit success (`pay_current_receipt`).
+- Drawer is requested only when payment includes cash (`cash > 0`) and `tender > 0`.
+- Drawer pulse uses `modules/devices/printer.py::open_cash_drawer(...)` (`python-escpos` Network transport).
+- Failure path logs error and reports to main StatusBar via `dialog_utils.report_to_statusbar()`.
+
+### Cash Drawer Config
+- `ENABLE_CASH_DRAWER` — master toggle for drawer pulses.
+- `CASH_DRAWER_PIN` — ESC/POS drawer pin (Epson commonly `2`).
+- `CASH_DRAWER_TIMEOUT` — network timeout for drawer call.
+
 ## Receipt Printing (Network)
 - `handle_print_clicked()` in `modules/payment/payment_panel.py` always generates and prints receipt text to console (`print(receipt_text)`) for debug visibility.
 - Optional physical printing is gated by `ENABLE_PRINTER_PRINT` in `config.py`.
@@ -86,3 +98,4 @@ change = tender - cash
 
 - `Documentation/payment_processing.md` — detailed commit flow and distinction between new-sale and held-receipt paths; the DB commit is executed by `main.py`.
 - `Documentation/printer.md` — printer helper transport details, cut behavior, and config keys.
+- `Documentation/cash_drawer.md` — drawer trigger conditions, config, error propagation/logging, and `main.py` vs `printer.py` responsibilities.

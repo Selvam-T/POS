@@ -75,6 +75,10 @@ PC_IP = "192.168.0.5"
 SUBNET_MASK = "255.255.255.0"
 PRINTER_PORT = 9100
 ENABLE_PRINTER_PRINT = True # set to True to enable network printing
+# Cash drawer settings
+ENABLE_CASH_DRAWER = True # set to True to enable cash drawer
+CASH_DRAWER_PIN = 2
+CASH_DRAWER_TIMEOUT = 2.0
 
 # Database path (absolute)
 _BASE_DIR = os.path.abspath(os.path.dirname(__file__))

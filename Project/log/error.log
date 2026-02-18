@@ -11,3 +11,5 @@
 2026-02-18T05:39:35.226380 - Printer send failed for receipt 20260218-0001.
 2026-02-18T06:19:50.266872 - python-escpos import failed: No module named 'escpos'
 2026-02-18T06:19:50.267916 - Printer send failed (device rejected / protocol error) for receipt 20260218-0002.
+2026-02-18T22:01:28.035454 - python-escpos import failed (cash drawer): No module named 'escpos'
+2026-02-18T22:01:28.037448 - Cash drawer open failed (helper returned False).

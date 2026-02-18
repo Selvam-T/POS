@@ -198,18 +198,6 @@ class PaymentPanel(QObject):
             return
         widget.setText(text)
 
-    def _show_main_status(self, message: str, duration_ms: int = 5000) -> None:
-        # Forward status messages to the main window status bar when available.
-        mw = getattr(self, '_main_window', None)
-        if mw is None:
-            return
-        try:
-            show_status = getattr(mw, '_show_main_status', None)
-            if callable(show_status):
-                show_status(message, duration_ms)
-        except Exception:
-            pass
-
     # Field accessors
     def _pay_field_order(self):
         # Return the ordered payment entry fields used for navigation.

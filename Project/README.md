@@ -5,6 +5,16 @@ The device manager functionality to configure devices such as barcode scanners, 
 
 A Point of Sale (POS) application built with PyQt5 and SQLite. It features a preloaded product cache for instant lookups, a modular UI composed from .ui files, a compact icon-only right-side menu, and barcode scanner integration.
 
+## Documentation Index
+
+- Payment processing flow: `Documentation/payment_processing.md`
+- Payment panel behavior: `Documentation/Payment_panel.md`
+- Cash drawer implementation: `Documentation/cash_drawer.md`
+- Printer helper: `Documentation/printer.md`
+- Error handling pipeline: `Documentation/error_logging_and_fallback.md`
+- Dialog utilities/pipeline: `Documentation/dialog_utils.md`, `Documentation/dialog_pipeline.md`
+- Scanner routing: `Documentation/scanner_input_infocus.md`
+
 ## Features
 
 ✅ **Database Integration**

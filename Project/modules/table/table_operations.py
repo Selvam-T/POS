@@ -360,7 +360,7 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
     unit_canon = canonicalize_unit(unit)
 
     if not found:
-        if status_bar: show_temp_status(status_bar, f"Product '{barcode}' not found", 5000)
+        if status_bar: show_temp_status(status_bar, f"Product '{barcode}' not found", 3000)
         return
 
     existing_row = find_product_in_table(table, barcode, unit_canon)
@@ -381,7 +381,7 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
                 show_temp_status(status_bar, "KG item - use Vegetable Entry to weigh", 3000)
     else:
         if unit_canon == 'Kg':
-            if status_bar: show_temp_status(status_bar, "KG item - use Vegetable Entry to weigh", 5000)
+            if status_bar: show_temp_status(status_bar, "KG item - use Vegetable Entry to weigh", 3000)
         else:
             _add_product_row(table, barcode, product_name, unit_price, unit_canon)
 

@@ -469,7 +469,7 @@ class MainLoader(QMainWindow):
         if not is_transaction_active(sales_table):
             sb = getattr(self, 'statusbar', None)
             if sb:
-                show_temp_status(sb, "No active sale to cancel.", 3000)
+                show_temp_status(sb, "Cart is empty.", 3000)
             return
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_clearcart_dialog,
@@ -595,6 +595,55 @@ class MainLoader(QMainWindow):
             })
         return out
 
+    def _should_open_cash_drawer(self, payment_split: dict) -> bool:
+        try:
+            cash = float(payment_split.get('cash', 0.0) or 0.0)
+        except Exception:
+            cash = 0.0
+        try:
+            tender = float(payment_split.get('tender', 0.0) or 0.0)
+        except Exception:
+            tender = 0.0
+        return cash > 0 and tender > 0
+
+    def _open_cash_drawer_if_needed(self, payment_split: dict) -> None:
+        if not bool(getattr(config, 'ENABLE_CASH_DRAWER', True)):
+            return
+        if not self._should_open_cash_drawer(payment_split):
+            return
+
+        try:
+            from modules.devices import printer as device_printer
+            opened = device_printer.open_cash_drawer(
+                pin=int(getattr(config, 'CASH_DRAWER_PIN', 2)),
+                blocking=True,
+                timeout=float(getattr(config, 'CASH_DRAWER_TIMEOUT', 2.0)),
+            )
+            if not opened:
+                report_to_statusbar(
+                    self,
+                    "Cash drawer failed to open.",
+                    is_error=True,
+                    duration=4000,
+                )
+                try:
+                    from modules.ui_utils.error_logger import log_error
+                    log_error("Cash drawer open failed (helper returned False).")
+                except Exception:
+                    pass
+        except Exception as e:
+            report_to_statusbar(
+                self,
+                "Cash drawer error.",
+                is_error=True,
+                duration=4000,
+            )
+            try:
+                from modules.ui_utils.error_logger import log_error
+                log_error(f"Cash drawer helper call failed: {e}")
+            except Exception:
+                pass
+
 
     def pay_current_receipt(self, payment_split: dict) -> bool:
         """Process current payment via SaleCommitter atomic service."""
@@ -634,6 +683,8 @@ class MainLoader(QMainWindow):
             )
 
             self.receipt_context['last_receipt_no'] = str(receipt_no)
+
+            self._open_cash_drawer_if_needed(payment_split)
 
             report_to_statusbar(
                 self,

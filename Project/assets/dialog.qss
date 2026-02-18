@@ -183,7 +183,8 @@ QLineEdit, QComboBox {
     border: 1px solid #c7cdd6;
     border-radius: 4px;
     padding: 6px 10px;
-    font-size: 12pt;
+    font-size: 10.5pt;
+    font-weight: 500;
 }
 
 QLineEdit:focus, QComboBox:focus {
