@@ -55,7 +55,7 @@ def main():
         sys.exit(1)
 
     for t in ("receipts", "receipt_items", "receipt_payments"):
-        print_table(cur, t, limit=10)
+        print_table(cur, t, limit=100)
 
     conn.close()
 

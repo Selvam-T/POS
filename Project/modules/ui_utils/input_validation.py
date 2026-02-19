@@ -294,15 +294,38 @@ def validate_supplier(value):
     return True, ""	
 #--- 6. supplier end ---
 
-#--- 7. tender amount start ---
+#--- 7. customer start ---
+
+def validate_customer(value):
+    ok, err = _validate_config_string(value, 'customer', "Customer")
+    if not ok:
+        return False, err
+    
+    # Requirement: If provided, must match Alphanumeric Regex
+    s = str(value or "").strip()
+    if s and not ALPHANUMERIC_REGEX.match(s):
+        return False, "Only Alphanumeric characters are allowed"
+    return True, ""	
+#--- 7. customer end ---
+
+#--- 8. notes start ---
+
+def validate_note(value):
+    ok, err = _validate_config_string(value, 'note', "Note")
+    if not ok:
+        return False, err
+    return True, ""	
+#--- 8. Note end ---
+ 
+#--- 9. tender amount start ---
 def validate_currency(value, asset_type="Amount"):
     if value is None or str(value).strip() == "":
         return True, ""
     # If not empty, use the same numeric logic
     return validate_unit_price(value, min_val=CURRENCY_MIN, max_val=CURRENCY_MAX, asset_type=asset_type)
-#--- 7. tender amount end ---
+#--- 9. tender amount end ---
 
-#--- 8. voucher amount start ---
+#--- 10. voucher amount start ---
 def validate_voucher_amount(value):
     if value is None or str(value).strip() == "":
         return True, ""
@@ -318,4 +341,4 @@ def validate_voucher_amount(value):
     if val > VOUCHER_MAX:
         return False, f"Maximum voucher value is {VOUCHER_MAX}"
     return True, ""
-#--- 8. voucher amount end ---
+#--- 10. voucher amount end ---

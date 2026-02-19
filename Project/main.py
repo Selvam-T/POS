@@ -411,16 +411,7 @@ class MainLoader(QMainWindow):
         """Open On Hold panel."""
         from modules.ui_utils.ui_feedback import show_temp_status
 
-        ctx = getattr(self, 'receipt_context', {}) or {}
-        sales_table = getattr(self, 'sales_table', None)
-
-        # Require active sale rows, no active_receipt_id, and source ACTIVE_SALE
-        if (
-            sales_table is None or
-            sales_table.rowCount() <= 0 or
-            ctx.get('active_receipt_id') is not None or
-            ctx.get('source') != 'ACTIVE_SALE'
-        ):
+        if not self._can_launch_hold_sales_dialog():
             sb = getattr(self, 'statusbar', None)
             if sb:
                 show_temp_status(sb, "On Hold is available only for an active sale.", 3000)
@@ -484,7 +475,6 @@ class MainLoader(QMainWindow):
         if frame is None:
             return
         frame.saleTotalChanged.connect(self._on_sale_total_changed)
-        frame.holdRequested.connect(self._on_hold_requested)
         frame.viewHoldLoaded.connect(self._on_view_hold_loaded)
 
     # Connect payment panel signals to handlers.
@@ -501,16 +491,28 @@ class MainLoader(QMainWindow):
         ctx['source'] = 'ACTIVE_SALE'
         ctx['status'] = 'NONE'
 
+    def _can_launch_hold_sales_dialog(self) -> bool:
+        ctx = getattr(self, 'receipt_context', {}) or {}
+        sales_table = getattr(self, 'sales_table', None)
+
+        try:
+            has_rows = sales_table is not None and sales_table.rowCount() > 0
+        except Exception:
+            has_rows = False
+
+        source_ok = ctx.get('source') == 'ACTIVE_SALE'
+        active_ok = ctx.get('active_receipt_id') is None
+        status = ctx.get('status')
+        status_ok = status in (None, 'NA', 'NONE')
+
+        return bool(has_rows and source_ok and active_ok and status_ok)
+
     # ========== Signal Handlers ==========
     # Update payment defaults when sale total updates.
     def _on_sale_total_changed(self, total: float) -> None:
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:
             panel.set_payment_default(total)
-
-    # Handle hold requests from the sales frame.
-    def _on_hold_requested(self) -> None:
-        print("Hold requested via sales frame signal")
 
     # Update receipt context when a held sale is loaded.
     def _on_view_hold_loaded(self, receipt_id: int, total: float) -> None:

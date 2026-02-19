@@ -16,7 +16,6 @@ ASSETS_DIR = os.path.join(
 
 class SalesFrame(QObject):
     saleTotalChanged = pyqtSignal(float)
-    holdRequested = pyqtSignal()
     viewHoldLoaded = pyqtSignal(int, float)
 
     def __init__(self, main_window, placeholder, ui_path):
@@ -137,7 +136,6 @@ class SalesFrame(QObject):
         self._main_window.open_clearcart_dialog()
 
     def _on_hold_requested(self) -> None:
-        self.holdRequested.emit()
         self._main_window.launch_hold_sales_dialog()
 
     @staticmethod
