@@ -22,7 +22,7 @@ This dialog is launched from the Sales Frame Hold button and is executed through
 - DB helpers:
   - modules/db_operation/db.py
   - modules/db_operation/receipt_numbers.py
-  - modules/db_operation/sale_committer.py
+  - modules/db_operation/held_sale_committer.py
 
 ## Launch Rules (Click-Time Guard)
 
@@ -147,15 +147,6 @@ Handled runtime exceptions inside controller:
 - Inline label can show a short failure message during dialog lifetime
 
 Unexpected controller escapes are still protected by DialogWrapper hard-fail boundary.
-
-## Internal Helper Notes
-
-The hold controller includes a small internal transactional committer class that reuses SaleCommitter table helpers for:
-
-- table-column introspection
-- receipt_items insertion compatibility across schema variants
-
-This avoids duplicating low-level insert SQL formatting and keeps behavior aligned with payment commit conventions.
 
 ## Related Implementation Notes
 

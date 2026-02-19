@@ -58,7 +58,7 @@ change = tender - cash
 
 ## Integration Notes
 - `MainLoader._on_payment_requested()` calls `pay_current_receipt(payment_split)` and forwards `tender` with the split.
-- `SaleCommitter` persists `tendered` for CASH in `receipt_payments` (non-cash sets `tendered = amount`).
+- `PaidSaleCommitter` persists `tendered` for CASH in `receipt_payments` (non-cash sets `tendered = amount`).
 - On success, `paymentSuccess` is emitted, the receipt context resets, sales table clears, and the payment frame resets.
 
 ## Cash Drawer (Network)

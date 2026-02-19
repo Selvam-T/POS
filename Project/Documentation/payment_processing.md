@@ -11,8 +11,8 @@ Overview
   for CASH). It does not write to the database.
 - Application layer (`main.py`): listens for `payRequested`, prepares payment
   data, applies a double-submit guard, and delegates DB finalization to
-  `modules/db_operation/sale_committer.py`.
-- Service layer (`modules/db_operation/sale_committer.py`): executes the multi-table
+  `modules/db_operation/paid_sale_committer.py`.
+- Service layer (`modules/db_operation/paid_sale_committer.py`): executes the multi-table
   DB commit inside one transaction using `modules/db_operation/db.transaction`.
 
 Why the app layer performs DB commits
@@ -100,7 +100,7 @@ Testing recommendations
 - Held receipt path: create a hold (UNPAID), load it, then pay. Verify the
   existing `receipts` row shows `status='PAID'` and `paid_at` set; `receipt_items`
   unchanged; `receipt_payments` has new payment rows.
-- Failure path (simulation): temporarily force `SaleCommitter.commit_payment`
+- Failure path (simulation): temporarily force `PaidSaleCommitter.commit_payment`
   to raise an exception (or point DB path to an invalid/unavailable DB in a dev
   environment). Verify:
   - status bar shows payment failure,
@@ -113,5 +113,5 @@ References
 - `modules/db_operation/db.py` — transaction helper (`BEGIN IMMEDIATE`).
 - `modules/db_operation/receipt_numbers.py` — `next_receipt_no` (now safe
   to call inside an existing transaction when passed `conn`).
-- `modules/db_operation/sale_committer.py` — dedicated atomic commit service.
+- `modules/db_operation/paid_sale_committer.py` — dedicated atomic commit service.
 - `main.py` — payment orchestration, double-submit guard, and hard-fail routing.

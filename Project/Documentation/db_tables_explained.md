@@ -110,16 +110,20 @@ Below is a mapping of functions in `modules/db_operation/` related to each datab
 - No direct functions; this is an internal SQLite table, not managed by application code.
 
 **receipts**
-- modules/db_operation/sale_committer.py:
-	- SaleCommitter.commit_payment (creates or marks receipts as PAID)
+- modules/db_operation/paid_sale_committer.py:
+	- PaidSaleCommitter.commit_paid_sale (creates or marks receipts as PAID)
+- modules/db_operation/held_sale_committer.py:
+	- HeldSaleCommitter.commit_hold_sale (creates UNPAID receipts)
 
 **receipt_items**
-- modules/db_operation/sale_committer.py:
-	- SaleCommitter.commit_payment (inserts receipt_items rows)
+- modules/db_operation/paid_sale_committer.py:
+	- PaidSaleCommitter.commit_paid_sale (inserts receipt_items rows)
+- modules/db_operation/held_sale_committer.py:
+	- HeldSaleCommitter.commit_hold_sale (inserts receipt_items rows)
 
 **receipt_payments**
-- modules/db_operation/sale_committer.py:
-	- SaleCommitter.commit_payment (inserts receipt_payments rows)
+- modules/db_operation/paid_sale_committer.py:
+	- PaidSaleCommitter.commit_paid_sale (inserts receipt_payments rows)
 
 **cash_outflows** (implemented as cash_movements)
 - modules/db_operation/cash_movements_repo.py:

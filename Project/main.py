@@ -34,7 +34,7 @@ from modules.table import setup_sales_table, handle_barcode_scanned, bind_total_
 from modules.table.table_operations import get_sales_data
 from modules.sales.sales_frame_setup import setup_sales_frame
 from modules.payment.payment_panel import setup_payment_panel
-from modules.db_operation.sale_committer import SaleCommitter
+from modules.db_operation.paid_sale_committer import PaidSaleCommitter
 from modules.devices.barcode_manager import BarcodeManager
 from modules.wrappers.dialog_wrapper import DialogWrapper
 from modules.db_operation import PRODUCT_CACHE
@@ -539,7 +539,7 @@ class MainLoader(QMainWindow):
             panel.clear_payment_frame()
 
     # ========== Payment Processing ==========
-    # Orchestrates payment; atomic DB commit is delegated to SaleCommitter.
+    # Orchestrates payment; atomic DB commit is delegated to PaidSaleCommitter.
 
     def _build_payment_rows(self, payment_split: dict) -> list[tuple[str, float, float]]:
         rows = []
@@ -648,7 +648,7 @@ class MainLoader(QMainWindow):
 
 
     def pay_current_receipt(self, payment_split: dict) -> bool:
-        """Process current payment via SaleCommitter atomic service."""
+        """Process current payment via PaidSaleCommitter atomic service."""
         if self._payment_in_progress:
             report_to_statusbar(
                 self,
@@ -676,7 +676,7 @@ class MainLoader(QMainWindow):
             payment_rows = self._build_payment_rows(payment_split)
 
             total = float(payment_split.get('total', 0.0) or 0.0)
-            committer = SaleCommitter()
+            committer = PaidSaleCommitter()
             receipt_no = committer.commit_payment(
                 active_receipt_id=active_receipt_id,
                 sales_items=sales_items,

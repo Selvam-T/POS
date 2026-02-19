@@ -138,7 +138,3 @@ class PaidSaleCommitter:
             total=total,
             paid_at=paid_at,
         )
-
-
-# Backward-compatible class name for legacy imports.
-SaleCommitter = PaidSaleCommitter

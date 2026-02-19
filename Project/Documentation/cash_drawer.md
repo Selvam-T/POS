@@ -18,7 +18,7 @@ Cash drawer pulse is attempted only when all conditions below are true:
 ## Runtime Flow
 1. `PaymentPanel.handle_pay_clicked()` emits `payRequested(payload)`.
 2. `MainLoader._on_payment_requested(...)` calls `pay_current_receipt(payload)`.
-3. `SaleCommitter.commit_payment(...)` persists payment and returns `receipt_no`.
+3. `PaidSaleCommitter.commit_payment(...)` persists payment and returns `receipt_no`.
 4. `MainLoader._open_cash_drawer_if_needed(payload)` is called.
 5. `modules/devices/printer.open_cash_drawer(...)` sends ESC/POS drawer pulse.
 

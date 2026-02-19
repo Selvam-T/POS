@@ -21,7 +21,8 @@ from .product_cache import (
     remove_cache_item,
 )
 from . import products_repo
-from .sale_committer import SaleCommitter
+from .paid_sale_committer import PaidSaleCommitter
+from .held_sale_committer import HeldSaleCommitter
 
 
 def get_product_slim(product_code: str) -> Tuple[bool, str, float, str]:
@@ -173,5 +174,6 @@ __all__ = [
     'add_product',
     'update_product',
     'delete_product',
-    'SaleCommitter',
+    'PaidSaleCommitter',
+    'HeldSaleCommitter',
 ]

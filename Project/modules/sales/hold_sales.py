@@ -4,9 +4,7 @@ from typing import Optional
 from PyQt5.QtCore import Qt, QObject, QEvent
 from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel
 
-from modules.db_operation.db import get_conn, now_iso, transaction
-from modules.db_operation.receipt_numbers import next_receipt_no
-from modules.db_operation.sale_committer import SaleCommitter
+from modules.db_operation.held_sale_committer import HeldSaleCommitter
 from modules.ui_utils import input_handler, input_validation, ui_feedback
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui,
@@ -40,70 +38,6 @@ class _ReactivePlaceholderFilter(QObject):
         except Exception:
             pass
         return super().eventFilter(obj, event)
-
-
-class _HoldSaleCommitter:
-    def __init__(self):
-        self._committer = SaleCommitter()
-
-    @staticmethod
-    def _column_notnull(conn, table_name: str, column_name: str) -> bool:
-        try:
-            rows = conn.execute(f"PRAGMA table_info({table_name})").fetchall()
-            for row in rows:
-                if str(row["name"]) == str(column_name):
-                    return bool(row["notnull"])
-        except Exception:
-            pass
-        return False
-
-    def _insert_unpaid_receipt(self, conn, receipt_no: str, customer_name: str, note: Optional[str], sales_items: list[dict]) -> int:
-        cols = self._committer._table_columns(conn, "receipts")
-        values = {}
-
-        key_col = self._committer._first_existing(cols, "receipt_no", "receipt_number")
-        if key_col is not None:
-            values[key_col] = receipt_no
-
-        note_col = self._committer._first_existing(cols, "note", "notes")
-        total_val = float(sum(float(i.get("line_total", 0.0) or 0.0) for i in (sales_items or [])))
-        created_at = now_iso()
-
-        for candidate, value in (
-            ("status", "UNPAID"),
-            ("customer_name", customer_name),
-            ("cashier_name", ""),
-            ("grand_total", total_val),
-            ("total", total_val),
-            ("created_at", created_at),
-            ("paid_at", None),
-        ):
-            if candidate in cols:
-                values[candidate] = value
-
-        if note_col is not None:
-            note_is_notnull = self._column_notnull(conn, "receipts", note_col)
-            if note:
-                values[note_col] = note
-            else:
-                values[note_col] = "" if note_is_notnull else None
-
-        if key_col is None and "id" not in cols and "receipt_id" not in cols:
-            raise RuntimeError("receipts table missing receipt key columns")
-
-        return self._committer._insert_row(conn, "receipts", values)
-
-    def hold_sale(self, *, customer_name: str, note: Optional[str], sales_items: list[dict]) -> str:
-        if not sales_items:
-            raise RuntimeError("No sale items to hold")
-
-        with get_conn() as conn:
-            with transaction(conn):
-                receipt_no = next_receipt_no(conn=conn)
-                receipt_db_id = self._insert_unpaid_receipt(conn, receipt_no, customer_name, note, sales_items)
-                self._committer._insert_receipt_items(conn, receipt_no, receipt_db_id, sales_items)
-
-        return str(receipt_no)
 
 
 def _show_validation_error(status_label: QLabel, widget: QLineEdit, message: str) -> None:
@@ -206,7 +140,7 @@ def launch_hold_sales_dialog(parent=None):
     name_in.returnPressed.connect(_on_name_enter)
     note_in.returnPressed.connect(_on_note_enter)
 
-    hold_committer = _HoldSaleCommitter()
+    hold_committer = HeldSaleCommitter()
 
     def _handle_ok() -> None:
         try:
@@ -229,7 +163,7 @@ def launch_hold_sales_dialog(parent=None):
             return
 
         try:
-            receipt_no = hold_committer.hold_sale(
+            receipt_no = hold_committer.commit_hold_sale(
                 customer_name=customer_name,
                 note=note_text,
                 sales_items=sales_items,

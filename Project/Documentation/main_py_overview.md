@@ -76,7 +76,7 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
   ### Payment commit (Feb 2026)
 
   - `main.py` orchestrates payment completion and delegates persistence to
-    `modules/payment/sale_committer.py`.
+    `modules/db_operation/paid_sale_committer.py`.
   - The service performs all DB writes (receipt counter, receipts header,
     receipt_items, receipt_payments) in one atomic transaction.
   - See `Documentation/payment_processing.md` for full details and the
