@@ -81,6 +81,15 @@ Current behavior:
 
 Deep-dive reference: `Documentation/payment_processing.md`.
 
+### Hold Sale DB failure (snapshot receipt)
+
+If Hold fails to write to the DB, the system prints a snapshot receipt from the
+current cart (console when `ENABLE_PRINTER_PRINT = False`). This snapshot does
+not generate a DB receipt number and is explicitly labeled `HOLD-FAILED` to
+avoid reserving a number when the write failed. The UI clears the sale after a
+successful print, so a duplicate cannot be reprinted. Cashiers must keep the
+snapshot copy to collect payment from the customer.
+
 ✅ **Consistent Dialog Button Styling**
 - All dialog action buttons now use standardized object names:
     - Constructive: ends with `Ok` (e.g., `btnAdminOk`, `btnVegMOk`)

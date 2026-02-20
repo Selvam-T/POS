@@ -68,16 +68,6 @@ def handle_note_input(line_edit: QLineEdit) -> str:
     _raise_if_invalid(input_validation.validate_note(note))
     return note
 
-def handle_customer_input(line_edit: QLineEdit) -> str:
-    customer = canonicalize_title_text(line_edit.text())
-    _raise_if_invalid(input_validation.validate_customer(customer))
-    return customer
-
-def handle_note_input(line_edit: QLineEdit) -> str:
-    note = canonicalize_title_text(line_edit.text())
-    _raise_if_invalid(input_validation.validate_note(note))
-    return note
-
 def handle_unit_input_combo(combo_box: QComboBox) -> str:
     unit = combo_box.currentText().strip()
     _raise_if_invalid(input_validation.validate_unit(unit))

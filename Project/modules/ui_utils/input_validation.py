@@ -15,6 +15,7 @@ from config import (
 	PASSWORD_MIN_LENGTH,
 	EMAIL_REGEX,
 	ALPHANUMERIC_REGEX,
+	NAME_REGEX,
 	STRING_CONFIG,
 )
 
@@ -289,8 +290,8 @@ def validate_supplier(value):
     
     # Requirement: If provided, must match Alphanumeric Regex
     s = str(value or "").strip()
-    if s and not ALPHANUMERIC_REGEX.match(s):
-        return False, "Only Alphanumeric characters are allowed"
+    if s and not NAME_REGEX.match(s):
+        return False, "Only letters, numbers, spaces and .,-&'()/ allowed"
     return True, ""	
 #--- 6. supplier end ---
 
@@ -304,7 +305,7 @@ def validate_customer(value):
     # Requirement: If provided, must match Alphanumeric Regex
     s = str(value or "").strip()
     if s and not ALPHANUMERIC_REGEX.match(s):
-        return False, "Only Alphanumeric characters are allowed"
+        return False, "Only Alphanumeric characters are allowed."
     return True, ""	
 #--- 7. customer end ---
 

@@ -59,25 +59,23 @@ Initial focus:
 
 - holdSalesCustomerLineEdit receives focus when opened.
 
-Enter-key flow:
+Enter-key flow (FieldCoordinator + FocusGate):
 
 1. Customer field Enter
-   - Validates with input_handler.handle_customer_input(...)
-   - On success: focus jumps to Note field
-   - On failure: focus stays on Customer and selects all
+  - Validates with input_handler.handle_customer_input(...)
+  - On success: unlocks Note field and jumps focus to it
+  - On failure: focus stays on Customer and selects all
 
 2. Note field Enter
-   - Validates with input_handler.handle_note_input(...)
-   - On success: focus jumps to OK button
-   - On failure: focus stays on Note and selects all
+  - Validates with input_handler.handle_note_input(...)
+  - On success: focus jumps to OK button
+  - On failure: focus stays on Note and selects all
 
 ## Placeholder Behavior
 
-The controller applies reactive placeholder behavior:
+The controller applies a simple placeholder reset:
 
-- UI-authored placeholder text is remembered.
-- On focus in: placeholder is hidden.
-- On focus out with empty text: placeholder is restored.
+- UI-authored placeholder text is preserved and re-applied on dialog open.
 
 ## Validation Pipeline
 
@@ -90,10 +88,6 @@ Inline error feedback:
 
 - Validation failures are shown in holdSalesStatusLabel via ui_feedback.set_status_label(..., ok=False).
 - The current invalid field remains focused and highlighted via selectAll().
-
-OK button state:
-
-- Enabled only when current Customer and Note values pass validate_customer/validate_note checks.
 
 ## Database Behavior (On OK)
 
@@ -145,6 +139,25 @@ Handled runtime exceptions inside controller:
 - Logged to log/error.log using report_exception_post_close(...)
 - Generic post-close StatusBar error intent is set
 - Inline label can show a short failure message during dialog lifetime
+
+### Snapshot Receipt on DB Failure
+
+If the hold commit fails to write to the database, the controller prints a
+snapshot receipt from the current cart:
+
+- Printed to console when `ENABLE_PRINTER_PRINT = False`
+- Sent to the printer when `ENABLE_PRINTER_PRINT = True`
+- On successful print, the sales table and payment panel are cleared
+- Dialog closes after handling the failure
+
+**Receipt number:** The snapshot receipt does not generate a DB receipt number.
+It is explicitly labeled as `HOLD-FAILED` to indicate a non-persisted fallback.
+This avoids reserving a receipt number when the DB write failed.
+
+**Limitation:** The snapshot receipt has no DB receipt number, so only a single
+copy is produced. Once printed and the UI is cleared, the data is no longer in
+the system; a duplicate cannot be reprinted. Cashiers must keep this copy to
+collect payment from the customer.
 
 Unexpected controller escapes are still protected by DialogWrapper hard-fail boundary.
 

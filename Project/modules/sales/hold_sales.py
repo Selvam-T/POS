@@ -1,43 +1,26 @@
 import os
 from typing import Optional
 
-from PyQt5.QtCore import Qt, QObject, QEvent
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel
 
 from modules.db_operation.held_sale_committer import HeldSaleCommitter
-from modules.ui_utils import input_handler, input_validation, ui_feedback
+from modules.payment import receipt_generator
+from modules.ui_utils.error_logger import log_error
+from config import ENABLE_PRINTER_PRINT
+from modules.ui_utils import input_handler, ui_feedback
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui,
     require_widgets,
     set_dialog_main_status_max,
     report_exception_post_close,
 )
+from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 HOLD_SALES_UI = os.path.join(UI_DIR, 'hold_sales.ui')
-
-
-class _ReactivePlaceholderFilter(QObject):
-    def __init__(self, templates: dict[QLineEdit, str], parent=None):
-        super().__init__(parent)
-        self._templates = templates or {}
-
-    def eventFilter(self, obj, event):
-        template = self._templates.get(obj)
-        if template is None:
-            return super().eventFilter(obj, event)
-
-        try:
-            if event.type() == QEvent.FocusIn:
-                obj.setPlaceholderText("")
-            elif event.type() == QEvent.FocusOut:
-                if not (obj.text() or "").strip():
-                    obj.setPlaceholderText(template)
-        except Exception:
-            pass
-        return super().eventFilter(obj, event)
 
 
 def _show_validation_error(status_label: QLabel, widget: QLineEdit, message: str) -> None:
@@ -67,8 +50,11 @@ def launch_hold_sales_dialog(parent=None):
         frameless=True,
         application_modal=True,
     )
-    if dlg is None:
-        return None
+
+    # If load failed, return the standardized fallback immediately
+    if not dlg:
+        from modules.ui_utils.dialog_utils import build_error_fallback_dialog
+        return build_error_fallback_dialog(parent, "Hold Sales", qss_path)
 
     widgets = require_widgets(dlg, {
         'name_in': (QLineEdit, 'holdSalesCustomerLineEdit'),
@@ -90,69 +76,79 @@ def launch_hold_sales_dialog(parent=None):
     name_in.setFocusPolicy(Qt.StrongFocus)
     note_in.setFocusPolicy(Qt.StrongFocus)
 
-    placeholders = {}
-    for le in (name_in, note_in):
-        ui_default = (le.placeholderText() or "").strip()
-        if not ui_default:
-            ui_default = (le.text() or "").strip()
-        placeholders[le] = ui_default
-        le.clear()
-        le.setPlaceholderText(ui_default)
+    gate = FocusGate([note_in], lock_enabled=True)
+    gate.set_locked(True)
 
-    placeholder_filter = _ReactivePlaceholderFilter(placeholders, dlg)
-    dlg._hold_sales_placeholder_filter = placeholder_filter
-    name_in.installEventFilter(placeholder_filter)
-    note_in.installEventFilter(placeholder_filter)
+    def _set_placeholders() -> None:
+        for le in (name_in, note_in):
+            ui_default = (le.placeholderText() or "").strip()
+            if not ui_default:
+                ui_default = (le.text() or "").strip()
+            le.clear()
+            le.setPlaceholderText(ui_default)
 
-    def _refresh_ok_enabled() -> None:
-        customer = input_handler.canonicalize_title_text(name_in.text())
-        ok_customer, _ = input_validation.validate_customer(customer)
-        note_val = input_handler.canonicalize_title_text(note_in.text())
-        ok_note, _ = input_validation.validate_note(note_val)
-        ok_btn.setEnabled(bool(ok_customer and ok_note))
+    _set_placeholders()
 
-    ok_btn.setEnabled(False)
+    coord = FieldCoordinator(dlg)
 
-    def _clear_inline_status(*_args):
-        ui_feedback.clear_status_label(status_lbl)
-        _refresh_ok_enabled()
+    def _validate_and_normalize_name() -> str:
+        val = input_handler.handle_customer_input(name_in)
+        name_in.setText(val)
+        return val
 
-    name_in.textEdited.connect(_clear_inline_status)
-    note_in.textEdited.connect(_clear_inline_status)
+    def _validate_and_normalize_note() -> str:
+        val = input_handler.handle_note_input(note_in)
+        note_in.setText(val)
+        return val
 
-    def _on_name_enter() -> None:
-        try:
-            customer_name = input_handler.handle_customer_input(name_in)
-            name_in.setText(customer_name)
-            note_in.setFocus(Qt.OtherFocusReason)
-            note_in.selectAll()
-        except ValueError as exc:
-            _show_validation_error(status_lbl, name_in, str(exc))
+    def _unlock_and_focus_note() -> None:
+        gate.set_locked(False)
+        note_in.setFocus(Qt.OtherFocusReason)
+        note_in.selectAll()
 
-    def _on_note_enter() -> None:
-        try:
-            note_text = input_handler.handle_note_input(note_in)
-            note_in.setText(note_text)
-            ok_btn.setFocus(Qt.OtherFocusReason)
-        except ValueError as exc:
-            _show_validation_error(status_lbl, note_in, str(exc))
+    def _lock_note_gate() -> None:
+        gate.set_locked(True)
+        note_in.clear()
 
-    name_in.returnPressed.connect(_on_name_enter)
-    note_in.returnPressed.connect(_on_note_enter)
+    def _on_name_edited(*_args):
+        _lock_note_gate()
+        coord.clear_status(status_lbl)
+
+    def _on_note_edited(*_args):
+        coord.clear_status(status_lbl)
+
+    name_in.textEdited.connect(_on_name_edited)
+    note_in.textEdited.connect(_on_note_edited)
+
+    coord.add_link(
+        source=name_in,
+        next_focus=_unlock_and_focus_note,
+        status_label=status_lbl,
+        validate_fn=_validate_and_normalize_name,
+    )
+
+    coord.add_link(
+        source=note_in,
+        next_focus=ok_btn,
+        status_label=status_lbl,
+        validate_fn=_validate_and_normalize_note,
+        swallow_empty=False,
+    )
+
+    coord.register_validator(name_in, _validate_and_normalize_name, status_label=status_lbl)
+    coord.register_validator(note_in, _validate_and_normalize_note, status_label=status_lbl)
 
     hold_committer = HeldSaleCommitter()
 
     def _handle_ok() -> None:
         try:
-            customer_name = input_handler.handle_customer_input(name_in)
-            name_in.setText(customer_name)
+            customer_name = _validate_and_normalize_name()
         except ValueError as exc:
             _show_validation_error(status_lbl, name_in, str(exc))
             return
 
         try:
-            note_text = input_handler.handle_note_input(note_in)
-            note_in.setText(note_text)
+            note_text = _validate_and_normalize_note()
         except ValueError as exc:
             _show_validation_error(status_lbl, note_in, str(exc))
             return
@@ -161,8 +157,9 @@ def launch_hold_sales_dialog(parent=None):
         if not sales_items:
             _show_validation_error(status_lbl, name_in, "No active sale to hold")
             return
-
         try:
+            # uncomment to test db operation failure handling:
+            # raise RuntimeError("TEST: hold sale failure")
             receipt_no = hold_committer.commit_hold_sale(
                 customer_name=customer_name,
                 note=note_text,
@@ -179,6 +176,56 @@ def launch_hold_sales_dialog(parent=None):
             set_dialog_main_status_max(dlg, "Sale held successfully.", level='info', duration=4000)
             dlg.accept()
         except Exception as exc:
+            try:
+                receipt_text = receipt_generator.generate_receipt_text_from_snapshot(
+                    items=sales_items,
+                    receipt_no="HOLD-FAILED",
+                    status="UNPAID",
+                    cashier_name="",
+                )
+                cleared = False
+                if not ENABLE_PRINTER_PRINT:
+                    print(receipt_text)
+                    set_dialog_main_status_max(
+                        dlg,
+                        "Hold failed. Receipt printed to console.",
+                        level='error',
+                        duration=6000,
+                    )
+                    cleared = True
+                else:
+                    from modules.devices import printer as device_printer
+                    printed_ok = device_printer.print_receipt(receipt_text, blocking=True)
+                    if printed_ok:
+                        set_dialog_main_status_max(
+                            dlg,
+                            "Hold failed. Receipt printed.",
+                            level='error',
+                            duration=6000,
+                        )
+                        cleared = True
+                    else:
+                        log_error("Hold failed: printer send failed for snapshot receipt.")
+                        set_dialog_main_status_max(
+                            dlg,
+                            "Hold failed. Receipt print failed.",
+                            level='error',
+                            duration=6000,
+                        )
+                if cleared and parent is not None:
+                    if hasattr(parent, "_clear_sales_table_core"):
+                        parent._clear_sales_table_core()
+                    panel = getattr(parent, 'payment_panel_controller', None)
+                    if panel is not None:
+                        panel.clear_payment_frame()
+            except Exception as print_exc:
+                log_error(f"Hold failed: receipt print error: {print_exc}")
+                set_dialog_main_status_max(
+                    dlg,
+                    "Hold failed. Receipt print error.",
+                    level='error',
+                    duration=6000,
+                )
             report_exception_post_close(
                 dlg,
                 "Hold sale",
@@ -187,15 +234,18 @@ def launch_hold_sales_dialog(parent=None):
                 level='error',
                 duration=6000,
             )
-            ui_feedback.set_status_label(status_lbl, "Unable to hold sale.", ok=False)
+            dlg.reject()
+
+    def _handle_close() -> None:
+        set_dialog_main_status_max(dlg, "Hold Sales cancelled.", level='info', duration=4000)
+        dlg.reject()
 
     ok_btn.clicked.connect(_handle_ok)
-    cancel_btn.clicked.connect(dlg.reject)
+    cancel_btn.clicked.connect(_handle_close)
     if close_btn is not None:
-        close_btn.clicked.connect(dlg.reject)
+        close_btn.clicked.connect(_handle_close)
 
     name_in.setFocus(Qt.OtherFocusReason)
     name_in.selectAll()
-    _refresh_ok_enabled()
 
     return dlg

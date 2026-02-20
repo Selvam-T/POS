@@ -175,3 +175,62 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
     lines.append(_center_line(_load_greeting(), width))
 
     return "\n".join(lines)
+
+def generate_receipt_text_from_snapshot(
+    *,
+    items: list[dict],
+    receipt_no: str = "TEMP",
+    status: str = "UNPAID",
+    created_at: str | None = None,
+    cashier_name: str = "",
+    width: int = config.RECEIPT_DEFAULT_WIDTH,
+) -> str:
+    created_text = _format_datetime(created_at) if created_at else _format_datetime(datetime.now().isoformat())
+    status_clean = str(status or "").strip().upper()
+    if status_clean not in ("PAID", "UNPAID", "CANCELLED"):
+        status_clean = "UNKNOWN"
+
+    total_qty = 0.0
+    total_amount = 0.0
+    for item in items or []:
+        qty = float(item.get("quantity") or item.get("qty") or 0.0)
+        line_total = item.get("line_total")
+        if line_total is None:
+            try:
+                line_total = float(item.get("price") or 0.0) * qty
+            except Exception:
+                line_total = 0.0
+        total_qty += qty
+        total_amount += float(line_total or 0.0)
+
+    lines: List[str] = []
+    lines.append(_center_line(str(getattr(config, "COMPANY_NAME", "")), width))
+    lines.append(_center_line(str(getattr(config, "ADDRESS_LINE_1", "")), width))
+    lines.append(_center_line(str(getattr(config, "ADDRESS_LINE_2", "")), width))
+    lines.append("")
+    lines.append(_center_line(f"Receipt id: {receipt_no}", width))
+    if cashier_name:
+        lines.append(_center_line(f"Served by {cashier_name}", width))
+    lines.append(_center_line(created_text, width))
+    lines.append("")
+    lines.append(_item_header(width))
+    lines.append("-" * width)
+    for item in items or []:
+        qty = float(item.get("quantity") or item.get("qty") or 0.0)
+        name = str(item.get("name") or item.get("product_name") or "")
+        line_total = item.get("line_total")
+        if line_total is None:
+            try:
+                line_total = float(item.get("price") or 0.0) * qty
+            except Exception:
+                line_total = 0.0
+        lines.append(_item_line(qty, name, float(line_total or 0.0), width))
+    lines.append("-" * width)
+
+    lines.append(_line_with_amount("Grand Total:", f"${total_amount:.2f}", width))
+    lines.append("")
+    lines.append(_center_line(f"Receipt Status is {status_clean}", width))
+    lines.append("")
+    lines.append(_center_line(_load_greeting(), width))
+
+    return "\n".join(lines)

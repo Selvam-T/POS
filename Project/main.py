@@ -414,7 +414,7 @@ class MainLoader(QMainWindow):
         if not self._can_launch_hold_sales_dialog():
             sb = getattr(self, 'statusbar', None)
             if sb:
-                show_temp_status(sb, "On Hold is available only for an active sale.", 3000)
+                show_temp_status(sb, "No active sale to place on hold.", 3000)
             return
 
         self.dialog_wrapper.open_dialog_scanner_blocked(launch_hold_sales_dialog, dialog_key='hold_sales')

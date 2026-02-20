@@ -74,7 +74,7 @@ PRINTER_IP = "192.168.0.10"
 PC_IP = "192.168.0.5"
 SUBNET_MASK = "255.255.255.0"
 PRINTER_PORT = 9100
-ENABLE_PRINTER_PRINT = True # set to True to enable network printing
+ENABLE_PRINTER_PRINT = False # set to True to enable network printing
 # Cash drawer settings
 ENABLE_CASH_DRAWER = False # set to True to enable cash drawer
 CASH_DRAWER_PIN = 2
@@ -120,6 +120,7 @@ PASSWORD_MIN_LENGTH = 8
 
 EMAIL_REGEX = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w+$")
 ALPHANUMERIC_REGEX = re.compile(r"^[A-Za-z0-9 \-']+$")
+NAME_REGEX = re.compile(r"^[A-Za-z0-9\s.,'&()\-/]+$")
 
 # ALTERNATIVE: Field-specific configurations (not implemented yet with validate_field)
 STRING_CONFIG = {
