@@ -63,6 +63,8 @@ Goal:
 - Prevent accidental scan-to-cart behavior while a held receipt is being paid.
 - Still allow normal keyboard typing (scanner bursts are blocked; manual typing remains unaffected).
 
+This behavior is part of the app’s ReceiptContext state machine: when the cart is a loaded hold receipt, the system operates in a payment-only mode.
+
 ### 3) Focus-based routing (no override)
 
 If no override consumes the scan, `BarcodeManager` applies routing rules:

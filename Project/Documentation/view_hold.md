@@ -16,6 +16,11 @@ When a receipt is loaded, the application enters a protected state (`ReceiptCont
 - Sales table quantity widgets are locked (no manual typing in SalesFrame)
 - Payment panel remains keyboard-typable for tender/split entry
 
+Design hard rule:
+
+- The app only transitions back to `ReceiptContext.source = 'ACTIVE_SALE'` after it has cleared the Sales table and reset the Payment panel to default.
+  This keeps the state machine predictable and avoids needing to “restore” per-row editability in the Sales table.
+
 ## Files Involved
 
 - Controller: `modules/sales/view_hold.py`

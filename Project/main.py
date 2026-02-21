@@ -143,6 +143,9 @@ class MainLoader(QMainWindow):
         if self.sales_frame_controller is not None:
             self._wire_sales_frame_signals()
 
+        # Ensure sales label matches initial receipt context.
+        self._refresh_sales_label_from_context()
+
         self.payment_panel_controller = setup_payment_panel(self, UI_DIR)
         if self.payment_panel_controller is not None:
             self._wire_payment_panel_signals()
@@ -509,11 +512,67 @@ class MainLoader(QMainWindow):
         panel.paymentSuccess.connect(self._on_payment_success)
 
     def _reset_receipt_context(self) -> None:
+        # Safety invariant: context reset should only happen after clearing the cart.
+        # This is logging-only (no behavior change).
+        try:
+            sales_table = getattr(self, 'sales_table', None)
+            has_rows = sales_table is not None and int(sales_table.rowCount()) > 0
+        except Exception:
+            has_rows = False
+        if has_rows:
+            try:
+                from modules.ui_utils.error_logger import log_error
+                log_error(
+                    "WARNING: _reset_receipt_context() called while sales_table has rows; "
+                    "expected clear cart/payment reset first."
+                )
+            except Exception:
+                pass
+
         ctx = self.receipt_context
         ctx['active_receipt_id'] = None
         ctx['source'] = 'ACTIVE_SALE'
         ctx['status'] = 'NONE'
         self._apply_hold_loaded_sales_lock(False)
+        self._refresh_sales_label_from_context()
+
+    def _refresh_sales_label_from_context(self) -> None:
+        """Update the SalesFrame header label based on current ReceiptContext."""
+        try:
+            ctx = getattr(self, 'receipt_context', {}) or {}
+            source = str(ctx.get('source') or '').strip()
+        except Exception:
+            source = ''
+
+        if source == 'HOLD_LOADED':
+            text = 'On Hold receipt loaded.'
+        else:
+            # Default for ACTIVE sale mode (includes legacy values like "Sales").
+            text = 'Sales'
+
+        self._set_sales_label_text(text)
+
+    def _set_sales_label_text(self, text: str) -> None:
+        """Set the text of the sales frame's `salesLabel` if present."""
+        label = None
+        try:
+            frame = getattr(self, 'sales_frame_controller', None)
+            if frame is not None and getattr(frame, 'widget', None) is not None:
+                label = frame.widget.findChild(QLabel, 'salesLabel')
+        except Exception:
+            label = None
+
+        if label is None:
+            try:
+                label = self.findChild(QLabel, 'salesLabel')
+            except Exception:
+                label = None
+
+        if label is not None:
+            try:
+                label.setText(text)
+            except Exception:
+                pass
 
     def _can_launch_hold_sales_dialog(self) -> bool:
         ctx = getattr(self, 'receipt_context', {}) or {}
@@ -545,15 +604,19 @@ class MainLoader(QMainWindow):
         ctx['source'] = 'HOLD_LOADED'
         ctx['status'] = 'UNPAID'
         self._apply_hold_loaded_sales_lock(True)
+        self._refresh_sales_label_from_context()
         print(f"ReceiptContext updated for hold load: {ctx}")
 
     def _apply_hold_loaded_sales_lock(self, locked: bool) -> None:
         """Lock qty editing in the sales table when a hold receipt is loaded.
 
-        Policy:
-        - HOLD_LOADED: prevent manual typing in qty widgets (read-only + no focus)
-        - ACTIVE_SALE: restore original read-only/focus policy per-row
+        App design rule:
+        - ReceiptContext is reset back to ACTIVE_SALE only after the sales table is cleared.
+        - Therefore unlocking is a no-op (there are no qty editors to restore).
         """
+        if not locked:
+            return
+
         try:
             from PyQt5.QtCore import Qt
             from PyQt5.QtWidgets import QLineEdit
@@ -577,37 +640,8 @@ class MainLoader(QMainWindow):
                 editor = qty_container.findChild(QLineEdit, 'qtyInput')
                 if editor is None:
                     continue
-
-                if locked:
-                    if editor.property('_holdlock_orig_readonly') is None:
-                        editor.setProperty('_holdlock_orig_readonly', bool(editor.isReadOnly()))
-                    if editor.property('_holdlock_orig_focus') is None:
-                        editor.setProperty('_holdlock_orig_focus', int(editor.focusPolicy()))
-                    editor.setReadOnly(True)
-                    editor.setFocusPolicy(Qt.NoFocus)
-                else:
-                    orig_ro = editor.property('_holdlock_orig_readonly')
-                    orig_fp = editor.property('_holdlock_orig_focus')
-
-                    if orig_ro is not None:
-                        try:
-                            editor.setReadOnly(bool(orig_ro))
-                        except Exception:
-                            pass
-                        try:
-                            editor.setProperty('_holdlock_orig_readonly', None)
-                        except Exception:
-                            pass
-
-                    if orig_fp is not None:
-                        try:
-                            editor.setFocusPolicy(Qt.FocusPolicy(int(orig_fp)))
-                        except Exception:
-                            pass
-                        try:
-                            editor.setProperty('_holdlock_orig_focus', None)
-                        except Exception:
-                            pass
+                editor.setReadOnly(True)
+                editor.setFocusPolicy(Qt.NoFocus)
             except Exception:
                 continue
 
@@ -620,12 +654,12 @@ class MainLoader(QMainWindow):
 
     # Clear state after successful payment completion.
     def _on_payment_success(self) -> None:
-        self._reset_receipt_context()
-        print(f"Payment success: {self.receipt_context}")
         self._clear_sales_table_core()
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:
             panel.clear_payment_frame()
+        self._reset_receipt_context()
+        print(f"Payment success: {self.receipt_context}")
 
     # ========== Payment Processing ==========
     # Orchestrates payment; atomic DB commit is delegated to PaidSaleCommitter.
@@ -947,11 +981,11 @@ class MainLoader(QMainWindow):
                 return
 
             self._clear_sales_table_core()
-            self._reset_receipt_context()
-
             panel = getattr(self, 'payment_panel_controller', None)
             if panel is not None:
                 panel.clear_payment_frame()
+
+            self._reset_receipt_context()
         except Exception as e:
             try:
                 import traceback
