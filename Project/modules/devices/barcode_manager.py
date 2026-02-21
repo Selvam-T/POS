@@ -80,6 +80,17 @@ class BarcodeManager(QObject):
         except Exception:
             pass
 
+        # If a held receipt is loaded into the cart, do not permit scanner-driven
+        # routing into the main sales/payment flow. Keep dialog overrides working
+        # (override logic above) so ProductCode dialogs can still accept scans.
+        try:
+            ctx = getattr(parent, 'receipt_context', {}) or {}
+            if ctx.get('source') == 'HOLD_LOADED':
+                self._ignore_scan(barcode, reason='hold-loaded')
+                return
+        except Exception:
+            pass
+
         # Get status bar reference
         status_bar = getattr(parent, 'statusbar', None)
 

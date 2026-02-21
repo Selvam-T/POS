@@ -10,6 +10,12 @@ The View Hold dialog allows the cashier to browse previously held **UNPAID** rec
 
 The dialog is opened through the standard DialogWrapper pipeline (scanner blocked, modal lifecycle, overlay, post-close StatusBar handling).
 
+When a receipt is loaded, the application enters a protected state (`ReceiptContext.source = 'HOLD_LOADED'`) intended for payment-only workflows:
+
+- Barcode scanner “scan-to-cart” routing is blocked (scans are ignored)
+- Sales table quantity widgets are locked (no manual typing in SalesFrame)
+- Payment panel remains keyboard-typable for tender/split entry
+
 ## Files Involved
 
 - Controller: `modules/sales/view_hold.py`
@@ -146,6 +152,7 @@ Flow:
    - `payment_panel_controller.set_payment_default(total)`
 6. Emit held-load signal (to update ReceiptContext):
    - `sales_frame_controller.notify_hold_loaded(receipt_id, total)`
+  - Main window handler (`_on_view_hold_loaded`) sets `ReceiptContext.source = 'HOLD_LOADED'` and applies a SalesFrame qty lock
 7. Close the dialog (`accept()`)
 
 ### 2) PRINT

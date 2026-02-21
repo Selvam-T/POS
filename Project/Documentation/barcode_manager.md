@@ -45,11 +45,30 @@ This makes Product Menu scanner behavior both:
 - **usable** (scan into the code field)
 - **safe** (scan cannot accidentally add to the sale while a modal is up)
 
+### 2b) ReceiptContext HOLD_LOADED block (cart-protection)
+
+When the main window `ReceiptContext.source == 'HOLD_LOADED'` (i.e., the cart was populated by loading a held receipt), scanner-driven routing is blocked at the manager level.
+
+Current rule:
+
+- `BarcodeManager.on_barcode_scanned()` checks the parent window’s `receipt_context`.
+- If `source == 'HOLD_LOADED'`, the scan is ignored via `_ignore_scan(...)`.
+
+Important nuance:
+
+- This check happens **after** the dialog override logic, so dialogs that explicitly own scans (via `set_barcode_override(...)` and `*ProductCodeLineEdit`) can still accept scans when appropriate.
+
+Goal:
+
+- Prevent accidental scan-to-cart behavior while a held receipt is being paid.
+- Still allow normal keyboard typing (scanner bursts are blocked; manual typing remains unaffected).
+
 ### 3) Focus-based routing (no override)
 
 If no override consumes the scan, `BarcodeManager` applies routing rules:
 
 - If `_modalBlockScanner` is enabled: ignore scan + cleanup leak
+- If `ReceiptContext.source == 'HOLD_LOADED'`: ignore scan + cleanup leak
 - If focus is `qtyInput`: ignore scan + cleanup leak
 - If focus is `refundInput`: write barcode into `refundInput`
 - Otherwise: treat as a sales-table barcode
@@ -83,6 +102,7 @@ Rationale: some widgets (e.g., price fields) often contain longer values; leak c
 
 - Main window creates `BarcodeManager` and installs its event filter on the app.
 - `DialogWrapper.open_dialog_scanner_blocked(...)` uses modal block to protect the main window.
+- Main window sets `ReceiptContext.source = 'HOLD_LOADED'` when a hold receipt is loaded; BarcodeManager uses this to block scan-to-cart routing.
 - Product Menu installs a temporary override and is expected to clear it on close (the wrapper also clears it as a safety net).
 
 ## Notes on Legacy (barcode_managerOLD)

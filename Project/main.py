@@ -384,6 +384,13 @@ class MainLoader(QMainWindow):
     # Request the vegetable entry dialog and merge its results.
     def launch_vegetable_entry_dialog(self):
         """Open Add Vegetable panel."""
+        if self._is_hold_loaded_in_cart():
+            from modules.ui_utils.ui_feedback import show_temp_status
+            sb = getattr(self, 'statusbar', None)
+            if sb:
+                show_temp_status(sb, "On Hold Receipt loaded. Vegetable entry not allowed.", 3000)
+            return
+
         self.dialog_wrapper.open_dialog_scanner_blocked(
             lambda parent: launch_vegetable_entry_dialog(parent, self.sales_table),
             dialog_key='vegetable_entry',
@@ -393,12 +400,11 @@ class MainLoader(QMainWindow):
     # Present manual entry dialog unless sale is held.
     def launch_manual_entry_dialog(self):
         """Open Manual Product Entry panel."""
-        ctx = getattr(self, 'receipt_context', {})
-        if (ctx or {}).get('source') == 'HOLD_LOADED':
+        if self._is_hold_loaded_in_cart():
             from modules.ui_utils.ui_feedback import show_temp_status
             sb = getattr(self, 'statusbar', None)
             if sb:
-                show_temp_status(sb, "Manual entry disabled for held receipts.", 3000)
+                show_temp_status(sb, "On Hold Receipt loaded. Manual entry not allowed.", 3000)
             return
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_manual_entry_dialog, 
@@ -410,6 +416,12 @@ class MainLoader(QMainWindow):
     def launch_hold_sales_dialog(self):
         """Open On Hold panel."""
         from modules.ui_utils.ui_feedback import show_temp_status
+
+        if self._is_hold_loaded_in_cart():
+            sb = getattr(self, 'statusbar', None)
+            if sb:
+                show_temp_status(sb, "On Hold Receipt loaded. Hold Sales disabled.", 3000)
+            return
 
         if not self._can_launch_hold_sales_dialog():
             sb = getattr(self, 'statusbar', None)
@@ -424,6 +436,12 @@ class MainLoader(QMainWindow):
         """Open View Hold panel."""
         from modules.ui_utils.ui_feedback import show_temp_status
 
+        if self._is_hold_loaded_in_cart():
+            sb = getattr(self, 'statusbar', None)
+            if sb:
+                show_temp_status(sb, "On Hold Receipt loaded. View Holds disabled.", 3000)
+            return
+
         sales_table = getattr(self, 'sales_table', None)
         ctx = getattr(self, 'receipt_context', {}) or {}
 
@@ -431,7 +449,7 @@ class MainLoader(QMainWindow):
         if sales_table is None or sales_table.rowCount() > 0 or ctx.get('active_receipt_id') is not None:
             sb = getattr(self, 'statusbar', None)
             if sb:
-                show_temp_status(sb, "Sale is in progress. View hold is disabled.", 3000)
+                show_temp_status(sb, "Sales in progress. View Holds disabled.", 3000)
             return
 
         # Optional extra guard: ensure payment frame is effectively empty (total 0)
@@ -449,6 +467,11 @@ class MainLoader(QMainWindow):
                 return
 
         self.dialog_wrapper.open_dialog_scanner_blocked(launch_viewhold_dialog, dialog_key='view_hold')
+
+    def _is_hold_loaded_in_cart(self) -> bool:
+        """True when the current cart originated from a loaded hold receipt."""
+        ctx = getattr(self, 'receipt_context', {}) or {}
+        return ctx.get('source') == 'HOLD_LOADED'
 
     # Prompt clear cart dialog only when a sale exists.
     def open_clearcart_dialog(self):
@@ -490,6 +513,7 @@ class MainLoader(QMainWindow):
         ctx['active_receipt_id'] = None
         ctx['source'] = 'ACTIVE_SALE'
         ctx['status'] = 'NONE'
+        self._apply_hold_loaded_sales_lock(False)
 
     def _can_launch_hold_sales_dialog(self) -> bool:
         ctx = getattr(self, 'receipt_context', {}) or {}
@@ -520,7 +544,72 @@ class MainLoader(QMainWindow):
         ctx['active_receipt_id'] = receipt_id
         ctx['source'] = 'HOLD_LOADED'
         ctx['status'] = 'UNPAID'
+        self._apply_hold_loaded_sales_lock(True)
         print(f"ReceiptContext updated for hold load: {ctx}")
+
+    def _apply_hold_loaded_sales_lock(self, locked: bool) -> None:
+        """Lock qty editing in the sales table when a hold receipt is loaded.
+
+        Policy:
+        - HOLD_LOADED: prevent manual typing in qty widgets (read-only + no focus)
+        - ACTIVE_SALE: restore original read-only/focus policy per-row
+        """
+        try:
+            from PyQt5.QtCore import Qt
+            from PyQt5.QtWidgets import QLineEdit
+        except Exception:
+            return
+
+        table = getattr(self, 'sales_table', None)
+        if table is None:
+            return
+
+        try:
+            row_count = int(table.rowCount())
+        except Exception:
+            row_count = 0
+
+        for r in range(row_count):
+            try:
+                qty_container = table.cellWidget(r, 2)
+                if qty_container is None:
+                    continue
+                editor = qty_container.findChild(QLineEdit, 'qtyInput')
+                if editor is None:
+                    continue
+
+                if locked:
+                    if editor.property('_holdlock_orig_readonly') is None:
+                        editor.setProperty('_holdlock_orig_readonly', bool(editor.isReadOnly()))
+                    if editor.property('_holdlock_orig_focus') is None:
+                        editor.setProperty('_holdlock_orig_focus', int(editor.focusPolicy()))
+                    editor.setReadOnly(True)
+                    editor.setFocusPolicy(Qt.NoFocus)
+                else:
+                    orig_ro = editor.property('_holdlock_orig_readonly')
+                    orig_fp = editor.property('_holdlock_orig_focus')
+
+                    if orig_ro is not None:
+                        try:
+                            editor.setReadOnly(bool(orig_ro))
+                        except Exception:
+                            pass
+                        try:
+                            editor.setProperty('_holdlock_orig_readonly', None)
+                        except Exception:
+                            pass
+
+                    if orig_fp is not None:
+                        try:
+                            editor.setFocusPolicy(Qt.FocusPolicy(int(orig_fp)))
+                        except Exception:
+                            pass
+                        try:
+                            editor.setProperty('_holdlock_orig_focus', None)
+                        except Exception:
+                            pass
+            except Exception:
+                continue
 
     # Process payment requests from the payment panel.
     def _on_payment_requested(self, payment_split: dict) -> None:
