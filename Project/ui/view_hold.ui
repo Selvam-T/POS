@@ -394,6 +394,16 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>viewHoldSearchLineEdit</tabstop>
+  <tabstop>viewHoldLoadRadioBtn</tabstop>
+  <tabstop>viewHoldPrintRadioBtn</tabstop>
+  <tabstop>viewHoldVoidRadioBtn</tabstop>
+  <tabstop>viewHoldNoteLineEdit</tabstop>
+  <tabstop>btnViewHoldOk</tabstop>
+  <tabstop>btnViewHoldCancel</tabstop>
+  <tabstop>customCloseBtn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -1,0 +1,2 @@
+2026-02-21T16:27:37.851005 - python-escpos import failed: No module named 'escpos'
+2026-02-21T16:27:37.851005 - View Hold print failed: printer send failed for receipt_no=20260221-0004

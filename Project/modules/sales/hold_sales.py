@@ -76,7 +76,7 @@ def launch_hold_sales_dialog(parent=None):
     name_in.setFocusPolicy(Qt.StrongFocus)
     note_in.setFocusPolicy(Qt.StrongFocus)
 
-    gate = FocusGate([note_in], lock_enabled=True)
+    gate = FocusGate([note_in, ok_btn],lock_enabled=True)
     gate.set_locked(True)
 
     def _set_placeholders() -> None:

@@ -23,6 +23,11 @@ from .product_cache import (
 from . import products_repo
 from .paid_sale_committer import PaidSaleCommitter
 from .held_sale_committer import HeldSaleCommitter
+from .hold_receipts_repo import (
+    list_unpaid_receipts,
+    search_unpaid_receipts_by_customer,
+    void_receipt,
+)
 
 
 def get_product_slim(product_code: str) -> Tuple[bool, str, float, str]:
@@ -176,4 +181,7 @@ __all__ = [
     'delete_product',
     'PaidSaleCommitter',
     'HeldSaleCommitter',
+    'list_unpaid_receipts',
+    'search_unpaid_receipts_by_customer',
+    'void_receipt',
 ]

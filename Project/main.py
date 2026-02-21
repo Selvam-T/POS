@@ -431,7 +431,7 @@ class MainLoader(QMainWindow):
         if sales_table is None or sales_table.rowCount() > 0 or ctx.get('active_receipt_id') is not None:
             sb = getattr(self, 'statusbar', None)
             if sb:
-                show_temp_status(sb, "View Hold is available only when no sale is in progress.", 3000)
+                show_temp_status(sb, "Sale is in progress. View hold is disabled.", 3000)
             return
 
         # Optional extra guard: ensure payment frame is effectively empty (total 0)

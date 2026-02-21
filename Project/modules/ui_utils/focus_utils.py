@@ -155,9 +155,6 @@ class FieldCoordinator(QObject):
                 self._set_reactive_placeholder(_w, show=False)
         
         if isinstance(source, QLineEdit):
-            source.textEdited.connect(lambda: self._sync_fields(source))
-            source.editingFinished.connect(lambda: self._sync_fields(source))
-
             link = self.links[source]
             if link.get('lookup') and link.get('live_lookup'):
                 timer = QTimer(source)
@@ -193,7 +190,13 @@ class FieldCoordinator(QObject):
                         pass
                     timer.start(delay)
 
+                # When live_lookup is enabled, avoid immediate per-keystroke lookups.
+                # Debounced execution is driven by textChanged.
                 source.textChanged.connect(_schedule_live)
+            else:
+                source.textEdited.connect(lambda: self._sync_fields(source))
+
+            source.editingFinished.connect(lambda: self._sync_fields(source))
         elif isinstance(source, QComboBox):
             source.activated.connect(lambda: self._sync_fields(source))
             
@@ -348,6 +351,12 @@ class FieldCoordinator(QObject):
                             self.set_error(obj, str(e), status_label=link['status_label'])
                         _trap_focus()  # STICKY: Trap focus firmly
                         return True    # Swallow the event
+
+                # If validation normalized/cleared text, re-read before lookup/jump.
+                try:
+                    val = obj.text() if hasattr(obj, 'text') else val
+                except Exception:
+                    pass
 
                 # --- PATH B: Lookup (Mainly UPDATE/REMOVE Tabs) ---
                 if link['lookup']:

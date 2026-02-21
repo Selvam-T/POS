@@ -12,7 +12,7 @@ DIALOG_RATIOS = {
 	'product_menu': (0.5, 0.7),
 	'vegetable_menu': (0.32, 0.7),
 	'hold_sales': (0.4, 0.4),
-	'view_hold': (0.5, 0.7),
+	'view_hold': (0.7, 0.7),
 	'clear_cart': (0.25, 0.25),
     'MaxRowsDialog': (0.25, 0.25)
 }
@@ -127,7 +127,7 @@ STRING_CONFIG = {
     'product_code': {'min_len': 4, 'max_len': 14, 'required': True},
     'product_name': {'min_len': 4, 'max_len': 40, 'required': True},
     'supplier': {'min_len': 3, 'max_len': 15, 'required': False},
-    'customer': {'min_len': 3, 'max_len': 15, 'required': True},  
+    'customer': {'min_len': 3, 'max_len': 6, 'required': True},  
     'note': {'min_len': 0, 'max_len': 25, 'required': False}, 
     'category': {'min_len': 4, 'max_len': 25, 'required': False}
 }
