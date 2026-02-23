@@ -1,21 +1,4 @@
-"""
-Product_list repository (SQL only).
-
-Location: Project/modules/db_operation/products_repo.py
-
-Table assumed: Product_list
-Columns used:
-- product_code (TEXT, primary key or unique)
-- name (TEXT)
-- category (TEXT)
-- supplier (TEXT)
-- selling_price (REAL)
-- cost_price (REAL)
-- unit (TEXT)
-- last_updated (TEXT)
-
-If your schema differs, adjust SQL in this file only.
-"""
+"""SQL-only repository for Product_list."""
 
 import sqlite3
 from typing import Any, Dict, List, Optional, Tuple
@@ -76,9 +59,7 @@ def update_product(
     unit: Optional[str] = None,
     conn: Optional[sqlite3.Connection] = None,
 ) -> bool:
-    """
-    Returns True if a row was updated.
-    """
+    """Return True if a row was updated."""
     fields: List[str] = []
     params: List[Any] = []
 
@@ -101,7 +82,6 @@ def update_product(
         fields.append("unit = ?")
         params.append(unit)
 
-    # always touch last_updated
     fields.append("last_updated = ?")
     params.append(now_iso())
 
@@ -127,9 +107,7 @@ def update_product(
 
 
 def delete_product(product_code: str, *, conn: Optional[sqlite3.Connection] = None) -> bool:
-    """
-    Returns True if a row was deleted.
-    """
+    """Return True if a row was deleted."""
     sql = f"DELETE FROM {TABLE} WHERE product_code = ? COLLATE NOCASE"
     own = conn is None
     c = conn or get_conn()
@@ -143,9 +121,7 @@ def delete_product(product_code: str, *, conn: Optional[sqlite3.Connection] = No
 
 
 def get_product_full(product_code: str, *, conn: Optional[sqlite3.Connection] = None) -> Optional[Dict[str, Any]]:
-    """
-    Returns dict with all columns used by this repo, or None if not found.
-    """
+    """Return full product row as dict, or None."""
     sql = f"""
     SELECT product_code, name, category, supplier, selling_price, cost_price, unit, last_updated
       FROM {TABLE}
@@ -162,9 +138,7 @@ def get_product_full(product_code: str, *, conn: Optional[sqlite3.Connection] = 
 
 
 def get_product_slim(product_code: str, *, conn: Optional[sqlite3.Connection] = None) -> Optional[Tuple[str, float, str]]:
-    """
-    Returns (name, selling_price, unit) or None.
-    """
+    """Return (name, selling_price, unit) or None."""
     sql = f"""
     SELECT name, selling_price, unit
       FROM {TABLE}
@@ -183,9 +157,7 @@ def get_product_slim(product_code: str, *, conn: Optional[sqlite3.Connection] = 
 
 
 def list_products(*, conn: Optional[sqlite3.Connection] = None) -> List[Dict[str, Any]]:
-    """
-    Returns list of dict rows (full fields).
-    """
+    """Return full product rows."""
     sql = f"""
     SELECT product_code, name, category, supplier, selling_price, cost_price, unit, last_updated
       FROM {TABLE}
@@ -202,10 +174,7 @@ def list_products(*, conn: Optional[sqlite3.Connection] = None) -> List[Dict[str
 
 
 def list_products_slim(*, conn: Optional[sqlite3.Connection] = None) -> List[Tuple[str, str, float, str]]:
-    """
-    Returns list of (product_code, name, selling_price, unit)
-    Used by product_cache.py.
-    """
+    """Return (product_code, name, selling_price, unit) rows."""
     sql = f"""
     SELECT product_code, name, selling_price, unit
       FROM {TABLE}

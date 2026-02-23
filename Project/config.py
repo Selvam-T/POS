@@ -14,6 +14,7 @@ DIALOG_RATIOS = {
 	'hold_sales': (0.4, 0.4),
 	'view_hold': (0.7, 0.7),
 	'clear_cart': (0.25, 0.25),
+	'refund': (0.35, 0.5),
     'MaxRowsDialog': (0.25, 0.25)
 }
 

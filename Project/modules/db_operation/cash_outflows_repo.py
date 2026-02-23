@@ -1,18 +1,4 @@
-"""Cash outflows repository (SQL only).
-
-Tracks money leaving the POS system for flows such as:
-- Refund payouts
-- Vendor payouts
-
-Table: cash_outflows
-Columns:
-- outflow_id INTEGER PRIMARY KEY AUTOINCREMENT
-- outflow_type TEXT NOT NULL            # e.g. REFUND_OUT, VENDOR_OUT
-- amount REAL NOT NULL
-- created_at TEXT NOT NULL
-- cashier_name TEXT
-- note TEXT
-"""
+"""SQL helpers for `cash_outflows`."""
 
 from __future__ import annotations
 
@@ -27,7 +13,7 @@ ALLOWED_OUTFLOW_TYPES = {"REFUND_OUT", "VENDOR_OUT"}
 
 
 def ensure_table(*, conn: Optional[sqlite3.Connection] = None) -> None:
-    """Create the cash_outflows table if it does not exist."""
+    """Create table if missing."""
     sql = f"""
     CREATE TABLE IF NOT EXISTS {TABLE} (
       outflow_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,7 +44,7 @@ def add_outflow(
     created_at: Optional[str] = None,
     conn: Optional[sqlite3.Connection] = None,
 ) -> int:
-    """Insert one outflow row and return the inserted outflow_id."""
+    """Insert one outflow row and return its id."""
     typ = str(outflow_type or "").strip().upper()
     if not typ:
         raise ValueError("outflow_type is required")
@@ -103,7 +89,7 @@ def list_outflows(
     limit: int = 200,
     conn: Optional[sqlite3.Connection] = None,
 ) -> List[Dict[str, Any]]:
-    """List outflow rows, newest first, with optional filters."""
+    """Return outflow rows (newest first)."""
     where = []
     params = []
 

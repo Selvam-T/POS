@@ -1,17 +1,4 @@
-"""App-wide product cache.
-
-Location: Project/modules/db_operation/product_cache.py
-
-This module is intentionally UI-free (no PyQt imports).
-
-Cache shape:
-    PRODUCT_CACHE: { normalized_product_code: (display_name, selling_price, display_unit) }
-
-Compatibility note:
-The rest of the app historically expects:
-    found, name, price, unit = get_product_info(code)
-so this module preserves that tuple shape.
-"""
+"""App-wide product cache."""
 
 from typing import Dict, Optional, Tuple
 
@@ -19,32 +6,23 @@ from . import products_repo
 from modules.ui_utils.canonicalization import canonicalize_product_code, canonicalize_title_text
 
 
-# {normalized_product_code: (name, selling_price, unit)}
 PRODUCT_CACHE: Dict[str, Tuple[str, float, str]] = {}
 
-# {normalized_product_code: display_product_code}
-# Keeps a user-friendly casing for product codes without changing PRODUCT_CACHE tuple shape.
 PRODUCT_CODE_DISPLAY: Dict[str, str] = {}
 
 
 def _norm(s: Optional[str]) -> str:
-    """Normalize product code / barcode for cache keys."""
+    """Normalize product code for cache keys."""
     return canonicalize_product_code(s)
 
 
 def _to_camel_case(text: Optional[str]) -> str:
-    """
-    Convert to Title/Camel-ish case for display consistency.
-    Keeps simple separators and trims whitespace.
-    """
+    """Normalize display text."""
     return canonicalize_title_text(text)
 
 
 def load_product_cache() -> Dict[str, Tuple[str, float, str]]:
-    """
-    Full reload from DB into PRODUCT_CACHE.
-    Returns the cache dict.
-    """
+    """Reload and return PRODUCT_CACHE."""
     PRODUCT_CACHE.clear()
     PRODUCT_CODE_DISPLAY.clear()
     rows = products_repo.list_products_slim()
@@ -54,7 +32,6 @@ def load_product_cache() -> Dict[str, Tuple[str, float, str]]:
         if not key:
             continue
 
-        # Store canonical display code (matches cache key + storage canonicalization).
         PRODUCT_CODE_DISPLAY[key] = key
         name_disp = _to_camel_case(name)
         unit_disp = _to_camel_case(unit) or _to_camel_case('Each')
@@ -72,14 +49,7 @@ def refresh_product_cache() -> Dict[str, Tuple[str, float, str]]:
 
 
 def get_product_info(product_code: str) -> Tuple[bool, str, float, str]:
-    """Cache-only lookup.
-
-    Returns:
-      (found, name, selling_price, unit)
-
-    If not found, returns:
-      (False, <original_code>, 0.0, 'EACH')
-    """
+    """Return (found, name, selling_price, unit)."""
     if not PRODUCT_CACHE:
         load_product_cache()
 
@@ -97,11 +67,7 @@ def get_product_info(product_code: str) -> Tuple[bool, str, float, str]:
 
 
 def upsert_cache_item(product_code: str, name: str, selling_price: float, unit: str) -> None:
-    """
-    Update/add one item in cache (call after product add/update).
-    """
-    # IMPORTANT: do not re-canonicalize here.
-    # Writes should already be canonicalized at the input boundary.
+    """Update or insert one cache item."""
     key = _norm(product_code)
     if not key:
         return
@@ -112,9 +78,7 @@ def upsert_cache_item(product_code: str, name: str, selling_price: float, unit: 
 
 
 def remove_cache_item(product_code: str) -> None:
-    """
-    Remove from cache (call after product delete).
-    """
+    """Remove one cache item."""
     target = _norm(product_code)
     if not target:
         return

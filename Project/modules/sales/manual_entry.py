@@ -87,7 +87,8 @@ def launch_manual_entry_dialog(parent):
         lookup_fn=lambda val: input_handler.get_coordinator_lookup(val, 'code'),
         next_focus=widgets['qty'],
         status_label=widgets['status'],
-        on_sync=_on_sync
+        on_sync=_on_sync,
+        auto_jump=False,
     )
 
     # Link Name Search -> Code/Unit
@@ -97,7 +98,8 @@ def launch_manual_entry_dialog(parent):
         lookup_fn=lambda val: input_handler.get_coordinator_lookup(val, 'name'),
         next_focus=widgets['qty'],
         status_label=widgets['status'],
-        on_sync=_on_sync
+        on_sync=_on_sync,
+        auto_jump=True, 
     )
 
     coord.add_link(

@@ -1,16 +1,4 @@
-"""
-Receipt number generation.
-
-Location: Project/modules/db_operation/receipt_numbers.py
-
-Format: YYYYMMDD-#### (counter max 9999)
-Resets daily.
-
-Implementation uses a small helper table:
-  receipt_counters(date TEXT PRIMARY KEY, counter INTEGER NOT NULL)
-
-You can replace this later with your own receipt table-based logic if you prefer.
-"""
+"""Receipt number generation (YYYYMMDD-####)."""
 
 import sqlite3
 from datetime import date, datetime
@@ -38,9 +26,7 @@ def next_receipt_no(for_date: Optional[date] = None, *, conn: Optional[sqlite3.C
     own = conn is None
     c = conn or get_conn()
     try:
-        # If caller provided a connection that is already inside a transaction,
-        # avoid starting another transaction here (SQLite does not support
-        # nested BEGIN). Use the active transaction context instead.
+        # Avoid nested BEGIN when caller already owns a transaction.
         already_in_tx = False
         try:
             already_in_tx = bool(getattr(c, 'in_transaction', False))
@@ -48,8 +34,6 @@ def next_receipt_no(for_date: Optional[date] = None, *, conn: Optional[sqlite3.C
             already_in_tx = False
 
         if own or not already_in_tx:
-            # Own connection or external connection not currently in transaction:
-            # use the transaction wrapper to ensure BEGIN IMMEDIATE semantics.
             with transaction(c):
                 c.execute(_COUNTER_TABLE_SQL)
                 row = c.execute(
@@ -75,9 +59,6 @@ def next_receipt_no(for_date: Optional[date] = None, *, conn: Optional[sqlite3.C
 
                 return f"{day}-{nxt:04d}"
         else:
-            # Connection provided and already in a transaction: do not call
-            # transaction() again; perform the counter update inline so the
-            # outer transaction controls atomicity.
             c.execute(_COUNTER_TABLE_SQL)
             row = c.execute(
                 "SELECT counter FROM receipt_counters WHERE date = ?",

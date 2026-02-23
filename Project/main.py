@@ -34,10 +34,11 @@ from modules.table import setup_sales_table, handle_barcode_scanned, bind_total_
 from modules.table.table_operations import get_sales_data
 from modules.sales.sales_frame_setup import setup_sales_frame
 from modules.payment.payment_panel import setup_payment_panel
+from modules.payment.refund import launch_refund_dialog
 from modules.db_operation.paid_sale_committer import PaidSaleCommitter
 from modules.devices.barcode_manager import BarcodeManager
 from modules.wrappers.dialog_wrapper import DialogWrapper
-from modules.db_operation import PRODUCT_CACHE
+from modules.db_operation import PRODUCT_CACHE, ensure_cash_outflows_table
 from modules.ui_utils.dialog_utils import report_exception, report_to_statusbar
 # --- Menu frame dialog controllers ---
 from modules.menu.logout_menu import launch_logout_dialog
@@ -105,6 +106,14 @@ class MainLoader(QMainWindow):
         }
         self._payment_in_progress = False
         self._payment_busy_status_ms = 3000
+        try:
+            ensure_cash_outflows_table()
+        except Exception as exc:
+            try:
+                from modules.ui_utils.error_logger import log_error
+                log_error(f"Cash outflows table ensure failed: {exc}")
+            except Exception:
+                pass
         # Remove the window close button (X) to force using Logout
         try:
             flags = self.windowFlags()
@@ -413,6 +422,13 @@ class MainLoader(QMainWindow):
             launch_manual_entry_dialog, 
             dialog_key='manual_entry',
             on_finish=self._add_items_to_sales_table
+        )
+
+    def open_refund_dialog(self):
+        """Open Refund panel."""
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            launch_refund_dialog,
+            dialog_key='refund',
         )
 
     # Open the hold sales dialog for active transactions.

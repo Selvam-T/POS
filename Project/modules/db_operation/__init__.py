@@ -1,12 +1,4 @@
-"""DB operation facade.
-
-This package provides a small, stable public surface for the rest of the app.
-
-Implementation is split into:
-- db.py: connection + transaction helpers
-- products_repo.py: SQL-only operations
-- product_cache.py: in-memory cache + fast lookups
-"""
+"""DB operation facade."""
 
 from __future__ import annotations
 
@@ -36,17 +28,13 @@ from .cash_outflows_repo import (
 
 
 def get_product_slim(product_code: str) -> Tuple[bool, str, float, str]:
-        """Fast DB lookup for basic fields without loading PRODUCT_CACHE.
-
-        Returns:
-            (found, name, selling_price, unit)
-        """
-        row = products_repo.get_product_slim(product_code)
-        if not row:
-                return False, '', 0.0, 'EACH'
-        name, price, unit = row
-        unit_val = unit or 'EACH'
-        return True, str(name or ''), float(price or 0.0), str(unit_val)
+    """Return (found, name, selling_price, unit)."""
+    row = products_repo.get_product_slim(product_code)
+    if not row:
+        return False, '', 0.0, 'EACH'
+    name, price, unit = row
+    unit_val = unit or 'EACH'
+    return True, str(name or ''), float(price or 0.0), str(unit_val)
 
 
 def get_product_full(product_code: str) -> Tuple[bool, Dict[str, Any]]:
@@ -54,7 +42,6 @@ def get_product_full(product_code: str) -> Tuple[bool, Dict[str, Any]]:
     row = products_repo.get_product_full(product_code)
     if not row:
         return False, {}
-    # Map repo fields into the names used across the UI.
     unit_val = row.get('unit', '')
     if unit_val is None or str(unit_val).strip() == '':
         unit_val = 'Each'
@@ -80,11 +67,7 @@ def add_product(
     unit: str = 'EACH',
     last_updated: Optional[str] = None,
 ) -> Tuple[bool, str]:
-    """Add a product row.
-
-    Signature matches existing UI call sites (positional args) and ignores
-    last_updated (DB layer owns timestamps).
-    """
+    """Add a product row and sync cache."""
     try:
         products_repo.add_product(
             product_code=product_code,
@@ -95,11 +78,9 @@ def add_product(
             cost_price=float(cost_price or 0.0),
             unit=unit,
         )
-        # Keep in-memory cache consistent with DB (in-place update)
         try:
             upsert_cache_item(product_code, name, float(selling_price or 0.0), unit)
         except Exception as e:
-            # Best-effort; UI may still call refresh_product_cache().
             try:
                 from modules.ui_utils.error_logger import log_error
                 log_error(f"add_product: cache upsert failed for {product_code}: {e}")
@@ -137,7 +118,6 @@ def update_product(
         )
         if not updated:
             return False, 'Product not found'
-        # Keep in-memory cache consistent with DB (in-place update)
         try:
             upsert_cache_item(product_code, name, float(selling_price or 0.0), unit)
         except Exception as e:
@@ -160,7 +140,6 @@ def delete_product(product_code: str) -> Tuple[bool, str]:
         deleted = products_repo.delete_product(product_code)
         if not deleted:
             return False, 'Product not found'
-        # Keep in-memory cache consistent with DB (in-place update)
         try:
             remove_cache_item(product_code)
         except Exception as e:

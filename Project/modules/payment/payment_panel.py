@@ -126,6 +126,24 @@ class PaymentPanel(QObject):
                 self._pay_select_buttons[method] = btn
                 btn.clicked.connect(lambda _=None, m=method: self.handle_pay_select(m))
 
+        refund_btn = self.widget.findChild(QPushButton, 'keyRefundBtn')
+        if refund_btn is not None:
+            refund_btn.clicked.connect(self._open_refund_dialog)
+            try:
+                refund_btn.installEventFilter(self)
+            except Exception:
+                pass
+
+    def _open_refund_dialog(self) -> None:
+        host = self._main_window
+        if host is not None and hasattr(host, 'open_refund_dialog'):
+            try:
+                host.open_refund_dialog()
+                return
+            except Exception as exc:
+                log_error(f"Refund dialog launch failed: {exc}")
+        report_to_statusbar(host, "Error: Refund dialog unavailable.", is_error=True, duration=4000)
+
     def _wire_inputs(self) -> None:
         # Connect field change/validation handlers and install line-edit event filters.
         pay_fields = self._pay_field_order()
