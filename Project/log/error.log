@@ -1,2 +1,3 @@
-2026-02-21T16:27:37.851005 - python-escpos import failed: No module named 'escpos'
-2026-02-21T16:27:37.851005 - View Hold print failed: printer send failed for receipt_no=20260221-0004
+2026-02-22T17:58:40.412656 - Printer send failed (192.168.0.10:9100): Device not found (Could not open socket for 192.168.0.10:
+timed out)
+2026-02-22T17:58:40.412656 - View Hold print failed: printer send failed for receipt_no=20260222-0002

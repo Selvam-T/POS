@@ -27,9 +27,14 @@ PRODUCT_CATEGORIES = [
 	'Dairy Products',
 	'Frozen Foods',
 	'Household Supplies',
+	'Ice cream',
+    'Magnolia',
+    'Marigold',
 	'Personal Care',
 	'Snacks & Confectionery',
+	'Telecom',
 	'Tobacco',
+	'Stationary',
 	'Vegetables',
 	'Other'
 ]
@@ -127,7 +132,7 @@ STRING_CONFIG = {
     'product_code': {'min_len': 4, 'max_len': 14, 'required': True},
     'product_name': {'min_len': 4, 'max_len': 40, 'required': True},
     'supplier': {'min_len': 3, 'max_len': 15, 'required': False},
-    'customer': {'min_len': 3, 'max_len': 6, 'required': True},  
+    'customer': {'min_len': 3, 'max_len': 12, 'required': True},  
     'note': {'min_len': 0, 'max_len': 25, 'required': False}, 
     'category': {'min_len': 4, 'max_len': 25, 'required': False}
 }

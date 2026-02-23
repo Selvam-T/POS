@@ -37,7 +37,7 @@ The **receipt_payments** table is designed to handle the complexities of payment
 - **Logic:** This table is only populated when a payment is actually processed; for "Hold Sales" (UNPAID status), no entries are made in this table until the customer returns to pay.
 
 ### 4. Cash_outflows Table
-The **cash_outflows** table (which replaced the originally proposed cash_movements table) tracks money leaving the system to simplify accounting and reporting.
+The **cash_outflows** table tracks money leaving the system to simplify accounting and reporting.
 - **Purpose:** Captures refunds and vendor payments independently of specific receipt-item tracking, as the system focuses on cash flow rather than strict inventory auditing.
 - **Movement Types:** The movement_type is restricted to 'REFUND_OUT' and 'VENDOR_OUT'.
 - **Reporting:** Essential for calculating the net total in sales reports by subtracting these outflows from the total sales. Includes a note field to capture specific details about the refund or vendor transaction.
@@ -125,11 +125,11 @@ Below is a mapping of functions in `modules/db_operation/` related to each datab
 - modules/db_operation/paid_sale_committer.py:
 	- PaidSaleCommitter.commit_paid_sale (inserts receipt_payments rows)
 
-**cash_outflows** (implemented as cash_movements)
-- modules/db_operation/cash_movements_repo.py:
+**cash_outflows**
+- modules/db_operation/cash_outflows_repo.py:
 	- ensure_table
-	- add_movement
-	- list_movements
+	- add_outflow
+	- list_outflows
 
 ---
 ## On the Shared 'note' Column in Receipts and Cash_outflows
@@ -165,7 +165,7 @@ By updating the notes in both tables for refunds, the system maintains clear and
 	- In the **cash_outflows** table, the `note` field captures specific info like the **receipt number for a refund** or the **description of a vendor transaction**.
 
 - **Design Policy:**
-	- The sources confirm that while the `note` field is not required for standard paid transactions, it is mandatory or optional for specific status changes (UNPAID/CANCELLED) and for all cash movements to ensure clear record-keeping.
+	- The sources confirm that while the `note` field is not required for standard paid transactions, it is mandatory or optional for specific status changes (UNPAID/CANCELLED) and for all cash outflows to ensure clear record-keeping.
 
 By maintaining these as separate columns in their respective tables, the system can track the "why" behind a held receipt separately from the "why" behind a cash refund, ensuring **accounting principles** are followed without data overlapping.
 ---

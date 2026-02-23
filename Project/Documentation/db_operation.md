@@ -77,6 +77,18 @@ Atomic, multi-table writer used to finalize payments. It inserts/updates:
 Key entry point:
 - `PaidSaleCommitter.commit_paid_sale(...)` (single transaction; rollback on failure)
 
+### `modules/db_operation/cash_outflows_repo.py` (SQL only)
+
+SQL-only repository for the `cash_outflows` table used by Refund and Vendor flows.
+
+- `ensure_table(...)`
+  - Idempotent table creation (`CREATE TABLE IF NOT EXISTS cash_outflows`)
+- `add_outflow(...) -> int`
+  - Inserts one row and returns `outflow_id`
+  - Validates `outflow_type` (`REFUND_OUT` / `VENDOR_OUT`) and positive `amount`
+- `list_outflows(...) -> List[dict]`
+  - Query helper with optional filters (`date_prefix`, `outflow_type`, `limit`)
+
 ## Public Facade (`modules/db_operation/__init__.py`)
 
 Most of the app should import from `modules.db_operation` only.
@@ -92,6 +104,10 @@ Exports:
 - Receipt commit service:
   - `PaidSaleCommitter`
   - `HeldSaleCommitter`
+- Cash outflows:
+  - `ensure_cash_outflows_table()`
+  - `add_outflow(...)`
+  - `list_outflows(...)`
 
 `get_product_full()` maps repo fields into the keys used by dialogs:
 - `price` comes from `selling_price`
@@ -115,6 +131,10 @@ Status bar messaging is **UI-only**:
 
 ### Manual entry completer
 - Uses `modules.db_operation.PRODUCT_CACHE` to build suggestions.
+
+### Refund / Vendor cash outflows
+- `modules.db_operation.ensure_cash_outflows_table()` at startup/migration points
+- `modules.db_operation.add_outflow(outflow_type='REFUND_OUT'|'VENDOR_OUT', amount=..., cashier_name=..., note=...)`
 
 ## Quick Runtime Check
 

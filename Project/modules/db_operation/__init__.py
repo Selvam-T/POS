@@ -28,6 +28,11 @@ from .hold_receipts_repo import (
     search_unpaid_receipts_by_customer,
     void_receipt,
 )
+from .cash_outflows_repo import (
+    ensure_table as ensure_cash_outflows_table,
+    add_outflow,
+    list_outflows,
+)
 
 
 def get_product_slim(product_code: str) -> Tuple[bool, str, float, str]:
@@ -184,4 +189,7 @@ __all__ = [
     'list_unpaid_receipts',
     'search_unpaid_receipts_by_customer',
     'void_receipt',
+    'ensure_cash_outflows_table',
+    'add_outflow',
+    'list_outflows',
 ]

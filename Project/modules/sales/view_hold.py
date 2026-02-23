@@ -1,4 +1,5 @@
 import os
+import datetime
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QLineEdit,
@@ -166,7 +167,7 @@ def launch_viewhold_dialog(parent=None):
 
         ui_feedback.set_status_label(
             status_lbl,
-            f"{customer_name} : {receipt_no} loaded.",
+            f"{customer_name} : {receipt_no} selected.",
             ok=True,
             duration=2000,
         )
@@ -260,6 +261,14 @@ def launch_viewhold_dialog(parent=None):
             _set_widgets_enabled(False)
             ui_feedback.set_status_label(status_lbl, "No UNPAID receipts found.", ok=False)
             set_dialog_main_status_max(dlg, "No UNPAID receipts found.", level='info', duration=2000)
+            try:
+                # When no receipts are available, ensure the Cancel button receives focus
+                cancel_btn.setFocus(Qt.OtherFocusReason)
+            except Exception:
+                try:
+                    cancel_btn.setFocus()
+                except Exception:
+                    pass
             return
 
         _set_widgets_enabled(True)
@@ -559,7 +568,7 @@ def launch_viewhold_dialog(parent=None):
 def _configure_receipts_table(table: QTableWidget) -> None:
     table.setColumnCount(5)
     table.setHorizontalHeaderLabels([
-        'Receipt No', 'Customer Name', 'Grand Total', 'Created At', 'Note'
+        'Receipt No', 'Customer Name', 'Grand Total', 'Date', 'Note'
     ])
     header = table.horizontalHeader()
     header.setSectionResizeMode(0, QHeaderView.Fixed)
@@ -618,7 +627,7 @@ def _fill_receipts_table(table: QTableWidget, rows: list[dict]) -> None:
             str(row.get('receipt_no') or ''),
             str(row.get('customer_name') or ''),
             f"{float(row.get('grand_total') or 0.0):.2f}",
-            str(row.get('created_at') or ''),
+            _format_created_at(row.get('created_at')),
             str(row.get('note') or ''),
         ]
         for c, text in enumerate(values):
@@ -635,3 +644,72 @@ def _fill_receipts_table(table: QTableWidget, rows: list[dict]) -> None:
         table.setSortingEnabled(bool(was_sorting))
     except Exception:
         pass
+
+
+def _format_created_at(val) -> str:
+    """Format a created_at value into 'dd-MMM-YYYY HH:MM'.
+
+    Accepts datetime objects, numeric timestamps, or common string formats.
+    Falls back to the original string representation on parse failure.
+    """
+    if val is None or (isinstance(val, str) and not val.strip()):
+        return ''
+
+    dt = None
+    try:
+        if isinstance(val, datetime.datetime):
+            dt = val
+        elif isinstance(val, (int, float)):
+            # assume POSIX timestamp
+            try:
+                dt = datetime.datetime.fromtimestamp(float(val))
+            except Exception:
+                dt = None
+        elif isinstance(val, str):
+            s = val.strip()
+            # try ISO first
+            try:
+                dt = datetime.datetime.fromisoformat(s)
+            except Exception:
+                dt = None
+            if dt is None:
+                # try several common formats
+                fmts = (
+                    "%Y-%m-%d %H:%M:%S",
+                    "%Y-%m-%dT%H:%M:%S",
+                    "%Y-%m-%d %H:%M",
+                    "%d-%m-%Y %H:%M:%S",
+                    "%d/%m/%Y %H:%M:%S",
+                    "%d-%m-%Y %H:%M",
+                    "%d/%m/%Y %H:%M",
+                    "%Y-%m-%d",
+                )
+                for fmt in fmts:
+                    try:
+                        dt = datetime.datetime.strptime(s, fmt)
+                        break
+                    except Exception:
+                        dt = None
+            # as a last resort, if string contains a space-separated ISO-like prefix
+        else:
+            # unknown type — fallback to str()
+            return str(val)
+    except Exception:
+        try:
+            return str(val)
+        except Exception:
+            return ''
+
+    if dt is None:
+        try:
+            return str(val)
+        except Exception:
+            return ''
+
+    try:
+        return dt.strftime("%d-%b-%Y %I:%M %p").replace("AM", "am").replace("PM", "pm")
+    except Exception:
+        try:
+            return str(val)
+        except Exception:
+            return ''
