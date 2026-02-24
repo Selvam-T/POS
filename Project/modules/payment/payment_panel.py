@@ -292,6 +292,15 @@ class PaymentPanel(QObject):
         self._last_unalloc = 0.0
         self._clear_unalloc_highlight()
         self._set_tender_visibility(False)
+        # Ensure placeholders are cleared when panel is idle (total == 0)
+        for key in ('cash', 'nets', 'paynow', 'voucher', 'tender'):
+            w = self._widgets.get(key)
+            try:
+                if w is not None:
+                    w.setPlaceholderText("")
+            except Exception:
+                pass
+
         self.update_readonly_policy()
         self.update_pay_button_state()
 
@@ -335,7 +344,21 @@ class PaymentPanel(QObject):
 
         self._set_tender_visibility(True)
         tender = self._get_validated_amount(tender_widget)
-        balance = self._round_currency(tender - cash)
+        # Compute over-allocation (positive number) when unalloc < 0
+        unalloc = self._last_unalloc
+        over_alloc = -unalloc if unalloc < 0 else 0.0
+        # Voucher as currency units (1 voucher == 1 currency unit)
+        voucher_amt = float(self._get_validated_voucher(self._widgets.get('voucher')))
+
+        # Balance rules (updated):
+        # - If voucher present AND cash present AND over_alloc < voucher_amt:
+        #     balance = (tender + over_alloc) - cash
+        # - Otherwise: balance = tender - cash
+        if voucher_amt > 0 and over_alloc > 0 and over_alloc < voucher_amt and cash > 0:
+            balance = self._round_currency((tender + over_alloc) - cash)
+        else:
+            balance = self._round_currency(tender - cash)
+
         self._set_line_text(self._widgets.get('balance'), self._format_number(balance))
         self._update_unalloc_ui(self._last_unalloc)
         self._update_placeholders(self._last_unalloc, cash)
@@ -394,9 +417,8 @@ class PaymentPanel(QObject):
         status = ctx.get('status')
         status_ok = status in ('NONE', 'UNPAID')
 
-        can_pay = total > 0 and unalloc <= 0 and status_ok and not self._has_validation_error
-        if cash > 0:
-            can_pay = can_pay and tender >= cash
+        # Derive pay eligibility from the authoritative validation routine
+        can_pay = self._is_payment_valid() and status_ok
 
         # Disable Pay while busy in addition to normal gating rules.
         pay_btn.setEnabled(can_pay and not busy)
@@ -405,6 +427,18 @@ class PaymentPanel(QObject):
 
     def _update_placeholders(self, unalloc: float, cash: float) -> None:
         # Show contextual placeholders only where user guidance is needed.
+        # Do not show any placeholders when the panel is inactive (total == 0)
+        total = self._get_total_amount()
+        if total <= 0:
+            for key in ('cash', 'nets', 'paynow', 'voucher', 'tender'):
+                field = self._widgets.get(key)
+                if field is not None:
+                    try:
+                        field.setPlaceholderText("")
+                    except Exception:
+                        pass
+            return
+
         for key in ('cash', 'nets', 'paynow', 'voucher'):
             field = self._widgets.get(key)
             if field is None:
@@ -428,11 +462,29 @@ class PaymentPanel(QObject):
         if cash > 0 and tender < cash:
             self._set_status("Cash tender < CASH payable.", is_error=True)
             return
-        '''if unalloc > 0:
+        # Under-allocation
+        if unalloc > 0:
             self._set_status("Payable not fully allocated.", is_error=True)
-            return'''
+            return
+
+        # Over-allocation messages (when unalloc < 0)
         if unalloc < 0:
-            self._set_status("Warning: Payment Over-allocation.", is_error=True)
+            over_alloc = -unalloc
+            voucher_amt = float(self._get_validated_voucher(self._widgets.get('voucher')))
+            # Case: voucher present and over_alloc >= voucher -> disallow/rectify
+            if voucher_amt > 0 and over_alloc >= voucher_amt:
+                self._set_status("Rectify payment over-allocation.", is_error=True)
+                return
+            # over_alloc < voucher
+            if voucher_amt > 0 and over_alloc < voucher_amt:
+                if cash <= 0:
+                    self._set_status("Voucher over payment, cash balance not issued.", is_error=True)
+                    return
+                else:
+                    self._set_status("Voucher over payment, cash balance issued.", is_error=True)
+                    return
+            # fallback
+            self._set_status("Rectify payment over-allocation.", is_error=True)
             return
         self._clear_status()
 
@@ -531,6 +583,19 @@ class PaymentPanel(QObject):
         pay_btn = self._widgets.get('pay_button')
 
         if current == cash_field:
+            # If editing cash produced an over-allocation, catch it here and
+            # force user to rectify in the cash field rather than jumping to tender.
+            if unalloc < 0:
+                # Show rectification message and keep focus in the cash field.
+                self._set_status("Rectify payment over-allocation.", is_error=True)
+                try:
+                    if hasattr(current, 'selectAll'):
+                        current.selectAll()
+                    current.setFocus()
+                except Exception:
+                    pass
+                return
+
             if cash > 0 and unalloc <= 0:
                 tender = self._get_validated_amount(tender_field)
                 if tender_field is not None and tender < cash:
@@ -545,6 +610,20 @@ class PaymentPanel(QObject):
                 return
         elif current in self._pay_field_order():
             if unalloc <= 0:
+                # If CASH present and tender is empty -> jump to tender
+                tender_field = self._widgets.get('tender')
+                cash_present = cash > 0
+                tender_empty = (tender is None) or (tender <= 0)
+                if cash_present and tender_empty:
+                    if tender_field is not None:
+                        tender_field.setFocus()
+                        try:
+                            tender_field.selectAll()
+                        except Exception:
+                            pass
+                        return
+
+                # Otherwise (cash present & tender not empty) or (cash not present) -> jump to PAY
                 if pay_btn is not None:
                     pay_btn.setFocus()
                 return
@@ -561,8 +640,6 @@ class PaymentPanel(QObject):
                 if pay_btn is not None:
                     pay_btn.setFocus()
                 return
-
-    
 
     def focus_jump_next_pay_field(self, current=None) -> None:
             # Move focus to the next editable payment field in navigation order.
@@ -731,10 +808,28 @@ class PaymentPanel(QObject):
         total = self._get_total_amount()
         if total <= 0:
             return False
-        if self._last_unalloc > 0:
-            return False
+        # validation error short-circuit
         if self._has_validation_error:
             return False
+
+        unalloc = self._last_unalloc
+        over_alloc = -unalloc if unalloc < 0 else 0.0
+        voucher_amt = float(self._get_validated_voucher(self._widgets.get('voucher')))
+
+        # exact allocation allowed
+        if unalloc == 0:
+            pass
+        elif unalloc > 0:
+            return False
+        else:
+            # unalloc < 0
+            # if no voucher, disallow
+            if voucher_amt <= 0:
+                return False
+            # voucher present: allow only when over_alloc < voucher_amt
+            if not (over_alloc < voucher_amt):
+                return False
+
         cash = self._get_validated_amount(self._widgets.get('cash'))
         tender = self._get_validated_amount(self._widgets.get('tender'))
         if cash > 0 and tender < cash:

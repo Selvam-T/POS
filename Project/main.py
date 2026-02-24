@@ -675,7 +675,7 @@ class MainLoader(QMainWindow):
         if panel is not None:
             panel.clear_payment_frame()
         self._reset_receipt_context()
-        print(f"Payment success: {self.receipt_context}")
+        # Debug print removed; use status reporting elsewhere if needed.
 
     # ========== Payment Processing ==========
     # Orchestrates payment; atomic DB commit is delegated to PaidSaleCommitter.
@@ -800,6 +800,15 @@ class MainLoader(QMainWindow):
         ctx = self.receipt_context
         active_receipt_id = ctx.get('active_receipt_id')
         panel = getattr(self, 'payment_panel_controller', None)
+
+        # Ensure payment panel's validation agrees with processing rules.
+        try:
+            if panel is not None and not panel._is_payment_valid():
+                report_to_statusbar(self, "Payment invalid: please correct allocation/tender.", is_error=True, duration=4000)
+                return False
+        except Exception:
+            # If validation routine is unavailable, continue and let commit handle failures.
+            pass
 
         self._payment_in_progress = True
         if panel is not None:

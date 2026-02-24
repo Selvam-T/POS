@@ -287,6 +287,9 @@
         </size>
        </property>
        <property name="text">
+        <string/>
+       </property>
+       <property name="placeholderText">
         <string>-- Allocate Payable Balance --</string>
        </property>
       </widget>
@@ -321,6 +324,9 @@
         </size>
        </property>
        <property name="text">
+        <string/>
+       </property>
+       <property name="placeholderText">
         <string>-- Allocate Payable Balance --</string>
        </property>
       </widget>
@@ -360,6 +366,9 @@
         </size>
        </property>
        <property name="text">
+        <string/>
+       </property>
+       <property name="placeholderText">
         <string>-- Allocate Payable Balance --</string>
        </property>
       </widget>
@@ -373,6 +382,9 @@
         </size>
        </property>
        <property name="text">
+        <string/>
+       </property>
+       <property name="placeholderText">
         <string>-- Enter Tendered Amount --</string>
        </property>
       </widget>
@@ -421,6 +433,9 @@ RECEIPT</string>
         </size>
        </property>
        <property name="text">
+        <string/>
+       </property>
+       <property name="placeholderText">
         <string>-- Allocate Payable Balance --</string>
        </property>
       </widget>
