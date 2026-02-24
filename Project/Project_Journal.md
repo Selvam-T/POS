@@ -7,6 +7,22 @@
 
 ---
  
+## Update Summary (February 24, 2026)
+
+Receipt/printing adjustments
+
+- `modules/db_operation/receipt_repo.py`
+    - Removed `amount` column from `list_receipt_payments_by_no()` (payments SELECT now returns `payment_type` and `tendered` only).
+    - Removed `get_receipt_total()` helper (receipt total is computed from in-memory `line_total` in callers).
+
+- `modules/payment/receipt_generator.py`
+    - `generate_receipt_text()` now computes cash change using the sum of `tendered` across all payments: `change = max(0, total_tendered - receipt_total)`.
+    - Falls back to the in-memory `line_total` sum when repository helpers are unavailable.
+
+Rationale: ensure printed change reflects actual tendered amounts (covers multi-method tenders, vouchers, and over-pay scenarios) and simplify repo surface.
+
+Compatibility: callers updated to consume `tendered` and no longer rely on `amount` or `get_receipt_total()`.
+
 ## Update Summary (November 5, 2025)
 
 Sales totals integration (grand total in Sales frame):

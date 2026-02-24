@@ -35,7 +35,9 @@ Launch + wiring:
 DB layer:
 - SQL repo: `modules/db_operation/hold_receipts_repo.py`
 - DB facade exports: `modules/db_operation/__init__.py` (exports `list_unpaid_receipts`, `search_unpaid_receipts_by_customer`, `void_receipt`)
-- Receipt reads (header/items): `modules/db_operation/receipt_repo.py`
+- Receipt reads (header/items/payments): `modules/db_operation/receipt_repo.py`
+  - NOTE: `list_receipt_payments_by_no()` now returns `payment_type` and `tendered` values only (the `amount`/allocated column was removed).
+  - The helper `get_receipt_total()` was removed — `generate_receipt_text()` uses the in-memory item sum (`line_total`) as the authoritative receipt total.
 
 Shared helpers:
 - Dialog utilities + error routing: `modules/ui_utils/dialog_utils.py`
@@ -165,7 +167,9 @@ Flow:
 Goal: Printer-only printing of a receipt.
 
 - Generates receipt text:
+- Generates receipt text:
   - `modules.payment.receipt_generator.generate_receipt_text(receipt_no)`
+    - NOTE: cash change is computed as `max(0, total_tendered - receipt_total)` where `total_tendered` is the sum of `tendered` values across all payments and `receipt_total` is the sum of `line_total` from `receipt_items`.
 - Prints via device printer:
   - `modules.devices.printer.print_receipt(receipt_text, blocking=True)`
 
@@ -220,4 +224,4 @@ The SQL repo `modules/db_operation/hold_receipts_repo.py` is schema-tolerant:
 
 ---
 
-*Last updated: February 21, 2026*
+*Last updated: February 24, 2026*

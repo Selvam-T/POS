@@ -119,25 +119,14 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
         total_amount += float(item.get("line_total") or 0.0)
 
     # Compute totals and change using total tendered across all payment methods
-    cash_amount = 0.0
     cash_tendered = 0.0
     total_tendered = 0.0
     for pay in payments:
         ptype = str(pay.get("payment_type") or "").upper()
-        amount = float(pay.get("amount") or 0.0)
-        tendered = float(pay.get("tendered") or amount)
+        tendered = float(pay.get("tendered") or 0.0)
         total_tendered += tendered
-        if ptype == "CASH":
-            cash_amount += amount
-            cash_tendered += tendered
 
-    # Use authoritative receipt total (sum of line_total). Prefer repository helper when available.
-    try:
-        total_on_receipt = receipt_repo.get_receipt_total(receipt_no, receipt_id=receipt_id)
-    except Exception:
-        total_on_receipt = total_amount
-
-    change_amount = max(0.0, round(total_tendered - total_on_receipt, 2))
+    change_amount = max(0.0, round(total_tendered - total_amount, 2))
 
     lines: List[str] = []
     lines.append(_center_line(str(getattr(config, "COMPANY_NAME", "")), width))
@@ -169,12 +158,13 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
     else:
         for pay in payments:
             ptype = str(pay.get("payment_type") or "")
-            amount = float(pay.get("amount") or 0.0)
+            tendered = float(pay.get("tendered") or 0.0)
             if ptype.upper() == "CASH":
+                cash_tendered += tendered
                 continue
-            lines.append(_line_with_amount(f"{ptype}:", f"${amount:.2f}", width))
+            lines.append(_line_with_amount(f"{ptype}:", f"${tendered:.2f}", width))
 
-        if cash_amount > 0:
+        if cash_tendered > 0:
             lines.append(_line_with_amount("Cash Tendered:", f"${cash_tendered:.2f}", width))
             if change_amount > 0:
                 lines.append("")

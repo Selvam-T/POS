@@ -135,15 +135,11 @@ def list_receipt_payments_by_no(
             return []
 
         ptype_col = _first_existing(cols, "payment_type", "type")
-        amount_col = _first_existing(cols, "amount", "paid_amount")
+        # `amount` (allocated) removed — callers now use `tendered` (actual tender values)
         tendered_col = _first_existing(cols, "tendered", "tender", "cash_tendered")
         order_col = _first_existing(cols, "created_at", "paid_at", "id", "payment_id")
 
-        select_parts = [
-            _select_alias(ptype_col, "payment_type", "''"),
-            _select_alias(amount_col, "amount", "0"),
-            _select_alias(tendered_col, "tendered", "0"),
-        ]
+        select_parts = [_select_alias(ptype_col, "payment_type", "''"), _select_alias(tendered_col, "tendered", "0")]
 
         where_val = receipt_no
         if link_col == "receipt_id":
@@ -158,41 +154,6 @@ def list_receipt_payments_by_no(
 
         rows = c.execute(sql, (where_val,)).fetchall()
         return [dict(r) for r in rows]
-    finally:
-        if own:
-            c.close()
-
-
-def get_receipt_total(
-    receipt_no: str,
-    *,
-    receipt_id: Optional[int] = None,
-    conn: Optional[sqlite3.Connection] = None,
-) -> float:
-    """Return SUM(line_total) for receipt items identified by receipt_no or receipt_id."""
-    own = conn is None
-    c = conn or get_conn()
-    try:
-        cols = _table_columns(c, "receipt_items")
-        link_col = _first_existing(cols, "receipt_id", "receipt_no", "receipt_number")
-        if link_col is None:
-            return 0.0
-
-        line_total_col = _first_existing(cols, "line_total")
-        if line_total_col is None:
-            # If no line_total column, attempt to compute from price * qty is out of scope here
-            return 0.0
-
-        where_val = receipt_no
-        if link_col == "receipt_id":
-            rid = receipt_id or _get_receipt_id(c, receipt_no)
-            if rid is None:
-                return 0.0
-            where_val = rid
-
-        sql = f"SELECT SUM(COALESCE({line_total_col}, 0)) AS total FROM receipt_items WHERE {link_col} = ?"
-        row = c.execute(sql, (where_val,)).fetchone()
-        return float(row["total"] or 0.0) if row is not None else 0.0
     finally:
         if own:
             c.close()
