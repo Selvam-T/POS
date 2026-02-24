@@ -6,9 +6,8 @@ from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui, require_widgets, set_dialog_main_status_max,
     set_dialog_error, build_error_fallback_dialog
 )
-from modules.ui_utils.canonicalization import canonicalize_product_code
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate
-from modules.ui_utils import input_handler, input_validation, ui_feedback
+from modules.ui_utils import input_handler, ui_feedback
 from modules.db_operation import (
     get_product_full, add_product, delete_product, 
     refresh_product_cache, PRODUCT_CACHE

@@ -1,6 +1,5 @@
 """Unified dialog wrapper for all modal dialogs."""
 from PyQt5.QtWidgets import QDialog
-from PyQt5.QtCore import QTimer
 from modules.ui_utils.dialog_utils import report_to_statusbar
 
 

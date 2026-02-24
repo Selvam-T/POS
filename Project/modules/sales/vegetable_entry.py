@@ -1,17 +1,15 @@
 import os
 from functools import partial
-from typing import List, Dict, Optional
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QDialog, QTableWidget, QPushButton, QLabel, QLineEdit
+from PyQt5.QtWidgets import QTableWidget, QPushButton, QLabel, QLineEdit
 from PyQt5.QtCore import Qt
 
 # Centralized Utilities
 from modules.ui_utils.focus_utils import FieldCoordinator
-from modules.wrappers import settings as app_settings
 from modules.db_operation import get_product_info, get_product_full
 from modules.db_operation import PRODUCT_CACHE
-from modules.ui_utils import ui_feedback, input_validation
+from modules.ui_utils import ui_feedback
 from modules.table.unit_helpers import canonicalize_unit
 from modules.table.table_operations import (
     setup_sales_table, get_sales_data, set_table_rows, 
@@ -48,7 +46,7 @@ def launch_vegetable_entry_dialog(parent, main_sales_table):
         dlg._coord = coord 
         # Store reference to main table for row limit checks during addition
         dlg._main_sales_table = main_sales_table 
-    except Exception as e:
+    except Exception:
         return None
     
     for btn in dlg.findChildren(QPushButton):

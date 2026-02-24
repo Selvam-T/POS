@@ -215,7 +215,8 @@ class FieldCoordinator(QObject):
         if not isinstance(widget, QLineEdit):
             return
         raw = widget.text().strip()
-        if not raw: return
+        if not raw:
+            return
 
         name = (widget.objectName() or "").lower()
         standardized = raw
@@ -302,15 +303,20 @@ class FieldCoordinator(QObject):
             else:
                 self.set_error(source, err_msg or "Not Found", status_label=link['status_label'])
 
-        if link['on_sync']: link['on_sync'](result)
-        if not is_clear and result and link.get('auto_jump'): self._move_focus(link['next'])
+        if link.get('on_sync'):
+            link['on_sync'](result)
+        if not is_clear and result and link.get('auto_jump'):
+            self._move_focus(link['next'])
 
     def _move_focus(self, target):
-        if not target: return
-        if callable(target): target()
-        else:
-            target.setFocus()
-            if hasattr(target, 'selectAll'): target.selectAll()
+        if not target:
+            return
+        if callable(target):
+            target()
+            return
+        target.setFocus()
+        if hasattr(target, 'selectAll'):
+            target.selectAll()
 
     def eventFilter(self, obj, event):
         # 1. Reactive Status Clearing (Clear error when user clicks back in)
@@ -397,14 +403,16 @@ def set_initial_focus(dlg, *, tab_widget=None, tab_index=None, tab_name=None, fi
                     if str(tab_widget.tabText(i)) == name:
                         tab_widget.setCurrentIndex(i)
                         break
-    except Exception: pass
+    except Exception:
+        pass
     try:
         if first_widget is not None:
             first_widget.setFocus(Qt.OtherFocusReason)
             focused = True
             if select_all and hasattr(first_widget, 'selectAll'):
                 first_widget.selectAll()
-    except Exception: pass
+    except Exception:
+        pass
     return focused
 
 class FocusGate:
@@ -418,14 +426,16 @@ class FocusGate:
         self._remembered = False
 
     def remember(self) -> None:
-        if self._remembered: return
+        if self._remembered:
+            return
         for w in self._widgets:
             try:
                 self._orig_focus_policy[w] = w.focusPolicy()
                 self._orig_enabled[w] = w.isEnabled()
                 if hasattr(w, 'isReadOnly') and callable(getattr(w, 'isReadOnly')):
                     self._orig_read_only[w] = bool(w.isReadOnly())
-            except Exception: pass
+            except Exception:
+                pass
         self._remembered = True
 
     def lock(self) -> None:
@@ -433,69 +443,94 @@ class FocusGate:
         for w in self._widgets:
             try:
                 w.setFocusPolicy(Qt.NoFocus)
-                if self._lock_enabled_cfg: w.setEnabled(False)
+                if self._lock_enabled_cfg:
+                    w.setEnabled(False)
                 if isinstance(w, QLineEdit):
                     w.setReadOnly(True)
                 elif isinstance(w, QComboBox):
                     w.setProperty("locked", True)
                     w.style().unpolish(w)
                     w.style().polish(w)
-            except Exception: pass
+            except Exception:
+                pass
 
     def unlock(self) -> None:
         self.remember()
         for w in self._widgets:
             try:
                 w.setFocusPolicy(self._orig_focus_policy.get(w, Qt.StrongFocus))
-                if self._lock_enabled_cfg: w.setEnabled(self._orig_enabled.get(w, True))
+                if self._lock_enabled_cfg:
+                    w.setEnabled(self._orig_enabled.get(w, True))
                 if isinstance(w, QLineEdit):
                     w.setReadOnly(self._orig_read_only.get(w, False))
                 elif isinstance(w, QComboBox):
                     w.setProperty("locked", False)
                     w.style().unpolish(w)
                     w.style().polish(w)
-            except Exception: pass
+            except Exception:
+                pass
 
     def set_locked(self, locked: bool) -> None:
-        if locked: self.lock()
-        else: self.unlock()
+        if locked:
+            self.lock()
+        else:
+            self.unlock()
 
 def set_focus_enabled(widgets, enabled: bool, *, remember: dict | None = None) -> dict:
     store = remember if isinstance(remember, dict) else {}
     ws = [w for w in (widgets or []) if w is not None]
     if enabled:
         for w in ws:
-            try: w.setFocusPolicy(store.get(w, Qt.StrongFocus))
-            except Exception: pass
+            try:
+                w.setFocusPolicy(store.get(w, Qt.StrongFocus))
+            except Exception:
+                pass
         return store
     for w in ws:
         try:
-            if w not in store: store[w] = w.focusPolicy()
+            if w not in store:
+                store[w] = w.focusPolicy()
             w.setFocusPolicy(Qt.NoFocus)
-        except Exception: pass
+        except Exception:
+            pass
     return store
 
 def enforce_exclusive_lineedits(a: QLineEdit, b: QLineEdit, *, on_switch_to_a=None, on_switch_to_b=None, clear_status_label=None) -> bool:
-    if not isinstance(a, QLineEdit) or not isinstance(b, QLineEdit): return False
+    if not isinstance(a, QLineEdit) or not isinstance(b, QLineEdit):
+        return False
     state = {'busy': False}
+
     def _safe_text(le):
-        try: return (le.text() or '').strip()
-        except: return ''
+        try:
+            return (le.text() or '').strip()
+        except Exception:
+            return ''
+
     def _clear(le):
         try:
             le.blockSignals(True)
             le.setText('')
-        finally: le.blockSignals(False)
+        finally:
+            le.blockSignals(False)
+
     def _maybe_switch(active, other, on_switch):
-        if state['busy'] or not _safe_text(active) or not _safe_text(other): return
+        if state['busy']:
+            return
+        if not _safe_text(active) or not _safe_text(other):
+            return
         state['busy'] = True
         try:
             _clear(other)
-            if clear_status_label: ui_feedback.clear_status_label(clear_status_label)
-            if callable(on_switch): on_switch()
-        finally: state['busy'] = False
+            if clear_status_label:
+                ui_feedback.clear_status_label(clear_status_label)
+            if callable(on_switch):
+                on_switch()
+        finally:
+            state['busy'] = False
+
     try:
         a.textChanged.connect(lambda: _maybe_switch(a, b, on_switch_to_a))
         b.textChanged.connect(lambda: _maybe_switch(b, a, on_switch_to_b))
-    except: return False
+    except Exception:
+        return False
     return True

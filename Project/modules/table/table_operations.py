@@ -1,17 +1,17 @@
 from typing import List, Dict, Any, Optional, Callable
 from functools import partial
 
-from PyQt5.QtCore import Qt, QEvent, QObject, QSize, QRegularExpression
+from PyQt5.QtCore import Qt, QEvent, QObject, QRegularExpression
 from PyQt5.QtWidgets import (
     QWidget, QTableWidget, QTableWidgetItem, QHBoxLayout, 
     QPushButton, QLineEdit, QStatusBar, QLabel, QHeaderView
 )
-from PyQt5.QtGui import QColor, QBrush, QIcon, QRegularExpressionValidator
+from PyQt5.QtGui import QColor, QBrush, QRegularExpressionValidator
 
 # Configuration and Database constants
 from config import (
     ROW_COLOR_EVEN, ROW_COLOR_ODD, ROW_COLOR_DELETE_HIGHLIGHT, 
-    ICON_DELETE, MAX_TABLE_ROWS
+    MAX_TABLE_ROWS
 )
 from modules.db_operation import get_product_info
 from modules.ui_utils.ui_feedback import show_temp_status
@@ -26,12 +26,13 @@ def get_row_color(row: int) -> QColor:
 
 def setup_sales_table(table: QTableWidget) -> None:
     """Configures table headers, column widths, and basic interaction policies."""
-    if table is None: return
+    if table is None:
+        return
 
     # Apply grey background to viewport
     try:
         table.viewport().setStyleSheet("background-color: #e4e4e4;")
-    except:
+    except Exception:
         pass
 
     table.setColumnCount(7)
@@ -150,7 +151,8 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         table.setCellWidget(r, 6, btn_container)
 
     _update_total_value(table)
-    if table.rowCount() > 0: table.scrollToBottom()
+    if table.rowCount() > 0:
+        table.scrollToBottom()
 
 def get_sales_data(table: QTableWidget) -> List[Dict[str, Any]]:
     """Extracts data from the QTableWidget back into a dictionary list."""
@@ -163,15 +165,18 @@ def get_sales_data(table: QTableWidget) -> List[Dict[str, Any]]:
         unit_item = table.item(r, 3)
         price_item = table.item(r, 4)
         qty_container = table.cellWidget(r, 2)
-        if not (name_item and qty_container): continue
+        if not (name_item and qty_container):
+            continue
             
         editor = qty_container.findChild(QLineEdit, 'qtyInput')
         unit_canon = canonicalize_unit(unit_item.text()) if unit_item else ''
         
         try:
-            qty = float(editor.property('numeric_value') or 0.0) if editor.isReadOnly() else \
-                  input_handler.handle_quantity_input(editor, unit_type='unit')
-        except:
+            if editor.isReadOnly():
+                qty = float(editor.property('numeric_value') or 0.0)
+            else:
+                qty = input_handler.handle_quantity_input(editor, unit_type='unit')
+        except Exception:
             qty = 0.0
 
         rows.append({
@@ -237,8 +242,10 @@ def recompute_total(table: QTableWidget) -> float:
     for r in range(table.rowCount()):
         item = table.item(r, 5)
         if item:
-            try: total += float(item.text())
-            except: pass
+            try:
+                total += float(item.text())
+            except Exception:
+                pass
     table._current_total = total
     label = getattr(table, '_total_label', None)
     if isinstance(label, QLabel):
@@ -266,8 +273,9 @@ def _on_qty_commit(editor: QLineEdit, table: QTableWidget) -> None:
     status_lbl = getattr(table, '_status_label', None)
     try:
         input_handler.handle_quantity_input(editor, unit_type='unit')
-        if status_lbl: ui_feedback.clear_status_label(status_lbl)
-    except:
+        if status_lbl:
+            ui_feedback.clear_status_label(status_lbl)
+    except Exception:
         pass
 
 def _install_row_focus_behavior(editor: QLineEdit, table: QTableWidget, row: int) -> None:
@@ -283,8 +291,10 @@ class _RowSelectFilter(QObject):
         self._table = table
     def eventFilter(self, obj, event):
         if event.type() == QEvent.FocusIn:
-            try: self._table.clearSelection()
-            except: pass
+            try:
+                self._table.clearSelection()
+            except Exception:
+                pass
         return False
 
 # =========================================================
@@ -329,13 +339,16 @@ def _remove_by_button(table: QTableWidget, btn: QPushButton) -> None:
         set_table_rows(table, data)
 
 def _highlight_row_for_deletion(table: QTableWidget, row: int) -> None:
-    if not (0 <= row < table.rowCount()): return
+    if not (0 <= row < table.rowCount()):
+        return
     highlight_color = QColor(ROW_COLOR_DELETE_HIGHLIGHT)
     for col in [0, 1, 3, 4, 5]:
         item = table.item(row, col)
-        if item: item.setBackground(QBrush(highlight_color))
+        if item:
+            item.setBackground(QBrush(highlight_color))
     qty_container = table.cellWidget(row, 2)
-    if qty_container: qty_container.setStyleSheet(f"background-color: {highlight_color.name()};")
+    if qty_container:
+        qty_container.setStyleSheet(f"background-color: {highlight_color.name()};")
 
 def _highlight_row_by_button(table: QTableWidget, btn: QPushButton) -> None:
     for r in range(table.rowCount()):

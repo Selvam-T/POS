@@ -13,7 +13,9 @@ import traceback
 from typing import Optional
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QDialog, QVBoxLayout
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
 
 from modules.ui_utils.error_logger import log_error
 from modules.ui_utils import ui_feedback
@@ -44,9 +46,12 @@ def set_dialog_error(dlg, message: str, *, duration: int = 5000) -> None:
 def center_dialog_relative_to(dlg: QDialog, host) -> None:
     """Center dlg relative to host window."""
     try:
-        mw = host.frameGeometry().width(); mh = host.frameGeometry().height()
-        mx = host.frameGeometry().x();     my = host.frameGeometry().y()
-        dw = dlg.width();                  dh = dlg.height()
+        mw = host.frameGeometry().width()
+        mh = host.frameGeometry().height()
+        mx = host.frameGeometry().x()
+        my = host.frameGeometry().y()
+        dw = dlg.width()
+        dh = dlg.height()
         dlg.move(mx + (mw - dw)//2, my + (mh - dh)//2)
     except Exception:
         pass
@@ -356,12 +361,7 @@ def require_widgets(
 
     return found
 
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
-from PyQt5.QtCore import Qt
-
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+# PyQt imports for the error fallback dialog are declared at module top
 
 def build_error_fallback_dialog(host_window, dialog_name: str, qss_path: str = None) -> QDialog:
     """
@@ -387,7 +387,8 @@ def build_error_fallback_dialog(host_window, dialog_name: str, qss_path: str = N
         try:
             with open(qss_path, 'r', encoding='utf-8') as f_qss:
                 dlg.setStyleSheet(f_qss.read())
-        except Exception: pass
+        except Exception:
+            pass
 
     layout = QVBoxLayout(dlg)
     layout.setContentsMargins(20, 20, 20, 20)
@@ -416,7 +417,6 @@ def build_error_fallback_dialog(host_window, dialog_name: str, qss_path: str = N
 
     # 6. Status Bar Propagation
     # This prepares the message that the Main Window will show AFTER this dialog closes.
-    from modules.ui_utils.dialog_utils import set_dialog_error
     set_dialog_error(dlg, f"Error: Standard UI for {dialog_name} is missing or corrupted.")
 
     btn_close.setFocus()

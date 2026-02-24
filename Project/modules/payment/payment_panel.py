@@ -396,9 +396,8 @@ class PaymentPanel(QObject):
         print_btn = self._widgets.get('print_button')
 
         total = self._get_total_amount()
-        unalloc = self._last_unalloc
-        cash = self._get_validated_amount(self._widgets.get('cash'))
-        tender = self._get_validated_amount(self._widgets.get('tender'))
+        # Note: unalloc/cash/tender are available via other helpers; avoid
+        # local unused assignments to satisfy linters.
 
         # Respect global payment-in-progress flag from main window to avoid
         # allowing Reset/Pay while a commit is underway.

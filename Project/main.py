@@ -4,7 +4,6 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 import sys
 import os
-import time
 import config
 from modules.ui_utils.overlay_manager import OverlayManager
 from modules.ui_utils.greeting_state import load_greeting, save_greeting
@@ -12,25 +11,15 @@ from PyQt5 import uic
 from PyQt5.QtWidgets import (
     QApplication,
     QMainWindow,
-    QWidget,
     QVBoxLayout,
     QHBoxLayout,
-    QSizePolicy,
-    QTableWidget,
     QPushButton,
-    QLineEdit,
     QLabel,
     QDialog,
-    QComboBox,
-    QSlider,
-    QCompleter,
-    QTabWidget,
 )
-from PyQt5.QtCore import Qt, QSize, QEvent, QTimer
-from PyQt5.QtWidgets import QHeaderView
-from PyQt5.QtGui import QFontMetrics, QIcon
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QIcon
 
-from modules.table import setup_sales_table, handle_barcode_scanned, bind_total_label
 from modules.table.table_operations import get_sales_data
 from modules.sales.sales_frame_setup import setup_sales_frame
 from modules.payment.payment_panel import setup_payment_panel
@@ -971,7 +960,7 @@ class MainLoader(QMainWindow):
                 if not found_match:
                     existing_rows.append(new_row)
             set_table_rows(self.sales_table, existing_rows)
-        except Exception as e:
+        except Exception:
             try:
                 import traceback
                 from modules.ui_utils.error_logger import log_error
@@ -1042,7 +1031,7 @@ def main():
     # Load product cache once at startup so name/code lookups and completers
     # can rely on in-memory PRODUCT_CACHE during runtime.
     try:
-        from modules.db_operation import load_product_cache, PRODUCT_CACHE
+        from modules.db_operation import load_product_cache
         load_product_cache()
     except Exception as e:
         cache_load_failed = True

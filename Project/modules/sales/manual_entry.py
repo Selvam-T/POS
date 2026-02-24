@@ -1,13 +1,12 @@
 import os
 from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt
 
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui, 
     require_widgets, 
     set_dialog_info
 )
-from modules.ui_utils.canonicalization import canonicalize_product_code
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 from modules.ui_utils import input_handler, ui_feedback
 import modules.db_operation as dbop
@@ -234,25 +233,25 @@ def _create_manual_entry_fallback_ui(parent):
     }
     codelbl = QLabel("Code:")
     codelbl.setStyleSheet("font-size: 12pt; color: #4b5563;")
-    grid.addWidget(codelbl, 0, 0); 
+    grid.addWidget(codelbl, 0, 0) 
     widgets['code'].setStyleSheet("font-size: 12pt; color: #4b5563;")
     grid.addWidget(widgets['code'], 0, 1)
 
     namelbl = QLabel("Name:")
     namelbl.setStyleSheet("font-size: 12pt; color: #4b5563;")
-    grid.addWidget(namelbl, 1, 0); 
+    grid.addWidget(namelbl, 1, 0) 
     widgets['name_srch'].setStyleSheet("font-size: 12pt; color: #4b5563;")
     grid.addWidget(widgets['name_srch'], 1, 1)
 
     unitlbl = QLabel("Unit:")
     unitlbl.setStyleSheet("font-size: 12pt; color: #4b5563;")
-    grid.addWidget(unitlbl, 2, 0); 
+    grid.addWidget(unitlbl, 2, 0) 
     widgets['unit'].setStyleSheet("font-size: 12pt; color: #4b5563;")
     grid.addWidget(widgets['unit'], 2, 1)
 
     qtylbl = QLabel("Qty:")
     qtylbl.setStyleSheet("font-size: 12pt; color: #4b5563;")
-    grid.addWidget(qtylbl, 3, 0);  
+    grid.addWidget(qtylbl, 3, 0)  
     widgets['qty'].setStyleSheet("font-size: 12pt; color: #4b5563;")
     grid.addWidget(widgets['qty'], 3, 1)
     layout.addLayout(grid)

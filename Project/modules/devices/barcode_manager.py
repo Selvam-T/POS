@@ -35,7 +35,7 @@ class BarcodeManager(QObject):
 
         # Generalized barcode override logic for all dialogs with *ProductCodeLineEdit
         try:
-            from PyQt5.QtWidgets import QApplication, QLineEdit, QLabel
+            from PyQt5.QtWidgets import QApplication, QLabel
             override = getattr(self, '_barcodeOverride', None)
             fw = QApplication.instance().focusWidget() if QApplication.instance() else None
             obj_name = fw.objectName() if fw and hasattr(fw, 'objectName') else ''
@@ -264,7 +264,6 @@ class BarcodeManager(QObject):
                     self._restore_pre_scan_text(fw) # Roll back to original text
                     return True
 
-        from PyQt5.QtCore import QObject
         return super().eventFilter(obj, event)
     
     def _cleanup_scanner_leak(self, fw, barcode):
@@ -303,7 +302,6 @@ class BarcodeManager(QObject):
     def _ignore_scan(self, barcode: str, reason: str = ''):
         try:
             from PyQt5.QtWidgets import QApplication
-            parent = self.parent()
             fw = QApplication.instance().focusWidget() if QApplication.instance() else None
             self._cleanup_scanner_leak(fw, barcode)
         except Exception:

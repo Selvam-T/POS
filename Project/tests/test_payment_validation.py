@@ -1,4 +1,3 @@
-import pytest
 
 from modules.payment.payment_panel import PaymentPanel
 

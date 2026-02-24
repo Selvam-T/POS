@@ -38,13 +38,13 @@ def _tool_log(message: str) -> None:
 # Optional imports with friendly messages
 try:
     from lxml import etree as ET
-except Exception as e:
+except Exception:
     _tool_log("Missing dependency: lxml. Install with: pip install lxml")
     raise
 
 try:
     import jsbeautifier
-except Exception as e:
+except Exception:
     _tool_log("Missing dependency: jsbeautifier. Install with: pip install jsbeautifier")
     raise
 

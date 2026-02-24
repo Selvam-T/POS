@@ -1,7 +1,7 @@
 from __future__ import annotations
-from PyQt5.QtWidgets import QCompleter, QLineEdit, QComboBox, QLabel
+from PyQt5.QtWidgets import QCompleter, QLineEdit, QComboBox
 from PyQt5.QtCore import Qt
-from modules.ui_utils import input_validation, ui_feedback
+from modules.ui_utils import input_validation
 from modules.ui_utils.canonicalization import (
     canonicalize_product_code,
     canonicalize_title_text,

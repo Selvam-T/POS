@@ -6,7 +6,7 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Add that parent directory to the system path
 sys.path.append(parent_dir)
 
-from modules.db_operation import PRODUCT_CACHE, get_product_info
+from modules.db_operation import get_product_info
 import sqlite3
 from modules.db_operation.db import get_db_path
 
