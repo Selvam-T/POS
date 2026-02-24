@@ -350,10 +350,7 @@ class PaymentPanel(QObject):
         # Voucher as currency units (1 voucher == 1 currency unit)
         voucher_amt = float(self._get_validated_voucher(self._widgets.get('voucher')))
 
-        # Balance rules (updated):
-        # - If voucher present AND cash present AND over_alloc < voucher_amt:
-        #     balance = (tender + over_alloc) - cash
-        # - Otherwise: balance = tender - cash
+        # Balance rules 
         if voucher_amt > 0 and over_alloc > 0 and over_alloc < voucher_amt and cash > 0:
             balance = self._round_currency((tender + over_alloc) - cash)
         else:
