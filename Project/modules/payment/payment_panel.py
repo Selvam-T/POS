@@ -724,6 +724,7 @@ class PaymentPanel(QObject):
             return
 
         try:
+            print("before receipt generation")
             receipt_text = receipt_generator.generate_receipt_text(str(receipt_no))
             printer_success = None
 

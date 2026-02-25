@@ -158,7 +158,7 @@ def launch_hold_sales_dialog(parent=None):
             return
         try:
             # uncomment to test db operation failure handling:
-            # raise RuntimeError("TEST: hold sale failure")
+            #raise RuntimeError("TEST: hold sale failure")
             receipt_no = hold_committer.commit_hold_sale(
                 customer_name=customer_name,
                 note=note_text,

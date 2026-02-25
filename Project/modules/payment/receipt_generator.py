@@ -74,11 +74,12 @@ def _line_with_amount(left_text: str, amount_text: str, width: int) -> str:
     return f"{left}{' ' * config.RECEIPT_GAP}{amount}"
 
 
-def _item_line(qty: float, name: str, line_total: float, width: int) -> str:
+def _item_line(qty: float, unit: str, name: str, line_total: float, width: int) -> str:
     left_width = _left_width(width)
     product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 3))
-
-    qty_text = _format_qty(qty)[:config.RECEIPT_QTY_WIDTH].ljust(config.RECEIPT_QTY_WIDTH)
+    if unit == "Each":
+        unit = ""
+    qty_text = f"{_format_qty(qty)} {unit}".strip()[:config.RECEIPT_QTY_WIDTH].ljust(config.RECEIPT_QTY_WIDTH)
     name_text = (name or "")[:product_width].ljust(product_width)
     left_text = f"{qty_text}  {name_text}"
     amount_text = f"${line_total:.2f}"
@@ -122,7 +123,6 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
     cash_tendered = 0.0
     total_tendered = 0.0
     for pay in payments:
-        ptype = str(pay.get("payment_type") or "").upper()
         tendered = float(pay.get("tendered") or 0.0)
         total_tendered += tendered
 
@@ -141,9 +141,10 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
     lines.append("-" * width)
     for item in items:
         qty = float(item.get("qty") or 0.0)
+        unit = str(item.get("unit") or "").strip()
         name = str(item.get("product_name") or "")
         line_total = float(item.get("line_total") or 0.0)
-        lines.append(_item_line(qty, name, line_total, width))
+        lines.append(_item_line(qty, unit, name, line_total, width))
     lines.append("-" * width)
 
     lines.append(_line_with_amount("Grand Total:", f"${total_amount:.2f}", width))
@@ -162,6 +163,8 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
             if ptype.upper() == "CASH":
                 cash_tendered += tendered
                 continue
+            if ptype.upper() == "OTHER":
+                ptype = "VOUCHER"
             lines.append(_line_with_amount(f"{ptype}:", f"${tendered:.2f}", width))
 
         if cash_tendered > 0:
@@ -194,11 +197,6 @@ def generate_receipt_text_from_snapshot(
     for item in items or []:
         qty = float(item.get("quantity") or item.get("qty") or 0.0)
         line_total = item.get("line_total")
-        if line_total is None:
-            try:
-                line_total = float(item.get("price") or 0.0) * qty
-            except Exception:
-                line_total = 0.0
         total_qty += qty
         total_amount += float(line_total or 0.0)
 
@@ -216,14 +214,10 @@ def generate_receipt_text_from_snapshot(
     lines.append("-" * width)
     for item in items or []:
         qty = float(item.get("quantity") or item.get("qty") or 0.0)
+        unit = str(item.get("unit") or "").strip()
         name = str(item.get("name") or item.get("product_name") or "")
         line_total = item.get("line_total")
-        if line_total is None:
-            try:
-                line_total = float(item.get("price") or 0.0) * qty
-            except Exception:
-                line_total = 0.0
-        lines.append(_item_line(qty, name, float(line_total or 0.0), width))
+        lines.append(_item_line(qty, unit, name, float(line_total or 0.0), width))
     lines.append("-" * width)
 
     lines.append(_line_with_amount("Grand Total:", f"${total_amount:.2f}", width))
