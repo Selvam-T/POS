@@ -180,6 +180,9 @@
         </size>
        </property>
        <property name="text">
+        <string/>
+       </property>
+       <property name="placeholderText">
         <string>-- Optional --</string>
        </property>
       </widget>

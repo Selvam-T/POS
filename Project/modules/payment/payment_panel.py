@@ -134,6 +134,14 @@ class PaymentPanel(QObject):
             except Exception:
                 pass
 
+        vendor_btn = self.widget.findChild(QPushButton, 'keyVendorBtn')
+        if vendor_btn is not None:
+            vendor_btn.clicked.connect(self._open_vendor_dialog)
+            try:
+                vendor_btn.installEventFilter(self)
+            except Exception:
+                pass
+
     def _open_refund_dialog(self) -> None:
         host = self._main_window
         if host is not None and hasattr(host, 'open_refund_dialog'):
@@ -143,6 +151,16 @@ class PaymentPanel(QObject):
             except Exception as exc:
                 log_error(f"Refund dialog launch failed: {exc}")
         report_to_statusbar(host, "Error: Refund dialog unavailable.", is_error=True, duration=4000)
+
+    def _open_vendor_dialog(self) -> None:
+        host = self._main_window
+        if host is not None and hasattr(host, 'open_vendor_dialog'):
+            try:
+                host.open_vendor_dialog()
+                return
+            except Exception as exc:
+                log_error(f"Vendor dialog launch failed: {exc}")
+        report_to_statusbar(host, "Error: Vendor dialog unavailable.", is_error=True, duration=4000)
 
     def _wire_inputs(self) -> None:
         # Connect field change/validation handlers and install line-edit event filters.

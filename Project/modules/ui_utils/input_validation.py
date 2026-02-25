@@ -321,7 +321,7 @@ def validate_note(value):
 #--- 9. tender amount start ---
 def validate_currency(value, asset_type="Amount"):
     if value is None or str(value).strip() == "":
-        return True, ""
+        return False, f"{asset_type} is required"
     # If not empty, use the same numeric logic
     return validate_unit_price(value, min_val=CURRENCY_MIN, max_val=CURRENCY_MAX, asset_type=asset_type)
 #--- 9. tender amount end ---

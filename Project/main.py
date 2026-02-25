@@ -24,6 +24,7 @@ from modules.table.table_operations import get_sales_data
 from modules.sales.sales_frame_setup import setup_sales_frame
 from modules.payment.payment_panel import setup_payment_panel
 from modules.payment.refund import launch_refund_dialog
+from modules.payment.vendor import launch_vendor_dialog
 from modules.db_operation.paid_sale_committer import PaidSaleCommitter
 from modules.devices.barcode_manager import BarcodeManager
 from modules.wrappers.dialog_wrapper import DialogWrapper
@@ -418,6 +419,13 @@ class MainLoader(QMainWindow):
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_refund_dialog,
             dialog_key='refund',
+        )
+
+    def open_vendor_dialog(self):
+        """Open Vendor panel."""
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            launch_vendor_dialog,
+            dialog_key='vendor',
         )
 
     # Open the hold sales dialog for active transactions.
