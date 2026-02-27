@@ -168,21 +168,16 @@ def launch_refund_dialog(parent=None):
         validate_fn=_recompute_amount,
     )
 
-    def _validate_note() -> str:
-        val = input_handler.handle_note_input(note)
-        note.setText(val)
-        return val
-
     coord.add_link(
         source=note,
         next_focus=ok_btn,
         status_label=status,
         swallow_empty=False,
-        validate_fn=_validate_note,
+        validate_fn=lambda: input_handler.handle_note_input(note),
     )
 
     coord.register_validator(qty, _recompute_amount, status_label=status)
-    coord.register_validator(note, _validate_note, status_label=status)
+    coord.register_validator(note, lambda: input_handler.handle_note_input(note), status_label=status)
 
     enforce_exclusive_lineedits(
         code,
@@ -214,7 +209,7 @@ def launch_refund_dialog(parent=None):
                 raise ValueError("Select a product first")
 
             _recompute_amount()
-            note_text = _validate_note()
+            note_text = input_handler.handle_note_input(note)
             amount_val = float(amount.text() or 0.0)
             if amount_val <= 0:
                 raise ValueError("Refund amount must be greater than 0")

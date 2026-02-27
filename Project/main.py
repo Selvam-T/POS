@@ -80,6 +80,19 @@ def load_qss(app):
                 pass
 
 class MainLoader(QMainWindow):
+    def launch_login_dialog_blocked(self):
+        """Show login dialog in barcode-blocked mode, open main app on success."""
+        from modules.devices.login_controller import launch_login_dialog
+        self.dialog_wrapper._show_overlay()
+        self.dialog_wrapper._block_scanner()
+        login_success = launch_login_dialog(self)
+        self.dialog_wrapper._hide_overlay()
+        self.dialog_wrapper._unblock_scanner()
+        if login_success:
+            self.show()  # Open main app window
+        else:
+            # Optionally show a message or stay blocked
+            pass
     # ========== Initialization ==========
     # Initialize the main loader, controllers, and wiring.
     def __init__(self):
@@ -1049,25 +1062,27 @@ def main():
         except Exception:
             pass
 
-    window = MainLoader()
-    """window.show()"""
-    window.showMaximized()
-    try:
-        # Bring window to front in case it opens behind other windows
-        window.raise_()
-        window.activateWindow()
-    except Exception:
-        pass
-
-    # If cache load failed earlier, surface it once the status bar exists.
-    if cache_load_failed:
-        report_to_statusbar(
-            window,
-            'Error: Failed to load product list (search may be limited)',
-            is_error=True,
-            duration=6000,
-        )
-    sys.exit(app.exec_())
+    from modules.devices.login_controller import launch_login_dialog
+    login_success = launch_login_dialog(None)
+    if login_success:
+        window = MainLoader()
+        window.showMaximized()
+        try:
+            window.raise_()
+            window.activateWindow()
+        except Exception:
+            pass
+        # If cache load failed earlier, surface it once the status bar exists.
+        if cache_load_failed:
+            report_to_statusbar(
+                window,
+                'Error: Failed to load product list (search may be limited)',
+                is_error=True,
+                duration=6000,
+            )
+        sys.exit(app.exec_())
+    else:
+        sys.exit(0)
 
 
 if __name__ == '__main__':

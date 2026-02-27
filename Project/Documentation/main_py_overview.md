@@ -185,4 +185,15 @@ Additional behavior:
 - `Documentation/logout_and_titlebar.md`: Logout dialog and custom title bar
 
 ---
+
+## Login Dialog Integration
+
+- On application startup, a login dialog is shown before the main window.
+- The dialog is launched via `launch_login_dialog(None)` in the main entry point.
+- Only if login is successful (OK pressed), the main window (`MainLoader`) is created and shown.
+- Button naming conventions: `btnLoginOk` (OK), `btnLoginCancel` (Cancel).
+- The login dialog controller is implemented in `modules/devices/login_controller.py`.
+- This section will be updated as the login controller implementation advances.
+
+---
 _Last updated: January 22, 2026_
