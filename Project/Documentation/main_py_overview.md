@@ -192,7 +192,7 @@ Additional behavior:
 - The dialog is launched via `launch_login_dialog(None)` in the main entry point.
 - Only if login is successful (OK pressed), the main window (`MainLoader`) is created and shown.
 - Button naming conventions: `btnLoginOk` (OK), `btnLoginCancel` (Cancel).
-- The login dialog controller is implemented in `modules/devices/login_controller.py`.
+- The login dialog controller is implemented in `modules/sales/login.py`.
 - This section will be updated as the login controller implementation advances.
 
 ---

@@ -60,7 +60,7 @@ def create_tables():
     
     # Check if database exists
     if not db_path.exists():
-        print(f"\n✗ Database not found: {db_path}")
+        print(f"\nDatabase not found: {db_path}")
         print("Run create_database.py first!")
         return
     

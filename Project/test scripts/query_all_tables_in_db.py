@@ -13,7 +13,7 @@ def list_tables(cursor):
     return [row[0] for row in cursor.fetchall()]
 
 def list_records(cursor, table):
-    cursor.execute(f"SELECT * FROM {table} LIMIT 5")
+    cursor.execute(f"SELECT * FROM {table} LIMIT 3")
     return cursor.fetchall()
 
 def count_records(cursor, table):

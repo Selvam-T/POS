@@ -39,7 +39,7 @@ The **receipt_payments** table is designed to handle the complexities of payment
 ### 4. Cash_outflows Table
 The **cash_outflows** table tracks money leaving the system to simplify accounting and reporting.
 - **Purpose:** Captures refunds and vendor payments independently of specific receipt-item tracking, as the system focuses on cash flow rather than strict inventory auditing.
-- **Movement Types:** The movement_type is restricted to 'REFUND_OUT' and 'VENDOR_OUT'.
+- **Outflow Types:** The outflow_type is restricted to 'REFUND_OUT' and 'VENDOR_OUT'.
 - **Reporting:** Essential for calculating the net total in sales reports by subtracting these outflows from the total sales. Includes a note field to capture specific details about the refund or vendor transaction.
 
 ---

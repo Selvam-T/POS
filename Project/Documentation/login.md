@@ -5,7 +5,7 @@ The login dialog is the first UI shown on application startup. It blocks access 
 
 ## Implementation
 - UI file: `ui/login.ui`
-- Controller: `modules/devices/login_controller.py`
+- Controller: `modules/sales/login.py`
 - Button naming: `btnLoginOk` (OK), `btnLoginCancel` (Cancel)
 - On OK: dialog returns Accepted, main window launches
 - On Cancel: dialog returns Rejected, application exits

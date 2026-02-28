@@ -82,7 +82,7 @@ def load_qss(app):
 class MainLoader(QMainWindow):
     def launch_login_dialog_blocked(self):
         """Show login dialog in barcode-blocked mode, open main app on success."""
-        from modules.devices.login_controller import launch_login_dialog
+        from modules.sales.login import launch_login_dialog
         self.dialog_wrapper._show_overlay()
         self.dialog_wrapper._block_scanner()
         login_success = launch_login_dialog(self)
@@ -1062,7 +1062,7 @@ def main():
         except Exception:
             pass
 
-    from modules.devices.login_controller import launch_login_dialog
+    from modules.sales.login import launch_login_dialog
     login_success = launch_login_dialog(None)
     if login_success:
         window = MainLoader()

@@ -37,7 +37,7 @@ def create_receipt_tables(drop_existing=True):
     db_path = (script_dir / db_path).resolve()
 
     if not db_path.exists():
-        print(f"\n✗ Database not found: {db_path}")
+        print(f"\nDatabase not found: {db_path}")
         print("Run create_database.py first!")
         return
 
@@ -48,27 +48,25 @@ def create_receipt_tables(drop_existing=True):
     cursor.execute("PRAGMA foreign_keys = ON;")
 
     if drop_existing:
-        # Drop child tables first
         cursor.execute("DROP TABLE IF EXISTS receipt_payments;")
         cursor.execute("DROP TABLE IF EXISTS receipt_items;")
         cursor.execute("DROP TABLE IF EXISTS receipts;")
 
-    # receipts (header)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS receipts (
-            receipt_id   INTEGER PRIMARY KEY AUTOINCREMENT,
-            receipt_no   TEXT    NOT NULL UNIQUE,
-            customer_name TEXT,
-            cashier_name TEXT    NOT NULL,
-            status       TEXT    NOT NULL CHECK(status IN ('PAID','UNPAID','CANCELLED')),
-            grand_total  REAL    NOT NULL,
-            created_at   TEXT    NOT NULL,
-            paid_at      TEXT,
-            cancelled_at TEXT,
-            note         TEXT
+            receipt_id      INTEGER PRIMARY KEY AUTOINCREMENT,
+            receipt_no      TEXT    NOT NULL UNIQUE,
+            customer_name   TEXT,
+            cashier_user_id INTEGER NOT NULL,
+            status          TEXT    NOT NULL CHECK(status IN ('PAID','UNPAID','CANCELLED')),
+            grand_total     REAL    NOT NULL,
+            created_at      TEXT    NOT NULL,
+            paid_at         TEXT,
+            cancelled_at    TEXT,
+            note            TEXT,
+            FOREIGN KEY(cashier_user_id) REFERENCES users(user_id) ON DELETE RESTRICT
         );
     """)
-
     # receipt_items (lines) - snapshot fields; no FK to Product_list by design
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS receipt_items (
@@ -104,9 +102,9 @@ def create_receipt_tables(drop_existing=True):
 
     conn.commit()
     if drop_existing:
-        print("✓ Tables dropped and recreated: receipts, receipt_items, receipt_payments")
+        print("Tables dropped and recreated: receipts, receipt_items, receipt_payments")
     else:
-        print("✓ Tables ensured: receipts, receipt_items, receipt_payments")
+        print("Tables ensured: receipts, receipt_items, receipt_payments")
     conn.close()
 
 

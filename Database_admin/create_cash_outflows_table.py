@@ -1,5 +1,5 @@
 """
-Create Cash Outflows Table Script for Anumani POS
+Create Cash movements Table Script for Anumani POS
 
 Creates the SQLite table that tracks cash leaving the drawer/account:
 - REFUND_OUT (refunds / voids)
@@ -47,29 +47,30 @@ def create_cash_outflows_table(drop_existing: bool = False) -> None:
     # (Not strictly needed here, but consistent with other scripts)
     cursor.execute("PRAGMA foreign_keys = ON;")
 
-    if drop_existing:
-        cursor.execute("DROP TABLE IF EXISTS cash_outflows;")
+    if drop_existing:cursor.execute("DROP TABLE IF EXISTS cash_outflows;")
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS cash_outflows (
-            outflow_id   INTEGER PRIMARY KEY AUTOINCREMENT,
-            outflow_type TEXT    NOT NULL CHECK(outflow_type IN ('REFUND_OUT','VENDOR_OUT')),
-            amount       REAL    NOT NULL CHECK(amount > 0),
-            created_at   TEXT    NOT NULL,
-            cashier_name TEXT    NOT NULL,
-            note         TEXT
+            outflows_id    INTEGER PRIMARY KEY AUTOINCREMENT,
+            outflows_type  TEXT    NOT NULL CHECK(outflows_type IN ('REFUND_OUT','VENDOR_OUT','CASH_IN_OTHER')),
+            amount         REAL    NOT NULL CHECK(amount != 0),
+            created_at     TEXT    NOT NULL,
+            actor_user_id  INTEGER NOT NULL,
+            note           TEXT,
+            FOREIGN KEY(actor_user_id) REFERENCES users(user_id) ON DELETE RESTRICT
         );
     """)
 
-    # Helpful indexes for filtering/sorting in reports/receipt management
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_cash_outflows_created_at ON cash_outflows(created_at);")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_cash_outflows_type ON cash_outflows(outflow_type);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_cash_outflows_type ON cash_outflows(outflows_type);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_cash_outflows_actor ON cash_outflows(actor_user_id);")
 
+    # ... commit and print messages (update print to "cash_outflows")
     conn.commit()
     if drop_existing:
-        print("✓ Table dropped and recreated: cash_outflows")
+        print("Table dropped and recreated: cash_outflows")
     else:
-        print("✓ Table ensured: cash_outflows")
+        print("Table ensured: cash_outflows")
     conn.close()
 
 

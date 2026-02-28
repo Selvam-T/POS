@@ -78,7 +78,7 @@ Creates:
 | outflow_type | TEXT     | NOT NULL | CHECK(outflow_type IN ('REFUND_OUT','VENDOR_OUT'))|
 | amount       | REAL     | NOT NULL | CHECK(amount > 0)                                 |
 | created_at   | TEXT     | NOT NULL |                                                   |
-| actor_user_id | INTEGER     | NOT NULL |                                                   |
+| cashier_name | TEXT     | NOT NULL |                                                   |
 | note         | TEXT     | NULL     | Free text (reason/details)                        |
 
 Indexes:
@@ -105,7 +105,7 @@ Creates:
 | receipt_id    | INTEGER  | NOT NULL | PRIMARY KEY AUTOINCREMENT                         |
 | receipt_no    | TEXT     | NOT NULL | UNIQUE (format: YYYYMMDD-####, max ####=9999)     |
 | customer_name | TEXT     | NULL     | Required for Hold; empty for normal paid          |
-| cashier_user_id  | INTEGER     | NOT NULL |                                                   |
+| cashier_name  | TEXT     | NOT NULL |                                                   |
 | status        | TEXT     | NOT NULL | CHECK(status IN ('PAID','UNPAID','CANCELLED'))    |
 | grand_total   | REAL     | NOT NULL |                                                   |
 | created_at    | TEXT     | NOT NULL | Index optional                                    |
@@ -147,53 +147,8 @@ Indexes:
 Indexes:
 - Index on receipt_id
 
-##### 6. Users Table
 
-``` bash
-python create_users_table.py
-```
-| Column        | Type     | Nullable | Constraint/Index                                  |
-|--------------|----------|----------|---------------------------------------------------|
-|  user_id   | INTEGER  | NOT NULL | PRIMARY KEY AUTOINCREMENT                         |
-| username   | TEXT  | NOT NULL | UNIQUE ('admin', 'staff', etc.)       |
-| password_hash | TEXT     | NOT NULL | Hashed password (never plaintext)|
-| password_updated_at       | TEXT     | NOT NULL | ISO timestamp (UTC recommended)|
-| recovery_email   | TEXT     | NOT NULL |  Required for admin; NULL for staff  |
-| is_active       | INTEGER     | NOT NULL | DEFAULT 1 (1=active,0=disabled)|     
-
-
-##### Indexes
-
--   UNIQUE index on `username`
--   Optional: index on `is_active`
-
-------------------------------------------------------------------------
-
-**Purpose**
-
--   Simple user authentication for POS login\
--   Supports at minimum `admin` and `staff` roles
-
-------------------------------------------------------------------------
-
-#### Default Initialization (After Table Creation)
-
-``` bash
-python init_default_users.py
-```
-
-Inserts:
-| Username        | Password     | Recovery Email |
-| ----------        | ----------     | ------------------------------ |
-| admin        | admin123     | thiagarajan.selvam@gmail.com |
-| staff        | staff123     | NULL |
-------------------------------------------------------------------------
-#### Security Note  
-
-Use proper password hashing (bcrypt / argon2) in production.\
-The initialization script uses SHA-256 for demonstration purposes only.
-
-------------------------------------------------------------------------
+---
 
 ## How to Query Tables and Columns from Command Line
 
@@ -258,7 +213,7 @@ python import_products.py --overwrite
 ---
 
 
-## Verification
+## 🔍 Verification
 
 Check database status:
 ```bash
@@ -273,14 +228,14 @@ Shows:
 ---
 
 
-## Schema Migration
+## 🔄 Schema Migration
 
 For schema changes (rename columns, add columns, etc.):
 
 1. Edit `migrate_schema.py` with your migration logic
 2. Run: `python migrate_schema.py`
 
-**Always backup your database before migrations!**
+⚠️ **Always backup your database before migrations!**
 
 ---
 
