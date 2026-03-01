@@ -253,6 +253,9 @@
  </widget>
  <tabstops>
   <tabstop>loginPassLineEdit</tabstop>
+  <tabstop>loginForgetBtn</tabstop>
+  <tabstop>customCloseBtn</tabstop>
+  <tabstop>loginComboBox</tabstop>
  </tabstops>
  <resources/>
  <connections/>

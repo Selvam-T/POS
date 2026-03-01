@@ -89,7 +89,7 @@ QLineEdit#loginPassLineEdit[echoMode="2"] {          /* password field */
 
 QLineEdit#loginPassLineEdit:focus, 
 QComboBox#loginComboBox:focus {
-    border: 1px solid #2196f3;
+    border: 2px solid #f39121;
 }
 
 QComboBox::down-arrow {
@@ -107,37 +107,6 @@ QComboBox::drop-down {
     border-bottom-right-radius: 4px;
 }
 
-QPushButton#btnLoginOk,
-QPushButton#btnLoginCancel {
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 18px;
-    font-weight: bold;
-    padding: 12px;
-    min-height: 50px;
-}
-
-QPushButton#btnLoginCancel {
-    background: #5c825e;          
-}
-QPushButton#btnLoginCancel:hover {
-    background: #659067;          
-}
-QPushButton#btnLoginCancel:pressed {
-    background: rgb(54, 76, 56);        
-}
-
-QPushButton#btnLoginOk {
-    background: #2e7d32;       
-}
-QPushButton#btnLoginOk:hover {
-    background: #388e3c;          
-}
-QPushButton#btnLoginOk:pressed {
-    background: #1b5e20;          
-}
-
 QPushButton#loginForgetBtn {
     color: #1b5e20;
     background: transparent;
@@ -151,6 +120,10 @@ QPushButton#loginForgetBtn:hover {
     text-decoration: underline;
 }
 
+QLabel#loginStatusLabel {
+  font-size: 18px;
+  font-weight: bold;
+}
 /* =============================================================
    PAYMENT FRAME AND ITS CHILDREN
    ============================================================= */
