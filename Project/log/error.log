@@ -1,2 +1,12 @@
-
-
+2026-03-01T18:01:31.593000 - Printer send failed (192.168.0.10:9100): Device not found (Could not open socket for 192.168.0.10:
+timed out)
+2026-03-01T18:01:31.595014 - View Hold print failed: printer send failed for receipt_no=20260301-0004
+2026-03-01T18:04:21.159887 - Printer send failed (192.168.0.10:9100): Device not found (Could not open socket for 192.168.0.10:
+timed out)
+2026-03-01T18:04:21.159887 - View Hold print failed: printer send failed for receipt_no=20260301-0004
+2026-03-01T18:04:36.460961 - Printer send failed (192.168.0.10:9100): Device not found (Could not open socket for 192.168.0.10:
+timed out)
+2026-03-01T18:04:36.462709 - View Hold print failed: printer send failed for receipt_no=20260301-0004
+2026-03-01T18:06:03.048018 - Printer send failed (192.168.0.10:9100): Device not found (Could not open socket for 192.168.0.10:
+timed out)
+2026-03-01T18:06:03.048018 - View Hold print failed: printer send failed for receipt_no=20260301-0004

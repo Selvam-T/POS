@@ -1,6 +1,6 @@
 **Vendor Dialog**
 
-- **Purpose:** Capture vendor cash payments (outflows) and record them in the `cash_outflows` table with `movement_type`/`outflow_type` = `VENDOR_OUT`.
+-- **Purpose:** Capture vendor cash payments (outflows) and record them in the `cash_outflows` table with `outflows_type` = `VENDOR_OUT`.
 - **Location:** UI file: `ui/vendor.ui`. Controller: `modules/payment/vendor.py`. DB helper: `modules/db_operation/cash_outflows_repo.py` (exposed via `modules.db_operation.add_outflow`).
 
 Behavior summary
@@ -28,7 +28,7 @@ Widgets and validation
   - Displays validation or error messages from the FieldCoordinator and controller.
 
 - Buttons
-  - `btnVendorOk`: Validates `vendorNameLineEdit` and `vendorAmountLineEdit`. If valid, records an outflow via `modules.db_operation.add_outflow(outflow_type='VENDOR_OUT', ...)`. On success shows a confirmation and closes the dialog. On validation error shows message on `vendorStatusLabel`. On DB/exception error the dialog reports via `report_exception_post_close()` (or status bar) and rejects/closes per caller policy.
+  - `btnVendorOk`: Validates `vendorNameLineEdit` and `vendorAmountLineEdit`. If valid, records an outflow via `modules.db_operation.add_outflow(outflows_type='VENDOR_OUT', ...)`. On success shows a confirmation and closes the dialog. On validation error shows message on `vendorStatusLabel`. On DB/exception error the dialog reports via `report_exception_post_close()` (or status bar) and rejects/closes per caller policy.
   - `btnVendorCancel` and `customCloseBtn`: call `reject()` and show a small cancellation info message.
 
 Implementation notes
@@ -38,8 +38,8 @@ Implementation notes
 
 DB flow
 - Ensure the `cash_outflows` table exists by calling `ensure_cash_outflows_table()` before writing.
-- Insert via `add_outflow(outflow_type='VENDOR_OUT', amount=..., cashier_name=..., note=...)`.
-- `add_outflow` validates `outflow_type` and `amount` and returns the inserted row id on success; errors are raised as exceptions.
+ - Insert via `add_outflow(outflows_type='VENDOR_OUT', amount=..., cashier_id=<INTEGER user_id>, note=...)`.
+ - `add_outflow` validates `outflows_type` and `amount` and returns the inserted `outflows_id` on success; errors are raised as exceptions.
 
 Testing and QA checklist
 - Manual flow
@@ -48,7 +48,7 @@ Testing and QA checklist
   3. Type an invalid amount (e.g., "abc") and press Enter — `vendorStatusLabel` should show an error and focus should remain.
   4. Type a valid amount (e.g., "12.50") and press Enter — focus moves to Note.
   5. Leave Note empty and hit Enter — focus should move to OK and `OK` should be enabled.
-  6. Click `OK` — verify a row is inserted into `cash_outflows` with `outflow_type='VENDOR_OUT'` and correct values.
+  6. Click `OK` — verify a row is inserted into `cash_outflows` with `outflows_type='VENDOR_OUT'` and correct values (check `outflows_id`, `amount`, `cashier_id` — an INTEGER `user_id` referencing `users(user_id)`, and `note`).
 
 - Simulating DB failure (for error-path testing)
   - In `modules/payment/vendor.py` temporarily raise an exception before the call to `ensure_cash_outflows_table()` to exercise error handling. The dialog should call `report_exception_post_close()` (or similar) and reject/close. Remove the injected error after testing.

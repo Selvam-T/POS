@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel
 
 from modules.db_operation.held_sale_committer import HeldSaleCommitter
 from modules.payment import receipt_generator
+from modules.db_operation.users_repo import get_username_by_id
 from modules.ui_utils.error_logger import log_error
 from config import ENABLE_PRINTER_PRINT
 from modules.ui_utils import input_handler, ui_feedback
@@ -159,10 +160,15 @@ def launch_hold_sales_dialog(parent=None):
         try:
             # uncomment to test db operation failure handling:
             #raise RuntimeError("TEST: hold sale failure")
+            cid = getattr(parent, 'current_user_id', None)
+            if cid is None:
+                _show_validation_error(status_lbl, name_in, "No logged-in user. Please login.")
+                return
             receipt_no = hold_committer.commit_hold_sale(
                 customer_name=customer_name,
                 note=note_text,
                 sales_items=sales_items,
+                cashier_id=int(cid),
             )
             dlg.held_receipt_no = receipt_no
 
@@ -176,12 +182,23 @@ def launch_hold_sales_dialog(parent=None):
             dlg.accept()
         except Exception as exc:
             try:
+                cid = getattr(parent, 'current_user_id', None)
+                cashier_name = get_username_by_id(int(cid)) if cid is not None else ''
                 receipt_text = receipt_generator.generate_receipt_text_from_snapshot(
                     items=sales_items,
                     receipt_no="HOLD-FAILED",
                     status="UNPAID",
-                    cashier_name="",
+                    cashier_name=cashier_name or '',
                 )
+            except Exception as print_exc:
+                log_error(f"Hold failed: receipt print error: {print_exc}")
+                set_dialog_main_status_max(
+                    dlg,
+                    "Hold failed. Receipt print error.",
+                    level='error',
+                    duration=6000,
+                )
+            else:
                 cleared = False
                 if not ENABLE_PRINTER_PRINT:
                     print(receipt_text)
@@ -211,20 +228,14 @@ def launch_hold_sales_dialog(parent=None):
                             level='error',
                             duration=6000,
                         )
+
                 if cleared and parent is not None:
                     if hasattr(parent, "_clear_sales_table_core"):
                         parent._clear_sales_table_core()
                     panel = getattr(parent, 'payment_panel_controller', None)
                     if panel is not None:
                         panel.clear_payment_frame()
-            except Exception as print_exc:
-                log_error(f"Hold failed: receipt print error: {print_exc}")
-                set_dialog_main_status_max(
-                    dlg,
-                    "Hold failed. Receipt print error.",
-                    level='error',
-                    duration=6000,
-                )
+
             report_exception_post_close(
                 dlg,
                 "Hold sale",

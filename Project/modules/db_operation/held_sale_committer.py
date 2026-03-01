@@ -34,7 +34,7 @@ class HeldSaleCommitter:
         customer_name: str,
         note: Optional[str],
         sales_items: list[dict],
-        cashier_name: str = "",
+        cashier_id: Optional[int] = None,
     ) -> int:
         cols = table_columns(conn, "receipts")
         values = {}
@@ -50,13 +50,15 @@ class HeldSaleCommitter:
         for candidate, value in (
             ("status", "UNPAID"),
             ("customer_name", customer_name),
-            ("cashier_name", str(cashier_name or "")),
+            ("cashier_id", int(cashier_id) if cashier_id is not None else None),
             ("grand_total", total_val),
             ("total", total_val),
             ("created_at", created_at),
             ("paid_at", None),
         ):
             if candidate in cols:
+                if candidate == "cashier_id" and value is None:
+                    raise RuntimeError("cashier_id is required when creating a held receipt")
                 values[candidate] = value
 
         if note_col is not None:
@@ -76,7 +78,7 @@ class HeldSaleCommitter:
         customer_name: str,
         note: Optional[str],
         sales_items: list[dict],
-        cashier_name: str = "",
+        cashier_id: Optional[int] = None,
     ) -> str:
         if not sales_items:
             raise RuntimeError("No sale items to hold")
@@ -90,7 +92,7 @@ class HeldSaleCommitter:
                     customer_name=customer_name,
                     note=note,
                     sales_items=sales_items,
-                    cashier_name=cashier_name,
+                    cashier_id=cashier_id,
                 )
                 insert_receipt_items(conn, receipt_no, receipt_db_id, sales_items)
 

@@ -56,12 +56,14 @@ def get_receipt_header_by_no(receipt_no: str, *, conn: Optional[sqlite3.Connecti
         id_col = _first_existing(cols, "id", "receipt_id")
         created_col = _first_existing(cols, "created_at", "paid_at")
         status_col = _first_existing(cols, "status")
+        cashier_id_col = _first_existing(cols, "cashier_id")
 
         select_parts = [
             _select_alias(id_col, "receipt_id", "NULL"),
             _select_alias(key_col, "receipt_no", "''"),
             _select_alias(created_col, "created_at", "''"),
             _select_alias(status_col, "status", "''"),
+            _select_alias(cashier_id_col, "cashier_id", "NULL"),
         ]
         sql = f"SELECT {', '.join(select_parts)} FROM receipts WHERE {key_col} = ? COLLATE NOCASE LIMIT 1"
         row = c.execute(sql, (receipt_no,)).fetchone()

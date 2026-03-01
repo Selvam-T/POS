@@ -39,6 +39,20 @@ def get_user_id_by_username(username: str) -> int | None:
     finally:
         conn.close()
 
+
+def get_username_by_id(user_id: int) -> str | None:
+    """Fetch username by user_id. Returns the username or None if not found."""
+    conn = get_conn()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT username FROM users WHERE user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        if row and row[0] is not None:
+            return str(row[0])
+        return None
+    finally:
+        conn.close()
+
 def validate_user_credentials(username: str, password: str) -> dict:
     """Validate username and password. Returns user dict if valid, else None."""
     user = get_user_by_username(username)
@@ -82,5 +96,24 @@ def generate_temporary_password_for_user(user_id: int, length: int = 12) -> str:
         )
         conn.commit()
         return temp_pwd
+    finally:
+        conn.close()
+
+
+def get_user_by_id(user_id: int):
+    """Fetch user record by user_id. Returns dict or None."""
+    conn = get_conn()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT user_id, username, password_hash, is_active FROM users WHERE user_id = ?", (user_id,))
+        row = cursor.fetchone()
+        if row:
+            return {
+                'user_id': row[0],
+                'username': row[1],
+                'password_hash': row[2],
+                'is_active': row[3],
+            }
+        return None
     finally:
         conn.close()

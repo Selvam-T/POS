@@ -88,12 +88,8 @@ def launch_vendor_dialog(parent=None):
     coord.register_validator(name, lambda: input_handler.handle_customer_input(name), status_label=status)
     coord.register_validator(amount, lambda: input_handler.handle_currency_input(amount, asset_type='Amount'), status_label=status)
 
-    def _get_cashier_name() -> str:
-        for attr in ('current_user', 'cashier_name', 'logged_in_user'):
-            val = getattr(parent, attr, '') if parent is not None else ''
-            if str(val or '').strip():
-                return str(val or '').strip()
-        return ''
+    # NOTE: rely on `parent.current_user_id` being set by the app login flow.
+    # Do not probe multiple attributes or fall back to a magic id; require a valid integer user id.
 
     def _handle_ok() -> None:
         try:
@@ -119,10 +115,14 @@ def launch_vendor_dialog(parent=None):
                 raise
 
             dbop.ensure_cash_outflows_table()
+            cid = getattr(parent, 'current_user_id', None)
+            if cid is None:
+                ui_feedback.set_status_label(status, 'No logged-in user. Please login.', ok=False)
+                return
             dbop.add_outflow(
-                outflow_type='VENDOR_OUT',
+                outflows_type='VENDOR_OUT',
                 amount=amount_val,
-                cashier_name=_get_cashier_name(),
+                cashier_id=int(cid),
                 note=note_val,
             )
 

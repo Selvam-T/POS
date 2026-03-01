@@ -84,8 +84,9 @@ SQL-only repository for the `cash_outflows` table used by Refund and Vendor flow
 - `ensure_table(...)`
   - Idempotent table creation (`CREATE TABLE IF NOT EXISTS cash_outflows`)
 - `add_outflow(...) -> int`
-  - Inserts one row and returns `outflow_id`
-  - Validates `outflow_type` (`REFUND_OUT` / `VENDOR_OUT`) and positive `amount`
+- `add_outflow(...) -> int`
+  - Inserts one row and returns `outflows_id`
+  - Validates `outflows_type` (`REFUND_OUT` / `VENDOR_OUT` / `CASH_IN_OTHER`) and positive `amount`
 - `list_outflows(...) -> List[dict]`
   - Query helper with optional filters (`date_prefix`, `outflow_type`, `limit`)
 
@@ -114,6 +115,27 @@ Exports:
 - `cost` comes from `cost_price`
 - `unit` defaults to `Each` if blank
 
+### `modules/db_operation/users_repo.py` (authentication helpers)
+
+Lightweight repository used by the login UI to authenticate users and support simple recovery flows. This module keeps SQL focused and delegates connection handling to `db.get_conn()`.
+
+- Primary functions:
+  - `hash_password(password: str) -> str` — SHA-256 hashing utility used by the module (demo only).
+  - `get_user_by_username(username: str) -> dict | None` — returns a dict with `user_id`, `username`, `password_hash`, `is_active` or `None` when not found.
+  - `get_user_id_by_username(username: str) -> int | None` — returns numeric `user_id` or `None`.
+  - `validate_user_credentials(username: str, password: str) -> dict | None` — validates credentials; returns the user dict on success (and only if `is_active`), otherwise `None`.
+  - `get_recovery_email(user_id: int) -> str | None` — returns `recovery_email` or `None`.
+  - `generate_temporary_password_for_user(user_id: int, length: int = 12) -> str` — creates a random temporary password, stores its SHA-256 hash to `password_hash`, updates `password_updated_at` to `now_iso()`, commits the change and returns the plaintext temporary password.
+
+- Security note:
+  - The module currently uses SHA-256 for hashing (convenience/demo). Replace with a slow, memory-hard algorithm such as `bcrypt` or `argon2` before production use.
+
+- Usage in the login UI (`modules/sales/login.py`):
+  - The login dialog imports `validate_user_credentials`, `get_recovery_email`, `generate_temporary_password_for_user`, and `get_user_id_by_username`.
+  - `validate_user_credentials()` is used to guard dialog acceptance and to prevent disabled (`is_active = 0`) users from logging in.
+  - The dialog prefers storing `user_id` in the username combo's `itemData`; if absent it falls back to `get_user_id_by_username()` using the displayed username.
+  - The "Forgot" flow uses `get_recovery_email()` to confirm an email exists, calls `generate_temporary_password_for_user()` to rotate the password, and copies the temporary password to the clipboard for manual delivery when no mailer is configured.
+
 ## UI-only Helpers
 
 Status bar messaging is **UI-only**:
@@ -134,7 +156,7 @@ Status bar messaging is **UI-only**:
 
 ### Refund / Vendor cash outflows
 - `modules.db_operation.ensure_cash_outflows_table()` at startup/migration points
-- `modules.db_operation.add_outflow(outflow_type='REFUND_OUT'|'VENDOR_OUT', amount=..., cashier_name=..., note=...)`
+- `modules.db_operation.add_outflow(outflows_type='REFUND_OUT'|'VENDOR_OUT'|'CASH_IN_OTHER', amount=..., cashier_id=<INTEGER user_id>, note=...)`
 
 ## Quick Runtime Check
 

@@ -107,6 +107,10 @@ class MainLoader(QMainWindow):
             'status': 'NONE',
             'last_receipt_no': None,
         }
+        # App-level logged-in user context (to be wired by login flow).
+        self.current_user_id = None
+        self.current_username = ""
+        self.current_is_admin = False
         self._payment_in_progress = False
         self._payment_busy_status_ms = 3000
         try:
@@ -340,11 +344,21 @@ class MainLoader(QMainWindow):
     # Launch the admin menu dialog with admin context.
     def open_admin_menu_dialog(self):
         """Open Admin dialog."""
+        if not bool(getattr(self, 'current_is_admin', False)):
+            report_to_statusbar(
+                self,
+                "Admin access denied.",
+                is_error=True,
+                duration=4000,
+            )
+            return
+
+        current_user = str(getattr(self, 'current_username', '') or '').strip() or 'Admin'
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_admin_dialog,
             dialog_key='admin_menu',
-            current_user='Admin',
-            is_admin=True
+            current_user=current_user,
+            is_admin=True,
         )
     # Show the greeting menu dialog.
     def open_greeting_menu_dialog(self):
@@ -835,11 +849,17 @@ class MainLoader(QMainWindow):
 
             total = float(payment_split.get('total', 0.0) or 0.0)
             committer = PaidSaleCommitter()
-            receipt_no = committer.commit_payment(
+            cid = getattr(self, 'current_user_id', None)
+            if cid is None:
+                report_to_statusbar(self, "No logged-in user. Please login.", is_error=True, duration=4000)
+                return False
+            committer = PaidSaleCommitter()
+            receipt_no = committer.commit_paid_sale(
                 active_receipt_id=active_receipt_id,
                 sales_items=sales_items,
                 payment_rows=payment_rows,
                 total=total,
+                cashier_id=int(cid),
             )
 
             self.receipt_context['last_receipt_no'] = str(receipt_no)
@@ -1063,9 +1083,16 @@ def main():
             pass
 
     from modules.sales.login import launch_login_dialog
-    login_success = launch_login_dialog(None)
-    if login_success:
+    login_user = launch_login_dialog(None, return_user=True)
+    if login_user is not None:
         window = MainLoader()
+        try:
+            uid = login_user.get('user_id')
+            window.current_user_id = int(uid) if uid is not None else None
+        except Exception:
+            window.current_user_id = None
+        window.current_username = str(login_user.get('username') or '')
+        window.current_is_admin = bool(login_user.get('is_admin'))
         window.showMaximized()
         try:
             window.raise_()

@@ -9,19 +9,19 @@ from .db import get_conn, now_iso, transaction
 
 
 TABLE = "cash_outflows"
-ALLOWED_OUTFLOW_TYPES = {"REFUND_OUT", "VENDOR_OUT"}
+ALLOWED_OUTFLOW_TYPES = {"REFUND_OUT", "VENDOR_OUT", "CASH_IN_OTHER"}
 
 
 def ensure_table(*, conn: Optional[sqlite3.Connection] = None) -> None:
     """Create table if missing."""
     sql = f"""
     CREATE TABLE IF NOT EXISTS {TABLE} (
-      outflow_id INTEGER PRIMARY KEY AUTOINCREMENT,
-      outflow_type TEXT NOT NULL,
-      amount REAL NOT NULL,
-      created_at TEXT NOT NULL,
-      cashier_name TEXT,
-      note TEXT
+        outflows_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        outflows_type TEXT NOT NULL,
+        amount REAL NOT NULL,
+        created_at TEXT NOT NULL,
+        cashier_id INTEGER,
+        note TEXT
     );
     """
 
@@ -37,19 +37,19 @@ def ensure_table(*, conn: Optional[sqlite3.Connection] = None) -> None:
 
 def add_outflow(
     *,
-    outflow_type: str,
+    outflows_type: str,
     amount: float,
-    cashier_name: str = "",
+    cashier_id: Optional[int] = None,
     note: str = "",
     created_at: Optional[str] = None,
     conn: Optional[sqlite3.Connection] = None,
 ) -> int:
     """Insert one outflow row and return its id."""
-    typ = str(outflow_type or "").strip().upper()
+    typ = str(outflows_type or "").strip().upper()
     if not typ:
-        raise ValueError("outflow_type is required")
+        raise ValueError("outflows_type is required")
     if typ not in ALLOWED_OUTFLOW_TYPES:
-        raise ValueError(f"Unsupported outflow_type: {typ}")
+        raise ValueError(f"Unsupported outflows_type: {typ}")
 
     amt = float(amount)
     if amt <= 0:
@@ -57,7 +57,7 @@ def add_outflow(
 
     sql = f"""
     INSERT INTO {TABLE}
-      (outflow_type, amount, created_at, cashier_name, note)
+      (outflows_type, amount, created_at, cashier_id, note)
     VALUES
       (?, ?, ?, ?, ?)
     """
@@ -72,7 +72,7 @@ def add_outflow(
                     typ,
                     amt,
                     created_at or now_iso(),
-                    str(cashier_name or "").strip(),
+                    int(cashier_id) if cashier_id is not None else None,
                     str(note or "").strip(),
                 ),
             )
@@ -85,7 +85,7 @@ def add_outflow(
 def list_outflows(
     *,
     date_prefix: Optional[str] = None,
-    outflow_type: Optional[str] = None,
+    outflows_type: Optional[str] = None,
     limit: int = 200,
     conn: Optional[sqlite3.Connection] = None,
 ) -> List[Dict[str, Any]]:
@@ -97,9 +97,9 @@ def list_outflows(
         where.append("created_at LIKE ?")
         params.append(f"{date_prefix}%")
 
-    if outflow_type:
-        where.append("outflow_type = ?")
-        params.append(str(outflow_type).strip().upper())
+    if outflows_type:
+        where.append("outflows_type = ?")
+        params.append(str(outflows_type).strip().upper())
 
     where_sql = (" WHERE " + " AND ".join(where)) if where else ""
     sql = f"SELECT * FROM {TABLE}{where_sql} ORDER BY created_at DESC LIMIT ?"

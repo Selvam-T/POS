@@ -16,7 +16,8 @@ from modules.db_operation.receipt_write_helpers import (
 
 
 class PaidSaleCommitter:
-    def _insert_receipt_header_paid(self, conn, receipt_no: str, total: float, paid_at: str) -> int:
+
+    def _insert_receipt_header_paid(self, conn, receipt_no: str, total: float, paid_at: str, cashier_id: Optional[int] = None) -> int:
         cols = table_columns(conn, "receipts")
         values = {}
 
@@ -29,13 +30,15 @@ class PaidSaleCommitter:
             ("total", total),
             ("status", "PAID"),
             ("customer_name", ""),
-            ("cashier_name", ""),
+            ("cashier_id", int(cashier_id) if cashier_id is not None else None),
             ("notes", ""),
             ("note", ""),
             ("created_at", paid_at),
             ("paid_at", paid_at),
         ):
             if candidate in cols:
+                if candidate == "cashier_id" and value is None:
+                    raise RuntimeError("cashier_id is required when creating a receipt")
                 values[candidate] = value
 
         if key_col is None and "id" not in cols and "receipt_id" not in cols:
@@ -97,6 +100,7 @@ class PaidSaleCommitter:
         payment_rows: list[tuple[str, float, float]],
         total: float,
         paid_at: Optional[str] = None,
+        cashier_id: Optional[int] = None,
     ) -> str:
         if not sales_items:
             raise RuntimeError("No sale items to pay")
@@ -111,7 +115,7 @@ class PaidSaleCommitter:
                 receipt_db_id = 0
                 if active_receipt_id is None:
                     receipt_no = next_receipt_no(conn=conn)
-                    receipt_db_id = self._insert_receipt_header_paid(conn, receipt_no, float(total or 0.0), paid_ts)
+                    receipt_db_id = self._insert_receipt_header_paid(conn, receipt_no, float(total or 0.0), paid_ts, cashier_id=cashier_id)
                     insert_receipt_items(conn, receipt_no, receipt_db_id, sales_items)
                 else:
                     receipt_no = self._mark_receipt_paid(conn, active_receipt_id, paid_ts)

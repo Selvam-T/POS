@@ -469,7 +469,7 @@ def launch_viewhold_dialog(parent=None):
             else:
                 log_error(f"View Hold print failed: printer send failed for receipt_no={receipt_no}")
                 report_to_statusbar(parent, f"Print failed for {receipt_no}", is_error=True, duration=6000)
-                ui_feedback.set_status_label(status_lbl, "Print failed.", ok=False)
+                ui_feedback.set_status_label(status_lbl, f"Print failed for {receipt_no}", ok=False)
         except Exception as exc:
             report_exception(parent, "Print receipt", exc, user_message="Error: Unable to print receipt", duration=6000)
             ui_feedback.set_status_label(status_lbl, "Print error.", ok=False)

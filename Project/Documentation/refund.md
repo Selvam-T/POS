@@ -50,10 +50,10 @@ On `btnRefundOk`:
 1. Re-validate quantity/note and recompute amount.
 2. Ensure table exists: `ensure_cash_outflows_table()`.
 3. Insert outflow:
-   - `outflow_type='REFUND_OUT'`
-   - `amount=<computed amount>`
-   - `cashier_name=<best available from parent context; empty if unavailable>`
-   - `note=<validated note>`
+  - `outflows_type='REFUND_OUT'`
+  - `amount=<computed amount>`
+  - `cashier_id=<best available user id (INTEGER) from parent context; NULL if unavailable; FK -> users(user_id)>`
+  - `note=<validated note>`
 4. Set post-close success message and accept dialog.
 
 On failures:

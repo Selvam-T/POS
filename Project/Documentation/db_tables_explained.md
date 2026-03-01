@@ -19,7 +19,7 @@ This document describes the purpose and structure of each database table used in
 ### 1. Receipts Table
 The **receipts** table serves as the primary header for every transaction, whether it is paid immediately, placed on hold, or subsequently cancelled.
 - **Identification:** Each entry uses a unique receipt number formatted as YYYYMMDD-####, with the counter capped at 9999.
-- **Customer & Staff Info:** A customer name is mandatory only for "Hold Sales" (status: UNPAID) and remains empty for standard paid transactions. The cashier_name captures the logged-in user at the time of the transaction.
+- **Customer & Staff Info:** A customer name is mandatory only for "Hold Sales" (status: UNPAID) and remains empty for standard paid transactions. The `cashier_id` (INTEGER) captures the logged-in user's `user_id` at the time of the transaction (FK -> `users(user_id)`).
 - **Financials & Status:** Stores the grand_total (sum of all item totals) and a status field, which can be 'PAID', 'UNPAID', or 'CANCELLED'.
 - **Temporal Tracking:** Includes timestamps for created_at, paid_at, and cancelled_at. A note field is utilised specifically for UNPAID or CANCELLED records.
 
@@ -40,6 +40,7 @@ The **receipt_payments** table is designed to handle the complexities of payment
 The **cash_outflows** table tracks money leaving the system to simplify accounting and reporting.
 - **Purpose:** Captures refunds and vendor payments independently of specific receipt-item tracking, as the system focuses on cash flow rather than strict inventory auditing.
 - **Outflow Types:** The outflow_type is restricted to 'REFUND_OUT' and 'VENDOR_OUT'.
+- **Outflow Types:** The `outflows_type` is restricted to 'REFUND_OUT', 'VENDOR_OUT', and 'CASH_IN_OTHER'.
 - **Reporting:** Essential for calculating the net total in sales reports by subtracting these outflows from the total sales. Includes a note field to capture specific details about the refund or vendor transaction.
 
 ---
@@ -63,6 +64,32 @@ The **Product_list** table is the master catalog for all products available in t
 	- Historical product details are snapshotted in `receipt_items` at sale time to preserve accuracy.
 	- Normalization scripts ensure consistent casing and formatting for product fields.
 	- Barcode scanning and menu dialogs reference this table for product validation and display.
+
+---
+
+### 6. Users Table
+The **users** table manages authentication and basic account control for POS logins.
+
+- **Purpose:** Simple authentication for POS login. Controls who can access the system (admin vs staff via username). Supports basic password recovery (admin only) and account disable.
+
+- **Schema:**
+```sql
+CREATE TABLE users (
+		user_id             INTEGER PRIMARY KEY AUTOINCREMENT,
+		username            TEXT    NOT NULL UNIQUE,           -- 'admin', 'staff', etc.
+		password_hash       TEXT    NOT NULL,                  -- hashed (never plaintext)
+		password_updated_at TEXT    NOT NULL,                  -- ISO timestamp
+		recovery_email      TEXT,                              -- NULL for staff, set for admin
+		is_active           INTEGER NOT NULL DEFAULT 1         -- 1 = active, 0 = disabled
+);
+```
+
+- **Initialization:**
+	- The table is initialised with two default accounts by the `init_default_users.py` script (run after `create_users_table.py`).
+		- `admin` — password `admin123` (hashed), `recovery_email`: thiagarajan.selvam@gmail.com, `is_active`: 1
+		- `staff` — password `staff123` (hashed), `recovery_email`: NULL, `is_active`: 1
+	- The script uses SHA-256 hashing for demonstration only — replace with a slow password hashing algorithm (bcrypt/argon2) in production.
+	- Inserts are performed with `INSERT OR IGNORE` so existing records are preserved if the script is re-run.
 
 ---
 

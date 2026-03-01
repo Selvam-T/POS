@@ -9,6 +9,7 @@ from typing import List
 
 import config
 from modules.db_operation import receipt_repo
+from modules.db_operation.users_repo import get_username_by_id
 
 
 def _project_root() -> Path:
@@ -74,6 +75,16 @@ def _line_with_amount(left_text: str, amount_text: str, width: int) -> str:
     return f"{left}{' ' * config.RECEIPT_GAP}{amount}"
 
 
+def _resolve_cashier_name(cashier_id: object) -> str:
+    try:
+        if cashier_id is None:
+            return ""
+        username = get_username_by_id(int(cashier_id))
+        return str(username or "").strip()
+    except Exception:
+        return ""
+
+
 def _item_line(qty: float, unit: str, name: str, line_total: float, width: int) -> str:
     left_width = _left_width(width)
     product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 3))
@@ -105,6 +116,7 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
         created_at_raw = str(header.get("created_at") or "")
         created_at = _format_datetime(created_at_raw)
         status = str(header.get("status") or "")
+        cashier_name = _resolve_cashier_name(header.get("cashier_id"))
 
         items = receipt_repo.list_receipt_items_by_no(receipt_no, receipt_id=receipt_id)
         payments = receipt_repo.list_receipt_payments_by_no(receipt_no, receipt_id=receipt_id)
@@ -134,7 +146,8 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
     lines.append(_center_line(str(getattr(config, "ADDRESS_LINE_2", "")), width))
     lines.append("")
     lines.append(_center_line(f"Receipt id: {receipt_no}", width))
-    lines.append(_center_line("Served by dummy", width))
+    if cashier_name:
+        lines.append(_center_line(f"Served by {cashier_name}", width))
     lines.append(_center_line(created_at, width))
     lines.append("")
     lines.append(_item_header(width))

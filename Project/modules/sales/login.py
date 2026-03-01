@@ -9,7 +9,7 @@ UI_PATH = os.path.join(_PROJECT_DIR, "ui", "login.ui")
 QSS_PATH = os.path.join(_PROJECT_DIR, "assets", "main.qss")
 
 
-def launch_login_dialog(parent=None):
+def launch_login_dialog(parent=None, *, return_user: bool = False):
     dlg = uic.loadUi(UI_PATH, parent)
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
 
@@ -33,6 +33,8 @@ def launch_login_dialog(parent=None):
         get_user_id_by_username,
     )
     from modules.ui_utils import ui_feedback
+
+    authenticated_user = None
 
     def clear_status():
         if status_label:
@@ -74,18 +76,31 @@ def launch_login_dialog(parent=None):
             return None
 
     def validate_now():
+        nonlocal authenticated_user
         username = username_combo.currentText().strip().lower() if username_combo else ""
         password = password_edit.text() if password_edit else ""
 
         if not username or not password:
+            authenticated_user = None
             set_error("Invalid username or password.")
             focus_password()
             return False
 
-        if validate_user_credentials(username, password):
+        user = validate_user_credentials(username, password)
+        if user:
+            uid = user.get("user_id")
+            if uid is None:
+                uid = current_user_id()
+            resolved_username = str(user.get("username") or username).strip()
+            authenticated_user = {
+                "user_id": int(uid) if uid is not None else None,
+                "username": resolved_username,
+                "is_admin": resolved_username.lower() == "admin",
+            }
             clear_status()
             return True
 
+        authenticated_user = None
         set_error("Invalid username or password.")
         focus_password()
         return False
@@ -156,4 +171,7 @@ def launch_login_dialog(parent=None):
     if close_btn:
         close_btn.clicked.connect(dlg.reject)
 
-    return dlg.exec_() == QDialog.Accepted
+    accepted = dlg.exec_() == QDialog.Accepted
+    if return_user:
+        return authenticated_user if accepted else None
+    return accepted

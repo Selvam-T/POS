@@ -113,7 +113,7 @@ If any step fails, transaction is rolled back.
   - empty note -> saved as NULL if column allows NULL
   - empty note -> saved as empty string if schema marks note column NOT NULL
 - paid_at remains NULL
-- cashier_name is populated (required for schemas with NOT NULL constraint)
+- `cashier_id` (INTEGER `user_id`) is populated (required for schemas with NOT NULL constraint; FK -> `users(user_id)`)
 
 ## Post-Commit UI Actions
 

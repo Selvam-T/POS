@@ -37,7 +37,7 @@ def create_cash_outflows_table(drop_existing: bool = False) -> None:
     db_path = (script_dir / db_path).resolve()
 
     if not db_path.exists():
-        print(f"\n✗ Database not found: {db_path}")
+        print(f"\nDatabase not found: {db_path}")
         print("Run create_database.py first!")
         return
 
@@ -55,15 +55,15 @@ def create_cash_outflows_table(drop_existing: bool = False) -> None:
             outflows_type  TEXT    NOT NULL CHECK(outflows_type IN ('REFUND_OUT','VENDOR_OUT','CASH_IN_OTHER')),
             amount         REAL    NOT NULL CHECK(amount != 0),
             created_at     TEXT    NOT NULL,
-            actor_user_id  INTEGER NOT NULL,
+            cashier_id  INTEGER NOT NULL,
             note           TEXT,
-            FOREIGN KEY(actor_user_id) REFERENCES users(user_id) ON DELETE RESTRICT
+            FOREIGN KEY(cashier_id) REFERENCES users(user_id) ON DELETE RESTRICT
         );
     """)
 
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_cash_outflows_created_at ON cash_outflows(created_at);")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_cash_outflows_type ON cash_outflows(outflows_type);")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_cash_outflows_actor ON cash_outflows(actor_user_id);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_cash_outflows_actor ON cash_outflows(cashier_id);")
 
     # ... commit and print messages (update print to "cash_outflows")
     conn.commit()

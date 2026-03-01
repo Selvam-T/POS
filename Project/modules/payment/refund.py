@@ -20,6 +20,8 @@ UI_PATH = os.path.join(_PROJECT_DIR, 'ui', 'refund.ui')
 QSS_PATH = os.path.join(_PROJECT_DIR, 'assets', 'dialog.qss')
 
 
+
+
 def _set_error_state(widget: QLineEdit, on: bool) -> None:
     if widget is None:
         return
@@ -43,20 +45,24 @@ def launch_refund_dialog(parent=None):
 
     if not dlg:
         from modules.ui_utils.dialog_utils import build_error_fallback_dialog
+
         return build_error_fallback_dialog(parent, 'Refund', QSS_PATH)
 
-    widgets = require_widgets(dlg, {
-        'code': (QLineEdit, 'refundProductCodeLineEdit'),
-        'name': (QLineEdit, 'refundNameSearchLineEdit'),
-        'price': (QLineEdit, 'refundPriceLineEdit'),
-        'qty': (QLineEdit, 'refundQtyeLineEdit'),
-        'note': (QLineEdit, 'refundNoteLineEdit'),
-        'amount': (QLineEdit, 'refundAmountLineEdit'),
-        'status': (QLabel, 'refundStatusLabel'),
-        'ok_btn': (QPushButton, 'btnRefundOk'),
-        'cancel_btn': (QPushButton, 'btnRefundCancel'),
-        'close_btn': (QPushButton, 'customCloseBtn'),
-    })
+    widgets = require_widgets(
+        dlg,
+        {
+            'code': (QLineEdit, 'refundProductCodeLineEdit'),
+            'name': (QLineEdit, 'refundNameSearchLineEdit'),
+            'price': (QLineEdit, 'refundPriceLineEdit'),
+            'qty': (QLineEdit, 'refundQtyeLineEdit'),
+            'note': (QLineEdit, 'refundNoteLineEdit'),
+            'amount': (QLineEdit, 'refundAmountLineEdit'),
+            'status': (QLabel, 'refundStatusLabel'),
+            'ok_btn': (QPushButton, 'btnRefundOk'),
+            'cancel_btn': (QPushButton, 'btnRefundCancel'),
+            'close_btn': (QPushButton, 'customCloseBtn'),
+        },
+    )
 
     code = widgets['code']
     name = widgets['name']
@@ -115,13 +121,13 @@ def launch_refund_dialog(parent=None):
         rec = input_handler.get_coordinator_lookup(val, 'code')
         if rec:
             return rec, None
-        return None, "Product Code Not Found"
+        return None, 'Product Code Not Found'
 
     def _lookup_by_name(val: str):
         rec = input_handler.get_coordinator_lookup(val, 'name')
         if rec:
             return rec, None
-        return None, "Product name not found"
+        return None, 'Product name not found'
 
     def _clear_lookup_error_style() -> None:
         _set_error_state(code, False)
@@ -196,33 +202,33 @@ def launch_refund_dialog(parent=None):
         on_selected=lambda *_: coord._sync_fields(name),
     )
 
-    def _get_cashier_name() -> str:
-        for attr in ('current_user', 'cashier_name', 'logged_in_user'):
-            val = getattr(parent, attr, '') if parent is not None else ''
-            if str(val or '').strip():
-                return str(val).strip()
-        return ''
+    # NOTE: rely on `parent.current_user_id` being set by the app login flow.
+    # Do not probe multiple attributes or fall back to a magic id; require a valid integer user id.
 
     def _handle_ok() -> None:
         try:
             if not code.text().strip() or not name.text().strip() or not price.text().strip():
-                raise ValueError("Select a product first")
+                raise ValueError('Select a product first')
 
             _recompute_amount()
             note_text = input_handler.handle_note_input(note)
             amount_val = float(amount.text() or 0.0)
             if amount_val <= 0:
-                raise ValueError("Refund amount must be greater than 0")
+                raise ValueError('Refund amount must be greater than 0')
 
             dbop.ensure_cash_outflows_table()
+            cid = getattr(parent, 'current_user_id', None)
+            if cid is None:
+                ui_feedback.set_status_label(status, 'No logged-in user. Please login.', ok=False)
+                return
             dbop.add_outflow(
-                outflow_type='REFUND_OUT',
+                outflows_type='REFUND_OUT',
                 amount=amount_val,
-                cashier_name=_get_cashier_name(),
+                cashier_id=int(cid),
                 note=note_text,
             )
 
-            set_dialog_info(dlg, f"Refund recorded: ${amount_val:.2f}", duration=4000)
+            set_dialog_info(dlg, f'Refund recorded: ${amount_val:.2f}', duration=4000)
             dlg.accept()
         except ValueError as exc:
             ui_feedback.set_status_label(status, str(exc), ok=False)

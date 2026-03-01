@@ -57,14 +57,14 @@ def create_receipt_tables(drop_existing=True):
             receipt_id      INTEGER PRIMARY KEY AUTOINCREMENT,
             receipt_no      TEXT    NOT NULL UNIQUE,
             customer_name   TEXT,
-            cashier_user_id INTEGER NOT NULL,
+            cashier_id INTEGER NOT NULL,
             status          TEXT    NOT NULL CHECK(status IN ('PAID','UNPAID','CANCELLED')),
             grand_total     REAL    NOT NULL,
             created_at      TEXT    NOT NULL,
             paid_at         TEXT,
             cancelled_at    TEXT,
             note            TEXT,
-            FOREIGN KEY(cashier_user_id) REFERENCES users(user_id) ON DELETE RESTRICT
+            FOREIGN KEY(cashier_id) REFERENCES users(user_id) ON DELETE RESTRICT
         );
     """)
     # receipt_items (lines) - snapshot fields; no FK to Product_list by design
