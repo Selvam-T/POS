@@ -155,7 +155,7 @@
        <property name="minimumSize">
         <size>
          <width>0</width>
-         <height>40</height>
+         <height>50</height>
         </size>
        </property>
        <property name="echoMode">
@@ -171,7 +171,7 @@
        <property name="minimumSize">
         <size>
          <width>0</width>
-         <height>40</height>
+         <height>50</height>
         </size>
        </property>
        <item>
@@ -235,19 +235,6 @@
       </size>
      </property>
     </spacer>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="login_actionBtns">
-     <property name="spacing">
-      <number>40</number>
-     </property>
-     <property name="leftMargin">
-      <number>30</number>
-     </property>
-     <property name="rightMargin">
-      <number>30</number>
-     </property>
-    </layout>
    </item>
   </layout>
  </widget>

@@ -63,6 +63,45 @@ def validate_user_credentials(username: str, password: str) -> dict:
     return None
 
 
+def authenticate_user(username: str, password: str) -> dict | None:
+    """Higher-level authentication API used by UI code.
+
+    Returns a normalized user dict (or None). Keeps DB/auth logic centralized.
+    """
+    # Keep behavior identical to validate_user_credentials but present a
+    # clean dict without exposing password_hash to callers.
+    user = validate_user_credentials(username, password)
+    if not user:
+        return None
+    return {
+        'user_id': int(user.get('user_id')) if user.get('user_id') is not None else None,
+        'username': str(user.get('username') or username),
+        'is_active': user.get('is_active', False),
+    }
+
+
+def build_authenticated_user(user: dict, fallback_uid=None) -> dict:
+    """Normalize a user record into the `authenticated_user` shape used by UI.
+
+    Args:
+        user: dict returned by `authenticate_user` (may have 'user_id' and 'username').
+        fallback_uid: optional integer used if `user['user_id']` is None.
+
+    Returns:
+        dict with keys: 'user_id', 'username', 'is_admin'.
+    """
+    uid = user.get('user_id')
+    if uid is None:
+        uid = fallback_uid
+
+    username = str(user.get('username') or '').strip()
+    return {
+        'user_id': int(uid) if uid is not None else None,
+        'username': username,
+        'is_admin': username.lower() == 'admin',
+    }
+
+
 def get_recovery_email(user_id: int) -> str | None:
     """Return the recovery_email for a given user_id, or None if not set/found."""
     conn = get_conn()

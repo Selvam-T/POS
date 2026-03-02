@@ -26,13 +26,14 @@ def launch_login_dialog(parent=None, *, return_user: bool = False):
     status_label = dlg.findChild(QLabel, "loginStatusLabel")
 
     from modules.db_operation.users_repo import (
-        validate_user_credentials,
+        authenticate_user,
+        build_authenticated_user,
         get_recovery_email,
         generate_temporary_password_for_user,
         # recommended to have this; otherwise use itemData approach (below)
         get_user_id_by_username,
     )
-    from modules.ui_utils import ui_feedback
+    from modules.ui_utils import ui_feedback, input_validation
 
     authenticated_user = None
 
@@ -62,7 +63,7 @@ def launch_login_dialog(parent=None, *, return_user: bool = False):
         if not username_combo:
             return None
 
-        # BEST: store user_id as itemData when populating combo
+        # store user_id as itemData when populating combo
         idx = username_combo.currentIndex()
         uid = username_combo.itemData(idx)
         if isinstance(uid, int):
@@ -80,23 +81,19 @@ def launch_login_dialog(parent=None, *, return_user: bool = False):
         username = username_combo.currentText().strip().lower() if username_combo else ""
         password = password_edit.text() if password_edit else ""
 
-        if not username or not password:
+        # Format/sanity validation
+        ok, err = input_validation.validate_username_password_input(username, password)
+        if not ok:
             authenticated_user = None
-            set_error("Invalid username or password.")
+            set_error(err or "Invalid username or password.")
             focus_password()
             return False
 
-        user = validate_user_credentials(username, password)
+        # Authenticate against users repository
+        user = authenticate_user(username, password)
         if user:
-            uid = user.get("user_id")
-            if uid is None:
-                uid = current_user_id()
-            resolved_username = str(user.get("username") or username).strip()
-            authenticated_user = {
-                "user_id": int(uid) if uid is not None else None,
-                "username": resolved_username,
-                "is_admin": resolved_username.lower() == "admin",
-            }
+            # Use helper to normalize and compute is_admin; pass combo fallback
+            authenticated_user = build_authenticated_user(user, fallback_uid=current_user_id())
             clear_status()
             return True
 
@@ -155,7 +152,7 @@ def launch_login_dialog(parent=None, *, return_user: bool = False):
         except Exception:
             pass
 
-        set_ok("Temporary password generated and copied to clipboard.")
+        set_ok("Login with temp password pasted to clipboard.")
         focus_password()
 
     if password_edit:

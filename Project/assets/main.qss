@@ -79,8 +79,8 @@ QLineEdit#loginPassLineEdit {
     border: 1px solid #bdc3c7;
     border-radius: 8px;
     padding: 8px 12px;
-    font-size: 18px;
-    color: #2c3e50;
+    font-size: 20px;
+    color: black;
 }
 
 QLineEdit#loginPassLineEdit[echoMode="2"] {          /* password field */
@@ -121,8 +121,9 @@ QPushButton#loginForgetBtn:hover {
 }
 
 QLabel#loginStatusLabel {
-  font-size: 18px;
-  font-weight: bold;
+  background: transparent;
+  border: none;
+  font-size: 20px;
 }
 /* =============================================================
    PAYMENT FRAME AND ITS CHILDREN

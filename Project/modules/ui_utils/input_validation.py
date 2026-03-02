@@ -63,6 +63,21 @@ def validate_password(value):
 	return True, ""
 
 
+def validate_username_password_input(username, password):
+    """Validate/sanitize username and password pair. Returns (ok, err)."""
+    # Username: mandatory, basic string check
+    ok, err = is_mandatory(username)
+    if not ok:
+        return False, "Username is required"
+
+    # Password for login: only require presence (non-empty).
+    ok, err = is_mandatory(password)
+    if not ok:
+        return False, "Password is required"
+
+    return True, ""
+
+
 def validate_email(value):
 	if not isinstance(value, str):
 		return False, "Email must be a string"
