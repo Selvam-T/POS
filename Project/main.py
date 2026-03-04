@@ -1078,10 +1078,18 @@ def main():
         except Exception:
             pass
 
+    # Build main window first so BarcodeManager event filter is installed
+    # before opening login; this prevents scanner text leakage into login inputs.
+    window = MainLoader()
+
     from modules.sales.login import launch_login_dialog
+    window.dialog_wrapper._show_overlay()
+    window.dialog_wrapper._block_scanner()
     login_user = launch_login_dialog(None, return_user=True)
+    window.dialog_wrapper._hide_overlay()
+    window.dialog_wrapper._unblock_scanner()
+
     if login_user is not None:
-        window = MainLoader()
         try:
             uid = login_user.get('user_id')
             window.current_user_id = int(uid) if uid is not None else None
