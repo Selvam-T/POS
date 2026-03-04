@@ -131,14 +131,26 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
         total_qty += float(item.get("qty") or 0.0)
         total_amount += float(item.get("line_total") or 0.0)
 
-    # Compute totals and change using total tendered across all payment methods
+    # Compute cash-only tender/change and detect voucher overpayment conditions.
     cash_tendered = 0.0
-    total_tendered = 0.0
+    cash_allocated = 0.0
+    voucher_tendered = 0.0
+    voucher_allocated = 0.0
     for pay in payments:
+        ptype = str(pay.get("payment_type") or "").strip().upper()
+        if ptype == "OTHER":
+            ptype = "VOUCHER"
         tendered = float(pay.get("tendered") or 0.0)
-        total_tendered += tendered
+        allocated = float(pay.get("amount") or 0.0)
+        if ptype == "CASH":
+            cash_tendered += tendered
+            cash_allocated += allocated
+        elif ptype == "VOUCHER":
+            voucher_tendered += tendered
+            voucher_allocated += allocated
 
-    change_amount = max(0.0, round(total_tendered - total_amount, 2))
+    change_amount = max(0.0, round(cash_tendered - cash_allocated, 2))
+    voucher_overpayment = voucher_tendered > voucher_allocated
 
     lines: List[str] = []
     lines.append(_center_line(str(getattr(config, "COMPANY_NAME", "")), width))
@@ -170,6 +182,7 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
     if status_clean != "PAID":
         lines.append(_center_line(f"Receipt Status is {status_clean}", width))
     else:
+        cash_tendered = 0.0
         for pay in payments:
             ptype = str(pay.get("payment_type") or "")
             tendered = float(pay.get("tendered") or 0.0)
@@ -185,6 +198,10 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
             if change_amount > 0:
                 lines.append("")
                 lines.append(_line_with_amount("Cash Change:", f"${change_amount:.2f}", width))
+
+        if voucher_overpayment:
+            lines.append("")
+            lines.append(_center_line("No cash changed given on voucher overpayment", width))
 
     lines.append("")
     lines.append(_center_line(_load_greeting(), width))

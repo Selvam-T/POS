@@ -64,7 +64,7 @@ change = tender - cash
 ## Cash Drawer (Network)
 - Drawer opening is **independent** of receipt-printing toggle.
 - Trigger point is in `main.py` after payment commit success (`pay_current_receipt`).
-- Drawer is requested only when payment includes cash (`cash > 0`) and `tender > 0`.
+- Drawer is requested only when payment includes cash (`cash > 0`). Tender or change does not affect drawer gating.
 - Drawer pulse uses `modules/devices/printer.py::open_cash_drawer(...)` (`python-escpos` Network transport).
 - Failure path logs error and reports to main StatusBar via `dialog_utils.report_to_statusbar()`.
 

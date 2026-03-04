@@ -31,9 +31,15 @@ def test_over_alloc_eq_voucher_disallowed():
 
 
 def test_over_alloc_less_than_voucher_allowed():
-    # over_alloc = 1.5 < voucher 2 -> allowed, ensure cash/tender satisfy tender>=cash
-    p = make_panel(total=10.0, last_unalloc=-1.5, voucher_amt=2, cash_val=5.0, tender_val=6.0)
+    # over_alloc = 1.5 < voucher 2 -> allowed only when voucher is the sole non-zero payment method
+    p = make_panel(total=10.0, last_unalloc=-1.5, voucher_amt=2, cash_val=0.0, tender_val=0.0)
     assert p._is_payment_valid() is True
+
+
+def test_over_alloc_less_than_voucher_with_cash_disallowed():
+    # even if over_alloc < voucher, mixed payment methods must not allow over-allocation
+    p = make_panel(total=10.0, last_unalloc=-1.5, voucher_amt=2, cash_val=5.0, tender_val=6.0)
+    assert p._is_payment_valid() is False
 
 
 def test_cash_tender_mismatch_disallows():

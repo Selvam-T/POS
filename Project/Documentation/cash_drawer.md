@@ -13,7 +13,7 @@ Document how cash drawer opening is triggered, where the logic lives, and how fa
 Cash drawer pulse is attempted only when all conditions below are true:
 1. `ENABLE_CASH_DRAWER` is `True` in `config.py`
 2. Payment is successfully committed in `MainLoader.pay_current_receipt(...)`
-3. Payment includes cash and tender: `cash > 0` and `tender > 0`
+3. Payment includes cash: `cash > 0` (tender/change are not part of drawer gating)
 
 ## Runtime Flow
 1. `PaymentPanel.handle_pay_clicked()` emits `payRequested(payload)`.
@@ -40,7 +40,7 @@ This separation follows: **what/when** in `main.py`, **how** in `printer.py`.
 
 ### `main.py`
 - `_should_open_cash_drawer(payment_split)`
-  - Pure condition check (`cash > 0 and tender > 0`).
+  - Pure condition check (`cash > 0`).
   - No side effects.
 
 - `_open_cash_drawer_if_needed(payment_split)`

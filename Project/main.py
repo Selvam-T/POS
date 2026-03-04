@@ -765,11 +765,7 @@ class MainLoader(QMainWindow):
             cash = float(payment_split.get('cash', 0.0) or 0.0)
         except Exception:
             cash = 0.0
-        try:
-            tender = float(payment_split.get('tender', 0.0) or 0.0)
-        except Exception:
-            tender = 0.0
-        return cash > 0 and tender > 0
+        return cash > 0
 
     def _open_cash_drawer_if_needed(self, payment_split: dict) -> None:
         if not bool(getattr(config, 'ENABLE_CASH_DRAWER', True)):

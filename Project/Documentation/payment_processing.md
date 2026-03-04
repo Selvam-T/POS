@@ -9,6 +9,8 @@ Overview
 - UI layer (`modules/payment/payment_panel.py`): validates inputs and emits the
   `payRequested` signal with a normalized payment payload (including `tender`
   for CASH). It does not write to the database.
+- Application logic uses a cash-only drawer gate (`cash > 0`); tender/change do
+  not affect drawer opening.
 - Application layer (`main.py`): listens for `payRequested`, prepares payment
   data, applies a double-submit guard, and delegates DB finalization to
   `modules/db_operation/paid_sale_committer.py`.

@@ -362,17 +362,7 @@ class PaymentPanel(QObject):
 
         self._set_tender_visibility(True)
         tender = self._get_validated_amount(tender_widget)
-        # Compute over-allocation (positive number) when unalloc < 0
-        unalloc = self._last_unalloc
-        over_alloc = -unalloc if unalloc < 0 else 0.0
-        # Voucher as currency units (1 voucher == 1 currency unit)
-        voucher_amt = float(self._get_validated_voucher(self._widgets.get('voucher')))
-
-        # Balance rules 
-        if voucher_amt > 0 and over_alloc > 0 and over_alloc < voucher_amt and cash > 0:
-            balance = self._round_currency((tender + over_alloc) - cash)
-        else:
-            balance = self._round_currency(tender - cash)
+        balance = self._round_currency(tender - cash)
 
         self._set_line_text(self._widgets.get('balance'), self._format_number(balance))
         self._update_unalloc_ui(self._last_unalloc)
@@ -389,7 +379,11 @@ class PaymentPanel(QObject):
             if field is None:
                 continue
             has_raw_text = bool(field.text().strip())
-            locked = unalloc <= 0 and not has_raw_text
+            if key == 'voucher':
+                has_nonzero_value = float(self._get_validated_voucher(field)) > 0
+            else:
+                has_nonzero_value = self._get_validated_amount(field) > 0
+            locked = unalloc <= 0 and (not has_raw_text or not has_nonzero_value)
             field.setReadOnly(locked)
             field.setFocusPolicy(Qt.NoFocus if locked else Qt.StrongFocus)
             field.setEnabled(not locked)
@@ -483,22 +477,10 @@ class PaymentPanel(QObject):
 
         # Over-allocation messages (when unalloc < 0)
         if unalloc < 0:
-            over_alloc = -unalloc
-            voucher_amt = float(self._get_validated_voucher(self._widgets.get('voucher')))
-            # Case: voucher present and over_alloc >= voucher -> disallow/rectify
-            if voucher_amt > 0 and over_alloc >= voucher_amt:
-                self._set_status("Rectify payment over-allocation.", is_error=True)
+            if self._is_voucher_only_overpay_allowed(unalloc):
+                self._set_status("No cash change given on voucher overpayment", is_error=False)
                 return
-            # over_alloc < voucher
-            if voucher_amt > 0 and over_alloc < voucher_amt:
-                if cash <= 0:
-                    self._set_status("Voucher over payment, cash balance not issued.", is_error=True)
-                    return
-                else:
-                    self._set_status("Voucher over payment, cash balance issued.", is_error=True)
-                    return
-            # fallback
-            self._set_status("Rectify payment over-allocation.", is_error=True)
+            self._set_status("overpayment detected, rectify payment allocation", is_error=True)
             return
         self._clear_status()
 
@@ -595,6 +577,16 @@ class PaymentPanel(QObject):
         cash_field = self._widgets.get('cash')
         tender_field = self._widgets.get('tender')
         pay_btn = self._widgets.get('pay_button')
+
+        if unalloc < 0 and not self._is_voucher_only_overpay_allowed(unalloc):
+            self._set_status("overpayment detected, rectify payment allocation", is_error=True)
+            try:
+                if hasattr(current, 'selectAll'):
+                    current.selectAll()
+                current.setFocus()
+            except Exception:
+                pass
+            return
 
         if current == cash_field:
             # If editing cash produced an over-allocation, catch it here and
@@ -827,8 +819,6 @@ class PaymentPanel(QObject):
             return False
 
         unalloc = self._last_unalloc
-        over_alloc = -unalloc if unalloc < 0 else 0.0
-        voucher_amt = float(self._get_validated_voucher(self._widgets.get('voucher')))
 
         # exact allocation allowed
         if unalloc == 0:
@@ -836,12 +826,7 @@ class PaymentPanel(QObject):
         elif unalloc > 0:
             return False
         else:
-            # unalloc < 0
-            # if no voucher, disallow
-            if voucher_amt <= 0:
-                return False
-            # voucher present: allow only when over_alloc < voucher_amt
-            if not (over_alloc < voucher_amt):
+            if not self._is_voucher_only_overpay_allowed(unalloc):
                 return False
 
         cash = self._get_validated_amount(self._widgets.get('cash'))
@@ -849,6 +834,24 @@ class PaymentPanel(QObject):
         if cash > 0 and tender < cash:
             return False
         return True
+
+    def _is_voucher_only_overpay_allowed(self, unalloc: float | None = None) -> bool:
+        # Allow over-allocation only when voucher is the sole non-zero payment and over_alloc < voucher value.
+        effective_unalloc = self._last_unalloc if unalloc is None else float(unalloc)
+        if effective_unalloc >= 0:
+            return False
+
+        over_alloc = -effective_unalloc
+        voucher_amt = float(self._get_validated_voucher(self._widgets.get('voucher')))
+        if voucher_amt <= 0:
+            return False
+        if not (over_alloc < voucher_amt):
+            return False
+
+        cash = self._get_validated_amount(self._widgets.get('cash'))
+        nets = self._get_validated_amount(self._widgets.get('nets'))
+        paynow = self._get_validated_amount(self._widgets.get('paynow'))
+        return cash <= 0 and nets <= 0 and paynow <= 0
 
     # UI helpers
     def _set_tender_visibility(self, enabled: bool) -> None:
@@ -866,19 +869,20 @@ class PaymentPanel(QObject):
         title = self._widgets.get('unalloc_title')
         label = self._widgets.get('unalloc_label')
         frame = self._widgets.get('unalloc_frame')
-
+        
         if active:
             if title is not None:
-                color = "red" if unalloc > 0 else "blue" if unalloc < 0 else ""
+                color = "darkblue" if unalloc > 0 else "blue" if unalloc < 0 else ""
                 title.setStyleSheet(f"color: {color}; border: transparent;" if color else "border: transparent;")
             if label is not None:
                 label.setStyleSheet("background-color: yellow; border: transparent;")
             if frame is not None:
-                frame.setStyleSheet("""
-                    background-color: orange;
-                    border: 3px solid orange;
+                bg = "darkorange" if unalloc > 0 else "lightblue" if unalloc < 0 else "transparent"
+                frame.setStyleSheet(f"""
+                    background-color: {bg};
+                    border: 3px solid #7e7f7e;
                     border-radius: 10px;
-                """)
+                """ if bg else "border: transparent;")
         else:
             if title is not None:
                 title.setStyleSheet("border: transparent;")

@@ -137,11 +137,15 @@ def list_receipt_payments_by_no(
             return []
 
         ptype_col = _first_existing(cols, "payment_type", "type")
-        # `amount` (allocated) removed — callers now use `tendered` (actual tender values)
+        amount_col = _first_existing(cols, "amount")
         tendered_col = _first_existing(cols, "tendered", "tender", "cash_tendered")
         order_col = _first_existing(cols, "created_at", "paid_at", "id", "payment_id")
 
-        select_parts = [_select_alias(ptype_col, "payment_type", "''"), _select_alias(tendered_col, "tendered", "0")]
+        select_parts = [
+            _select_alias(ptype_col, "payment_type", "''"),
+            _select_alias(amount_col, "amount", "0"),
+            _select_alias(tendered_col, "tendered", "0"),
+        ]
 
         where_val = receipt_no
         if link_col == "receipt_id":
