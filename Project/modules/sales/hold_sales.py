@@ -159,7 +159,7 @@ def launch_hold_sales_dialog(parent=None):
             return
         try:
             # uncomment to test db operation failure handling:
-            #raise RuntimeError("TEST: hold sale failure")
+            # raise RuntimeError("TEST: hold sale failure")
             cid = getattr(parent, 'current_user_id', None)
             if cid is None:
                 _show_validation_error(status_lbl, name_in, "No logged-in user. Please login.")

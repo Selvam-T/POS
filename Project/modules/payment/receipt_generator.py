@@ -125,33 +125,6 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
     except Exception as exc:
         raise RuntimeError("Receipt data unavailable.") from exc
 
-    total_qty = 0.0
-    total_amount = 0.0
-    for item in items:
-        total_qty += float(item.get("qty") or 0.0)
-        total_amount += float(item.get("line_total") or 0.0)
-
-    # Compute cash-only tender/change and detect voucher overpayment conditions.
-    cash_tendered = 0.0
-    cash_allocated = 0.0
-    voucher_tendered = 0.0
-    voucher_allocated = 0.0
-    for pay in payments:
-        ptype = str(pay.get("payment_type") or "").strip().upper()
-        if ptype == "OTHER":
-            ptype = "VOUCHER"
-        tendered = float(pay.get("tendered") or 0.0)
-        allocated = float(pay.get("amount") or 0.0)
-        if ptype == "CASH":
-            cash_tendered += tendered
-            cash_allocated += allocated
-        elif ptype == "VOUCHER":
-            voucher_tendered += tendered
-            voucher_allocated += allocated
-
-    change_amount = max(0.0, round(cash_tendered - cash_allocated, 2))
-    voucher_overpayment = voucher_tendered > voucher_allocated
-
     lines: List[str] = []
     lines.append(_center_line(str(getattr(config, "COMPANY_NAME", "")), width))
     lines.append(_center_line(str(getattr(config, "ADDRESS_LINE_1", "")), width))
@@ -164,44 +137,64 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
     lines.append("")
     lines.append(_item_header(width))
     lines.append("-" * width)
+
+    payable_total= 0.0
     for item in items:
         qty = float(item.get("qty") or 0.0)
         unit = str(item.get("unit") or "").strip()
         name = str(item.get("product_name") or "")
         line_total = float(item.get("line_total") or 0.0)
+        payable_total+= line_total
         lines.append(_item_line(qty, unit, name, line_total, width))
     lines.append("-" * width)
 
-    lines.append(_line_with_amount("Grand Total:", f"${total_amount:.2f}", width))
+    lines.append(_line_with_amount("Grand Total:", f"${payable_total:.2f}", width))
     lines.append("")
 
+    # PAID vs other status
     status_clean = status.strip().upper()
     if status_clean not in ("PAID", "UNPAID", "CANCELLED"):
         status_clean = "UNKNOWN"
-
+    # display status if not PAID
     if status_clean != "PAID":
         lines.append(_center_line(f"Receipt Status is {status_clean}", width))
     else:
         cash_tendered = 0.0
+        total_tendered = 0.0
+        cash_amount = 0.0
         for pay in payments:
             ptype = str(pay.get("payment_type") or "")
             tendered = float(pay.get("tendered") or 0.0)
+            amount = float(pay.get("amount") or 0.0)
+            total_tendered += tendered
             if ptype.upper() == "CASH":
                 cash_tendered += tendered
+                cash_amount += amount
                 continue
             if ptype.upper() == "OTHER":
                 ptype = "VOUCHER"
             lines.append(_line_with_amount(f"{ptype}:", f"${tendered:.2f}", width))
 
+        # Compute change only from cash tendered. Voucher overpayments do not produce cash refunds.
+        cash_change = max(0.0, round(cash_tendered - cash_amount, 2))
+        overpaid = max(0.0, round(total_tendered - payable_total - cash_change, 2))
+
         if cash_tendered > 0:
             lines.append(_line_with_amount("Cash Tendered:", f"${cash_tendered:.2f}", width))
-            if change_amount > 0:
-                lines.append("")
-                lines.append(_line_with_amount("Cash Change:", f"${change_amount:.2f}", width))
-
-        if voucher_overpayment:
+        lines.append("-" * width)
+        lines.append(_line_with_amount("Total Tendered:", f"${total_tendered:.2f}", width))
+        
+        if cash_change > 0:
             lines.append("")
-            lines.append(_center_line("No cash changed given on voucher overpayment", width))
+            lines.append(_line_with_amount("Cash Change:", f"${cash_change:.2f}", width))
+
+        # Show voucher overpayment note when applicable
+        if overpaid > 0:
+            lines.append("")
+            lines.append(_center_line("No change issued on voucher payment.", width))
+
+        if cash_change > 0 or overpaid > 0:
+            lines.append("-" * width)
 
     lines.append("")
     lines.append(_center_line(_load_greeting(), width))
@@ -222,14 +215,6 @@ def generate_receipt_text_from_snapshot(
     if status_clean not in ("PAID", "UNPAID", "CANCELLED"):
         status_clean = "UNKNOWN"
 
-    total_qty = 0.0
-    total_amount = 0.0
-    for item in items or []:
-        qty = float(item.get("quantity") or item.get("qty") or 0.0)
-        line_total = item.get("line_total")
-        total_qty += qty
-        total_amount += float(line_total or 0.0)
-
     lines: List[str] = []
     lines.append(_center_line(str(getattr(config, "COMPANY_NAME", "")), width))
     lines.append(_center_line(str(getattr(config, "ADDRESS_LINE_1", "")), width))
@@ -242,18 +227,19 @@ def generate_receipt_text_from_snapshot(
     lines.append("")
     lines.append(_item_header(width))
     lines.append("-" * width)
+
+    total_amount = 0.0
     for item in items or []:
         qty = float(item.get("quantity") or item.get("qty") or 0.0)
         unit = str(item.get("unit") or "").strip()
         name = str(item.get("name") or item.get("product_name") or "")
         line_total = item.get("line_total")
+        total_amount += float(line_total or 0.0)
         lines.append(_item_line(qty, unit, name, float(line_total or 0.0), width))
     lines.append("-" * width)
 
     lines.append(_line_with_amount("Grand Total:", f"${total_amount:.2f}", width))
     lines.append("")
     lines.append(_center_line(f"Receipt Status is {status_clean}", width))
-    lines.append("")
-    lines.append(_center_line(_load_greeting(), width))
 
     return "\n".join(lines)
