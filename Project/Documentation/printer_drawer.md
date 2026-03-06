@@ -1,13 +1,13 @@
 # Printer Helper
 
 ## Files
-- `modules/devices/printer.py`
+- `modules/devices/printer_and_drawer.py`
 - `config.py`
 - `modules/payment/payment_panel.py`
 - `main.py`
 
 ## Purpose
-`modules/devices/printer.py` centralizes ESC/POS network transport for:
+`modules/devices/printer_and_drawer.py` centralizes ESC/POS network transport for:
 - Receipt printing (`print_receipt(...)`)
 - Cash drawer pulse (`open_cash_drawer(...)`)
 
@@ -42,7 +42,7 @@
 	- Current call uses **blocking** mode for immediate success/failure handling.
 
 - In `main.py::pay_current_receipt()`:
-	- After commit success, cash drawer open is attempted through `open_cash_drawer(...)`
+	- After commit success, cash drawer open is attempted through `modules.devices.printer_and_drawer.open_cash_drawer(...)`
 		when `ENABLE_CASH_DRAWER` is on and payment includes cash+tender.
 
 ## See also

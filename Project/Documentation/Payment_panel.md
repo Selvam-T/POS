@@ -65,7 +65,7 @@ change = tender - cash
 - Drawer opening is **independent** of receipt-printing toggle.
 - Trigger point is in `main.py` after payment commit success (`pay_current_receipt`).
 - Drawer is requested only when payment includes cash (`cash > 0`). Tender or change does not affect drawer gating.
-- Drawer pulse uses `modules/devices/printer.py::open_cash_drawer(...)` (`python-escpos` Network transport).
+	- Drawer pulse uses `modules/devices/printer_and_drawer.py::open_cash_drawer(...)` (`python-escpos` Network transport).
 - Failure path logs error and reports to main StatusBar via `dialog_utils.report_to_statusbar()`.
 
 ### Cash Drawer Config
@@ -76,7 +76,7 @@ change = tender - cash
 ## Receipt Printing (Network)
 - `handle_print_clicked()` in `modules/payment/payment_panel.py` always generates and prints receipt text to console (`print(receipt_text)`) for debug visibility.
 - Optional physical printing is gated by `ENABLE_PRINTER_PRINT` in `config.py`.
-- When enabled, the panel calls `modules/devices/printer.py::print_receipt(receipt_text, blocking=True)`.
+	- When enabled, the panel calls `modules/devices/printer_and_drawer.py::print_receipt(receipt_text, blocking=True)`.
 - With `blocking=True`, the return value is checked; on printer send failure, an error is logged and shown in the main status bar.
 - Network destination is sourced from `config.py`: `PRINTER_IP` and `PRINTER_PORT` (TM-T82x on TCP 9100).
 - The helper uses `python-escpos` `Network` transport and issues `text(...)` + `cut()`.
@@ -98,4 +98,4 @@ change = tender - cash
 
 - `Documentation/payment_processing.md` — detailed commit flow and distinction between new-sale and held-receipt paths; the DB commit is executed by `main.py`.
 - `Documentation/printer.md` — printer helper transport details, cut behavior, and config keys.
-- `Documentation/cash_drawer.md` — drawer trigger conditions, config, error propagation/logging, and `main.py` vs `printer.py` responsibilities.
+- `Documentation/cash_drawer.md` — drawer trigger conditions, config, error propagation/logging, and `main.py` vs `printer_and_drawer.py` responsibilities.

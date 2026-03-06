@@ -7,7 +7,7 @@ from modules.db_operation.held_sale_committer import HeldSaleCommitter
 from modules.payment import receipt_generator
 from modules.db_operation.users_repo import get_username_by_id
 from modules.ui_utils.error_logger import log_error
-from config import ENABLE_PRINTER_PRINT
+from modules.devices import print_helper
 from modules.ui_utils import input_handler, ui_feedback
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui,
@@ -17,17 +17,9 @@ from modules.ui_utils.dialog_utils import (
 )
 from modules.ui_utils.focus_utils import FieldCoordinator
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 HOLD_SALES_UI = os.path.join(UI_DIR, 'hold_sales.ui')
-
-
-def _show_validation_error(status_label: QLabel, widget: QLineEdit, message: str) -> None:
-    ui_feedback.set_status_label(status_label, message, ok=False)
-    widget.setFocus(Qt.OtherFocusReason)
-    widget.selectAll()
-
 
 def _build_sales_snapshot(parent) -> list[dict]:
     if parent is None:
@@ -41,6 +33,7 @@ def _build_sales_snapshot(parent) -> list[dict]:
 
 
 def launch_hold_sales_dialog(parent=None):
+    # Build the dialog, with error fallback if loading fails
     qss_path = os.path.join(BASE_DIR, 'assets', 'dialog.qss')
     dlg = build_dialog_from_ui(
         HOLD_SALES_UI,
@@ -74,13 +67,8 @@ def launch_hold_sales_dialog(parent=None):
 
     coord = FieldCoordinator(dlg)
 
-    def _validate_and_normalize_name() -> str:
-        val = input_handler.handle_customer_input(name_in)
-        name_in.setText(val)
-        return val
-
     def _on_name_edited(*_args):
-        coord.clear_status(status_lbl)
+        ui_feedback.clear_status_label(status_lbl)
 
     name_in.textEdited.connect(_on_name_edited)
 
@@ -88,37 +76,46 @@ def launch_hold_sales_dialog(parent=None):
         source=name_in,
         next_focus=ok_btn,
         status_label=status_lbl,
-        validate_fn=_validate_and_normalize_name,
+        validate_fn=lambda: input_handler.handle_customer_input(name_in),
     )
 
-    coord.register_validator(name_in, _validate_and_normalize_name, status_label=status_lbl)
+    coord.register_validator(name_in, lambda: input_handler.handle_customer_input(name_in), status_label=status_lbl)
 
     hold_committer = HeldSaleCommitter()
 
     def _handle_ok() -> None:
         try:
-            customer_name = _validate_and_normalize_name()
+            customer_name = input_handler.handle_customer_input(name_in)
+            name_in.setText(customer_name)
         except ValueError as exc:
-            _show_validation_error(status_lbl, name_in, str(exc))
+            ui_feedback.set_status_label(status_lbl, str(exc), ok=False)
+            name_in.setFocus(Qt.OtherFocusReason)
+            name_in.selectAll()
             return
 
         sales_items = _build_sales_snapshot(parent)
         if not sales_items:
-            _show_validation_error(status_lbl, name_in, "No active sale to hold")
+            ui_feedback.set_status_label(status_lbl, "No active sale to hold", ok=False)
+            name_in.setFocus(Qt.OtherFocusReason)
+            name_in.selectAll()
             return
         try:
             # uncomment to test db operation failure handling:
-            # raise RuntimeError("TEST: hold sale failure")
+            #raise RuntimeError("TEST: hold sale failure")
             cid = getattr(parent, 'current_user_id', None)
             if cid is None:
-                _show_validation_error(status_lbl, name_in, "No logged-in user. Please login.")
+                ui_feedback.set_status_label(status_lbl, "No logged-in user. Please login.", ok=False)
+                name_in.setFocus(Qt.OtherFocusReason)
+                name_in.selectAll()
                 return
+            # Commit held receipt to DB (insert receipts header + receipt_items)
             receipt_no = hold_committer.commit_hold_sale(
                 customer_name=customer_name,
                 sales_items=sales_items,
                 cashier_id=int(cid),
             )
             dlg.held_receipt_no = receipt_no
+            # Commit successful: will clear UI and accept dialog below
 
             if parent is not None and hasattr(parent, "_clear_sales_table_core"):
                 parent._clear_sales_table_core()
@@ -129,6 +126,7 @@ def launch_hold_sales_dialog(parent=None):
             set_dialog_main_status_max(dlg, "Sale held successfully.", level='info', duration=4000)
             dlg.accept()
         except Exception as exc:
+            # Commit failed: prepare snapshot receipt for fallback printing
             try:
                 cid = getattr(parent, 'current_user_id', None)
                 cashier_name = get_username_by_id(int(cid)) if cid is not None else ''
@@ -139,6 +137,7 @@ def launch_hold_sales_dialog(parent=None):
                     cashier_name=cashier_name or '',
                 )
             except Exception as print_exc:
+                # Snapshot generation failed
                 log_error(f"Hold failed: receipt print error: {print_exc}")
                 set_dialog_main_status_max(
                     dlg,
@@ -148,35 +147,36 @@ def launch_hold_sales_dialog(parent=None):
                 )
             else:
                 cleared = False
-                if not ENABLE_PRINTER_PRINT:
-                    print(receipt_text)
-                    set_dialog_main_status_max(
-                        dlg,
-                        "Hold failed. Receipt printed to console.",
-                        level='error',
-                        duration=6000,
-                    )
-                    cleared = True
-                else:
-                    from modules.devices import printer as device_printer
-                    printed_ok = device_printer.print_receipt(receipt_text, blocking=True)
-                    if printed_ok:
+                print_result = print_helper.print_receipt_with_fallback(
+                    receipt_text,
+                    blocking=True,
+                    context="Hold failed",
+                )
+                if print_result.get("ok"):
+                    if print_result.get("mode") == "console":
+                        set_dialog_main_status_max(
+                            dlg,
+                            "Hold failed. Receipt printed to console.",
+                            level='error',
+                            duration=6000,
+                        )
+                    else:
                         set_dialog_main_status_max(
                             dlg,
                             "Hold failed. Receipt printed.",
                             level='error',
                             duration=6000,
                         )
-                        cleared = True
-                    else:
-                        log_error("Hold failed: printer send failed for snapshot receipt.")
-                        set_dialog_main_status_max(
-                            dlg,
-                            "Hold failed. Receipt print failed.",
-                            level='error',
-                            duration=6000,
-                        )
+                    cleared = True
+                else:
+                    set_dialog_main_status_max(
+                        dlg,
+                        "Hold failed. Receipt print failed.",
+                        level='error',
+                        duration=6000,
+                    )
 
+                # After successful snapshot print/console fallback, clear UI to avoid duplicate state
                 if cleared and parent is not None:
                     if hasattr(parent, "_clear_sales_table_core"):
                         parent._clear_sales_table_core()

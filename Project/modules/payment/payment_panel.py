@@ -5,7 +5,6 @@ finalization (atomic commit across receipts/items/payments) is handled by
 the application layer (`main.py`).
 """
 import os
-from config import ENABLE_PRINTER_PRINT
 from PyQt5 import uic
 from PyQt5.QtCore import QObject, pyqtSignal, Qt, QEvent
 from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QLineEdit, QLabel, QFrame
@@ -14,6 +13,7 @@ from modules.ui_utils import ui_feedback
 from modules.ui_utils.dialog_utils import report_to_statusbar
 from modules.ui_utils.error_logger import log_error
 from modules.payment import receipt_generator
+from modules.devices import print_helper
 
 
 class PaymentPanel(QObject):
@@ -735,38 +735,24 @@ class PaymentPanel(QObject):
 
         try:
             receipt_text = receipt_generator.generate_receipt_text(str(receipt_no))
-            printer_success = None
+            print_result = print_helper.print_receipt_with_fallback(
+                receipt_text,
+                blocking=True,
+                context="Payment",
+            )
 
-            if not ENABLE_PRINTER_PRINT:
-                print(receipt_text)
-            else:
-                try:
-                    from modules.devices import printer as device_printer
-                    printed_ok = device_printer.print_receipt(receipt_text, blocking=True)
-                    printer_success = bool(printed_ok)
-                    if not printer_success:
-                        log_error(f"Printer send failed (device rejected / protocol error) for receipt {receipt_no}.")
-                        report_to_statusbar(
-                            self._main_window,
-                            f"Receipt {receipt_no} printer send failed.",
-                            is_error=True,
-                            duration=3000,
-                        )
-                except Exception as exc:
-                    printer_success = False
-                    log_error(f"Printer helper call failed: {exc}. Failure before even talking to printer")
-                    report_to_statusbar(
-                        self._main_window,
-                        f"Receipt {receipt_no} printer error.",
-                        is_error=True,
-                        duration=3000,
-                    )
-
-            if printer_success is not False:
+            if print_result.get("ok"):
                 report_to_statusbar(
                     self._main_window,
                     f"Receipt {receipt_no} printed.",
                     is_error=False,
+                    duration=3000,
+                )
+            else:
+                report_to_statusbar(
+                    self._main_window,
+                    f"Receipt {receipt_no} print failed.",
+                    is_error=True,
                     duration=3000,
                 )
             if "Receipt Status is UNKNOWN" in receipt_text:

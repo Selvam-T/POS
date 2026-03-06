@@ -171,7 +171,7 @@ Goal: Printer-only printing of a receipt.
   - `modules.payment.receipt_generator.generate_receipt_text(receipt_no)`
     - NOTE: cash change is computed as `max(0, total_tendered - receipt_total)` where `total_tendered` is the sum of `tendered` values across all payments and `receipt_total` is the sum of `line_total` from `receipt_items`.
 - Prints via device printer:
-  - `modules.devices.printer.print_receipt(receipt_text, blocking=True)`
+  - `modules.devices.printer_and_drawer.print_receipt(receipt_text, blocking=True)`
 
 On success:
 

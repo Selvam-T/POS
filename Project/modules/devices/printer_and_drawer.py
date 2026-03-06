@@ -1,4 +1,8 @@
-"""Network receipt printer and cash drawer helper using python-escpos."""
+"""Network receipt printer and cash drawer helper using python-escpos.
+
+This module is the consolidated device wrapper for printing and cash-drawer
+operations. It replaces the older `printer.py` module name for clarity.
+"""
 import threading
 
 from config import PRINTER_IP, PRINTER_PORT

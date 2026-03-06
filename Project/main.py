@@ -774,7 +774,7 @@ class MainLoader(QMainWindow):
             return
 
         try:
-            from modules.devices import printer as device_printer
+            from modules.devices import printer_and_drawer as device_printer
             opened = device_printer.open_cash_drawer(
                 pin=int(getattr(config, 'CASH_DRAWER_PIN', 2)),
                 blocking=True,

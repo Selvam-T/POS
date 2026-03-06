@@ -5,7 +5,7 @@ Document how cash drawer opening is triggered, where the logic lives, and how fa
 
 ## Related Files
 - `main.py`
-- `modules/devices/printer.py`
+- `modules/devices/printer_and_drawer.py`
 - `config.py`
 - `Documentation/Payment_panel.md`
 
@@ -20,7 +20,7 @@ Cash drawer pulse is attempted only when all conditions below are true:
 2. `MainLoader._on_payment_requested(...)` calls `pay_current_receipt(payload)`.
 3. `PaidSaleCommitter.commit_payment(...)` persists payment and returns `receipt_no`.
 4. `MainLoader._open_cash_drawer_if_needed(payload)` is called.
-5. `modules/devices/printer.open_cash_drawer(...)` sends ESC/POS drawer pulse.
+5. `modules/devices.printer_and_drawer.open_cash_drawer(...)` sends ESC/POS drawer pulse.
 
 ## Why Logic is Split Across `main.py` and `printer.py`
 
@@ -29,12 +29,12 @@ Cash drawer pulse is attempted only when all conditions below are true:
 - Drawer opening is a post-commit business side effect, not a UI widget concern.
 - `main.py` already owns app-level status reporting (`report_to_statusbar`) and flow-level error routing.
 
-### Why transport is in `modules/devices/printer.py`
+### Why transport is in `modules/devices/printer_and_drawer.py`
 - Drawer pulse is hardware/protocol behavior (ESC/POS via `python-escpos`).
 - Device concerns (IP/port connection, protocol call, close, low-level errors) stay centralized.
 - Keeps UI/business layers independent from transport details.
 
-This separation follows: **what/when** in `main.py`, **how** in `printer.py`.
+This separation follows: **what/when** in `main.py`, **how** in `printer_and_drawer.py`.
 
 ## Functions
 
@@ -51,7 +51,7 @@ This separation follows: **what/when** in `main.py`, **how** in `printer.py`.
     - `CASH_DRAWER_TIMEOUT`
   - On failure, reports to status bar and logs to `error.log`.
 
-### `modules/devices/printer.py`
+- `modules/devices/printer_and_drawer.py`
 - `open_cash_drawer(pin=2, blocking=True, timeout=2.0)`
   - Public helper used by `main.py`.
   - Blocking: executes and returns final success/failure.

@@ -459,15 +459,25 @@ def launch_viewhold_dialog(parent=None):
 
         try:
             from modules.payment import receipt_generator
-            from modules.devices import printer as device_printer
+            from modules.devices import print_helper
 
             receipt_text = receipt_generator.generate_receipt_text(receipt_no)
-            printed_ok = device_printer.print_receipt(receipt_text, blocking=True)
-            if printed_ok:
+            print_result = print_helper.print_receipt_with_fallback(
+                receipt_text,
+                blocking=True,
+                context="View Hold",
+            )
+            # Debug: log print outcome and current status label state to help diagnose QSS coloring
+            try:
+                log_error(
+                    f"ViewHold print_result={print_result}, label_status={status_lbl.property('status')}, inline_style={bool(status_lbl.styleSheet())}"
+                )
+            except Exception:
+                pass
+            if print_result.get("ok"):
                 report_to_statusbar(parent, f"Printed receipt {receipt_no}", is_error=False, duration=4000)
-                ui_feedback.set_status_label(status_lbl, "Printed.", ok=True, duration=2000)
+                ui_feedback.set_status_label(status_lbl, f"Printed receipt {receipt_no}", ok=True, duration=2000)
             else:
-                log_error(f"View Hold print failed: printer send failed for receipt_no={receipt_no}")
                 report_to_statusbar(parent, f"Print failed for {receipt_no}", is_error=True, duration=6000)
                 ui_feedback.set_status_label(status_lbl, f"Print failed for {receipt_no}", ok=False)
         except Exception as exc:
