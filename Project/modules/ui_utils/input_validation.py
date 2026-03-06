@@ -320,7 +320,7 @@ def validate_customer(value):
     # Requirement: If provided, must match Alphanumeric Regex
     s = str(value or "").strip()
     if s and not ALPHANUMERIC_REGEX.match(s):
-        return False, "Only Alphanumeric characters are allowed."
+        return False, "Only letters, numbers, - , and space are allowed."
     return True, ""	
 #--- 7. customer end ---
 

@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>400</height>
+    <height>370</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>400</width>
-    <height>400</height>
+    <height>370</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -138,16 +138,10 @@
      <property name="verticalSpacing">
       <number>20</number>
      </property>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="holdSalesNoteLineEdit">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>40</height>
-        </size>
-       </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="holdSalesCustomerFieldLbl">
        <property name="text">
-        <string>-- Optional --</string>
+        <string>Customer Name * :</string>
        </property>
       </widget>
      </item>
@@ -163,24 +157,10 @@
         <enum>Qt::StrongFocus</enum>
        </property>
        <property name="text">
-        <string/>
+        <string>Ongoing-shopping</string>
        </property>
        <property name="readOnly">
         <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="holdSalesCustomerFieldLbl">
-       <property name="text">
-        <string>Customer Name * :</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="holdSalesNoteFieldLbl">
-       <property name="text">
-        <string>Note :</string>
        </property>
       </widget>
      </item>
@@ -296,7 +276,6 @@
  </widget>
  <tabstops>
   <tabstop>holdSalesCustomerLineEdit</tabstop>
-  <tabstop>holdSalesNoteLineEdit</tabstop>
   <tabstop>btnHoldSalesOk</tabstop>
   <tabstop>btnHoldSalesCancel</tabstop>
   <tabstop>customCloseBtn</tabstop>

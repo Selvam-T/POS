@@ -10,7 +10,6 @@ from modules.db_operation.receipt_write_helpers import (
     table_columns,
     first_existing,
     insert_row,
-    column_notnull,
     insert_receipt_items,
 )
 
@@ -32,7 +31,6 @@ class HeldSaleCommitter:
         *,
         receipt_no: str,
         customer_name: str,
-        note: Optional[str],
         sales_items: list[dict],
         cashier_id: Optional[int] = None,
     ) -> int:
@@ -43,7 +41,6 @@ class HeldSaleCommitter:
         if key_col is not None:
             values[key_col] = receipt_no
 
-        note_col = first_existing(cols, "note", "notes")
         total_val = float(sum(self._line_total(i) for i in (sales_items or [])))
         created_at = now_iso()
 
@@ -61,12 +58,6 @@ class HeldSaleCommitter:
                     raise RuntimeError("cashier_id is required when creating a held receipt")
                 values[candidate] = value
 
-        if note_col is not None:
-            if note:
-                values[note_col] = note
-            else:
-                values[note_col] = "" if column_notnull(conn, "receipts", note_col) else None
-
         if key_col is None and "id" not in cols and "receipt_id" not in cols:
             raise RuntimeError("receipts table missing receipt key columns")
 
@@ -76,7 +67,6 @@ class HeldSaleCommitter:
         self,
         *,
         customer_name: str,
-        note: Optional[str],
         sales_items: list[dict],
         cashier_id: Optional[int] = None,
     ) -> str:
@@ -90,7 +80,6 @@ class HeldSaleCommitter:
                     conn,
                     receipt_no=receipt_no,
                     customer_name=customer_name,
-                    note=note,
                     sales_items=sales_items,
                     cashier_id=cashier_id,
                 )

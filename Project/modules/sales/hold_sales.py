@@ -15,7 +15,7 @@ from modules.ui_utils.dialog_utils import (
     set_dialog_main_status_max,
     report_exception_post_close,
 )
-from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate
+from modules.ui_utils.focus_utils import FieldCoordinator
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -58,7 +58,6 @@ def launch_hold_sales_dialog(parent=None):
 
     widgets = require_widgets(dlg, {
         'name_in': (QLineEdit, 'holdSalesCustomerLineEdit'),
-        'note_in': (QLineEdit, 'holdSalesNoteLineEdit'),
         'status_lbl': (QLabel, 'holdSalesStatusLabel'),
         'ok_btn': (QPushButton, 'btnHoldSalesOk'),
         'cancel_btn': (QPushButton, 'btnHoldSalesCancel'),
@@ -66,28 +65,12 @@ def launch_hold_sales_dialog(parent=None):
     close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
 
     name_in = widgets['name_in']
-    note_in = widgets['note_in']
     status_lbl = widgets['status_lbl']
     ok_btn = widgets['ok_btn']
     cancel_btn = widgets['cancel_btn']
 
     name_in.setReadOnly(False)
-    note_in.setReadOnly(False)
     name_in.setFocusPolicy(Qt.StrongFocus)
-    note_in.setFocusPolicy(Qt.StrongFocus)
-
-    gate = FocusGate([note_in, ok_btn],lock_enabled=True)
-    gate.set_locked(True)
-
-    def _set_placeholders() -> None:
-        for le in (name_in, note_in):
-            ui_default = (le.placeholderText() or "").strip()
-            if not ui_default:
-                ui_default = (le.text() or "").strip()
-            le.clear()
-            le.setPlaceholderText(ui_default)
-
-    _set_placeholders()
 
     coord = FieldCoordinator(dlg)
 
@@ -96,47 +79,19 @@ def launch_hold_sales_dialog(parent=None):
         name_in.setText(val)
         return val
 
-    def _validate_and_normalize_note() -> str:
-        val = input_handler.handle_note_input(note_in)
-        note_in.setText(val)
-        return val
-
-    def _unlock_and_focus_note() -> None:
-        gate.set_locked(False)
-        note_in.setFocus(Qt.OtherFocusReason)
-        note_in.selectAll()
-
-    def _lock_note_gate() -> None:
-        gate.set_locked(True)
-        note_in.clear()
-
     def _on_name_edited(*_args):
-        _lock_note_gate()
-        coord.clear_status(status_lbl)
-
-    def _on_note_edited(*_args):
         coord.clear_status(status_lbl)
 
     name_in.textEdited.connect(_on_name_edited)
-    note_in.textEdited.connect(_on_note_edited)
 
     coord.add_link(
         source=name_in,
-        next_focus=_unlock_and_focus_note,
+        next_focus=ok_btn,
         status_label=status_lbl,
         validate_fn=_validate_and_normalize_name,
     )
 
-    coord.add_link(
-        source=note_in,
-        next_focus=ok_btn,
-        status_label=status_lbl,
-        validate_fn=_validate_and_normalize_note,
-        swallow_empty=False,
-    )
-
     coord.register_validator(name_in, _validate_and_normalize_name, status_label=status_lbl)
-    coord.register_validator(note_in, _validate_and_normalize_note, status_label=status_lbl)
 
     hold_committer = HeldSaleCommitter()
 
@@ -145,12 +100,6 @@ def launch_hold_sales_dialog(parent=None):
             customer_name = _validate_and_normalize_name()
         except ValueError as exc:
             _show_validation_error(status_lbl, name_in, str(exc))
-            return
-
-        try:
-            note_text = _validate_and_normalize_note()
-        except ValueError as exc:
-            _show_validation_error(status_lbl, note_in, str(exc))
             return
 
         sales_items = _build_sales_snapshot(parent)
@@ -166,7 +115,6 @@ def launch_hold_sales_dialog(parent=None):
                 return
             receipt_no = hold_committer.commit_hold_sale(
                 customer_name=customer_name,
-                note=note_text,
                 sales_items=sales_items,
                 cashier_id=int(cid),
             )
@@ -255,7 +203,6 @@ def launch_hold_sales_dialog(parent=None):
     if close_btn is not None:
         close_btn.clicked.connect(_handle_close)
 
-    name_in.setFocus(Qt.OtherFocusReason)
-    name_in.selectAll()
+    ok_btn.setFocus(Qt.OtherFocusReason)
 
     return dlg
