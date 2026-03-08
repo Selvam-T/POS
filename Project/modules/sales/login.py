@@ -2,17 +2,17 @@ import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QObject, QEvent
 from PyQt5.QtWidgets import QDialog, QLineEdit, QComboBox, QLabel, QPushButton, QApplication
+import config
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 _PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
 UI_PATH = os.path.join(_PROJECT_DIR, "ui", "login.ui")
 QSS_PATH = os.path.join(_PROJECT_DIR, "assets", "main.qss")
 
-
 def launch_login_dialog(parent=None, *, return_user: bool = False):
     dlg = uic.loadUi(UI_PATH, parent)
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
-
+    dlg.customTitle.setText(config.COMPANY_NAME)
     try:
         with open(QSS_PATH, "r") as f:
             dlg.setStyleSheet(f.read())

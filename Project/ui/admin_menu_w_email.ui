@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>560</width>
-    <height>700</height>
+    <height>650</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>700</height>
+    <height>600</height>
    </size>
   </property>
   <layout class="QVBoxLayout" name="mainVerticalLayout">
@@ -106,7 +106,7 @@
     </widget>
    </item>
    <item>
-    <spacer name="verticalSpacer_1">
+    <spacer name="verticalSpacer_11">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -500,11 +500,11 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabScreen2">
+     <widget class="QWidget" name="tabEmail">
       <attribute name="title">
-       <string>Screen 2 Ads</string>
+       <string>EMAIL</string>
       </attribute>
-      <layout class="QVBoxLayout" name="tabScreen2Layout">
+      <layout class="QVBoxLayout" name="tabEmailLayout">
        <property name="spacing">
         <number>10</number>
        </property>
@@ -521,11 +521,17 @@
         <number>20</number>
        </property>
        <item>
-        <widget class="QGroupBox" name="screen2GroupBox">
+        <widget class="QGroupBox" name="emailGroupBox">
          <property name="title">
-          <string>Manage Advertisement Ads</string>
+          <string>Change Email</string>
          </property>
-         <layout class="QHBoxLayout" name="imagesLayout">
+         <layout class="QFormLayout" name="formEmail">
+          <property name="horizontalSpacing">
+           <number>10</number>
+          </property>
+          <property name="verticalSpacing">
+           <number>20</number>
+          </property>
           <property name="leftMargin">
            <number>10</number>
           </property>
@@ -538,81 +544,54 @@
           <property name="bottomMargin">
            <number>25</number>
           </property>
-          <item>
-           <widget class="QListWidget" name="screen2ListWidget">
-            <property name="iconSize">
-             <size>
-              <width>100</width>
-              <height>100</height>
-             </size>
-            </property>
-            <property name="movement">
-             <enum>QListView::Static</enum>
-            </property>
-            <property name="resizeMode">
-             <enum>QListView::Adjust</enum>
-            </property>
-            <property name="spacing">
-             <number>10</number>
-            </property>
-            <property name="viewMode">
-             <enum>QListView::IconMode</enum>
+          <item row="0" column="0">
+           <widget class="QLabel" name="emailCurFieldLbl">
+            <property name="text">
+             <string>Current Email:</string>
             </property>
            </widget>
           </item>
-          <item>
-           <layout class="QVBoxLayout" name="screen2BtnLayout">
-            <item>
-             <widget class="QPushButton" name="addScreen2Btn">
-              <property name="text">
-               <string>Add</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="removeScreen2Btn">
-              <property name="text">
-               <string>Remove</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="upScreen2Btn">
-              <property name="text">
-               <string>Up</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="downScreen2Btn">
-              <property name="text">
-               <string>Down</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="verticalSpacerButtons">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Expanding</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="emailCurCodeLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="placeholderText">
+             <string>user@example.com</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="emailNewFieldLbl">
+            <property name="text">
+             <string>New Email:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="emailNewCodeLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="placeholderText">
+             <string>Enter new recovery email</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_11">
+        <spacer name="verticalSpacer_3">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -628,7 +607,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="staffScreen2Label">
+        <widget class="QLabel" name="emailStatusLabel">
          <property name="text">
           <string/>
          </property>
@@ -638,7 +617,7 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_12">
+        <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
@@ -654,7 +633,7 @@
         </spacer>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="screen2_actionBtns">
+        <layout class="QHBoxLayout" name="email_actionBtns">
          <property name="spacing">
           <number>40</number>
          </property>
@@ -665,14 +644,14 @@
           <number>30</number>
          </property>
          <item>
-          <widget class="QPushButton" name="btnScreen2Ok">
+          <widget class="QPushButton" name="btnEmailOk">
            <property name="text">
             <string>SAVE</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="btnScreen2Cancel">
+          <widget class="QPushButton" name="btnEmailCancel">
            <property name="text">
             <string>CANCEL</string>
            </property>
@@ -698,13 +677,10 @@
   <tabstop>staffNewPwdCodeLineEdit</tabstop>
   <tabstop>btnStaffOk</tabstop>
   <tabstop>btnStaffCancel</tabstop>
-  <tabstop>screen2ListWidget</tabstop>
-  <tabstop>addScreen2Btn</tabstop>
-  <tabstop>removeScreen2Btn</tabstop>
-  <tabstop>upScreen2Btn</tabstop>
-  <tabstop>downScreen2Btn</tabstop>
-  <tabstop>btnScreen2Ok</tabstop>
-  <tabstop>btnScreen2Cancel</tabstop>
+  <tabstop>emailCurCodeLineEdit</tabstop>
+  <tabstop>emailNewCodeLineEdit</tabstop>
+  <tabstop>btnEmailOk</tabstop>
+  <tabstop>btnEmailCancel</tabstop>
   <tabstop>customCloseBtn</tabstop>
  </tabstops>
  <resources/>

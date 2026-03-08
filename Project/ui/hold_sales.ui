@@ -157,7 +157,7 @@
         <enum>Qt::StrongFocus</enum>
        </property>
        <property name="text">
-        <string>Ongoing-shopping</string>
+        <string>Ongoing-sale</string>
        </property>
        <property name="readOnly">
         <bool>true</bool>

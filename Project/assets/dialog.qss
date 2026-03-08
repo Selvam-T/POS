@@ -137,6 +137,16 @@ QPushButton[objectName*="vegEButton"][state="active"]:focus {
     outline: none;
 }
 
+/* =========================================================
+    screen2BtnLayout
+   ========================================================= */
+
+QPushButton[objectName*="Screen2Btn"] {
+    background-color: #b5e018;
+    border: 1px solid #799905;
+    color: #1b1a1a;
+    font-weight: 300;
+}
 
 /* =========================================================
    STATUS LABELS (DYNAMIC PROPERTIES)
@@ -154,16 +164,16 @@ QLabel[objectName$="StatusLabel"] {
 
 /* Success State - Triggered by .setProperty("status", "success") */
 QLabel[status="success"] {
-    color: #166534; /* Dark Green */
-    background-color: #f0fdf4; /* Light Green Tint */
+    color: #166534;
+    background-color: #f0fdf4; 
     border: 1px solid #bbf7d0;
     border-radius: 4px;
 }
 
 /* Error State - Triggered by .setProperty("status", "error") */
 QLabel[status="error"] {
-    color: #991b1b; /* Dark Red */
-    background-color: #fef2f2; /* Light Red Tint */
+    color: #991b1b;
+    background-color: #fef2f2;
     border: 1px solid #fecaca;
     border-radius: 4px;
 }

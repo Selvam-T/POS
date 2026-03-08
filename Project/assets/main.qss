@@ -47,8 +47,14 @@ QFrame#customTitleBar {
     min-height: 40px;
 }
 
+QLabel#customTitle {
+    color: #222222;
+    font-size: 20px;
+    font-weight: 700;
+}
+
 QPushButton#customCloseBtn {
-    color: white;
+    color: #18042f;
     background: transparent;
     border: 2px solid transparent; /* Reserve space for the focus border */
     font-size: 40px;
@@ -89,7 +95,7 @@ QLineEdit#loginPassLineEdit[echoMode="2"] {          /* password field */
 
 QLineEdit#loginPassLineEdit:focus, 
 QComboBox#loginComboBox:focus {
-    border: 2px solid #f39121;
+    border: 2px solid #2128f3;
 }
 
 QComboBox::down-arrow {
@@ -124,6 +130,14 @@ QLabel#loginStatusLabel {
   background: transparent;
   border: none;
   font-size: 20px;
+}
+
+QLabel#loginStatusLabel[status="success"] {
+    color: white;
+}
+
+QLabel#loginStatusLabel[status="error"] {
+    color: #991b1b; 
 }
 /* =============================================================
    PAYMENT FRAME AND ITS CHILDREN
