@@ -257,6 +257,8 @@ For a deep dive into the exact routing rules, protections, and debug options, se
 - The main window's Close (X) and Alt+F4 are disabled and ignored. Use the Logout button in the right menu to exit.
 - Clicking Logout opens a modal confirmation dialog (frameless) and dims the background.
 - Yes, Logout: stops the scanner and exits the app. Cancel returns to the app.
+ - Yes, Logout: stops the scanner and exits the app. Cancel returns to the app.
+ - Safety check: the UI-loaded Logout dialog now prevents accepting logout if the Sales table contains items. When blocked, the dialog writes an error to the dialog-local `logoutStatusLabel` (preferred) or falls back to a transient main status bar message. The lightweight fallback dialog (used when the .ui file fails to load) is unchanged and still allows logout.
 - Styling the logout dialog:
    - Title bar background: `QFrame#customTitleBar` in `assets/main.qss`
    - Close (X) button: `QPushButton#customCloseBtn` (font size, colors, hover/pressed)

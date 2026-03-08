@@ -8,6 +8,8 @@ from modules.ui_utils.dialog_utils import (
     set_dialog_main_status_max,
     set_dialog_error
 )
+from modules.table.table_operations import is_transaction_active
+from modules.ui_utils.ui_feedback import set_status_label, show_temp_status
 
 # Paths
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -28,13 +30,33 @@ def launch_logout_dialog(host_window):
             widgets = require_widgets(dlg, {
                 'ok_btn': (QPushButton, 'btnLogoutOk'),
                 'cancel_btn': (QPushButton, 'btnLogoutCancel'),
-                'close_btn': (QPushButton, 'customCloseBtn')
+                'close_btn': (QPushButton, 'customCloseBtn'),
+                'status_lbl': (QLabel, 'logoutStatusLabel')
             })
             def _handle_cancel():
                 set_dialog_main_status_max(dlg, "Logout cancelled.", level='info')
                 dlg.reject()
 
-            widgets['ok_btn'].clicked.connect(dlg.accept)
+            def _handle_ok():
+                # Block logout when a sale/cart is active.
+                try:
+                    sales_table = getattr(host_window, 'sales_table', None)
+                    if is_transaction_active(sales_table):
+                        status_lbl = widgets.get('status_lbl')
+                        if status_lbl is not None:
+                            set_status_label(status_lbl, "Clear sales cart before logging out.", ok=False)
+                        else:
+                            sb = getattr(host_window, 'statusbar', None)
+                            if sb:
+                                show_temp_status(sb, "Clear sales cart before logging out.", 3000)
+                        widgets['cancel_btn'].setFocus()
+                        return
+                except Exception:
+                    # On error, be conservative and allow logout to proceed
+                    pass
+                dlg.accept()
+
+            widgets['ok_btn'].clicked.connect(_handle_ok)
             widgets['cancel_btn'].clicked.connect(_handle_cancel)
             widgets['close_btn'].clicked.connect(_handle_cancel)
             widgets['cancel_btn'].setFocus()
