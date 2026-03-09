@@ -42,6 +42,10 @@ These helpers are additive and do not affect existing dialogs unless used.
    - Optional behavior:
      - `lock_enabled=True` disables widgets while locked (prevents typing/clicking).
      - `lock_read_only=True` forces `QLineEdit` read-only while locked.
+    - Placeholder visibility helpers (opt-in):
+       - `remember_placeholders(widgets)` captures original placeholder text.
+       - `hide_placeholders(widgets)` clears placeholders while locked.
+       - `restore_placeholders(widgets)` restores remembered placeholders on unlock.
 - **Lightweight Focus Toggle:** `set_focus_enabled(...)`
    - Simple function to toggle `Qt.NoFocus` using a caller-owned remember-map.
 

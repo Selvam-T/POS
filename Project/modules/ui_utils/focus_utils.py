@@ -421,6 +421,8 @@ class FocusGate:
         self._orig_focus_policy = {}
         self._orig_enabled = {}
         self._orig_read_only = {}
+        self._orig_placeholders = {}
+        self._placeholders_remembered = False
         self._lock_enabled_cfg = bool(lock_enabled)
         self._lock_read_only_cfg = bool(lock_read_only)
         self._remembered = False
@@ -475,6 +477,52 @@ class FocusGate:
             self.lock()
         else:
             self.unlock()
+
+    # -------------------------
+    # Placeholder visibility helpers (opt-in)
+    # -------------------------
+    def remember_placeholders(self, widgets=None) -> None:
+        """Remember placeholderText for given widgets (or gate widgets if None)."""
+        ws = [w for w in (widgets or self._widgets) if w is not None]
+        for w in ws:
+            if not isinstance(w, QLineEdit):
+                continue
+            try:
+                # store the original placeholder even if empty
+                self._orig_placeholders[w] = w.placeholderText() or ""
+            except Exception:
+                try:
+                    self._orig_placeholders[w] = ""
+                except Exception:
+                    pass
+        self._placeholders_remembered = True
+
+    def hide_placeholders(self, widgets=None) -> None:
+        """Clear placeholderText on the given widgets (or gate widgets if None)."""
+        ws = [w for w in (widgets or self._widgets) if w is not None]
+        for w in ws:
+            if not isinstance(w, QLineEdit):
+                continue
+            try:
+                w.setPlaceholderText("")
+            except Exception:
+                pass
+
+    def restore_placeholders(self, widgets=None) -> None:
+        """Restore previously remembered placeholderText for widgets."""
+        if not self._placeholders_remembered:
+            return
+        ws = [w for w in (widgets or self._widgets) if w is not None]
+        for w in ws:
+            if not isinstance(w, QLineEdit):
+                continue
+            try:
+                txt = self._orig_placeholders.get(w, None)
+                if txt is None:
+                    continue
+                w.setPlaceholderText(txt)
+            except Exception:
+                pass
 
 def set_focus_enabled(widgets, enabled: bool, *, remember: dict | None = None) -> dict:
     store = remember if isinstance(remember, dict) else {}

@@ -85,41 +85,6 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         'upd_status': (QLabel, 'updateStatusLabel'),
     })
 
-    # Remember UI-provided placeholders/defaults so we can hide them while gated
-    # and restore them later without hardcoding strings.
-    _ui_placeholders: dict[QLineEdit, str] = {}
-    _ui_texts: dict[QLineEdit, str] = {}
-
-    def _remember_ui_for_lineedit(le: QLineEdit) -> None:
-        if le is None:
-            return
-        if le not in _ui_placeholders:
-            try:
-                _ui_placeholders[le] = le.placeholderText() or ""
-            except Exception:
-                _ui_placeholders[le] = ""
-        if le not in _ui_texts:
-            try:
-                _ui_texts[le] = le.text() or ""
-            except Exception:
-                _ui_texts[le] = ""
-
-    def _set_lineedit_hints_visible(le: QLineEdit, visible: bool) -> None:
-        if le is None:
-            return
-        _remember_ui_for_lineedit(le)
-        try:
-            le.setPlaceholderText(_ui_placeholders.get(le, "") if visible else "")
-        except Exception:
-            pass
-        # Only restore UI default text when becoming visible and field is empty.
-        if visible:
-            try:
-                if not (le.text() or "").strip():
-                    le.setText(_ui_texts.get(le, ""))
-            except Exception:
-                pass
-
     # --- Shared UI setup ---
     def _configure_readonly_lineedit(le: QLineEdit) -> None:
         if le is None:
@@ -609,6 +574,14 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     ]
     upd_gate = FocusGate(upd_gate_widgets, lock_enabled=True)
 
+    try:
+        # Remember placeholders for update editable fields so we can hide/restore them.
+        upd_gate.remember_placeholders([
+            widgets['upd_cost'], widgets['upd_supplier']
+        ])
+    except Exception:
+        pass
+
     # Snapshot of loaded values for no-op update detection.
     _upd_loaded: dict = {}
 
@@ -625,6 +598,20 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 _set_combo_blank(widgets['upd_cat'])
             except Exception:
                 pass
+            try:
+                upd_gate.hide_placeholders([
+                    widgets['upd_cost'], widgets['upd_supplier']
+                ])
+            except Exception:
+                pass
+            return
+        # when enabling, restore placeholders
+        try:
+            upd_gate.restore_placeholders([
+                widgets['upd_cost'], widgets['upd_supplier']
+            ])
+        except Exception:
+            pass
 
     # Initial locked state for UPDATE tab.
     _set_upd_inputs_enabled(False)
@@ -637,22 +624,32 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     ]
     add_gate = FocusGate(add_gate_widgets, lock_enabled=True)
 
-    # Remember UI placeholders/defaults for gated widgets.
-    for _le in [
-        widgets['add_name'], widgets['add_sell'], widgets['add_cost'],
-        widgets['add_supp'], widgets['add_unit'], widgets['add_markup'],
-    ]:
-        _remember_ui_for_lineedit(_le)
+    # Remember UI placeholders for gated widgets via FocusGate (opt-in).
+    try:
+        add_gate.remember_placeholders([
+            widgets['add_name'], widgets['add_sell'], widgets['add_cost'],
+            widgets['add_supp'], widgets['add_unit'], widgets['add_markup'],
+        ])
+    except Exception:
+        pass
 
     def _set_add_inputs_enabled(enabled: bool) -> None:
         add_gate.set_locked(not enabled)
 
-        # Hide hints and defaults while locked; restore UI-provided hints/defaults when unlocked.
-        for _le in [
-            widgets['add_name'], widgets['add_sell'], widgets['add_cost'],
-            widgets['add_supp'], widgets['add_unit'], widgets['add_markup'],
-        ]:
-            _set_lineedit_hints_visible(_le, enabled)
+        # Hide placeholders while locked; restore placeholders when unlocked.
+        try:
+            if not enabled:
+                add_gate.hide_placeholders([
+                    widgets['add_name'], widgets['add_sell'], widgets['add_cost'],
+                    widgets['add_supp'], widgets['add_unit'], widgets['add_markup'],
+                ])
+            else:
+                add_gate.restore_placeholders([
+                    widgets['add_name'], widgets['add_sell'], widgets['add_cost'],
+                    widgets['add_supp'], widgets['add_unit'], widgets['add_markup'],
+                ])
+        except Exception:
+            pass
 
         # Unit is fixed for Product Menu: show 'Each' once unlocked.
         try:

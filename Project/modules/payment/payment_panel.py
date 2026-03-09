@@ -10,6 +10,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, Qt, QEvent
 from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QLineEdit, QLabel, QFrame
 
 from modules.ui_utils import ui_feedback
+from modules.ui_utils.focus_utils import FocusGate
 from modules.ui_utils.dialog_utils import report_to_statusbar
 from modules.ui_utils.error_logger import log_error
 from modules.payment import receipt_generator
@@ -40,6 +41,14 @@ class PaymentPanel(QObject):
         self._cache_widgets()
         self._wire_buttons()
         self._wire_inputs()
+        # Setup a FocusGate to remember and manage placeholder visibility
+        try:
+            pay_ws = [self._widgets.get(k) for k in ('cash', 'nets', 'paynow', 'voucher', 'tender')]
+            self._placeholder_gate = FocusGate(pay_ws)
+            self._placeholder_gate.remember_placeholders()
+        except Exception:
+            self._placeholder_gate = None
+
         self.clear_payment_frame()
 
     # Public API
@@ -375,6 +384,9 @@ class PaymentPanel(QObject):
         cash_field = self._widgets.get('cash')
         cash_val = self._get_validated_amount(cash_field)
 
+        locked_widgets = []
+        unlocked_widgets = []
+
         for key, field in zip(('nets', 'paynow', 'voucher', 'cash'), self._pay_field_order()):
             if field is None:
                 continue
@@ -389,12 +401,38 @@ class PaymentPanel(QObject):
             field.setEnabled(not locked)
             if locked and field.hasFocus():
                 self.focus_jump_next_pay_field(field)
+            # track for placeholder visibility management
+            try:
+                if locked:
+                    locked_widgets.append(field)
+                else:
+                    unlocked_widgets.append(field)
+            except Exception:
+                pass
 
         tender = self._widgets.get('tender')
         if tender is not None:
             tender_locked = cash_val <= 0
             tender.setReadOnly(tender_locked)
             tender.setFocusPolicy(Qt.NoFocus if tender_locked else Qt.StrongFocus)
+
+            try:
+                if tender_locked:
+                    locked_widgets.append(tender)
+                else:
+                    unlocked_widgets.append(tender)
+            except Exception:
+                pass
+
+        # Hide placeholders for locked fields and restore for unlocked ones
+        try:
+            if getattr(self, '_placeholder_gate', None) is not None:
+                if locked_widgets:
+                    self._placeholder_gate.hide_placeholders(locked_widgets)
+                if unlocked_widgets:
+                    self._placeholder_gate.restore_placeholders(unlocked_widgets)
+        except Exception:
+            pass
 
         self._refresh_lineedit_visuals()
 

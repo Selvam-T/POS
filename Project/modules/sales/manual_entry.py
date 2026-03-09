@@ -57,18 +57,32 @@ def launch_manual_entry_dialog(parent):
 
     # Gate logic: Lock Qty and OK button until product is identified
     gate = FocusGate([widgets['qty'], widgets['ok_btn']], lock_enabled=True)
+    try:
+        gate.remember_placeholders([widgets['qty']])
+        gate.hide_placeholders([widgets['qty']])
+    except Exception:
+        pass
     
     def _set_gate_state(enabled: bool, result: dict = None):
         gate.set_locked(not enabled)
         if enabled and result:
-            # Setup Quantity Placeholder based on unit
+            # Setup Quantity Placeholder based on unit (dynamic content remains controller-local)
             is_kg = (result.get('unit', '').lower() == 'kg')
-            widgets['qty'].setPlaceholderText('Enter weight (e.g. 0.5)' if is_kg else 'Enter Quantity')
+            try:
+                widgets['qty'].setPlaceholderText('Enter weight (e.g. 0.5)' if is_kg else 'Enter Quantity')
+            except Exception:
+                pass
             # Store price for the OK handler
             widgets['qty'].setProperty('unit_price', result.get('price', 0))
         else:
-            widgets['qty'].clear()
-            widgets['qty'].setPlaceholderText('')
+            try:
+                widgets['qty'].clear()
+            except Exception:
+                pass
+            try:
+                gate.hide_placeholders([widgets['qty']])
+            except Exception:
+                pass
 
     _set_gate_state(False) # Initial state
 

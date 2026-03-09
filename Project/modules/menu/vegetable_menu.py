@@ -50,19 +50,29 @@ def launch_vegetable_menu_dialog(host_window):
         widgets[k].setFocusPolicy(Qt.NoFocus)
 
     # Ghost Gating Setup
-    _placeholders = {k: widgets[k].placeholderText() for k in ['name', 'sell', 'cost', 'supp']}
     gate = FocusGate([widgets['name'], widgets['sell'], widgets['cost'], widgets['unit'], 
                     widgets['supp'], widgets['ok_btn'], widgets['del_btn']], lock_enabled=True)
+
+    try:
+        gate.remember_placeholders([widgets['name'], widgets['sell'], widgets['cost'], widgets['supp']])
+        gate.hide_placeholders([widgets['name'], widgets['sell'], widgets['cost'], widgets['supp']])
+    except Exception:
+        pass
 
     def _set_gate_state(enabled: bool):
         gate.set_locked(not enabled)
         if not enabled:
             for k in ['name', 'sell', 'cost', 'supp', 'markup', 'cat']: widgets[k].clear()
-            widgets['markup'].setPlaceholderText("")
-            for k in _placeholders: widgets[k].setPlaceholderText("")
+            try:
+                gate.hide_placeholders([widgets['name'], widgets['sell'], widgets['cost'], widgets['supp']])
+            except Exception:
+                pass
             widgets['unit'].setCurrentIndex(-1) # Hides "--Select Unit--"
         else:
-            for k, p in _placeholders.items(): widgets[k].setPlaceholderText(p)
+            try:
+                gate.restore_placeholders([widgets['name'], widgets['sell'], widgets['cost'], widgets['supp']])
+            except Exception:
+                pass
             widgets['cat'].setText(DEFAULT_VEG_CATEGORY)
             
             if not widgets['cost'].text():

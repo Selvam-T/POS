@@ -13,14 +13,10 @@ from modules.ui_utils.dialog_utils import (
 )
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 
-
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 _PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
 UI_PATH = os.path.join(_PROJECT_DIR, 'ui', 'refund.ui')
 QSS_PATH = os.path.join(_PROJECT_DIR, 'assets', 'dialog.qss')
-
-
-
 
 def _set_error_state(widget: QLineEdit, on: bool) -> None:
     if widget is None:
@@ -75,23 +71,30 @@ def launch_refund_dialog(parent=None):
     cancel_btn = widgets['cancel_btn']
     close_btn = widgets['close_btn']
 
+    # Remember and hide note placeholder while inputs are locked (opt-in)
     try:
-        note_default = (note.text() or '').strip()
-        if note_default:
-            note.clear()
-            note.setPlaceholderText(note_default)
+        # Opt-in: let FocusGate manage placeholder visibility for `note`.
+        gate = FocusGate([qty, note, ok_btn], lock_enabled=True)
+    except Exception:
+        gate = FocusGate([qty, note, ok_btn], lock_enabled=True)
+
+    try:
+        gate.remember_placeholders([note])
+        gate.hide_placeholders([note])
     except Exception:
         pass
-
     price.setReadOnly(True)
     price.setFocusPolicy(Qt.NoFocus)
     amount.setReadOnly(True)
     amount.setFocusPolicy(Qt.NoFocus)
 
-    gate = FocusGate([qty, note, ok_btn], lock_enabled=True)
     gate.set_locked(True)
 
     def _lock_inputs(clear_values: bool = True) -> None:
+        try:
+            gate.hide_placeholders([note])
+        except Exception:
+            pass
         gate.set_locked(True)
         if clear_values:
             price.clear()
@@ -101,6 +104,10 @@ def launch_refund_dialog(parent=None):
 
     def _unlock_inputs(result: dict) -> None:
         gate.set_locked(False)
+        try:
+            gate.restore_placeholders([note])
+        except Exception:
+            pass
         price_val = float(result.get('price') or 0.0)
         price.setText(f"{price_val:.2f}")
         qty_val = 1

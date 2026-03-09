@@ -11,7 +11,7 @@ from modules.ui_utils.dialog_utils import (
     set_dialog_info,
     report_exception_post_close,
 )
-from modules.ui_utils.focus_utils import FieldCoordinator
+from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 _PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
@@ -57,16 +57,34 @@ def launch_vendor_dialog(parent=None):
     except Exception:
         pass
 
+    # Gate: lock amount and note until name is valid
+    gate = FocusGate([amount, note, ok_btn], lock_enabled=True)
+    try:
+        gate.remember_placeholders([note, amount])
+        gate.hide_placeholders([note, amount])
+    except Exception:
+        pass
+    gate.set_locked(True)
+
     coord = FieldCoordinator(dlg)
 
     # Validation is delegated directly to input_handler via lambdas.
+
+    def _validate_name_and_unlock():
+        val = input_handler.handle_customer_input(name)
+        try:
+            gate.restore_placeholders([note, amount])
+        except Exception:
+            pass
+        gate.set_locked(False)
+        return val
 
     coord.add_link(
         source=name,
         next_focus=amount,
         status_label=status,
         swallow_empty=False,
-        validate_fn=lambda: input_handler.handle_customer_input(name),
+        validate_fn=_validate_name_and_unlock,
     )
 
     coord.add_link(
@@ -85,7 +103,7 @@ def launch_vendor_dialog(parent=None):
         validate_fn=lambda: input_handler.handle_note_input(note),
     )
 
-    coord.register_validator(name, lambda: input_handler.handle_customer_input(name), status_label=status)
+    coord.register_validator(name, _validate_name_and_unlock, status_label=status)
     coord.register_validator(amount, lambda: input_handler.handle_currency_input(amount, asset_type='Amount'), status_label=status)
 
     # NOTE: rely on `parent.current_user_id` being set by the app login flow.
