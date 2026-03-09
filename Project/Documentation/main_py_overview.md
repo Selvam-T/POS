@@ -172,6 +172,7 @@ Additional behavior:
 - `assets/main.qss` — Global stylesheet
 - `ui/` — Qt Designer UI files
 - `modules/` — Modular controllers for dialogs, sales, devices, etc.
+  - `modules/info_section/info_section.py` — Header info controller (`InfoSectionController`)
 - `Documentation/` — Project documentation (this file)
 
 ---

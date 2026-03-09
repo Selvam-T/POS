@@ -1,4 +1,3 @@
-
 from PyQt5.QtWidgets import QWidget, QMainWindow, QLabel
 from PyQt5.QtCore import QTimer, QDateTime, Qt, QLocale
 from config import COMPANY_NAME, DATE_FMT, DAY_FMT, TIME_FMT

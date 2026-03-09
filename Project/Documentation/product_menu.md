@@ -130,6 +130,9 @@ Rules:
 - The two sources are mutually exclusive: typing in one clears the other and clears the displayed mapped fields.
 - Display fields are read-only + `Qt.NoFocus`.
 
+- Note: The `last_updated` display in REMOVE/UPDATE is formatted via
+	`modules.date_time.format_datetime()` and appears like `09 Mar 2026  03:45 pm`.
+
 ---
 
 ## UPDATE Tab (lookup-gated editing + no-op protection)

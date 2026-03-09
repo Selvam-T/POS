@@ -54,7 +54,7 @@ from config import (
     ICON_HISTORY,
     ICON_LOGOUT,
 )
-from modules.date_time.info_section import InfoSectionController
+from modules.info_section.info_section import InfoSectionController
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UI_DIR = os.path.join(BASE_DIR, 'ui')

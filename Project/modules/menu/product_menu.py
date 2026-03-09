@@ -21,6 +21,7 @@ from modules.ui_utils.input_validation import is_reserved_vegetable_code, valida
 from modules.table import handle_barcode_scanned
 from modules.table.unit_helpers import canonicalize_unit
 from config import PRODUCT_CATEGORIES
+from modules.date_time import format_datetime
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -316,7 +317,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             'sell': str(pdata.get('price') or ''),
             'unit': pdata.get('unit') or '',
             'supplier': pdata.get('supplier') or '',
-            'last_updated': pdata.get('last_updated') or '',
+            'last_updated': format_datetime(pdata.get('last_updated') or ''),
         }, None
 
     # --- Coordinator Wiring ---

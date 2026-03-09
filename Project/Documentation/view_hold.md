@@ -76,20 +76,21 @@ Required controls (objectName):
 ## Receipts Table Contract
 
 The table is configured as a read-only row selector:
-
 - 5 columns:
   1) Receipt No
-  2) Customer Name
-  3) Grand Total
-  4) Created At
-  5) Note
+  2) Customer Name (stretch column)
+  3) Grand Total (left-aligned, prefixed with `$`)
+  4) Date — displays only the date portion using `modules.date_time.format_date()` (default: `DD MMM YYYY`)
+  5) Time — displays only the time portion using `modules.date_time.format_time()` (default: `hh:mm am/pm`)
+- The table no longer shows the `note` as a visible column; notes are retained for VOID operations but stored off-cell (see Receipt ID storage below).
 - Select rows, single selection, no in-table edits
 - Sorting enabled (sorting is temporarily disabled during refresh fill)
 
 ### Receipt ID storage
 
 When available, `receipt_id` is stored in the **Receipt No** cell using `Qt.UserRole`.
-This enables a reliable linkage back to the existing DB receipt row.
+The receipt `note` (used for VOID) is stored alongside it in the same cell under `Qt.UserRole + 1` so the UI can populate `viewHoldNoteLineEdit` without extra DB lookups.
+This enables a reliable linkage back to the existing DB receipt row and fast note population.
 
 If `receipt_id` is missing for any reason, the controller attempts to resolve it by calling:
 

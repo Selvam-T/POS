@@ -58,6 +58,8 @@ The **Product_list** table is the master catalog for all products available in t
 	- `cost_price` (REAL): Purchase cost for accounting.
 	- `unit` (TEXT): Unit of measure (e.g., Kg, Each).
 	- `last_updated` (TEXT): ISO timestamp of last modification.
+	  - UI display: shown to users via `modules.date_time.format_datetime()` as
+	    `DD MMM YYYY  hh:mm am/pm` (e.g., `09 Mar 2026  03:45 pm`).
 - **Integration:**
 	- Product cache is loaded from this table at startup for fast lookups.
 	- CRUD operations (add, update, delete) are managed via the Product Management dialog and backend modules.

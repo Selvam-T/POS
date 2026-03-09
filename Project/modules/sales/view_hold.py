@@ -27,6 +27,7 @@ from modules.ui_utils.dialog_utils import (
 from modules.ui_utils import ui_feedback, input_handler
 from modules.ui_utils.focus_utils import FieldCoordinator
 from modules.ui_utils.error_logger import log_error
+from modules.date_time import format_date, format_time
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
@@ -89,18 +90,24 @@ def launch_viewhold_dialog(parent=None):
         if not enabled:
             note_in.setEnabled(False)
 
-    def _selected_row_note() -> str:
+    def _selected_note_text() -> str:
         try:
             r = table.currentRow()
         except Exception:
             r = -1
         if r < 0:
             return ""
-        item = table.item(r, 4)
+        # Prefer the stored note in UserRole+1 on the receipt_no cell (col 0).
         try:
-            return str(item.text() if item is not None else "")
+            item0 = table.item(r, 0)
+            if item0 is not None:
+                note_data = item0.data(Qt.UserRole + 1)
+                if note_data is not None:
+                    return str(note_data or '')
         except Exception:
-            return ""
+            pass
+        # No visible note column any more; if not found return empty.
+        return ""
 
     def _selected_receipt_identifiers() -> tuple[int | None, str]:
         try:
@@ -126,21 +133,6 @@ def launch_viewhold_dialog(parent=None):
                 receipt_id = None
 
         return receipt_id, receipt_no
-
-    def _selected_receipt_total() -> float:
-        try:
-            r = table.currentRow()
-        except Exception:
-            return 0.0
-        if r < 0:
-            return 0.0
-        item = table.item(r, 2)
-        if item is None:
-            return 0.0
-        try:
-            return float(str(item.text() or "0").replace(',', ''))
-        except Exception:
-            return 0.0
 
     _search_no_match = {'active': False}
 
@@ -193,7 +185,7 @@ def launch_viewhold_dialog(parent=None):
 
         note_in.setEnabled(True)
         note_in.blockSignals(True)
-        note_in.setText(_selected_row_note())
+        note_in.setText(_selected_note_text())
         note_in.blockSignals(False)
 
     def _focus_table() -> None:
@@ -578,24 +570,25 @@ def launch_viewhold_dialog(parent=None):
 def _configure_receipts_table(table: QTableWidget) -> None:
     table.setColumnCount(5)
     table.setHorizontalHeaderLabels([
-        'Receipt No', 'Customer Name', 'Grand Total', 'Date', 'Note'
+        'Receipt No', 'Customer Name', 'Grand Total', 'Date', 'Time'
     ])
     header = table.horizontalHeader()
     header.setSectionResizeMode(0, QHeaderView.Fixed)
-    header.setSectionResizeMode(1, QHeaderView.Fixed)
+    header.setSectionResizeMode(1, QHeaderView.Stretch)
     header.setSectionResizeMode(2, QHeaderView.Fixed)
-    header.setSectionResizeMode(3, QHeaderView.Stretch)
-    header.setSectionResizeMode(4, QHeaderView.Stretch)
+    header.setSectionResizeMode(3, QHeaderView.Fixed)
+    header.setSectionResizeMode(4, QHeaderView.Fixed)
     header.resizeSection(0, 200)
-    header.resizeSection(1, 200)
     header.resizeSection(2, 150)
+    header.resizeSection(3, 150)
+    header.resizeSection(4, 150)
 
     header_align = {
         0: Qt.AlignCenter,
         1: Qt.AlignLeft | Qt.AlignVCenter,
-        2: Qt.AlignRight | Qt.AlignVCenter,
+        2: Qt.AlignLeft | Qt.AlignVCenter,
         3: Qt.AlignCenter,
-        4: Qt.AlignLeft | Qt.AlignVCenter,
+        4: Qt.AlignCenter,
     }
     for col, align in header_align.items():
         try:
@@ -627,24 +620,28 @@ def _fill_receipts_table(table: QTableWidget, rows: list[dict]) -> None:
     cell_align = {
         0: Qt.AlignCenter,
         1: Qt.AlignLeft | Qt.AlignVCenter,
-        2: Qt.AlignRight | Qt.AlignVCenter,
+        2: Qt.AlignLeft | Qt.AlignVCenter,
         3: Qt.AlignCenter,
-        4: Qt.AlignLeft | Qt.AlignVCenter,
+        4: Qt.AlignCenter,
     }
     for r, row in enumerate(rows):
         table.insertRow(r)
         values = [
             str(row.get('receipt_no') or ''),
             str(row.get('customer_name') or ''),
-            f"{float(row.get('grand_total') or 0.0):.2f}",
-            _format_created_at(row.get('created_at')),
-            str(row.get('note') or ''),
+            f"$ {float(row.get('grand_total') or 0.0):.2f}",
+            format_date(row.get('created_at')),
+            format_time(row.get('created_at')),
         ]
         for c, text in enumerate(values):
             item = QTableWidgetItem(text)
             if c == 0:
                 try:
                     item.setData(Qt.UserRole, row.get('receipt_id') or row.get('id'))
+                    try:
+                        item.setData(Qt.UserRole + 1, row.get('note') or '')
+                    except Exception:
+                        pass
                 except Exception:
                     pass
             item.setTextAlignment(cell_align.get(c, Qt.AlignLeft | Qt.AlignVCenter))
@@ -655,71 +652,3 @@ def _fill_receipts_table(table: QTableWidget, rows: list[dict]) -> None:
     except Exception:
         pass
 
-
-def _format_created_at(val) -> str:
-    """Format a created_at value into 'dd-MMM-YYYY HH:MM'.
-
-    Accepts datetime objects, numeric timestamps, or common string formats.
-    Falls back to the original string representation on parse failure.
-    """
-    if val is None or (isinstance(val, str) and not val.strip()):
-        return ''
-
-    dt = None
-    try:
-        if isinstance(val, datetime.datetime):
-            dt = val
-        elif isinstance(val, (int, float)):
-            # assume POSIX timestamp
-            try:
-                dt = datetime.datetime.fromtimestamp(float(val))
-            except Exception:
-                dt = None
-        elif isinstance(val, str):
-            s = val.strip()
-            # try ISO first
-            try:
-                dt = datetime.datetime.fromisoformat(s)
-            except Exception:
-                dt = None
-            if dt is None:
-                # try several common formats
-                fmts = (
-                    "%Y-%m-%d %H:%M:%S",
-                    "%Y-%m-%dT%H:%M:%S",
-                    "%Y-%m-%d %H:%M",
-                    "%d-%m-%Y %H:%M:%S",
-                    "%d/%m/%Y %H:%M:%S",
-                    "%d-%m-%Y %H:%M",
-                    "%d/%m/%Y %H:%M",
-                    "%Y-%m-%d",
-                )
-                for fmt in fmts:
-                    try:
-                        dt = datetime.datetime.strptime(s, fmt)
-                        break
-                    except Exception:
-                        dt = None
-            # as a last resort, if string contains a space-separated ISO-like prefix
-        else:
-            # unknown type — fallback to str()
-            return str(val)
-    except Exception:
-        try:
-            return str(val)
-        except Exception:
-            return ''
-
-    if dt is None:
-        try:
-            return str(val)
-        except Exception:
-            return ''
-
-    try:
-        return dt.strftime("%d-%b-%Y %I:%M %p").replace("AM", "am").replace("PM", "pm")
-    except Exception:
-        try:
-            return str(val)
-        except Exception:
-            return ''
