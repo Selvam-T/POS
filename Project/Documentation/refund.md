@@ -24,6 +24,8 @@ The Refund dialog is launched from the payment keypad and records refund outflow
 - On successful lookup:
   - Price is populated into `refundPriceLineEdit`.
   - Quantity, Note, and OK are unlocked.
+- Refund price is editable after lookup so the cashier can enter the original purchase price
+  (product prices may have changed since the sale).
 - `refundAmountLineEdit` is read-only and auto-calculated as:
 
 `amount = unit_price * quantity`
@@ -32,9 +34,15 @@ The Refund dialog is launched from the payment keypad and records refund outflow
 - Product must be selected (code/name + mapped price).
 - Quantity is validated using shared input handler:
   - `input_handler.handle_quantity_input(..., unit_type='unit')`
+- Price is validated on ENTER using:
+  - `input_handler.handle_selling_price(...)`
 - Note is validated using shared input handler:
   - `input_handler.handle_note_input(...)`
 - Computed refund amount must be `> 0`.
+
+When price validation fails, the price field is highlighted, the status label shows the
+error, and focus remains in the price field. On valid price input, the amount is
+recomputed and focus moves to `refundNoteLineEdit`.
 
 Errors are shown in `refundStatusLabel` using shared `ui_feedback` helpers.
 

@@ -83,8 +83,6 @@ def launch_refund_dialog(parent=None):
         gate.hide_placeholders([note])
     except Exception:
         pass
-    price.setReadOnly(True)
-    price.setFocusPolicy(Qt.NoFocus)
     amount.setReadOnly(True)
     amount.setFocusPolicy(Qt.NoFocus)
 
@@ -96,6 +94,11 @@ def launch_refund_dialog(parent=None):
         except Exception:
             pass
         gate.set_locked(True)
+        try:
+            price.setReadOnly(True)
+            price.setFocusPolicy(Qt.NoFocus)
+        except Exception:
+            pass
         if clear_values:
             price.clear()
             qty.clear()
@@ -110,6 +113,12 @@ def launch_refund_dialog(parent=None):
             pass
         price_val = float(result.get('price') or 0.0)
         price.setText(f"{price_val:.2f}")
+        try:
+            price.setReadOnly(False)
+            price.setFocusPolicy(Qt.StrongFocus)
+            price.setStyleSheet("background-color: white;")
+        except Exception:
+            pass
         qty_val = 1
         qty.setText(str(qty_val))
         amount_val = round(price_val * qty_val, 2)
@@ -121,6 +130,19 @@ def launch_refund_dialog(parent=None):
         amount_val = round(unit_price * qty_val, 2)
         amount.setText(f"{amount_val:.2f}")
         return qty_val
+
+    def _validate_price() -> float:
+        try:
+            _set_error_state(price, False)
+            val = input_handler.handle_selling_price(price)
+        except ValueError:
+            _set_error_state(price, True)
+            raise
+        try:
+            _recompute_amount()
+        except Exception:
+            pass
+        return val
 
     coord = FieldCoordinator(dlg)
 
@@ -170,7 +192,7 @@ def launch_refund_dialog(parent=None):
         next_focus=note,
         status_label=status,
         on_sync=_on_name_sync,
-        auto_jump=True,
+        auto_jump=False,
     )
 
     coord.add_link(
@@ -179,6 +201,14 @@ def launch_refund_dialog(parent=None):
         status_label=status,
         swallow_empty=True,
         validate_fn=_recompute_amount,
+    )
+
+    coord.add_link(
+        source=price,
+        next_focus=note,
+        status_label=status,
+        swallow_empty=True,
+        validate_fn=_validate_price,
     )
 
     coord.add_link(
@@ -191,6 +221,7 @@ def launch_refund_dialog(parent=None):
 
     coord.register_validator(qty, _recompute_amount, status_label=status)
     coord.register_validator(note, lambda: input_handler.handle_note_input(note), status_label=status)
+    coord.register_validator(price, _validate_price, status_label=status)
 
     enforce_exclusive_lineedits(
         code,
@@ -201,6 +232,7 @@ def launch_refund_dialog(parent=None):
 
     code.textEdited.connect(lambda *_: _clear_lookup_error_style())
     name.textEdited.connect(lambda *_: _clear_lookup_error_style())
+    price.textEdited.connect(lambda *_: _set_error_state(price, False))
 
     product_names = [rec[0] for rec in (dbop.PRODUCT_CACHE or {}).values() if rec and rec[0]]
     input_handler.setup_name_search_lineedit(

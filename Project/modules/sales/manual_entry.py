@@ -112,7 +112,7 @@ def launch_manual_entry_dialog(parent):
         next_focus=widgets['qty'],
         status_label=widgets['status'],
         on_sync=_on_sync,
-        auto_jump=True, 
+        auto_jump=False,
     )
 
     coord.add_link(
