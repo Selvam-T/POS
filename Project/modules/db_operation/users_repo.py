@@ -103,7 +103,14 @@ def build_authenticated_user(user: dict, fallback_uid=None) -> dict:
 
 
 def get_recovery_email(user_id: int) -> str | None:
-    """Return the recovery_email for a given user_id, or None if not set/found."""
+    """Return the recovery_email for a given user_id, or None if not set/found.
+
+    Note: The function is retained for future use when recovery-email based flows
+    are reintroduced. admin (user id 1) is set up with a recovery email in users table.
+    staff (user id 2) is not set up with a recovery email, so this function will 
+    return None for user id 2.
+    
+    """
     conn = get_conn()
     try:
         cur = conn.cursor()

@@ -52,6 +52,15 @@ The login dialog is the first UI shown on application startup. It blocks access 
 - The controller disables default/auto-default button behavior and intercepts Enter at the dialog level so the default-button acceptance cannot close the dialog before validation runs.
 - The implementation intentionally avoids `FieldCoordinator` for this simple flow and handles validation directly in `modules/sales/login.py`.
 
+- Password recovery policy: the UI no longer uses `recovery_email` for admin/staff.
+	- `uid == 1` (admin): clicking the "forgot" button generates a temporary
+		password (via `modules/db_operation/users_repo.generate_temporary_password_for_user`)
+		and copies it to the clipboard for manual delivery.
+	- `uid == 2` (staff): clicking the "forgot" button displays the message
+		"Please contact admin to login." and does not generate a password.
+	- The `get_recovery_email` function remains in `modules/db_operation/users_repo.py`
+		for future recovery-email based flows but is not used by the current UI.
+
 ## Future Updates
 This file will be updated as login controller implementation advances (validation, user management, etc.)
 

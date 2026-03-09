@@ -28,7 +28,6 @@ def launch_login_dialog(parent=None, *, return_user: bool = False):
     from modules.db_operation.users_repo import (
         authenticate_user,
         build_authenticated_user,
-        get_recovery_email,
         generate_temporary_password_for_user,
         # recommended to have this; otherwise use itemData approach (below)
         get_user_id_by_username,
@@ -135,25 +134,28 @@ def launch_login_dialog(parent=None, *, return_user: bool = False):
 
     def on_forget_clicked():
         uid = current_user_id()
+
         if uid is None:
             set_error("Select a user first.")
             return
-
-        email = get_recovery_email(int(uid))
-        if not email:
-            set_error("No recovery email set for this user.")
+        # - uid == 1: generate a temporary password and copy it to clipboard
+        # - uid == 2: instruct the user to contact admin
+        if int(uid) == 1:
+            temp_pwd = generate_temporary_password_for_user(int(uid), length=12)
+            try:
+                QApplication.clipboard().setText(temp_pwd)
+            except Exception:
+                pass
+            set_ok("Login with temp password pasted to clipboard.")
+            focus_password()
             return
 
-        temp_pwd = generate_temporary_password_for_user(int(uid), length=12)
+        if int(uid) == 2:
+            set_error("Please contact admin to login.")
+            return
 
-        # No email configured: copy to clipboard for manual delivery
-        try:
-            QApplication.clipboard().setText(temp_pwd)
-        except Exception:
-            pass
-
-        set_ok("Login with temp password pasted to clipboard.")
-        focus_password()
+        # Fallback for other users
+        set_error("Password recovery not supported for this user.")
 
     if password_edit:
         focus_password(select_all=True)
