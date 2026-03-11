@@ -67,6 +67,9 @@ def _left_width(width: int) -> int:
 def _center_line(text: str, width: int) -> str:
     return (text or "").strip().center(width)
 
+def _left_line(text: str, width: int) -> str:
+    return (text or "").strip().ljust(width)
+
 
 def _line_with_amount(left_text: str, amount_text: str, width: int) -> str:
     left_width = _left_width(width)
@@ -85,17 +88,34 @@ def _resolve_cashier_name(cashier_id: object) -> str:
         return ""
 
 
-def _item_line(qty: float, unit: str, name: str, line_total: float, width: int) -> str:
+def _item_line(qty: float, unit: str, unit_price: float, name: str, line_total: float, width: int) -> str:
     left_width = _left_width(width)
     product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 3))
+
+    original_unit = unit
+
     if unit == "Each":
         unit = ""
+    elif unit == "Kg":
+        if qty < 1.0:
+            unit = "g"
+            qty *= 1000
+        else:
+            unit = "kg"
+
     qty_text = f"{_format_qty(qty)} {unit}".strip()[:config.RECEIPT_QTY_WIDTH].ljust(config.RECEIPT_QTY_WIDTH)
     name_text = (name or "")[:product_width].ljust(product_width)
-    left_text = f"{qty_text}  {name_text}"
-    amount_text = f"${line_total:.2f}"
-    return f"{left_text}{' ' * config.RECEIPT_GAP}{amount_text.rjust(config.RECEIPT_AMOUNT_WIDTH)}"
 
+    left_text = f"{qty_text}  {name_text}"
+    amount_text = f"$ {line_total:.2f}"
+    main_line = f"{left_text}{' ' * config.RECEIPT_GAP}{amount_text.rjust(config.RECEIPT_AMOUNT_WIDTH)}"
+
+    if original_unit == "Kg":
+        price_prefix = " " * config.RECEIPT_QTY_WIDTH + " " * 2
+        unit_price_line = f"{price_prefix}  --> $ {unit_price:.2f}/kg"
+        return f"{main_line}\n{unit_price_line}"
+
+    return main_line
 
 def _item_header(width: int) -> str:
     left_width = _left_width(width)
@@ -130,10 +150,10 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
     lines.append(_center_line(str(getattr(config, "ADDRESS_LINE_1", "")), width))
     lines.append(_center_line(str(getattr(config, "ADDRESS_LINE_2", "")), width))
     lines.append("")
-    lines.append(_center_line(f"Receipt id: {receipt_no}", width))
+    lines.append(_left_line(f"Receipt id: {receipt_no}", width))
     if cashier_name:
-        lines.append(_center_line(f"Served by {cashier_name}", width))
-    lines.append(_center_line(created_at, width))
+        lines.append(_left_line(f"Served by : {cashier_name}", width))
+    lines.append(_left_line(f"Date      : {created_at}", width))
     lines.append("")
     lines.append(_item_header(width))
     lines.append("-" * width)
@@ -142,13 +162,15 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
     for item in items:
         qty = float(item.get("qty") or 0.0)
         unit = str(item.get("unit") or "").strip()
+        unit_price = float(item.get("unit_price") or 0.0)
         name = str(item.get("product_name") or "")
         line_total = float(item.get("line_total") or 0.0)
         payable_total+= line_total
-        lines.append(_item_line(qty, unit, name, line_total, width))
+        lines.append(_item_line(qty, unit, unit_price, name, line_total, width))
     lines.append("-" * width)
 
-    lines.append(_line_with_amount("Grand Total:", f"${payable_total:.2f}", width))
+    lines.append(_line_with_amount("Grand Total:", f"$ {payable_total:.2f}", width))
+    lines.append("")
     lines.append("")
 
     # PAID vs other status
@@ -173,20 +195,20 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
                 continue
             if ptype.upper() == "OTHER":
                 ptype = "VOUCHER"
-            lines.append(_line_with_amount(f"{ptype}:", f"${tendered:.2f}", width))
+            lines.append(_line_with_amount(f"{ptype}:", f"$ {tendered:.2f}", width))
 
         # Compute change only from cash tendered. Voucher overpayments do not produce cash refunds.
         cash_change = max(0.0, round(cash_tendered - cash_amount, 2))
         overpaid = max(0.0, round(total_tendered - payable_total - cash_change, 2))
 
         if cash_tendered > 0:
-            lines.append(_line_with_amount("Cash Tendered:", f"${cash_tendered:.2f}", width))
+            lines.append(_line_with_amount("Cash Tendered:", f"$ {cash_tendered:.2f}", width))
         lines.append("-" * width)
-        lines.append(_line_with_amount("Total Tendered:", f"${total_tendered:.2f}", width))
+        lines.append(_line_with_amount("Total Tendered:", f"$ {total_tendered:.2f}", width))
         
         if cash_change > 0:
             lines.append("")
-            lines.append(_line_with_amount("Cash Change:", f"${cash_change:.2f}", width))
+            lines.append(_line_with_amount("Cash Change:", f"$ {cash_change:.2f}", width))
 
         # Show voucher overpayment note when applicable
         if overpaid > 0:
@@ -238,7 +260,7 @@ def generate_receipt_text_from_snapshot(
         lines.append(_item_line(qty, unit, name, float(line_total or 0.0), width))
     lines.append("-" * width)
 
-    lines.append(_line_with_amount("Grand Total:", f"${total_amount:.2f}", width))
+    lines.append(_line_with_amount("Grand Total:", f"$ {total_amount:.2f}", width))
     lines.append("")
     lines.append(_center_line(f"Receipt Status is {status_clean}", width))
 

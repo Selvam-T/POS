@@ -226,9 +226,6 @@
      </item>
      <item>
       <widget class="QGroupBox" name="viewHoldGroupBox">
-       <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
-       </property>
        <property name="title">
         <string/>
        </property>
@@ -252,9 +249,9 @@
          <number>10</number>
         </property>
         <item>
-         <widget class="QRadioButton" name="viewHoldLoad1RadioBtn">
+         <widget class="QRadioButton" name="viewHoldLoadRadioBtn">
           <property name="text">
-           <string>LOAD to continue</string>
+           <string>LOAD Receipt</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -262,26 +259,16 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="viewHoldLoad2RadioBtn">
-          <property name="text">
-           <string>LOAD to Pay</string>
-          </property>
-          <property name="checked">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QRadioButton" name="viewHoldPrintRadioBtn">
           <property name="text">
-           <string>PRINT</string>
+           <string>PRINT Receipt</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QRadioButton" name="viewHoldVoidRadioBtn">
           <property name="text">
-           <string>VOID</string>
+           <string>VOID Receipt</string>
           </property>
          </widget>
         </item>
@@ -412,15 +399,14 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>btnViewHoldOk</tabstop>
-  <tabstop>btnViewHoldCancel</tabstop>
-  <tabstop>customCloseBtn</tabstop>
   <tabstop>viewHoldSearchLineEdit</tabstop>
-  <tabstop>viewHoldLoad1RadioBtn</tabstop>
-  <tabstop>viewHoldLoad2RadioBtn</tabstop>
+  <tabstop>viewHoldLoadRadioBtn</tabstop>
   <tabstop>viewHoldPrintRadioBtn</tabstop>
   <tabstop>viewHoldVoidRadioBtn</tabstop>
   <tabstop>viewHoldNoteLineEdit</tabstop>
+  <tabstop>btnViewHoldOk</tabstop>
+  <tabstop>btnViewHoldCancel</tabstop>
+  <tabstop>customCloseBtn</tabstop>
  </tabstops>
  <resources/>
  <connections/>

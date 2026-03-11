@@ -4,7 +4,7 @@
 
 The View Hold dialog allows the cashier to browse previously held **UNPAID** receipts and perform one of three actions:
 
-- **LOAD**: load a held receipt back into the Sales table and prepare the Payment panel
+- **LOAD**: load a held receipt back into the Sales table (two modes: continue hold flow or convert to active sale)
 - **PRINT**: print the selected receipt via the configured printer (no console fallback)
 - **VOID**: cancel the selected receipt (status → `CANCELLED`) with an optional note
 
@@ -70,7 +70,7 @@ Required controls (objectName):
 - `viewHoldNoteLineEdit` (note for VOID)
 - `viewHoldStatusLabel` (dialog-local feedback)
 - `btnViewHoldOk`, `btnViewHoldCancel`
-- `viewHoldLoadRadioBtn`, `viewHoldPrintRadioBtn`, `viewHoldVoidRadioBtn`
+- `viewHoldLoad1RadioBtn`, `viewHoldLoad2RadioBtn`, `viewHoldPrintRadioBtn`, `viewHoldVoidRadioBtn`
 - `customCloseBtn` (optional)
 
 ## Receipts Table Contract
@@ -84,8 +84,13 @@ The table is configured as a read-only row selector:
   5) Time — displays only the time portion using `modules.date_time.format_time()` (default: `hh:mm am/pm`)
 - The table no longer shows the `note` as a visible column; notes are retained for VOID operations but stored off-cell (see Receipt ID storage below).
 - Select rows, single selection, no in-table edits
+ - Select rows, single selection only (multi-selection is disabled), no in-table edits
 - Sorting enabled (sorting is temporarily disabled during refresh fill)
-
+ 
+Display order and interactive sorting:
+- By default the table rows are inserted in the same sequence returned by the DB query: ordered by `created_at` DESC (newest first), with `receipt_no` DESC as a tiebreaker. This ordering is implemented in `modules/db_operation/hold_receipts_repo.py`.
+- The table itself has column-sorting enabled (`QTableWidget.setSortingEnabled(True)`), so users can click any column header to re-sort the rows interactively. Note that programmatic refreshes temporarily disable sorting to avoid visual jitter while rows are repopulated.
+ 
 ### Receipt ID storage
 
 When available, `receipt_id` is stored in the **Receipt No** cell using `Qt.UserRole`.
@@ -109,7 +114,7 @@ If no UNPAID receipts exist:
 
 If receipts exist:
 
-- LOAD action radio is selected
+- `viewHoldLoad1RadioBtn` is selected by default
 - The first row is selected automatically
 - A short success message is shown for 2000ms:
   - `"{customer_name} : {receipt_no} loaded."`
@@ -133,10 +138,11 @@ When a non-empty search returns no rows:
 - The dialog-local status label shows “No matching receipts.”
 - The search text is selected (highlighted) and focus returns to the search box
 
-Enter key behavior on the search field:
+Enter key and live-typing behavior on the search field:
 
-- If the search text is empty: focus jumps to `viewHoldLoadRadioBtn`
-- If the search text is non-empty and yielded no matches: pressing Enter clears the search text and reloads UNPAID receipts, selecting the top row
+- Live typing: the `viewHoldSearchLineEdit` performs a debounced live lookup (180ms) and updates the receipts table. The top row is auto-selected on live results, however the dialog suppresses the automatic "selected" status message during live updates so the UI doesn't spam feedback while the user types.
+- Pressing ENTER when there are matching rows: explicitly selects the top row (row 0), shows a short dialog-local message of the form `"{customer_name} receipt is selected."`, and moves keyboard focus to the OK button — it does not auto-execute the OK action.
+- Pressing ENTER when there are NO rows: treats this as a "no match" confirmation — the search box is cleared, the full UNPAID receipts list is reloaded, the top row is not auto-selected, the dialog-local status shows "No match was found", and keyboard focus moves to Cancel.
 
 ## Action Modes
 
@@ -144,6 +150,25 @@ The OK button dispatches based on the selected radio action.
 The OK button is disabled until a receipt row is selected.
 
 ### 1) LOAD
+
+The LOAD action has two modes:
+
+**LOAD to continue** (`viewHoldLoad1RadioBtn`)
+
+Goal: convert a held receipt into a fresh ACTIVE sale so it can be held again.
+
+Flow (differences vs normal load):
+
+1. Cancel the original held receipt before loading items:
+  - `void_receipt(receipt_id=..., receipt_no=..., note='System cancelled - ongoing shopping')`
+2. Load items into the Sales table as a new ACTIVE sale.
+3. Reset `ReceiptContext` inside the dialog:
+  - `active_receipt_id = None`
+  - `source = 'ACTIVE_SALE'`
+  - `status = 'NONE'`
+4. StatusBar message: “Load ongoing shopping items”.
+
+**LOAD to Pay** (`viewHoldLoad2RadioBtn`)
 
 Goal: Load held receipt items into the Sales table and set Payment defaults.
 

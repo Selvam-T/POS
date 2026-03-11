@@ -135,7 +135,7 @@ STRING_CONFIG = {
     'product_name': {'min_len': 4, 'max_len': 40, 'required': True},
     'supplier': {'min_len': 3, 'max_len': 15, 'required': False},
     'customer': {'min_len': 3, 'max_len': 25, 'required': True},  
-    'note': {'min_len': 0, 'max_len': 25, 'required': False}, 
+    'note': {'min_len': 0, 'max_len': 40, 'required': False}, 
     'category': {'min_len': 4, 'max_len': 25, 'required': False}
 }
 

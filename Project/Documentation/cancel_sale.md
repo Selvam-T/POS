@@ -79,6 +79,21 @@ def _clear_sales_table(self):
 ### Future Considerations:
 - ReceiptContext reset is handled in the sales-frame signal path (`_on_cancel_requested`). If you want the dialog path to also reset `receipt_context`, mirror that call inside `_clear_sales_table()`.
 
+### Behavior with held receipts (clarification)
+
+- When a held receipt was previously loaded into the Sales table (the "hold-loaded" flow), the Clear Cart confirmation will remove the visible rows from the Sales table but it does *not* delete or mutate the original held receipt in the database by design. The dialog/controller currently performs only the user-confirmed UI clear; DB state and `receipt_context` remain unchanged unless other code explicitly resets them.
+- Rationale: `Clear Cart` is implemented as a conservative, local UI action that clears the in-memory/cart view. It is intentionally non-destructive to persisted held receipts to avoid accidental data loss. The system separates concerns:
+    - The dialog/controller confirms intent and returns control to the Main Window.
+    - Main Window handlers perform the actual table mutation and are responsible for higher-level state changes (such as resetting `ReceiptContext` or voiding receipts) so those side-effects remain explicit and auditable.
+- Consequence: after clearing the cart in `HOLD_LOADED` mode the UI may appear empty but the app still considers a held receipt active (because `receipt_context['active_receipt_id']` and `source` are unchanged). This is why clearing the cart alone does not remove the underlying held receipt rows from the DB.
+- Recommended behaviour options (implementation choices):
+    1. Non-destructive (current): keep Clear Cart as-is (UI-only). To fully abandon a hold-loaded cart, call the same receipt-reset path used after payment (preferred for safety) from the Clear Cart handler so the `receipt_context` is cleared after the table is cleared.
+ 2. Destructive: void the held receipt on Clear Cart (dangerous). Automatically deleting/marking the DB receipt as `CANCELLED` when the user clears the cart is destructive and should only be used when clearly documented and confirmed by the user.
+
+Include tests / UX notes:
+- If you adopt option (1), ensure `open_clearcart_dialog(..., on_finish=...)` calls `_reset_receipt_context()` (or the safe sequence used after payment) when the current `receipt_context` indicates a hold-loaded cart.
+- If you adopt option (2), show an explicit, second confirmation explaining that this will cancel the persisted held receipt in the DB.
+
 ---
 
 ## Dialog Wrapper Integration

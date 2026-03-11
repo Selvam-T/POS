@@ -645,7 +645,6 @@ class MainLoader(QMainWindow):
         ctx['status'] = 'UNPAID'
         self._apply_hold_loaded_sales_lock(True)
         self._refresh_sales_label_from_context()
-        print(f"ReceiptContext updated for hold load: {ctx}")
 
     def _apply_hold_loaded_sales_lock(self, locked: bool) -> None:
         """Lock qty editing in the sales table when a hold receipt is loaded.

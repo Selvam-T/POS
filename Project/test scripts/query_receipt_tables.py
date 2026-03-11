@@ -13,7 +13,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from modules.db_operation.db import get_db_path
-
+LIMIT = 10
 
 def print_table(cursor, table_name: str, limit: int = 10) -> None:
     try:
@@ -23,7 +23,7 @@ def print_table(cursor, table_name: str, limit: int = 10) -> None:
         print(f"Table not found: {table_name}\n")
         return
 
-    print(f"--- {table_name} (first {limit} rows) ---")
+    print(f"\n[ {table_name} Table - {limit} rows ]")
     print("| ".join(cols))
     print('-' * 80)
     try:
@@ -55,7 +55,7 @@ def main():
         sys.exit(1)
 
     for t in ("receipts", "receipt_items", "receipt_payments"):
-        print_table(cur, t, limit=100)
+        print_table(cur, t, limit=LIMIT)
 
     conn.close()
 
