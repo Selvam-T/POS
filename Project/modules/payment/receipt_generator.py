@@ -90,12 +90,13 @@ def _resolve_cashier_name(cashier_id: object) -> str:
 
 def _item_line(qty: float, unit: str, unit_price: float, name: str, line_total: float, width: int) -> str:
     left_width = _left_width(width)
-    product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 3))
+    # Reserve space for: qty, one space, product name, one space, and unit price column
+    product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 2 + config.RECEIPT_AMOUNT_WIDTH))
 
     original_unit = unit
 
     if unit == "Each":
-        unit = ""
+        unit = "ea"
     elif unit == "Kg":
         if qty < 1.0:
             unit = "g"
@@ -104,25 +105,35 @@ def _item_line(qty: float, unit: str, unit_price: float, name: str, line_total: 
             unit = "kg"
 
     qty_text = f"{_format_qty(qty)} {unit}".strip()[:config.RECEIPT_QTY_WIDTH].ljust(config.RECEIPT_QTY_WIDTH)
-    name_text = (name or "")[:product_width].ljust(product_width)
-
-    left_text = f"{qty_text}  {name_text}"
+    raw_name = str(name or "")
+    if len(raw_name) > product_width:
+        # show a single-char ellipsis and keep total width
+        if product_width <= 1:
+            name_text = "…"
+        else:
+            name_text = (raw_name[: product_width - 1] + "…")
+    else:
+        name_text = raw_name.ljust(product_width)
+    price_text = f"$ {_format_qty(unit_price)}".rjust(config.RECEIPT_AMOUNT_WIDTH)
+    # Single space between qty and name, and between name and unit price
+    left_text = f"{qty_text} {name_text} {price_text}"
     amount_text = f"$ {line_total:.2f}"
     main_line = f"{left_text}{' ' * config.RECEIPT_GAP}{amount_text.rjust(config.RECEIPT_AMOUNT_WIDTH)}"
-
-    if original_unit == "Kg":
-        price_prefix = " " * config.RECEIPT_QTY_WIDTH + " " * 2
-        unit_price_line = f"{price_prefix}  --> $ {unit_price:.2f}/kg"
-        return f"{main_line}\n{unit_price_line}"
 
     return main_line
 
 def _item_header(width: int) -> str:
     left_width = _left_width(width)
-    product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 3))
+    # Reserve space for unit price column inside the left area so columns fit the receipt width
+    product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 2 + config.RECEIPT_AMOUNT_WIDTH))
     qty_text = "Qty".ljust(config.RECEIPT_QTY_WIDTH)
-    name_text = "Product".ljust(product_width)
-    left_text = f"{qty_text}  {name_text}"
+    hdr_name = "Product"
+    if len(hdr_name) > product_width:
+        name_text = hdr_name[:product_width]
+    else:
+        name_text = hdr_name.ljust(product_width)
+    price_text = "Price".rjust(config.RECEIPT_AMOUNT_WIDTH)
+    left_text = f"{qty_text} {name_text} {price_text}"
     return f"{left_text}{' ' * config.RECEIPT_GAP}{'Total'.rjust(config.RECEIPT_AMOUNT_WIDTH)}"
 
 
@@ -256,8 +267,9 @@ def generate_receipt_text_from_snapshot(
         unit = str(item.get("unit") or "").strip()
         name = str(item.get("name") or item.get("product_name") or "")
         line_total = item.get("line_total")
+        unit_price = float(item.get("unit_price") or 0.0)
         total_amount += float(line_total or 0.0)
-        lines.append(_item_line(qty, unit, name, float(line_total or 0.0), width))
+        lines.append(_item_line(qty, unit, unit_price, name, float(line_total or 0.0), width))
     lines.append("-" * width)
 
     lines.append(_line_with_amount("Grand Total:", f"$ {total_amount:.2f}", width))

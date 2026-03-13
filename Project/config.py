@@ -74,7 +74,7 @@ ADDRESS_LINE_2 = "INDUS GARDEN SINGAPORE"
 RECEIPT_DEFAULT_WIDTH = 48
 RECEIPT_QTY_WIDTH = 10 # qty + unit
 RECEIPT_AMOUNT_WIDTH = 8  # $9999.99
-RECEIPT_GAP = 2
+RECEIPT_GAP = 1
 
 # Network settings for printer
 PRINTER_IP = "192.168.0.10"
@@ -156,3 +156,26 @@ GREETING_STRINGS = [
 
 # Current greeting message (can be updated by admin)
 GREETING_SELECTED = "Thanks for shopping with us!"
+
+# QR Code and PayNow settings
+
+merchant_name = 'Anumani Trading Pte Ltd'
+merchant_city = 'Singapore'
+country_code = 'SG'
+currency = 'SGD'
+
+# PayNow Corporate proxy (UEN or UEN+suffix if you use one)
+paynow_proxy_type = 'UEN'
+paynow_proxy_value = '201940352W'
+
+# Optional merchant category code (often unused for PayNow QR)
+mcc = 0
+
+# QR image settings (your QR library uses these)
+error_correction = 'H'
+box_size = 10
+border = 3
+expiry_seconds = 600
+
+# PayNow Logo overlay
+logo = 'paynow_logo-3.png'
