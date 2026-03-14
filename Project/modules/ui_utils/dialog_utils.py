@@ -10,7 +10,7 @@ unless they explicitly call them.
 
 import os
 import traceback
-from typing import Optional
+from typing import Optional, Iterable, Callable
 
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
@@ -421,3 +421,47 @@ def build_error_fallback_dialog(host_window, dialog_name: str, qss_path: str = N
 
     btn_close.setFocus()
     return dlg
+
+
+def clear_display(target_widgets: Iterable, status_label=None, extra_post_clear: Optional[Callable] = None) -> None:
+    """Clear a set of widgets and an optional status label.
+
+    target_widgets: an iterable (e.g., list or dict.values()) of QWidget-like objects supporting `clear()`.
+    status_label: optional QLabel to be cleared via `ui_feedback.clear_status_label`.
+    extra_post_clear: optional callable executed after clearing widgets (safe-wrapped).
+    """
+    # Clear widget values
+    try:
+        # Support dicts by accepting .values()
+        if hasattr(target_widgets, 'values'):
+            iterator = target_widgets.values()
+        else:
+            iterator = target_widgets or []
+    except Exception:
+        iterator = []
+
+    for w in iterator:
+        try:
+            if w is None:
+                continue
+            # Some widgets may not have clear(); guard accordingly
+            clear_fn = getattr(w, 'clear', None)
+            if callable(clear_fn):
+                clear_fn()
+        except Exception:
+            pass
+
+    # Clear status label via ui_feedback helper if provided
+    try:
+        if status_label is not None:
+            from modules.ui_utils import ui_feedback
+            ui_feedback.clear_status_label(status_label)
+    except Exception:
+        pass
+
+    # Run any controller-specific extra cleanup
+    if extra_post_clear:
+        try:
+            extra_post_clear()
+        except Exception:
+            pass

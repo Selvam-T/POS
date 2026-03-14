@@ -5,7 +5,8 @@ from PyQt5.QtCore import Qt
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui, 
     require_widgets, 
-    set_dialog_info
+    set_dialog_info,
+    clear_display,
 )
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 from modules.ui_utils import input_handler, ui_feedback
@@ -129,15 +130,25 @@ def launch_manual_entry_dialog(parent):
     # Search Exclusivity (Type in code -> clear name, vice versa)
     enforce_exclusive_lineedits(
         widgets['code'], widgets['name_srch'],
-        on_switch_to_a=lambda: _set_gate_state(False),
-        on_switch_to_b=lambda: _set_gate_state(False)
+        on_switch_to_a=lambda: clear_display([widgets['qty'], widgets['unit']], widgets['status'], extra_post_clear=lambda: _set_gate_state(False)),
+        on_switch_to_b=lambda: clear_display([widgets['qty'], widgets['unit']], widgets['status'], extra_post_clear=lambda: _set_gate_state(False))
     )
 
     # Name search suggestions
     product_names = [rec[0] for rec in (dbop.PRODUCT_CACHE or {}).values() if rec[0]]
+    def _name_selected():
+        try:
+            coord._sync_fields(widgets['name_srch'])
+        except Exception:
+            pass
+        try:
+            widgets['qty'].setFocus()
+        except Exception:
+            pass
+
     input_handler.setup_name_search_lineedit(
         widgets['name_srch'], product_names,
-        on_selected=lambda: coord._sync_fields(widgets['name_srch']),
+        on_selected=_name_selected,
         trigger_on_finish=False,
     )
 

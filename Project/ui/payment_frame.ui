@@ -404,6 +404,9 @@
          <height>40</height>
         </size>
        </property>
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
       </widget>
      </item>
      <item row="5" column="0">
@@ -543,6 +546,9 @@ RECEIPT</string>
       </property>
       <item row="0" column="0">
        <widget class="QPushButton" name="keyNumBtn7">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>7</string>
         </property>
@@ -550,6 +556,9 @@ RECEIPT</string>
       </item>
       <item row="0" column="1">
        <widget class="QPushButton" name="keyNumBtn8">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>8</string>
         </property>
@@ -557,6 +566,9 @@ RECEIPT</string>
       </item>
       <item row="0" column="2">
        <widget class="QPushButton" name="keyNumBtn9">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>9</string>
         </property>
@@ -564,6 +576,9 @@ RECEIPT</string>
       </item>
       <item row="0" column="3">
        <widget class="QPushButton" name="keyDolBtn10">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>$10</string>
         </property>
@@ -571,6 +586,9 @@ RECEIPT</string>
       </item>
       <item row="0" column="4">
        <widget class="QPushButton" name="keyFastBtntab">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>TAB</string>
         </property>
@@ -585,6 +603,9 @@ RECEIPT</string>
       </item>
       <item row="1" column="0">
        <widget class="QPushButton" name="keyNumBtn4">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>4</string>
         </property>
@@ -592,6 +613,9 @@ RECEIPT</string>
       </item>
       <item row="1" column="1">
        <widget class="QPushButton" name="keyNumBtn5">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>5</string>
         </property>
@@ -599,6 +623,9 @@ RECEIPT</string>
       </item>
       <item row="1" column="2">
        <widget class="QPushButton" name="keyNumBtn6">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>6</string>
         </property>
@@ -606,6 +633,9 @@ RECEIPT</string>
       </item>
       <item row="1" column="3">
        <widget class="QPushButton" name="keyDolBtn50">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>$50</string>
         </property>
@@ -613,6 +643,9 @@ RECEIPT</string>
       </item>
       <item row="1" column="4">
        <widget class="QPushButton" name="keyFastBtnshftab">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>SHIFT+TAB</string>
         </property>
@@ -620,6 +653,9 @@ RECEIPT</string>
       </item>
       <item row="2" column="0">
        <widget class="QPushButton" name="keyNumBtn1">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>1</string>
         </property>
@@ -627,6 +663,9 @@ RECEIPT</string>
       </item>
       <item row="2" column="1">
        <widget class="QPushButton" name="keyNumBtn2">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>2</string>
         </property>
@@ -634,6 +673,9 @@ RECEIPT</string>
       </item>
       <item row="2" column="2">
        <widget class="QPushButton" name="keyNumBtn3">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>3</string>
         </property>
@@ -641,6 +683,9 @@ RECEIPT</string>
       </item>
       <item row="2" column="3">
        <widget class="QPushButton" name="keyDolBtn100">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>$100</string>
         </property>
@@ -648,6 +693,9 @@ RECEIPT</string>
       </item>
       <item row="2" column="4">
        <widget class="QPushButton" name="keyFastBtnclr">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>CLEAR</string>
         </property>
@@ -662,6 +710,9 @@ RECEIPT</string>
       </item>
       <item row="3" column="0">
        <widget class="QPushButton" name="keyNumBtn00">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>00</string>
         </property>
@@ -669,6 +720,9 @@ RECEIPT</string>
       </item>
       <item row="3" column="1">
        <widget class="QPushButton" name="keyNumBtn0">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>0</string>
         </property>
@@ -676,6 +730,9 @@ RECEIPT</string>
       </item>
       <item row="3" column="2">
        <widget class="QPushButton" name="keyNumBtndot">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>.</string>
         </property>
@@ -683,6 +740,9 @@ RECEIPT</string>
       </item>
       <item row="3" column="3">
        <widget class="QPushButton" name="keyFastBtnenter">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>ENTER</string>
         </property>
@@ -690,6 +750,9 @@ RECEIPT</string>
       </item>
       <item row="3" column="4">
        <widget class="QPushButton" name="keyFastBtnbksp">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>BKSP</string>
         </property>
@@ -730,41 +793,20 @@ RECEIPT</string>
   </layout>
  </widget>
  <tabstops>
-  <tabstop>cashPaySlcBtn</tabstop>
-  <tabstop>netsPaySlcBtn</tabstop>
-  <tabstop>paynowPaySlcBtn</tabstop>
-  <tabstop>voucherPaySlcBtn</tabstop>
   <tabstop>tenderValLineEdit</tabstop>
   <tabstop>payPayOpsBtn</tabstop>
   <tabstop>printPayOpsBtn</tabstop>
   <tabstop>resetPayOpsBtn</tabstop>
-  <tabstop>keyRefundBtn</tabstop>
-  <tabstop>keyVendorBtn</tabstop>
-  <tabstop>keyNumBtn7</tabstop>
-  <tabstop>keyNumBtn8</tabstop>
-  <tabstop>keyNumBtn9</tabstop>
-  <tabstop>keyDolBtn10</tabstop>
-  <tabstop>keyFastBtntab</tabstop>
-  <tabstop>keyNumBtn4</tabstop>
-  <tabstop>keyNumBtn5</tabstop>
-  <tabstop>keyNumBtn6</tabstop>
-  <tabstop>keyDolBtn50</tabstop>
-  <tabstop>keyFastBtnshftab</tabstop>
-  <tabstop>keyNumBtn1</tabstop>
-  <tabstop>keyNumBtn2</tabstop>
-  <tabstop>keyNumBtn3</tabstop>
-  <tabstop>keyDolBtn100</tabstop>
-  <tabstop>keyFastBtnclr</tabstop>
-  <tabstop>keyNumBtn00</tabstop>
-  <tabstop>keyNumBtn0</tabstop>
-  <tabstop>keyNumBtndot</tabstop>
-  <tabstop>keyFastBtnenter</tabstop>
-  <tabstop>keyFastBtnbksp</tabstop>
+  <tabstop>netsPaySlcBtn</tabstop>
   <tabstop>netsPayLineEdit</tabstop>
+  <tabstop>paynowPaySlcBtn</tabstop>
   <tabstop>paynowPayLineEdit</tabstop>
+  <tabstop>voucherPaySlcBtn</tabstop>
   <tabstop>voucherPayLineEdit</tabstop>
+  <tabstop>cashPaySlcBtn</tabstop>
   <tabstop>cashPayLineEdit</tabstop>
-  <tabstop>balanceValLineEdit</tabstop>
+  <tabstop>keyVendorBtn</tabstop>
+  <tabstop>keyRefundBtn</tabstop>
  </tabstops>
  <resources/>
  <connections/>

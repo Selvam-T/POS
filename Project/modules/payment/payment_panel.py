@@ -14,6 +14,7 @@ from modules.ui_utils.focus_utils import FocusGate
 from modules.ui_utils.dialog_utils import report_to_statusbar
 from modules.ui_utils.error_logger import log_error
 from modules.payment import receipt_generator
+from modules.payment.keypad_controller import KeypadController
 from modules.devices import print_helper
 
 
@@ -41,6 +42,11 @@ class PaymentPanel(QObject):
         self._cache_widgets()
         self._wire_buttons()
         self._wire_inputs()
+        self._keypad = KeypadController(
+            self.widget,
+            enter_handler=self._handle_keypad_enter,
+            tab_handler=self._handle_keypad_tab,
+        )
         # Setup a FocusGate to remember and manage placeholder visibility
         try:
             pay_ws = [self._widgets.get(k) for k in ('cash', 'nets', 'paynow', 'voucher', 'tender')]
@@ -193,6 +199,50 @@ class PaymentPanel(QObject):
                 field.installEventFilter(self)
             except Exception:
                 pass
+
+    def _handle_keypad_tab(self, target, reverse: bool = False) -> bool:
+        if target is None:
+            return False
+        try:
+            target.focusNextPrevChild(not reverse)
+            return True
+        except Exception:
+            return False
+
+    def _handle_keypad_enter(self, obj) -> bool:
+        if obj is None:
+            return False
+        if obj not in self._pay_field_order() and obj != self._widgets.get('tender'):
+            return False
+
+        try:
+            from modules.ui_utils import input_handler
+            text = obj.text() if hasattr(obj, 'text') else ''
+            if text and text.strip():
+                if obj == self._widgets.get('voucher'):
+                    input_handler.handle_voucher_input(obj)
+                else:
+                    input_handler.handle_currency_input(obj)
+        except Exception as exc:
+            self._has_validation_error = True
+            self._validation_message = str(exc) or "Invalid amount."
+            self._mark_widget_invalid(obj)
+            self._set_status(self._validation_message, is_error=True)
+            try:
+                obj.setFocus()
+                if hasattr(obj, 'selectAll'):
+                    obj.selectAll()
+            except Exception:
+                pass
+            return True
+
+        self._handle_enter_navigation(
+            obj,
+            self._get_validated_amount(self._widgets.get('cash')),
+            self._get_validated_amount(self._widgets.get('tender')),
+            self._last_unalloc,
+        )
+        return True
 
     # Parsing and formatting helpers
     @staticmethod

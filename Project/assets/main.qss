@@ -207,6 +207,19 @@ QPushButton#voucherPaySlcBtn:hover { background-color: #e0c04a; }
 QPushButton#voucherPaySlcBtn:pressed { background-color: #b89628; }
 
 
+/* Focus highlight for payment selection buttons */
+QPushButton#cashPaySlcBtn:focus,
+QPushButton#netsPaySlcBtn:focus,
+QPushButton#paynowPaySlcBtn:focus,
+QPushButton#voucherPaySlcBtn:focus,
+QPushButton#keyVendorBtn:focus,
+QPushButton#keyRefundBtn:focus {
+  outline: none;
+  border: 3px solid #ffd54f;
+  border-radius: 8px;
+}
+
+
 /* 5. Operation buttons */
 
 #payPayOpsBtn, #printPayOpsBtn, #resetPayOpsBtn {

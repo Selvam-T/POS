@@ -10,6 +10,7 @@ from modules.ui_utils.dialog_utils import (
     report_exception_post_close,
     log_and_set_post_close,
 )
+from modules.ui_utils.dialog_utils import clear_display
 from modules.ui_utils.canonicalization import canonicalize_product_code
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 from modules.ui_utils import input_handler, ui_feedback
@@ -476,33 +477,23 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             pass
 
     def _clear_remove_display() -> None:
-        for w in rem_display_targets.values():
-            try:
-                w.clear()
-            except Exception:
-                pass
         try:
-            ui_feedback.clear_status_label(widgets['rem_status'])
+            clear_display(rem_display_targets, widgets['rem_status'])
         except Exception:
             pass
 
     def _clear_update_display() -> None:
-        # Keep sources intact; clear stale mapped values.
-        for w in upd_lineedit_targets.values():
+        def _upd_extra():
             try:
-                w.clear()
+                _set_upd_inputs_enabled(False)
+            except Exception:
+                pass
+            try:
+                _upd_loaded.clear()
             except Exception:
                 pass
         try:
-            ui_feedback.clear_status_label(widgets['upd_status'])
-        except Exception:
-            pass
-        try:
-            _set_upd_inputs_enabled(False)
-        except Exception:
-            pass
-        try:
-            _upd_loaded.clear()
+            clear_display(upd_lineedit_targets, widgets['upd_status'], extra_post_clear=_upd_extra)
         except Exception:
             pass
 
