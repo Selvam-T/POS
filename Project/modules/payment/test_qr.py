@@ -202,13 +202,7 @@ def main():
     img = generate_qr_image(payload, expiry)
     img = overlay_logo(img)
     img = add_qr_card(img)
-
-    out_path = os.path.abspath("paynow_qr.png")
-    img.save(out_path)
-    print("\nSaved:", out_path)
-
     img.show()
-
 
 if __name__ == "__main__":
     main()

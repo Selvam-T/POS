@@ -1,4 +1,5 @@
 import os
+from functools import partial
 from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel, QComboBox, QTabWidget
 from PyQt5.QtCore import Qt, QTimer, QDateTime
 
@@ -511,44 +512,32 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     # Enter-to-commit for name search:
     # - Map values on Enter
     # - Jump focus only when a match exists
-    def _commit_rem_name_srch() -> None:
+    def _commit_name_srch(source_le: QLineEdit, next_widget) -> None:
         try:
-            txt = widgets['rem_name_srch'].text() or ''
+            txt = source_le.text() or ''
         except Exception:
             txt = ''
         try:
             result, _err = _lookup_product_by_name(txt)
         except Exception:
             result = None
-        _sync_source(widgets['rem_name_srch'])
+        _sync_source(source_le)
         if result:
             try:
-                widgets['rem_ok'].setFocus()
-            except Exception:
-                pass
-
-    def _commit_upd_name_srch() -> None:
-        try:
-            txt = widgets['upd_name_srch'].text() or ''
-        except Exception:
-            txt = ''
-        try:
-            result, _err = _lookup_product_by_name(txt)
-        except Exception:
-            result = None
-        _sync_source(widgets['upd_name_srch'])
-        if result:
-            try:
-                widgets['upd_cancel'].setFocus()
+                next_widget.setFocus()
             except Exception:
                 pass
 
     try:
-        widgets['rem_name_srch'].returnPressed.connect(_commit_rem_name_srch)
+        widgets['rem_name_srch'].returnPressed.connect(
+            partial(_commit_name_srch, widgets['rem_name_srch'], widgets['rem_ok'])
+        )
     except Exception:
         pass
     try:
-        widgets['upd_name_srch'].returnPressed.connect(_commit_upd_name_srch)
+        widgets['upd_name_srch'].returnPressed.connect(
+            partial(_commit_name_srch, widgets['upd_name_srch'], widgets['upd_cancel'])
+        )
     except Exception:
         pass
 

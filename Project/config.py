@@ -178,4 +178,4 @@ border = 3
 expiry_seconds = 600
 
 # PayNow Logo overlay
-logo = 'paynow_logo-3.png'
+logo = 'paynow_logo.png'

@@ -137,8 +137,33 @@ def launch_manual_entry_dialog(parent):
     product_names = [rec[0] for rec in (dbop.PRODUCT_CACHE or {}).values() if rec[0]]
     input_handler.setup_name_search_lineedit(
         widgets['name_srch'], product_names,
-        on_selected=lambda: coord._sync_fields(widgets['name_srch'])
+        on_selected=lambda: coord._sync_fields(widgets['name_srch']),
+        trigger_on_finish=False,
     )
+
+    def _commit_name_srch() -> None:
+        try:
+            txt = widgets['name_srch'].text() or ''
+        except Exception:
+            txt = ''
+        try:
+            result = input_handler.get_coordinator_lookup(txt, 'name')
+        except Exception:
+            result = None
+        try:
+            coord._sync_fields(widgets['name_srch'])
+        except Exception:
+            pass
+        if result:
+            try:
+                widgets['qty'].setFocus()
+            except Exception:
+                pass
+
+    try:
+        widgets['name_srch'].returnPressed.connect(_commit_name_srch)
+    except Exception:
+        pass
 
     # Auto-clear-on-correction: Clears the red error once the user types a valid qty
     coord.register_validator(
