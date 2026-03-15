@@ -100,40 +100,37 @@ QLabel#totalValue {
     border: 1px solid #4317ab;
 }
 
-/* --- Add Buttons (vegBtn, manualBtn) --- */
-QPushButton#vegBtn,
-QPushButton#manualBtn {
+/* --- Add Buttons (vegEntryBtn, manualEntryBtn) --- */
+
+QFrame#salesFrame QPushButton {
     border-radius: 18px;
     padding: 8px 10px;
     color: white;
     font-size: 14pt;
 }
-QPushButton#vegBtn { background-color: green; }
-QPushButton#vegBtn:hover { background-color: #006400; }
-QPushButton#vegBtn:pressed { background-color: #004d00; }
-QPushButton#manualBtn { background-color: purple; }
-QPushButton#manualBtn:hover { background-color: #5e0e5e; }
-QPushButton#manualBtn:pressed { background-color: #3c003c; }
 
-/* --- Receipt Action Buttons (clearcartBtn, holdSalesBtn, viewholdBtn) --- */
-QPushButton#clearcartBtn,
-QPushButton#holdSalesBtn,
-QPushButton#viewholdBtn {
-    border-radius: 18px;
-    padding: 12px 20px;
-    color: white;
-    font-size: 14pt;
+/* Keyboard focus */
+QFrame#salesFrame QPushButton:focus {
+    outline: none;
+    border: 3px solid #f0714e;
 }
-QPushButton#clearcartBtn { background-color: #660600; }
-QPushButton#clearcartBtn:hover { background-color: #7a0800; }
-QPushButton#clearcartBtn:pressed { background-color: #4b0400; }
+
+QPushButton#vegEntryBtn { background-color: green; }
+QPushButton#vegEntryBtn:hover { background-color: #006400; }
+QPushButton#vegEntryBtn:pressed { background-color: #004d00; }
+QPushButton#manualEntryBtn { background-color: purple; }
+QPushButton#manualEntryBtn:hover { background-color: #5e0e5e; }
+QPushButton#manualEntryBtn:pressed { background-color: #3c003c; }
+
+QPushButton#clearCartBtn { background-color: #660600; }
+QPushButton#clearCartBtn:hover { background-color: #7a0800; }
+QPushButton#clearCartBtn:pressed { background-color: #4b0400; }
 QPushButton#holdSalesBtn { background-color: #998900; }
 QPushButton#holdSalesBtn:hover { background-color: #b3a300; }
 QPushButton#holdSalesBtn:pressed { background-color: #7a6f00; }
-QPushButton#viewholdBtn { background-color: #006699; }
-QPushButton#viewholdBtn:hover { background-color: #0077b3; }
-QPushButton#viewholdBtn:pressed { background-color: #004d73; }
-
+QPushButton#viewHoldBtn { background-color: #006699; }
+QPushButton#viewHoldBtn:hover { background-color: #0077b3; }
+QPushButton#viewHoldBtn:pressed { background-color: #004d73; }
 
 /* 4. Table Styling */
 QWidget#vegEntryDialog QTableWidget#vegEntryTable {

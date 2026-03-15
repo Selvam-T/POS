@@ -394,8 +394,8 @@ QFrame#menuFrame {
   border: 1px solid #333333;
   border-radius: 8px;
 }
+
 QFrame#menuFrame QPushButton {
-  /* Square icon-only buttons, centered visually */
   min-width: 64px;
   max-width: 64px;
   min-height: 64px;
@@ -405,23 +405,23 @@ QFrame#menuFrame QPushButton {
   background: Transparent;
   color: transparent;  
 }
-QFrame#menuFrame QPushButton:hover {
-  border: 2px solid yellow;
+QFrame#menuFrame QPushButton:hover,
+QFrame#menuFrame QPushButton:focus {
+  border: 2px solid #f59733;;
   background: #f7f08b;
 }
 QFrame#menuFrame QPushButton:pressed {
-    border: 2px solid orange;
-    background:Transparent;
+    border: 2px solid #f59733;
+    background: #f7ca8b;
 }
 
-/* Fallback: show text if icon couldn't be loaded (set via iconFallback property) */
+/* Fallback: show text if icon couldn't be loaded */
 QFrame#menuFrame QPushButton[iconFallback="true"] {
-  /* Fallback text style: black background, bold white text, white border */
   background-color: #4a1717;
   color: #ffffff;
   font-weight: bold;
   border: 1px solid #ffffff;
-  /* Size adjustments for text buttons */
+  
   min-width: 120px;
   max-width: 220px;
   min-height: 40px;

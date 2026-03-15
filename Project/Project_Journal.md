@@ -334,15 +334,15 @@ salesFrame (QFrame)
     │
     ├── totalContainer (QWidget) - [stretch=2]
     │   └── Displays subtotal, tax, total
-    │       ├── vegBtn (QPushButton) - "Vegetable Entry"
+    │       ├── vegEntryBtn (QPushButton) - "Vegetable Entry"
     │       │   └── Opens vegetable_entry.ui dialog
-    │       └── manualBtn (QPushButton) - "Manual Entry"
+    │       └── manualEntryBtn (QPushButton) - "Manual Entry"
     │           └── Manual product entry
     └── receiptContainer (QWidget) - [stretch=2]
         └── receiptLayout (QHBoxLayout)
-            ├── clearcartBtn (QPushButton) - "Clear Cart"
+            ├── clearCartBtn (QPushButton) - "Clear Cart"
             ├── holdSalesBtn (QPushButton) - "On Hold"
-            └── viewholdBtn (QPushButton) - "View Hold"
+            └── viewHoldBtn (QPushButton) - "View Hold"
         └── Height: 4.0em, buttons expand vertically
 ```
 

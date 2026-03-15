@@ -152,14 +152,26 @@
        <number>20</number>
       </property>
       <item>
-       <widget class="QPushButton" name="vegBtn">
+       <widget class="QPushButton" name="vegEntryBtn">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
         <property name="text">
          <string>Vegetable Entry</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="manualBtn">
+       <widget class="QPushButton" name="manualEntryBtn">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
         <property name="text">
          <string>Manual Entry</string>
         </property>
@@ -184,7 +196,13 @@
        <number>10</number>
       </property>
       <item>
-       <widget class="QPushButton" name="clearcartBtn">
+       <widget class="QPushButton" name="clearCartBtn">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
         <property name="text">
          <string>Clear Cart</string>
         </property>
@@ -192,13 +210,25 @@
       </item>
       <item>
        <widget class="QPushButton" name="holdSalesBtn">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
         <property name="text">
          <string>Hold Sales</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="viewholdBtn">
+       <widget class="QPushButton" name="viewHoldBtn">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
         <property name="text">
          <string>View Holds</string>
         </property>

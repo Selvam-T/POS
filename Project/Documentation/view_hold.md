@@ -29,7 +29,7 @@ Design hard rule:
 
 Launch + wiring:
 - Main launch guard + wrapper open: `main.py` (`open_viewhold_panel`)
-- Button wiring: `modules/sales/sales_frame_setup.py` (`viewholdBtn`)
+- Button wiring: `modules/sales/sales_frame_setup.py` (`viewHoldBtn`)
 - Signal target: `modules/sales/sales_frame_setup.py` (`viewHoldLoaded(int, float)`) and `main.py` (`_on_view_hold_loaded`)
 
 DB layer:

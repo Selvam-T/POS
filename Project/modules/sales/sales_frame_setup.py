@@ -80,11 +80,11 @@ class SalesFrame(QObject):
             height = self._em_px(add_container, 4.0)
             add_container.setMinimumHeight(height)
             add_container.setMaximumHeight(height)
-            veg_btn = self.widget.findChild(QPushButton, 'vegBtn')
+            veg_btn = self.widget.findChild(QPushButton, 'vegEntryBtn')
             if veg_btn is not None:
                 veg_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
                 veg_btn.clicked.connect(self._main_window.launch_vegetable_entry_dialog)
-            manual_btn = self.widget.findChild(QPushButton, 'manualBtn')
+            manual_btn = self.widget.findChild(QPushButton, 'manualEntryBtn')
             if manual_btn is not None:
                 manual_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
                 manual_btn.clicked.connect(self._main_window.launch_manual_entry_dialog)
@@ -98,7 +98,7 @@ class SalesFrame(QObject):
         receipt_container.setMinimumHeight(height)
         receipt_container.setMaximumHeight(height)
 
-        clearcart_btn = receipt_container.findChild(QPushButton, 'clearcartBtn')
+        clearcart_btn = receipt_container.findChild(QPushButton, 'clearCartBtn')
         if clearcart_btn is not None:
             clearcart_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
             clearcart_btn.clicked.connect(self._on_cancel_clicked)
@@ -108,7 +108,7 @@ class SalesFrame(QObject):
             holdsales_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
             holdsales_btn.clicked.connect(self._on_hold_requested)
 
-        viewhold_btn = receipt_container.findChild(QPushButton, 'viewholdBtn')
+        viewhold_btn = receipt_container.findChild(QPushButton, 'viewHoldBtn')
         if viewhold_btn is not None:
             viewhold_btn.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
             viewhold_btn.clicked.connect(self._main_window.open_viewhold_panel)
