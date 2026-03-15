@@ -7,7 +7,7 @@ the application layer (`main.py`).
 import os
 from PyQt5 import uic
 from PyQt5.QtCore import QObject, pyqtSignal, Qt, QEvent
-from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QLineEdit, QLabel, QFrame
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QLineEdit, QLabel, QFrame, QWidget
 
 from modules.ui_utils import ui_feedback
 from modules.ui_utils.focus_utils import FocusGate
@@ -16,7 +16,7 @@ from modules.ui_utils.error_logger import log_error
 from modules.payment import receipt_generator
 from modules.payment.keypad_controller import KeypadController
 from modules.devices import print_helper
-
+from PyQt5.QtWidgets import QApplication
 
 class PaymentPanel(QObject):
     payRequested = pyqtSignal(dict)
@@ -47,6 +47,19 @@ class PaymentPanel(QObject):
             enter_handler=self._handle_keypad_enter,
             tab_handler=self._handle_keypad_tab,
         )
+        try:
+            from PyQt5.QtWidgets import QApplication
+            # Debug logging removed; keep flag disabled by default
+            self._debug_focus_log = False
+            app = QApplication.instance()
+            if app is not None:
+                # ensure widget sees Tab key events
+                try:
+                    self.widget.installEventFilter(self)
+                except Exception:
+                    pass
+        except Exception:
+            self._debug_focus_log = False
         # Setup a FocusGate to remember and manage placeholder visibility
         try:
             pay_ws = [self._widgets.get(k) for k in ('cash', 'nets', 'paynow', 'voucher', 'tender')]
@@ -201,13 +214,41 @@ class PaymentPanel(QObject):
                 pass
 
     def _handle_keypad_tab(self, target, reverse: bool = False) -> bool:
-        if target is None:
+        ordered = self._keypad_tab_order()
+        if not ordered:
             return False
-        try:
-            target.focusNextPrevChild(not reverse)
+
+        cur = target if target in ordered else None
+        if cur is None:
+            ordered[0].setFocus()
             return True
-        except Exception:
-            return False
+
+        idx = ordered.index(cur)
+        step = -1 if reverse else 1
+        next_idx = (idx + step) % len(ordered)
+        ordered[next_idx].setFocus()
+        return True
+
+    def _keypad_tab_order(self):
+        # Keypad-only tab order (keeps focus inside payment panel)
+        names = [
+            'tenderValLineEdit',
+            'payPayOpsBtn',
+            'printPayOpsBtn',
+            'resetPayOpsBtn',
+            'netsPaySlcBtn',
+            'netsPayLineEdit',
+            'paynowPaySlcBtn',
+            'paynowPayLineEdit',
+            'voucherPaySlcBtn',
+            'voucherPayLineEdit',
+            'cashPaySlcBtn',
+            'cashPayLineEdit',
+            'keyVendorBtn',
+            'keyRefundBtn',
+        ]
+        widgets = [self.widget.findChild(QWidget, n) for n in names]
+        return [w for w in widgets if w is not None and w.isEnabled() and w.focusPolicy() != Qt.NoFocus]
 
     def _handle_keypad_enter(self, obj) -> bool:
         if obj is None:
@@ -243,6 +284,10 @@ class PaymentPanel(QObject):
             self._last_unalloc,
         )
         return True
+
+    def _on_focus_changed(self, old, new) -> None:
+        # focus change handler removed (debugging)
+        return
 
     # Parsing and formatting helpers
     @staticmethod
@@ -626,37 +671,7 @@ class PaymentPanel(QObject):
                 obj.click()
                 return True
 
-            if obj in self._pay_field_order() or obj == self._widgets.get('tender'):
-                try:
-                    from modules.ui_utils import input_handler
-                    # only validate when there's content
-                    text = obj.text() if hasattr(obj, 'text') else ''
-                    if text and text.strip():
-                        if obj == self._widgets.get('voucher'):
-                            input_handler.handle_voucher_input(obj)
-                        else:
-                            input_handler.handle_currency_input(obj)
-                except Exception as exc:
-                    self._has_validation_error = True
-                    self._validation_message = str(exc) or "Invalid amount."
-                    self._mark_widget_invalid(obj)
-                    self._set_status(self._validation_message, is_error=True)
-                    try:
-                        obj.setFocus()
-                        if hasattr(obj, 'selectAll'):
-                            obj.selectAll()
-                    except Exception:
-                        pass
-                    return True
-
-                # valid — continue navigation
-                self._handle_enter_navigation(
-                    obj,
-                    self._get_validated_amount(self._widgets.get('cash')),
-                    self._get_validated_amount(self._widgets.get('tender')),
-                    self._last_unalloc,
-                )
-                return True
+        # Tab/Backtab handling and debug logging removed (was for testing)
 
         return super().eventFilter(obj, event)
 

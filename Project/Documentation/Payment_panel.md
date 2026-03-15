@@ -96,7 +96,4 @@ change = tender - cash
 
 ## See also
 
-- `Documentation/payment_processing.md` — detailed commit flow and distinction between new-sale and held-receipt paths; the DB commit is executed by `main.py`.
-- `Documentation/printer.md` — printer helper transport details, cut behavior, and config keys.
-- `Documentation/cash_drawer.md` — drawer trigger conditions, config, error propagation/logging, and `main.py` vs `printer_and_drawer.py` responsibilities.
-- [Documentation/payment_keypad.md](Documentation/payment_keypad.md) — keypad wiring, target routing, and Enter-key behavior.
+	Additionally, local keypad Tab navigation rules (keyboard Tab remains global; see keypad doc for details).

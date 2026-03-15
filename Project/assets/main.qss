@@ -215,10 +215,13 @@ QPushButton#voucherPaySlcBtn:focus,
 QPushButton#keyVendorBtn:focus,
 QPushButton#keyRefundBtn:focus {
   outline: none;
-  border: 3px solid #ffd54f;
+  border: 3px solid #ff9b4f;
   border-radius: 8px;
 }
 
+QPushButton#voucherPaySlcBtn:focus {
+  border: 3px solid #4fa1ff;
+}
 
 /* 5. Operation buttons */
 

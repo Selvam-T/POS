@@ -26,5 +26,7 @@ The keypad maps [ui/payment_frame.ui](ui/payment_frame.ui) buttons to payment fi
 - When focus is on an allowed field, keypad ENTER delegates to `PaymentPanel` to validate and jump using the existing Enter navigation rules.
 
 ## Notes
-- Tab/Shift-Tab is intentionally left to the panel and UI tab order configuration.
+- Deleting `<tabstop>` entries in [ui/payment_frame.ui](ui/payment_frame.ui) only changes the tab order for that specific form; it does not modify the application's global Qt tab chain used by keyboard Tab.
+- Keep keyboard Tab global: the standard keyboard Tab/Shift‑Tab follows Qt's global tab chain and remains application-wide.
+- Make keypad Tab local: keypad Tab and Shift‑Tab ignore Qt's tab chain and instead manually cycle focus through a fixed, keypad-only list of payment-panel widgets. This ensures the keypad's Tab navigation stays inside the payment panel and does not jump to other UI sections.
 - Validation and formatting still use [modules/ui_utils/input_handler.py](modules/ui_utils/input_handler.py) via `PaymentPanel`.

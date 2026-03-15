@@ -73,8 +73,40 @@ class KeypadController(QObject):
                     self._last_target = obj
             elif isinstance(obj, QPushButton):
                 if obj is not self._enter_button:
-                    self._last_button = obj
+                    name = obj.objectName() or ""
+                    if not name.startswith("keyNumBtn") and not name.startswith("keyDolBtn"):
+                        if name not in {
+                            "keyFastBtntab",
+                            "keyFastBtnshftab",
+                            "keyFastBtnclr",
+                            "keyFastBtnenter",
+                            "keyFastBtnbksp",
+                            "keyNumBtndot",
+                        }:
+                            self._last_button = obj
         return super().eventFilter(obj, event)
+
+    def _get_tab_target(self):
+        fw = QApplication.focusWidget()
+        if isinstance(fw, QLineEdit) and not fw.isReadOnly():
+            return fw
+        if isinstance(fw, QPushButton):
+            name = fw.objectName() or ""
+            if not name.startswith("keyNumBtn") and not name.startswith("keyDolBtn"):
+                if name not in {
+                    "keyFastBtntab",
+                    "keyFastBtnshftab",
+                    "keyFastBtnclr",
+                    "keyFastBtnenter",
+                    "keyFastBtnbksp",
+                    "keyNumBtndot",
+                }:
+                    return fw
+        if isinstance(self._last_button, QPushButton):
+            return self._last_button
+        if isinstance(self._last_target, QLineEdit) and not self._last_target.isReadOnly():
+            return self._last_target
+        return None
 
     def _get_target(self):
         fw = QApplication.focusWidget()
@@ -144,7 +176,7 @@ class KeypadController(QObject):
         target.clear()
 
     def _on_tab(self, reverse: bool = False):
-        target = self._get_target()
+        target = self._get_tab_target()
         if self._tab_handler is not None and self._tab_handler(target, reverse):
             return
         if target is not None:
