@@ -211,9 +211,7 @@ QPushButton#voucherPaySlcBtn:pressed { background-color: #b89628; }
 QPushButton#cashPaySlcBtn:focus,
 QPushButton#netsPaySlcBtn:focus,
 QPushButton#paynowPaySlcBtn:focus,
-QPushButton#voucherPaySlcBtn:focus,
-QPushButton#keyVendorBtn:focus,
-QPushButton#keyRefundBtn:focus {
+QPushButton#voucherPaySlcBtn:Focus {
   outline: none;
   border: 3px solid #ff9b4f;
   border-radius: 8px;
@@ -271,7 +269,10 @@ QPushButton#voucherPaySlcBtn:focus {
 /* Focus highlight for payment operation buttons */
 QPushButton#payPayOpsBtn:focus,
 QPushButton#resetPayOpsBtn:focus,
-QPushButton#printPayOpsBtn:focus {
+QPushButton#printPayOpsBtn:focus,
+QPushButton#keyVendorBtn:focus,
+QPushButton#keyRefundBtn:focus,
+QPushButton#key2ndScreenBtn:focus {
     outline: none;
     font-size: 24px;
     border: 3px solid yellow;
@@ -350,21 +351,51 @@ QPushButton#printPayOpsBtn:focus {
   color: white;
 }
 
-#keypadFrame #keyRefundBtn, 
-#keypadFrame #keyVendorBtn {
-    min-height: 160px;
-    max-height: 160px;
+/* 7. Keypad keyOpsFrame QPushButtons */
+#keyRefundBtn, #keyVendorBtn, #key2ndScreenBtn {
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: 1px solid transparent; /* Forces custom styling engine */
+    min-width: 130px;
+    min-height: 80px;
 }
 
-#keyRefundBtn  { 
-  background-color: #a3aebd;
+#keyRefundBtn {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #608a88, stop:1 #4f7e7b);
+    border: 1px solid #3f6663;
+}
+#keyRefundBtn:hover {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #719896, stop:1 #608a88);
+}
+#keyRefundBtn:pressed {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #547f7c, stop:1 #47716e);
 }
 
-#keyVendorBtn { 
-  background-color: #919eb0;
+#keyVendorBtn {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #6b5b8d, stop:1 #5f4f7e);
+    border: 1px solid #6a4f7e;
+}
+#keyVendorBtn:hover {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #7b6c98, stop:1 #6f608a);
+}
+#keyVendorBtn:pressed {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #61527f, stop:1 #554771);
 }
 
-/* 7. Status Label */
+#key2ndScreenBtn {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #8a7b57, stop:1 #7e6f4f);
+    border: 1px solid #6d6044;
+}
+#key2ndScreenBtn:hover {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #97896a, stop:1 #8a7d60);
+}
+#key2ndScreenBtn:pressed {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #7b6c4d, stop:1 #716347);
+}
+
+/* 8. Status Label */
 QLabel#payStatusLabel {
   font-size: 18px;
   font-weight: bold;

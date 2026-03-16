@@ -561,7 +561,10 @@
            </widget>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="screen2BtnLayout">
+           <layout class="QVBoxLayout" name="screen2BtnLayout" stretch="1,1,1,1">
+            <property name="spacing">
+             <number>10</number>
+            </property>
             <item>
              <widget class="QPushButton" name="addScreen2Btn">
               <property name="text">
@@ -589,22 +592,6 @@
                <string>Down</string>
               </property>
              </widget>
-            </item>
-            <item>
-             <spacer name="verticalSpacerButtons">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Expanding</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>40</height>
-               </size>
-              </property>
-             </spacer>
             </item>
            </layout>
           </item>

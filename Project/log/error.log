@@ -1,0 +1,1 @@
+2026-03-16T09:38:26.253558 - Failed to initialize payment panel: 'QGridLayout' object has no attribute 'setRowstretch'

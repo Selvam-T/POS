@@ -130,93 +130,199 @@ class KeypadController(QObject):
         return s
 
     def _on_digit(self, digit: str):
-        target = self._get_target()
-        if target is None:
-            return
-        cur = target.text() or ""
-        new = cur + digit
-        formatted = self._format_after_append(new)
-        if formatted is None:
-            return
-        if formatted == "0" and "." not in new and new.strip("0") == "":
-            target.setText("0")
-        else:
-            target.setText(formatted)
+        try:
+            target = self._get_target()
+            if target is None:
+                return
+            cur = target.text() or ""
+            new = cur + digit
+            formatted = self._format_after_append(new)
+            if formatted is None:
+                return
+            if formatted == "0" and "." not in new and new.strip("0") == "":
+                target.setText("0")
+            else:
+                target.setText(formatted)
+        except Exception as exc:
+            try:
+                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.dialog_utils import report_to_statusbar
+                log_error(f"Keypad error (_on_digit): {exc}")
+                wnd = getattr(self.parent, 'window', None)
+                mainw = None
+                try:
+                    mainw = wnd() if callable(wnd) else getattr(self.parent, 'window')()
+                except Exception:
+                    mainw = None
+                if mainw is None:
+                    try:
+                        # fallback: Qt widget top-level
+                        mainw = self.parent.window() if hasattr(self.parent, 'window') else None
+                    except Exception:
+                        mainw = None
+                if mainw is not None:
+                    try:
+                        report_to_statusbar(mainw, "Keypad input error", is_error=True, duration=2000)
+                    except Exception:
+                        pass
+            except Exception:
+                pass
 
     def _on_dot(self):
-        target = self._get_target()
-        if target is None:
-            return
-        cur = target.text() or ""
-        if "." in cur:
-            return
-        if cur == "":
-            target.setText("0.")
-        else:
-            target.setText(cur + ".")
+        try:
+            target = self._get_target()
+            if target is None:
+                return
+            cur = target.text() or ""
+            if "." in cur:
+                return
+            if cur == "":
+                target.setText("0.")
+            else:
+                target.setText(cur + ".")
+        except Exception as exc:
+            try:
+                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.dialog_utils import report_to_statusbar
+                log_error(f"Keypad error (_on_dot): {exc}")
+                try:
+                    mw = self.parent.window()
+                    report_to_statusbar(mw, "Keypad input error", is_error=True, duration=2000)
+                except Exception:
+                    pass
+            except Exception:
+                pass
 
     def _on_fast_set(self, amount: float):
-        target = self._get_target()
-        if target is None:
-            return
-        target.setText(f"{amount:.2f}")
+        try:
+            target = self._get_target()
+            if target is None:
+                return
+            target.setText(f"{amount:.2f}")
+        except Exception as exc:
+            try:
+                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.dialog_utils import report_to_statusbar
+                log_error(f"Keypad error (_on_fast_set): {exc}")
+                try:
+                    mw = self.parent.window()
+                    report_to_statusbar(mw, "Keypad input error", is_error=True, duration=2000)
+                except Exception:
+                    pass
+            except Exception:
+                pass
 
     def _on_backspace(self):
-        target = self._get_target()
-        if target is None:
-            return
-        cur = target.text() or ""
-        if cur:
-            target.setText(cur[:-1])
+        try:
+            target = self._get_target()
+            if target is None:
+                return
+            cur = target.text() or ""
+            if cur:
+                target.setText(cur[:-1])
+        except Exception as exc:
+            try:
+                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.dialog_utils import report_to_statusbar
+                log_error(f"Keypad error (_on_backspace): {exc}")
+                try:
+                    mw = self.parent.window()
+                    report_to_statusbar(mw, "Keypad input error", is_error=True, duration=2000)
+                except Exception:
+                    pass
+            except Exception:
+                pass
 
     def _on_clear(self):
-        target = self._get_target()
-        if target is None:
-            return
-        target.clear()
+        try:
+            target = self._get_target()
+            if target is None:
+                return
+            target.clear()
+        except Exception as exc:
+            try:
+                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.dialog_utils import report_to_statusbar
+                log_error(f"Keypad error (_on_clear): {exc}")
+                try:
+                    mw = self.parent.window()
+                    report_to_statusbar(mw, "Keypad input error", is_error=True, duration=2000)
+                except Exception:
+                    pass
+            except Exception:
+                pass
 
     def _on_tab(self, reverse: bool = False):
-        target = self._get_tab_target()
-        if self._tab_handler is not None and self._tab_handler(target, reverse):
-            return
-        if target is not None:
-            target.focusNextPrevChild(not reverse)
-        else:
-            self.parent.focusNextPrevChild(not reverse)
+        try:
+            target = self._get_tab_target()
+            if self._tab_handler is not None and self._tab_handler(target, reverse):
+                return
+            if target is not None:
+                target.focusNextPrevChild(not reverse)
+            else:
+                try:
+                    self.parent.focusNextPrevChild(not reverse)
+                except Exception:
+                    pass
+        except Exception as exc:
+            try:
+                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.dialog_utils import report_to_statusbar
+                log_error(f"Keypad error (_on_tab): {exc}")
+                try:
+                    mw = self.parent.window()
+                    report_to_statusbar(mw, "Keypad navigation error", is_error=True, duration=2000)
+                except Exception:
+                    pass
+            except Exception:
+                pass
 
     def _on_enter(self):
-        fw = QApplication.focusWidget()
-        allowed_buttons = {
-            "cashPaySlcBtn",
-            "netsPaySlcBtn",
-            "paynowPaySlcBtn",
-            "voucherPaySlcBtn",
-            "payPayOpsBtn",
-            "resetPayOpsBtn",
-            "printPayOpsBtn",
-            "keyVendorBtn",
-            "keyRefundBtn",
-        }
-        if isinstance(fw, QPushButton) and fw is not self._enter_button:
-            if fw.objectName() in allowed_buttons and fw.isEnabled():
-                fw.click()
-            return
-        if fw is self._enter_button and isinstance(self._last_button, QPushButton):
-            if self._last_button.objectName() in allowed_buttons and self._last_button.isEnabled():
-                self._last_button.click()
+        try:
+            fw = QApplication.focusWidget()
+            allowed_buttons = {
+                "cashPaySlcBtn",
+                "netsPaySlcBtn",
+                "paynowPaySlcBtn",
+                "voucherPaySlcBtn",
+                "payPayOpsBtn",
+                "resetPayOpsBtn",
+                "printPayOpsBtn",
+                "keyVendorBtn",
+                "keyRefundBtn",
+            }
+            if isinstance(fw, QPushButton) and fw is not self._enter_button:
+                if fw.objectName() in allowed_buttons and fw.isEnabled():
+                    fw.click()
                 return
-        target = self._get_target()
-        if target is None:
-            return
-        if target.objectName() not in {"tenderValLineEdit", "cashPayLineEdit", "netsPayLineEdit", "paynowPayLineEdit", "voucherPayLineEdit"}:
-            return
-        if self._enter_handler is not None and self._enter_handler(target):
-            return
-        if hasattr(target, "next_focus"):
-            nf = getattr(target, "next_focus")
-            if callable(nf):
-                nf()
+            if fw is self._enter_button and isinstance(self._last_button, QPushButton):
+                if self._last_button.objectName() in allowed_buttons and self._last_button.isEnabled():
+                    self._last_button.click()
+                    return
+            target = self._get_target()
+            if target is None:
                 return
-            if nf is not None:
-                nf.setFocus()
+            if target.objectName() not in {"tenderValLineEdit", "cashPayLineEdit", "netsPayLineEdit", "paynowPayLineEdit", "voucherPayLineEdit"}:
                 return
+            if self._enter_handler is not None and self._enter_handler(target):
+                return
+            if hasattr(target, "next_focus"):
+                nf = getattr(target, "next_focus")
+                if callable(nf):
+                    nf()
+                    return
+                if nf is not None:
+                    nf.setFocus()
+                    return
+        except Exception as exc:
+            try:
+                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.dialog_utils import report_to_statusbar
+                log_error(f"Keypad error (_on_enter): {exc}")
+                try:
+                    mw = self.parent.window()
+                    report_to_statusbar(mw, "Keypad action error", is_error=True, duration=2000)
+                except Exception:
+                    pass
+            except Exception:
+                pass

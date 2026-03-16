@@ -1082,11 +1082,27 @@ def main():
     window = MainLoader()
 
     from modules.sales.login import launch_login_dialog
-    window.dialog_wrapper._show_overlay()
-    window.dialog_wrapper._block_scanner()
-    login_user = launch_login_dialog(None, return_user=True)
-    window.dialog_wrapper._hide_overlay()
-    window.dialog_wrapper._unblock_scanner()
+    # Respect config.LOGIN_ON: set to False in `config.py` to skip login.
+    try:
+        if not bool(getattr(config, 'LOGIN_ON', True)):
+            login_user = {
+                'user_id': int(getattr(config, 'AUTO_LOGIN_UID', 1)),
+                'username': str(getattr(config, 'AUTO_LOGIN_USERNAME', 'dev') or 'dev'),
+                'is_admin': bool(getattr(config, 'AUTO_LOGIN_IS_ADMIN', True)),
+            }
+        else:
+            window.dialog_wrapper._show_overlay()
+            window.dialog_wrapper._block_scanner()
+            login_user = launch_login_dialog(None, return_user=True)
+            window.dialog_wrapper._hide_overlay()
+            window.dialog_wrapper._unblock_scanner()
+    except Exception:
+        # Fallback to normal login on any unexpected error reading config
+        window.dialog_wrapper._show_overlay()
+        window.dialog_wrapper._block_scanner()
+        login_user = launch_login_dialog(None, return_user=True)
+        window.dialog_wrapper._hide_overlay()
+        window.dialog_wrapper._unblock_scanner()
 
     if login_user is not None:
         try:

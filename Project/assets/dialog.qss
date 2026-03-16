@@ -144,8 +144,9 @@ QPushButton[objectName*="vegEButton"][state="active"]:focus {
 QPushButton[objectName*="Screen2Btn"] {
     background-color: #b5e018;
     border: 1px solid #799905;
-    color: #1b1a1a;
-    font-weight: 300;
+    color: #5c5e5f;
+    font-size: 10.5pt;
+    font-weight: 600;
 }
 
 /* =========================================================

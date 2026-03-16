@@ -246,6 +246,7 @@ class PaymentPanel(QObject):
             'cashPayLineEdit',
             'keyVendorBtn',
             'keyRefundBtn',
+            'key2ndScreenBtn',
         ]
         widgets = [self.widget.findChild(QWidget, n) for n in names]
         return [w for w in widgets if w is not None and w.isEnabled() and w.focusPolicy() != Qt.NoFocus]
