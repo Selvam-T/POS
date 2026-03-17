@@ -149,7 +149,7 @@ snapshot receipt from the current cart:
 - Dialog closes after handling the failure
 
 **Receipt number:** The snapshot receipt does not generate a DB receipt number.
-It is explicitly labeled as `HOLD-FAILED` to indicate a non-persisted fallback.
+It is explicitly labeled as `Not generated - HOLD-FAILED",` to indicate a non-persisted fallback.
 This avoids reserving a receipt number when the DB write failed.
 
 **Limitation:** The snapshot receipt has no DB receipt number, so only a single

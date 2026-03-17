@@ -1,1 +1,24 @@
-2026-03-17T11:52:42.436522 - Greeting menu: UI not found (C:\Users\SELVAM\OneDrive\Desktop\POS\Project\ui\greeting_menu.ui)
+2026-03-17T14:54:04.568347 - Hold sale: RuntimeError('TEST: hold sale failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\sales\hold_sales.py", line 104, in _handle_ok
+    raise RuntimeError("TEST: hold sale failure")
+RuntimeError: TEST: hold sale failure
+
+2026-03-17T14:57:04.408494 - Hold sale: RuntimeError('TEST: hold sale failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\sales\hold_sales.py", line 104, in _handle_ok
+    raise RuntimeError("TEST: hold sale failure")
+RuntimeError: TEST: hold sale failure
+
+2026-03-17T14:58:19.905501 - Hold sale: RuntimeError('TEST: hold sale failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\sales\hold_sales.py", line 104, in _handle_ok
+    raise RuntimeError("TEST: hold sale failure")
+RuntimeError: TEST: hold sale failure
+
+2026-03-17T15:01:18.432390 - Hold sale: RuntimeError('TEST: hold sale failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\sales\hold_sales.py", line 104, in _handle_ok
+    raise RuntimeError("TEST: hold sale failure")
+RuntimeError: TEST: hold sale failure
+

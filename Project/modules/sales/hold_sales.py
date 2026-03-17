@@ -101,7 +101,7 @@ def launch_hold_sales_dialog(parent=None):
             return
         try:
             # uncomment to test db operation failure handling:
-            #raise RuntimeError("TEST: hold sale failure")
+            raise RuntimeError("TEST: hold sale failure")
             cid = getattr(parent, 'current_user_id', None)
             if cid is None:
                 ui_feedback.set_status_label(status_lbl, "No logged-in user. Please login.", ok=False)
@@ -132,7 +132,7 @@ def launch_hold_sales_dialog(parent=None):
                 cashier_name = get_username_by_id(int(cid)) if cid is not None else ''
                 receipt_text = receipt_generator.generate_receipt_text_from_snapshot(
                     items=sales_items,
-                    receipt_no="HOLD-FAILED",
+                    receipt_no="Not generated - HOLD-FAILED",
                     status="UNPAID",
                     cashier_name=cashier_name or '',
                 )
