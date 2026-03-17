@@ -44,7 +44,7 @@ class PaymentPanel(QObject):
         self._wire_inputs()
         self._keypad = KeypadController(
             self.widget,
-            enter_handler=self._handle_keypad_enter,
+            enter_handler=self._handle_enter_key,
             tab_handler=self._handle_keypad_tab,
         )
         try:
@@ -251,7 +251,8 @@ class PaymentPanel(QObject):
         widgets = [self.widget.findChild(QWidget, n) for n in names]
         return [w for w in widgets if w is not None and w.isEnabled() and w.focusPolicy() != Qt.NoFocus]
 
-    def _handle_keypad_enter(self, obj) -> bool:
+    def _handle_enter_key(self, obj) -> bool:
+        # Shared Enter handler for keypad and keyboard line edits.
         if obj is None:
             return False
         if obj not in self._pay_field_order() and obj != self._widgets.get('tender'):
@@ -381,7 +382,7 @@ class PaymentPanel(QObject):
             return 0
 
     # Public API
-    def set_payment_default(self, total: float) -> None:
+    def set_payment_default(self, total: float, *, focus: bool = True) -> None:
         # Reset payment split to default values for the provided total.
         if total <= 0:
             self.clear_payment_frame()
@@ -396,10 +397,11 @@ class PaymentPanel(QObject):
         self._last_pay_select_method = None
         self.recalc_unalloc_and_ui()
         self.update_pay_button_state()
-        tender = self._widgets.get('tender')
-        if tender is not None and tender.isVisible():
-            tender.setFocus()
-            tender.selectAll()
+        if focus:
+            tender = self._widgets.get('tender')
+            if tender is not None and tender.isVisible():
+                tender.setFocus()
+                tender.selectAll()
 
     def clear_payment_frame(self) -> None:
         # Clear all payment fields/state and return the panel to idle defaults.
@@ -668,6 +670,8 @@ class PaymentPanel(QObject):
                 self._refresh_lineedit_visuals()
 
         if event.type() == QEvent.KeyPress and event.key() in (Qt.Key_Return, Qt.Key_Enter):
+            if isinstance(obj, QLineEdit):
+                return bool(self._handle_enter_key(obj))
             if isinstance(obj, QPushButton) and obj.isEnabled():
                 obj.click()
                 return True

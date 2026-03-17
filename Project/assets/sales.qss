@@ -4,7 +4,7 @@
 
 /* --- Sales Frame Container --- */
 QFrame#salesFrame {
-    font-family: Tahoma, Verdana;
+    font-family: Verdana, Tahoma;
     background-color: lightblue;
     border: 1px solid #333333;
     border-radius: 8px;
@@ -23,7 +23,7 @@ QLabel#salesLabel {
 /* Alternating row colors are set programmatically in Python due to embedded widgets. */
 QTableWidget#salesTable {
     border: 1px solid #4317ab;
-    font-size: 10pt;
+    font-size: 11pt;
     font-weight: bold;
     background-color: #e4e4e4;
     gridline-color: rgba(0, 0, 0, 0.2);
@@ -41,34 +41,30 @@ QTableWidget::item:selected { background-color: transparent; }
 
 /* --- Quantity Input Field --- */
 QLineEdit#qtyInput {
-    font-size: 10pt;
+    font-size: 11pt;
     font-weight: bold;
     qproperty-alignment: AlignCenter;
-    background-color: #fffbe6;
     border: 2px solid #4682b4;
-    border-radius: 5px;
+    border-radius: 8px;
 }
 QLineEdit#qtyInput:focus {
     background-color: orange;
     border: 3px solid green;
 }
 QLineEdit#qtyInput[error="true"] {
-    border: 3px solid red;
     background-color: #ffcccc;
+    border: 3px solid red;
 }
 
 /* --- Remove Button --- */
 QPushButton#removeBtn {
-    background-color: #d33f12;
+    background-color: transparent; /* Transparent to show row color */
     border: 5px solid #d33f12;
-    font-weight: bold;
-    font-size: 20px;
-    color: white;
-    border-radius: 2px;
+    
     min-width: 33px;
     max-width: 33px;
-    min-height: 26px;
-    max-height: 26px;
+    min-height: 30px;
+    max-height: 30px;
     padding: 0px;
 }
 QPushButton#removeBtn:hover {
@@ -103,8 +99,7 @@ QLabel#totalValue {
 /* --- Add Buttons (vegEntryBtn, manualEntryBtn) --- */
 
 QFrame#salesFrame QPushButton {
-    border-radius: 18px;
-    padding: 8px 10px;
+    border-radius: 18px; 
     color: white;
     font-size: 14pt;
 }

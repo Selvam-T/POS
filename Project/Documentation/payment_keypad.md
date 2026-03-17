@@ -23,7 +23,7 @@ The keypad maps [ui/payment_frame.ui](ui/payment_frame.ui) buttons to payment fi
   - Buttons: `*PaySlcBtn`, `*PayOpsBtn`, `keyVendorBtn`, `keyRefundBtn`.
   - Fields: `*PayLineEdit`, `tenderValLineEdit`.
 - When focus is on an allowed button, keypad ENTER clicks the button.
-- When focus is on an allowed field, keypad ENTER delegates to `PaymentPanel` to validate and jump using the existing Enter navigation rules.
+- When focus is on an allowed field, keypad ENTER delegates to `PaymentPanel._handle_enter_key()` to validate and jump using the existing Enter navigation rules.
 
 ## Notes
 - Deleting `<tabstop>` entries in [ui/payment_frame.ui](ui/payment_frame.ui) only changes the tab order for that specific form; it does not modify the application's global Qt tab chain used by keyboard Tab.

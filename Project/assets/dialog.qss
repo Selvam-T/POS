@@ -392,14 +392,15 @@ QWidget#ViewHoldDialog QTableWidget#receiptsTable::item:selected {
 QLineEdit#qtyInput {
     font-size: 11pt;
     font-weight: bold;
-    border-radius: 8px;
+    qproperty-alignment: AlignCenter;
     border: 2px solid #4682b4;
+    border-radius: 8px;
 }
 
 /* --- EACH Items: Border changes ONLY when focused AND editable --- */
 QLineEdit#qtyInput:focus:!read-only {
-    border: 4px solid orange;
     background-color: gray; /* alternating row color overrides bg */
+    border: 4px solid orange;
 }
 
 /* --- KG Items: Styling for non-editable rows --- */
@@ -415,8 +416,8 @@ QPushButton#removeBtn {
     border-radius: 2px;
     min-width: 30px;
     max-width: 30px;
-    min-height: 28px;
-    max-height: 28px;
+    min-height: 30px;
+    max-height: 30px;
     padding: 0px;
 }
 QPushButton#removeBtn:hover {

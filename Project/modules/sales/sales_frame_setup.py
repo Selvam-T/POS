@@ -5,7 +5,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtGui import QFontMetrics
 from PyQt5.QtWidgets import QVBoxLayout, QSizePolicy, QPushButton, QWidget, QTableWidget, QLabel
 
-from modules.table import setup_sales_table, bind_total_label, add_total_listener
+from modules.table import setup_sales_table, bind_total_label, add_total_listener, bind_qty_commit_listener
 from modules.ui_utils.error_logger import log_error
 
 ASSETS_DIR = os.path.join(
@@ -128,6 +128,7 @@ class SalesFrame(QObject):
             if total_label is not None:
                 bind_total_label(sale_table, total_label)
                 add_total_listener(sale_table, self._handle_total_change)
+        bind_qty_commit_listener(sale_table, self._main_window._on_qty_commit_total_changed)
 
     def _handle_total_change(self, total: float) -> None:
         self.saleTotalChanged.emit(total)

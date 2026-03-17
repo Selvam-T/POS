@@ -77,7 +77,6 @@ def launch_vegetable_entry_dialog(parent, main_sales_table):
         setup_sales_table(vtable)
         bind_status_label(vtable, status_lbl)
         if ok_btn: bind_next_focus_widget(vtable, ok_btn)
-        vtable.verticalHeader().setDefaultSectionSize(48)
 
     # Link OK button to coordinator so Enter clicks it when focused
     if ok_btn:

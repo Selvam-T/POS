@@ -31,7 +31,7 @@ change = tender - cash
 ```
 
 ## UI Behavior (current)
-- **Validation**: All payment fields (cash, nets, paynow, tender, voucher) are validated via `modules/ui_utils.input_handler` when the user presses Enter or leaves the field. Validation failures hold focus on the offending widget, surface an error through `payStatusLabel`, and block navigation/Pay until corrected. Editing or re-focusing the field clears the error via `ui_feedback` so the message goes away as soon as the value changes.
+- **Validation**: All payment fields (cash, nets, paynow, tender, voucher) are validated via `modules/ui_utils.input_handler` when the user presses Enter (handled by `PaymentPanel._handle_enter_key()`) or leaves the field. Validation failures hold focus on the offending widget, surface an error through `payStatusLabel`, and block navigation/Pay until corrected. Editing or re-focusing the field clears the error via `ui_feedback` so the message goes away as soon as the value changes.
 - **Unallocated tracking**: Recomputed on any payment change. Highlights the unalloc frame when `unalloc > 0`; clears highlight when `unalloc <= 0`. When `unalloc < 0`, the frame stays neutral but the status label shows `Warning: Payment Over-allocation.` so the user knows a warning state exists even though Pay remains reachable.
 - **Status priority**: validation error > (cash>0 and tender<cash) > (unalloc>0) > (unalloc<0) > clear.
 - **Tender/Balance**: Tender UI is shown/enabled only when `cash > 0`. `balance = tender - cash` (may go negative while typing); tender placeholder shows only when `cash > 0` and tender is empty.
