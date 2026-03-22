@@ -181,7 +181,7 @@ expiry_seconds = 600
 logo = 'paynow_logo.png'
 
 # Development: toggle login on/off. Set to False to open main app directly.
-LOGIN_ON = False
+LOGIN_ON = True
 # When `LOGIN_ON` is False, these values define the auto-logged-in user.
 AUTO_LOGIN_UID = 1
 AUTO_LOGIN_USERNAME = 'dev'

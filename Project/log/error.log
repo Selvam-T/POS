@@ -1,24 +1,50 @@
-2026-03-17T14:54:04.568347 - Hold sale: RuntimeError('TEST: hold sale failure')
+2026-03-22T16:55:06.801492 - Dialog failed: name 'ui_path' is not defined
 Traceback (most recent call last):
-  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\sales\hold_sales.py", line 104, in _handle_ok
-    raise RuntimeError("TEST: hold sale failure")
-RuntimeError: TEST: hold sale failure
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\wrappers\dialog_wrapper.py", line 164, in open_dialog_scanner_blocked
+    dlg = dialog_func(self.main, *args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\menu\admin_menu.py", line 34, in launch_admin_dialog
+    dlg = build_dialog_from_ui(ui_path, host_window=host_window, dialog_name='admin_menu', qss_path=QSS_PATH)
+                               ^^^^^^^
+NameError: name 'ui_path' is not defined
 
-2026-03-17T14:57:04.408494 - Hold sale: RuntimeError('TEST: hold sale failure')
+2026-03-22T16:56:27.057264 - Dialog failed: name 'ui_path' is not defined
 Traceback (most recent call last):
-  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\sales\hold_sales.py", line 104, in _handle_ok
-    raise RuntimeError("TEST: hold sale failure")
-RuntimeError: TEST: hold sale failure
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\wrappers\dialog_wrapper.py", line 164, in open_dialog_scanner_blocked
+    dlg = dialog_func(self.main, *args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\menu\admin_menu.py", line 34, in launch_admin_dialog
+    dlg = build_dialog_from_ui(ui_path, host_window=host_window, dialog_name='admin_menu', qss_path=QSS_PATH)
+                               ^^^^^^^
+NameError: name 'ui_path' is not defined
 
-2026-03-17T14:58:19.905501 - Hold sale: RuntimeError('TEST: hold sale failure')
+2026-03-22T16:56:30.717489 - Dialog failed: name 'ui_path' is not defined
 Traceback (most recent call last):
-  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\sales\hold_sales.py", line 104, in _handle_ok
-    raise RuntimeError("TEST: hold sale failure")
-RuntimeError: TEST: hold sale failure
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\wrappers\dialog_wrapper.py", line 164, in open_dialog_scanner_blocked
+    dlg = dialog_func(self.main, *args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\menu\admin_menu.py", line 34, in launch_admin_dialog
+    dlg = build_dialog_from_ui(ui_path, host_window=host_window, dialog_name='admin_menu', qss_path=QSS_PATH)
+                               ^^^^^^^
+NameError: name 'ui_path' is not defined
 
-2026-03-17T15:01:18.432390 - Hold sale: RuntimeError('TEST: hold sale failure')
+2026-03-22T16:56:31.412204 - Dialog failed: name 'ui_path' is not defined
 Traceback (most recent call last):
-  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\sales\hold_sales.py", line 104, in _handle_ok
-    raise RuntimeError("TEST: hold sale failure")
-RuntimeError: TEST: hold sale failure
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\wrappers\dialog_wrapper.py", line 164, in open_dialog_scanner_blocked
+    dlg = dialog_func(self.main, *args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\menu\admin_menu.py", line 34, in launch_admin_dialog
+    dlg = build_dialog_from_ui(ui_path, host_window=host_window, dialog_name='admin_menu', qss_path=QSS_PATH)
+                               ^^^^^^^
+NameError: name 'ui_path' is not defined
+
+2026-03-22T16:57:41.027254 - Dialog failed: name 'ui_path' is not defined
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\wrappers\dialog_wrapper.py", line 164, in open_dialog_scanner_blocked
+    dlg = dialog_func(self.main, *args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\menu\admin_menu.py", line 34, in launch_admin_dialog
+    dlg = build_dialog_from_ui(ui_path, host_window=host_window, dialog_name='admin_menu', qss_path=QSS_PATH)
+                               ^^^^^^^
+NameError: name 'ui_path' is not defined
 

@@ -1,8 +1,13 @@
 import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QPushButton, QLineEdit, QToolButton, QLabel
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QPushButton, QLineEdit, QToolButton, QLabel, QTabWidget
 from modules.ui_utils.error_logger import log_error
+from modules.ui_utils.dialog_utils import build_dialog_from_ui, require_widgets, set_dialog_error, set_dialog_info, report_exception_post_close
+from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, set_initial_focus
+from modules.ui_utils import input_handler
+from modules.db_operation.users_repo import verify_password, update_password
+from modules.ui_utils import ui_feedback
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
@@ -11,193 +16,196 @@ ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
 
 
-def launch_admin_dialog(host_window, current_user: str = 'Admin', is_admin: bool = True):
-    """Open the Admin Settings dialog (ui/admin_menu.ui) as a modal.
-    
-    DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
-    This function only creates and returns the QDialog.
+# Build and return the admin settings dialog.
+def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool = True):
+    """Open the Admin Settings dialog.
 
     Args:
-        host_window: Main window instance
-        current_user: Display name for "Logged in as:" label.
-        is_admin: If False, the dialog will open read-only (no password/email changes allowed).
-    
+        host_window: Main window instance.
+        user_id: Logged-in user id for password verification and update.
+        is_admin: If False, dialog is read-only.
+
     Returns:
-        QDialog instance ready for DialogWrapper.open_dialog_scanner_blocked() to execute
+        QDialog instance.
     """
+    # Use shared dialog builder for consistent behavior
     ui_path = os.path.join(UI_DIR, 'admin_menu.ui')
-    if not os.path.exists(ui_path):
-        try:
-            log_error(f"admin_menu.ui missing at {ui_path}")
-        except Exception:
-            pass
+    dlg = build_dialog_from_ui(ui_path, host_window=host_window, dialog_name='admin_menu', qss_path=QSS_PATH)
+    if dlg is None:
         return None
 
+    # Resolve required widgets (hard-fail if UI changed)
     try:
-        content = uic.loadUi(ui_path)
+        widgets = require_widgets(dlg, {
+            'tabWidget': (QTabWidget, 'tabWidget'),
+            'adminCur': (QLineEdit, 'adminCurPwdLineEdit'),
+            'adminNew': (QLineEdit, 'adminNewPwdLineEdit'),
+            'adminEye': (QToolButton, 'adminToolBtn'),
+            'adminStatus': (QLabel, 'adminStatusLabel'),
+            'btnAdminOk': (QPushButton, 'btnAdminOk'),
+            'btnAdminCancel': (QPushButton, 'btnAdminCancel'),
+            'staffCur': (QLineEdit, 'staffCurPwdLineEdit'),
+            'staffNew': (QLineEdit, 'staffNewPwdLineEdit'),
+            'staffEye': (QToolButton, 'staffQToolBtn'),
+            'staffStatus': (QLabel, 'staffStatusLabel'),
+            'btnStaffOk': (QPushButton, 'btnStaffOk'),
+            'btnStaffCancel': (QPushButton, 'btnStaffCancel'),
+            'customClose': (QPushButton, 'customCloseBtn'),
+        }, hard_fail=True)
     except Exception as e:
         try:
-            log_error(f"Failed to load admin_menu.ui: {e}")
+            log_error(f"admin_menu: require_widgets failed: {e}")
         except Exception:
             pass
-        return None
+        return dlg
 
-    # If the .ui root is already a QDialog use it; else wrap
-    if isinstance(content, QDialog):
-        dlg = content
-    else:
-        dlg = QDialog(host_window)
-        lay = QVBoxLayout(dlg)
-        lay.setContentsMargins(0, 0, 0, 0)
-        lay.addWidget(content)
+    tabWidget = widgets['tabWidget']
+    adminCur = widgets['adminCur']
+    adminNew = widgets['adminNew']
+    adminEye = widgets['adminEye']
+    adminStatus = widgets['adminStatus']
+    btnAdminOk = widgets['btnAdminOk']
+    btnAdminCancel = widgets['btnAdminCancel']
+    staffCur = widgets['staffCur']
+    staffNew = widgets['staffNew']
+    staffEye = widgets['staffEye']
+    staffStatus = widgets['staffStatus']
+    btnStaffOk = widgets['btnStaffOk']
+    btnStaffCancel = widgets['btnStaffCancel']
+    customClose = widgets.get('customClose')
 
-    # Basic window flags (frameless like logout) + modality
-    dlg.setParent(host_window)
-    dlg.setModal(True)
-    dlg.setWindowModality(Qt.ApplicationModal)
-    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-    dlg.setObjectName('AdminDialogContainer')
-    
-    # Apply stylesheet
-    if os.path.exists(QSS_PATH):
+    # Titlebar close
+    if customClose is not None:
         try:
-            with open(QSS_PATH, 'r', encoding='utf-8') as f:
-                dlg.setStyleSheet(f.read())
-        except Exception as e:
-            try:
-                log_error(f"Failed to load dialog.qss: {e}")
-            except Exception:
-                pass
-    
-    # Wire custom window titlebar X button to close dialog
-    custom_close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
-    if custom_close_btn is not None:
-        custom_close_btn.clicked.connect(dlg.reject)
-
-    # Populate logged-in label
-    try:
-        logged_lbl: QLabel = dlg.findChild(QLabel, 'loggedInLabel')
-        if logged_lbl is not None:
-            logged_lbl.setText(f"Logged in as: {current_user}")
-    except Exception:
-        pass
-
-    # Show/hide ability hints based on is_admin
-    try:
-        info_lbl: QLabel = dlg.findChild(QLabel, 'infoLabel')
-        if info_lbl is not None:
-            if is_admin:
-                info_lbl.setText('Only Admin can modify settings')
-            else:
-                info_lbl.setText('Read-only: Staff cannot modify settings')
-    except Exception:
-        pass
-
-    # Helper to set enabled/disabled for change controls
-    def _set_change_enabled(enabled: bool):
-        try:
-            for name in (
-                'adminCurrentPassword','adminNewPassword','btnAdminOk',
-                'staffCurrentPassword','staffNewPassword','btnStaffOk',
-                'currentEmailLineEdit','newEmailLineEdit','btnEmailOk',
-                'btnToggleAdminCurrent','btnToggleStaffCurrent'
-            ):
-                w = dlg.findChild(QWidget, name)
-                if w is not None:
-                    # Keep currentEmailLineEdit readOnly always; override enabled for style only
-                    if name == 'currentEmailLineEdit':
-                        try:
-                            w.setEnabled(True)  # stays visible
-                        except Exception:
-                            pass
-                        continue
-                    try:
-                        w.setEnabled(enabled)
-                    except Exception:
-                        pass
+            customClose.clicked.connect(dlg.reject)
         except Exception:
             pass
 
-    if not is_admin:
-        _set_change_enabled(False)
+    # Toggle visibility buttons
+    # Wire password visibility toggle.
+    def _wire_eye(btn, le):
+        try:
+            btn.toggled.connect(lambda checked: le.setEchoMode(QLineEdit.Normal if checked else QLineEdit.Password))
+        except Exception:
+            pass
 
-    # Toggle password visibility for given tool button + target line edit
-    def _wire_eye(btn_name: str, line_name: str):
-        btn: QToolButton = dlg.findChild(QToolButton, btn_name)
-        le: QLineEdit = dlg.findChild(QLineEdit, line_name)
-        if btn is None or le is None:
+    _wire_eye(adminEye, adminCur)
+    _wire_eye(staffEye, staffCur)
+
+    # Coordinator & gates
+    fc = FieldCoordinator(dlg)
+
+    # Determine user id for admin (prefer explicit arg; fallback to session id)
+    try:
+        uid = int(user_id) if user_id is not None else None
+    except Exception:
+        uid = None
+
+    if uid is None:
+        try:
+            if getattr(host_window, 'current_user_id', None):
+                uid = int(host_window.current_user_id)
+        except Exception:
+            uid = None
+
+    # Focus gate: lock new-password and OK button until current password validated
+    admin_gate = FocusGate([adminNew, btnAdminOk], lock_enabled=True, lock_read_only=True)
+    admin_gate.remember()
+    admin_gate.lock()
+    # Visual cue for locked state
+    try:
+        adminNew.setStyleSheet('background-color: #efefef;')
+    except Exception:
+        pass
+
+    # Validation function for current admin password
+    # Validate current admin password before unlocking new password.
+    def _validate_admin_current():
+        txt = adminCur.text() or ''
+        if not txt:
+            raise ValueError('Enter current password')
+        try:
+            ok = False
+            if uid is not None:
+                ok = verify_password(uid, txt)
+            if not ok:
+                raise ValueError('Invalid current password')
+        except ValueError:
+            raise
+        except Exception:
+            raise ValueError('Password check failed')
+        # Unlock the gate on success
+        try:
+            admin_gate.unlock()
+            adminNew.setStyleSheet('')
+        except Exception:
+            pass
+        return True
+
+    # Register field in coordinator so ENTER handling and auto-clear work
+    fc.register_validator(adminCur, _validate_admin_current, adminStatus)
+    fc.add_link(adminCur, target_map={}, next_focus=adminNew, status_label=adminStatus, validate_fn=_validate_admin_current, auto_jump=True)
+
+    # New password validation using shared input handler
+    # Validate new admin password using shared rules.
+    def _validate_new_admin():
+        try:
+            return input_handler.handle_password_input(adminNew)
+        except ValueError as e:
+            raise
+        except Exception:
+            raise ValueError('Invalid new password')
+
+    fc.register_validator(adminNew, _validate_new_admin, adminStatus)
+    fc.add_link(adminNew, target_map={}, next_focus=btnAdminOk, status_label=adminStatus, validate_fn=_validate_new_admin, auto_jump=True)
+
+    # btnAdminOk click handler: validate again and update DB
+    # Commit admin password update after validation.
+    def _on_admin_ok():
+        try:
+            # Re-validate current and new
+            _validate_admin_current()
+            new_pwd = _validate_new_admin()
+        except ValueError as e:
+            fc.set_error(adminNew if 'new' in str(e).lower() else adminCur, str(e), status_label=adminStatus)
             return
-        def _on_toggled(checked: bool):
-            try:
-                le.setEchoMode(QLineEdit.Normal if checked else QLineEdit.Password)
-            except Exception:
-                pass
-        try:
-            btn.toggled.connect(_on_toggled)
-        except Exception:
-            pass
 
-    _wire_eye('btnToggleAdminCurrent','adminCurrentPassword')
-    _wire_eye('btnToggleStaffCurrent','staffCurrentPassword')
-
-    # Wire Save and Cancel buttons to close window and exit
-    def _close_and_exit():
+        # Attempt update
         try:
+            if uid is None:
+                raise Exception('User id not found')
+            update_password(uid, new_pwd)
+        except Exception as exc:
+            # Set post-close status as error and close dialog
+            report_exception_post_close(dlg, 'update_password', exc, user_message='Failed to update password', level='error')
             dlg.reject()
-            import sys
-            sys.exit(0)
+            return
+
+        # Success: set post-close info and close
+        set_dialog_info(dlg, 'Password updated successfully')
+        dlg.accept()
+
+    try:
+        btnAdminOk.clicked.connect(_on_admin_ok)
+    except Exception:
+        pass
+
+    # Cancel/Close buttons
+    try:
+        btnAdminCancel.clicked.connect(dlg.reject)
+        btnStaffCancel.clicked.connect(dlg.reject)
+    except Exception:
+        pass
+
+    # Set initial focus to admin current password field and select all
+    try:
+        set_initial_focus(dlg, tab_widget=tabWidget, tab_name='ADMIN', first_widget=adminCur)
+    except Exception:
+        try:
+            adminCur.setFocus()
         except Exception:
             pass
 
-    for btn_name in ('btnAdminOk','btnAdminCancel','btnStaffOk','btnStaffCancel','btnEmailOk','btnEmailCancel'):
-        b: QPushButton = dlg.findChild(QPushButton, btn_name)
-        if b is not None:
-            try:
-                b.clicked.connect(_close_and_exit)
-            except Exception:
-                pass
-
-    # Close button & title bar X
-    try:
-        close_btn: QPushButton = dlg.findChild(QPushButton, 'closeButton')
-        if close_btn is not None:
-            close_btn.clicked.connect(dlg.reject)
-        x_btn: QPushButton = dlg.findChild(QPushButton, 'customCloseBtn')
-        if x_btn is not None:
-            x_btn.clicked.connect(dlg.reject)
-    except Exception:
-        pass
-
-    # Basic drag move support using customTitleBar (same pattern as logout)
-    try:
-        title_bar = dlg.findChild(QWidget, 'customTitleBar')
-        if title_bar is not None:
-            dlg._drag_pos = None
-            def _mousePress(ev):
-                try:
-                    from PyQt5.QtCore import Qt as _Qt
-                    if ev.button() == _Qt.LeftButton:
-                        dlg._drag_pos = ev.globalPos() - dlg.frameGeometry().topLeft()
-                        ev.accept()
-                except Exception:
-                    pass
-            def _mouseMove(ev):
-                try:
-                    from PyQt5.QtCore import Qt as _Qt
-                    if dlg._drag_pos is not None and ev.buttons() & _Qt.LeftButton:
-                        dlg.move(ev.globalPos() - dlg._drag_pos)
-                        ev.accept()
-                except Exception:
-                    pass
-            def _mouseRelease(ev):
-                dlg._drag_pos = None
-            title_bar.mousePressEvent = _mousePress
-            title_bar.mouseMoveEvent = _mouseMove
-            title_bar.mouseReleaseEvent = _mouseRelease
-    except Exception:
-        pass
-
-    # Return QDialog for DialogWrapper to execute
     return dlg
 
 

@@ -353,11 +353,11 @@ class MainLoader(QMainWindow):
             )
             return
 
-        current_user = str(getattr(self, 'current_username', '') or '').strip() or 'Admin'
+        current_user_id = getattr(self, 'current_user_id', None)
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_admin_dialog,
             dialog_key='admin_menu',
-            current_user=current_user,
+            user_id=current_user_id,
             is_admin=True,
         )
     # Show the greeting menu dialog.

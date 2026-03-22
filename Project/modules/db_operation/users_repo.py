@@ -8,6 +8,36 @@ def hash_password(password: str) -> str:
     """Hash a password using SHA-256."""
     return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
+
+def _store_password_hash(user_id: int, pwd_hash: str) -> None:
+    """Store password hash and update timestamp."""
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE users SET password_hash = ?, password_updated_at = ? WHERE user_id = ?",
+            (pwd_hash, now_iso(), user_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def update_password(user_id: int, new_password: str) -> None:
+    """Set a new password for `user_id` (hash + timestamp)."""
+    pwd_hash = hash_password(new_password)
+    _store_password_hash(user_id, pwd_hash)
+
+
+def verify_password(user_id: int, password: str, require_active: bool = False) -> bool:
+    """Return True if plaintext password matches stored hash (optional active check)."""
+    user = get_user_by_id(user_id)
+    if not user:
+        return False
+    if require_active and not user.get('is_active'):
+        return False
+    return bool(user.get('password_hash') == hash_password(password))
+
 def get_user_by_username(username: str):
     """Fetch user record by username. Returns dict or None."""
     conn = get_conn()
@@ -81,15 +111,7 @@ def authenticate_user(username: str, password: str) -> dict | None:
 
 
 def build_authenticated_user(user: dict, fallback_uid=None) -> dict:
-    """Normalize a user record into the `authenticated_user` shape used by UI.
-
-    Args:
-        user: dict returned by `authenticate_user` (may have 'user_id' and 'username').
-        fallback_uid: optional integer used if `user['user_id']` is None.
-
-    Returns:
-        dict with keys: 'user_id', 'username', 'is_admin'.
-    """
+    """Normalize user dict for UI; returns `user_id`, `username`, `is_admin`."""
     uid = user.get('user_id')
     if uid is None:
         uid = fallback_uid
@@ -103,14 +125,7 @@ def build_authenticated_user(user: dict, fallback_uid=None) -> dict:
 
 
 def get_recovery_email(user_id: int) -> str | None:
-    """Return the recovery_email for a given user_id, or None if not set/found.
-
-    Note: The function is retained for future use when recovery-email based flows
-    are reintroduced. admin (user id 1) is set up with a recovery email in users table.
-    staff (user id 2) is not set up with a recovery email, so this function will 
-    return None for user id 2.
-    
-    """
+    """Return recovery email for `user_id`, or None."""
     conn = get_conn()
     try:
         cur = conn.cursor()
@@ -123,28 +138,15 @@ def get_recovery_email(user_id: int) -> str | None:
         conn.close()
 
 def generate_temporary_password_for_user(user_id: int, length: int = 12) -> str:
-    """Generate a secure temporary password, store its hash for the given user_id,
-    update the `password_updated_at` timestamp, and return the plaintext password.
-
-    Note: Password hashes are one-way; we store only the SHA-256 hash.
-    """
-    # Create a reasonably strong, URL-safe password using letters and digits
+    """Generate a temporary password, store its hash, update timestamp, and return it."""
+    # Create a random password using letters and digits
     alphabet = string.ascii_letters + string.digits
     temp_pwd = ''.join(secrets.choice(alphabet) for _ in range(int(length)))
     pwd_hash = hash_password(temp_pwd)
 
-    conn = get_conn()
-    try:
-        cur = conn.cursor()
-        cur.execute(
-            "UPDATE users SET password_hash = ?, password_updated_at = ? WHERE user_id = ?",
-            (pwd_hash, now_iso(), user_id),
-        )
-        conn.commit()
-        return temp_pwd
-    finally:
-        conn.close()
-
+    # Use centralized helper to persist the password hash and timestamp
+    _store_password_hash(user_id, pwd_hash)
+    return temp_pwd
 
 def get_user_by_id(user_id: int):
     """Fetch user record by user_id. Returns dict or None."""

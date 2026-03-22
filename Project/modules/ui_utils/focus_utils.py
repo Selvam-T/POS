@@ -219,6 +219,8 @@ class FieldCoordinator(QObject):
             return
 
         name = (widget.objectName() or "").lower()
+        if any(tag in name for tag in ("pwd", "pass", "password")):
+            return
         standardized = raw
 
         # 1. PRICE/COST FORMATTING (e.g., 1. -> 1.00)

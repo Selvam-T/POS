@@ -93,6 +93,20 @@ CREATE TABLE users (
 	- The script uses SHA-256 hashing for demonstration only — replace with a slow password hashing algorithm (bcrypt/argon2) in production.
 	- Inserts are performed with `INSERT OR IGNORE` so existing records are preserved if the script is re-run.
 
+**Notes on `is_active` and session tracking**
+
+- **Intended purpose:** The `is_active` column is a persistent account flag used to enable or disable a user account (1 = enabled, 0 = disabled). It exists to let administrators prevent an account from authenticating without deleting the record.
+
+- **Current code usage:** The column defaults to `1` when the table is created and initial users are seeded. The application **reads** `is_active` during authentication to prevent disabled accounts from logging in, but there is no code in the repository that programmatically sets or unsets `is_active` (no `UPDATE users SET is_active = ...` usage). In short: it's a persistent enable/disable flag, not an automatic session marker.
+
+- **Why `is_active` is not suitable to mark "who is logged in":**
+  - Writing to `is_active` on login/logout would require extra database writes and cause unnecessary I/O.
+  - It creates race conditions and prevents multi-session or multi-terminal logins for the same account.
+  - It conflates account state (enabled/disabled) with session state (who is currently using the app).
+  - The application already keeps the active session in memory via `current_user_id` on the main window; this is efficient, immediate, and appropriate for the current session.
+
+- **If persistent session tracking is required:** add a dedicated `sessions` table or a `last_login_at`/`last_session_id` field instead of repurposing `is_active`.
+
 ---
 
 ## Helper Table: receipt_counters  
