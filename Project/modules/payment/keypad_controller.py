@@ -1,4 +1,5 @@
 from PyQt5.QtCore import QObject, QEvent
+from PyQt5.QtGui import QValidator
 from PyQt5.QtWidgets import QApplication, QLineEdit, QPushButton
 
 
@@ -129,6 +130,13 @@ class KeypadController(QObject):
         s = s.lstrip("0") or "0"
         return s
 
+    def _accepts_text(self, target: QLineEdit, text: str) -> bool:
+        validator = target.validator() if target is not None else None
+        if validator is None:
+            return True
+        state, _, _ = validator.validate(text, 0)
+        return state != QValidator.Invalid
+
     def _on_digit(self, digit: str):
         try:
             target = self._get_target()
@@ -138,6 +146,8 @@ class KeypadController(QObject):
             new = cur + digit
             formatted = self._format_after_append(new)
             if formatted is None:
+                return
+            if not self._accepts_text(target, formatted):
                 return
             if formatted == "0" and "." not in new and new.strip("0") == "":
                 target.setText("0")
@@ -176,10 +186,10 @@ class KeypadController(QObject):
             cur = target.text() or ""
             if "." in cur:
                 return
-            if cur == "":
-                target.setText("0.")
-            else:
-                target.setText(cur + ".")
+            new_text = "0." if cur == "" else cur + "."
+            if not self._accepts_text(target, new_text):
+                return
+            target.setText(new_text)
         except Exception as exc:
             try:
                 from modules.ui_utils.error_logger import log_error
@@ -195,6 +205,9 @@ class KeypadController(QObject):
 
     def _on_fast_set(self, amount: float):
         try:
+            fw = QApplication.focusWidget()
+            if isinstance(fw, QLineEdit) and fw.objectName() == "qtyInput":
+                return
             target = self._get_target()
             if target is None:
                 return
@@ -254,6 +267,9 @@ class KeypadController(QObject):
 
     def _on_tab(self, reverse: bool = False):
         try:
+            fw = QApplication.focusWidget()
+            if isinstance(fw, QLineEdit) and fw.objectName() == "qtyInput":
+                return
             target = self._get_tab_target()
             if self._tab_handler is not None and self._tab_handler(target, reverse):
                 return
@@ -280,6 +296,10 @@ class KeypadController(QObject):
     def _on_enter(self):
         try:
             fw = QApplication.focusWidget()
+            if isinstance(fw, QLineEdit) and fw.objectName() == "qtyInput":
+                if fw.hasAcceptableInput():
+                    fw.returnPressed.emit()
+                return
             allowed_buttons = {
                 "cashPaySlcBtn",
                 "netsPaySlcBtn",
