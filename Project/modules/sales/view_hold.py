@@ -24,7 +24,7 @@ from modules.ui_utils.dialog_utils import (
     report_exception,
 )
 from modules.ui_utils import ui_feedback, input_handler
-from modules.ui_utils.focus_utils import FieldCoordinator
+from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate
 from modules.ui_utils.error_logger import log_error
 from modules.date_time import format_date, format_time
 
@@ -184,6 +184,20 @@ def launch_viewhold_dialog(parent=None):
     coord = FieldCoordinator(dlg)
     dlg._coord = coord  # prevent GC
 
+    # Gate note input for VOID-only editing; placeholder shown only when unlocked
+    # Ensure note is editable so unlock restores a white background via QSS
+    try:
+        note_in.setReadOnly(False)
+    except Exception:
+        pass
+    note_gate = FocusGate([note_in], lock_enabled=True)
+    try:
+        note_gate.remember_placeholders([note_in])
+        note_gate.hide_placeholders([note_in])
+    except Exception:
+        pass
+    note_gate.set_locked(True)
+
     # Enable or disable main input widgets when no receipts are available
     def _set_widgets_enabled(enabled: bool) -> None:
         search_in.setEnabled(enabled)
@@ -310,7 +324,11 @@ def launch_viewhold_dialog(parent=None):
             note_in.blockSignals(True)
             note_in.clear()
             note_in.blockSignals(False)
-            note_in.setEnabled(False)
+            try:
+                note_gate.hide_placeholders([note_in])
+            except Exception:
+                pass
+            note_gate.set_locked(True)
             return
 
         try:
@@ -321,10 +339,18 @@ def launch_viewhold_dialog(parent=None):
             note_in.blockSignals(True)
             note_in.clear()
             note_in.blockSignals(False)
-            note_in.setEnabled(False)
+            try:
+                note_gate.hide_placeholders([note_in])
+            except Exception:
+                pass
+            note_gate.set_locked(True)
             return
 
-        note_in.setEnabled(True)
+        note_gate.set_locked(False)
+        try:
+            note_gate.restore_placeholders([note_in])
+        except Exception:
+            pass
         note_in.blockSignals(True)
         note_in.setText(_selected_note_text())
         note_in.blockSignals(False)

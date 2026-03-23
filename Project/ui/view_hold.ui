@@ -325,7 +325,7 @@
         <item>
          <widget class="QLineEdit" name="viewHoldNoteLineEdit">
           <property name="placeholderText">
-           <string/>
+           <string>-- Optional --</string>
           </property>
          </widget>
         </item>

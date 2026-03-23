@@ -3,7 +3,7 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QPushButton, QLineEdit, QToolButton, QLabel, QTabWidget
 from modules.ui_utils.error_logger import log_error
-from modules.ui_utils.dialog_utils import build_dialog_from_ui, require_widgets, set_dialog_error, set_dialog_info, report_exception_post_close
+from modules.ui_utils.dialog_utils import build_dialog_from_ui, require_widgets, set_dialog_error, set_dialog_info, report_exception_post_close, build_error_fallback_dialog
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, set_initial_focus
 from modules.ui_utils import input_handler
 from modules.db_operation.users_repo import verify_password, update_password
@@ -32,7 +32,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     ui_path = os.path.join(UI_DIR, 'admin_menu.ui')
     dlg = build_dialog_from_ui(ui_path, host_window=host_window, dialog_name='admin_menu', qss_path=QSS_PATH)
     if dlg is None:
-        return None
+        return build_error_fallback_dialog(host_window, 'Admin Settings', QSS_PATH)
 
     # Resolve required widgets (hard-fail if UI changed)
     try:
@@ -109,14 +109,18 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             uid = None
 
     # Focus gate: lock new-password and OK button until current password validated
-    admin_gate = FocusGate([adminNew, btnAdminOk], lock_enabled=True, lock_read_only=True)
-    admin_gate.remember()
-    admin_gate.lock()
-    # Visual cue for locked state
     try:
-        adminNew.setStyleSheet('background-color: #efefef;')
+        adminNew.setReadOnly(False)
     except Exception:
         pass
+    admin_gate = FocusGate([adminNew, btnAdminOk], lock_enabled=True, lock_read_only=True)
+    admin_gate.remember()
+    try:
+        admin_gate.remember_placeholders([adminNew])
+        admin_gate.hide_placeholders([adminNew])
+    except Exception:
+        pass
+    admin_gate.lock()
 
     # Validation function for current admin password
     # Validate current admin password before unlocking new password.
@@ -137,7 +141,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
         # Unlock the gate on success
         try:
             admin_gate.unlock()
-            adminNew.setStyleSheet('')
+            admin_gate.restore_placeholders([adminNew])
         except Exception:
             pass
         return True
