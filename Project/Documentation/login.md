@@ -10,9 +10,17 @@ The login dialog is the first UI shown on application startup. It blocks access 
 - Submit flow: there is no `OK` button. Pressing Enter while focused on the password field triggers validation; on success the dialog returns Accepted and the main window launches. On failure the dialog remains open, the error is shown in `loginStatusLabel`, and the password text is selected for easy correction.
 - Cancel/close: if present, `customCloseBtn` or window reject closes the dialog (Rejected).
 
+Forced-change UX notes:
+- When the Admin dialog is opened in forced-change mode, the dialog disables tab switching, disables Cancel and title-bar Close, and prevents programmatic `reject()` so the user cannot dismiss the dialog without successfully updating the password. On successful update the Admin controller clears the `must_change_password` flag in the DB.
+- The `staff` user (`uid == 2`) remains excluded from forced-change; the "Forgot" flow for staff continues to instruct users to contact admin and does not set the flag.
+
 ## Entry Point Logic
 - In `main.py`, the login dialog is launched before the main window.
 - Only if login is successful, the main window is shown.
+
+Forced password-change integration:
+- The login "Forgot" flow for the admin (`uid == 1`) now not only generates a temporary password (via `generate_temporary_password_for_user`) but also sets a persistent `must_change_password` flag in the users table using `users_repo.set_must_change_password(uid, True)`. This ensures the admin will be required to change the temporary password on next login.
+- After successful login, `main.py` checks `users_repo.get_must_change_password(current_user_id)` and — when set for an admin — opens the Admin dialog in forced-change mode. The forced dialog is opened via the app's `DialogWrapper` but its creation is deferred using `QTimer.singleShot(...)` so the main window has time to finish maximize/resize. This ensures `DialogWrapper` applies `config.DIALOG_RATIOS` against the final main-window geometry and prevents the dialog from sizing too small.
 
 ## UI/UX details
 - Focus: the password field receives initial focus when the dialog opens.

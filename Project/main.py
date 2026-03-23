@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QDialog,
 )
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import Qt, QSize, QTimer
 from PyQt5.QtGui import QIcon
 
 from modules.table.table_operations import get_sales_data
@@ -309,6 +309,14 @@ class MainLoader(QMainWindow):
         except Exception:
             pass
         super().closeEvent(event)
+
+    def resizeEvent(self, event):
+        """Keep modal overlay sized to the main window."""
+        try:
+            self.overlay_manager.resize_overlay()
+        except Exception:
+            pass
+        super().resizeEvent(event)
 
     # ========== Menu Frame Dialog Handlers ==========
     # Trigger logout dialog via the dialog wrapper.
@@ -1125,10 +1133,34 @@ def main():
             window.current_user_id = None
         window.current_username = str(login_user.get('username') or '')
         window.current_is_admin = bool(login_user.get('is_admin'))
-        window.showMaximized()
+        # Show the main window first so any subsequent dialogs use the
+        # dialog wrapper overlay (modal over main window) like normal UI flows.
         try:
+            window.showMaximized()
             window.raise_()
             window.activateWindow()
+        except Exception:
+            pass
+
+        # Enforce persistent must-change-password flag: if set for this user,
+        # open the admin dialog in forced-change mode once the window geometry settles.
+        try:
+            from modules.db_operation.users_repo import get_must_change_password
+            if window.current_user_id is not None and get_must_change_password(int(window.current_user_id)):
+                # Only allow admin users to perform the forced update via admin dialog.
+                if bool(window.current_is_admin):
+                    def _open_forced_admin():
+                        window.dialog_wrapper.open_dialog_scanner_blocked(
+                            launch_admin_dialog,
+                            dialog_key='admin_menu',
+                            user_id=window.current_user_id,
+                            is_admin=True,
+                            force_change=True,
+                        )
+
+                    # Defer dialog open to ensure main window has final size,
+                    # so dialog ratio sizing is accurate.
+                    QTimer.singleShot(150, _open_forced_admin)
         except Exception:
             pass
         # If cache load failed earlier, surface it once the status bar exists.

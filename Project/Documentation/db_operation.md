@@ -127,6 +127,11 @@ Lightweight repository used by the login UI to authenticate users and support si
   - `get_recovery_email(user_id: int) -> str | None` — returns `recovery_email` or `None`.
   - `generate_temporary_password_for_user(user_id: int, length: int = 12) -> str` — creates a random temporary password, stores its SHA-256 hash to `password_hash`, updates `password_updated_at` to `now_iso()`, commits the change and returns the plaintext temporary password.
 
+- New helpers for forced password-change flow:
+  - `set_must_change_password(user_id: int, must_change: bool = True)` — sets the persistent `must_change_password` flag for `user_id` (writes 1 when `must_change=True`, 0 otherwise).
+  - `clear_must_change_password(user_id: int)` — convenience wrapper that clears the flag (sets to 0).
+  - Note: the `must_change_password` column is persisted in the `users` table. The application uses this flag to enforce a password-change dialog on next login when set; for the `staff` username this flag is not used and remains 0.
+
 - Security note:
   - The module currently uses SHA-256 for hashing (convenience/demo). Replace with a slow, memory-hard algorithm such as `bcrypt` or `argon2` before production use.
 

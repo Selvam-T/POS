@@ -45,12 +45,20 @@ Both tabs use the same shared logic via a neutral helper:
 - On OK, update with `update_password(user_id, new_pwd)`.
 - Show a post-close status message on success or error.
 
+Implementation note:
+- The shared helper is implemented in `modules/menu/admin_menu.py` as a neutral `_setup_password_tab(...)` function which is invoked for both ADMIN and STAFF tabs. This consolidates validation, FocusGate behavior and the call to `update_password()` so maintenance and UX rules remain consistent.
+
 ### Forced Password Change (Admin)
 When the admin account has `must_change_password = 1`:
 - The dialog must open on the ADMIN tab.
 - The user is blocked from switching tabs or closing the dialog until a successful admin password change.
 - Cancel and title-bar close should show an error message and keep the dialog open.
 - On success, the controller resets `must_change_password` to `0` in the users table.
+
+Behavioral details / implementation notes:
+- The persistent flag is stored in the `users.must_change_password` INTEGER column and manipulated via helpers in `modules/db_operation/users_repo.py` (`set_must_change_password`, `get_must_change_password`, `clear_must_change_password`).
+- When the app launches and detects the flag for the logged-in admin, `main.py` opens the Admin dialog in forced-change mode using the normal `DialogWrapper` flow. To ensure dialog sizing is computed against the final main-window geometry, the forced dialog open is deferred with `QTimer.singleShot(...)` so the main window can finish maximize/resize operations before the dialog applies `config.DIALOG_RATIOS`.
+- While `force_change=True`, the controller disables other tabs, disables Cancel and the custom Close button, and prevents `dlg.reject()` from closing the dialog. The DB flag is cleared only after a successful password update.
 
 ### Fixed User Ids (Documented Invariant)
 The password change targets are fixed by user id:
@@ -68,6 +76,9 @@ The controller still honors an explicit `user_id` argument for ADMIN if the call
 
 - ADMIN/STAFF ids are fixed in the database seed. If these change, update constants in the controller.
 - Other tabs (e.g., Screen 2 Ads) are not documented here yet.
+
+Security note:
+- The forced-change flow is only applied for the ADMIN account (user id 1). The `staff` account intentionally does not participate in forced password changes and the application will ignore `must_change_password` for staff (remains 0).
 
 ## Update Checklist (When Adding New Tab)
 

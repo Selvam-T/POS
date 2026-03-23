@@ -29,6 +29,7 @@ def launch_login_dialog(parent=None, *, return_user: bool = False):
         authenticate_user,
         build_authenticated_user,
         generate_temporary_password_for_user,
+        set_must_change_password,
         # recommended to have this; otherwise use itemData approach (below)
         get_user_id_by_username,
     )
@@ -142,6 +143,12 @@ def launch_login_dialog(parent=None, *, return_user: bool = False):
         # - uid == 2: instruct the user to contact admin
         if int(uid) == 1:
             temp_pwd = generate_temporary_password_for_user(int(uid), length=12)
+            try:
+                # mark the admin account to require a password change on next login
+                set_must_change_password(int(uid), True)
+            except Exception:
+                # non-fatal; proceed even if flag update fails
+                pass
             try:
                 QApplication.clipboard().setText(temp_pwd)
             except Exception:

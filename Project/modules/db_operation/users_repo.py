@@ -23,6 +23,50 @@ def _store_password_hash(user_id: int, pwd_hash: str) -> None:
         conn.close()
 
 
+def set_must_change_password(user_id: int, must_change: bool = True) -> None:
+    """Set or clear the persistent `must_change_password` flag for a user.
+
+    Args:
+        user_id: the integer id of the user to update.
+        must_change: True to set the flag (1), False to clear it (0).
+    """
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE users SET must_change_password = ? WHERE user_id = ?",
+            (1 if must_change else 0, user_id),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def clear_must_change_password(user_id: int) -> None:
+    """Convenience wrapper to clear `must_change_password` (set to 0)."""
+    set_must_change_password(user_id, False)
+
+
+def get_must_change_password(user_id: int) -> bool:
+    """Return True if `must_change_password` is set for `user_id`.
+
+    Returns False when the flag is not present or any error occurs.
+    """
+    conn = get_conn()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT must_change_password FROM users WHERE user_id = ?", (user_id,))
+        row = cur.fetchone()
+        if not row:
+            return False
+        try:
+            return bool(int(row[0]))
+        except Exception:
+            return False
+    finally:
+        conn.close()
+
+
 def update_password(user_id: int, new_password: str) -> None:
     """Set a new password for `user_id` (hash + timestamp)."""
     pwd_hash = hash_password(new_password)

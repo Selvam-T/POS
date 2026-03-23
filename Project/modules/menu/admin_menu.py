@@ -6,7 +6,7 @@ from modules.ui_utils.error_logger import log_error
 from modules.ui_utils.dialog_utils import build_dialog_from_ui, require_widgets, set_dialog_error, set_dialog_info, report_exception_post_close, build_error_fallback_dialog
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, set_initial_focus
 from modules.ui_utils import input_handler
-from modules.db_operation.users_repo import verify_password, update_password
+from modules.db_operation.users_repo import verify_password, update_password, clear_must_change_password
 from modules.ui_utils import ui_feedback
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -17,7 +17,7 @@ QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
 
 
 # Build and return the admin settings dialog.
-def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool = True):
+def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool = True, force_change: bool = False):
     """Open the Admin Settings dialog.
 
     Args:
@@ -108,6 +108,33 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     # Determine user id for staff (fixed id)
     staff_uid = STAFF_USER_ID
 
+    # If forcing a password change, restrict UI to ADMIN tab and prevent cancel/close.
+    if force_change:
+        try:
+            # Disable all tabs except the first (ADMIN) so user cannot switch away.
+            for i in range(tabWidget.count()):
+                tabWidget.setTabEnabled(i, i == 0)
+        except Exception:
+            pass
+        # Disable cancel/close actions while in forced-change mode.
+        try:
+            btnAdminCancel.setEnabled(False)
+        except Exception:
+            pass
+        try:
+            btnStaffCancel.setEnabled(False)
+        except Exception:
+            pass
+        try:
+            if customClose is not None:
+                customClose.setEnabled(False)
+        except Exception:
+            pass
+        try:
+            dlg.reject = lambda: None
+        except Exception:
+            pass
+
     def _setup_password_tab(*, cur_edit, new_edit, ok_btn, status_lbl, user_id: int | None):
         # Focus gate: lock new-password and OK button until current password validated
         try:
@@ -172,6 +199,12 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
                 if user_id is None:
                     raise Exception('User id not found')
                 update_password(user_id, new_pwd)
+                # If this dialog was opened to force a password change, clear the DB flag.
+                try:
+                    if force_change:
+                        clear_must_change_password(user_id)
+                except Exception:
+                    pass
             except Exception as exc:
                 report_exception_post_close(dlg, 'update_password', exc, user_message='Failed to update password', level='error')
                 dlg.reject()

@@ -19,3 +19,9 @@ class OverlayManager:
         else:
             if self._dim_overlay:
                 self._dim_overlay.hide()
+
+    def resize_overlay(self):
+        """Resize the overlay to match the main window geometry."""
+        if self._dim_overlay and self._dim_overlay.isVisible():
+            self._dim_overlay.setGeometry(self.mw.rect())
+            self._dim_overlay.raise_()
