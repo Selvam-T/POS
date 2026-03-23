@@ -2,7 +2,7 @@
 # Database Administration for Anumani POS
 
 **Version:** 1.2
-**Last Updated:** January 10, 2026
+**Last Updated:** March 23, 2026
 
 
 This folder contains all database administration scripts for the Anumani POS system.
@@ -160,8 +160,9 @@ python create_users_table.py
 | password_updated_at       | TEXT     | NOT NULL | ISO timestamp (UTC recommended)|
 | recovery_email   | TEXT     | NOT NULL |  Required for admin; NULL for staff  |
 | is_active       | INTEGER     | NOT NULL | DEFAULT 1 (1=active,0=disabled)|     
+| must_change_password       | INTEGER     | NOT NULL | DEFAULT 0 ** |
 
-
+** **Note: must_change_password was migrated separately, see below.**
 ##### Indexes
 
 -   UNIQUE index on `username`
@@ -187,6 +188,30 @@ Inserts:
 | ----------        | ----------     | ------------------------------ |
 | admin        | admin123     | thiagarajan.selvam@gmail.com |
 | staff        | staff123     | NULL |
+------------------------------------------------------------------------
+
+#### Added column:
+
+- `must_change_password INTEGER NOT NULL DEFAULT 0`  
+  Used for Force Password Change. When set to `1`, the user is redirected to the password change screen after login.
+
+Notes:
+
+- Existing users are automatically initialized to `0`.
+- No existing user data was modified or deleted during migration.
+- `is_active` remains in the schema for backward compatibility and can be treated as deprecated if unused.
+
+Migration:
+
+- A standalone idempotent script checks whether the column already exists before running `ALTER TABLE`.
+- The migration uses a transaction and rolls back on failure.
+
+Insert reminder:
+
+```sql
+INSERT INTO users (username, password_hash, password_updated_at, must_change_password)
+VALUES ('new_user', 'hash_value', datetime('now'), 0);
+```
 ------------------------------------------------------------------------
 #### Security Note  
 

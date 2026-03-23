@@ -82,7 +82,8 @@ CREATE TABLE users (
 		password_hash       TEXT    NOT NULL,                  -- hashed (never plaintext)
 		password_updated_at TEXT    NOT NULL,                  -- ISO timestamp
 		recovery_email      TEXT,                              -- NULL for staff, set for admin
-		is_active           INTEGER NOT NULL DEFAULT 1         -- 1 = active, 0 = disabled
+		is_active           INTEGER NOT NULL DEFAULT 1,        -- 1 = active, 0 = disabled
+		must_change_password INTEGER NOT NULL DEFAULT 0        -- 1 = force password change
 );
 ```
 
@@ -92,6 +93,8 @@ CREATE TABLE users (
 		- `staff` — password `staff123` (hashed), `recovery_email`: NULL, `is_active`: 1
 	- The script uses SHA-256 hashing for demonstration only — replace with a slow password hashing algorithm (bcrypt/argon2) in production.
 	- Inserts are performed with `INSERT OR IGNORE` so existing records are preserved if the script is re-run.
+	- `must_change_password` defaults to `0` and is toggled to `1` only when a temporary password is issued.
+	- After a successful password change, `must_change_password` is reset to `0`.
 
 **Notes on `is_active` and session tracking**
 

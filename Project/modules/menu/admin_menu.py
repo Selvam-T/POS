@@ -95,104 +95,98 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     # Coordinator & gates
     fc = FieldCoordinator(dlg)
 
-    # Determine user id for admin (prefer explicit arg; fallback to session id)
-    try:
-        uid = int(user_id) if user_id is not None else None
-    except Exception:
-        uid = None
+    # Fixed user ids for password change (documented invariant in DB seed)
+    ADMIN_USER_ID = 1
+    STAFF_USER_ID = 2
 
-    if uid is None:
-        try:
-            if getattr(host_window, 'current_user_id', None):
-                uid = int(host_window.current_user_id)
-        except Exception:
-            uid = None
-
-    # Focus gate: lock new-password and OK button until current password validated
+    # Determine user id for admin (prefer explicit arg; fallback to fixed id)
     try:
-        adminNew.setReadOnly(False)
+        admin_uid = int(user_id) if user_id is not None else ADMIN_USER_ID
     except Exception:
-        pass
-    admin_gate = FocusGate([adminNew, btnAdminOk], lock_enabled=True, lock_read_only=True)
-    admin_gate.remember()
-    try:
-        admin_gate.remember_placeholders([adminNew])
-        admin_gate.hide_placeholders([adminNew])
-    except Exception:
-        pass
-    admin_gate.lock()
+        admin_uid = ADMIN_USER_ID
 
-    # Validation function for current admin password
-    # Validate current admin password before unlocking new password.
-    def _validate_admin_current():
-        txt = adminCur.text() or ''
-        if not txt:
-            raise ValueError('Enter current password')
+    # Determine user id for staff (fixed id)
+    staff_uid = STAFF_USER_ID
+
+    def _setup_password_tab(*, cur_edit, new_edit, ok_btn, status_lbl, user_id: int | None):
+        # Focus gate: lock new-password and OK button until current password validated
         try:
-            ok = False
-            if uid is not None:
-                ok = verify_password(uid, txt)
-            if not ok:
-                raise ValueError('Invalid current password')
-        except ValueError:
-            raise
-        except Exception:
-            raise ValueError('Password check failed')
-        # Unlock the gate on success
-        try:
-            admin_gate.unlock()
-            admin_gate.restore_placeholders([adminNew])
+            new_edit.setReadOnly(False)
         except Exception:
             pass
-        return True
-
-    # Register field in coordinator so ENTER handling and auto-clear work
-    fc.register_validator(adminCur, _validate_admin_current, adminStatus)
-    fc.add_link(adminCur, target_map={}, next_focus=adminNew, status_label=adminStatus, validate_fn=_validate_admin_current, auto_jump=True)
-
-    # New password validation using shared input handler
-    # Validate new admin password using shared rules.
-    def _validate_new_admin():
+        gate = FocusGate([new_edit, ok_btn], lock_enabled=True, lock_read_only=True)
+        gate.remember()
         try:
-            return input_handler.handle_password_input(adminNew)
-        except ValueError as e:
-            raise
+            gate.remember_placeholders([new_edit])
+            gate.hide_placeholders([new_edit])
         except Exception:
-            raise ValueError('Invalid new password')
+            pass
+        gate.lock()
 
-    fc.register_validator(adminNew, _validate_new_admin, adminStatus)
-    fc.add_link(adminNew, target_map={}, next_focus=btnAdminOk, status_label=adminStatus, validate_fn=_validate_new_admin, auto_jump=True)
+        # Validate current password before unlocking new password.
+        def _validate_current():
+            txt = cur_edit.text() or ''
+            if not txt:
+                raise ValueError('Enter current password')
+            try:
+                ok = False
+                if user_id is not None:
+                    ok = verify_password(user_id, txt)
+                if not ok:
+                    raise ValueError('Invalid current password')
+            except ValueError:
+                raise
+            except Exception:
+                raise ValueError('Password check failed')
+            try:
+                gate.unlock()
+                gate.restore_placeholders([new_edit])
+            except Exception:
+                pass
+            return True
 
-    # btnAdminOk click handler: validate again and update DB
-    # Commit admin password update after validation.
-    def _on_admin_ok():
+        # Validate new password using shared rules.
+        def _validate_new():
+            try:
+                return input_handler.handle_password_input(new_edit)
+            except ValueError:
+                raise
+            except Exception:
+                raise ValueError('Invalid new password')
+
+        fc.register_validator(cur_edit, _validate_current, status_lbl)
+        fc.add_link(cur_edit, target_map={}, next_focus=new_edit, status_label=status_lbl, validate_fn=_validate_current, auto_jump=True)
+
+        fc.register_validator(new_edit, _validate_new, status_lbl)
+        fc.add_link(new_edit, target_map={}, next_focus=ok_btn, status_label=status_lbl, validate_fn=_validate_new, auto_jump=True)
+
+        def _on_ok():
+            try:
+                _validate_current()
+                new_pwd = _validate_new()
+            except ValueError as e:
+                fc.set_error(new_edit if 'new' in str(e).lower() else cur_edit, str(e), status_label=status_lbl)
+                return
+
+            try:
+                if user_id is None:
+                    raise Exception('User id not found')
+                update_password(user_id, new_pwd)
+            except Exception as exc:
+                report_exception_post_close(dlg, 'update_password', exc, user_message='Failed to update password', level='error')
+                dlg.reject()
+                return
+
+            set_dialog_info(dlg, 'Password updated successfully')
+            dlg.accept()
+
         try:
-            # Re-validate current and new
-            _validate_admin_current()
-            new_pwd = _validate_new_admin()
-        except ValueError as e:
-            fc.set_error(adminNew if 'new' in str(e).lower() else adminCur, str(e), status_label=adminStatus)
-            return
+            ok_btn.clicked.connect(_on_ok)
+        except Exception:
+            pass
 
-        # Attempt update
-        try:
-            if uid is None:
-                raise Exception('User id not found')
-            update_password(uid, new_pwd)
-        except Exception as exc:
-            # Set post-close status as error and close dialog
-            report_exception_post_close(dlg, 'update_password', exc, user_message='Failed to update password', level='error')
-            dlg.reject()
-            return
-
-        # Success: set post-close info and close
-        set_dialog_info(dlg, 'Password updated successfully')
-        dlg.accept()
-
-    try:
-        btnAdminOk.clicked.connect(_on_admin_ok)
-    except Exception:
-        pass
+    _setup_password_tab(cur_edit=adminCur, new_edit=adminNew, ok_btn=btnAdminOk, status_lbl=adminStatus, user_id=admin_uid)
+    _setup_password_tab(cur_edit=staffCur, new_edit=staffNew, ok_btn=btnStaffOk, status_lbl=staffStatus, user_id=staff_uid)
 
     # Cancel/Close buttons
     try:
