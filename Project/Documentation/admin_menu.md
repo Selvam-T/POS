@@ -26,8 +26,9 @@ When `must_change_password` is set for the admin account, the Admin Menu enforce
 ### Required Widgets
 The controller resolves and hard-fails on missing widgets, including:
 - `QTabWidget#tabWidget`
-- ADMIN: `adminCurPwdLineEdit`, `adminNewPwdLineEdit`, `btnAdminOk`, `btnAdminCancel`, `adminStatusLabel`, `adminToolBtn`
-- STAFF: `staffCurPwdLineEdit`, `staffNewPwdLineEdit`, `btnStaffOk`, `btnStaffCancel`, `staffStatusLabel`, `staffQToolBtn`
+- ADMIN: `adminCurPwdLineEdit`, `adminNewPwdLineEdit`, `btnAdminOk`, `btnAdminCancel`, `adminStatusLabel`, `adminToolBtn`, `adminToolBtn2`
+- STAFF: `staffCurPwdLineEdit`, `staffNewPwdLineEdit`, `btnStaffOk`, `btnStaffCancel`, `staffStatusLabel`, `staffToolBtn`, `staffToolBtn2`
+- Screen 2 Ads: `screen2ListWidget`, `screen2PreviewLabel`, `screen2CountLabel`, `screen2StatusLabel`, `addScreen2Btn`, `removeScreen2Btn`, `upScreen2Btn`, `downScreen2Btn`
 - Title bar: `customCloseBtn`
 
 ### Title Bar
@@ -72,10 +73,41 @@ The controller still honors an explicit `user_id` argument for ADMIN if the call
 - Uses `FocusGate` to lock/unlock fields and hide/restore placeholders.
 - Initial focus is set to `adminCurPwdLineEdit` on open.
 
+## Screen 2 Ads Tab
+
+Screen 2 Ads is wired via a dedicated helper so it remains independent from Admin/Staff password logic.
+
+Helper module:
+- [modules/menu/screen2_ads_helper.py](modules/menu/screen2_ads_helper.py)
+
+Storage model:
+- Folder: `assets/ads`
+- Files are named with numeric prefixes (e.g., `1_image.jpg`, `2_image.jpg`)
+- Order is determined by numeric prefix and persisted by renaming files
+
+Behavior summary:
+- Add images via file picker; accepted formats: JPG, JPEG, PNG
+- Validation: resolution must be exactly 1280x800 (16:10)
+- Limit: max 6 images
+- Thumbnails are generated in memory and shown in the list
+- Preview is displayed in `screen2PreviewLabel`
+- Reorder uses Up/Down and persists by renumbering files
+- Remove deletes the selected image and renumbers remaining files
+
+Gating rules:
+- Add is disabled when the limit is reached
+- Remove is disabled unless an item is selected
+- Up is disabled on the first item or if nothing is selected
+- Down is disabled on the last item or if nothing is selected
+
+Status messaging:
+- Errors and success messages are routed through `screen2StatusLabel` via `ui_feedback.set_status_label(...)`
+- Clearing status uses `ui_feedback.clear_status_label(...)`
+
 ## Known Limits / Assumptions
 
 - ADMIN/STAFF ids are fixed in the database seed. If these change, update constants in the controller.
-- Other tabs (e.g., Screen 2 Ads) are not documented here yet.
+- Screen 2 Ads uses file-system persistence in `assets/ads`. Ensure this folder is accessible to the app user.
 
 Security note:
 - The forced-change flow is only applied for the ADMIN account (user id 1). The `staff` account intentionally does not participate in forced password changes and the application will ignore `must_change_password` for staff (remains 0).

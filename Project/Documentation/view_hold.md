@@ -188,6 +188,14 @@ Flow:
   - Main window handler (`_on_view_hold_loaded`) sets `ReceiptContext.source = 'HOLD_LOADED'` and applies a SalesFrame qty lock
 7. Close the dialog (`accept()`)
 
+#### LOAD modes — behavior and reasoning
+
+Every time a sale is placed on hold the system generates a receipt number and the receipt row is stored with status `UNPAID`.
+
+- LOAD to continue: the controller will void the original held receipt (calls `void_receipt(...)` and sets status → `CANCELLED`) before re-creating the items in the Sales table as a new active sale. Because the original receipt is voided it is no longer listed among `UNPAID` receipts and so will not appear in the View Hold table. The loaded items are treated as a fresh active cart — additional items can be appended to the cart or the cart can be cleared. This mode is useful when a customer temporarily leaves their in-progress shopping (we hold their cart so the cashier can serve the next customer) and later returns to continue shopping. Note: voiding a receipt is a status change (CANCELLED), not permanent deletion — the cancelled receipt remains retrievable in Receipt History under CANCELLED receipts.
+
+- LOAD to pay: this mode preserves the held receipt (keeps the `receipt_no` and `UNPAID` semantics) and loads its items into the Sales table in a payment-only context. The system requires a resolvable `receipt_id` so the payment can be recorded against the original receipt. While the items are shown in the Sales table the UI enforces a payment-focused workflow: appending new items to the loaded receipt is disallowed, but the cart may be cleared after payment. This mode is intended for customers who purchased on credit and return later to settle the outstanding amount — preserving the original receipt prevents mixing new purchases with unpaid items and avoids dispute scenarios where it's unclear which items belong to the original hold versus newly added items.
+
 ### 2) PRINT
 
 Goal: Printer-only printing of a receipt.

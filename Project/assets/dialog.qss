@@ -110,7 +110,7 @@ QPushButton:focus {
 }
 
 /* =========================================================
-   VEGETABLE SLOT BUTTONS
+   VEGETABLE SLOT BUTTONS (special)
    ========================================================= */
 
 /* Use *= (contains) and remove the comma between attributes */
@@ -183,6 +183,27 @@ QLabel[status="error"] {
 QLabel[objectName$="SubLbl"] {
     color: #710b0b !important;
 }*/
+
+/* =========================================================
+   Admin_menu Screen 2 Ads Tab Special Labels
+   ========================================================= */
+QLabel#screen2RulesLabel,
+QLabel#screen2CountLabel,
+QLabel#screen2PreviewLabel{
+    color: #4b5563;
+    font-size: 10pt;
+    font-weight: 400;
+}
+
+QLabel#screen2CountLabel {
+    font-weight: 500;
+}
+
+QListWidget#screen2ListWidget,
+QLabel#screen2PreviewLabel{
+    border: 1px solid #dfdcdcdd;
+    border-radius: 4px;
+}
 
 /* =========================================================
    COMMON INPUT WIDGETS
@@ -271,15 +292,26 @@ QComboBox[locked="true"]::down-arrow {
 }
 
 /* ToolButton SVG Icon */
-QToolButton {
+
+QToolButton#adminToolBtn,
+QToolButton#adminToolBtn2,
+QToolButton#staffToolBtn,
+QToolButton#staffToolBtn2 {
+    qproperty-icon: url(assets/icons/eye.svg);
+    icon-size: 28px;
+    min-width: 30px;
+    min-height: 30px;
     border: none;
-    background: transparent;
+    padding: 10px;
 }
 
-QToolButton::icon {
-    image: url(assets/icons/eye.svg);
-    width: 22px;
-    height: 22px;
+QToolButton#adminToolBtn:focus,
+QToolButton#adminToolBtn2:focus,
+QToolButton#staffToolBtn:focus,
+QToolButton#staffToolBtn2:focus,
+QPushButton[objectName*="Screen2Btn"]:focus {
+    outline: none;
+    border: 2px solid orange;
 }
 
 /* Field labels */
@@ -333,21 +365,15 @@ QTabBar::tab:hover:!selected {
     color: #0062ff; /* Text color change on hover */
 }
 
-/* GroupBox with inline title */
-QGroupBox {
-    font-size: 8pt;
-    font-weight: 600;
-    border: 1px solid #c7cdd6;
-    border-radius: 4px;
-    margin-top: 8px;
-    padding-top: 12px;
+QTabBar::tab:focus {
+    outline: none;
+    border: 2px solid orange;
 }
 
-QGroupBox::title {
-    subcontrol-origin: margin;
-    left: 10px;
-    color: #05425f;
-    padding: 0 4px 0 4px;
+/* GroupBox */
+QGroupBox {
+    border: none;
+    margin-top: 0px;
 }
 
 /* =============================================================

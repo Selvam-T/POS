@@ -1,34 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <path d="
-    M 21.0 266.0
-    C 126.75 116.0  385.25 116.0  491.0 266.0
-    C 385.25 416.0  126.75 416.0  21.0 266.0
-    Z"
-    fill="#e9eef7" stroke="#222222" stroke-width="22" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <circle cx="256" cy="256" r="244" fill="#F3C9C0"/>
 
-  <circle cx="256.0" cy="266.0" r="128" fill="#3fc0ef" stroke="#222222" stroke-width="18"/>
-  <circle cx="256.0" cy="276.0" r="74" fill="#2d3b74" stroke="#222222" stroke-width="18"/>
+  <!-- soft pink accents -->
+  <path d="M78 290c45 60 115 96 189 96 62 0 121-24 166-67" fill="none" stroke="#F48F88" stroke-width="18" stroke-linecap="round"/>
+  <path d="M88 230c43-63 116-103 197-103 61 0 121 23 168 63" fill="none" stroke="#E88C83" stroke-width="18" stroke-linecap="round"/>
+  <path d="M96 330c18 0 33 7 45 21" fill="none" stroke="#D96E69" stroke-width="14" stroke-linecap="round"/>
+  <path d="M398 326c15 5 26 14 34 28" fill="none" stroke="#D96E69" stroke-width="14" stroke-linecap="round"/>
+  <path d="M382 204c18 2 32-3 43-15" fill="none" stroke="#E88C83" stroke-width="14" stroke-linecap="round"/>
 
-  <path d="
-    M 226.0 188.0
-    C 171.0 196.0, 146.0 261.0, 176.0 306.0
-    C 201.0 344.0, 276.0 361.0, 301.0 321.0
-    C 321.0 286.0, 296.0 236.0, 246.0 231.0
-    C 221.0 228.0, 221.0 211.0, 226.0 188.0
-    Z"
-    fill="#3fc0ef" />
-
-  <g stroke="#3a3a3a" stroke-width="18" stroke-linecap="round">
-    <line x1="186.0" y1="61.0" x2="161.0" y2="11.0"/>
-    <line x1="256.0" y1="46.0" x2="256.0" y2="-14.0"/>
-    <line x1="326.0" y1="61.0" x2="351.0" y2="11.0"/>
+  <!-- lashes -->
+  <g fill="none" stroke="#3F425D" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M365 184l28-14"/>
+    <path d="M387 194l20-20"/>
+    <path d="M405 209l20-6"/>
+    <path d="M381 304l23 17"/>
+    <path d="M359 320l13 22"/>
+    <path d="M121 286l-27 9"/>
+    <path d="M101 321l30 12"/>
   </g>
 
-  <path d="M 35 266.0 C 70 231.0 95 201.0 120 171.0 C 95 246.0 95 286.0 120 361.0 C 95 331.0 70 301.0 35 266.0 Z"
-        fill="#222222"/>
-  <path d="M 477 266.0 C 442 231.0 417 201.0 392 171.0
-           C 417 246.0 417 286.0 392 361.0
-           C 417 331.0 442 301.0 477 266.0 Z"
-        fill="#222222"/>
+  <!-- upper/lower lid accents -->
+  <path d="M77 247c54-76 126-115 213-115 58 0 112 18 159 47" fill="none" stroke="#F48F88" stroke-width="12" stroke-linecap="round"/>
+  <path d="M108 326c43 31 93 48 150 48 46 0 91-11 129-32" fill="none" stroke="#F48F88" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- eye outline -->
+  <path d="M42 256c55-71 123-107 214-107 92 0 162 36 214 107-52 71-122 107-214 107-91 0-159-36-214-107z" fill="#F7F7F7" stroke="#3F425D" stroke-width="12" stroke-linejoin="round"/>
+  <path d="M64 255c45-60 108-90 192-90 84 0 147 30 192 90" fill="none" stroke="#3F425D" stroke-width="12" stroke-linecap="round"/>
+  <path d="M110 334c40 15 85 23 135 23 48 0 91-7 130-21" fill="none" stroke="#3F425D" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- iris / pupil -->
+  <circle cx="260" cy="256" r="92" fill="#98D7E8" stroke="#3F425D" stroke-width="12"/>
+  <circle cx="260" cy="256" r="59" fill="#5C6273"/>
+  <path d="M205 209c17-24 44-40 74-40 17 0 34 5 48 14" fill="none" stroke="#5C9BEF" stroke-width="18" stroke-linecap="round"/>
+  <path d="M315 241c3 10 5 20 5 31 0 24-10 46-25 61" fill="none" stroke="#3F425D" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="226" cy="260" r="25" fill="#F7F7F7" stroke="#3F425D" stroke-width="10"/>
+
+  <!-- corners -->
+  <path d="M42 256c12 6 20 13 28 22" fill="none" stroke="#3F425D" stroke-width="12" stroke-linecap="round"/>
+  <path d="M470 256c-12 6-20 13-28 22" fill="none" stroke="#3F425D" stroke-width="12" stroke-linecap="round"/>
 </svg>

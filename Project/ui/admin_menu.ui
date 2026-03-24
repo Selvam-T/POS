@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>586</width>
-    <height>700</height>
+    <height>680</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>700</height>
+    <height>680</height>
    </size>
   </property>
   <layout class="QVBoxLayout" name="mainVerticalLayout">
@@ -123,11 +123,14 @@
    </item>
    <item>
     <widget class="QTabWidget" name="tabWidget">
+     <property name="focusPolicy">
+      <enum>Qt::TabFocus</enum>
+     </property>
      <property name="tabPosition">
       <enum>QTabWidget::North</enum>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -144,7 +147,7 @@
         <number>10</number>
        </property>
        <property name="topMargin">
-        <number>40</number>
+        <number>20</number>
        </property>
        <property name="rightMargin">
         <number>10</number>
@@ -153,9 +156,54 @@
         <number>20</number>
        </property>
        <item>
+        <spacer name="verticalSpacer_12">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="adminHeaderLabel">
+         <property name="text">
+          <string>Change Admin Password</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <widget class="QGroupBox" name="adminGroupBox">
          <property name="title">
-          <string>Change Admin Password</string>
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
          </property>
          <layout class="QFormLayout" name="formAdmin">
           <property name="horizontalSpacing">
@@ -168,13 +216,13 @@
            <number>10</number>
           </property>
           <property name="topMargin">
-           <number>25</number>
+           <number>20</number>
           </property>
           <property name="rightMargin">
            <number>10</number>
           </property>
           <property name="bottomMargin">
-           <number>25</number>
+           <number>20</number>
           </property>
           <item row="0" column="0">
            <widget class="QLabel" name="adminCurFieldLbl">
@@ -227,20 +275,40 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="adminNewPwdLineEdit">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="echoMode">
-             <enum>QLineEdit::Password</enum>
-            </property>
-            <property name="placeholderText">
-             <string>Enter new password</string>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="layoutAdminNew">
+            <item>
+             <widget class="QLineEdit" name="adminNewPwdLineEdit">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>40</height>
+               </size>
+              </property>
+              <property name="echoMode">
+               <enum>QLineEdit::Password</enum>
+              </property>
+              <property name="placeholderText">
+               <string>Enter new password</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="adminToolBtn2">
+              <property name="toolTip">
+               <string>Show/Hide</string>
+              </property>
+              <property name="text">
+               <string>👁</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="autoRaise">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -314,6 +382,19 @@
          </item>
         </layout>
        </item>
+       <item>
+        <spacer name="verticalSpacer_13">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabStaff">
@@ -328,7 +409,7 @@
         <number>10</number>
        </property>
        <property name="topMargin">
-        <number>40</number>
+        <number>20</number>
        </property>
        <property name="rightMargin">
         <number>10</number>
@@ -337,9 +418,54 @@
         <number>20</number>
        </property>
        <item>
+        <spacer name="verticalSpacer_8">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="staffHeaderLabel">
+         <property name="text">
+          <string>Change Staff Password</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <widget class="QGroupBox" name="staffGroupBox">
          <property name="title">
-          <string>Change Staff Password</string>
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
          </property>
          <layout class="QFormLayout" name="formStaff">
           <property name="horizontalSpacing">
@@ -352,13 +478,13 @@
            <number>10</number>
           </property>
           <property name="topMargin">
-           <number>25</number>
+           <number>20</number>
           </property>
           <property name="rightMargin">
            <number>10</number>
           </property>
           <property name="bottomMargin">
-           <number>25</number>
+           <number>20</number>
           </property>
           <item row="0" column="0">
            <widget class="QLabel" name="staffCurFieldLbl">
@@ -386,7 +512,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QToolButton" name="staffQToolBtn">
+             <widget class="QToolButton" name="staffToolBtn">
               <property name="toolTip">
                <string>Show/Hide</string>
               </property>
@@ -411,20 +537,40 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="staffNewPwdLineEdit">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="echoMode">
-             <enum>QLineEdit::Password</enum>
-            </property>
-            <property name="placeholderText">
-             <string>Enter new password</string>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="layoutStaffNew">
+            <item>
+             <widget class="QLineEdit" name="staffNewPwdLineEdit">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>40</height>
+               </size>
+              </property>
+              <property name="echoMode">
+               <enum>QLineEdit::Password</enum>
+              </property>
+              <property name="placeholderText">
+               <string>Enter new password</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QToolButton" name="staffToolBtn2">
+              <property name="toolTip">
+               <string>Show/Hide</string>
+              </property>
+              <property name="text">
+               <string>👁</string>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="autoRaise">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -498,6 +644,19 @@
          </item>
         </layout>
        </item>
+       <item>
+        <spacer name="verticalSpacer_14">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tabScreen2">
@@ -512,7 +671,7 @@
         <number>10</number>
        </property>
        <property name="topMargin">
-        <number>40</number>
+        <number>20</number>
        </property>
        <property name="rightMargin">
         <number>10</number>
@@ -521,12 +680,54 @@
         <number>20</number>
        </property>
        <item>
-        <widget class="QLabel" name="screen2RulesLabel">
+        <spacer name="verticalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="screen2HeaderLabel">
          <property name="text">
-          <string>Allowed: JPG, JPEG, PNG | Max: 6 images | Standard size: 1280x800 (16:10)</string>
+          <string>Manage Display images</string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="screen2RulesLabel">
+         <property name="text">
+          <string>Allowed:  JPG, JPEG, PNG  |  Max: 6 images  |  Standard size: 1280x800 (16:10)</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -534,32 +735,41 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="screen2CountLabel">
-         <property name="text">
-          <string>0 / 6 images</string>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
          </property>
-        </widget>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <widget class="QGroupBox" name="screen2GroupBox">
          <property name="title">
-          <string>Manage Advertisement Ads</string>
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
          </property>
          <layout class="QHBoxLayout" name="imagesLayout">
           <property name="leftMargin">
            <number>10</number>
           </property>
           <property name="topMargin">
-           <number>25</number>
+           <number>20</number>
           </property>
           <property name="rightMargin">
            <number>10</number>
           </property>
           <property name="bottomMargin">
-           <number>25</number>
+           <number>20</number>
           </property>
           <item>
            <widget class="QLabel" name="screen2PreviewLabel">
@@ -588,13 +798,19 @@
           </item>
           <item>
            <widget class="QListWidget" name="screen2ListWidget">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="contextMenuPolicy">
              <enum>Qt::CustomContextMenu</enum>
             </property>
             <property name="iconSize">
              <size>
-              <width>160</width>
-              <height>100</height>
+              <width>224</width>
+              <height>140</height>
              </size>
             </property>
             <property name="textElideMode">
@@ -614,7 +830,7 @@
             </property>
             <property name="gridSize">
              <size>
-              <width>180</width>
+              <width>224</width>
               <height>140</height>
              </size>
             </property>
@@ -668,6 +884,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="screen2CountLabel">
+         <property name="text">
+          <string>0 / 6 images</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
         <spacer name="verticalSpacer_11">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -693,49 +919,6 @@
          </property>
         </widget>
        </item>
-       <item>
-        <spacer name="verticalSpacer_12">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>10</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="screen2_actionBtns">
-         <property name="spacing">
-          <number>40</number>
-         </property>
-         <property name="leftMargin">
-          <number>30</number>
-         </property>
-         <property name="rightMargin">
-          <number>30</number>
-         </property>
-         <item>
-          <widget class="QPushButton" name="btnScreen2Ok">
-           <property name="text">
-            <string>SAVE</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="btnScreen2Cancel">
-           <property name="text">
-            <string>CANCEL</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
       </layout>
      </widget>
     </widget>
@@ -746,22 +929,22 @@
   <tabstop>adminCurPwdLineEdit</tabstop>
   <tabstop>adminToolBtn</tabstop>
   <tabstop>adminNewPwdLineEdit</tabstop>
+  <tabstop>adminToolBtn2</tabstop>
   <tabstop>btnAdminOk</tabstop>
   <tabstop>btnAdminCancel</tabstop>
-  <tabstop>tabWidget</tabstop>
   <tabstop>staffCurPwdLineEdit</tabstop>
-  <tabstop>staffQToolBtn</tabstop>
+  <tabstop>staffToolBtn</tabstop>
   <tabstop>staffNewPwdLineEdit</tabstop>
+  <tabstop>staffToolBtn2</tabstop>
   <tabstop>btnStaffOk</tabstop>
   <tabstop>btnStaffCancel</tabstop>
-  <tabstop>screen2ListWidget</tabstop>
   <tabstop>addScreen2Btn</tabstop>
   <tabstop>removeScreen2Btn</tabstop>
   <tabstop>upScreen2Btn</tabstop>
   <tabstop>downScreen2Btn</tabstop>
-  <tabstop>btnScreen2Ok</tabstop>
-  <tabstop>btnScreen2Cancel</tabstop>
+  <tabstop>screen2ListWidget</tabstop>
   <tabstop>customCloseBtn</tabstop>
+  <tabstop>tabWidget</tabstop>
  </tabstops>
  <resources/>
  <connections/>

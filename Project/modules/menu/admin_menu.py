@@ -1,13 +1,14 @@
 import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QPushButton, QLineEdit, QToolButton, QLabel, QTabWidget
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QPushButton, QLineEdit, QToolButton, QLabel, QTabWidget, QListWidget
 from modules.ui_utils.error_logger import log_error
 from modules.ui_utils.dialog_utils import build_dialog_from_ui, require_widgets, set_dialog_error, set_dialog_info, report_exception_post_close, build_error_fallback_dialog
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, set_initial_focus
 from modules.ui_utils import input_handler
 from modules.db_operation.users_repo import verify_password, update_password, clear_must_change_password
 from modules.ui_utils import ui_feedback
+from modules.menu.screen2_ads_helper import Screen2AdsController
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
@@ -41,15 +42,25 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             'adminCur': (QLineEdit, 'adminCurPwdLineEdit'),
             'adminNew': (QLineEdit, 'adminNewPwdLineEdit'),
             'adminEye': (QToolButton, 'adminToolBtn'),
+            'adminEye2': (QToolButton, 'adminToolBtn2'),
             'adminStatus': (QLabel, 'adminStatusLabel'),
             'btnAdminOk': (QPushButton, 'btnAdminOk'),
             'btnAdminCancel': (QPushButton, 'btnAdminCancel'),
             'staffCur': (QLineEdit, 'staffCurPwdLineEdit'),
             'staffNew': (QLineEdit, 'staffNewPwdLineEdit'),
-            'staffEye': (QToolButton, 'staffQToolBtn'),
+            'staffEye': (QToolButton, 'staffToolBtn'),
+            'staffEye2': (QToolButton, 'staffToolBtn2'),
             'staffStatus': (QLabel, 'staffStatusLabel'),
             'btnStaffOk': (QPushButton, 'btnStaffOk'),
             'btnStaffCancel': (QPushButton, 'btnStaffCancel'),
+            'screen2List': (QListWidget, 'screen2ListWidget'),
+            'screen2Preview': (QLabel, 'screen2PreviewLabel'),
+            'screen2Count': (QLabel, 'screen2CountLabel'),
+            'screen2Status': (QLabel, 'screen2StatusLabel'),
+            'screen2Add': (QPushButton, 'addScreen2Btn'),
+            'screen2Remove': (QPushButton, 'removeScreen2Btn'),
+            'screen2Up': (QPushButton, 'upScreen2Btn'),
+            'screen2Down': (QPushButton, 'downScreen2Btn'),
             'customClose': (QPushButton, 'customCloseBtn'),
         }, hard_fail=True)
     except Exception as e:
@@ -63,21 +74,32 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     adminCur = widgets['adminCur']
     adminNew = widgets['adminNew']
     adminEye = widgets['adminEye']
+    adminEye2 = widgets['adminEye2']
     adminStatus = widgets['adminStatus']
     btnAdminOk = widgets['btnAdminOk']
     btnAdminCancel = widgets['btnAdminCancel']
     staffCur = widgets['staffCur']
     staffNew = widgets['staffNew']
     staffEye = widgets['staffEye']
+    staffEye2 = widgets['staffEye2']
     staffStatus = widgets['staffStatus']
     btnStaffOk = widgets['btnStaffOk']
     btnStaffCancel = widgets['btnStaffCancel']
+    screen2List = widgets['screen2List']
+    screen2Preview = widgets['screen2Preview']
+    screen2Count = widgets['screen2Count']
+    screen2Status = widgets['screen2Status']
+    screen2Add = widgets['screen2Add']
+    screen2Remove = widgets['screen2Remove']
+    screen2Up = widgets['screen2Up']
+    screen2Down = widgets['screen2Down']
     customClose = widgets.get('customClose')
 
     # Titlebar close
     if customClose is not None:
         try:
-            customClose.clicked.connect(dlg.reject)
+            # Use a lambda so the call resolves to the current `dlg.reject` (may be wrapped later).
+            customClose.clicked.connect(lambda: dlg.reject())
         except Exception:
             pass
 
@@ -90,7 +112,9 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             pass
 
     _wire_eye(adminEye, adminCur)
+    _wire_eye(adminEye2, adminNew)
     _wire_eye(staffEye, staffCur)
+    _wire_eye(staffEye2, staffNew)
 
     # Coordinator & gates
     fc = FieldCoordinator(dlg)
@@ -198,6 +222,8 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             try:
                 if user_id is None:
                     raise Exception('User id not found')
+                # UNCOMMENT next line to simulate raise Exception('Simulated update failure')
+                #raise Exception('Simulated update failure')
                 update_password(user_id, new_pwd)
                 # If this dialog was opened to force a password change, clear the DB flag.
                 try:
@@ -221,10 +247,85 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     _setup_password_tab(cur_edit=adminCur, new_edit=adminNew, ok_btn=btnAdminOk, status_lbl=adminStatus, user_id=admin_uid)
     _setup_password_tab(cur_edit=staffCur, new_edit=staffNew, ok_btn=btnStaffOk, status_lbl=staffStatus, user_id=staff_uid)
 
+    # Screen 2 ads tab wiring (independent helper).
+    try:
+        screen2_ctrl = Screen2AdsController(
+            list_widget=screen2List,
+            preview_label=screen2Preview,
+            count_label=screen2Count,
+            status_label=screen2Status,
+            add_btn=screen2Add,
+            remove_btn=screen2Remove,
+            up_btn=screen2Up,
+            down_btn=screen2Down,
+        )
+        # Keep a reference so slots remain alive.
+        try:
+            dlg._screen2_ctrl = screen2_ctrl
+        except Exception:
+            pass
+        screen2_ctrl.wire()
+        screen2_ctrl.refresh(select_index=0)
+    except Exception:
+        try:
+            ui_feedback.set_status_label(screen2Status, 'Screen 2 setup failed.', ok=False)
+        except Exception:
+            pass
+
     # Cancel/Close buttons
     try:
-        btnAdminCancel.clicked.connect(dlg.reject)
-        btnStaffCancel.clicked.connect(dlg.reject)
+        # Preserve original reject so we can call it directly from handlers.
+        orig_reject = getattr(dlg, 'reject', None)
+    except Exception:
+        orig_reject = None
+
+    # Only wrap dialog reject to provide a generic post-close message when
+    # not forcing a password change (force_change disables reject earlier).
+    try:
+        if not force_change and callable(orig_reject):
+            def _reject_with_default_msg():
+                try:
+                    if not getattr(dlg, 'main_status_msg', None):
+                        set_dialog_info(dlg, 'Admin dialog closed.', duration=3000)
+                except Exception:
+                    pass
+                try:
+                    orig_reject()
+                except Exception:
+                    pass
+            dlg.reject = _reject_with_default_msg
+    except Exception:
+        pass
+
+    try:
+        def _on_admin_cancel():
+            try:
+                set_dialog_info(dlg, 'Admin password change cancelled.', duration=3000)
+            except Exception:
+                pass
+            try:
+                if callable(orig_reject):
+                    orig_reject()
+                else:
+                    dlg.reject()
+            except Exception:
+                pass
+
+        def _on_staff_cancel():
+            try:
+                set_dialog_info(dlg, 'Staff password change cancelled.', duration=3000)
+            except Exception:
+                pass
+            try:
+                if callable(orig_reject):
+                    orig_reject()
+                else:
+                    dlg.reject()
+            except Exception:
+                pass
+
+        btnAdminCancel.clicked.connect(_on_admin_cancel)
+        btnStaffCancel.clicked.connect(_on_staff_cancel)
     except Exception:
         pass
 

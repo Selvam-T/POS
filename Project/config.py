@@ -101,6 +101,19 @@ APPDATA_DIR = os.path.join(_BASE_DIR, 'AppData')
 VEG_SLOTS = 16
 
 # =========================================================
+# Screen 2 Ads settings
+# =========================================================
+# Maximum number of images allowed for the customer-facing Screen 2 ads
+MAX_ADS = 6
+# Allowed image file extensions (lowercase)
+ALLOWED_EXTS = {'.jpg', '.jpeg', '.png'}
+# Required image resolution for Screen 2 (width x height)
+REQ_WIDTH = 1280
+REQ_HEIGHT = 800
+# Aspect ratio derived from required width/height
+REQ_RATIO = REQ_WIDTH / REQ_HEIGHT
+
+# =========================================================
 # Validation / Input Constraints (moved from input_validation.py)
 # =========================================================
 
