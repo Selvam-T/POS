@@ -216,8 +216,8 @@ class Screen2AdsController:
 
         width = image.width()
         height = image.height()
-        if width != REQ_WIDTH or height != REQ_HEIGHT:
-            return False, 'Wrong resolution'
+        #if width != REQ_WIDTH or height != REQ_HEIGHT:
+        #    return False, 'Wrong resolution'
 
         ratio = width / height if height else 0
         if abs(ratio - REQ_RATIO) > 0.001:
@@ -317,20 +317,21 @@ class Screen2AdsController:
         if ordered_paths is None:
             ordered_paths = self._list_ad_files()
 
-        temp_paths: List[str] = []
+        temp_paths: List[Tuple[str, str]] = []
         for idx, path in enumerate(ordered_paths, start=1):
+            # Use stripped base to avoid accumulating prefixes.
             base = os.path.basename(path)
-            temp_name = f"__tmp__{idx}__{base}"
+            stripped = self._strip_prefix(base)
+            temp_name = f"__tmp__{idx}__{stripped}"
             temp_path = os.path.join(ADS_DIR, temp_name)
             try:
                 os.rename(path, temp_path)
-                temp_paths.append(temp_path)
+                temp_paths.append((temp_path, stripped))
             except Exception:
                 continue
 
-        for idx, temp_path in enumerate(temp_paths, start=1):
-            base = self._strip_prefix(temp_path)
-            final_name = f"{idx}_{base}"
+        for idx, (temp_path, stripped) in enumerate(temp_paths, start=1):
+            final_name = f"{idx}_{stripped}"
             final_path = os.path.join(ADS_DIR, final_name)
             try:
                 os.rename(temp_path, final_path)

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>586</width>
+    <width>597</width>
     <height>680</height>
    </rect>
   </property>
@@ -130,7 +130,7 @@
       <enum>QTabWidget::North</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <property name="documentMode">
       <bool>false</bool>
@@ -724,7 +724,7 @@
        <item>
         <widget class="QLabel" name="screen2RulesLabel">
          <property name="text">
-          <string>Allowed:  JPG, JPEG, PNG  |  Max: 6 images  |  Standard size: 1280x800 (16:10)</string>
+          <string>Allowed:  JPG, JPEG, PNG  |  Max: 6 images  |  Standard size: 1280 x 800 (8 : 5)</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
