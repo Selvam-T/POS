@@ -65,9 +65,45 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 
 ## Category Source of Truth
 
-- Categories are sourced from `config.PRODUCT_CATEGORIES`.
-- The first combo item is treated as a UI-provided placeholder (from the `.ui`).
-- The controller clears/rebuilds the combo and appends config categories.
+- Categories are stored in `AppData/categories.json` (seeded once from `config.PRODUCT_CATEGORIES`).
+- The first item in the JSON list is treated as the placeholder (e.g. `--Select Category--`).
+- JSON order is canonical: placeholder first, sorted middle, `Other` last.
+- The Category tab is **admin-only**.
+
+### Storage and seeding
+
+- The JSON file is created only if missing; after that, the config list is no longer used at runtime.
+- Reads validate a minimal schema and normalize ordering each load.
+
+### category_state.py responsibilities
+
+- Loads and validates JSON, seeds on first run, and reorders lists into canonical order.
+- Enforces uniqueness (case-insensitive) and protects `Other` and `--Select Category--` from rename/delete.
+- Performs atomic writes (temp file + replace) with timestamped backups.
+
+### Category tab behavior
+
+- Add: validates and inserts into JSON only.
+- Remove: replaces category in `Product_list` and `receipt_items` with `Other`, then deletes from JSON.
+- Replace: updates both DB tables, then updates JSON.
+- The Category tab list excludes `Other` from delete/replace selection.
+
+### Corrupt JSON recovery
+
+- If the JSON is invalid, the file is renamed to `categories.json.corrupt.YYYYMMDDThhmmss` and the store is reseeded.
+- To restore a known-good backup, rename the desired backup to `categories.json` (overwrite), then restart the app.
+
+### Manual backup / restore (no UI)
+
+- Backups are created in `AppData/` as `categories.json.bak.YYYYMMDDThhmmss`.
+- Export: copy `AppData/categories.json` to a safe filename.
+- Restore: rename a backup to `categories.json` (overwrite), then restart the app.
+
+### Tests (category features)
+
+- `tests/test_category_state.py`: JSON storage, ordering, and validation behavior.
+- `tests/test_category_db_replace.py`: DB replacement when deleting categories.
+- `tests/test_category_ui.py`: Admin-only tab gating and category combo filtering.
 
 ---
 

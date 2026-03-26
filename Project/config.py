@@ -100,6 +100,29 @@ DEBUG_CACHE_LOOKUP = False
 APPDATA_DIR = os.path.join(_BASE_DIR, 'AppData')
 VEG_SLOTS = 16
 
+# Categories JSON storage (single-client runtime store)
+# File will live under `APPDATA_DIR` and is seeded from `PRODUCT_CATEGORIES` on first-run only.
+CATEGORIES_JSON_FILENAME = 'categories.json'
+CATEGORIES_JSON_PATH = os.path.join(APPDATA_DIR, CATEGORIES_JSON_FILENAME)
+# Backup prefix for rotated backups when writing updates
+CATEGORIES_JSON_BACKUP_PREFIX = 'categories.json.bak.'
+
+# Protected category names: cannot be renamed or deleted from the JSON store
+PROTECTED_CATEGORIES = ['Other', '--Select Category--']
+
+# Minimal JSON schema for `categories.json` (for validation / docs)
+# Expected format: { "categories": ["--Select Category--", "Alcohol", ..., "Other"] }
+CATEGORIES_JSON_SCHEMA = {
+	"type": "object",
+	"properties": {
+		"categories": {
+			"type": "array",
+			"items": {"type": "string"}
+		}
+	},
+	"required": ["categories"]
+}
+
 # =========================================================
 # Screen 2 Ads settings
 # =========================================================
@@ -149,7 +172,7 @@ STRING_CONFIG = {
     'supplier': {'min_len': 3, 'max_len': 15, 'required': False},
     'customer': {'min_len': 3, 'max_len': 25, 'required': True},  
     'note': {'min_len': 0, 'max_len': 40, 'required': False}, 
-    'category': {'min_len': 4, 'max_len': 25, 'required': False}
+    'category': {'min_len': 3, 'max_len': 25, 'required': False}
 }
 
 # Greeting message options

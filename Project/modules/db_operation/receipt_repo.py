@@ -1,11 +1,11 @@
-"""Receipt read-only repository (SQL only)."""
+"""Receipt repository (read-only + small write helpers)."""
 
 from __future__ import annotations
 
 import sqlite3
 from typing import Any, Dict, List, Optional
 
-from .db import get_conn
+from .db import get_conn, transaction
 
 
 def _table_columns(conn: sqlite3.Connection, table_name: str) -> set[str]:
@@ -160,6 +160,32 @@ def list_receipt_payments_by_no(
 
         rows = c.execute(sql, (where_val,)).fetchall()
         return [dict(r) for r in rows]
+    finally:
+        if own:
+            c.close()
+
+
+def replace_item_category(
+    old_category: str,
+    new_category: str,
+    *,
+    conn: Optional[sqlite3.Connection] = None,
+) -> int:
+    """Replace category in receipt_items; returns affected row count."""
+    sql = """
+    UPDATE receipt_items
+       SET category = ?
+     WHERE category = ? COLLATE NOCASE
+    """
+    own = conn is None
+    c = conn or get_conn()
+    try:
+        if own:
+            with transaction(c):
+                cur = c.execute(sql, (new_category, old_category))
+                return int(cur.rowcount or 0)
+        cur = c.execute(sql, (new_category, old_category))
+        return int(cur.rowcount or 0)
     finally:
         if own:
             c.close()

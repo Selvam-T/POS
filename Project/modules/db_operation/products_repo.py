@@ -120,6 +120,33 @@ def delete_product(product_code: str, *, conn: Optional[sqlite3.Connection] = No
             c.close()
 
 
+def replace_category(
+    old_category: str,
+    new_category: str,
+    *,
+    conn: Optional[sqlite3.Connection] = None,
+) -> int:
+    """Replace category for all products; returns affected row count."""
+    sql = f"""
+    UPDATE {TABLE}
+       SET category = ?,
+           last_updated = ?
+     WHERE category = ? COLLATE NOCASE
+    """
+    own = conn is None
+    c = conn or get_conn()
+    try:
+        if own:
+            with transaction(c):
+                cur = c.execute(sql, (new_category, now_iso(), old_category))
+                return int(cur.rowcount or 0)
+        cur = c.execute(sql, (new_category, now_iso(), old_category))
+        return int(cur.rowcount or 0)
+    finally:
+        if own:
+            c.close()
+
+
 def get_product_full(product_code: str, *, conn: Optional[sqlite3.Connection] = None) -> Optional[Dict[str, Any]]:
     """Return full product row as dict, or None."""
     sql = f"""

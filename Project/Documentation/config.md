@@ -52,6 +52,20 @@ This file centralizes key configuration values for the POS application. It is im
 ## App Data Directory
 - `APPDATA_DIR`: Path to the writable folder for JSON-based settings (e.g., `vegetables.json`).
 
+## Category JSON Storage
+- `CATEGORIES_JSON_FILENAME`: File name for the categories store (default: `categories.json`).
+- `CATEGORIES_JSON_PATH`: Full path for the categories store under `APPDATA_DIR`.
+- `CATEGORIES_JSON_BACKUP_PREFIX`: Backup prefix for rotated copies (e.g., `categories.json.bak.`).
+- `PROTECTED_CATEGORIES`: Names that cannot be renamed/deleted (default includes `Other` and `--Select Category--`).
+- `CATEGORIES_JSON_SCHEMA`: Minimal schema for `{ "categories": [ ... ] }` validation.
+
+### Seeding Rules
+- The JSON file is seeded once from `PRODUCT_CATEGORIES` if it is missing.
+- After seeding, `config.PRODUCT_CATEGORIES` is no longer used at runtime.
+- Ordering is enforced as: placeholder first, sorted middle, `Other` last.
+
+See `Documentation/product_menu.md` for UI behavior, admin-only rules, and restore steps.
+
 ## Feature Constants
 - `VEG_SLOTS`: Number of vegetable buttons/slots in the vegetable entry UI (default: 16).
 

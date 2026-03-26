@@ -79,17 +79,6 @@ def handle_category_input_combo(combo_box: QComboBox) -> str:
     return category
 
 
-def handle_category_input_combo_default_other(combo_box: QComboBox, *, default: str = "") -> str:
-    try:
-        category = (combo_box.currentText() or '').strip()
-    except Exception:
-        category = ''
-    
-    if not category:
-        return ""
-        
-    _raise_if_invalid(input_validation.validate_category(category))
-    return category
 
 def handle_quantity_input(line_edit: QLineEdit, unit_type: str = 'unit') -> float:
     text = line_edit.text().strip()
