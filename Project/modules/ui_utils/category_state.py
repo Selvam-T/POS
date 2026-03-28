@@ -136,7 +136,9 @@ def _write_categories(data: dict, *, backup: bool = True) -> None:
     tmp = path.with_suffix('.json.tmp')
 
     if backup and path.exists():
-        backup_name = f"{CATEGORIES_JSON_BACKUP_PREFIX}{_timestamp()}"
+        # Overwrite a single fixed backup file instead of creating timestamped
+        # backups. This keeps the backup folder from accumulating many files.
+        backup_name = f"{CATEGORIES_JSON_BACKUP_PREFIX}"
         backup_path = path.with_name(backup_name)
         try:
             shutil.copy2(str(path), str(backup_path))
