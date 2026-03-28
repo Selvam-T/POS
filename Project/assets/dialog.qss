@@ -17,7 +17,7 @@ QDialog {
    ========================================================= */
 QFrame#customTitleBar {
     background-color: #ffffff;
-    min-height: 40px;
+    min-height: 64px;
 }
 
 QLabel#customTitle {
@@ -32,6 +32,11 @@ QPushButton#customCloseBtn {
     border: 2px solid transparent; /* Reserve space for the focus border */
     font-size: 40px;
     font-weight: bold;
+    min-height: 48px;
+    max-height: 48px;
+    min-width: 48px;
+    max-width: 48px;
+    padding: 0px;
 }
 
 /* Focus Style */

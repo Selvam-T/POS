@@ -104,10 +104,110 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         'cat_status': (QLabel, 'categoryStatusLabel'),
     })
 
+    _dialog_anchor = {'pos': None}
+
+    def _capture_dialog_anchor() -> None:
+        if _dialog_anchor['pos'] is not None:
+            return
+        try:
+            if not dlg.isVisible():
+                QTimer.singleShot(0, _capture_dialog_anchor)
+                return
+        except Exception:
+            pass
+        try:
+            p = dlg.pos()
+            if p.x() == 0 and p.y() == 0:
+                QTimer.singleShot(0, _capture_dialog_anchor)
+                return
+            try:
+                host_y = main_window.frameGeometry().y()
+            except Exception:
+                host_y = 0
+            try:
+                offset = -80
+                new_y = max(host_y, p.y() + offset)
+                p.setY(new_y)
+            except Exception:
+                pass
+            _dialog_anchor['pos'] = p
+            try:
+                dlg.move(_dialog_anchor['pos'])
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+    def _resize_dialog_to_tab(index: int | None = None) -> None:
+        tabs = widgets.get('tabs')
+        if tabs is None:
+            return
+        if index is None:
+            try:
+                index = tabs.currentIndex()
+            except Exception:
+                index = None
+        if index is None or index < 0:
+            return
+        try:
+            tab = tabs.widget(index)
+        except Exception:
+            tab = None
+        if tab is None:
+            return
+
+        if _dialog_anchor['pos'] is None:
+            _capture_dialog_anchor()
+
+        try:
+            if tab.layout() is not None:
+                tab.layout().activate()
+            if dlg.layout() is not None:
+                dlg.layout().activate()
+        except Exception:
+            pass
+
+        try:
+            base_extra = dlg.layout().sizeHint().height() - tabs.sizeHint().height()
+        except Exception:
+            base_extra = 0
+
+        try:
+            if tab.layout() is not None:
+                tab_height = tab.layout().sizeHint().height()
+            else:
+                tab_height = tab.sizeHint().height()
+        except Exception:
+            tab_height = 0
+
+        try:
+            desired = max(int(tab_height + base_extra), 300)
+            dlg.setMinimumHeight(desired)
+            dlg.setMaximumHeight(desired)
+        except Exception:
+            pass
+
+        try:
+            if _dialog_anchor['pos'] is not None:
+                dlg.move(_dialog_anchor['pos'])
+        except Exception:
+            pass
+
     # Category OK should not auto-trigger on Enter when focus changes.
     try:
         widgets['cat_ok'].setDefault(False)
         widgets['cat_ok'].setAutoDefault(False)
+    except Exception:
+        pass
+
+    # Resize dialog height based on the active tab, keep a fixed anchor position.
+    def _post_show_resize() -> None:
+        _capture_dialog_anchor()
+        _resize_dialog_to_tab()
+
+    try:
+        widgets['tabs'].currentChanged.connect(_resize_dialog_to_tab)
+        QTimer.singleShot(0, _post_show_resize)
     except Exception:
         pass
 
