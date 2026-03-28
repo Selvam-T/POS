@@ -231,14 +231,29 @@ def update_category(old_name: str, new_name: str) -> None:
 
     categories = load_categories()
     old_key = old.key()
-    replaced = False
+    # Locate the existing entry for `old_name`.
+    replaced_idx = None
     for idx, item in enumerate(categories):
         if _normalize_key(item) == old_key:
-            categories[idx] = new.normalized()
-            replaced = True
+            replaced_idx = idx
             break
-    if not replaced:
+    if replaced_idx is None:
         raise ValueError("Category not found")
+
+    new_key = new.key()
+    # If `new_name` already exists elsewhere in the list, remove the old
+    # entry instead of creating a duplicate. This keeps JSON unique while
+    # DB replacements (performed elsewhere) can still map old->new.
+    exists_elsewhere = any(
+        _normalize_key(c) == new_key and i != replaced_idx
+        for i, c in enumerate(categories)
+    )
+    if exists_elsewhere:
+        # Remove the old entry
+        del categories[replaced_idx]
+    else:
+        # Safe to replace in-place
+        categories[replaced_idx] = new.normalized()
 
     save_categories(categories)
 

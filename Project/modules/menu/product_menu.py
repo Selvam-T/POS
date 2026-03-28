@@ -245,11 +245,50 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     cat_select_gate = FocusGate([widgets['cat_select_combo']], lock_enabled=True)
     cat_update_gate = FocusGate([widgets['cat_update_le']], lock_enabled=True)
 
+    # Gate for Category OK button.
+    cat_ok_gate = FocusGate([widgets['cat_ok']], lock_enabled=True)
+
     try:
         cat_add_gate.remember_placeholders([widgets['cat_add_le']])
         cat_update_gate.remember_placeholders([widgets['cat_update_le']])
     except Exception:
         pass
+
+    # Find corresponding FieldLbl widgets (may be missing in some UI variants).
+    try:
+        cat_add_lbl = dlg.findChild(QLabel, 'categoryAddFieldLbl')
+    except Exception:
+        cat_add_lbl = None
+    try:
+        cat_select_lbl = dlg.findChild(QLabel, 'categorySelectFieldLbl')
+    except Exception:
+        cat_select_lbl = None
+    try:
+        cat_update_lbl = dlg.findChild(QLabel, 'categoryUpdateFieldLbl')
+    except Exception:
+        cat_update_lbl = None
+
+    def _set_field_locked(lbl: QLabel, locked: bool) -> None:
+        """Set the dynamic 'locked' property on a FieldLbl and repolish so QSS updates.
+
+        QSS should contain rules for QLabel[objectName$="FieldLbl"][locked="true"].
+        """
+        if lbl is None:
+            return
+        try:
+            lbl.setProperty('locked', bool(locked))
+            # Force style refresh so QSS picks up dynamic property change.
+            try:
+                lbl.style().unpolish(lbl)
+                lbl.style().polish(lbl)
+            except Exception:
+                pass
+            try:
+                lbl.update()
+            except Exception:
+                pass
+        except Exception:
+            pass
 
     def _set_category_placeholders(add_enabled: bool, update_enabled: bool) -> None:
         try:
@@ -275,16 +314,24 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
 
         try:
             cat_add_gate.set_locked(not add_mode)
+            _set_field_locked(cat_add_lbl, not add_mode)
             if add_mode:
                 widgets['cat_add_le'].setFocus()
         except Exception:
             pass
         try:
             cat_select_gate.set_locked(not (rem_mode or rep_mode))
+            _set_field_locked(cat_select_lbl, not (rem_mode or rep_mode))
         except Exception:
             pass
         try:
-            cat_update_gate.set_locked(not rep_mode)
+            # Keep update field locked until combo selection in Replace mode.
+            if rep_mode:
+                cat_update_gate.set_locked(True)
+                _set_field_locked(cat_update_lbl, True)
+            else:
+                cat_update_gate.set_locked(not rep_mode)
+                _set_field_locked(cat_update_lbl, not rep_mode)
         except Exception:
             pass
 
@@ -295,6 +342,21 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             pass
         try:
             widgets['cat_update_le'].setEnabled(rep_mode)
+        except Exception:
+            pass
+
+        # OK button gating: locked by default.
+        try:
+            cat_ok_gate.set_locked(True)
+        except Exception:
+            pass
+
+        # Reset replace selection state.
+        try:
+            _cat_replace_selection_valid['val'] = False
+            if not rep_mode:
+                cat_update_gate.set_locked(True)
+                _set_field_locked(cat_update_lbl, True)
         except Exception:
             pass
 
@@ -337,6 +399,11 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             try:
                 if focus_widget is not None:
                     focus_widget.setFocus()
+                    try:
+                        if hasattr(focus_widget, 'selectAll'):
+                            focus_widget.selectAll()
+                    except Exception:
+                        pass
             except Exception:
                 pass
         return bool(ok)
@@ -346,6 +413,11 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         if not _validate_category_text(name, focus_widget=widgets['cat_add_le']):
             return
         _set_category_prompt(f"Add new category {name} ?")
+        try:
+            # Unlock OK now that input validated
+            cat_ok_gate.set_locked(False)
+        except Exception:
+            pass
         try:
             widgets['cat_ok'].setFocus()
         except Exception:
@@ -362,12 +434,33 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         if widgets['cat_remove_radio'].isChecked():
             _set_category_prompt(f"Remove category {name} ?")
             try:
+                cat_ok_gate.set_locked(False)
+            except Exception:
+                pass
+            try:
                 widgets['cat_ok'].setFocus()
             except Exception:
                 pass
         elif widgets['cat_replace_radio'].isChecked():
             _set_category_prompt(f"Replace category {name} ?")
+            # On selection: unlock update field; OK stays locked until valid.
             try:
+                _cat_replace_selection_valid['val'] = True
+            except Exception:
+                pass
+            try:
+                cat_update_gate.set_locked(False)
+                _set_field_locked(cat_update_lbl, False)
+            except Exception:
+                pass
+            try:
+                # Ensure update field editable.
+                try:
+                    widgets['cat_update_le'].setEnabled(True)
+                    widgets['cat_update_le'].setReadOnly(False)
+                    widgets['cat_update_le'].setFocusPolicy(Qt.StrongFocus)
+                except Exception:
+                    pass
                 widgets['cat_update_le'].setFocus()
             except Exception:
                 pass
@@ -544,6 +637,30 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     # --- Coordinator Wiring ---
     coord = FieldCoordinator(dlg)
 
+    # Override category validator to register error with coordinator so
+    # register_validator can auto-clear it when the user re-edits the field.
+    def _validate_category_text(text: str, focus_widget=None) -> bool:
+        ok, err = validate_category(text)
+        if not ok:
+            try:
+                coord.set_error(focus_widget, err, status_label=widgets['cat_status'])
+            except Exception:
+                try:
+                    ui_feedback.set_status_label(widgets['cat_status'], err, ok=False)
+                except Exception:
+                    pass
+            try:
+                if focus_widget is not None:
+                    focus_widget.setFocus()
+                    try:
+                        if hasattr(focus_widget, 'selectAll'):
+                            focus_widget.selectAll()
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+        return bool(ok)
+
     # IMPORTANT: Do not include the active source QLineEdit inside its own target_map.
     # Otherwise FieldCoordinator will overwrite what the user is typing on every keystroke.
 
@@ -594,14 +711,6 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             return
         s = (value or '').strip()
         if not s:
-            try:
-                combo.setCurrentIndex(0)
-            except Exception:
-                pass
-            return
-        # Project convention: DB/cache stores 'Other' when user didn't pick a category.
-        # Keep the placeholder visible instead of showing 'Other' as if it was chosen.
-        if s.strip().lower() == 'other':
             try:
                 combo.setCurrentIndex(0)
             except Exception:
@@ -1298,6 +1407,138 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         lambda: input_handler.handle_selling_price(widgets['upd_sell'], price_type='Selling price'),
         status_label=widgets['upd_status'],
     )
+
+    # Category tab: auto-clear validation when user fixes the field.
+    # State used to gate Replace mode OK button (needs both selection + valid update)
+    _cat_replace_selection_valid = {'val': False}
+
+    def _cat_add_validator():
+        txt = (widgets['cat_add_le'].text() or '').strip()
+        ok, err = validate_category(txt)
+        if not ok or not txt:
+            # Treat empty as invalid for gating purposes
+            raise ValueError(err or "Category is required")
+        # Unlock OK for Add mode when valid & non-empty
+        try:
+            cat_ok_gate.set_locked(False)
+        except Exception:
+            pass
+        return True
+
+    def _cat_update_validator():
+        txt = (widgets['cat_update_le'].text() or '').strip()
+        ok, err = validate_category(txt)
+        if not ok or not txt:
+            # Treat empty as invalid for gating purposes
+            raise ValueError(err or "Category is required")
+        # For Replace mode: only unlock OK if a selection exists
+        try:
+            if _cat_replace_selection_valid.get('val'):
+                cat_ok_gate.set_locked(False)
+        except Exception:
+            pass
+        return True
+
+    try:
+        coord.register_validator(
+            widgets['cat_add_le'],
+            _cat_add_validator,
+            status_label=widgets['cat_status'],
+        )
+    except Exception:
+        pass
+
+    try:
+        coord.register_validator(
+            widgets['cat_update_le'],
+            _cat_update_validator,
+            status_label=widgets['cat_status'],
+        )
+    except Exception:
+        pass
+
+    # Immediate-clear on typing: if the user corrects or clears the field while
+    # focus remains, clear the status label right away (editingFinished only
+    # fires on focus-out). This keeps the UI responsive when the user backspaces.
+    try:
+        def _on_cat_add_text_changed(_txt=None):
+            try:
+                text = (widgets['cat_add_le'].text() or '').strip()
+            except Exception:
+                text = ''
+
+            # If the field is empty while typing, clear the status but keep OK locked
+            if not text:
+                try:
+                    coord.clear_status(widgets['cat_status'])
+                except Exception:
+                    pass
+                try:
+                    cat_ok_gate.set_locked(True)
+                except Exception:
+                    pass
+                return
+
+            try:
+                _cat_add_validator()
+            except Exception:
+                try:
+                    cat_ok_gate.set_locked(True)
+                except Exception:
+                    pass
+                return
+
+            try:
+                coord.clear_status(widgets['cat_status'])
+                # Ensure OK unlocked when typing makes input valid
+                try:
+                    cat_ok_gate.set_locked(False)
+                except Exception:
+                    pass
+            except Exception:
+                pass
+
+        widgets['cat_add_le'].textChanged.connect(_on_cat_add_text_changed)
+    except Exception:
+        pass
+
+    try:
+        def _on_cat_update_text_changed(_txt=None):
+            try:
+                text = (widgets['cat_update_le'].text() or '').strip()
+            except Exception:
+                text = ''
+
+            # Clear status immediately on empty input but keep OK locked
+            if not text:
+                try:
+                    coord.clear_status(widgets['cat_status'])
+                except Exception:
+                    pass
+                try:
+                    cat_ok_gate.set_locked(True)
+                except Exception:
+                    pass
+                return
+
+            try:
+                _cat_update_validator()
+            except Exception:
+                try:
+                    cat_ok_gate.set_locked(True)
+                except Exception:
+                    pass
+                return
+
+            try:
+                coord.clear_status(widgets['cat_status'])
+                # For Replace flow, validator unlocks OK when selection exists.
+            except Exception:
+                pass
+
+        widgets['cat_update_le'].textChanged.connect(_on_cat_update_text_changed)
+    except Exception:
+        pass
 
     # Connections
     widgets['add_ok'].clicked.connect(do_add); widgets['rem_ok'].clicked.connect(do_rem); widgets['upd_ok'].clicked.connect(do_upd)

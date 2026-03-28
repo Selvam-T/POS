@@ -247,7 +247,7 @@ QWidget#ViewHoldDialog QLineEdit:read-only {
 
 /* 1. State-specific style (Overrides base because it's more specific) */
 QLabel[objectName$="FieldLbl"][readOnly="true"] {
-    color: #7b7c7d !important;
+    color: rgba(9, 241, 36, 0.43) !important;
 }
 
 /* 2. Read-Only LineEdit */
@@ -321,6 +321,16 @@ QLabel[objectName$="FieldLbl"] {
     font-weight: 600;
 }
 
+/* Locked state for Field labels (used by gating logic) */
+QLabel[objectName$="FieldLbl"][locked="true"] {
+    color: #9aa0a3 !important;
+}
+/* Explicit unlocked state to ensure default color when property is present
+   (overrides earlier readOnly selector if it exists). */
+QLabel[objectName$="FieldLbl"][locked="false"] {
+    color: #5c5e5f !important;
+}
+
 /* Header Label */
 QLabel[objectName$="HeaderLabel"] {
     font-size: 14pt;
@@ -328,8 +338,10 @@ QLabel[objectName$="HeaderLabel"] {
     color: #222222;
 }
 
-QLabel[objectName$="userHeaderLabel"] {
-    color: #0eec1d;
+QLabel[objectName$="HeaderLabel2"] {
+    font-size: 13pt;
+    font-weight: 300;
+    color: #210707;
 }
 
 /* TabWidget */
@@ -459,7 +471,7 @@ QPushButton#removeBtn:pressed {
    QRadioButton: Base Text Style
 ------------------------------------------------------------------- */
 QRadioButton {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     color: #2c3e50;
     spacing: 8px; /* Space between indicator and text */

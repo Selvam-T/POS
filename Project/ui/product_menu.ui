@@ -115,7 +115,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>2</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tabAdd">
       <attribute name="title">
@@ -139,7 +139,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="addHeaderLabel">
+        <widget class="QLabel" name="addHeaderLabel2">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -149,6 +149,9 @@
          </property>
          <property name="text">
           <string>Add New Product</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -445,7 +448,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="removeHeaderLabel">
+        <widget class="QLabel" name="removeHeaderLabel2">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -455,6 +458,9 @@
          </property>
          <property name="text">
           <string>Remove Product</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -764,7 +770,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="updateHeaderLabel">
+        <widget class="QLabel" name="updateHeaderLabel2">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -774,6 +780,9 @@
          </property>
          <property name="text">
           <string>Update / View Product</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -1190,7 +1199,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="categoryHeaderLabel">
+        <widget class="QLabel" name="categoryHeaderLabel2">
          <property name="font">
           <font>
            <pointsize>12</pointsize>
@@ -1200,6 +1209,9 @@
          </property>
          <property name="text">
           <string>Manage Categories</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
@@ -1220,7 +1232,7 @@
         </spacer>
        </item>
        <item>
-        <layout class="QFormLayout" name="category_formLayout">
+        <layout class="QFormLayout" name="category_2formLayout">
          <property name="horizontalSpacing">
           <number>10</number>
          </property>
@@ -1228,9 +1240,12 @@
           <number>18</number>
          </property>
          <item row="0" column="0">
-          <widget class="QLabel" name="category1SubLbl">
+          <widget class="QLabel" name="categoryFieldLbl">
            <property name="text">
-            <string>Action</string>
+            <string>Select an operation :</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
            </property>
           </widget>
          </item>
@@ -1238,6 +1253,9 @@
           <widget class="QGroupBox" name="categoryGroupBox">
            <property name="title">
             <string/>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
            </property>
            <layout class="QHBoxLayout" name="categoryModeLayout">
             <property name="spacing">
@@ -1282,14 +1300,40 @@
            </layout>
           </widget>
          </item>
-         <item row="1" column="0">
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_7">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>30</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QFormLayout" name="category_formLayout">
+         <property name="horizontalSpacing">
+          <number>10</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>18</number>
+         </property>
+         <item row="0" column="0">
           <widget class="QLabel" name="categoryAddFieldLbl">
            <property name="text">
             <string>New Category</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1">
+         <item row="0" column="1">
           <widget class="QLineEdit" name="categoryAddLineEdit">
            <property name="minimumSize">
             <size>
@@ -1302,14 +1346,14 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
+         <item row="1" column="0">
           <widget class="QLabel" name="categorySelectFieldLbl">
            <property name="text">
             <string>Select Category</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
+         <item row="1" column="1">
           <widget class="QComboBox" name="categorySelectComboBox">
            <property name="enabled">
             <bool>false</bool>
@@ -1325,14 +1369,14 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="2" column="0">
           <widget class="QLabel" name="categoryUpdateFieldLbl">
            <property name="text">
             <string>Replace With</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="2" column="1">
           <widget class="QLineEdit" name="categoryUpdateLineEdit">
            <property name="enabled">
             <bool>false</bool>

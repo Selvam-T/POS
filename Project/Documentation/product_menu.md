@@ -83,10 +83,17 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 
 ### Category tab behavior
 
-- Add: validates and inserts into JSON only.
-- Remove: replaces category in `Product_list` and `receipt_items` with `Other`, then deletes from JSON.
-- Replace: updates both DB tables, then updates JSON.
-- The Category tab list excludes `Other` from delete/replace selection.
+- Add: validates and inserts into JSON only. In **ADD** mode the category combo is intentionally cleared (no placeholder or existing items are injected) so the user must explicitly type or press Enter to confirm a new category.
+- Remove: executes a DB replace + JSON delete. The operation runs inside a single transaction that updates `Product_list` and `receipt_items` where the category matches the deleted value (case-insensitive), then removes the category from the JSON store. Note: rows with an empty/blank `receipt_items.category` are not matched by the SQL `WHERE category = ?` clause and therefore are not updated by the replace.
+- Replace: updates both DB tables and then updates the JSON store to swap the old value for the new value. The UI uses a refreshed combo for Replace mode.
+- UI behaviour and safeguards:
+	- The combo handling was split into two explicit flows: `refresh` (populate from JSON) and `clear` (empty + no selection). `ADD` uses `clear`; `REMOVE`/`REPLACE` use `refresh`.
+	- Radio buttons that switch Add/Remove/Replace are wired to only trigger their handlers when becoming `checked` (prevents unintended repopulation during programmatic state changes).
+	- Widgets (combo, update line edit) are explicitly enabled/disabled per mode instead of relying on implicit UI defaults.
+	- Enter key behavior is intercepted in the Category tab: Enter does not auto-close the dialog. `Enter` is routed to an explicit handler which validates the current field and advances focus or requires an explicit press of the `OK` button to commit. The `OK` button is not an auto-default so focus changes won't accidentally trigger a commit.
+	- The `Other` category is preserved and is now shown as its real value when present in the DB (the dialog no longer maps `Other` to a placeholder string in the UPDATE flow).
+	- Successful category operations set a post-close StatusBar message on the host window. The dialog sets a skip flag so the generic "dialog closed" message does not overwrite the action-specific message.
+
 
 ### Corrupt JSON recovery
 

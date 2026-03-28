@@ -172,7 +172,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="adminHeaderLabel">
+        <widget class="QLabel" name="adminHeaderLabel2">
          <property name="text">
           <string>Change Admin Password</string>
          </property>
@@ -434,7 +434,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="staffHeaderLabel">
+        <widget class="QLabel" name="staffHeaderLabel2">
          <property name="text">
           <string>Change Staff Password</string>
          </property>
@@ -696,7 +696,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="screen2HeaderLabel">
+        <widget class="QLabel" name="screen2HeaderLabel2">
          <property name="text">
           <string>Manage Display images</string>
          </property>
