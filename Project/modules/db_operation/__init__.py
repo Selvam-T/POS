@@ -79,7 +79,7 @@ def add_product(
             unit=unit,
         )
         try:
-            upsert_cache_item(product_code, name, float(selling_price or 0.0), unit)
+            upsert_cache_item(product_code, name, float(selling_price or 0.0), unit, category)
         except Exception as e:
             try:
                 from modules.ui_utils.error_logger import log_error
@@ -119,7 +119,7 @@ def update_product(
         if not updated:
             return False, 'Product not found'
         try:
-            upsert_cache_item(product_code, name, float(selling_price or 0.0), unit)
+            upsert_cache_item(product_code, name, float(selling_price or 0.0), unit, category)
         except Exception as e:
             try:
                 from modules.ui_utils.error_logger import log_error

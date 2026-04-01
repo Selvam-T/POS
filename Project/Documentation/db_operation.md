@@ -38,7 +38,7 @@ SQL-only repository for the `Product_list` table.
 - `update_product(product_code, **fields)` → returns `True` if updated
 - `delete_product(product_code)` → returns `True` if deleted
 - `get_product_full(product_code)` → returns a dict row or `None`
-- `list_products()` / `list_products_slim()` → list rows (used by cache)
+  - `list_products()` → list rows (used by cache)
 
 Important:
 - Keep schema changes localized here.
@@ -48,8 +48,8 @@ Important:
 
 In-memory cache used for fast barcode/product_code lookup.
 
-- `PRODUCT_CACHE: Dict[str, Tuple[str, float, str]]`
-  - Shape: `{PRODUCT_CODE: (display_name, selling_price, display_unit)}`
+- `PRODUCT_CACHE: Dict[str, Tuple[str, float, str, str]]`
+  - Shape: `{PRODUCT_CODE: (display_name, selling_price, display_unit, category)}`
   - Product code canonicalization: always normalized to UPPER CASE (via `canonicalize_product_code()`)
   - Product name and other strings: normalized to CamelCase/Title Case (via `canonicalize_title_text()`)
   - Unit safety: blank/NULL units default to `Each`
@@ -57,7 +57,11 @@ In-memory cache used for fast barcode/product_code lookup.
   - User input is normalized at lookup time, so comparison is always in the correct case, regardless of user input or DB legacy data.
 
 - `load_product_cache()` / `refresh_product_cache()`
-  - Loads all products from DB via `products_repo.list_products_slim()`
+  - Loads all products from DB via `products_repo.list_products()`
+
+Important cache and snapshot notes:
+- `receipt_items` stores snapshot data at sale time and is not updated by later master-table edits. This preserves historical report accuracy.
+- When the application performs product CRUD (ADD/UPDATE/DELETE) or bulk category replacement, call `refresh_product_cache()` once after the DB change completes successfully so `PRODUCT_CACHE` reflects current master data for subsequent lookups. Do not refresh per-item during a bulk DB transaction — refresh once after commit to avoid intermediate inconsistencies.
 
 - `get_product_info(product_code)`
   - Cache-only lookup

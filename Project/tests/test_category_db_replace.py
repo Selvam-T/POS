@@ -79,19 +79,43 @@ def test_delete_category_replaces_in_db(temp_db_and_json):
     finally:
         conn.close()
 
-    products_updated, receipts_updated = category_service.delete_category("Snacks")
+    products_updated = category_service.delete_category("Snacks")
     assert products_updated == 1
-    assert receipts_updated == 1
 
     conn = sqlite3.connect(str(temp_db_and_json))
     try:
         assert _count_by_category(conn, "Product_list", "Snacks") == 0
-        assert _count_by_category(conn, "receipt_items", "Snacks") == 0
+        assert _count_by_category(conn, "receipt_items", "Snacks") == 1
         assert _count_by_category(conn, "Product_list", "Other") == 1
-        assert _count_by_category(conn, "receipt_items", "Other") == 1
+        assert _count_by_category(conn, "receipt_items", "Other") == 0
     finally:
         conn.close()
 
     cats = category_state.list_categories()
     assert "Snacks" not in cats
     assert "Other" in cats
+
+
+def test_product_cache_refreshed_after_category_replace(temp_db_and_json):
+    # Ensure product and category exist
+    category_state.add_category("Snacks")
+    conn = sqlite3.connect(str(temp_db_and_json))
+    try:
+        conn.execute(
+            "INSERT INTO Product_list (product_code, name, category, supplier, selling_price, cost_price, unit, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            ("P002", "CacheTest", "Snacks", "", 2.0, 0.0, "EACH", "2026-01-01"),
+        )
+        conn.commit()
+    finally:
+        conn.close()
+
+    # Clear in-memory cache and run the delete_category which should refresh it
+    from modules.db_operation import PRODUCT_CACHE
+    PRODUCT_CACHE.clear()
+
+    products_updated = category_service.delete_category("Snacks")
+    assert products_updated >= 1
+
+    # PRODUCT_CACHE should have been refreshed and contain P002
+    from modules.db_operation import PRODUCT_CACHE as PC
+    assert any(k == 'P002' for k in (PC or {}).keys())

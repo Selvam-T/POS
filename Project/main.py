@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QDialog,
 )
-from PyQt5.QtCore import Qt, QSize, QTimer
+from PyQt5.QtCore import Qt, QSize, QTimer, qInstallMessageHandler
 from PyQt5.QtGui import QIcon
 
 from modules.table.table_operations import get_sales_data
@@ -769,10 +769,19 @@ class MainLoader(QMainWindow):
             name = str(row.get('product_name') or row.get('product') or '').strip()
             qty = float(row.get('quantity') or 0.0)
             unit_price = float(row.get('unit_price') or 0.0)
+            code = by_name.get(name.lower(), '')
+            cat = ''
+            try:
+                if code and (PRODUCT_CACHE or {}).get(code):
+                    rec = (PRODUCT_CACHE or {}).get(code)
+                    if rec and len(rec) > 3:
+                        cat = rec[3] or ''
+            except Exception:
+                cat = ''
             out.append({
-                'product_code': by_name.get(name.lower(), ''),
+                'product_code': code,
                 'name': name,
-                'category': '',
+                'category': cat,
                 'quantity': qty,
                 'unit': str(row.get('unit') or ''),
                 'price': unit_price,
@@ -1080,6 +1089,34 @@ class MainLoader(QMainWindow):
 
 # Bootstrap the QApplication and launch the main window.
 def main():
+    def _install_qt_message_handler() -> None:
+        try:
+            from modules.ui_utils.error_logger import log_error
+        except Exception:
+            log_error = None
+
+        def _handler(msg_type, context, message):
+            if log_error is None:
+                return
+            try:
+                mt = int(msg_type)
+            except Exception:
+                mt = -1
+
+            # Qt message types: Debug=0, Warning=1, Critical=2, Fatal=3, Info=4
+            if mt in (1, 2, 3):
+                try:
+                    log_error(f"Qt: {message}")
+                except Exception:
+                    pass
+
+        try:
+            qInstallMessageHandler(_handler)
+        except Exception:
+            pass
+
+    _install_qt_message_handler()
+
     app = QApplication(sys.argv)
     load_qss(app)
 

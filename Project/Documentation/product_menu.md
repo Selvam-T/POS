@@ -84,8 +84,8 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 ### Category tab behavior
 
 - Add: validates and inserts into JSON only. In **ADD** mode the category combo is intentionally cleared (no placeholder or existing items are injected) so the user must explicitly type or press Enter to confirm a new category.
-- Remove: executes a DB replace + JSON delete. The operation runs inside a single transaction that updates `Product_list` and `receipt_items` where the category matches the deleted value (case-insensitive), then removes the category from the JSON store. Note: rows with an empty/blank `receipt_items.category` are not matched by the SQL `WHERE category = ?` clause and therefore are not updated by the replace.
-- Replace: updates both DB tables and then updates the JSON store to swap the old value for the new value. The UI uses a refreshed combo for Replace mode.
+- Remove: executes a DB replace + JSON delete. The operation runs inside a single transaction that updates `Product_list` where the category matches the deleted value (case-insensitive), then removes the category from the JSON store. `PRODUCT_CACHE` is refreshed after a successful bulk replace so in-memory lookups match the current Product_list.
+- Replace: executes a DB replace in `Product_list`, then updates the JSON store to swap the old value for the new value. `PRODUCT_CACHE` is refreshed after a successful bulk replace. Receipt snapshots are not updated; the category stored in `receipt_items` remains the value at time of sale (snapshot model).
 - UI behaviour and safeguards:
 	- The combo handling was split into two explicit flows: `refresh` (populate from JSON) and `clear` (empty + no selection). `ADD` uses `clear`; `REMOVE`/`REPLACE` use `refresh`.
 	- Radio buttons that switch Add/Remove/Replace are wired to only trigger their handlers when becoming `checked` (prevents unintended repopulation during programmatic state changes).

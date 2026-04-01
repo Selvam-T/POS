@@ -136,16 +136,6 @@ def get_coordinator_lookup(value: str, source_type: str = 'code') -> dict | None
     if not val_norm:
         return None
 
-    # Helper to map the cache record to a clean dictionary
-    def _map(code, rec):
-        return {
-            'code': code,
-            'name': rec[0],
-            'price': rec[1],
-            'unit': rec[2] if rec[2] else "", # Ensure empty if null/empty in DB
-            'cost': rec[3] if len(rec) > 3 else "" # Added support for Cost Price
-        }
-    
     # 1. Search by Code
     if source_type == 'code':
         # Gateway B: Standardize the input before searching

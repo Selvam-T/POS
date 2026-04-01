@@ -2,6 +2,7 @@ import os
 from functools import partial
 from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel, QComboBox, QTabWidget, QRadioButton
 from PyQt5.QtCore import Qt, QTimer, QDateTime, QObject, QEvent
+from PyQt5.QtGui import QGuiApplication
 
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui,
@@ -104,6 +105,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         'cat_status': (QLabel, 'categoryStatusLabel'),
     })
 
+
     _dialog_anchor = {'pos': None}
 
     def _capture_dialog_anchor() -> None:
@@ -182,8 +184,26 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
 
         try:
             desired = max(int(tab_height + base_extra), 300)
+            max_h = None
+            try:
+                screen = None
+                if dlg.windowHandle() is not None:
+                    screen = dlg.windowHandle().screen()
+                if screen is None:
+                    screen = QGuiApplication.primaryScreen()
+                if screen is not None:
+                    geom = screen.availableGeometry()
+                    max_h = int(geom.height())
+            except Exception:
+                max_h = None
+
+            if max_h is not None:
+                desired = min(desired, max_h)
+
             dlg.setMinimumHeight(desired)
-            dlg.setMaximumHeight(desired)
+            # Clamp max height to available geometry to avoid Windows warnings.
+            if max_h is not None:
+                dlg.setMaximumHeight(max_h)
         except Exception:
             pass
 
@@ -1693,7 +1713,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             if not target:
                 return
             try:
-                products_updated, receipts_updated = category_service.delete_category(target)
+                products_updated = category_service.delete_category(target)
                 _finalize_category(
                     f"Category '{target}' removed",
                     show_label=False,
@@ -1722,7 +1742,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             try:
                 if not _validate_category_text(replacement, focus_widget=widgets['cat_update_le']):
                     return
-                products_updated, receipts_updated = category_service.update_category(target, replacement)
+                products_updated = category_service.update_category(target, replacement)
                 _finalize_category(
                     f"Category '{target}' replaced with '{replacement}'",
                     show_label=False,
@@ -1824,7 +1844,9 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
 
     # Initialization
     if sale_lock:
-        widgets['tabs'].setTabEnabled(1, False); widgets['tabs'].setTabEnabled(2, False)
+        widgets['tabs'].setTabEnabled(1, False)
+        widgets['tabs'].setTabEnabled(2, False)
+        widgets['tabs'].setTabEnabled(3, False)
 
     # Admin-only Category tab
     is_admin = bool(getattr(main_window, 'current_is_admin', False))
@@ -1860,10 +1882,18 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     # Initialize Category tab mode (Add is default in UI)
     _set_category_add_mode()
 
+    # Preload Category combo for admins on dialog open.
+    try:
+        if is_admin:
+            _refresh_category_tab_combo()
+    except Exception:
+        pass
+
     try:
         widgets['cat_add_radio'].toggled.connect(lambda checked: checked and _set_category_add_mode())
         widgets['cat_remove_radio'].toggled.connect(lambda checked: checked and _set_category_remove_mode())
         widgets['cat_replace_radio'].toggled.connect(lambda checked: checked and _set_category_replace_mode())
     except Exception:
         pass
+
     return dlg

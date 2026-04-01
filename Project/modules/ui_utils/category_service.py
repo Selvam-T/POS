@@ -1,7 +1,5 @@
-from typing import Tuple
-
 from config import PROTECTED_CATEGORIES
-from modules.db_operation import products_repo, receipt_repo
+from modules.db_operation import products_repo, refresh_product_cache
 from modules.db_operation.db import get_conn, transaction
 from modules.ui_utils import category_state
 from modules.ui_utils.error_logger import log_error
@@ -26,14 +24,13 @@ def _ensure_category_present(name: str) -> None:
         raise
 
 
-def replace_category_in_db(old_name: str, new_name: str) -> Tuple[int, int]:
-    """Replace category across Product_list and receipt_items."""
+def replace_category_in_db(old_name: str, new_name: str) -> int:
+    """Replace category in Product_list only (snapshot model preserves receipts)."""
     conn = get_conn()
     try:
         with transaction(conn):
             products_updated = products_repo.replace_category(old_name, new_name, conn=conn)
-            receipts_updated = receipt_repo.replace_item_category(old_name, new_name, conn=conn)
-            return products_updated, receipts_updated
+            return products_updated
     except Exception as e:
         log_error(f"category_service: DB replace failed ({old_name} -> {new_name}): {e}")
         raise
@@ -46,7 +43,7 @@ def add_category(name: str) -> None:
     category_state.add_category(name)
 
 
-def update_category(old_name: str, new_name: str) -> Tuple[int, int]:
+def update_category(old_name: str, new_name: str) -> int:
     """Rename category in DB tables, then JSON store."""
     old_cat = category_state.Category.from_raw(old_name)
     new_cat = category_state.Category.from_raw(new_name)
@@ -59,12 +56,13 @@ def update_category(old_name: str, new_name: str) -> Tuple[int, int]:
     if new_cat.is_protected():
         raise ValueError("Protected category cannot be used")
 
-    counts = replace_category_in_db(old_cat.normalized(), new_cat.normalized())
+    products_updated = replace_category_in_db(old_cat.normalized(), new_cat.normalized())
+    refresh_product_cache()
     category_state.update_category(old_cat.normalized(), new_cat.normalized())
-    return counts
+    return products_updated
 
 
-def delete_category(name: str, *, replacement: str | None = None) -> Tuple[int, int]:
+def delete_category(name: str, *, replacement: str | None = None) -> int:
     """Replace category with 'Other' in DB tables, then remove from JSON store."""
     target = category_state.Category.from_raw(name)
     if target.is_protected():
@@ -72,9 +70,10 @@ def delete_category(name: str, *, replacement: str | None = None) -> Tuple[int, 
 
     repl = replacement or _other_category_name()
     _ensure_category_present(repl)
-    counts = replace_category_in_db(target.normalized(), repl)
+    products_updated = replace_category_in_db(target.normalized(), repl)
+    refresh_product_cache()
     category_state.delete_category(target.normalized())
-    return counts
+    return products_updated
 
 
 def list_categories():

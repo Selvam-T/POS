@@ -26,6 +26,10 @@ The **receipts** table serves as the primary header for every transaction, wheth
 ### 2. Receipt_items Table
 This table stores the specific products associated with a receipt, functioning as a historical snapshot.
 - **Data Integrity:** Records the product name, category, and price at the exact moment of sale; this ensures that if a product's details are changed in the main Product_list later, the historical receipt remains accurate.
+
+Note on category edits and snapshot model:
+- Category edits performed in the `Product_list` (including bulk replace operations from the Product Menu) do NOT retroactively modify rows in `receipt_items`. The `receipt_items` table is intentionally a snapshot: it preserves the product/category values as they were at sale time so historical reports remain stable.
+- After any Product_list change (single-item CRUD or bulk replace), the in-memory `PRODUCT_CACHE` should be refreshed once so runtime lookups reflect the current master data; this does not change existing receipt rows.
 - **Detail-Oriented:** Each row includes a line_no to maintain the order of items, the product_code, quantity (integer or float), unit (e.g., Kg or Each), and the line_total.
 - **Linking:** Links to the parent receipt via a receipt_id. Notably, this table does not require its own created_at field, as it relies on the parent receipt's timestamp.
 
@@ -144,7 +148,6 @@ Below is a mapping of functions in `modules/db_operation/` related to each datab
 	- get_product_full
 	- get_product_slim
 	- list_products
-	- list_products_slim
 - modules/db_operation/product_cache.py:
 	- load_product_cache
 	- refresh_product_cache

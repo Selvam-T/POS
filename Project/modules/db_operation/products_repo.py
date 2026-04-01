@@ -225,3 +225,4 @@ def list_products_slim(*, conn: Optional[sqlite3.Connection] = None) -> List[Tup
     finally:
         if own:
             c.close()
+

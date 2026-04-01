@@ -68,6 +68,9 @@ Important implementation details
 - The code is schema-tolerant: helper functions in `main.py` detect common
   column names (e.g. `receipt_no` vs `receipt_number`, `quantity` vs `qty`)
   to work with minor schema variants.
+
+Snapshot model reminder:
+- The `receipt_items` rows are a historical snapshot and are not retroactively modified when master `Product_list` rows change (for example when a product's `category` is updated or replaced). This design guarantees stable historical reporting. When master data changes, refresh `PRODUCT_CACHE()` for runtime lookups, but do not alter existing `receipt_items`.
 - Hard-fail error handling: `main.py` routes commit exceptions through
   `modules/ui_utils/dialog_utils.report_exception(...)` so failures are both:
   - logged with traceback detail (for troubleshooting), and
