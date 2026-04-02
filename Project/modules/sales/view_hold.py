@@ -196,7 +196,28 @@ def launch_viewhold_dialog(parent=None):
         note_gate.hide_placeholders([note_in])
     except Exception:
         pass
+    # Label that corresponds to the note input (for greying when gated)
+    note_lbl = dlg.findChild(QLabel, 'viewHoldNoteFieldLbl')
+
+    def _set_field_locked(lbl: QLabel, locked: bool) -> None:
+        if lbl is None:
+            return
+        try:
+            lbl.setProperty('locked', bool(locked))
+            try:
+                lbl.style().unpolish(lbl)
+                lbl.style().polish(lbl)
+            except Exception:
+                pass
+            try:
+                lbl.update()
+            except Exception:
+                pass
+        except Exception:
+            pass
+
     note_gate.set_locked(True)
+    _set_field_locked(note_lbl, True)
 
     # Enable or disable main input widgets when no receipts are available
     def _set_widgets_enabled(enabled: bool) -> None:
@@ -329,6 +350,10 @@ def launch_viewhold_dialog(parent=None):
             except Exception:
                 pass
             note_gate.set_locked(True)
+            try:
+                _set_field_locked(note_lbl, True)
+            except Exception:
+                pass
             return
 
         try:
@@ -344,9 +369,17 @@ def launch_viewhold_dialog(parent=None):
             except Exception:
                 pass
             note_gate.set_locked(True)
+            try:
+                _set_field_locked(note_lbl, True)
+            except Exception:
+                pass
             return
 
         note_gate.set_locked(False)
+        try:
+            _set_field_locked(note_lbl, False)
+        except Exception:
+            pass
         try:
             note_gate.restore_placeholders([note_in])
         except Exception:

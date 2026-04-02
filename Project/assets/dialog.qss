@@ -147,9 +147,9 @@ QPushButton[objectName*="vegEButton"][state="active"]:focus {
    ========================================================= */
 
 QPushButton[objectName*="Screen2Btn"] {
-    background-color: #b5e018;
-    border: 1px solid #799905;
-    color: #5c5e5f;
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #4facfe, stop:1 #0062ff);
+    border: 1px solid #0046b3;
+    color: White;
     font-size: 10.5pt;
     font-weight: 600;
 }
@@ -328,13 +328,15 @@ QLabel[objectName$="FieldLbl"] {
 
 /* Locked state for Field labels (used by gating logic) */
 QLabel[objectName$="FieldLbl"][locked="true"] {
-    color: #9aa0a3 !important;
+    color: #5c5e5fb1 !important;
 }
 /* Explicit unlocked state to ensure default color when property is present
    (overrides earlier readOnly selector if it exists). */
 QLabel[objectName$="FieldLbl"][locked="false"] {
     color: #5c5e5f !important;
 }
+
+
 
 /* Header Label */
 QLabel[objectName$="HeaderLabel"] {
@@ -476,10 +478,10 @@ QPushButton#removeBtn:pressed {
    QRadioButton: Base Text Style
 ------------------------------------------------------------------- */
 QRadioButton {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: bold;
-    color: #2c3e50;
-    spacing: 8px; /* Space between indicator and text */
+    color: #2147ba;
+    spacing: 20px; /* Space between indicator and text */
     outline: none; /* Removes the dotted focus line */
 }
 

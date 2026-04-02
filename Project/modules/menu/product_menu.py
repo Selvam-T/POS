@@ -201,9 +201,17 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 desired = min(desired, max_h)
 
             dlg.setMinimumHeight(desired)
-            # Clamp max height to available geometry to avoid Windows warnings.
-            if max_h is not None:
-                dlg.setMaximumHeight(max_h)
+            dlg.setMaximumHeight(desired)
+            try:
+                actual_h = int(dlg.height())
+                if abs(actual_h - int(desired)) > 2:
+                    from modules.ui_utils.error_logger import log_error
+                    log_error(
+                        "WARNING: ProductMenu resize mismatch: "
+                        f"desired_h={int(desired)} actual_h={actual_h}"
+                    )
+            except Exception:
+                pass
         except Exception:
             pass
 

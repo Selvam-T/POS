@@ -238,7 +238,7 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>20</width>
-         <height>10</height>
+         <height>5</height>
         </size>
        </property>
       </spacer>
@@ -273,7 +273,7 @@
         <item>
          <widget class="QRadioButton" name="viewHoldLoad1RadioBtn">
           <property name="text">
-           <string>LOAD to continue</string>
+           <string>Load to continue</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -283,7 +283,7 @@
         <item>
          <widget class="QRadioButton" name="viewHoldLoad2RadioBtn">
           <property name="text">
-           <string>LOAD to Pay</string>
+           <string>Load to Pay</string>
           </property>
           <property name="checked">
            <bool>false</bool>
@@ -293,14 +293,14 @@
         <item>
          <widget class="QRadioButton" name="viewHoldPrintRadioBtn">
           <property name="text">
-           <string>PRINT</string>
+           <string>Print</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QRadioButton" name="viewHoldVoidRadioBtn">
           <property name="text">
-           <string>VOID</string>
+           <string>Void</string>
           </property>
          </widget>
         </item>

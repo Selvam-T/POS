@@ -867,14 +867,14 @@
             <item>
              <widget class="QPushButton" name="upScreen2Btn">
               <property name="text">
-               <string>Up</string>
+               <string>🔼</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QPushButton" name="downScreen2Btn">
               <property name="text">
-               <string>Down</string>
+               <string>🔽</string>
               </property>
              </widget>
             </item>
