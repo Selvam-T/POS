@@ -106,6 +106,12 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 - Export: copy `AppData/categories.json` to a safe filename.
 - Restore: rename a backup to `categories.json` (overwrite), then restart the app.
 
+## Category tab — quick summary
+
+- The Category tab delegates to `modules/ui_utils/category_service.py`.
+- `add` updates only the JSON store; `remove`/`replace` run a DB replace (via `products_repo.replace_category`) then call `refresh_product_cache()` and update JSON.
+- Product Menu triggers cache refresh / completer refresh after DB category changes so UI lookups stay current.
+
 ### Tests (category features)
 
 - `tests/test_category_state.py`: JSON storage, ordering, and validation behavior.

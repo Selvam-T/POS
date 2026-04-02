@@ -142,6 +142,11 @@ Key behaviors:
 - Writes via `delete_product(code)` and `add_product(...)`.
 - `PRODUCT_CACHE` is updated in-place by the DB layer during these operations.
 
+## Cache sync (quick)
+
+- After the rewrite (delete+reinsert) the dialog calls `refresh_product_cache()` so `PRODUCT_CACHE` and UI completers reflect the new vegetable slots immediately.
+- Use per-row upsert when changing individual products; use `refresh_product_cache()` after bulk rewrites or category-wide replacements.
+
 ### Error handling and messaging
 
 Vegetable Menu uses dialog-local status (`vegMStatusLabel`) for immediate user feedback.

@@ -176,3 +176,11 @@ A safe DB-backed smoke check (no GUI):
 - Call `get_product_info('Veg01')`
 
 If that works, DB path resolution, SQL repo, and cache wiring are correct.
+
+## Product CRUD & Cache (concise)
+
+- UI dialogs call the DB facade (`modules.db_operation.add_product/update_product/delete_product`).
+- The facade executes SQL via `modules/db_operation/products_repo.py` and keeps the in-memory cache in sync by calling `upsert_cache_item()` or `remove_cache_item()` for per-row changes.
+- For bulk changes (category replace, rewrites) callers should use `refresh_product_cache()` to reload `PRODUCT_CACHE` from the DB snapshot.
+
+References: `modules/db_operation/__init__.py`, `modules/db_operation/products_repo.py`, `modules/db_operation/product_cache.py`.
