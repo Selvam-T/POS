@@ -108,10 +108,10 @@ QPushButton[objectName$="Del"]:pressed {
     padding-top: 10px;
 }
 
-/* --- Focus State --- */
+/* --- Focus State inside dialogs only --- */
 QPushButton:focus {
     outline: none;
-    border: 2px solid #c99e76;
+    border: 2px solid orange;
 }
 
 /* =========================================================
@@ -310,14 +310,13 @@ QToolButton#staffToolBtn2 {
     padding: 10px;
 }
 
-QToolButton#adminToolBtn:focus,
-QToolButton#adminToolBtn2:focus,
-QToolButton#staffToolBtn:focus,
-QToolButton#staffToolBtn2:focus,
-QPushButton[objectName*="Screen2Btn"]:focus {
+#adminToolBtn:focus, #adminToolBtn2:focus,
+#staffToolBtn:focus, #staffToolBtn2:focus,
+QPushButton[objectName*="Screen2Btn"]:focus,
+QPushButton[objectName*="ExportBtn"]:focus {
     outline: none;
     border: 2px solid orange;
-}
+} 
 
 /* Field labels */
 QLabel[objectName$="FieldLbl"] {
@@ -335,8 +334,6 @@ QLabel[objectName$="FieldLbl"][locked="true"] {
 QLabel[objectName$="FieldLbl"][locked="false"] {
     color: #5c5e5f !important;
 }
-
-
 
 /* Header Label */
 QLabel[objectName$="HeaderLabel"] {

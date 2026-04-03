@@ -1,4 +1,7 @@
 import os
+import csv
+from datetime import datetime
+from pathlib import Path
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QPushButton, QLineEdit, QToolButton, QLabel, QTabWidget, QListWidget
@@ -6,6 +9,8 @@ from modules.ui_utils.error_logger import log_error
 from modules.ui_utils.dialog_utils import build_dialog_from_ui, require_widgets, set_dialog_error, set_dialog_info, report_exception_post_close, build_error_fallback_dialog
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, set_initial_focus
 from modules.ui_utils import input_handler
+from modules.db_operation.db import get_conn
+from modules.db_operation.products_repo import get_product_list_schema_and_rows
 from modules.db_operation.users_repo import verify_password, update_password, clear_must_change_password
 from modules.ui_utils import ui_feedback
 from modules.menu.screen2_ads_helper import Screen2AdsController
@@ -61,6 +66,13 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             'screen2Remove': (QPushButton, 'removeScreen2Btn'),
             'screen2Up': (QPushButton, 'upScreen2Btn'),
             'screen2Down': (QPushButton, 'downScreen2Btn'),
+
+            # EXPORT
+            'csvExportBtn': (QPushButton, 'csvExportBtn'),
+            'xlsxExportBtn': (QPushButton, 'xlsxExportBtn'),
+            'sqlExportBtn': (QPushButton, 'sqlExportBtn'),
+            'exportStatusLabel': (QLabel, 'exportStatusLabel'),
+
             'customClose': (QPushButton, 'customCloseBtn'),
         }, hard_fail=True)
     except Exception as e:
@@ -93,6 +105,10 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     screen2Remove = widgets['screen2Remove']
     screen2Up = widgets['screen2Up']
     screen2Down = widgets['screen2Down']
+    csvExportBtn = widgets['csvExportBtn']
+    xlsxExportBtn = widgets['xlsxExportBtn']
+    sqlExportBtn = widgets['sqlExportBtn']
+    exportStatusLabel = widgets['exportStatusLabel']
     customClose = widgets.get('customClose')
 
     # Titlebar close
@@ -271,6 +287,147 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             ui_feedback.set_status_label(screen2Status, 'Screen 2 setup failed.', ok=False)
         except Exception:
             pass
+
+    # EXPORT tab wiring (product_list exports only).
+    def _exports_dir() -> Path:
+        # User-requested location: Documents/POS_Exports
+        return Path.home() / 'Documents' / 'POS_Exports'
+
+    def _timestamp_for_filename() -> str:
+        # Windows-safe replacement for requested hh:mm format.
+        return datetime.now().strftime('%d%b%Y_%H-%M').lower()
+
+    def _base_export_file_stem() -> str:
+        return f"product_list_{{kind}}_{_timestamp_for_filename()}"
+
+    def _ensure_exports_folder() -> Path:
+        out_dir = _exports_dir()
+        out_dir.mkdir(parents=True, exist_ok=True)
+        return out_dir
+
+    def _set_export_status(msg: str, ok: bool) -> None:
+        try:
+            ui_feedback.set_status_label(exportStatusLabel, msg, ok=ok, duration=3500 if ok else 0)
+        except Exception:
+            pass
+
+    def _fetch_product_rows_and_headers():
+        # Use repo helper to fetch headers and rows so SQL lives in `products_repo`.
+        try:
+            _, headers, rows = get_product_list_schema_and_rows()
+            return headers, rows
+        except Exception:
+            return [], []
+
+    def _export_csv() -> None:
+        try:
+            out_dir = _ensure_exports_folder()
+            file_name = _base_export_file_stem().format(kind='csv') + '.csv'
+            out_path = out_dir / file_name
+
+            headers, rows = _fetch_product_rows_and_headers()
+            with out_path.open('w', encoding='utf-8', newline='') as f:
+                writer = csv.writer(f)
+                if headers:
+                    writer.writerow(headers)
+                for r in rows:
+                    writer.writerow(list(r))
+
+            _set_export_status(f'CSV file exported to {out_dir}', ok=True)
+        except Exception as e:
+            log_error(f'admin_menu export CSV failed: {e}')
+            _set_export_status('CSV export failed.', ok=False)
+
+    def _export_xlsx() -> None:
+        try:
+            try:
+                import importlib
+                _openpyxl = importlib.import_module('openpyxl')
+                Workbook = getattr(_openpyxl, 'Workbook')
+            except Exception as imp_err:
+                raise RuntimeError('Missing dependency: openpyxl') from imp_err
+
+            out_dir = _ensure_exports_folder()
+            file_name = _base_export_file_stem().format(kind='xlsx') + '.xlsx'
+            out_path = out_dir / file_name
+
+            headers, rows = _fetch_product_rows_and_headers()
+            wb = Workbook()
+            ws = wb.active
+            ws.title = 'Product_list'
+            if headers:
+                ws.append(headers)
+            for r in rows:
+                ws.append(list(r))
+            wb.save(str(out_path))
+
+            _set_export_status(f'XLSX file exported to {out_dir}', ok=True)
+        except Exception as e:
+            log_error(f'admin_menu export XLSX failed: {e}')
+            _set_export_status('XLSX export failed.', ok=False)
+
+    def _sql_literal(v):
+        if v is None:
+            return 'NULL'
+        if isinstance(v, bool):
+            return '1' if v else '0'
+        if isinstance(v, (int, float)):
+            return str(v)
+        s = str(v).replace("'", "''")
+        return f"'{s}'"
+
+    def _export_sql() -> None:
+        try:
+            out_dir = _ensure_exports_folder()
+            file_name = _base_export_file_stem().format(kind='sql') + '.sql'
+            out_path = out_dir / file_name
+
+            create_sql, headers, rows = get_product_list_schema_and_rows()
+            if not create_sql:
+                raise RuntimeError('Product_list schema not found')
+
+            with out_path.open('w', encoding='utf-8', newline='\n') as f:
+                f.write('-- Product_list export\n')
+                f.write(f'-- Generated: {datetime.now().isoformat(timespec="seconds")}\n\n')
+                f.write('BEGIN TRANSACTION;\n')
+                f.write(f'{create_sql};\n')
+                if headers:
+                    cols_sql = ', '.join([f'"{h}"' for h in headers])
+                    for r in rows:
+                        vals_sql = ', '.join([_sql_literal(v) for v in list(r)])
+                        f.write(f'INSERT INTO "Product_list" ({cols_sql}) VALUES ({vals_sql});\n')
+                f.write('COMMIT;\n')
+
+            _set_export_status(f'SQL file exported to {out_dir}', ok=True)
+        except Exception as e:
+            log_error(f'admin_menu export SQL failed: {e}')
+            _set_export_status('SQL export failed.', ok=False)
+
+    try:
+        csvExportBtn.clicked.connect(_export_csv)
+        xlsxExportBtn.clicked.connect(_export_xlsx)
+        sqlExportBtn.clicked.connect(_export_sql)
+    except Exception:
+        pass
+
+    # Land focus on CSV export button when EXPORT tab is selected.
+    def _focus_export_btn_on_tab_change(index: int) -> None:
+        try:
+            tab = tabWidget.widget(index)
+            tab_name = tab.objectName() if tab is not None else ''
+        except Exception:
+            tab_name = ''
+        if tab_name == 'tabExport':
+            try:
+                csvExportBtn.setFocus()
+            except Exception:
+                pass
+
+    try:
+        tabWidget.currentChanged.connect(_focus_export_btn_on_tab_change)
+        _focus_export_btn_on_tab_change(tabWidget.currentIndex())
+    except Exception:
+        pass
 
     # Cancel/Close buttons
     try:

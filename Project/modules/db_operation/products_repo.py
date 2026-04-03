@@ -226,3 +226,28 @@ def list_products_slim(*, conn: Optional[sqlite3.Connection] = None) -> List[Tup
         if own:
             c.close()
 
+
+def get_product_list_schema_and_rows(*, conn: Optional[sqlite3.Connection] = None) -> Tuple[Optional[str], list, list]:
+    """Return (create_table_sql, headers, rows) for Product_list.
+
+    create_table_sql may be None if not found. Rows is a list of sqlite3.Row tuples.
+    """
+    own = conn is None
+    c = conn or get_conn()
+    try:
+        cur = c.cursor()
+        cur.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND lower(name)=lower(?)",
+            ('Product_list',)
+        )
+        row = cur.fetchone()
+        create_sql = row[0] if row and row[0] else None
+
+        cur.execute('SELECT * FROM Product_list ORDER BY name COLLATE NOCASE')
+        rows = cur.fetchall()
+        headers = [d[0] for d in (cur.description or [])]
+        return create_sql, headers, rows
+    finally:
+        if own:
+            c.close()
+

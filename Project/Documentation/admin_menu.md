@@ -104,6 +104,24 @@ Status messaging:
 - Errors and success messages are routed through `screen2StatusLabel` via `ui_feedback.set_status_label(...)`
 - Clearing status uses `ui_feedback.clear_status_label(...)`
 
+## EXPORT Tab
+
+The EXPORT tab allows exporting the application's `Product_list` table in three formats:
+
+- CSV (`.csv`) — simple comma-separated values file.
+- XLSX (`.xlsx`) — Excel workbook (requires the `openpyxl` package).
+- SQL (`.sql`) — SQL file containing the `CREATE TABLE` statement and `INSERT` statements for every row.
+
+Behaviour and wiring:
+- Buttons wired in controller: `csvExportBtn`, `xlsxExportBtn`, `sqlExportBtn` (see `modules/menu/admin_menu.py`).
+- Exports are written to the user Documents folder under `Documents/POS_Exports`.
+- Filenames follow the pattern: `product_list_{kind}_ddmmmyyyy_hh-mm.ext` (timestamp uses `ddMmmYYYY_HH-MM` with `:` replaced by `-` for Windows-safe filenames).
+- After a successful export the UI shows a concise status message in `exportStatusLabel` of the form: `"<FILETYPE> file exported to <full-path>"` (e.g. `CSV file exported to C:/Users/.../Documents/POS_Exports/product_list_csv_03apr2026_21-30.csv`).
+
+Notes:
+- The XLSX export uses `openpyxl`. If `openpyxl` is not installed the controller will report an error and the XLSX export will fail; install via `pip install openpyxl` or include it in your environment requirements. The project `requirements.txt` already lists `openpyxl>=3.1`.
+- Exports are generated from a `SELECT * FROM Product_list ORDER BY name COLLATE NOCASE` query; ensure the `Product_list` table exists and the DB path is correct.
+
 ## Known Limits / Assumptions
 
 - ADMIN/STAFF ids are fixed in the database seed. If these change, update constants in the controller.
