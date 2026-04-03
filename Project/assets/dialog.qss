@@ -521,3 +521,71 @@ QRadioButton::indicator:checked {
 QRadioButton::indicator:pressed {
     background-color: #ecf0f1;
 }
+
+/* --- Admin menu Export --- */ 
+
+QFrame[objectName*="ExportFrame"] {
+    border: 1px solid #7e7f7e;
+    border-radius: 10px;
+}
+
+QFrame#csvExportFrame,
+QFrame#csv2ExportFrame {
+    background-color: #eb81d9;  
+}
+
+QFrame#xlsxExportFrame,
+QFrame#xlsx2ExportFrame {
+    background-color: #81eb8a;  
+}
+
+QFrame#sqlExportFrame,
+QFrame#sql2ExportFrame {
+    background-color: #818deb;  
+}
+
+QLabel[objectName*="ExportLabel"] {
+    font-size: 18px;
+    font-weight: 400;
+    color: black;
+}
+
+QFrame#exportFrame QPushButton[objectName*="ExportBtn"],
+QFrame#exportFrame QPushButton[objectName*="ExportBtn"] {
+    font-size: 20px;
+    font-weight: 400;
+    color: black;
+    border: 2px solid #7e7f7e;
+    border-radius: 10px;
+    padding: 0px 10px 0px 10px; 
+}
+
+QPushButton[objectName*="ExportBtn"] {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                        stop:0 #ebe881, stop:1 #ebe181); 
+}
+
+QPushButton[objectName*="ExportBtn"]:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                        stop:0 #fbc181, stop:1 #fbcc81);
+}
+
+QPushButton[objectName*="ExportBtn"]:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                        stop:0 #fbd110, stop:1 #fbd650);
+}
+
+QPushButton[objectName*="2ExportBtn"] {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                        stop:0 #94eeee, stop:1 #81ebeb);
+}
+
+QPushButton[objectName*="2ExportBtn"]:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                        stop:0 #63efd3, stop:1 #6debd2);
+}
+
+QPushButton[objectName*="2ExportBtn"]:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                        stop:0 #1eedbd, stop:1 #56edbd);
+}

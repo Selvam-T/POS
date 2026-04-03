@@ -6,7 +6,7 @@ DIALOG_RATIOS = {
 	'vegetable_entry': (0.5, 0.9),
 	'manual_entry': (0.4, 0.3),
 	'logout_menu': (0.25, 0.25),
-	'admin_menu': (0.4, 0.3),
+	'admin_menu': (0.45, 0.4),
 	'history_menu': (0.4, 0.4),
 	'reports_menu': (0.7, 0.7),
 	'greeting_menu': (0.3, 0.3),
