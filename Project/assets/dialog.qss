@@ -312,8 +312,7 @@ QToolButton#staffToolBtn2 {
 
 #adminToolBtn:focus, #adminToolBtn2:focus,
 #staffToolBtn:focus, #staffToolBtn2:focus,
-QPushButton[objectName*="Screen2Btn"]:focus,
-QPushButton[objectName*="ExportBtn"]:focus {
+QPushButton[objectName*="Screen2Btn"]:focus {
     outline: none;
     border: 2px solid orange;
 } 
@@ -547,7 +546,6 @@ QLabel[objectName*="ExportLabel"] {
     color: black;
 }
 
-QFrame#exportFrame QPushButton[objectName*="ExportBtn"],
 QFrame#exportFrame QPushButton[objectName*="ExportBtn"] {
     font-size: 20px;
     font-weight: 400;
@@ -585,4 +583,10 @@ QPushButton[objectName*="2ExportBtn"]:hover {
 QPushButton[objectName*="2ExportBtn"]:pressed {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
                                         stop:0 #1eedbd, stop:1 #56edbd);
+}
+
+/* Tab navigation focus */
+QFrame#exportFrame QPushButton[objectName*="ExportBtn"]:focus {
+    border: 2px solid orange;
+    outline: none;
 }

@@ -1,5 +1,6 @@
 import os
 import csv
+import json
 from datetime import datetime
 from pathlib import Path
 from PyQt5 import uic
@@ -71,7 +72,9 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             'csvExportBtn': (QPushButton, 'csvExportBtn'),
             'xlsxExportBtn': (QPushButton, 'xlsxExportBtn'),
             'sqlExportBtn': (QPushButton, 'sqlExportBtn'),
+            'csv2ExportBtn': (QPushButton, 'csv2ExportBtn'),
             'exportStatusLabel': (QLabel, 'exportStatusLabel'),
+            'exportHeaderLabel2': (QLabel, 'exportHeaderLabel2'),
 
             'customClose': (QPushButton, 'customCloseBtn'),
         }, hard_fail=True)
@@ -108,7 +111,9 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     csvExportBtn = widgets['csvExportBtn']
     xlsxExportBtn = widgets['xlsxExportBtn']
     sqlExportBtn = widgets['sqlExportBtn']
+    csv2ExportBtn = widgets.get('csv2ExportBtn')
     exportStatusLabel = widgets['exportStatusLabel']
+    exportHeaderLabel2 = widgets.get('exportHeaderLabel2')
     customClose = widgets.get('customClose')
 
     # Titlebar close
@@ -291,25 +296,73 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     # EXPORT tab wiring (product_list exports only).
     def _exports_dir() -> Path:
         # User-requested location: Documents/POS_Exports
-        return Path.home() / 'Documents' / 'POS_Exports'
+        return Path.home() / 'POS_Exports'
 
     def _timestamp_for_filename() -> str:
         # Windows-safe replacement for requested hh:mm format.
         return datetime.now().strftime('%d%b%Y_%H-%M').lower()
 
     def _base_export_file_stem() -> str:
-        return f"product_list_{{kind}}_{_timestamp_for_filename()}"
+        return f"Product_List_{{kind}}_{_timestamp_for_filename()}"
 
     def _ensure_exports_folder() -> Path:
         out_dir = _exports_dir()
         out_dir.mkdir(parents=True, exist_ok=True)
         return out_dir
 
+    # Display the configured exports directory in the EXPORT tab header label.
+    try:
+        if exportHeaderLabel2 is not None:
+            exportHeaderLabel2.setText(f"Export to {_exports_dir()}")
+    except Exception:
+        pass
+
     def _set_export_status(msg: str, ok: bool) -> None:
         try:
             ui_feedback.set_status_label(exportStatusLabel, msg, ok=ok, duration=3500 if ok else 0)
         except Exception:
             pass
+
+    def _export_csv2() -> None:
+        """Export categories to CSV (reads AppData/categories.json or falls back to in-memory list)."""
+        try:
+            out_dir = _ensure_exports_folder()
+            file_name = f"Categories_csv_{_timestamp_for_filename()}.csv"
+            out_path = out_dir / file_name
+
+            # Prefer on-disk categories JSON when available
+            cats = []
+            try:
+                import config
+                path = getattr(config, 'CATEGORIES_JSON_PATH', None)
+                if path and os.path.exists(path):
+                    with open(path, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                        if isinstance(data, dict):
+                            cats = data.get('categories') or []
+                        elif isinstance(data, list):
+                            cats = data
+            except Exception:
+                cats = []
+
+            # Fallback to in-memory categories from config
+            if not cats:
+                try:
+                    import config
+                    cats = getattr(config, 'PRODUCT_CATEGORIES', []) or []
+                except Exception:
+                    cats = []
+
+            with out_path.open('w', encoding='utf-8', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(['category'])
+                for c in (cats or []):
+                    writer.writerow([c])
+
+            _set_export_status(f'Categories CSV exported to {out_dir}', ok=True)
+        except Exception as e:
+            log_error(f'admin_menu export Categories CSV failed: {e}')
+            _set_export_status('Categories CSV export failed.', ok=False)
 
     def _fetch_product_rows_and_headers():
         # Use repo helper to fetch headers and rows so SQL lives in `products_repo`.
@@ -333,10 +386,10 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
                 for r in rows:
                     writer.writerow(list(r))
 
-            _set_export_status(f'CSV file exported to {out_dir}', ok=True)
+            _set_export_status(f'Product List CSV file exported to {out_dir}', ok=True)
         except Exception as e:
-            log_error(f'admin_menu export CSV failed: {e}')
-            _set_export_status('CSV export failed.', ok=False)
+            log_error(f'admin_menu export Product List CSV failed: {e}')
+            _set_export_status('Product List CSV export failed.', ok=False)
 
     def _export_xlsx() -> None:
         try:
@@ -361,10 +414,10 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
                 ws.append(list(r))
             wb.save(str(out_path))
 
-            _set_export_status(f'XLSX file exported to {out_dir}', ok=True)
+            _set_export_status(f'Product List XLSX file exported to {out_dir}', ok=True)
         except Exception as e:
-            log_error(f'admin_menu export XLSX failed: {e}')
-            _set_export_status('XLSX export failed.', ok=False)
+            log_error(f'admin_menu export Product List XLSX failed: {e}')
+            _set_export_status('Product List XLSX export failed.', ok=False)
 
     def _sql_literal(v):
         if v is None:
@@ -398,15 +451,21 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
                         f.write(f'INSERT INTO "Product_list" ({cols_sql}) VALUES ({vals_sql});\n')
                 f.write('COMMIT;\n')
 
-            _set_export_status(f'SQL file exported to {out_dir}', ok=True)
+            _set_export_status(f'Product List SQL file exported to {out_dir}', ok=True)
         except Exception as e:
-            log_error(f'admin_menu export SQL failed: {e}')
-            _set_export_status('SQL export failed.', ok=False)
+            log_error(f'admin_menu export Product List SQL failed: {e}')
+            _set_export_status('Product List SQL export failed.', ok=False)
 
     try:
         csvExportBtn.clicked.connect(_export_csv)
         xlsxExportBtn.clicked.connect(_export_xlsx)
         sqlExportBtn.clicked.connect(_export_sql)
+        # Wire categories CSV export button if present
+        try:
+            if csv2ExportBtn is not None:
+                csv2ExportBtn.clicked.connect(_export_csv2)
+        except Exception:
+            pass
     except Exception:
         pass
 
