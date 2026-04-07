@@ -312,7 +312,8 @@ QToolButton#staffToolBtn2 {
 
 #adminToolBtn:focus, #adminToolBtn2:focus,
 #staffToolBtn:focus, #staffToolBtn2:focus,
-QPushButton[objectName*="Screen2Btn"]:focus {
+QPushButton[objectName*="Screen2Btn"]:focus,
+QPushButton[objectName*="ReceiptBtn"]:focus {
     outline: none;
     border: 2px solid orange;
 } 
@@ -589,4 +590,43 @@ QPushButton[objectName*="2ExportBtn"]:pressed {
 QFrame#exportFrame QPushButton[objectName*="ExportBtn"]:focus {
     border: 2px solid orange;
     outline: none;
+}
+
+/* =============================================================
+     receipt menu
+    ============================================================= */
+
+/* Search Button */
+QPushButton#searchReceiptBtn {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #1b9490, stop:1 #08a7a2);
+    border: 1px solid #257976;
+}
+
+QPushButton#searchReceiptBtn:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #4abfbb, stop:1 #65c0bd);
+}
+
+QPushButton#searchReceiptBtn:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #2fc3be, stop:1 #44ded9);
+    padding-top: 10px;
+}
+
+/* Reset Button - softer purple */
+QPushButton#resetReceiptBtn {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+                                      stop:0 #8c3f80, stop:1 #9a4a8e);
+    border: 1px solid #7d6c7a;
+}
+
+QPushButton#resetReceiptBtn:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+                                      stop:0 #a85f9c, stop:1 #b873ad);
+}
+
+QPushButton#resetReceiptBtn:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+                                      stop:0 #9b3f8c, stop:1 #c06ab1);
+    padding-top: 10px;
 }

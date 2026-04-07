@@ -347,7 +347,7 @@
            </sizepolicy>
           </property>
           <property name="text">
-           <string>Note :</string>
+           <string>Add a note :</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

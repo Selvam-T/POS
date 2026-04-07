@@ -167,7 +167,7 @@
      <item row="2" column="0">
       <widget class="QLabel" name="vendorNoteFieldLbl">
        <property name="text">
-        <string>Note :</string>
+        <string>Add a note :</string>
        </property>
       </widget>
      </item>

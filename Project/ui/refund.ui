@@ -254,7 +254,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Note :</string>
+        <string>Add a note :</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
