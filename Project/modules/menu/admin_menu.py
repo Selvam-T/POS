@@ -4,7 +4,8 @@ import json
 from datetime import datetime
 from pathlib import Path
 from PyQt5 import uic
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QObject, QEvent
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QPushButton, QLineEdit, QToolButton, QLabel, QTabWidget, QListWidget
 from modules.ui_utils.error_logger import log_error
 from modules.ui_utils.dialog_utils import build_dialog_from_ui, require_widgets, set_dialog_error, set_dialog_info, report_exception_post_close, build_error_fallback_dialog
@@ -21,6 +22,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
+EYE_OPEN_ICON_PATH = os.path.join(ASSETS_DIR, 'icons', 'eye_open.svg')
+EYE_CLOSE_ICON_PATH = os.path.join(ASSETS_DIR, 'icons', 'eye_close.svg')
 
 
 # Build and return the admin settings dialog.
@@ -127,8 +130,32 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     # Toggle visibility buttons
     # Wire password visibility toggle.
     def _wire_eye(btn, le):
+        def _apply_eye_state(checked: bool) -> None:
+            try:
+                le.setEchoMode(QLineEdit.Normal if checked else QLineEdit.Password)
+            except Exception:
+                pass
+            try:
+                icon_path = EYE_CLOSE_ICON_PATH if checked else EYE_OPEN_ICON_PATH
+                if os.path.exists(icon_path):
+                    btn.setIcon(QIcon(icon_path))
+            except Exception:
+                pass
+
         try:
-            btn.toggled.connect(lambda checked: le.setEchoMode(QLineEdit.Normal if checked else QLineEdit.Password))
+            btn.setText('')
+        except Exception:
+            pass
+        try:
+            btn.setToolButtonStyle(Qt.ToolButtonIconOnly)
+        except Exception:
+            pass
+        try:
+            btn.toggled.connect(_apply_eye_state)
+        except Exception:
+            pass
+        try:
+            _apply_eye_state(bool(btn.isChecked()))
         except Exception:
             pass
 
@@ -136,6 +163,32 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     _wire_eye(adminEye2, adminNew)
     _wire_eye(staffEye, staffCur)
     _wire_eye(staffEye2, staffNew)
+
+    # Prevent Enter on eye buttons from propagating to dialog-level default/reject actions.
+    class _EyeEnterFilter(QObject):
+        def eventFilter(self, obj, event):
+            try:
+                if event.type() == QEvent.KeyPress and event.key() in (Qt.Key_Return, Qt.Key_Enter):
+                    if isinstance(obj, QToolButton):
+                        try:
+                            obj.toggle()
+                        except Exception:
+                            pass
+                        return True
+            except Exception:
+                pass
+            return False
+
+    try:
+        _eye_enter_filter = _EyeEnterFilter(dlg)
+        dlg._eye_enter_filter = _eye_enter_filter
+        for _eye_btn in (adminEye, adminEye2, staffEye, staffEye2):
+            try:
+                _eye_btn.installEventFilter(_eye_enter_filter)
+            except Exception:
+                pass
+    except Exception:
+        pass
 
     # Coordinator & gates
     fc = FieldCoordinator(dlg)
@@ -359,10 +412,10 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
                 for c in (cats or []):
                     writer.writerow([c])
 
-            _set_export_status(f'Categories CSV exported to {out_dir}', ok=True)
+            _set_export_status(f'Product Categories CSV exported to {out_dir}', ok=True)
         except Exception as e:
-            log_error(f'admin_menu export Categories CSV failed: {e}')
-            _set_export_status('Categories CSV export failed.', ok=False)
+            log_error(f'admin_menu export Product Categories CSV failed: {e}')
+            _set_export_status('Product Categories CSV export failed.', ok=False)
 
     def _fetch_product_rows_and_headers():
         # Use repo helper to fetch headers and rows so SQL lives in `products_repo`.

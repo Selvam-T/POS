@@ -70,7 +70,7 @@ class BarcodeManager(QObject):
                     if dlg is not None:
                         # Try to find a status label with a common naming pattern
                         status_lbl = None
-                        for lbl_name in ['addStatusLabel', 'removeStatusLabel', 'updateStatusLabel', 'refundStatusLabel', 'historyStatusLabel']:
+                        for lbl_name in ['addStatusLabel', 'removeStatusLabel', 'updateStatusLabel', 'refundStatusLabel', 'receiptStatusLabel']:
                             status_lbl = dlg.findChild(QLabel, lbl_name)
                             if status_lbl is not None:
                                 break

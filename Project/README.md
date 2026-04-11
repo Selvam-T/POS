@@ -370,7 +370,7 @@ See `Project_Journal.md` for detailed architecture documentation, design decisio
    - Design decisions and rationale
    - Implementation details
    - Code examples and technical explanations
-   - Development history
+   - Development Receipt
 - **error_logging_and_fallback.md** - Error logging and fallback dialog documentation
 - Database layer architecture: see Documentation/db_operation.md for `modules/db_operation` structure and public API.
 - Scanner input architecture: see Documentation/scanner_input_infocus.md for focus-first routing, modal block, and debug guidance.

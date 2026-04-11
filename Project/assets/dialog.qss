@@ -302,10 +302,9 @@ QToolButton#adminToolBtn,
 QToolButton#adminToolBtn2,
 QToolButton#staffToolBtn,
 QToolButton#staffToolBtn2 {
-    qproperty-icon: url(assets/icons/eye.svg);
-    icon-size: 28px;
-    min-width: 30px;
-    min-height: 30px;
+    icon-size: 32px;
+    min-width: 33px;
+    min-height: 33px;
     border: none;
     padding: 10px;
 }
@@ -613,7 +612,7 @@ QPushButton#searchReceiptBtn:pressed {
     padding-top: 10px;
 }
 
-/* Reset Button - softer purple */
+/* Reset Button */
 QPushButton#resetReceiptBtn {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
                                       stop:0 #8c3f80, stop:1 #9a4a8e);
@@ -629,4 +628,30 @@ QPushButton#resetReceiptBtn:pressed {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
                                       stop:0 #9b3f8c, stop:1 #c06ab1);
     padding-top: 10px;
+}
+
+/* Print Button */
+
+QPushButton#printReceiptBtn {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #42A5F5, stop:1 #2196F3);
+    border: 1px solid #1976D2;
+}
+QPushButton#printReceiptBtn:hover {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #64B5F6, stop:1 #42A5F5);
+}
+QPushButton#printReceiptBtn:pressed {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #2196F3, stop:1 #1976D2);
+}
+
+/* Void Button */
+
+QPushButton#voidReceiptBtn {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #EF5350, stop:1 #F44336);
+    border: 1px solid #D32F2F;
+}
+QPushButton#voidReceiptBtn:hover {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #E57373, stop:1 #EF5350);
+}
+QPushButton#voidReceiptBtn:pressed {
+    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #F44336, stop:1 #D32F2F);
 }

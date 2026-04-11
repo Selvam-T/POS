@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1200</width>
+    <width>1280</width>
     <height>860</height>
    </rect>
   </property>
@@ -583,7 +583,7 @@
       </layout>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="receiptRightLayout" stretch="7,0,2">
+      <layout class="QVBoxLayout" name="receiptRightLayout" stretch="7,3">
        <property name="spacing">
         <number>10</number>
        </property>
@@ -628,22 +628,6 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>30</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
         <widget class="QFrame" name="receiptActionFrame">
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -653,37 +637,92 @@
          </property>
          <layout class="QVBoxLayout" name="receiptActionLayout">
           <property name="spacing">
-           <number>20</number>
+           <number>0</number>
           </property>
           <property name="leftMargin">
-           <number>30</number>
+           <number>0</number>
           </property>
           <property name="topMargin">
-           <number>10</number>
+           <number>0</number>
           </property>
           <property name="rightMargin">
-           <number>30</number>
+           <number>0</number>
           </property>
           <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
-           <widget class="QPushButton" name="printReceiptBtn">
+           <widget class="QLabel" name="receiptActionFieldLbl">
             <property name="text">
-             <string>PRINT Receipt</string>
+             <string>Choose action to take on receipt :</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="voidReceiptBtn">
-            <property name="text">
-             <string>VOID Receipt</string>
+           <layout class="QHBoxLayout" name="receiptActionRadioLayout">
+            <property name="spacing">
+             <number>10</number>
             </property>
-           </widget>
+            <property name="leftMargin">
+             <number>10</number>
+            </property>
+            <property name="topMargin">
+             <number>10</number>
+            </property>
+            <property name="rightMargin">
+             <number>10</number>
+            </property>
+            <property name="bottomMargin">
+             <number>10</number>
+            </property>
+            <item>
+             <widget class="QRadioButton" name="receiptPrintRadioBtn">
+              <property name="text">
+               <string>Print Receipt</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="receiptChangeStatusRadioBtn">
+              <property name="text">
+               <string>VOID Receipt</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
           <item>
            <widget class="QGroupBox" name="receiptNoteGroupBox">
-            <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,2">
+            <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,2,0">
              <property name="spacing">
               <number>10</number>
              </property>
@@ -700,6 +739,19 @@
               <number>0</number>
              </property>
              <item>
+              <spacer name="horizontalSpacer_6">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
               <widget class="QLabel" name="receiptNoteFieldLbl">
                <property name="text">
                 <string>Add a note :</string>
@@ -712,6 +764,19 @@
                 <string>-- Explain why receipt is Voided --</string>
                </property>
               </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_5">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
              </item>
             </layout>
            </widget>
@@ -727,11 +792,34 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btnReceiptCancel">
-            <property name="text">
-             <string>CANCEL</string>
+           <layout class="QHBoxLayout" name="receiptActionBtnsLayout">
+            <property name="spacing">
+             <number>40</number>
             </property>
-           </widget>
+            <property name="leftMargin">
+             <number>40</number>
+            </property>
+            <property name="rightMargin">
+             <number>40</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="btnReceiptOk">
+              <property name="text">
+               <string>OK</string>
+              </property>
+              <property name="default">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnReceiptCancel">
+              <property name="text">
+               <string>CANCEL</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>

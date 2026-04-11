@@ -53,7 +53,7 @@
     </widget>
    </item>
    <item alignment="Qt::AlignHCenter">
-    <widget class="QPushButton" name="historyBtn">
+    <widget class="QPushButton" name="receiptBtn">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -64,7 +64,7 @@
       <string>Receipt history</string>
      </property>
      <property name="text">
-      <string>History</string>
+      <string>Receipt</string>
      </property>
     </widget>
    </item>

@@ -51,7 +51,7 @@ from config import (
     ICON_VEGETABLE,
     ICON_PRODUCT,
     ICON_GREETING,
-    ICON_HISTORY,
+    ICON_RECEIPT,
     ICON_LOGOUT,
 )
 from modules.info_section.info_section import InfoSectionController
@@ -189,7 +189,7 @@ class MainLoader(QMainWindow):
             'vegetableBtn': ICON_VEGETABLE,
             'productBtn': ICON_PRODUCT,
             'greetingBtn': ICON_GREETING,
-            'historyBtn': ICON_HISTORY,
+            'receiptBtn': ICON_RECEIPT,
             'logoutBtn': ICON_LOGOUT,
         }
         try:
@@ -215,7 +215,7 @@ class MainLoader(QMainWindow):
                 'vegetableBtn': 'Vegetable',
                 'productBtn': 'Product',
                 'greetingBtn': 'Greeting',
-                'historyBtn': 'History',
+                'receiptBtn': 'Receipt',
                 'logoutBtn': 'Logout',
             }
 
@@ -255,7 +255,7 @@ class MainLoader(QMainWindow):
                     btn.clicked.connect(self.open_admin_menu_dialog)
                 elif obj_name == 'reportsBtn':
                     btn.clicked.connect(self.open_reports_menu_dialog)
-                elif obj_name == 'historyBtn':
+                elif obj_name == 'receiptBtn':
                     btn.clicked.connect(self.open_receipt_menu_dialog)
                 else:
                     try:

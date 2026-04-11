@@ -235,6 +235,8 @@ def get_product_list_schema_and_rows(*, conn: Optional[sqlite3.Connection] = Non
     own = conn is None
     c = conn or get_conn()
     try:
+        # Simulate error for testing:
+        # raise RuntimeError('Simulated Product_list read failure from get_product_list_schema_and_rows')
         cur = c.cursor()
         cur.execute(
             "SELECT sql FROM sqlite_master WHERE type='table' AND lower(name)=lower(?)",

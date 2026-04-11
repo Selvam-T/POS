@@ -1,5 +1,5 @@
 # modules/menu/receipt_menu.py
-# This file was created by renaming devices_menu.py for the new History dialog.
+# This file was created by renaming devices_menu.py for the new Receipt dialog.
 import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
@@ -12,7 +12,7 @@ ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
 
 def launch_receipt_dialog(host_window, *args, **kwargs):
-    """Open History dialog (ui/receipt_menu.ui) as a modal frameless panel.
+    """Open Receipt dialog (ui/receipt_menu.ui) as a modal frameless panel.
     DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
     This function only creates and returns the QDialog.
     Args:

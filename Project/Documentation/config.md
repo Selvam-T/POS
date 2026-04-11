@@ -31,7 +31,7 @@ This file centralizes key configuration values for the POS application. It is im
 - `ROW_COLOR_DELETE_HIGHLIGHT`: Highlight color for row deletion preview.
 
 ## Icon Paths
-- `ICON_DELETE`, `ICON_ADMIN`, `ICON_REPORTS`, `ICON_VEGETABLE`, `ICON_PRODUCT`, `ICON_GREETING`, `ICON_HISTORY`, `ICON_LOGOUT`: Relative paths to SVG icon files used in the UI.
+- `ICON_DELETE`, `ICON_ADMIN`, `ICON_REPORTS`, `ICON_VEGETABLE`, `ICON_PRODUCT`, `ICON_GREETING`, `ICON_RECEIPT`, `ICON_LOGOUT`: Relative paths to SVG icon files used in the UI.
 
 ## Date/Time Formats
 - `DATE_FMT`: Format for displaying dates (e.g., `3 Nov 2025`).
