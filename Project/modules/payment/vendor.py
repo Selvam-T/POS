@@ -70,6 +70,22 @@ def launch_vendor_dialog(parent=None):
 
     # Validation is delegated directly to input_handler via lambdas.
 
+    def _lock_vendor_targets(clear_values: bool = True) -> None:
+        try:
+            gate.hide_placeholders([note, amount])
+        except Exception:
+            pass
+        gate.set_locked(True)
+        if clear_values:
+            try:
+                amount.clear()
+            except Exception:
+                pass
+            try:
+                note.clear()
+            except Exception:
+                pass
+
     def _validate_name_and_unlock():
         val = input_handler.handle_customer_input(name)
         try:
@@ -105,6 +121,20 @@ def launch_vendor_dialog(parent=None):
 
     coord.register_validator(name, _validate_name_and_unlock, status_label=status)
     coord.register_validator(amount, lambda: input_handler.handle_currency_input(amount, asset_type='Amount'), status_label=status)
+
+    def _on_name_text_edited(_txt=None) -> None:
+        if (name.text() or '').strip():
+            return
+        _lock_vendor_targets(clear_values=True)
+        try:
+            ui_feedback.clear_status_label(status)
+        except Exception:
+            pass
+
+    try:
+        name.textEdited.connect(_on_name_text_edited)
+    except Exception:
+        pass
 
     # NOTE: rely on `parent.current_user_id` being set by the app login flow.
     # Do not probe multiple attributes or fall back to a magic id; require a valid integer user id.

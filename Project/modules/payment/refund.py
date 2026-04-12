@@ -50,7 +50,7 @@ def launch_refund_dialog(parent=None):
             'code': (QLineEdit, 'refundProductCodeLineEdit'),
             'name': (QLineEdit, 'refundNameSearchLineEdit'),
             'price': (QLineEdit, 'refundPriceLineEdit'),
-            'qty': (QLineEdit, 'refundQtyeLineEdit'),
+            'qty': (QLineEdit, 'refundQtyLineEdit'),
             'note': (QLineEdit, 'refundNoteLineEdit'),
             'amount': (QLineEdit, 'refundAmountLineEdit'),
             'status': (QLabel, 'refundStatusLabel'),
@@ -239,6 +239,8 @@ def launch_refund_dialog(parent=None):
 
     def _handle_ok() -> None:
         try:
+            # Simulate a database failure for testing error handling
+            #raise RuntimeError('Simulated DB failure')
             if not code.text().strip() or not name.text().strip():
                 raise ValueError('Select a product first')
 
