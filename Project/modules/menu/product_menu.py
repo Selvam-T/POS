@@ -12,7 +12,7 @@ from modules.ui_utils.dialog_utils import (
     log_and_set_post_close,
 )
 from modules.ui_utils.dialog_utils import clear_display
-from modules.ui_utils.canonicalization import canonicalize_product_code
+from modules.ui_utils.canonicalization import canonicalize_product_code, canonicalize_title_text
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 from modules.ui_utils import input_handler, ui_feedback
 from modules.ui_utils import category_service
@@ -318,10 +318,6 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
 
     # Category tab: combo should use JSON categories (exclude 'Other'; keep placeholder).
     def _category_placeholder(items: list) -> str:
-        if items:
-            head = (items[0] or '').strip()
-            if head and head.strip().lower() != 'other':
-                return head
         return '--Select Category--'
 
     def _refresh_category_tab_combo() -> None:
@@ -332,6 +328,8 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             categories = category_service.list_categories() or []
             combo.blockSignals(True)
             combo.clear()
+            placeholder = _category_placeholder(categories)
+            combo.addItem(placeholder)
 
             items = []
             for c in categories:
@@ -340,10 +338,12 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                     continue
                 if s.strip().lower() == 'other':
                     continue
+                if s.strip().lower() == placeholder.strip().lower():
+                    continue
                 if s not in items:
                     items.append(s)
             combo.addItems(items)
-            combo.setCurrentIndex(0 if items else -1)
+            combo.setCurrentIndex(0)
         except Exception:
             pass
         finally:
@@ -493,6 +493,10 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         # Combo population: only populate JSON items when remove/replace mode is active (unlocked).
         if rem_mode or rep_mode:
             _refresh_category_tab_combo()
+            try:
+                widgets['cat_select_combo'].setFocus()
+            except Exception:
+                pass
         else:
             _clear_category_tab_combo()
 
@@ -520,6 +524,16 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     def _set_category_prompt(message: str) -> None:
         ui_feedback.set_status_label(widgets['cat_status'], message, ok=True)
 
+    def _normalize_category_line_edit(le: QLineEdit) -> str:
+        raw = (le.text() or '').strip()
+        normalized = canonicalize_title_text(raw)
+        if normalized != raw:
+            try:
+                le.setText(normalized)
+            except Exception:
+                pass
+        return normalized
+
     def _validate_category_text(text: str, focus_widget=None) -> bool:
         ok, err = validate_category(text)
         if not ok:
@@ -537,7 +551,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         return bool(ok)
 
     def _on_cat_add_enter() -> None:
-        name = (widgets['cat_add_le'].text() or '').strip()
+        name = _normalize_category_line_edit(widgets['cat_add_le'])
         if not _validate_category_text(name, focus_widget=widgets['cat_add_le']):
             return
         _set_category_prompt(f"Add new category {name} ?")
@@ -555,10 +569,15 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         combo = widgets['cat_select_combo']
         if combo is None:
             return
-        if combo.currentIndex() < 0:
+        current_name = (combo.currentText() or '').strip()
+        if combo.currentIndex() <= 0 or current_name == _category_placeholder([]):
             ui_feedback.set_status_label(widgets['cat_status'], "Select a category", ok=False)
+            try:
+                combo.setFocus()
+            except Exception:
+                pass
             return
-        name = (combo.currentText() or '').strip()
+        name = current_name
         if widgets['cat_remove_radio'].isChecked():
             _set_category_prompt(f"Remove category {name} ?")
             try:
@@ -594,7 +613,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 pass
 
     def _on_cat_update_enter() -> None:
-        replacement = (widgets['cat_update_le'].text() or '').strip()
+        replacement = _normalize_category_line_edit(widgets['cat_update_le'])
         if not _validate_category_text(replacement, focus_widget=widgets['cat_update_le']):
             return
         try:
@@ -1674,25 +1693,26 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     def do_category_ok() -> None:
         def _finalize_category(message: str, *, show_label: bool = True) -> None:
             if show_label:
-                ui_feedback.set_status_label(widgets['cat_status'], message, ok=True)
+                ui_feedback.set_status_label(widgets['cat_status'], message, ok=True, duration=3000)
             set_dialog_main_status_max(dlg, message, level='info', duration=4000)
             try:
                 dlg._skip_close_status = True
             except Exception:
                 pass
-            QTimer.singleShot(200, dlg.accept)
+            QTimer.singleShot(500, dlg.accept)
 
         def _selected_category() -> str | None:
             combo = widgets['cat_select_combo']
             if combo is None:
                 return None
-            if combo.currentIndex() < 0:
+            name = (combo.currentText() or '').strip()
+            if combo.currentIndex() <= 0 or name == _category_placeholder([]):
                 ui_feedback.set_status_label(widgets['cat_status'], "Select a category", ok=False)
                 return None
-            return (combo.currentText() or '').strip()
+            return name
 
         if widgets['cat_add_radio'].isChecked():
-            name = widgets['cat_add_le'].text() or ''
+            name = _normalize_category_line_edit(widgets['cat_add_le'])
             try:
                 if not _validate_category_text(name, focus_widget=widgets['cat_add_le']):
                     return
@@ -1702,18 +1722,27 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 # Soft validation failure: keep dialog open so user can fix input.
                 ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False)
             except Exception as e:
-                # Hard failure: log and notify after dialog closes.
+                try:
+                    ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False, duration=3000)
+                except Exception:
+                    pass
                 from modules.ui_utils.error_logger import log_error
-                log_error(f"Category ADD failed: {e}")
-                log_and_set_post_close(
-                    dlg,
-                    "Category ADD failed",
-                    str(e),
-                    user_message=f"Error: {e}",
-                    level='error',
-                    duration=5000,
-                )
-                dlg.reject()
+                try:
+                    log_error(f"Category ADD failed: {e}")
+                except Exception:
+                    pass
+                try:
+                    log_and_set_post_close(
+                        dlg,
+                        "Category ADD failed",
+                        str(e),
+                        user_message=f"Error: {e}",
+                        level='error',
+                        duration=5000,
+                    )
+                except Exception:
+                    pass
+                QTimer.singleShot(3000, dlg.reject)
             return
 
         if widgets['cat_remove_radio'].isChecked():
@@ -1724,22 +1753,32 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 products_updated = category_service.delete_category(target)
                 _finalize_category(
                     f"Category '{target}' removed",
-                    show_label=False,
+                    show_label=True,
                 )
             except ValueError as e:
                 ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False)
             except Exception as e:
+                try:
+                    ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False, duration=3000)
+                except Exception:
+                    pass
                 from modules.ui_utils.error_logger import log_error
-                log_error(f"Category REMOVE failed: {e}")
-                log_and_set_post_close(
-                    dlg,
-                    "Category REMOVE failed",
-                    str(e),
-                    user_message=f"Error: {e}",
-                    level='error',
-                    duration=5000,
-                )
-                dlg.reject()
+                try:
+                    log_error(f"Category REMOVE failed: {e}")
+                except Exception:
+                    pass
+                try:
+                    log_and_set_post_close(
+                        dlg,
+                        "Category REMOVE failed",
+                        str(e),
+                        user_message=f"Error: {e}",
+                        level='error',
+                        duration=5000,
+                    )
+                except Exception:
+                    pass
+                QTimer.singleShot(3000, dlg.reject)
             return
 
         if widgets['cat_replace_radio'].isChecked():
@@ -1753,22 +1792,32 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 products_updated = category_service.update_category(target, replacement)
                 _finalize_category(
                     f"Category '{target}' replaced with '{replacement}'",
-                    show_label=False,
+                    show_label=True,
                 )
             except ValueError as e:
                 ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False)
             except Exception as e:
+                try:
+                    ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False, duration=3000)
+                except Exception:
+                    pass
                 from modules.ui_utils.error_logger import log_error
-                log_error(f"Category REPLACE failed: {e}")
-                log_and_set_post_close(
-                    dlg,
-                    "Category REPLACE failed",
-                    str(e),
-                    user_message=f"Error: {e}",
-                    level='error',
-                    duration=5000,
-                )
-                dlg.reject()
+                try:
+                    log_error(f"Category REPLACE failed: {e}")
+                except Exception:
+                    pass
+                try:
+                    log_and_set_post_close(
+                        dlg,
+                        "Category REPLACE failed",
+                        str(e),
+                        user_message=f"Error: {e}",
+                        level='error',
+                        duration=5000,
+                    )
+                except Exception:
+                    pass
+                QTimer.singleShot(3000, dlg.reject)
             return
 
     widgets['cat_ok'].clicked.connect(do_category_ok)

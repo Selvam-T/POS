@@ -74,9 +74,9 @@ def launch_refund_dialog(parent=None):
     # Remember and hide note placeholder while inputs are locked (opt-in)
     try:
         # Opt-in: let FocusGate manage placeholder visibility for `note`.
-        gate = FocusGate([qty, note, ok_btn], lock_enabled=True)
+        gate = FocusGate([price, qty, note, ok_btn], lock_enabled=True)
     except Exception:
-        gate = FocusGate([qty, note, ok_btn], lock_enabled=True)
+        gate = FocusGate([price, qty, note, ok_btn], lock_enabled=True)
 
     try:
         gate.remember_placeholders([note])
@@ -94,11 +94,6 @@ def launch_refund_dialog(parent=None):
         except Exception:
             pass
         gate.set_locked(True)
-        try:
-            price.setReadOnly(True)
-            price.setFocusPolicy(Qt.NoFocus)
-        except Exception:
-            pass
         if clear_values:
             price.clear()
             qty.clear()
@@ -114,8 +109,6 @@ def launch_refund_dialog(parent=None):
         price_val = float(result.get('price') or 0.0)
         price.setText(f"{price_val:.2f}")
         try:
-            price.setReadOnly(False)
-            price.setFocusPolicy(Qt.StrongFocus)
             price.setStyleSheet("background-color: white;")
         except Exception:
             pass

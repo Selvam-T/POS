@@ -54,6 +54,8 @@ def load_product_cache() -> Dict[str, Tuple[str, float, str, str]]:
 
 def refresh_product_cache() -> Dict[str, Tuple[str, float, str, str]]:
     """Alias for load_product_cache()."""
+    # test error handling
+    raise RuntimeError('Simulated PRODUCT_CACHE reload failure (debug)')
     return load_product_cache()
 
 

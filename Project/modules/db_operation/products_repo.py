@@ -136,6 +136,8 @@ def replace_category(
     own = conn is None
     c = conn or get_conn()
     try:
+        # test error handling
+        #raise RuntimeError("Simulated replace_category failure")
         if own:
             with transaction(c):
                 cur = c.execute(sql, (new_category, now_iso(), old_category))
