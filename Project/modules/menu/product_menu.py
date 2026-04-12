@@ -35,6 +35,7 @@ from modules.date_time import format_datetime
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_PATH = os.path.join(BASE_DIR, 'ui', 'product_menu.ui')
 QSS_PATH = os.path.join(BASE_DIR, 'assets', 'dialog.qss')
+PRODUCT_MENU_GEOMETRY_DEBUG = os.getenv('PRODUCT_MENU_GEOMETRY_DEBUG', '0').strip() == '1'
 
 def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     from modules.table.table_operations import is_transaction_active
@@ -107,6 +108,29 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
 
 
     _dialog_anchor = {'pos': None}
+    _tab_debug_state = {'prev_idx': None, 'from_idx': None, 'to_idx': None}
+
+    def _debug_log_geometry(msg: str) -> None:
+        if not PRODUCT_MENU_GEOMETRY_DEBUG:
+            return
+        try:
+            from modules.ui_utils.error_logger import log_error_message
+            log_error_message(f"DEBUG ProductMenu geometry: {msg}")
+        except Exception:
+            pass
+
+    def _tab_name(idx: int | None) -> str:
+        try:
+            tabs = widgets.get('tabs')
+            if tabs is None or idx is None or idx < 0:
+                return 'None'
+            tab = tabs.widget(idx)
+            if tab is None:
+                return str(idx)
+            name = (tab.objectName() or '').strip()
+            return name or str(idx)
+        except Exception:
+            return str(idx)
 
     def _capture_dialog_anchor() -> None:
         if _dialog_anchor['pos'] is not None:
@@ -151,6 +175,11 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 index = None
         if index is None or index < 0:
             return
+
+        from_idx = _tab_debug_state.get('from_idx')
+        to_idx = _tab_debug_state.get('to_idx')
+        if to_idx is None:
+            to_idx = index
         try:
             tab = tabs.widget(index)
         except Exception:
@@ -185,6 +214,8 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         try:
             desired = max(int(tab_height + base_extra), 300)
             max_h = None
+            avail_h = None
+            avail_w = None
             try:
                 screen = None
                 if dlg.windowHandle() is not None:
@@ -194,6 +225,8 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 if screen is not None:
                     geom = screen.availableGeometry()
                     max_h = int(geom.height())
+                    avail_h = int(geom.height())
+                    avail_w = int(geom.width())
             except Exception:
                 max_h = None
 
@@ -204,11 +237,20 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             dlg.setMaximumHeight(desired)
             try:
                 actual_h = int(dlg.height())
+                _debug_log_geometry(
+                    f"switch={from_idx}->{to_idx} ({_tab_name(from_idx)}->{_tab_name(to_idx)}), "
+                    f"desired_h={int(desired)}, actual_h={actual_h}, tab_h={int(tab_height)}, "
+                    f"base_extra={int(base_extra)}, avail_w={avail_w}, avail_h={avail_h}, "
+                    f"dlg_min={int(dlg.minimumHeight())}, dlg_max={int(dlg.maximumHeight())}"
+                )
                 if abs(actual_h - int(desired)) > 2:
                     from modules.ui_utils.error_logger import log_error_message
                     log_error_message(
                         "WARNING: ProductMenu resize mismatch: "
-                        f"desired_h={int(desired)} actual_h={actual_h}"
+                        f"switch={from_idx}->{to_idx} ({_tab_name(from_idx)}->{_tab_name(to_idx)}), "
+                        f"desired_h={int(desired)} actual_h={actual_h}, tab_h={int(tab_height)}, "
+                        f"base_extra={int(base_extra)}, avail_w={avail_w}, avail_h={avail_h}, "
+                        f"dlg_min={int(dlg.minimumHeight())} dlg_max={int(dlg.maximumHeight())}"
                     )
             except Exception:
                 pass
@@ -1312,6 +1354,14 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             pass
 
     def _on_tab_changed(idx: int) -> None:
+        try:
+            prev_idx = _tab_debug_state.get('prev_idx')
+            _tab_debug_state['from_idx'] = prev_idx
+            _tab_debug_state['to_idx'] = idx
+            _tab_debug_state['prev_idx'] = idx
+            _debug_log_geometry(f"tab_changed: {prev_idx}->{idx} ({_tab_name(prev_idx)}->{_tab_name(idx)})")
+        except Exception:
+            pass
         _focus_code_for_tab(idx)
         # Refresh Category tab list when opened (only if remove/replace is active).
         if idx == 3:
@@ -1326,6 +1376,10 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 pass
 
     widgets['tabs'].currentChanged.connect(_on_tab_changed)
+    try:
+        _tab_debug_state['prev_idx'] = widgets['tabs'].currentIndex()
+    except Exception:
+        _tab_debug_state['prev_idx'] = None
 
     # --- OK/Cancel Handlers ---
     def _focus_widget(w, select_all: bool = False) -> None:

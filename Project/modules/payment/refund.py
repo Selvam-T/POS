@@ -118,7 +118,7 @@ def launch_refund_dialog(parent=None):
         amount.setText(f"{amount_val:.2f}")
 
     def _recompute_amount() -> float:
-        unit_price = float(price.text() or 0.0)
+        unit_price = input_handler.handle_selling_price(price, price_type='Unit Price')
         qty_val = input_handler.handle_quantity_input(qty, unit_type='unit')
         amount_val = round(unit_price * qty_val, 2)
         amount.setText(f"{amount_val:.2f}")
@@ -127,7 +127,7 @@ def launch_refund_dialog(parent=None):
     def _validate_price() -> float:
         try:
             _set_error_state(price, False)
-            val = input_handler.handle_selling_price(price)
+            val = input_handler.handle_selling_price(price, price_type='Unit Price')
         except ValueError:
             _set_error_state(price, True)
             raise
@@ -198,7 +198,7 @@ def launch_refund_dialog(parent=None):
 
     coord.add_link(
         source=price,
-        next_focus=note,
+        next_focus=ok_btn,
         status_label=status,
         swallow_empty=True,
         validate_fn=_validate_price,
@@ -239,11 +239,13 @@ def launch_refund_dialog(parent=None):
 
     def _handle_ok() -> None:
         try:
-            if not code.text().strip() or not name.text().strip() or not price.text().strip():
+            if not code.text().strip() or not name.text().strip():
                 raise ValueError('Select a product first')
 
+            # unit price and qty are validated in _recompute_amount
             _recompute_amount()
             note_text = input_handler.handle_note_input(note)
+            # defensive fallback check of unit price and qty values
             amount_val = float(amount.text() or 0.0)
             if amount_val <= 0:
                 raise ValueError('Refund amount must be greater than 0')
