@@ -28,7 +28,7 @@ Widgets and validation
   - Displays validation or error messages from the FieldCoordinator and controller.
 
 - Buttons
-  - `btnVendorOk`: Validates `vendorNameLineEdit` and `vendorAmountLineEdit`. If valid, records an outflow via `modules.db_operation.add_outflow(outflows_type='VENDOR_OUT', ...)`. On success shows a confirmation and closes the dialog. On validation error shows message on `vendorStatusLabel`. On DB/exception error the dialog reports via `report_exception_post_close()` (or status bar) and rejects/closes per caller policy.
+  - `btnVendorOk`: Validates `vendorNameLineEdit` and `vendorAmountLineEdit`. If valid, records an outflow via `modules.db_operation.add_outflow(outflows_type='VENDOR_OUT', ...)`. On success shows a confirmation and closes the dialog. On validation error shows message on `vendorStatusLabel`. On DB/exception error the dialog reports via `log_exception_traceback_and_postclose_statusBar()` (or status bar) and rejects/closes per caller policy.
   - `btnVendorCancel` and `customCloseBtn`: call `reject()` and show a small cancellation info message.
 
 Implementation notes
@@ -51,7 +51,7 @@ Testing and QA checklist
   6. Click `OK` — verify a row is inserted into `cash_outflows` with `outflows_type='VENDOR_OUT'` and correct values (check `outflows_id`, `amount`, `cashier_id` — an INTEGER `user_id` referencing `users(user_id)`, and `note`).
 
 - Simulating DB failure (for error-path testing)
-  - In `modules/payment/vendor.py` temporarily raise an exception before the call to `ensure_cash_outflows_table()` to exercise error handling. The dialog should call `report_exception_post_close()` (or similar) and reject/close. Remove the injected error after testing.
+  - In `modules/payment/vendor.py` temporarily raise an exception before the call to `ensure_cash_outflows_table()` to exercise error handling. The dialog should call `log_exception_traceback_and_postclose_statusBar()` (or similar) and reject/close. Remove the injected error after testing.
 
 Notes for maintainers
 - Keep validation logic in `modules/ui_utils/input_handler.py` and `modules/ui_utils/input_validation.py`. Do not reimplement validation in the controller.

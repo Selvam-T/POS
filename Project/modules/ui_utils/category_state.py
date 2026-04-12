@@ -13,7 +13,7 @@ from config import (
 )
 from modules.wrappers.settings import appdata_path
 from modules.ui_utils.input_validation import validate_category
-from modules.ui_utils.error_logger import log_error
+from modules.ui_utils.error_logger import log_error_message
 
 _CATEGORY_NAME = 'categories'
 
@@ -61,7 +61,7 @@ def _archive_corrupt(path: Path) -> None:
         backup = path.with_name(f"{path.name}.corrupt.{_timestamp()}")
         os.replace(str(path), str(backup))
     except Exception as e:
-        log_error(f"category_state: archive corrupt failed: {e}")
+        log_error_message(f"category_state: archive corrupt failed: {e}")
 
 
 def _validate_categories_data(data) -> Tuple[bool, str]:
@@ -143,7 +143,7 @@ def _write_categories(data: dict, *, backup: bool = True) -> None:
         try:
             shutil.copy2(str(path), str(backup_path))
         except Exception as e:
-            log_error(f"category_state: backup copy failed: {e}")
+            log_error_message(f"category_state: backup copy failed: {e}")
 
     with tmp.open('w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -182,7 +182,7 @@ def load_categories() -> List[str]:
             try:
                 save_categories(ordered)
             except Exception:
-                log_error("category_state: reorder save failed; using unsorted categories")
+                log_error_message("category_state: reorder save failed; using unsorted categories")
                 return categories
         return ordered
     except Exception:

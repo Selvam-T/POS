@@ -24,7 +24,7 @@ These helpers support the standardized dialog pipeline used by menu dialogs and 
 `load_ui_strict(...)` is the recommended boundary for “can this dialog open at all?”.
 
 - If the `.ui` file is missing or fails to load:
-  - details are logged via `log_error(...)`
+  - details are logged via `log_error_message(...)`
   - a short StatusBar error is **deferred** when a host window is provided (so it isn’t hidden under a modal overlay)
   - `None` is returned so the caller can hard-fail
 
@@ -50,10 +50,10 @@ UI-load failures are a special case:
 - `DialogWrapper` flushes it if the controller returns `None`.
 
 For exception scenarios during a modal dialog, use the **post-close** exception helper:
-- `report_exception_post_close(...)`
+- `log_exception_traceback_and_postclose_statusBar(...)`
 
 For handled (non-exception) failures (e.g., DB CRUD returning `(ok=False, msg)`), use:
-- `log_and_set_post_close(...)`
+- `log_error_message_and_postclose_statusBar(...)`
 
 ---
 
@@ -110,23 +110,39 @@ Standardized exception routing:
 
 This is intended for unexpected DB/UI failures where users need a quick hint but developers need full traceback.
 
-### `report_exception_post_close(dlg, where, exc, *, user_message, level='error', duration=5000)`
+### `log_exception_traceback_and_postclose_statusBar(dlg, where, exc, *, user_message, level='error', duration=5000)`
 
 Modal-safe exception routing:
 
 - logs detailed exception + traceback to `log/error.log`
 - sets a post-close StatusBar intent on the dialog (so `DialogWrapper` shows it after `exec_()` returns)
 
-### `log_exception_only(where, exc)`
+### `log_exception_details(where, exc)`
 
 Logs a detailed exception + traceback to `log/error.log` without StatusBar messaging.
 
-### `log_and_set_post_close(dlg, where, details, *, user_message, level='error', duration=5000)`
+Difference from `log_error_message(...)`:
+- `log_error_message(msg)` writes exactly the provided message with timestamp.
+- `log_exception_details(where, exc)` builds a richer message (`where` + exception repr + traceback when available) and then calls `log_error_message(...)`.
+
+### `log_error_message_and_postclose_statusBar(dlg, where, details, *, user_message, level='error', duration=5000)`
 
 For non-exception failures (typically DB functions returning `(ok=False, msg)`):
 
 - logs to `log/error.log`
 - sets post-close StatusBar intent on the dialog (severity precedence honored)
+
+### Helper intent differences (quick reference)
+
+- `log_exception_traceback_and_postclose_statusBar(...)`:
+  - Input type: caught exception object (`exc`)
+  - Log detail: includes traceback (`log_exception_details(...)`)
+  - Use when: unexpected exceptions in modal runtime flow
+
+- `log_error_message_and_postclose_statusBar(...)`:
+  - Input type: handled failure details string (`details`)
+  - Log detail: message-only (no traceback by default)
+  - Use when: non-exception operational failures (e.g., DB returns `(ok=False, msg)`)
 
 ---
 

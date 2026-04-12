@@ -4,7 +4,7 @@ import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QPushButton
-from modules.ui_utils.error_logger import log_error
+from modules.ui_utils.error_logger import log_error_message
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
@@ -51,7 +51,7 @@ def launch_reports_dialog(host_window):
                 dlg.setStyleSheet(f.read())
         except Exception as e:
             try:
-                log_error(f"Failed to load dialog.qss: {e}")
+                log_error_message(f"Failed to load dialog.qss: {e}")
             except Exception:
                 pass
 

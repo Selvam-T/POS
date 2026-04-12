@@ -243,8 +243,8 @@ class DialogWrapper:
             self._clear_scanner_override()
             try:
                 import traceback
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"Dialog failed: {e}\n{traceback.format_exc()}")
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(f"Dialog failed: {e}\n{traceback.format_exc()}")
             except Exception:
                 pass
 

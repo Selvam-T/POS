@@ -8,8 +8,8 @@ from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui,
     require_widgets,
     set_dialog_main_status_max,
-    report_exception_post_close,
-    log_and_set_post_close,
+    log_exception_traceback_and_postclose_statusBar,
+    log_error_message_and_postclose_statusBar,
 )
 from modules.ui_utils.dialog_utils import clear_display
 from modules.ui_utils.canonicalization import canonicalize_product_code, canonicalize_title_text
@@ -205,8 +205,8 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             try:
                 actual_h = int(dlg.height())
                 if abs(actual_h - int(desired)) > 2:
-                    from modules.ui_utils.error_logger import log_error
-                    log_error(
+                    from modules.ui_utils.error_logger import log_error_message
+                    log_error_message(
                         "WARNING: ProductMenu resize mismatch: "
                         f"desired_h={int(desired)} actual_h={actual_h}"
                     )
@@ -630,7 +630,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         if not (dbop.PRODUCT_CACHE or {}):
             dbop.load_product_cache()
     except Exception as e:
-        report_exception_post_close(
+        log_exception_traceback_and_postclose_statusBar(
             dlg,
             'ProductMenu: load_product_cache() for completers',
             e,
@@ -648,11 +648,8 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         try:
             dbop.refresh_product_cache()
         except Exception as e:
-            # Log the technical failure
-            from modules.ui_utils.error_logger import log_error
-            log_error(f"Cache Refresh Failed after {where}: {e}")
-            # Notify user after dialog closes
-            report_exception_post_close(
+            # Notify user after dialog closes (exception helper logs traceback details)
+            log_exception_traceback_and_postclose_statusBar(
                 dlg,
                 f'Product Menu: refresh_product_cache() after {where}',
                 e,
@@ -663,7 +660,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         try:
             _refresh_name_completers()
         except Exception as e:
-            report_exception_post_close(
+            log_exception_traceback_and_postclose_statusBar(
                 dlg,
                 f'Product Menu: refresh name completers after {where}',
                 e,
@@ -727,11 +724,8 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 trigger_on_finish=False,
             )
         except Exception as e:
-            # update error logger
-            from modules.ui_utils.error_logger import log_error
-            log_error(f"UI Search Suggestion Error: {e}")
-            # display to user after dialog closes
-            report_exception_post_close(
+            # display to user after dialog closes (exception helper logs traceback details)
+            log_exception_traceback_and_postclose_statusBar(
                 dlg,
                 'ProductMenu: _refresh_name_completers()',
                 e,
@@ -1430,11 +1424,8 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             dbop.refresh_product_cache()
             _finalize('add', code, name)
         else:
-            # ERROR LOGGING
-            from modules.ui_utils.error_logger import log_error
-            log_error(f"DB Error (ADD Product {code}): {db_msg}")
-            # STATUSBAR feedback after dialog closes
-            log_and_set_post_close(
+            # STATUSBAR feedback after dialog closes (handled-failure helper logs message details)
+            log_error_message_and_postclose_statusBar(
                 dlg,
                 f"Product Menu ADD failed (code={code})",
                 str(db_msg),
@@ -1453,11 +1444,8 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             _post_db_success_refresh('REMOVE')
             _finalize('rem', code, name)
         else:
-            # ERROR LOGGING
-            from modules.ui_utils.error_logger import log_error
-            log_error(f"DB Error (REMOVE Product {code}): {msg}")
-            # STATUSBAR feedback after dialog closes
-            log_and_set_post_close(
+            # STATUSBAR feedback after dialog closes (handled-failure helper logs message details)
+            log_error_message_and_postclose_statusBar(
                 dlg,
                 f"Product Menu REMOVE failed (code={code})",
                 str(msg),
@@ -1518,11 +1506,8 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             dbop.refresh_product_cache()
             _finalize('upd', code, name)
         else:
-            # ERROR LOGGING
-            from modules.ui_utils.error_logger import log_error
-            log_error(f"DB Error (UPDATE Product {code}): {db_msg}")
-            # STATUSBAR feedback after dialog closes
-            log_and_set_post_close(
+            # STATUSBAR feedback after dialog closes (handled-failure helper logs message details)
+            log_error_message_and_postclose_statusBar(
                 dlg,
                 f"Product Menu UPDATE failed (code={code})",
                 str(db_msg),
@@ -1711,30 +1696,23 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 return None
             return name
 
-        if widgets['cat_add_radio'].isChecked():
-            name = _normalize_category_line_edit(widgets['cat_add_le'])
+        def _run_category_op(op_fn, success_msg: str, error_tag: str) -> None:
+            """Run a category op with shared success and error handling."""
             try:
-                if not _validate_category_text(name, focus_widget=widgets['cat_add_le']):
-                    return
-                category_service.add_category(name)
-                _finalize_category(f"Category '{name.strip()}' added")
+                op_fn()
+                _finalize_category(success_msg)
             except ValueError as e:
-                # Soft validation failure: keep dialog open so user can fix input.
-                ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False)
+                ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False, duration=3000)
             except Exception as e:
                 try:
                     ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False, duration=3000)
                 except Exception:
                     pass
-                from modules.ui_utils.error_logger import log_error
                 try:
-                    log_error(f"Category ADD failed: {e}")
-                except Exception:
-                    pass
-                try:
-                    log_and_set_post_close(
+                    # Already logs details; avoid duplicate log.
+                    log_error_message_and_postclose_statusBar(
                         dlg,
-                        "Category ADD failed",
+                        f"{error_tag}",
                         str(e),
                         user_message=f"Error: {e}",
                         level='error',
@@ -1742,43 +1720,20 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                     )
                 except Exception:
                     pass
-                QTimer.singleShot(3000, dlg.reject)
+                QTimer.singleShot(500, dlg.reject)
+
+        if widgets['cat_add_radio'].isChecked():
+            name = _normalize_category_line_edit(widgets['cat_add_le'])
+            if not _validate_category_text(name, focus_widget=widgets['cat_add_le']):
+                return
+            _run_category_op(lambda: category_service.add_category(name), f"Category '{name.strip()}' added", "Category ADD failed")
             return
 
         if widgets['cat_remove_radio'].isChecked():
             target = _selected_category()
             if not target:
                 return
-            try:
-                products_updated = category_service.delete_category(target)
-                _finalize_category(
-                    f"Category '{target}' removed",
-                    show_label=True,
-                )
-            except ValueError as e:
-                ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False)
-            except Exception as e:
-                try:
-                    ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False, duration=3000)
-                except Exception:
-                    pass
-                from modules.ui_utils.error_logger import log_error
-                try:
-                    log_error(f"Category REMOVE failed: {e}")
-                except Exception:
-                    pass
-                try:
-                    log_and_set_post_close(
-                        dlg,
-                        "Category REMOVE failed",
-                        str(e),
-                        user_message=f"Error: {e}",
-                        level='error',
-                        duration=5000,
-                    )
-                except Exception:
-                    pass
-                QTimer.singleShot(3000, dlg.reject)
+            _run_category_op(lambda: category_service.delete_category(target), f"Category '{target}' removed", "Category REMOVE failed")
             return
 
         if widgets['cat_replace_radio'].isChecked():
@@ -1786,38 +1741,9 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             if not target:
                 return
             replacement = widgets['cat_update_le'].text() or ''
-            try:
-                if not _validate_category_text(replacement, focus_widget=widgets['cat_update_le']):
-                    return
-                products_updated = category_service.update_category(target, replacement)
-                _finalize_category(
-                    f"Category '{target}' replaced with '{replacement}'",
-                    show_label=True,
-                )
-            except ValueError as e:
-                ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False)
-            except Exception as e:
-                try:
-                    ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False, duration=3000)
-                except Exception:
-                    pass
-                from modules.ui_utils.error_logger import log_error
-                try:
-                    log_error(f"Category REPLACE failed: {e}")
-                except Exception:
-                    pass
-                try:
-                    log_and_set_post_close(
-                        dlg,
-                        "Category REPLACE failed",
-                        str(e),
-                        user_message=f"Error: {e}",
-                        level='error',
-                        duration=5000,
-                    )
-                except Exception:
-                    pass
-                QTimer.singleShot(3000, dlg.reject)
+            if not _validate_category_text(replacement, focus_widget=widgets['cat_update_le']):
+                return
+            _run_category_op(lambda: category_service.update_category(target, replacement), f"Category '{target}' replaced with '{replacement}'", "Category REPLACE failed")
             return
 
     widgets['cat_ok'].clicked.connect(do_category_ok)

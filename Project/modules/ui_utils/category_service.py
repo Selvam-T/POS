@@ -2,7 +2,7 @@ from config import PROTECTED_CATEGORIES
 from modules.db_operation import products_repo, refresh_product_cache
 from modules.db_operation.db import get_conn, transaction
 from modules.ui_utils import category_state
-from modules.ui_utils.error_logger import log_error
+from modules.ui_utils.error_logger import log_error_message
 
 
 def _other_category_name() -> str:
@@ -20,7 +20,7 @@ def _ensure_category_present(name: str) -> None:
     try:
         category_state.save_categories(categories)
     except Exception as e:
-        log_error(f"category_service: ensure replacement category failed: {e}")
+        log_error_message(f"category_service: ensure replacement category failed: {e}")
         raise
 
 
@@ -32,7 +32,7 @@ def replace_category_in_db(old_name: str, new_name: str) -> int:
             products_updated = products_repo.replace_category(old_name, new_name, conn=conn)
             return products_updated
     except Exception as e:
-        log_error(f"category_service: DB replace failed ({old_name} -> {new_name}): {e}")
+        log_error_message(f"category_service: DB replace failed ({old_name} -> {new_name}): {e}")
         raise
     finally:
         conn.close()

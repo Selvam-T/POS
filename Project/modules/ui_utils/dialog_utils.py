@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 
-from modules.ui_utils.error_logger import log_error
+from modules.ui_utils.error_logger import log_error_message
 from modules.ui_utils import ui_feedback
 
 
@@ -76,7 +76,7 @@ def load_ui_strict(ui_path: str, *, host_window=None, dialog_name: str = "Dialog
     if not ui_path or not os.path.exists(ui_path):
         msg = f"{dialog_name}: UI not found ({ui_path})"
         try:
-            log_error(msg)
+            log_error_message(msg)
         except Exception:
             pass
         # Defer user notification to the wrapper when possible so it isn't
@@ -95,7 +95,7 @@ def load_ui_strict(ui_path: str, *, host_window=None, dialog_name: str = "Dialog
     except Exception as e:
         msg = f"{dialog_name}: failed to load UI ({ui_path}): {e}"
         try:
-            log_error(msg)
+            log_error_message(msg)
         except Exception:
             pass
         if host_window is not None:
@@ -127,7 +127,7 @@ def report_exception(host_window, where: str, exc: Exception, *, user_message: O
         msg = f"{where_txt}: {exc!r}"
         if tb and 'Traceback' in tb:
             msg = msg + "\n" + tb
-        log_error(msg)
+        log_error_message(msg)
     except Exception:
         pass
 
@@ -200,7 +200,7 @@ def set_dialog_main_status_max(
     set_dialog_main_status(dlg, message, is_error=bool(is_error), duration=duration)
 
 
-def log_exception_only(where: str, exc: Exception) -> None:
+def log_exception_details(where: str, exc: Exception) -> None:
     """Log exception details to error.log without touching the StatusBar."""
     where_txt = (where or 'Error').strip()
     try:
@@ -212,12 +212,12 @@ def log_exception_only(where: str, exc: Exception) -> None:
         msg = f"{where_txt}: {exc!r}"
         if tb and 'Traceback' in tb:
             msg = msg + "\n" + tb
-        log_error(msg)
+        log_error_message(msg)
     except Exception:
         pass
 
 
-def report_exception_post_close(
+def log_exception_traceback_and_postclose_statusBar(
     dlg,
     where: str,
     exc: Exception,
@@ -231,14 +231,14 @@ def report_exception_post_close(
     Use this for failures that happen during modal dialogs where we don't want
     to show StatusBar messages while the modal is still open.
     """
-    log_exception_only(where, exc)
+    log_exception_details(where, exc)
     try:
         set_dialog_main_status_max(dlg, (user_message or f"Error: {where}").strip(), level=level, duration=duration)
     except Exception:
         pass
 
 
-def log_and_set_post_close(
+def log_error_message_and_postclose_statusBar(
     dlg,
     where: str,
     details: str,
@@ -249,7 +249,7 @@ def log_and_set_post_close(
 ) -> None:
     """Log a handled (non-exception) failure and set post-close StatusBar intent."""
     try:
-        log_error(f"{(where or 'Error').strip()}: {details}")
+        log_error_message(f"{(where or 'Error').strip()}: {details}")
     except Exception:
         pass
     try:
@@ -315,7 +315,7 @@ def build_dialog_from_ui(
                 dlg.setStyleSheet(f.read())
         except Exception as e:
             try:
-                log_error(f"{dialog_name}: failed to load qss ({qss_path}): {e}")
+                log_error_message(f"{dialog_name}: failed to load qss ({qss_path}): {e}")
             except Exception:
                 pass
 

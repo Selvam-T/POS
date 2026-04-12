@@ -178,8 +178,8 @@ def launch_vegetable_menu_dialog(host_window):
             return True, "Vegetable list updated."
         except Exception as e:
             msg = f"DB Rewrite Failed: {e}"
-            from modules.ui_utils.error_logger import log_error
-            log_error(msg); set_dialog_error(dlg, msg)
+            from modules.ui_utils.error_logger import log_error_message
+            log_error_message(msg); set_dialog_error(dlg, msg)
             return False, msg
 
     # --- SECTION 4: ACTIONS ---

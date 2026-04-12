@@ -78,7 +78,7 @@ Failure is shown through `dialog_utils.report_to_statusbar(...)` in `main.py`:
 - "Cash drawer error." (unexpected exception)
 
 ### Error log entries
-`modules/ui_utils/error_logger.log_error(...)` appends to `log/error.log`.
+`modules/ui_utils/error_logger.log_error_message(...)` appends to `log/error.log`.
 
 Typical messages include:
 - Main-level:

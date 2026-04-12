@@ -82,8 +82,8 @@ def add_product(
             upsert_cache_item(product_code, name, float(selling_price or 0.0), unit, category)
         except Exception as e:
             try:
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"add_product: cache upsert failed for {product_code}: {e}")
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(f"add_product: cache upsert failed for {product_code}: {e}")
             except Exception:
                 pass
         return True, 'OK'
@@ -122,8 +122,8 @@ def update_product(
             upsert_cache_item(product_code, name, float(selling_price or 0.0), unit, category)
         except Exception as e:
             try:
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"update_product: cache upsert failed for {product_code}: {e}")
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(f"update_product: cache upsert failed for {product_code}: {e}")
             except Exception:
                 pass
         return True, 'OK'
@@ -144,8 +144,8 @@ def delete_product(product_code: str) -> Tuple[bool, str]:
             remove_cache_item(product_code)
         except Exception as e:
             try:
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"delete_product: cache remove failed for {product_code}: {e}")
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(f"delete_product: cache remove failed for {product_code}: {e}")
             except Exception:
                 pass
         return True, 'OK'

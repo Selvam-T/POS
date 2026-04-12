@@ -74,8 +74,8 @@ def load_qss(app):
                 app.setStyleSheet(f.read())
         except Exception as e:
             try:
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"Failed to load QSS: {e}")
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(f"Failed to load QSS: {e}")
             except Exception:
                 pass
 
@@ -117,8 +117,8 @@ class MainLoader(QMainWindow):
             ensure_cash_outflows_table()
         except Exception as exc:
             try:
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"Cash outflows table ensure failed: {exc}")
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(f"Cash outflows table ensure failed: {exc}")
             except Exception:
                 pass
         # Remove the window close button (X) to force using Logout
@@ -265,8 +265,8 @@ class MainLoader(QMainWindow):
                         pass
         except Exception as e:
             try:
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"Failed to wire menu buttons: {e}")
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(f"Failed to wire menu buttons: {e}")
             except Exception:
                 pass
 
@@ -569,8 +569,8 @@ class MainLoader(QMainWindow):
             has_rows = False
         if has_rows:
             try:
-                from modules.ui_utils.error_logger import log_error
-                log_error(
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(
                     "WARNING: _reset_receipt_context() called while sales_table has rows; "
                     "expected clear cart/payment reset first."
                 )
@@ -817,8 +817,8 @@ class MainLoader(QMainWindow):
                     duration=4000,
                 )
                 try:
-                    from modules.ui_utils.error_logger import log_error
-                    log_error("Cash drawer open failed (helper returned False).")
+                    from modules.ui_utils.error_logger import log_error_message
+                    log_error_message("Cash drawer open failed (helper returned False).")
                 except Exception:
                     pass
         except Exception as e:
@@ -829,8 +829,8 @@ class MainLoader(QMainWindow):
                 duration=4000,
             )
             try:
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"Cash drawer helper call failed: {e}")
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(f"Cash drawer helper call failed: {e}")
             except Exception:
                 pass
 
@@ -1029,8 +1029,8 @@ class MainLoader(QMainWindow):
         except Exception:
             try:
                 import traceback
-                from modules.ui_utils.error_logger import log_error
-                log_error(traceback.format_exc())
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(traceback.format_exc())
             except Exception:
                 pass
 
@@ -1045,8 +1045,8 @@ class MainLoader(QMainWindow):
             recompute_total(self.sales_table)
         except Exception as e:
             try:
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"Failed to clear sales table core: {e}")
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(f"Failed to clear sales table core: {e}")
             except Exception:
                 pass
 
@@ -1069,8 +1069,8 @@ class MainLoader(QMainWindow):
         except Exception as e:
             try:
                 import traceback
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"Failed to clear sales table: {e}\n{traceback.format_exc()}")
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(f"Failed to clear sales table: {e}\n{traceback.format_exc()}")
             except Exception:
                 pass
 
@@ -1081,8 +1081,8 @@ class MainLoader(QMainWindow):
             self._clear_sales_table_core()
         except Exception as e:
             try:
-                from modules.ui_utils.error_logger import log_error
-                log_error(f"Failed to force-clear sales table: {e}")
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(f"Failed to force-clear sales table: {e}")
             except Exception:
                 pass
 
@@ -1091,12 +1091,12 @@ class MainLoader(QMainWindow):
 def main():
     def _install_qt_message_handler() -> None:
         try:
-            from modules.ui_utils.error_logger import log_error
+            from modules.ui_utils.error_logger import log_error_message
         except Exception:
-            log_error = None
+            log_error_message = None
 
         def _handler(msg_type, context, message):
-            if log_error is None:
+            if log_error_message is None:
                 return
             try:
                 mt = int(msg_type)
@@ -1106,7 +1106,7 @@ def main():
             # Qt message types: Debug=0, Warning=1, Critical=2, Fatal=3, Info=4
             if mt in (1, 2, 3):
                 try:
-                    log_error(f"Qt: {message}")
+                    log_error_message(f"Qt: {message}")
                 except Exception:
                     pass
 
@@ -1130,8 +1130,8 @@ def main():
     except Exception as e:
         cache_load_failed = True
         try:
-            from modules.ui_utils.error_logger import log_error
-            log_error(f"Failed to load PRODUCT_CACHE: {e}")
+            from modules.ui_utils.error_logger import log_error_message
+            log_error_message(f"Failed to load PRODUCT_CACHE: {e}")
         except Exception:
             pass
 

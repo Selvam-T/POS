@@ -7,8 +7,8 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt, QObject, QEvent
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QWidget, QPushButton, QLineEdit, QToolButton, QLabel, QTabWidget, QListWidget
-from modules.ui_utils.error_logger import log_error
-from modules.ui_utils.dialog_utils import build_dialog_from_ui, require_widgets, set_dialog_error, set_dialog_info, report_exception_post_close, build_error_fallback_dialog
+from modules.ui_utils.error_logger import log_error_message
+from modules.ui_utils.dialog_utils import build_dialog_from_ui, require_widgets, set_dialog_error, set_dialog_info, log_exception_traceback_and_postclose_statusBar, build_error_fallback_dialog
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, set_initial_focus
 from modules.ui_utils import input_handler
 from modules.db_operation.db import get_conn
@@ -83,7 +83,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
         }, hard_fail=True)
     except Exception as e:
         try:
-            log_error(f"admin_menu: require_widgets failed: {e}")
+            log_error_message(f"admin_menu: require_widgets failed: {e}")
         except Exception:
             pass
         return dlg
@@ -306,7 +306,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
                 except Exception:
                     pass
             except Exception as exc:
-                report_exception_post_close(dlg, 'update_password', exc, user_message='Failed to update password', level='error')
+                log_exception_traceback_and_postclose_statusBar(dlg, 'update_password', exc, user_message='Failed to update password', level='error')
                 dlg.reject()
                 return
 
@@ -414,7 +414,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
 
             _set_export_status(f'Product Categories CSV exported to {out_dir}', ok=True)
         except Exception as e:
-            log_error(f'admin_menu export Product Categories CSV failed: {e}')
+            log_error_message(f'admin_menu export Product Categories CSV failed: {e}')
             _set_export_status('Product Categories CSV export failed.', ok=False)
 
     def _fetch_product_rows_and_headers():
@@ -441,7 +441,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
 
             _set_export_status(f'Product List CSV file exported to {out_dir}', ok=True)
         except Exception as e:
-            log_error(f'admin_menu export Product List CSV failed: {e}')
+            log_error_message(f'admin_menu export Product List CSV failed: {e}')
             _set_export_status('Product List CSV export failed.', ok=False)
 
     def _export_xlsx() -> None:
@@ -469,7 +469,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
 
             _set_export_status(f'Product List XLSX file exported to {out_dir}', ok=True)
         except Exception as e:
-            log_error(f'admin_menu export Product List XLSX failed: {e}')
+            log_error_message(f'admin_menu export Product List XLSX failed: {e}')
             _set_export_status('Product List XLSX export failed.', ok=False)
 
     def _sql_literal(v):
@@ -506,7 +506,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
 
             _set_export_status(f'Product List SQL file exported to {out_dir}', ok=True)
         except Exception as e:
-            log_error(f'admin_menu export Product List SQL failed: {e}')
+            log_error_message(f'admin_menu export Product List SQL failed: {e}')
             _set_export_status('Product List SQL export failed.', ok=False)
 
     try:

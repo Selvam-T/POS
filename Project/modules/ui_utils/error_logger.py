@@ -4,7 +4,7 @@ from datetime import datetime
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 LOG_PATH = os.path.join(BASE_DIR, 'log', 'error.log')
 
-def log_error(msg):
+def log_error_message(msg):
     """Append error message with timestamp to error.log."""
     try:
         with open(LOG_PATH, 'a', encoding='utf-8') as f:

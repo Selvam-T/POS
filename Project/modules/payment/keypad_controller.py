@@ -155,9 +155,9 @@ class KeypadController(QObject):
                 target.setText(formatted)
         except Exception as exc:
             try:
-                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.error_logger import log_error_message
                 from modules.ui_utils.dialog_utils import report_to_statusbar
-                log_error(f"Keypad error (_on_digit): {exc}")
+                log_error_message(f"Keypad error (_on_digit): {exc}")
                 wnd = getattr(self.parent, 'window', None)
                 mainw = None
                 try:
@@ -192,9 +192,9 @@ class KeypadController(QObject):
             target.setText(new_text)
         except Exception as exc:
             try:
-                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.error_logger import log_error_message
                 from modules.ui_utils.dialog_utils import report_to_statusbar
-                log_error(f"Keypad error (_on_dot): {exc}")
+                log_error_message(f"Keypad error (_on_dot): {exc}")
                 try:
                     mw = self.parent.window()
                     report_to_statusbar(mw, "Keypad input error", is_error=True, duration=2000)
@@ -214,9 +214,9 @@ class KeypadController(QObject):
             target.setText(f"{amount:.2f}")
         except Exception as exc:
             try:
-                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.error_logger import log_error_message
                 from modules.ui_utils.dialog_utils import report_to_statusbar
-                log_error(f"Keypad error (_on_fast_set): {exc}")
+                log_error_message(f"Keypad error (_on_fast_set): {exc}")
                 try:
                     mw = self.parent.window()
                     report_to_statusbar(mw, "Keypad input error", is_error=True, duration=2000)
@@ -235,9 +235,9 @@ class KeypadController(QObject):
                 target.setText(cur[:-1])
         except Exception as exc:
             try:
-                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.error_logger import log_error_message
                 from modules.ui_utils.dialog_utils import report_to_statusbar
-                log_error(f"Keypad error (_on_backspace): {exc}")
+                log_error_message(f"Keypad error (_on_backspace): {exc}")
                 try:
                     mw = self.parent.window()
                     report_to_statusbar(mw, "Keypad input error", is_error=True, duration=2000)
@@ -254,9 +254,9 @@ class KeypadController(QObject):
             target.clear()
         except Exception as exc:
             try:
-                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.error_logger import log_error_message
                 from modules.ui_utils.dialog_utils import report_to_statusbar
-                log_error(f"Keypad error (_on_clear): {exc}")
+                log_error_message(f"Keypad error (_on_clear): {exc}")
                 try:
                     mw = self.parent.window()
                     report_to_statusbar(mw, "Keypad input error", is_error=True, duration=2000)
@@ -282,9 +282,9 @@ class KeypadController(QObject):
                     pass
         except Exception as exc:
             try:
-                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.error_logger import log_error_message
                 from modules.ui_utils.dialog_utils import report_to_statusbar
-                log_error(f"Keypad error (_on_tab): {exc}")
+                log_error_message(f"Keypad error (_on_tab): {exc}")
                 try:
                     mw = self.parent.window()
                     report_to_statusbar(mw, "Keypad navigation error", is_error=True, duration=2000)
@@ -336,9 +336,9 @@ class KeypadController(QObject):
                     return
         except Exception as exc:
             try:
-                from modules.ui_utils.error_logger import log_error
+                from modules.ui_utils.error_logger import log_error_message
                 from modules.ui_utils.dialog_utils import report_to_statusbar
-                log_error(f"Keypad error (_on_enter): {exc}")
+                log_error_message(f"Keypad error (_on_enter): {exc}")
                 try:
                     mw = self.parent.window()
                     report_to_statusbar(mw, "Keypad action error", is_error=True, duration=2000)

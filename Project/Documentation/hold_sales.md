@@ -96,7 +96,7 @@ On successful commit:
 
 ## Error Handling Policy
 
-Runtime exceptions are logged and reported via `report_exception_post_close(...)`, and a snapshot receipt (HOLD-FAILED) is printed if configured when a DB commit fails.
+Runtime exceptions are logged and reported via `log_exception_traceback_and_postclose_statusBar(...)`, and a snapshot receipt (HOLD-FAILED) is printed if configured when a DB commit fails.
 
 ## Notes for Maintainers
 
@@ -134,7 +134,7 @@ Context reset is not forcibly changed by this controller.
 
 Handled runtime exceptions inside controller:
 
-- Logged to log/error.log using report_exception_post_close(...)
+- Logged to log/error.log using log_exception_traceback_and_postclose_statusBar(...)
 - Generic post-close StatusBar error intent is set
 - Inline label can show a short failure message during dialog lifetime
 

@@ -9,7 +9,7 @@ from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui,
     require_widgets,
     set_dialog_info,
-    report_exception_post_close,
+    log_exception_traceback_and_postclose_statusBar,
 )
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 
@@ -265,7 +265,7 @@ def launch_refund_dialog(parent=None):
         except ValueError as exc:
             ui_feedback.set_status_label(status, str(exc), ok=False)
         except Exception as exc:
-            report_exception_post_close(
+            log_exception_traceback_and_postclose_statusBar(
                 dlg,
                 'Refund save',
                 exc,

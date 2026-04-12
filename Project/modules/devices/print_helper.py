@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Dict
 
 from config import ENABLE_PRINTER_PRINT
-from modules.ui_utils.error_logger import log_error
+from modules.ui_utils.error_logger import log_error_message
 
 
 def print_receipt_with_fallback(
@@ -43,10 +43,10 @@ def print_receipt_with_fallback(
             result["mode"] = "printer"
             return result
 
-        log_error(f"{context} print failed: printer send failed.")
+        log_error_message(f"{context} print failed: printer send failed.")
         result["error"] = "send_failed"
         return result
     except Exception as exc:
-        log_error(f"{context} print failed: {exc}")
+        log_error_message(f"{context} print failed: {exc}")
         result["error"] = "exception"
         return result

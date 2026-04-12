@@ -6,14 +6,14 @@ from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel
 from modules.db_operation.held_sale_committer import HeldSaleCommitter
 from modules.payment import receipt_generator
 from modules.db_operation.users_repo import get_username_by_id
-from modules.ui_utils.error_logger import log_error
+from modules.ui_utils.error_logger import log_error_message
 from modules.devices import print_helper
 from modules.ui_utils import input_handler, ui_feedback
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui,
     require_widgets,
     set_dialog_main_status_max,
-    report_exception_post_close,
+    log_exception_traceback_and_postclose_statusBar,
 )
 from modules.ui_utils.focus_utils import FieldCoordinator
 
@@ -138,7 +138,7 @@ def launch_hold_sales_dialog(parent=None):
                 )
             except Exception as print_exc:
                 # Snapshot generation failed
-                log_error(f"Hold failed: receipt print error: {print_exc}")
+                log_error_message(f"Hold failed: receipt print error: {print_exc}")
                 set_dialog_main_status_max(
                     dlg,
                     "Hold failed. Receipt print error.",
@@ -184,7 +184,7 @@ def launch_hold_sales_dialog(parent=None):
                     if panel is not None:
                         panel.clear_payment_frame()
 
-            report_exception_post_close(
+            log_exception_traceback_and_postclose_statusBar(
                 dlg,
                 "Hold sale",
                 exc,

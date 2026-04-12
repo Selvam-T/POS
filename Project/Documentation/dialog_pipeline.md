@@ -28,8 +28,8 @@ Controller responsibilities:
 - Set dialog-local feedback (status labels) during runtime.
 - Set **post-close StatusBar intent** on the dialog when appropriate.
 - For handled operational failures (soft-fail) that should be supportable/debuggable, write to `log/error.log` *from the controller* using shared helpers while also setting post-close StatusBar intent:
-	- DB CRUD returns `(ok=False, msg)` → `log_and_set_post_close(...)` (+ dialog status label)
-	- caught exceptions during refresh/lookup → `report_exception_post_close(...)`
+	- DB CRUD returns `(ok=False, msg)` → `log_error_message_and_postclose_statusBar(...)` (+ dialog status label)
+	- caught exceptions during refresh/lookup → `log_exception_traceback_and_postclose_statusBar(...)`
 
 Wrapper responsibilities:
 - Execute modal lifecycle (overlay/scanner block, geometry, focus restore).
@@ -142,9 +142,9 @@ Standardize the “field action” path:
 	- do **not** write `error.log`
 	- do **not** use StatusBar
 - For handled operational failures (DB returns `(ok=False, msg)`):
-	- set status label (immediate) + `log_and_set_post_close(...)` (post-close StatusBar + error.log)
+	- set status label (immediate) + `log_error_message_and_postclose_statusBar(...)` (post-close StatusBar + error.log)
 - For exceptions (unexpected operational errors caught inside controller):
-	- Prefer `report_exception_post_close(...)` (error.log + post-close StatusBar intent)
+	- Prefer `log_exception_traceback_and_postclose_statusBar(...)` (error.log + post-close StatusBar intent)
 	- `report_exception(...)` is the immediate StatusBar variant; avoid it from modal dialog runtime code unless you intentionally want an immediate message.
 
 ### 8) OK/Cancel semantics + post-close message

@@ -6,7 +6,7 @@ from PyQt5.QtGui import QFontMetrics
 from PyQt5.QtWidgets import QVBoxLayout, QSizePolicy, QPushButton, QWidget, QTableWidget, QLabel
 
 from modules.table import setup_sales_table, bind_total_label, add_total_listener, bind_qty_commit_listener
-from modules.ui_utils.error_logger import log_error
+from modules.ui_utils.error_logger import log_error_message
 
 ASSETS_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
@@ -42,7 +42,7 @@ class SalesFrame(QObject):
                 self.widget.setStyleSheet(content)
                 self._placeholder.setStyleSheet(content)
             except Exception as e:
-                log_error(f"Failed to load sales.qss: {e}")
+                log_error_message(f"Failed to load sales.qss: {e}")
 
     def _attach_to_placeholder(self) -> None:
         layout = self._placeholder.layout()
@@ -153,5 +153,5 @@ def setup_sales_frame(main_window, UI_DIR):
     try:
         return SalesFrame(main_window, sales_placeholder, sales_ui)
     except Exception as e:
-        log_error(f"Failed to initialize sales frame: {e}")
+        log_error_message(f"Failed to initialize sales frame: {e}")
         return None

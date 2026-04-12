@@ -1,7 +1,7 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QComboBox, QPushButton
 import os
-from modules.ui_utils.error_logger import log_error
+from modules.ui_utils.error_logger import log_error_message
 from modules.ui_utils import ui_feedback
 from modules.ui_utils.dialog_utils import set_dialog_main_status, build_dialog_from_ui, build_error_fallback_dialog
 
@@ -35,7 +35,7 @@ def launch_greeting_dialog(parent=None):
                 dlg.setStyleSheet(f.read())
         except Exception as e:
             try:
-                log_error(f"Failed to load dialog.qss: {e}")
+                log_error_message(f"Failed to load dialog.qss: {e}")
             except Exception:
                 pass
     

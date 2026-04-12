@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QLineEdit, QLabel, QFrame,
 from modules.ui_utils import ui_feedback
 from modules.ui_utils.focus_utils import FocusGate
 from modules.ui_utils.dialog_utils import report_to_statusbar
-from modules.ui_utils.error_logger import log_error
+from modules.ui_utils.error_logger import log_error_message
 from modules.payment import receipt_generator
 from modules.payment.keypad_controller import KeypadController
 from modules.devices import print_helper
@@ -177,7 +177,7 @@ class PaymentPanel(QObject):
                 host.open_refund_dialog()
                 return
             except Exception as exc:
-                log_error(f"Refund dialog launch failed: {exc}")
+                log_error_message(f"Refund dialog launch failed: {exc}")
         report_to_statusbar(host, "Error: Refund dialog unavailable.", is_error=True, duration=4000)
 
     def _open_vendor_dialog(self) -> None:
@@ -187,7 +187,7 @@ class PaymentPanel(QObject):
                 host.open_vendor_dialog()
                 return
             except Exception as exc:
-                log_error(f"Vendor dialog launch failed: {exc}")
+                log_error_message(f"Vendor dialog launch failed: {exc}")
         report_to_statusbar(host, "Error: Vendor dialog unavailable.", is_error=True, duration=4000)
 
     def _wire_inputs(self) -> None:
@@ -864,13 +864,13 @@ class PaymentPanel(QObject):
                     duration=3000,
                 )
             if "Receipt Status is UNKNOWN" in receipt_text:
-                log_error(f"Receipt status is UNKNOWN for receipt {receipt_no}.")
+                log_error_message(f"Receipt status is UNKNOWN for receipt {receipt_no}.")
                 
         except ValueError:
-            log_error(f"Receipt not found for receipt {receipt_no}.")
+            log_error_message(f"Receipt not found for receipt {receipt_no}.")
             report_to_statusbar(self._main_window, "Receipt not found.", is_error=True, duration=3000)
         except RuntimeError:
-            log_error(f"Receipt data not found for receipt {receipt_no}.")
+            log_error_message(f"Receipt data not found for receipt {receipt_no}.")
             report_to_statusbar(
                 self._main_window,
                 "Receipt data not found.",
@@ -878,7 +878,7 @@ class PaymentPanel(QObject):
                 duration=3000,
             )
         except Exception as exc:
-            log_error(f"Receipt print failed: {exc}")
+            log_error_message(f"Receipt print failed: {exc}")
             report_to_statusbar(
                 self._main_window,
                 "Receipt print failed.",
@@ -1103,5 +1103,5 @@ def setup_payment_panel(main_window, UI_DIR):
     try:
         return PaymentPanel(main_window, payment_placeholder, payment_ui)
     except Exception as e:
-        log_error(f"Failed to initialize payment panel: {e}")
+        log_error_message(f"Failed to initialize payment panel: {e}")
         return None

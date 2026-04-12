@@ -25,7 +25,7 @@ from modules.ui_utils.dialog_utils import (
 )
 from modules.ui_utils import ui_feedback, input_handler
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate
-from modules.ui_utils.error_logger import log_error
+from modules.ui_utils.error_logger import log_error_message
 from modules.date_time import format_date, format_time
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -838,7 +838,7 @@ def launch_viewhold_dialog(parent=None):
             _handle_void()
             return
         # Defensive logging: record unexpected state and show a user-facing hint
-        log_error("ViewHold: OK pressed but no action selected")
+        log_error_message("ViewHold: OK pressed but no action selected")
         ui_feedback.set_status_label(status_lbl, "Select an action.", ok=False)
 
     def _handle_cancel() -> None:

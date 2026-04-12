@@ -8,7 +8,7 @@ from modules.ui_utils.dialog_utils import (
     set_dialog_main_status_max,
     set_dialog_error
 )
-from modules.ui_utils.error_logger import log_error
+from modules.ui_utils.error_logger import log_error_message
 
 # Paths
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -55,7 +55,7 @@ def launch_clearcart_dialog(host_window):
             return dlg
             
         except Exception as e:
-            log_error(f"Clear Cart UI mapping failed, falling back: {e}")
+            log_error_message(f"Clear Cart UI mapping failed, falling back: {e}")
             # Fall through to programmatic fallback if widgets are missing/renamed
 
     # --- BRANCH B: PROGRAMMATIC FALLBACK (250x250) ---

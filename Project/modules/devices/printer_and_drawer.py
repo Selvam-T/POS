@@ -6,7 +6,7 @@ operations. It replaces the older `printer.py` module name for clarity.
 import threading
 
 from config import PRINTER_IP, PRINTER_PORT
-from modules.ui_utils.error_logger import log_error
+from modules.ui_utils.error_logger import log_error_message
 
 
 def _send_with_escpos(receipt_text: str, ip: str, port: int, timeout: float) -> bool:
@@ -14,7 +14,7 @@ def _send_with_escpos(receipt_text: str, ip: str, port: int, timeout: float) -> 
         from escpos.printer import Network
     except Exception as exc:
         try:
-            log_error(f"python-escpos import failed: {exc}")
+            log_error_message(f"python-escpos import failed: {exc}")
         except Exception:
             pass
         return False
@@ -29,7 +29,7 @@ def _send_with_escpos(receipt_text: str, ip: str, port: int, timeout: float) -> 
         return True
     except Exception as exc:
         try:
-            log_error(f"Printer send failed ({ip}:{port}): {exc}")
+            log_error_message(f"Printer send failed ({ip}:{port}): {exc}")
         except Exception:
             pass
         return False
@@ -59,7 +59,7 @@ def print_receipt(receipt_text: str, blocking: bool = True, timeout: float = 5.0
         return True
     except Exception as exc:
         try:
-            log_error(f"Failed to start printer thread: {exc}")
+            log_error_message(f"Failed to start printer thread: {exc}")
         except Exception:
             pass
         return False
@@ -70,7 +70,7 @@ def _open_cash_drawer_escpos(pin: int, ip: str, port: int, timeout: float) -> bo
         from escpos.printer import Network
     except Exception as exc:
         try:
-            log_error(f"python-escpos import failed (cash drawer): {exc}")
+            log_error_message(f"python-escpos import failed (cash drawer): {exc}")
         except Exception:
             pass
         return False
@@ -82,7 +82,7 @@ def _open_cash_drawer_escpos(pin: int, ip: str, port: int, timeout: float) -> bo
         return True
     except Exception as exc:
         try:
-            log_error(f"Cash drawer pulse failed ({ip}:{port}, pin={pin}): {exc}")
+            log_error_message(f"Cash drawer pulse failed ({ip}:{port}, pin={pin}): {exc}")
         except Exception:
             pass
         return False
@@ -109,7 +109,7 @@ def open_cash_drawer(pin: int = 2, blocking: bool = True, timeout: float = 2.0) 
         return True
     except Exception as exc:
         try:
-            log_error(f"Failed to start cash-drawer thread: {exc}")
+            log_error_message(f"Failed to start cash-drawer thread: {exc}")
         except Exception:
             pass
         return False

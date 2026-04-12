@@ -15,12 +15,30 @@ This doc also defines the shared terminology used across dialogs:
 
 ## Error Logging
 - All critical dialog/UI errors (such as missing `.ui` files, failed UI load, unexpected exceptions) are logged to `log/error.log`.
-- Logging is performed via `log_error(msg)` in `modules/ui_utils/error_logger.py`.
+- Logging is performed via `log_error_message(msg)` in `modules/ui_utils/error_logger.py`.
 - Each log entry includes an ISO 8601 timestamp for traceability.
 - Example log entry:
   ```
   2026-01-09T14:23:45.123456 - Failed to load clear_cart.ui, using fallback dialog.
   ```
+
+### Logging helper differences
+
+- `log_error_message(msg)`:
+  - Writes exactly the provided message with a timestamp.
+  - Does not automatically add traceback details.
+
+- `log_exception_details(where, exc)`:
+  - Builds a detailed message from `where` + exception repr + traceback (when available).
+  - Delegates final file write to `log_error_message(...)`.
+
+- `log_exception_traceback_and_postclose_statusBar(...)`:
+  - Uses `log_exception_details(...)` and queues a post-close StatusBar intent on the dialog.
+  - Best for caught exceptions during modal flows.
+
+- `log_error_message_and_postclose_statusBar(...)`:
+  - Logs handled error text (no traceback by default) and queues a post-close StatusBar intent.
+  - Best for handled non-exception failures (e.g., DB returns `(ok=False, msg)`).
 
 ## Fallback Dialogs
 Fallback behavior is dialog-specific. Some dialogs show an explicit fallback dialog; others choose to abort opening and show a StatusBar message.
@@ -63,8 +81,8 @@ Example rule:
 
 ## Implementation Details
 Core modules:
-- `modules/ui_utils/error_logger.py` — `log_error(...)`
-- `modules/ui_utils/dialog_utils.py` — `load_ui_strict(...)`, `report_exception(...)` (immediate), `report_exception_post_close(...)` (post-close), `set_dialog_main_status_max(...)`
+- `modules/ui_utils/error_logger.py` — `log_error_message(...)`
+- `modules/ui_utils/dialog_utils.py` — `load_ui_strict(...)`, `report_exception(...)` (immediate), `log_exception_traceback_and_postclose_statusBar(...)` (post-close), `set_dialog_main_status_max(...)`
 - `modules/wrappers/dialog_wrapper.py` — dialog lifecycle, overlay/scanner, focus restore, post-close StatusBar messages, and hard-fail StatusBar hint after cleanup
 - `modules/ui_utils/ui_feedback.py` — StatusBar and label feedback helpers
 
