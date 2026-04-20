@@ -214,7 +214,7 @@ QLabel#screen2PreviewLabel{
    COMMON INPUT WIDGETS
    ========================================================= */
 
-QLineEdit, QComboBox {
+QLineEdit, QComboBox, QDateEdit {
     background-color: #ffffff;
     color: #222222;
     border: 1px solid #c7cdd6;
@@ -594,39 +594,46 @@ QFrame#exportFrame QPushButton[objectName*="ExportBtn"]:focus {
 /* =============================================================
      receipt menu
     ============================================================= */
+QFrame#receiptSearchFrame,
+QFrame#receiptDateFrame,
+QFrame#receiptStatusFrame {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #f8fafa, stop:1 #f8fafaf5);
+    border: 1px solid #c2c4c4;
+    padding: 0px 10px 0px 10px;
+}
+QFrame#receiptActionFrame {
+    border: 1px solid #c2c4c4;
+}
 
 /* Search Button */
 QPushButton#searchReceiptBtn {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #1b9490, stop:1 #08a7a2);
-    border: 1px solid #257976;
+    background-color: #c2dbdb; 
+    color: #1f3736;
+    border: 1px solid #60a9a6;
 }
 
-QPushButton#searchReceiptBtn:hover {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
-                                      stop:0 #4abfbb, stop:1 #65c0bd);
+QPushButton#searchReceiptBtn:hover { 
+    background-color: #9cc8c8; 
 }
 
 QPushButton#searchReceiptBtn:pressed {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
-                                      stop:0 #2fc3be, stop:1 #44ded9);
+    background-color: #77b3b3; 
     padding-top: 10px;
 }
 
 /* Reset Button */
 QPushButton#resetReceiptBtn {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-                                      stop:0 #8c3f80, stop:1 #9a4a8e);
-    border: 1px solid #7d6c7a;
+    background-color: #d5c2db; 
+    color: #1f3736;
+    border: 1px solid #60a990;
 }
 
 QPushButton#resetReceiptBtn:hover {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-                                      stop:0 #a85f9c, stop:1 #b873ad);
+    background-color: #c09ecb;  
 }
 
 QPushButton#resetReceiptBtn:pressed {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-                                      stop:0 #9b3f8c, stop:1 #c06ab1);
+    background-color: #aa7eb9;; 
     padding-top: 10px;
 }
 

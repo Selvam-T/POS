@@ -54,8 +54,8 @@ def launch_vegetable_menu_dialog(host_window):
                     widgets['supp'], widgets['ok_btn'], widgets['del_btn']], lock_enabled=True)
 
     try:
-        gate.remember_placeholders([widgets['name'], widgets['sell'], widgets['cost'], widgets['supp']])
-        gate.hide_placeholders([widgets['name'], widgets['sell'], widgets['cost'], widgets['supp']])
+        gate.remember_placeholders([widgets['name'], widgets['sell'], widgets['cost'], widgets['supp'], widgets['markup']])
+        gate.hide_placeholders([widgets['name'], widgets['sell'], widgets['cost'], widgets['supp'], widgets['markup']])
     except Exception:
         pass
 
@@ -64,13 +64,13 @@ def launch_vegetable_menu_dialog(host_window):
         if not enabled:
             for k in ['name', 'sell', 'cost', 'supp', 'markup', 'cat']: widgets[k].clear()
             try:
-                gate.hide_placeholders([widgets['name'], widgets['sell'], widgets['cost'], widgets['supp']])
+                gate.hide_placeholders([widgets['name'], widgets['sell'], widgets['cost'], widgets['supp'], widgets['markup']])
             except Exception:
                 pass
             widgets['unit'].setCurrentIndex(-1) # Hides "--Select Unit--"
         else:
             try:
-                gate.restore_placeholders([widgets['name'], widgets['sell'], widgets['cost'], widgets['supp']])
+                gate.restore_placeholders([widgets['name'], widgets['sell'], widgets['cost'], widgets['supp'], widgets['markup']])
             except Exception:
                 pass
             widgets['cat'].setText(DEFAULT_VEG_CATEGORY)

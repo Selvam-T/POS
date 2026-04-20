@@ -24,16 +24,16 @@
     <number>0</number>
    </property>
    <property name="leftMargin">
-    <number>0</number>
+    <number>10</number>
    </property>
    <property name="topMargin">
-    <number>0</number>
+    <number>20</number>
    </property>
    <property name="rightMargin">
-    <number>0</number>
+    <number>10</number>
    </property>
    <property name="bottomMargin">
-    <number>0</number>
+    <number>10</number>
    </property>
    <item>
     <widget class="QWidget" name="customTitleBar" native="true">
@@ -114,7 +114,7 @@
       <number>20</number>
      </property>
      <item>
-      <layout class="QVBoxLayout" name="receiptLeftLayout" stretch="7,0,0,0,2">
+      <layout class="QVBoxLayout" name="receiptLeftLayout" stretch="7,0,0,2">
        <property name="spacing">
         <number>10</number>
        </property>
@@ -322,10 +322,14 @@
             <item>
              <widget class="QDateEdit" name="receiptFromDateEdit">
               <property name="displayFormat">
-               <string>yyyy-MM-dd</string>
+               <string>dd/MM/yyyy</string>
               </property>
-              <property name="calendarPopup">
-               <bool>true</bool>
+              <property name="date">
+               <date>
+                <year>2026</year>
+                <month>1</month>
+                <day>1</day>
+               </date>
               </property>
              </widget>
             </item>
@@ -374,10 +378,17 @@
             <item>
              <widget class="QDateEdit" name="receiptToDateEdit">
               <property name="displayFormat">
-               <string>yyyy-MM-dd</string>
+               <string>dd/MM/yyyy</string>
               </property>
               <property name="calendarPopup">
-               <bool>true</bool>
+               <bool>false</bool>
+              </property>
+              <property name="date">
+               <date>
+                <year>2026</year>
+                <month>1</month>
+                <day>1</day>
+               </date>
               </property>
              </widget>
             </item>
@@ -385,22 +396,6 @@
           </item>
          </layout>
         </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>30</height>
-          </size>
-         </property>
-        </spacer>
        </item>
        <item>
         <widget class="QFrame" name="receiptSearchFrame">
@@ -424,7 +419,7 @@
            <number>0</number>
           </property>
           <property name="bottomMargin">
-           <number>0</number>
+           <number>10</number>
           </property>
           <item>
            <layout class="QFormLayout" name="receiptSearchFormLayout">
@@ -583,7 +578,7 @@
       </layout>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="receiptRightLayout" stretch="7,0,2">
+      <layout class="QVBoxLayout" name="receiptRightLayout" stretch="7,2">
        <property name="spacing">
         <number>10</number>
        </property>
@@ -628,22 +623,6 @@
         </widget>
        </item>
        <item>
-        <spacer name="verticalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeType">
-          <enum>QSizePolicy::Fixed</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>30</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
         <widget class="QFrame" name="receiptActionFrame">
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -665,7 +644,7 @@
            <number>30</number>
           </property>
           <property name="bottomMargin">
-           <number>0</number>
+           <number>10</number>
           </property>
           <item>
            <widget class="QPushButton" name="printReceiptBtn">
