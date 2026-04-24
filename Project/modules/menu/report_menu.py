@@ -1,4 +1,4 @@
-# modules/menu/reports_menu.py
+# modules/menu/report_menu.py
 
 import os
 from PyQt5 import uic
@@ -12,7 +12,7 @@ ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
 
 def launch_reports_dialog(host_window):
-    """Open Reports dialog (ui/reports_menu.ui) as a modal frameless panel.
+    """Open Reports dialog (ui/report_menu.ui) as a modal frameless panel.
     
     DialogWrapper handles: overlay, sizing, centering, scanner blocking, cleanup, and focus restoration.
     This function only creates and returns the QDialog.
@@ -23,7 +23,7 @@ def launch_reports_dialog(host_window):
     Returns:
         QDialog instance ready for DialogWrapper.open_dialog_scanner_blocked() to execute
     """
-    ui_path = os.path.join(UI_DIR, 'reports_menu.ui')
+    ui_path = os.path.join(UI_DIR, 'report_menu.ui')
     if not os.path.exists(ui_path):
         return None
 

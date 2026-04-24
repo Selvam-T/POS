@@ -34,7 +34,7 @@ from modules.ui_utils.dialog_utils import report_exception, report_to_statusbar
 from modules.menu.logout_menu import launch_logout_dialog
 from modules.menu.admin_menu import launch_admin_dialog
 from modules.menu.receipt_menu import launch_receipt_dialog
-from modules.menu.reports_menu import launch_reports_dialog
+from modules.menu.report_menu import launch_reports_dialog
 from modules.menu.greeting_menu import launch_greeting_dialog
 from modules.menu.product_menu import launch_product_dialog
 from modules.menu.vegetable_menu import launch_vegetable_menu_dialog
@@ -254,7 +254,7 @@ class MainLoader(QMainWindow):
                 elif obj_name == 'adminBtn':
                     btn.clicked.connect(self.open_admin_menu_dialog)
                 elif obj_name == 'reportsBtn':
-                    btn.clicked.connect(self.open_reports_menu_dialog)
+                    btn.clicked.connect(self.open_report_menu_dialog)
                 elif obj_name == 'receiptBtn':
                     btn.clicked.connect(self.open_receipt_menu_dialog)
                 else:
@@ -396,9 +396,9 @@ class MainLoader(QMainWindow):
         self.dialog_wrapper.open_dialog_scanner_blocked(launch_receipt_dialog, dialog_key='receipt_menu')
 
     # Open the reports dialog for analytics.
-    def open_reports_menu_dialog(self):
+    def open_report_menu_dialog(self):
         """Open Reports dialog."""
-        self.dialog_wrapper.open_dialog_scanner_blocked(launch_reports_dialog, dialog_key='reports_menu')
+        self.dialog_wrapper.open_dialog_scanner_blocked(launch_reports_dialog, dialog_key='report_menu')
 
     # Launch the vegetable management dialog when allowed.
     def launch_vegetable_menu_dialog(self):

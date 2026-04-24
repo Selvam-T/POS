@@ -88,7 +88,8 @@ QPushButton[objectName$="Cancel"]:hover {
 QPushButton[objectName$="Cancel"]:pressed {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
                                       stop:0 #7a828f, stop:1 #9ea8b7); /* Softer gray */
-    padding-top: 10px;
+    /*padding-top: 10px;*/
+    padding-top: 2px;
 }
 
 /* Delete Button */
@@ -476,39 +477,33 @@ QPushButton#removeBtn:pressed {
 QRadioButton {
     font-size: 20px;
     font-weight: bold;
-    color: #2147ba;
-    spacing: 20px; /* Space between indicator and text */
+    color: #0786db;
+    spacing: 5px; /* Space between indicator and text */
     outline: none; /* Removes the dotted focus line */
 }
 
 /*   The Indicator (The Circle) */
 
 QRadioButton::indicator {
-    width: 18px;            /* Inner width */
-    height: 18px;           /* Inner height */
-    border-radius: 11px;    /* Radius = (Width + 2*Border) / 2. Here: (18+4)/2 = 11 */
-    border: 2px solid #bdc3c7; /* Gray Ring */
-    background-color: white;   /* White Background */
+    width: 18px;
+    height: 18px;
+    border-radius: 11px; /* circle */
+    border: 2px solid #bdc3c7; /* Ring */
+    background-color: white;
 }
 
 /* Hover State */
 QRadioButton::indicator:hover {
-    border-color: #3498db;  /* Blue Ring on Hover */
+    border-color: #ba7f21;
 }
 
 /*   Checked State (The Dot Effect) */
 QRadioButton::indicator:checked {
-    border: 2px solid #3498db; /* Blue Ring */
-    
-    /* This creates the Dot. 
-       cx/cy: Center point. 
-       radius: Size of dot (0.4 = 40% of size). 
-       stop 0-0.5: Blue. stop 0.6-1.0: Transparent (White bg shows through).
-    */
+    border: 2px solid #4c6ac4;
     background-color: qradialgradient(
         spread: pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
-        stop:0 #3498db, 
-        stop:0.6 #3498db,
+        stop:0 #4c6ac4, 
+        stop:0.6 #4c6ac4,
         stop:0.7 transparent
     );
 }
@@ -596,13 +591,12 @@ QFrame#exportFrame QPushButton[objectName*="ExportBtn"]:focus {
     ============================================================= */
 QFrame#receiptSearchFrame,
 QFrame#receiptDateFrame,
-QFrame#receiptStatusFrame {
+QFrame#receiptStatusFrame,
+QFrame#receiptActionFrame, 
+QFrame#reportDateFrame { /* report menu */
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #f8fafa, stop:1 #f8fafaf5);
     border: 1px solid #c2c4c4;
     padding: 0px 10px 0px 10px;
-}
-QFrame#receiptActionFrame {
-    border: 1px solid #c2c4c4;
 }
 
 /* Search Button */
@@ -661,4 +655,95 @@ QPushButton#voidReceiptBtn:hover {
 }
 QPushButton#voidReceiptBtn:pressed {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #F44336, stop:1 #D32F2F);
+}
+
+
+/* =============================================================
+     report menu
+    ============================================================= */
+
+/* View Report */
+QPushButton#viewReportBtn {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #5dade2, stop:1 #2e86c1);
+    border: 1px solid #2471a3;
+    color: white;
+}
+
+QPushButton#viewReportBtn:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #85c1e9, stop:1 #5dade2);
+}
+
+QPushButton#viewReportBtn:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #2874a6, stop:1 #5dade2);
+    padding-top: 2px; /* Adjusted from 10px to be more subtle */
+}
+
+/* Save to PDF */
+QPushButton#savePdfReportBtn {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #ec7063, stop:1 #c0392b);
+    border: 1px solid #922b21;
+    color: white;
+}
+
+QPushButton#savePdfReportBtn:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #f1948a, stop:1 #ec7063);
+}
+
+QPushButton#savePdfReportBtn:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #943126, stop:1 #ec7063);
+    padding-top: 2px;
+}
+
+/* Save to Excel */
+QPushButton#saveExcelReportBtn {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #58d68d, stop:1 #27ae60);
+    border: 1px solid #1e8449;
+    color: white;
+}
+
+QPushButton#saveExcelReportBtn:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #82e0aa, stop:1 #58d68d);
+}
+
+QPushButton#saveExcelReportBtn:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #1d8348, stop:1 #58d68d);
+    padding-top: 2px;
+}
+
+/* Reset Selection */
+QPushButton#resetReportBtn {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #d1d9e2, stop:1 #9ea8b7);
+    border: 1px solid #6c7a89;
+    color: #6c757d
+}
+
+QPushButton#resetReportBtn:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #e2e8f0, stop:1 #bdc7d4);
+}
+
+QPushButton#resetReportBtn:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #8a96a8, stop:1 #bdc7d4);
+    padding-top: 2px;
+}
+
+QRadioButton#todayRadioBtn,
+QRadioButton#dateRangeRadioBtn {
+    font-size: 18px;
+    font-weight: bold;
+    color: #068d76;
+}
+
+/*   Checked State (The Dot Effect) */
+QRadioButton#todayRadioBtn::indicator:checked,
+QRadioButton#dateRangeRadioBtn::indicator:checked {
+    border: 2px solid #2d7554;
+    background-color: qradialgradient(
+        spread: pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5,
+        stop:0 #3c9a6e, 
+        stop:0.6 #3c9a6e,
+        stop:0.7 transparent
+    );
 }
