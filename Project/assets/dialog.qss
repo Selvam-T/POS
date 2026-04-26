@@ -229,6 +229,21 @@ QLineEdit:focus, QComboBox:focus {
     border: 1px solid #2196f3;
 }
 
+/* Report menu: disabled radios must look visibly locked (dot + text). */
+QRadioButton:disabled {
+    color: #9aa0a6;
+}
+
+QRadioButton::indicator:disabled {
+    background-color: #e5e7eb;
+    border: 1px solid #c7cdd6;
+}
+
+QRadioButton::indicator:checked:disabled {
+    background-color: #c7cdd6;
+    border: 1px solid #b0b7c3;
+}
+
 QLineEdit[validation="error"] {
     border: 2px solid #c62828;
     background-color: #fff1f0;
@@ -260,6 +275,40 @@ QLabel[objectName$="FieldLbl"][readOnly="true"] {
 QLineEdit:read-only {
     background-color: #f5f5f5;
     border: 1px solid #dcdcdc;
+}
+
+/* Report menu: gating lock style for date edits. */
+QDateEdit[locked="true"] {
+    background-color: #f0f0f0;
+    color: transparent;
+    border: 1px solid #dcdcdc;
+}
+
+QDateEdit[locked="true"]:disabled,
+QDateEdit[locked="true"] QLineEdit,
+QDateEdit[locked="true"] QLineEdit:disabled {
+    color: transparent;
+}
+
+QDateEdit[locked="false"] {
+    background-color: #ffffff;
+    color: #222222;
+    border: 1px solid #c7cdd6;
+}
+
+/* Report menu: gated action buttons (view/pdf/excel). */
+QPushButton[objectName="viewReportBtn"][locked="true"],
+QPushButton[objectName="savePdfReportBtn"][locked="true"],
+QPushButton[objectName="saveExcelReportBtn"][locked="true"] {
+    background-color: #b8bdc4;
+    border: 1px solid #9ea4ad;
+    color: #e8eaed;
+}
+
+QPushButton[objectName="viewReportBtn"][locked="false"],
+QPushButton[objectName="savePdfReportBtn"][locked="false"],
+QPushButton[objectName="saveExcelReportBtn"][locked="false"] {
+    color: white;
 }
 
 /* ComboBox Dropdown Arrow */
@@ -710,6 +759,14 @@ QPushButton#saveExcelReportBtn:pressed {
     padding-top: 2px;
 }
 
+QPushButton#viewReportBtn:focus,
+QPushButton#savePdfReportBtn:focus,
+QPushButton#saveExcelReportBtn:focus,
+QPushButton#resetReportBtn:focus {
+    outline: none;
+    border: 2px solid orange;
+}
+
 /* Reset Selection */
 QPushButton#resetReportBtn {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
@@ -746,4 +803,19 @@ QRadioButton#dateRangeRadioBtn::indicator:checked {
         stop:0.6 #3c9a6e,
         stop:0.7 transparent
     );
+}
+
+/* Force report date-range disabled state to remain gray (label + dot). */
+QRadioButton#dateRangeRadioBtn:disabled {
+    color: #9aa0a6;
+}
+
+QRadioButton#dateRangeRadioBtn::indicator:disabled {
+    background-color: #e5e7eb;
+    border: 1px solid #c7cdd6;
+}
+
+QRadioButton#dateRangeRadioBtn::indicator:checked:disabled {
+    background-color: #c7cdd6;
+    border: 1px solid #b0b7c3;
 }
