@@ -1,6 +1,0 @@
-2026-04-24T11:44:42.918658 - Qt: QEventDispatcherWin32::wakeUp: Failed to post a message (Invalid window handle.)
-2026-04-25T14:34:04.592927 - Qt: QEventDispatcherWin32::wakeUp: Failed to post a message (Invalid window handle.)
-2026-04-26T16:11:53.760329 - Qt: QEventDispatcherWin32::wakeUp: Failed to post a message (Invalid window handle.)
-2026-04-27T09:03:31.432590 - Qt: monitorData: Unable to obtain handle for monitor '\\.\DISPLAY1', defaulting to 96 DPI.
-2026-04-27T09:03:31.521518 - Qt: monitorData: Unable to obtain handle for monitor '\\.\DISPLAY1', defaulting to 96 DPI.
-2026-04-27T09:03:31.522516 - Qt: monitorData: Unable to obtain handle for monitor '\\.\DISPLAY1', defaulting to 96 DPI.

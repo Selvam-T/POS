@@ -155,6 +155,15 @@ Below is a mapping of functions in `modules/db_operation/` related to each datab
 	- upsert_cache_item
 	- remove_cache_item
 
+**Reports (multi-table aggregations)**
+- modules/db_operation/reports_repo.py:
+	- detailed_report  -- Builds the Detailed Sales Report by joining `receipts`,
+	  `receipt_items`, `receipt_payments`, `cash_outflows` and `users`.
+	- summary_report   -- (planned) Aggregated summary totals and top products.
+	- chart_series     -- (planned) Series data for time-based charts (sales by hour).
+	- inactivity_report-- (planned) Inactivity buckets using `product_list` and
+	  `receipt_items`/`receipts` to compute last-sold dates.
+
 **sqlite_sequence**
 - No direct functions; this is an internal SQLite table, not managed by application code.
 

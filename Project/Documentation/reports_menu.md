@@ -14,7 +14,7 @@ This document summarizes the current functional design for report-menu wiring, f
   - Applies role defaults/permissions via `_apply_role_default_state(...)`.
   - Wires shared date gating via `DateRangeGateController`.
   - Wires `resetReportBtn` to restore defaults for report type and date frame.
-  - Wires `viewReportBtn` to open a child modal viewer placeholder.
+  - Wires `viewReportBtn` to resolve selected report type, optionally fetch detailed data, and open viewer via `modules/menu/report_viewers.py`.
   - Sets default landing focus to `viewReportBtn` (deferred to next event loop tick).
 
 - `_apply_role_default_state(dlg, is_admin)`
@@ -33,12 +33,23 @@ This document summarizes the current functional design for report-menu wiring, f
 - `_current_report_type(dlg)`
   - Resolves selected report type from report radio buttons (`detail|summary|chart|inactivity`).
 
-- `_open_report_placeholder_viewer(parent_dlg, report_type)`
-  - Opens child modal viewer above report dialog.
-  - Title reflects report type (e.g., `Detail Report Viewer`).
-  - Viewer size uses explicit map by report type with default fallback.
-  - Displays placeholder text: `No content available.`
-  - Adds temporary dim overlay on parent report dialog while viewer is open.
+- `_build_report_params(dlg, host_window)`
+  - Collects date range + user context params for report data requests.
+
+- Detailed report integration
+  - For `detail` selection, `viewReportBtn` calls
+    `modules.menu.report_generator.get_detailed_report(...)`.
+  - Viewer rendering is delegated to `modules.menu.report_viewers.open_report_viewer(...)`.
+
+## Viewer/UI Module
+### `modules/menu/report_viewers.py`
+- Owns viewer/dialog UI functions (no data fetching).
+- Uses one shared viewer shell (`open_report_viewer`) with per-report renderers:
+  - `detail`: searchable `QPlainTextEdit` with report text
+  - other types (`summary|chart|inactivity`): placeholder content renderer
+- Uses `REPORT_VIEWER_SIZES` as the size policy map by report type, with default fallback.
+- Viewer closes via native window titlebar `X` button (no in-dialog Close push button).
+- Applies dim overlay while viewer is open.
 
 ## Shared Date Gating Module
 ### `modules/date_time/date_gating.py`
@@ -99,5 +110,7 @@ This document summarizes the current functional design for report-menu wiring, f
 - Shared date gating is implemented and reusable for future controllers.
 - Focus landing and progressive focus jump to `viewReportBtn` are implemented.
 - `resetReportBtn` restores report type/date defaults and lands focus on `viewReportBtn`.
-- `viewReportBtn` opens placeholder child modal viewer with report-type title and size policy.
-- Temporary debug print used during testing has been removed.
+- `viewReportBtn` now routes through `report_viewers.py` shared shell + per-report renderer architecture.
+- Viewer styling hooks are centralized in `assets/dialog.qss` using viewer object names.
+
+See the report generator adapter and data-layer notes: Documentation/report_generator.md

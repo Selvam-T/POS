@@ -3,25 +3,16 @@
 import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QPushButton, QRadioButton, QDateEdit, QLabel, QWidget
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QPushButton, QRadioButton, QDateEdit, QLabel
 from modules.ui_utils.error_logger import log_error_message
 from modules.ui_utils.dialog_utils import set_dialog_info
 from modules.date_time.date_gating import DateRangeGateController, set_locked_property
+from modules.menu import report_generator, report_viewers
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
-
-# Placeholder viewer size policy by selected report type.
-REPORT_VIEWER_SIZES = {
-    'detail': (900, 620),
-    'summary': (760, 520),
-    'chart': (980, 680),
-    'inactivity': (720, 500),
-}
-DEFAULT_REPORT_VIEWER_SIZE = (760, 520)
-
 
 def _apply_role_default_state(dlg: QDialog, *, is_admin: bool) -> None:
     """Apply role defaults and permissions."""
@@ -86,50 +77,27 @@ def _current_report_type(dlg: QDialog) -> str:
     return 'summary'
 
 
-def _open_report_viewer(parent_dlg: QDialog, *, report_type: str) -> None:
-    """Open a child modal placeholder viewer above report dialog with dimmed parent."""
-    rpt = str(report_type or 'summary').strip().lower()
-    size = REPORT_VIEWER_SIZES.get(rpt, DEFAULT_REPORT_VIEWER_SIZE)
-    title = f"{rpt.capitalize()} Report Viewer"
-
-    overlay = None
-    try:
-        overlay = QWidget(parent_dlg)
-        overlay.setGeometry(parent_dlg.rect())
-        overlay.setStyleSheet('background-color: rgba(0, 0, 0, 120);')
-        overlay.show()
-        overlay.raise_()
-    except Exception:
-        overlay = None
-
-    viewer = QDialog(parent_dlg)
-    viewer.setModal(True)
-    viewer.setWindowModality(Qt.WindowModal)
-    viewer.setWindowTitle(title)
-    viewer.resize(int(size[0]), int(size[1]))
-
-    lay = QVBoxLayout(viewer)
-    lay.setContentsMargins(16, 16, 16, 16)
-    lay.setSpacing(12)
-
-    msg = QLabel('No content available.', viewer)
-    msg.setAlignment(Qt.AlignCenter)
-    msg.setWordWrap(True)
-    lay.addWidget(msg)
-
-    close_btn = QPushButton('Close', viewer)
-    close_btn.clicked.connect(viewer.accept)
-    lay.addWidget(close_btn)
-
-    _defer_focus(close_btn)
-    viewer.exec_()
+def _build_report_params(dlg: QDialog, host_window) -> dict:
+    """Collect report request params from dialog and host context."""
+    from_date = dlg.findChild(QDateEdit, 'reportFromDateEdit')
+    to_date = dlg.findChild(QDateEdit, 'reportToDateEdit')
+    start_ts = None
+    end_ts = None
 
     try:
-        if overlay is not None:
-            overlay.hide()
-            overlay.deleteLater()
+        if from_date is not None:
+            start_ts = from_date.date().toString('yyyy-MM-dd') + 'T00:00:00'
+        if to_date is not None:
+            end_ts = to_date.date().toString('yyyy-MM-dd') + 'T23:59:59'
     except Exception:
         pass
+
+    return {
+        'from': start_ts,
+        'to': end_ts,
+        'user_id': getattr(host_window, 'current_user_id', None),
+        'username': getattr(host_window, 'current_username', None),
+    }
 
 
 def launch_reports_dialog(host_window):
@@ -314,7 +282,11 @@ def launch_reports_dialog(host_window):
     def _on_view_report_clicked() -> None:
         try:
             rpt = _current_report_type(dlg)
-            _open_report_viewer(dlg, report_type=rpt)
+            data = None
+            if rpt == 'detail':
+                data = report_generator.get_detailed_report(_build_report_params(dlg, host_window))
+
+            report_viewers.open_report_viewer(dlg, report_type=rpt, report_data=data)
             _defer_focus(view_btn)
         except Exception as e:
             try:

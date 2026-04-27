@@ -806,3 +806,39 @@ QRadioButton#dateRangeRadioBtn::indicator:checked {
     );
 }
 
+/* Report viewer shell and content */
+QWidget#reportViewerOverlay {
+    background-color: rgba(0, 0, 0, 120);
+}
+
+QDialog#reportViewerDialog {
+    background-color: #ffffff;
+}
+
+QLabel#reportViewerMessageLabel {
+    color: #374151;
+    font-size: 12pt;
+    font-weight: 500;
+    padding: 8px;
+}
+
+QLabel#reportViewerSearchLabel {
+    color: #334155;
+    font-size: 10pt;
+    font-weight: 600;
+}
+
+QLineEdit#reportViewerSearchInput {
+    min-width: 280px;
+}
+
+QPlainTextEdit#reportViewerTextEdit {
+    background-color: #ffffff;
+    color: #1f2937;
+    border: 1px solid #cfd8e3;
+    border-radius: 6px;
+    padding: 8px;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 10.5pt;
+}
+
