@@ -230,18 +230,19 @@ QLineEdit:focus, QComboBox:focus {
 }
 
 /* Report menu: disabled radios must look visibly locked (dot + text). */
-QRadioButton:disabled {
-    color: #9aa0a6;
+QRadioButton:disabled,
+QRadioButton#dateRangeRadioBtn:disabled {
+    color: #5c5e5fb1;
 }
 
 QRadioButton::indicator:disabled {
     background-color: #e5e7eb;
-    border: 1px solid #c7cdd6;
+    border: 2px solid #c7cdd6;
 }
 
 QRadioButton::indicator:checked:disabled {
     background-color: #c7cdd6;
-    border: 1px solid #b0b7c3;
+    border: 2px solid #b0b7c3;
 }
 
 QLineEdit[validation="error"] {
@@ -369,7 +370,7 @@ QPushButton[objectName*="ReceiptBtn"]:focus {
 
 /* Field labels */
 QLabel[objectName$="FieldLbl"] {
-    color: #5c5e5f;
+    color: #5d5c5f;
     font-size: 10.5pt;
     font-weight: 600;
 }
@@ -805,17 +806,3 @@ QRadioButton#dateRangeRadioBtn::indicator:checked {
     );
 }
 
-/* Force report date-range disabled state to remain gray (label + dot). */
-QRadioButton#dateRangeRadioBtn:disabled {
-    color: #9aa0a6;
-}
-
-QRadioButton#dateRangeRadioBtn::indicator:disabled {
-    background-color: #e5e7eb;
-    border: 1px solid #c7cdd6;
-}
-
-QRadioButton#dateRangeRadioBtn::indicator:checked:disabled {
-    background-color: #c7cdd6;
-    border: 1px solid #b0b7c3;
-}

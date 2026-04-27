@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>780</width>
-    <height>530</height>
+    <height>550</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>760</width>
-    <height>530</height>
+    <height>550</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -197,12 +197,12 @@
         <enum>Qt::Vertical</enum>
        </property>
        <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
+        <enum>QSizePolicy::Expanding</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
          <width>20</width>
-         <height>15</height>
+         <height>25</height>
         </size>
        </property>
       </spacer>

@@ -8,9 +8,13 @@ This document summarizes the current functional design for report-menu wiring, f
 - `launch_reports_dialog(host_window)`
   - Loads and returns the report dialog (`ui/report_menu.ui`) as modal + frameless.
   - Applies shared dialog stylesheet (`assets/dialog.qss`).
-  - Wires close/cancel behavior to reject the dialog.
+  - Wires `customCloseBtn` and `btnReportCancel` using admin-style reject flow:
+    - `customCloseBtn`: closes dialog and posts default non-error status (`Report dialog closed.`) to main status bar.
+    - `btnReportCancel`: closes dialog and posts cancel non-error status (`Report selection cancelled.`) to main status bar.
   - Applies role defaults/permissions via `_apply_role_default_state(...)`.
   - Wires shared date gating via `DateRangeGateController`.
+  - Wires `resetReportBtn` to restore defaults for report type and date frame.
+  - Wires `viewReportBtn` to open a child modal viewer placeholder.
   - Sets default landing focus to `viewReportBtn` (deferred to next event loop tick).
 
 - `_apply_role_default_state(dlg, is_admin)`
@@ -25,6 +29,16 @@ This document summarizes the current functional design for report-menu wiring, f
 
 - `_defer_focus(widget)`
   - Utility to apply focus on the next event-loop tick (`QTimer.singleShot(0, ...)`) for reliable focus landing.
+
+- `_current_report_type(dlg)`
+  - Resolves selected report type from report radio buttons (`detail|summary|chart|inactivity`).
+
+- `_open_report_placeholder_viewer(parent_dlg, report_type)`
+  - Opens child modal viewer above report dialog.
+  - Title reflects report type (e.g., `Detail Report Viewer`).
+  - Viewer size uses explicit map by report type with default fallback.
+  - Displays placeholder text: `No content available.`
+  - Adds temporary dim overlay on parent report dialog while viewer is open.
 
 ## Shared Date Gating Module
 ### `modules/date_time/date_gating.py`
@@ -84,6 +98,6 @@ This document summarizes the current functional design for report-menu wiring, f
 - Role defaults and permissions are implemented.
 - Shared date gating is implemented and reusable for future controllers.
 - Focus landing and progressive focus jump to `viewReportBtn` are implemented.
+- `resetReportBtn` restores report type/date defaults and lands focus on `viewReportBtn`.
+- `viewReportBtn` opens placeholder child modal viewer with report-type title and size policy.
 - Temporary debug print used during testing has been removed.
-- Remaining planned enhancement:
-  - wire `resetReportBtn` to re-apply role defaults and date-gating state in one action.
