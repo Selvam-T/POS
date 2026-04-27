@@ -7,6 +7,7 @@ from .formatters import (
     format_datetime,
     format_date,
     format_time,
+    format_report_timestamp,
 )
 from .date_gating import (
     set_locked_property,
@@ -20,6 +21,7 @@ __all__ = [
     "format_datetime",
     "format_date",
     "format_time",
+    "format_report_timestamp",
     "set_locked_property",
     "set_dateedit_locked",
     "set_buttons_locked",

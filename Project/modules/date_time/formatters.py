@@ -120,3 +120,18 @@ def format_time(value, fmt: str = "%I:%M %p", lower_ampm: bool = True) -> str:
     if lower_ampm:
         out = out.replace("AM", "am").replace("PM", "pm")
     return out
+
+
+def format_report_timestamp(value, default: str = "-") -> str:
+    """Format report timestamps as DD/MM/YYYY HH:MM.
+
+    Returns `default` for missing/unparseable values.
+    """
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return default
+
+    dt = parse_to_datetime(value)
+    if dt is None:
+        return default
+
+    return dt.strftime("%d/%m/%Y %H:%M")
