@@ -1,4 +1,7 @@
-# modules/menu/report_menu.py
+"""report_menu is the UI controller. 
+   It reads the selected report type, builds the request parameters, 
+   and decides when to open a viewer.
+"""
 
 import os
 from PyQt5 import uic
@@ -200,7 +203,7 @@ def launch_reports_dialog(host_window):
     action_buttons = [view_btn, save_pdf_btn, save_excel_btn]
     date_field_labels = [from_label, to_label]
 
-    # Match admin-menu behavior for report cancel button.
+    # report cancel button.
     try:
         if report_cancel_btn is not None:
             def _on_report_cancel():
@@ -285,6 +288,8 @@ def launch_reports_dialog(host_window):
             data = None
             if rpt == 'detail':
                 data = report_generator.get_detailed_report(_build_report_params(dlg, host_window))
+            elif rpt == 'summary':
+                data = report_generator.get_summary_report(_build_report_params(dlg, host_window))
 
             report_viewers.open_report_viewer(dlg, report_type=rpt, report_data=data)
             _defer_focus(view_btn)

@@ -1,16 +1,16 @@
-"""Report-specific data access and aggregation helpers.
-
-This module owns cross-table report aggregations. It is intentionally separate
-from per-table CRUD repos so reporting logic stays localized and testable.
+"""Reports_repo is the data layer. 
+   It runs the SQL/aggregation logic and returns structured report data.
 """
 
 from __future__ import annotations
 
-import sqlite3
 from collections import defaultdict
+from datetime import datetime
+import sqlite3
 from typing import Any, Dict, List, Optional, Tuple
 
 from .db import get_conn, now_iso
+from . import receipt_repo
 
 
 def _table_columns(conn: sqlite3.Connection, table_name: str) -> set[str]:
@@ -33,6 +33,139 @@ def _to_float(value: Any) -> float:
         return float(value or 0.0)
     except Exception:
         return 0.0
+
+
+def _to_int(value: Any) -> int:
+    try:
+        return int(value or 0)
+    except Exception:
+        return 0
+
+
+def _hour_slot_label(timestamp_value: Any) -> Optional[Tuple[int, str]]:
+    try:
+        if timestamp_value is None:
+            return None
+        text = str(timestamp_value).strip().replace('Z', '+00:00')
+        parsed = datetime.fromisoformat(text)
+        hour = int(parsed.hour)
+        next_hour = (hour + 1) % 24
+        return hour, f"{hour:02d}:00 - {next_hour:02d}:00"
+    except Exception:
+        return None
+
+
+def _aggregate_product_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    grouped: Dict[Tuple[str, str], Dict[str, Any]] = {}
+    for row in rows:
+        product_name = str(row.get('product_name') or '')
+        unit = str(row.get('unit') or '')
+        key = (product_name, unit)
+        entry = grouped.get(key)
+        if entry is None:
+            entry = {
+                'product_name': product_name,
+                'unit': unit,
+                'qty_sold': 0.0,
+                'line_sales': 0.0,
+            }
+            grouped[key] = entry
+        entry['qty_sold'] = _to_float(entry['qty_sold']) + _to_float(row.get('qty_sold'))
+        entry['line_sales'] = _to_float(entry['line_sales']) + _to_float(row.get('line_sales'))
+
+    out = list(grouped.values())
+    out.sort(key=lambda r: (_to_float(r.get('line_sales')), _to_float(r.get('qty_sold'))), reverse=True)
+    return out
+
+
+def _top_n_products(rows: List[Dict[str, Any]], *, limit: int, sort_key: str) -> List[Dict[str, Any]]:
+    aggregated = _aggregate_product_rows(rows)
+    if sort_key == 'qty_sold':
+        aggregated.sort(key=lambda r: (_to_float(r.get('qty_sold')), _to_float(r.get('line_sales'))), reverse=True)
+    else:
+        aggregated.sort(key=lambda r: (_to_float(r.get('line_sales')), _to_float(r.get('qty_sold'))), reverse=True)
+
+    out: List[Dict[str, Any]] = []
+    for idx, row in enumerate(aggregated[: int(limit)], start=1):
+        out.append(
+            {
+                'rank': idx,
+                'product_name': row.get('product_name', ''),
+                'qty_sold': _to_float(row.get('qty_sold')),
+                'unit': row.get('unit', ''),
+                'line_sales': _to_float(row.get('line_sales')),
+            }
+        )
+    return out
+
+
+def _format_hour_slot(hour: int) -> str:
+    next_hour = (hour + 1) % 24
+    return f"{hour:02d}:00 - {next_hour:02d}:00"
+
+
+def _fetch_paid_receipt_rows(
+    conn: sqlite3.Connection,
+    *,
+    period_from: Optional[str],
+    period_to: Optional[str],
+) -> List[Dict[str, Any]]:
+    cols = _table_columns(conn, 'receipts')
+    if not cols:
+        return []
+
+    id_col = _first_existing(cols, 'receipt_id', 'id')
+    no_col = _first_existing(cols, 'receipt_no', 'receipt_number')
+    total_col = _first_existing(cols, 'grand_total', 'total')
+    status_col = _first_existing(cols, 'status')
+    paid_col = _first_existing(cols, 'paid_at', 'created_at')
+
+    select_parts = []
+    select_parts.append(f"{id_col} AS receipt_id" if id_col is not None else "NULL AS receipt_id")
+    select_parts.append(f"{no_col} AS receipt_no" if no_col is not None else "'' AS receipt_no")
+    select_parts.append(f"{total_col} AS total" if total_col is not None else "0 AS total")
+    select_parts.append(f"{paid_col} AS paid_at" if paid_col is not None else "'' AS paid_at")
+
+    where_sql, where_params = _receipt_filter_clause(
+        status_col=status_col,
+        paid_col=paid_col,
+        period_from=period_from,
+        period_to=period_to,
+        status='PAID',
+    )
+    sql = f"SELECT {', '.join(select_parts)} FROM receipts{where_sql} ORDER BY {paid_col or 'receipt_id'} ASC"
+    rows = conn.execute(sql, tuple(where_params)).fetchall()
+    return [dict(row) for row in rows]
+
+
+def _fetch_paid_item_rows(
+    conn: sqlite3.Connection,
+    paid_receipts: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    for receipt in paid_receipts:
+        receipt_no = str(receipt.get('receipt_no') or '')
+        if not receipt_no:
+            continue
+        receipt_id = receipt.get('receipt_id')
+        paid_at = receipt.get('paid_at')
+        hour_slot = _hour_slot_label(paid_at)
+        hour_order = hour_slot[0] if hour_slot else 0
+        items = receipt_repo.list_receipt_items_by_no(receipt_no, receipt_id=_to_int(receipt_id) if receipt_id is not None else None, conn=conn)
+        for item in items:
+            qty = _to_float(item.get('qty'))
+            line_sales = _to_float(item.get('line_total'))
+            rows.append(
+                {
+                    'hour_order': hour_order,
+                    'hour_slot': hour_slot[1] if hour_slot else '00:00 - 01:00',
+                    'product_name': item.get('product_name') or '',
+                    'unit': item.get('unit') or '',
+                    'qty_sold': qty,
+                    'line_sales': line_sales,
+                }
+            )
+    return rows
 
 
 def _safe_period(params: Dict[str, Any]) -> Tuple[Optional[str], Optional[str]]:
@@ -262,22 +395,6 @@ def _build_category_breakdown(product_rows: List[Dict[str, Any]]) -> List[Dict[s
     return categories
 
 
-def _build_top_products(product_rows: List[Dict[str, Any]], limit: int = 10) -> List[Dict[str, Any]]:
-    top = sorted(product_rows, key=lambda r: _to_float(r.get("line_sales")), reverse=True)[: int(limit)]
-    out: List[Dict[str, Any]] = []
-    for idx, row in enumerate(top, start=1):
-        out.append(
-            {
-                "rank": idx,
-                "product_name": row.get("product_name", ""),
-                "qty_sold": _to_float(row.get("qty_sold")),
-                "unit": row.get("unit", ""),
-                "line_sales": _to_float(row.get("line_sales")),
-            }
-        )
-    return out
-
-
 def _fetch_outflows(
     conn: sqlite3.Connection,
     *,
@@ -441,27 +558,20 @@ def detailed_report(
     *,
     conn: Optional[sqlite3.Connection] = None,
 ) -> Dict[str, Any]:
-    """Return the structured Detailed Sales Report.
-
-    Rules implemented:
-    - Sales counted only for `receipts.status = 'PAID'` and within paid_at range.
-    - Outflows counted by `cash_outflows.created_at` range.
-    - Excluded section includes UNPAID/CANCELLED receipts in range.
-    """
+    """Return the detailed sales report."""
     period_from, period_to = _safe_period(params)
     own = conn is None
     c = conn or get_conn()
     try:
-        paid_rows, paid_ids, paid_nos, gross_sales = _collect_paid_receipts(
-            c,
-            period_from=period_from,
-            period_to=period_to,
-        )
+        paid_rows = _fetch_paid_receipt_rows(c, period_from=period_from, period_to=period_to)
+        paid_ids = [row.get('receipt_id') for row in paid_rows if row.get('receipt_id') is not None]
+        paid_nos = [str(row.get('receipt_no') or '') for row in paid_rows if row.get('receipt_no')]
+        gross_sales = sum(_to_float(row.get('total')) for row in paid_rows)
 
         payment_breakdown = _fetch_payment_breakdown(c, receipt_ids=paid_ids, receipt_nos=paid_nos)
         product_rows = _fetch_product_aggregates(c, receipt_ids=paid_ids, receipt_nos=paid_nos)
         categories = _build_category_breakdown(product_rows)
-        top_products = _build_top_products(product_rows, limit=10)
+        top_products = _top_n_products(product_rows, limit=10, sort_key='line_sales')
 
         outflows, outflow_subtotals = _fetch_outflows(c, period_from=period_from, period_to=period_to)
         refund_total = _to_float(outflow_subtotals.get("REFUND_OUT"))
@@ -490,6 +600,89 @@ def detailed_report(
             "cash_outflows": outflows,
             "outflow_subtotals": outflow_subtotals,
             "excluded": excluded,
+        }
+    finally:
+        if own:
+            c.close()
+
+
+def summary_report(
+    params: Dict[str, Any],
+    *,
+    conn: Optional[sqlite3.Connection] = None,
+) -> Dict[str, Any]:
+    """Return the summary sales report."""
+    period_from, period_to = _safe_period(params)
+    own = conn is None
+    c = conn or get_conn()
+    try:
+        paid_rows = _fetch_paid_receipt_rows(c, period_from=period_from, period_to=period_to)
+        paid_ids = [row.get('receipt_id') for row in paid_rows if row.get('receipt_id') is not None]
+        paid_nos = [str(row.get('receipt_no') or '') for row in paid_rows if row.get('receipt_no')]
+        gross_sales = sum(_to_float(row.get('total')) for row in paid_rows)
+
+        payment_breakdown = _fetch_payment_breakdown(c, receipt_ids=paid_ids, receipt_nos=paid_nos)
+        outflows, outflow_subtotals = _fetch_outflows(c, period_from=period_from, period_to=period_to)
+        refund_total = _to_float(outflow_subtotals.get('REFUND_OUT'))
+        vendor_total = _to_float(outflow_subtotals.get('VENDOR_OUT'))
+        net_after_outflows = gross_sales - refund_total - vendor_total
+
+        excluded = _fetch_excluded_receipts(c, period_from=period_from, period_to=period_to)
+
+        paid_item_rows = _fetch_paid_item_rows(c, paid_rows)
+
+        hour_sales: Dict[int, Dict[str, Any]] = {}
+        hour_rows: Dict[int, List[Dict[str, Any]]] = defaultdict(list)
+        all_product_rows: List[Dict[str, Any]] = []
+        for row in paid_item_rows:
+            hour_order = _to_int(row.get('hour_order'))
+            hour_slot = str(row.get('hour_slot') or '')
+            hour_sales.setdefault(hour_order, {'hour_order': hour_order, 'hour_slot': hour_slot, 'sales_amount': 0.0})
+            hour_sales[hour_order]['sales_amount'] = _to_float(hour_sales[hour_order]['sales_amount']) + _to_float(row.get('line_sales'))
+            hour_rows[hour_order].append(row)
+            all_product_rows.append(row)
+
+        sales_by_hour = [hour_sales[idx] for idx in sorted(hour_sales)]
+        peak_hour = max(sales_by_hour, key=lambda r: _to_float(r.get('sales_amount')), default=None)
+
+        def _top_rows_for(rows: List[Dict[str, Any]], *, sort_key: str, limit: int) -> List[Dict[str, Any]]:
+            return _top_n_products(rows, limit=limit, sort_key=sort_key)
+
+        top_qty_by_hour = []
+        top_sales_by_hour = []
+        for hour_order in sorted(hour_rows):
+            label = hour_sales[hour_order]['hour_slot']
+            rows = hour_rows[hour_order]
+            top_qty_by_hour.append({'hour_slot': label, 'products': _top_rows_for(rows, sort_key='qty_sold', limit=5)})
+            top_sales_by_hour.append({'hour_slot': label, 'products': _top_rows_for(rows, sort_key='line_sales', limit=5)})
+
+        top_qty_day = _top_n_products(all_product_rows, limit=10, sort_key='qty_sold')
+        top_sales_day = _top_n_products(all_product_rows, limit=10, sort_key='line_sales')
+
+        return {
+            'header': {
+                'period_from': period_from,
+                'period_to': period_to,
+                'generated_at': now_iso(),
+                'generated_by': _resolve_generated_by(c, params),
+            },
+            'sales_summary': {
+                'paid_receipt_count': len(paid_rows),
+                'gross_sales': _to_float(gross_sales),
+                'less_refund_outflow': refund_total,
+                'less_vendor_outflow': vendor_total,
+                'net_after_outflows': _to_float(net_after_outflows),
+            },
+            'sales_by_hour': sales_by_hour,
+            'peak_hour': peak_hour,
+            'top_products_by_qty_hour': top_qty_by_hour,
+            'top_products_by_sales_hour': top_sales_by_hour,
+            'top_products_by_qty_day': top_qty_day,
+            'top_products_by_sales_day': top_sales_day,
+            'payment_breakdown': payment_breakdown,
+            'cash_outflows': outflows,
+            'outflow_subtotals': outflow_subtotals,
+            'excluded': excluded,
         }
     finally:
         if own:

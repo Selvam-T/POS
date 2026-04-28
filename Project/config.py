@@ -21,8 +21,8 @@ DIALOG_RATIOS = {
 
 # Report viewer size ratios (width_ratio, height_ratio) as fraction of parent window
 REPORT_VIEWER_RATIOS = {
-	'detail': (0.60, 0.85),
-	'summary': (0.6, 0.55),
+	'detail': (0.6, 0.85),
+	'summary': (0.6, 0.85),
 	'chart': (0.85, 0.75),
 	'inactivity': (0.55, 0.5),
 }

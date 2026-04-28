@@ -14,7 +14,8 @@ This document summarizes the current functional design for report-menu wiring, f
   - Applies role defaults/permissions via `_apply_role_default_state(...)`.
   - Wires shared date gating via `DateRangeGateController`.
   - Wires `resetReportBtn` to restore defaults for report type and date frame.
-  - Wires `viewReportBtn` to resolve selected report type, optionally fetch detailed data, and open viewer via `modules/menu/report_viewers.py`.
+  - Wires `viewReportBtn` to resolve selected report type, fetch detailed or
+    summary data when needed, and open viewer via `modules/menu/report_viewers.py`.
   - Sets default landing focus to `viewReportBtn` (deferred to next event loop tick).
 
 - `_apply_role_default_state(dlg, is_admin)`
@@ -41,11 +42,24 @@ This document summarizes the current functional design for report-menu wiring, f
     `modules.menu.report_generator.get_detailed_report(...)`.
   - Viewer rendering is delegated to `modules.menu.report_viewers.open_report_viewer(...)`.
 
+- Summary report integration
+  - For `summary` selection, `viewReportBtn` calls
+    `modules.menu.report_generator.get_summary_report(...)`.
+  - Summary rendering uses the same shared viewer shell and searchable text
+    layout as detailed, but with summary-specific sections:
+    sales by hour, top products by hour/day, and top 5 product lists.
+
 ## Viewer/UI Module
 ### `modules/menu/report_viewers.py`
 - Owns viewer/dialog UI functions (no data fetching).
 - Uses one shared viewer shell (`open_report_viewer`) with per-report renderers:
   - `detail`: searchable `QPlainTextEdit` with report text
+  - `summary`: searchable `QPlainTextEdit` with report text
+  - Rationale: `QPlainTextEdit` is used for the detailed report to preserve
+    fixed-width/monospaced column alignment and provide lightweight search
+    without adding external PDF toolchains. `QTextBrowser` is better suited
+    for complex HTML/CSS layouts; PDF export would require additional
+    dependencies and is unnecessary for this simple, fixed-width design.
   - other types (`summary|chart|inactivity`): placeholder content renderer
 - Uses `REPORT_VIEWER_SIZES` as the size policy map by report type, with default fallback.
 - Viewer closes via native window titlebar `X` button (no in-dialog Close push button).

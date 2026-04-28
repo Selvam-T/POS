@@ -13,16 +13,25 @@ Purpose
 Current status
 - `get_detailed_report(params)` is implemented and returns structured Detailed
   Sales Report data from `modules/db_operation/reports_repo.py`.
+- `get_summary_report(params)` is implemented and returns structured Summary
+  Sales Report data from the same repository.
 - `modules/menu/report_menu.py` now calls this adapter when
-  `detailReportRadioBtn` is selected.
+  `detailReportRadioBtn` or `summaryReportRadioBtn` is selected.
 - Viewer/UI rendering is intentionally separated into
   `modules/menu/report_viewers.py` (shared shell + per-report content renderer).
+  - Note: The detailed viewer uses `QPlainTextEdit` (monospaced, searchable)
+    to preserve fixed-width column alignment and avoid introducing external
+    PDF toolchains or heavier HTML-based rendering. `QTextBrowser` is more
+    appropriate for complex HTML/CSS reports; for the current simple
+    textual layout `QPlainTextEdit` keeps rendering lightweight and
+    dependency-free.
 - Report viewer sizes are controlled by `REPORT_VIEWER_SIZES` in
   `report_viewers.py`.
 - Viewer exit is via native titlebar `X` close button.
 
 Integration
-- UI: import `modules.menu.report_generator` and call `get_detailed_report`.
+- UI: import `modules.menu.report_generator` and call
+  `get_detailed_report` or `get_summary_report`.
 - Data: `report_generator` calls into `modules.db_operation.reports_repo`.
 
 Implementation notes

@@ -1,10 +1,9 @@
-"""UI-only report viewer helpers.
-
-This module owns report viewer dialogs and rendering. It intentionally keeps
-all data fetching outside (for example in report_generator / reports_repo).
+"""Report viewer is the rendering layer. 
+   It takes detailed/summary/chart/inactivity report data and builds the modal viewer UI.
 """
 
 import re
+from typing import Any, Dict, List
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QSyntaxHighlighter, QTextCharFormat
@@ -12,7 +11,7 @@ from PyQt5.QtWidgets import QDialog, QHBoxLayout, QLabel, QLineEdit, QPlainTextE
 from modules.date_time.formatters import format_report_timestamp
 import config
 
-# Viewer size policy moved to `config.py` as `REPORT_VIEWER_RATIOS`.
+# Viewer size policy REPORT_VIEWER_RATIOS is in `config.py`.
 # Keep a pixel fallback in case ratios are not available at runtime.
 DEFAULT_REPORT_VIEWER_SIZE = (760, 520)
 
@@ -43,14 +42,11 @@ def _cleanup_overlay(overlay):
 def _build_shell(parent_dlg: QDialog, *, report_type: str):
     """Create the modal viewer shell with titlebar close button."""
     rpt = str(report_type or 'summary').strip().lower()
-    # Resolve size from config.REPORT_VIEWER_RATIOS using the main/top-level
-    # window frame geometry (matches DialogWrapper behavior). Fall back to
-    # primary screen when main window cannot be determined.
+    # Size from config ratios, with screen fallback.
     size_w, size_h = DEFAULT_REPORT_VIEWER_SIZE
     mw = mh = mx = my = 0
     try:
-        # Find top-level ancestor (should be the main window when parent_dlg
-        # was created via DialogWrapper or setParent(main_window)).
+        # Find top-level parent window.
         ref = None
         if parent_dlg is not None:
             ref = parent_dlg
@@ -64,7 +60,7 @@ def _build_shell(parent_dlg: QDialog, *, report_type: str):
             mx = geom.x()
             my = geom.y()
         else:
-            # Fallback to primary screen available geometry
+            # Screen fallback.
             from PyQt5.QtWidgets import QApplication
             screen = QApplication.primaryScreen()
             geom = screen.availableGeometry()
@@ -86,7 +82,7 @@ def _build_shell(parent_dlg: QDialog, *, report_type: str):
     viewer.setWindowModality(Qt.WindowModal)
     viewer.setWindowFlags(viewer.windowFlags() | Qt.WindowTitleHint | Qt.WindowCloseButtonHint)
     viewer.setWindowTitle(f"{rpt.capitalize()} Report Viewer")
-    # Enforce minimum size from .ui and center on main window
+    # Apply minimum size and center.
     try:
         min_w = viewer.minimumWidth()
         min_h = viewer.minimumHeight()
@@ -94,7 +90,7 @@ def _build_shell(parent_dlg: QDialog, *, report_type: str):
         final_h = max(min_h, int(size_h))
         viewer.resize(final_w, final_h)
 
-        # Center the viewer over the reference window/screen
+        # Center over the reference window/screen.
         try:
             dw, dh = viewer.width(), viewer.height()
             dialog_x = mx + (mw - dw) // 2
@@ -116,7 +112,7 @@ def _build_shell(parent_dlg: QDialog, *, report_type: str):
 
 
 def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str], set[str]]:
-    """Render fixed-width text and style metadata for detailed report data."""
+    """Render detailed report text and style metadata."""
     if not isinstance(report, dict):
         report = {}
 
@@ -147,21 +143,21 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
         raw_unit = str(unit or '').strip()
         unit_lower = raw_unit.lower()
         if unit_lower in ('each', 'ea'):
-            return str(int(round(_to_float(qty)))), 'Ea'
+            return str(int(round(_to_float(qty)))), 'ea'
 
         unit_txt = raw_unit or '-'
         if 'kg' in unit_lower:
-            # Only convert to grams if the weight is less than 1.0 kg
+            # Use grams for sub-1kg weights.
             if qty < 1.0:
                 gram_qty = qty * 1000
                 qty_txt = f"{gram_qty:.0f}"  # Whole number for grams
                 unit_txt = 'g'
             else:
-                # Keep as kg for 1.0 and above, use 2 decimals (e.g., 1.50 kg)
+                # Keep kg for 1.0 and above.
                 qty_txt = f"{qty:.2f}"
                 unit_txt = 'kg' 
         else:
-            # Default behavior for non-weight units (Each, Pcs, etc.)
+            # Default for non-weight units.
             qty_txt = f"{qty:.3f}"
         return qty_txt, unit_txt
 
@@ -175,7 +171,7 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
 
     bold_lines: set[str] = set()
     table_header_lines: set[str] = set()
-    brown_lines: set[str] = set()
+    blue_lines: set[str] = set()
     
     gross_line = f"{'Gross Sales':<24} : {_fmt_money(sales.get('gross_sales')):>12}"
     net_line = f"{'Net After Outflow':<24} : {_fmt_money(sales.get('net_after_outflows')):>12}"
@@ -190,8 +186,8 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
         '1. Sales Summary',
         '-' * 72,
         f"{'PAID Receipt Count':<24} : {_to_int(sales.get('paid_receipt_count')):>8}",
-        '',
         gross_line,
+        '',
         f"{'Refund Outflow':<24} : {_fmt_money(sales.get('less_refund_outflow')):>12}",
         f"{'Vendor Outflow':<24} : {_fmt_money(sales.get('less_vendor_outflow')):>12}",
         '',
@@ -201,33 +197,50 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
         '-' * 72,
     ]
 
-    brown_lines.add(gross_line)
-    brown_lines.add(net_line)
-
-    pay_header = f"{'Method':<20} {'Amount':>12}"
-    lines.append(pay_header)
-    table_header_lines.add(pay_header)
+    blue_lines.add(gross_line)
+    blue_lines.add(net_line)
 
     if payments:
+        pay_header = f"{'Method':<24}   {'Amount':>12}"
+        lines.append(pay_header)
+        lines.append('')
+        table_header_lines.add(pay_header)
+
         for row in payments:
-            lines.append(f"{str(row.get('method') or '').upper():<20} {_fmt_money(row.get('amount')):>12}")
+            lines.append(f"{str(row.get('method') or '').upper():<24} : {_fmt_money(row.get('amount')):>12}")
         payment_total = sum(_to_float(row.get('amount')) for row in payments)
     else:
         lines.append('No payment rows.')
         payment_total = 0.0
 
     lines.append('')
-    payment_total_line = f"{'PAYMENT TOTAL':<20} {_fmt_money(payment_total):>12}"
+    payment_total_line = f"{'Payment Total':<24} : {_fmt_money(payment_total):>12}"
     lines.append(payment_total_line)
-    brown_lines.add(payment_total_line)
+    blue_lines.add(payment_total_line)
 
-    lines.extend(['', '3. Category Breakdown with Products', '-' * 72])
+    cash_received = sum(_to_float(row.get('amount')) for row in payments if str(row.get('method') or '').upper() == 'CASH')
+    refund_outflow = _to_float(sales.get('less_refund_outflow'))
+    vendor_outflow = _to_float(sales.get('less_vendor_outflow'))
+    cash_outflow = refund_outflow + vendor_outflow
+    cash_after_outflow = cash_received - cash_outflow
+
+    lines.extend(['', '3. Cash Drawer Expected', '-' * 72])
+    cash_line = f"{'CASH':<24} : {_fmt_money(cash_received):>12}"
+    cash_outflow_line = f"{'Refund + Vendor Outflow':<24} : {_fmt_money(cash_outflow):>12}"
+    cash_after_line = f"{'Cash After Outflow':<24} : {_fmt_money(cash_after_outflow):>12}"
+    lines.append(cash_line)
+    lines.append(cash_outflow_line)
+    lines.append('')
+    lines.append(cash_after_line)
+    #blue_lines.update({cash_line, cash_outflow_line, cash_after_line})
+    blue_lines.add(cash_after_line)
+
+    lines.extend(['', '4. Category Breakdown with Products', '-' * 72])
     name_w = 30
-    qty_w = 8
-    unit_w = 6
+    qty_unit_w = 14
     money_w = 12
     # Keep header/body columns on identical geometry (including index prefix).
-    prod_header = f"{'No.':<4}{'Product Name':<{name_w}} {'Qty Sold':>{qty_w}} {'':<{unit_w}} {'Amount':>{money_w}}"
+    prod_header = f"{'No.':<4}{'Product Name':<{name_w}} {'Qty Sold':>{qty_unit_w}} {'Amount':>{money_w}}"
     if categories:
         for cat_idx, cat in enumerate(categories):
             cat_name = str(cat.get('category_name') or 'Uncategorized')
@@ -240,42 +253,46 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
             for idx, prod in enumerate((cat.get('products') or []), start=1):
                 qty_txt, unit_txt = _fmt_qty_unit(prod.get('qty_sold'), prod.get('unit'))
                 product_name = _truncate(str(prod.get('product_name') or ''), name_w)
+                qty_unit_txt = f"{qty_txt} {unit_txt}".strip()
                 lines.append(
                     f"{str(idx) + '.':>3} {product_name:<{name_w}} "
-                    f"{qty_txt:>{qty_w}} {unit_txt:<{unit_w}} {_fmt_money(prod.get('line_sales')):>{money_w}}"
+                    f"{qty_unit_txt:>{qty_unit_w}} {_fmt_money(prod.get('line_sales')):>{money_w}}"
                 )
             lines.append('')
-            total_label_w = 4 + name_w + 1 + qty_w + 1 + unit_w
+            total_label_w = 4 + name_w + 1 + qty_unit_w
             total_line = f"{'Total':<{total_label_w}} {_fmt_money(cat_total):>{money_w}}"
             lines.append(total_line)
-            brown_lines.add(total_line)
+            blue_lines.add(total_line)
             #if cat_idx < len(categories) - 1:
             lines.append('.' * 72)
             lines.append('')
     else:
         lines.append('No category/product rows.')
 
-    lines.extend(['', '4. Top 10 Products', '-' * 72])
-    top_name_w = 30
-    top_header = f"{'Rank':>4} {'Product Name':<{top_name_w}} {'Qty Sold':>{qty_w}} {'':<{unit_w}} {'Amount':>{money_w}}"
-    lines.append(top_header)
-    table_header_lines.add(top_header)
+    lines.extend(['', '5. Top 10 Products', '-' * 72])
     if top_products:
+        top_name_w = 30
+        top_header = f"{'Rank':>4} {'Product Name':<{top_name_w}} {'Qty Sold':>{qty_unit_w}} {'Amount':>{money_w}}"
+        lines.append(top_header)
+        table_header_lines.add(top_header)
+
         for row in top_products:
             qty_txt, unit_txt = _fmt_qty_unit(row.get('qty_sold'), row.get('unit'))
             pname = _truncate(str(row.get('product_name') or ''), top_name_w)
+            qty_unit_txt = f"{qty_txt} {unit_txt}".strip()
             lines.append(
                 f"{_to_int(row.get('rank')):>3}. {pname:<{top_name_w}} "
-                f"{qty_txt:>{qty_w}} {unit_txt:<{unit_w}} {_fmt_money(row.get('line_sales')):>{money_w}}"
+                f"{qty_unit_txt:>{qty_unit_w}} {_fmt_money(row.get('line_sales')):>{money_w}}"
             )
     else:
         lines.append('No product rows.')
 
-    lines.extend(['', '5. Cash Outflows Detail', '-' * 72])
-    out_header = f"{'Type':<12} {'Date/Time':<20} {'Cashier':<10} {'Amount':>12}  Note"
-    lines.append(out_header)
-    table_header_lines.add(out_header)
+    lines.extend(['', '6. Cash Outflows Detail', '-' * 72])
     if outflows:
+        out_header = f"{'Type':<12} {'Date/Time':<20} {'Cashier':<10} {'Amount':>12}  Note"
+        lines.append(out_header)
+        table_header_lines.add(out_header)
+
         for row in outflows:
             outflow_type = row.get('outflow_type')
             if outflow_type == 'VENDOR_OUT':
@@ -297,7 +314,7 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
     lines.extend(
         [
             '',
-            '6. Excluded / Operational Section',
+            '7. Excluded / Operational Section',
             '-' * 72,
             f"{'UNPAID Receipts Count':<28} : {_to_int(excluded.get('unpaid_receipts_count')):>8}",
             f"{'UNPAID Receipts Total':<28} : {_fmt_money(excluded.get('unpaid_receipts_total')):>12}",
@@ -308,17 +325,17 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
             'END OF REPORT',
         ]
     )
-    return '\n'.join(lines), bold_lines, table_header_lines, brown_lines
+    return '\n'.join(lines), bold_lines, table_header_lines, blue_lines
 
 
 class _ReportTextHighlighter(QSyntaxHighlighter):
     """Apply lightweight styling to key lines in QPlainTextEdit."""
 
-    def __init__(self, document, *, bold_lines: set[str], table_header_lines: set[str], brown_lines: set[str]):
+    def __init__(self, document, *, bold_lines: set[str], table_header_lines: set[str], blue_lines: set[str]):
         super().__init__(document)
         self._bold_lines = bold_lines
         self._table_header_lines = table_header_lines
-        self._brown_lines = brown_lines
+        self._blue_lines = blue_lines
 
         self._body_fmt = QTextCharFormat()
         self._body_fmt.setFontFamily('Courier New')
@@ -350,20 +367,20 @@ class _ReportTextHighlighter(QSyntaxHighlighter):
         self._table_header_fmt.setFontFixedPitch(True)
         self._table_header_fmt.setFontWeight(50)
         self._table_header_fmt.setFontPointSize(12)
-        self._table_header_fmt.setForeground(QColor('#1E70FF'))
+        self._table_header_fmt.setForeground(QColor('#7A4A21'))
 
-        self._brown_fmt = QTextCharFormat()
-        self._brown_fmt.setFontFamily('Courier New')
-        self._brown_fmt.setFontFixedPitch(True)
-        self._brown_fmt.setFontWeight(50)
-        self._brown_fmt.setFontPointSize(12)
-        self._brown_fmt.setForeground(QColor('#7A4A21'))
+        self._blue_fmt = QTextCharFormat()
+        self._blue_fmt.setFontFamily('Courier New')
+        self._blue_fmt.setFontFixedPitch(True)
+        self._blue_fmt.setFontWeight(75)
+        self._blue_fmt.setFontPointSize(12)
+        self._blue_fmt.setForeground(QColor('#1E70FF'))
 
     def highlightBlock(self, text: str) -> None:
-        # Apply one common monospaced baseline to all lines for strict column alignment.
+        # Base formatting for alignment.
         self.setFormat(0, len(text), self._body_fmt)
 
-        if text == 'DETAILED SALES REPORT':
+        if text in ('DETAILED SALES REPORT', 'SUMMARY SALES REPORT'):
             self.setFormat(0, len(text), self._title_fmt)
             return
 
@@ -375,8 +392,8 @@ class _ReportTextHighlighter(QSyntaxHighlighter):
             self.setFormat(0, len(text), self._table_header_fmt)
             return
 
-        if text in self._brown_lines:
-            self.setFormat(0, len(text), self._brown_fmt)
+        if text in self._blue_lines:
+            self.setFormat(0, len(text), self._blue_fmt)
             return
 
         if text in self._bold_lines:
@@ -393,8 +410,15 @@ def _render_placeholder(layout: QVBoxLayout, *, report_type: str) -> None:
     layout.addWidget(msg)
 
 
-def _render_detailed(layout: QVBoxLayout, *, report_data: dict) -> None:
-    """Render detailed text report with search and scrollbars."""
+def _render_text_report(
+    layout: QVBoxLayout,
+    *,
+    report_text: str,
+    bold_lines: set[str],
+    table_header_lines: set[str],
+    blue_lines: set[str],
+) -> None:
+    """Render searchable monospaced text report content."""
     search_row = QHBoxLayout()
     search_row.setSpacing(8)
 
@@ -416,15 +440,14 @@ def _render_detailed(layout: QVBoxLayout, *, report_data: dict) -> None:
     text_box.setLineWrapMode(QPlainTextEdit.NoWrap)
     text_box.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
     text_box.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-    report_text, bold_lines, table_header_lines, brown_lines = _format_detailed_report_text(report_data)
     text_box.setPlainText(report_text)
     text_box._report_highlighter = _ReportTextHighlighter(  # keep reference alive
-        text_box.document(), bold_lines=bold_lines, table_header_lines=table_header_lines, brown_lines=brown_lines
+        text_box.document(), bold_lines=bold_lines, table_header_lines=table_header_lines, blue_lines=blue_lines
     )
     layout.addWidget(text_box)
 
     def _highlight_matches(term: str) -> None:
-        """Highlight all search matches with yellow background."""
+        """Highlight search matches."""
         if not term:
             text_box.setExtraSelections([])
             return
@@ -460,8 +483,193 @@ def _render_detailed(layout: QVBoxLayout, *, report_data: dict) -> None:
     search_input.returnPressed.connect(_find_text)
 
 
+def _render_detailed(layout: QVBoxLayout, *, report_data: dict) -> None:
+    """Render detailed report text with search."""
+    report_text, bold_lines, table_header_lines, blue_lines = _format_detailed_report_text(report_data)
+    _render_text_report(
+        layout,
+        report_text=report_text,
+        bold_lines=bold_lines,
+        table_header_lines=table_header_lines,
+        blue_lines=blue_lines,
+    )
+
+
+def _format_summary_report_text(report: dict) -> tuple[str, set[str], set[str], set[str]]:
+    """Render summary report text and style metadata."""
+    if not isinstance(report, dict):
+        report = {}
+
+    def _to_float(value) -> float:
+        try:
+            return float(value or 0.0)
+        except Exception:
+            return 0.0
+
+    def _to_int(value) -> int:
+        try:
+            return int(value or 0)
+        except Exception:
+            return 0
+
+    def _fmt_money(value) -> str:
+        return f"$ {_to_float(value):,.2f}"
+
+    def _truncate(text: str, width: int) -> str:
+        s = str(text or '')
+        if len(s) <= width:
+            return s
+        if width <= 3:
+            return s[:width]
+        return s[: width - 3] + '...'
+
+    def _fmt_qty_unit(qty, unit) -> tuple[str, str]:
+        raw_unit = str(unit or '').strip()
+        unit_lower = raw_unit.lower()
+        if unit_lower in ('each', 'ea'):
+            return str(int(round(_to_float(qty)))), 'ea'
+
+        unit_txt = raw_unit or '-'
+        if 'kg' in unit_lower:
+            if qty < 1.0:
+                gram_qty = qty * 1000
+                qty_txt = f"{gram_qty:.0f}"
+                unit_txt = 'g'
+            else:
+                qty_txt = f"{qty:.2f}"
+                unit_txt = 'kg'
+        else:
+            qty_txt = f"{qty:.3f}"
+        return qty_txt, unit_txt
+
+    header = report.get('header') or {}
+    sales = report.get('sales_summary') or {}
+    sales_by_hour = report.get('sales_by_hour') or []
+    peak_hour = report.get('peak_hour') or {}
+    top_qty_by_hour = report.get('top_products_by_qty_hour') or []
+    top_sales_by_hour = report.get('top_products_by_sales_hour') or []
+    top_qty_day = report.get('top_products_by_qty_day') or []
+    top_sales_day = report.get('top_products_by_sales_day') or []
+    excluded = report.get('excluded') or {}
+
+    bold_lines: set[str] = set()
+    table_header_lines: set[str] = set()
+    blue_lines: set[str] = set()
+
+    gross_line = f"{'Gross Sales':<24} : {_fmt_money(sales.get('gross_sales')):>12}"
+    refund_line = f"{'Less Refund Outflow':<24} : {_fmt_money(sales.get('less_refund_outflow')):>12}"
+    vendor_line = f"{'Less Vendor Outflow':<24} : {_fmt_money(sales.get('less_vendor_outflow')):>12}"
+    net_line = f"{'Net After Outflows':<24} : {_fmt_money(sales.get('net_after_outflows')):>12}"
+
+    lines = [
+        'SUMMARY SALES REPORT',
+        '=' * 72,
+        f"Period        : {format_report_timestamp(header.get('period_from'))} to {format_report_timestamp(header.get('period_to'))}",
+        f"Generated At  : {format_report_timestamp(header.get('generated_at'))}",
+        f"Generated By  : {header.get('generated_by') or '-'}",
+        '',
+        '1. SALES SUMMARY',
+        '-' * 70,
+        f"{'PAID Receipt Count':<24} : {_to_int(sales.get('paid_receipt_count')):>8}",
+        gross_line,
+        '',
+        refund_line,
+        vendor_line,
+        '',
+        net_line,
+    ]
+    blue_lines.update({gross_line, net_line})
+
+    lines.extend(['', '2. SALES BY HOUR', '-' * 70])
+    if sales_by_hour:
+        hour_header = f"{'Hour Slot':<24} {'Sales Amount':>12}"
+        lines.append(hour_header)
+        table_header_lines.add(hour_header)
+
+        for row in sales_by_hour:
+            hour_slot = str(row.get('hour_slot') or '')
+            amount = _fmt_money(row.get('sales_amount'))
+            lines.append(f"{hour_slot:<24} {amount:>12}")
+    else:
+        lines.append('No sales by hour rows.')
+
+    peak_hour_label = str(peak_hour.get('hour_slot') or '-')
+    peak_hour_amount = _fmt_money(peak_hour.get('sales_amount')) if peak_hour else _fmt_money(0.0)
+    peak_line = f"{'Peak Hour':<24} {peak_hour_label:<14} ({peak_hour_amount})"
+    lines.append('')
+    lines.append(peak_line)
+    blue_lines.add(peak_line)
+
+    name_w = 28
+    qty_unit_w = 14
+    sales_w = 12
+    top_header = f"{'Rank':>4} {'Product Name':<{name_w}} {'Qty Sold':>{qty_unit_w}} {'Line Sales':>{sales_w}}"
+
+    def _append_group_section(title: str, groups: List[Dict[str, Any]], section_no: int) -> None:
+        lines.extend(['', f'{section_no}. {title}', '-' * 70])
+        for group in groups:
+            hour_slot = str(group.get('hour_slot') or '')
+            products = group.get('products') or []
+            lines.append(hour_slot)
+            bold_lines.add(hour_slot)
+            if products:
+                lines.append(top_header)
+                table_header_lines.add(top_header)
+
+                for row in products:
+                    qty_txt, unit_txt = _fmt_qty_unit(row.get('qty_sold'), row.get('unit'))
+                    qty_unit_txt = f"{qty_txt} {unit_txt}".strip()
+                    pname = _truncate(str(row.get('product_name') or ''), name_w)
+                    lines.append(
+                        f"{_to_int(row.get('rank')):>3}. {pname:<{name_w}} "
+                        f"{qty_unit_txt:>{qty_unit_w}} {_fmt_money(row.get('line_sales')):>{sales_w}}"
+                    )
+            else:
+                lines.append('No product rows.')
+            lines.append('')
+
+    _append_group_section('TOP 5 PRODUCTS BY QUANTITY BY HOUR', top_qty_by_hour, 3)
+    _append_group_section('TOP 5 PRODUCTS BY SALES AMOUNT BY HOUR', top_sales_by_hour, 4)
+
+    def _append_day_section(title: str, rows: List[Dict[str, Any]], section_no: int) -> None:
+        lines.extend(['', f'{section_no}. {title}', '-' * 70])
+        if rows:
+            lines.append(top_header)
+            table_header_lines.add(top_header)
+
+            for row in rows:
+                qty_txt, unit_txt = _fmt_qty_unit(row.get('qty_sold'), row.get('unit'))
+                qty_unit_txt = f"{qty_txt} {unit_txt}".strip()
+                pname = _truncate(str(row.get('product_name') or ''), name_w)
+                lines.append(
+                    f"{_to_int(row.get('rank')):>3}. {pname:<{name_w}} "
+                    f"{qty_unit_txt:>{qty_unit_w}} {_fmt_money(row.get('line_sales')):>{sales_w}}"
+                )
+        else:
+            lines.append('No product rows.')
+
+    _append_day_section('TOP 10 PRODUCTS BY QUANTITY BY DAY', top_qty_day, 5)
+    _append_day_section('TOP 10 PRODUCTS BY SALES AMOUNT BY DAY', top_sales_day, 6)
+
+    lines.extend(['', 'END OF REPORT'])
+
+    return '\n'.join(lines), bold_lines, table_header_lines, blue_lines
+
+
+def _render_summary(layout: QVBoxLayout, *, report_data: dict) -> None:
+    """Render summary report text with search."""
+    report_text, bold_lines, table_header_lines, blue_lines = _format_summary_report_text(report_data)
+    _render_text_report(
+        layout,
+        report_text=report_text,
+        bold_lines=bold_lines,
+        table_header_lines=table_header_lines,
+        blue_lines=blue_lines,
+    )
+
+
 def open_report_viewer(parent_dlg: QDialog, *, report_type: str, report_data: dict = None) -> None:
-    """Open report viewer with a shared shell and type-specific renderer."""
+    """Open the report viewer."""
     overlay = _create_overlay(parent_dlg)
     try:
         rpt = str(report_type or 'summary').strip().lower()
@@ -469,6 +677,8 @@ def open_report_viewer(parent_dlg: QDialog, *, report_type: str, report_data: di
 
         if rpt == 'detail':
             _render_detailed(layout, report_data=report_data or {})
+        elif rpt == 'summary':
+            _render_summary(layout, report_data=report_data or {})
         else:
             _render_placeholder(layout, report_type=rpt)
 

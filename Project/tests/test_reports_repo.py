@@ -80,6 +80,10 @@ class ReportsRepoTest(unittest.TestCase):
         )
         cur.execute(
             "INSERT INTO receipts(receipt_id, receipt_no, status, grand_total, created_at, paid_at, customer_name, note) "
+            "VALUES (3, '20260206-0003', 'PAID', 39.50, '2026-06-02T09:00:00', '2026-06-02T09:20:00', '', '')"
+        )
+        cur.execute(
+            "INSERT INTO receipts(receipt_id, receipt_no, status, grand_total, created_at, paid_at, customer_name, note) "
             "VALUES (2, '20260206-0002', 'UNPAID', 20.00, '2026-06-02T11:00:00', NULL, 'John', 'Pending')"
         )
         cur.execute(
@@ -91,7 +95,18 @@ class ReportsRepoTest(unittest.TestCase):
             "VALUES (1, 'Bread', 'Bakery', 1, 'Each', 5.0, 5.0)"
         )
         cur.execute(
+            "INSERT INTO receipt_items(receipt_id, product_name, category, quantity, unit, unit_price, line_total) "
+            "VALUES (3, 'Red Apple', 'Fruits', 2.5, 'Kg', 3.0, 7.5)"
+        )
+        cur.execute(
+            "INSERT INTO receipt_items(receipt_id, product_name, category, quantity, unit, unit_price, line_total) "
+            "VALUES (3, 'Detergent', 'Household', 1, 'Each', 32.0, 32.0)"
+        )
+        cur.execute(
             "INSERT INTO receipt_payments(receipt_id, payment_type, amount, tendered) VALUES (1, 'CASH', 18.0, 20.0)"
+        )
+        cur.execute(
+            "INSERT INTO receipt_payments(receipt_id, payment_type, amount, tendered) VALUES (3, 'CASH', 39.5, 40.0)"
         )
         cur.execute(
             "INSERT INTO cash_outflows(outflows_type, amount, created_at, cashier_id, note) "
@@ -108,20 +123,38 @@ class ReportsRepoTest(unittest.TestCase):
 
             self.assertIsInstance(rpt, dict)
             self.assertEqual(rpt['header']['generated_by'], 'admin')
-            self.assertEqual(rpt['sales_summary']['paid_receipt_count'], 1)
-            self.assertEqual(rpt['sales_summary']['gross_sales'], 50.0)
+            self.assertEqual(rpt['sales_summary']['paid_receipt_count'], 2)
+            self.assertEqual(rpt['sales_summary']['gross_sales'], 89.5)
             self.assertEqual(rpt['sales_summary']['less_refund_outflow'], 3.0)
-            self.assertEqual(rpt['sales_summary']['net_after_outflows'], 47.0)
+            self.assertEqual(rpt['sales_summary']['net_after_outflows'], 86.5)
 
             self.assertEqual(len(rpt['payment_breakdown']), 1)
             self.assertEqual(rpt['payment_breakdown'][0]['method'], 'CASH')
-            self.assertEqual(rpt['payment_breakdown'][0]['amount'], 18.0)
+            self.assertEqual(rpt['payment_breakdown'][0]['amount'], 57.5)
 
-            self.assertEqual(len(rpt['categories']), 2)
-            self.assertEqual(rpt['top_products'][0]['product_name'], 'Milk 2L')
+            self.assertGreaterEqual(len(rpt['categories']), 4)
+            self.assertEqual(rpt['top_products'][0]['product_name'], 'Detergent')
 
             self.assertEqual(rpt['excluded']['unpaid_receipts_count'], 1)
             self.assertEqual(rpt['excluded']['unpaid_receipts_total'], 20.0)
+        finally:
+            conn.close()
+
+    def test_summary_report_aggregates(self):
+        conn = self._build_conn()
+        try:
+            params = {'from': '2026-06-02T00:00:00', 'to': '2026-06-02T23:59:59', 'user_id': 1}
+            rpt = reports_repo.summary_report(params, conn=conn)
+
+            self.assertIsInstance(rpt, dict)
+            self.assertEqual(rpt['sales_summary']['paid_receipt_count'], 2)
+            self.assertEqual(rpt['sales_summary']['gross_sales'], 89.5)
+            self.assertEqual(len(rpt['sales_by_hour']), 2)
+            self.assertEqual(rpt['peak_hour']['hour_slot'], '09:00 - 10:00')
+            self.assertEqual(len(rpt['top_products_by_qty_hour']), 2)
+            self.assertEqual(len(rpt['top_products_by_sales_hour']), 2)
+            self.assertGreaterEqual(len(rpt['top_products_by_qty_day']), 3)
+            self.assertGreaterEqual(len(rpt['top_products_by_sales_day']), 3)
         finally:
             conn.close()
 
