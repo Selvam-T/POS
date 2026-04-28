@@ -162,8 +162,9 @@ Below is a mapping of functions in `modules/db_operation/` related to each datab
 	- summary_report   -- Builds the Summary Sales Report with hourly sales,
 	  top products by hour/day, and payment breakdown.
 	- chart_series     -- (planned) Series data for time-based charts (sales by hour).
-	- inactivity_report-- (planned) Inactivity buckets using `product_list` and
-	  `receipt_items`/`receipts` to compute last-sold dates.
+	- inactivity_report-- Builds the Inactive Products Report using `Product_list`
+	  as the master product list and paid `receipts` + `receipt_items` history to
+	  compute last-sold dates and inactivity buckets.
 
 **sqlite_sequence**
 - No direct functions; this is an internal SQLite table, not managed by application code.

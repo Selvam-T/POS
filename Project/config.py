@@ -24,7 +24,7 @@ REPORT_VIEWER_RATIOS = {
 	'detail': (0.6, 0.85),
 	'summary': (0.6, 0.85),
 	'chart': (0.85, 0.75),
-	'inactivity': (0.55, 0.5),
+	'inactivity': (0.6, 0.85),
 }
 
 # Product Categories (Don't exceed 25 Characters)

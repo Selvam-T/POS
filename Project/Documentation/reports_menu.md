@@ -14,8 +14,9 @@ This document summarizes the current functional design for report-menu wiring, f
   - Applies role defaults/permissions via `_apply_role_default_state(...)`.
   - Wires shared date gating via `DateRangeGateController`.
   - Wires `resetReportBtn` to restore defaults for report type and date frame.
-  - Wires `viewReportBtn` to resolve selected report type, fetch detailed or
-    summary data when needed, and open viewer via `modules/menu/report_viewers.py`.
+  - Wires `viewReportBtn` to resolve selected report type, fetch detailed,
+    summary, or inactivity data when needed, and open viewer via
+    `modules/menu/report_viewers.py`.
   - Sets default landing focus to `viewReportBtn` (deferred to next event loop tick).
 
 - `_apply_role_default_state(dlg, is_admin)`
@@ -49,18 +50,30 @@ This document summarizes the current functional design for report-menu wiring, f
     layout as detailed, but with summary-specific sections:
     sales by hour, top products by hour/day, and top 5 product lists.
 
+- Inactivity report integration
+  - For `inactivity` selection, `viewReportBtn` calls
+    `modules.menu.report_generator.get_inactivity_report(...)`.
+  - Inactivity rendering uses the same shared viewer shell and searchable text
+    layout as detailed/summary, with fixed-width tables for inactive product
+    buckets and the summary count block.
+  - While `inactivityReportRadioBtn` is selected, the date-range frame is
+    temporarily locked: `dateRangeRadioBtn` is disabled, the date edits are
+    read-only/greyed, and the field labels are dimmed. When the radio is
+    deselected, the current date-mode selection is restored.
+
 ## Viewer/UI Module
 ### `modules/menu/report_viewers.py`
 - Owns viewer/dialog UI functions (no data fetching).
 - Uses one shared viewer shell (`open_report_viewer`) with per-report renderers:
   - `detail`: searchable `QPlainTextEdit` with report text
   - `summary`: searchable `QPlainTextEdit` with report text
+  - `inactivity`: searchable `QPlainTextEdit` with report text
   - Rationale: `QPlainTextEdit` is used for the detailed report to preserve
     fixed-width/monospaced column alignment and provide lightweight search
     without adding external PDF toolchains. `QTextBrowser` is better suited
     for complex HTML/CSS layouts; PDF export would require additional
     dependencies and is unnecessary for this simple, fixed-width design.
-  - other types (`summary|chart|inactivity`): placeholder content renderer
+  - other types (`chart` and unknown values): placeholder content renderer
 - Uses `REPORT_VIEWER_SIZES` as the size policy map by report type, with default fallback.
 - Viewer closes via native window titlebar `X` button (no in-dialog Close push button).
 - Applies dim overlay while viewer is open.

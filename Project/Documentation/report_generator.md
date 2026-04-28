@@ -15,8 +15,11 @@ Current status
   Sales Report data from `modules/db_operation/reports_repo.py`.
 - `get_summary_report(params)` is implemented and returns structured Summary
   Sales Report data from the same repository.
+- `get_inactivity_report(params)` is implemented and returns structured
+  Inactive Products Report data from the same repository.
 - `modules/menu/report_menu.py` now calls this adapter when
-  `detailReportRadioBtn` or `summaryReportRadioBtn` is selected.
+  `detailReportRadioBtn`, `summaryReportRadioBtn`, or
+  `inactivityReportRadioBtn` is selected.
 - Viewer/UI rendering is intentionally separated into
   `modules/menu/report_viewers.py` (shared shell + per-report content renderer).
   - Note: The detailed viewer uses `QPlainTextEdit` (monospaced, searchable)
@@ -31,7 +34,7 @@ Current status
 
 Integration
 - UI: import `modules.menu.report_generator` and call
-  `get_detailed_report` or `get_summary_report`.
+  `get_detailed_report`, `get_summary_report`, or `get_inactivity_report`.
 - Data: `report_generator` calls into `modules.db_operation.reports_repo`.
 
 Implementation notes

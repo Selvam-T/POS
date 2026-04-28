@@ -9,8 +9,9 @@ from datetime import datetime
 import sqlite3
 from typing import Any, Dict, List, Optional, Tuple
 
+from ..date_time.formatters import parse_to_datetime
 from .db import get_conn, now_iso
-from . import receipt_repo
+from . import products_repo, receipt_repo
 
 
 def _table_columns(conn: sqlite3.Connection, table_name: str) -> set[str]:
@@ -159,7 +160,9 @@ def _fetch_paid_item_rows(
                 {
                     'hour_order': hour_order,
                     'hour_slot': hour_slot[1] if hour_slot else '00:00 - 01:00',
+                    'product_code': str(item.get('product_code') or ''),
                     'product_name': item.get('product_name') or '',
+                    'category': item.get('category') or '',
                     'unit': item.get('unit') or '',
                     'qty_sold': qty,
                     'line_sales': line_sales,
@@ -218,9 +221,13 @@ def _receipt_filter_clause(
         where_parts.append(f"{status_col} = ? COLLATE NOCASE")
         params.append(status)
 
-    if paid_col is not None and period_from is not None and period_to is not None:
-        where_parts.append(f"{paid_col} >= ? AND {paid_col} <= ?")
-        params.extend([period_from, period_to])
+    if paid_col is not None and period_from is not None:
+        where_parts.append(f"{paid_col} >= ?")
+        params.append(period_from)
+
+    if paid_col is not None and period_to is not None:
+        where_parts.append(f"{paid_col} <= ?")
+        params.append(period_to)
 
     if not where_parts:
         return "", params
@@ -553,6 +560,160 @@ def _fetch_excluded_receipts(
     }
 
 
+def _parse_cutoff_datetime(period_from: Optional[str], period_to: Optional[str]) -> Optional[datetime]:
+    cutoff_value = period_to or period_from
+    if cutoff_value is None:
+        return None
+    dt = parse_to_datetime(cutoff_value)
+    if dt is not None:
+        return dt
+    try:
+        return datetime.fromisoformat(str(cutoff_value).replace('Z', '+00:00'))
+    except Exception:
+        return None
+
+
+def _months_since(last_sold: datetime, cutoff: datetime) -> Optional[int]:
+    if last_sold is None or cutoff is None:
+        return None
+    if last_sold > cutoff:
+        return None
+    months = (cutoff.year - last_sold.year) * 12 + (cutoff.month - last_sold.month)
+    if cutoff.day < last_sold.day:
+        months -= 1
+    return months
+
+
+def _norm_key(value: Any) -> str:
+    return str(value or '').strip().lower()
+
+
+def _build_inactivity_report_rows(
+    conn: sqlite3.Connection,
+    *,
+    period_from: Optional[str],
+    period_to: Optional[str],
+) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    products = products_repo.list_products(conn=conn)
+    if not products:
+        return [], {
+            'bucket_counts': {'3_6': 0, '6_12': 0, '1_plus': 0, 'never': 0},
+            'total_inactive_products': 0,
+        }
+
+    cutoff_dt = _parse_cutoff_datetime(period_from, period_to)
+    if cutoff_dt is None:
+        cutoff_dt = parse_to_datetime(now_iso())
+
+    paid_receipts = _fetch_paid_receipt_rows(conn, period_from=None, period_to=period_to)
+    last_sold_by_code: Dict[str, datetime] = {}
+    last_sold_by_name: Dict[str, datetime] = {}
+
+    for receipt in paid_receipts:
+        receipt_no = str(receipt.get('receipt_no') or '')
+        if not receipt_no:
+            continue
+        paid_dt = parse_to_datetime(receipt.get('paid_at'))
+        if paid_dt is None:
+            continue
+        receipt_id = receipt.get('receipt_id')
+        items = receipt_repo.list_receipt_items_by_no(
+            receipt_no,
+            receipt_id=_to_int(receipt_id) if receipt_id is not None else None,
+            conn=conn,
+        )
+        for item in items:
+            code_key = _norm_key(item.get('product_code'))
+            name_key = _norm_key(item.get('product_name'))
+            if code_key:
+                current = last_sold_by_code.get(code_key)
+                if current is None or paid_dt > current:
+                    last_sold_by_code[code_key] = paid_dt
+            if name_key:
+                current = last_sold_by_name.get(name_key)
+                if current is None or paid_dt > current:
+                    last_sold_by_name[name_key] = paid_dt
+
+    buckets: Dict[str, List[Dict[str, Any]]] = {
+        '3_6': [],
+        '6_12': [],
+        '1_plus': [],
+        'never': [],
+    }
+
+    for product in products:
+        product_code = str(product.get('product_code') or '')
+        product_name = str(product.get('name') or '')
+        category = str(product.get('category') or '')
+        code_key = _norm_key(product_code)
+        name_key = _norm_key(product_name)
+        last_sold_dt = last_sold_by_code.get(code_key) or last_sold_by_name.get(name_key)
+
+        if last_sold_dt is None:
+            buckets['never'].append(
+                {
+                    'product_code': product_code,
+                    'product_name': product_name,
+                    'category': category,
+                    'last_sold': None,
+                }
+            )
+            continue
+
+        months_since = _months_since(last_sold_dt, cutoff_dt) if cutoff_dt is not None else None
+        if months_since is None or months_since < 3:
+            continue
+        if months_since < 6:
+            bucket_key = '3_6'
+        elif months_since < 12:
+            bucket_key = '6_12'
+        else:
+            bucket_key = '1_plus'
+
+        buckets[bucket_key].append(
+            {
+                'product_code': product_code,
+                'product_name': product_name,
+                'category': category,
+                'last_sold': last_sold_dt.isoformat(sep=' '),
+            }
+        )
+
+    def _sort_rows(rows: List[Dict[str, Any]], *, never_sold: bool = False) -> List[Dict[str, Any]]:
+        if never_sold:
+            return sorted(rows, key=lambda r: (_norm_key(r.get('product_code')), _norm_key(r.get('product_name'))))
+        return sorted(
+            rows,
+            key=lambda r: (
+                parse_to_datetime(r.get('last_sold')) or datetime.min,
+                _norm_key(r.get('product_code')),
+                _norm_key(r.get('product_name')),
+            ),
+        )
+
+    buckets['3_6'] = _sort_rows(buckets['3_6'])
+    buckets['6_12'] = _sort_rows(buckets['6_12'])
+    buckets['1_plus'] = _sort_rows(buckets['1_plus'])
+    buckets['never'] = _sort_rows(buckets['never'], never_sold=True)
+
+    summary = {
+        'bucket_counts': {
+            '3_6': len(buckets['3_6']),
+            '6_12': len(buckets['6_12']),
+            '1_plus': len(buckets['1_plus']),
+            'never': len(buckets['never']),
+        },
+        'total_inactive_products': len(buckets['3_6']) + len(buckets['6_12']) + len(buckets['1_plus']) + len(buckets['never']),
+    }
+
+    return [
+        {'bucket': '3_6', 'title': 'NO SALE FOR 3–6 MONTHS', 'products': buckets['3_6']},
+        {'bucket': '6_12', 'title': 'NO SALE FOR 6–12 MONTHS', 'products': buckets['6_12']},
+        {'bucket': '1_plus', 'title': 'NO SALE FOR MORE THAN 1 YEAR', 'products': buckets['1_plus']},
+        {'bucket': 'never', 'title': 'NEVER SOLD', 'products': buckets['never']},
+    ], summary
+
+
 def detailed_report(
     params: Dict[str, Any],
     *,
@@ -683,6 +844,31 @@ def summary_report(
             'cash_outflows': outflows,
             'outflow_subtotals': outflow_subtotals,
             'excluded': excluded,
+        }
+    finally:
+        if own:
+            c.close()
+
+
+def inactivity_report(
+    params: Dict[str, Any],
+    *,
+    conn: Optional[sqlite3.Connection] = None,
+) -> Dict[str, Any]:
+    """Return the inactivity report."""
+    period_from, period_to = _safe_period(params)
+    own = conn is None
+    c = conn or get_conn()
+    try:
+        sections, summary = _build_inactivity_report_rows(c, period_from=period_from, period_to=period_to)
+        return {
+            'header': {
+                'period_checked': period_to or period_from,
+                'generated_at': now_iso(),
+                'generated_by': _resolve_generated_by(c, params),
+            },
+            'sections': sections,
+            'summary': summary,
         }
     finally:
         if own:

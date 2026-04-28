@@ -190,6 +190,7 @@ def launch_reports_dialog(host_window):
 
     # Report action/date widgets for gating flow
     date_range = dlg.findChild(QRadioButton, 'dateRangeRadioBtn')
+    inactivity = dlg.findChild(QRadioButton, 'inactivityReportRadioBtn')
     today = dlg.findChild(QRadioButton, 'todayRadioBtn')
     from_date = dlg.findChild(QDateEdit, 'reportFromDateEdit')
     to_date = dlg.findChild(QDateEdit, 'reportToDateEdit')
@@ -224,9 +225,42 @@ def launch_reports_dialog(host_window):
         pass
 
     gate_controller = None
+    inactivity_restore_mode = {'radio': None}
     if all((today, date_range, from_date, to_date)):
         def _focus_first_action() -> None:
             _defer_focus(view_btn)
+
+        def _set_inactivity_gate(active: bool) -> None:
+            try:
+                if active:
+                    if date_range is not None:
+                        inactivity_restore_mode['radio'] = 'date_range' if date_range.isChecked() else 'today'
+                        date_range.setEnabled(False)
+                        set_locked_property(date_range, True)
+                    if today is not None:
+                        today.setText('Upto Today')
+                        today.setChecked(True)
+                    if gate_controller is not None:
+                        gate_controller.apply_state()
+                    _defer_focus(view_btn)
+                else:
+                    if date_range is not None:
+                        date_range.setEnabled(is_admin_user)
+                        set_locked_property(date_range, not is_admin_user)
+                        if inactivity_restore_mode.get('radio') == 'date_range':
+                            date_range.setChecked(True)
+                        else:
+                            today.setChecked(True)
+                    if today is not None:
+                        today.setText('Today')
+                    if gate_controller is not None:
+                        gate_controller.apply_state()
+                    _defer_focus(view_btn)
+            except Exception:
+                pass
+
+        def _on_inactivity_toggled(checked: bool) -> None:
+            _set_inactivity_gate(bool(checked))
 
         try:
             gate_controller = DateRangeGateController(
@@ -246,12 +280,28 @@ def launch_reports_dialog(host_window):
             except Exception:
                 pass
 
+        try:
+            if inactivity is not None:
+                inactivity.toggled.connect(_on_inactivity_toggled)
+        except Exception:
+            pass
+
+        try:
+            _set_inactivity_gate(False)
+        except Exception:
+            pass
+
     try:
         _apply_role_default_state(dlg, is_admin=is_admin_user)
         # Initialize date/actions gating after role defaults are applied.
         if gate_controller is not None:
             gate_controller.init_date_bounds()
             gate_controller.apply_state()
+            if inactivity is not None and inactivity.isChecked():
+                try:
+                    _set_inactivity_gate(True)
+                except Exception:
+                    pass
         else:
             # Safe fallback if gate controller is unavailable.
             for btn in action_buttons:
@@ -268,7 +318,10 @@ def launch_reports_dialog(host_window):
 
     def _reset_report_selection() -> None:
         try:
+            inactivity_restore_mode['radio'] = None
             _apply_role_default_state(dlg, is_admin=is_admin_user)
+            if today is not None:
+                today.setText('Today')
             if gate_controller is not None:
                 gate_controller.init_date_bounds()
                 gate_controller.apply_state()
@@ -290,6 +343,8 @@ def launch_reports_dialog(host_window):
                 data = report_generator.get_detailed_report(_build_report_params(dlg, host_window))
             elif rpt == 'summary':
                 data = report_generator.get_summary_report(_build_report_params(dlg, host_window))
+            elif rpt == 'inactivity':
+                data = report_generator.get_inactivity_report(_build_report_params(dlg, host_window))
 
             report_viewers.open_report_viewer(dlg, report_type=rpt, report_data=data)
             _defer_focus(view_btn)

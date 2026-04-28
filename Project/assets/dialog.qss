@@ -312,6 +312,22 @@ QPushButton[objectName="saveExcelReportBtn"][locked="false"] {
     color: white;
 }
 
+QFrame#reportDateFrame[locked="true"] QLabel[objectName$="FieldLbl"] {
+    color: #5c5e5fb1 !important;
+}
+
+QFrame#reportDateFrame[locked="true"] QDateEdit {
+    background-color: #f0f0f0;
+    color: transparent;
+    border: 1px solid #dcdcdc;
+}
+
+QFrame#reportDateFrame[locked="true"] QDateEdit:disabled,
+QFrame#reportDateFrame[locked="true"] QDateEdit QLineEdit,
+QFrame#reportDateFrame[locked="true"] QDateEdit QLineEdit:disabled {
+    color: transparent;
+}
+
 /* ComboBox Dropdown Arrow */
 QComboBox::down-arrow {
     image: url(assets/icons/down_arrow.svg);

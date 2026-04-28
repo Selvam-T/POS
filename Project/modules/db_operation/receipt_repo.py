@@ -89,6 +89,7 @@ def list_receipt_items_by_no(
             return []
 
         qty_col = _first_existing(cols, "quantity", "qty")
+        code_col = _first_existing(cols, "product_code")
         name_col = _first_existing(cols, "product_name", "name")
         unit_col = _first_existing(cols, "unit")
         price_col = _first_existing(cols, "unit_price", "price")
@@ -96,6 +97,7 @@ def list_receipt_items_by_no(
         order_col = _first_existing(cols, "line_no", "id", "item_id")
 
         select_parts = [
+            _select_alias(code_col, "product_code", "''"),
             _select_alias(qty_col, "qty", "0"),
             _select_alias(name_col, "product_name", "''"),
             _select_alias(unit_col, "unit", "''"),
