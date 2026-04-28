@@ -293,18 +293,29 @@ class ReportsRepoTest(unittest.TestCase):
     def test_summary_report_aggregates(self):
         conn = self._build_conn()
         try:
-            params = {'from': '2026-06-02T00:00:00', 'to': '2026-06-02T23:59:59', 'user_id': 1}
+            params = {'from': '2026-06-02T00:00:00', 'to': '2026-06-03T23:59:59', 'user_id': 1}
             rpt = reports_repo.summary_report(params, conn=conn)
 
             self.assertIsInstance(rpt, dict)
-            self.assertEqual(rpt['sales_summary']['paid_receipt_count'], 2)
-            self.assertEqual(rpt['sales_summary']['gross_sales'], 89.5)
+            self.assertAlmostEqual(rpt['sales_summary']['paid_receipt_count'], 1.0)
+            self.assertAlmostEqual(rpt['sales_summary']['gross_sales'], 44.75)
+            self.assertAlmostEqual(rpt['sales_summary']['less_refund_outflow'], 1.5)
+            self.assertAlmostEqual(rpt['sales_summary']['net_after_outflows'], 43.25)
             self.assertEqual(len(rpt['sales_by_hour']), 2)
             self.assertEqual(rpt['peak_hour']['hour_slot'], '09:00 - 10:00')
+            self.assertAlmostEqual(rpt['sales_by_hour'][0]['sales_amount'], 19.75)
+            self.assertAlmostEqual(rpt['sales_by_hour'][1]['sales_amount'], 9.0)
+            self.assertAlmostEqual(rpt['peak_hour']['sales_amount'], 19.75)
             self.assertEqual(len(rpt['top_products_by_qty_hour']), 2)
             self.assertEqual(len(rpt['top_products_by_sales_hour']), 2)
             self.assertGreaterEqual(len(rpt['top_products_by_qty_day']), 3)
             self.assertGreaterEqual(len(rpt['top_products_by_sales_day']), 3)
+            self.assertEqual(rpt['top_products_by_qty_hour'][0]['products'][0]['product_name'], 'Red Apple')
+            self.assertAlmostEqual(rpt['top_products_by_qty_hour'][0]['products'][0]['qty_sold'], 1.25)
+            self.assertEqual(rpt['top_products_by_qty_day'][0]['product_name'], 'Red Apple')
+            self.assertAlmostEqual(rpt['top_products_by_qty_day'][0]['qty_sold'], 1.25)
+            self.assertEqual(rpt['top_products_by_sales_day'][0]['product_name'], 'Detergent')
+            self.assertAlmostEqual(rpt['top_products_by_sales_day'][0]['line_sales'], 16.0)
         finally:
             conn.close()
 

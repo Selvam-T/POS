@@ -32,6 +32,13 @@ Current status
   `report_viewers.py`.
 - Viewer exit is via native titlebar `X` close button.
 
+Summary report note
+- The Summary report is now presented as SALES INSIGHTS REPORT.
+- Section 1 uses average values over the selected date range, and the hourly
+  and day product sections continue to rank products by average quantity or
+  sales rather than raw totals. This keeps the report normalized to the length
+  of the report window.
+
 Integration
 - UI: import `modules.menu.report_generator` and call
   `get_detailed_report`, `get_summary_report`, or `get_inactivity_report`.

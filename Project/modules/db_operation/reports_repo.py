@@ -79,8 +79,22 @@ def _aggregate_product_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return out
 
 
-def _top_n_products(rows: List[Dict[str, Any]], *, limit: int, sort_key: str) -> List[Dict[str, Any]]:
+def _rank_products(
+    rows: List[Dict[str, Any]],
+    *,
+    limit: int,
+    sort_key: str,
+    divisor: float = 1.0,
+) -> List[Dict[str, Any]]:
     aggregated = _aggregate_product_rows(rows)
+    scale = _to_float(divisor)
+    if scale <= 0:
+        scale = 1.0
+    if scale != 1.0:
+        for row in aggregated:
+            row['qty_sold'] = _to_float(row.get('qty_sold')) / scale
+            row['line_sales'] = _to_float(row.get('line_sales')) / scale
+
     if sort_key == 'qty_sold':
         aggregated.sort(key=lambda r: (_to_float(r.get('qty_sold')), _to_float(r.get('line_sales'))), reverse=True)
     else:
@@ -98,6 +112,28 @@ def _top_n_products(rows: List[Dict[str, Any]], *, limit: int, sort_key: str) ->
             }
         )
     return out
+
+
+def _period_day_count(
+    period_from: Optional[str],
+    period_to: Optional[str],
+    paid_rows: List[Dict[str, Any]],
+) -> int:
+    start_dt = parse_to_datetime(period_from)
+    end_dt = parse_to_datetime(period_to)
+    if start_dt is not None and end_dt is not None:
+        start_date = start_dt.date()
+        end_date = end_dt.date()
+        if end_date < start_date:
+            return 1
+        return max(1, (end_date - start_date).days + 1)
+
+    distinct_days = set()
+    for row in paid_rows:
+        paid_dt = parse_to_datetime(row.get('paid_at'))
+        if paid_dt is not None:
+            distinct_days.add(paid_dt.date())
+    return max(1, len(distinct_days)) if distinct_days else 1
 
 
 def _format_hour_slot(hour: int) -> str:
@@ -732,7 +768,7 @@ def detailed_report(
         payment_breakdown = _fetch_payment_breakdown(c, receipt_ids=paid_ids, receipt_nos=paid_nos)
         product_rows = _fetch_product_aggregates(c, receipt_ids=paid_ids, receipt_nos=paid_nos)
         categories = _build_category_breakdown(product_rows)
-        top_products = _top_n_products(product_rows, limit=10, sort_key='line_sales')
+        top_products = _rank_products(product_rows, limit=10, sort_key='line_sales')
 
         outflows, outflow_subtotals = _fetch_outflows(c, period_from=period_from, period_to=period_to)
         refund_total = _to_float(outflow_subtotals.get("REFUND_OUT"))
@@ -803,11 +839,20 @@ def summary_report(
             hour_rows[hour_order].append(row)
             all_product_rows.append(row)
 
-        sales_by_hour = [hour_sales[idx] for idx in sorted(hour_sales)]
+        range_days = _period_day_count(period_from, period_to, paid_rows)
+        if range_days <= 0:
+            range_days = 1
+
+        sales_by_hour = []
+        for idx in sorted(hour_sales):
+            row = dict(hour_sales[idx])
+            row['sales_amount'] = _to_float(row.get('sales_amount')) / range_days
+            sales_by_hour.append(row)
+
         peak_hour = max(sales_by_hour, key=lambda r: _to_float(r.get('sales_amount')), default=None)
 
         def _top_rows_for(rows: List[Dict[str, Any]], *, sort_key: str, limit: int) -> List[Dict[str, Any]]:
-            return _top_n_products(rows, limit=limit, sort_key=sort_key)
+            return _rank_products(rows, limit=limit, sort_key=sort_key, divisor=range_days)
 
         top_qty_by_hour = []
         top_sales_by_hour = []
@@ -817,8 +862,8 @@ def summary_report(
             top_qty_by_hour.append({'hour_slot': label, 'products': _top_rows_for(rows, sort_key='qty_sold', limit=5)})
             top_sales_by_hour.append({'hour_slot': label, 'products': _top_rows_for(rows, sort_key='line_sales', limit=5)})
 
-        top_qty_day = _top_n_products(all_product_rows, limit=10, sort_key='qty_sold')
-        top_sales_day = _top_n_products(all_product_rows, limit=10, sort_key='line_sales')
+        top_qty_day = _rank_products(all_product_rows, limit=10, sort_key='qty_sold', divisor=range_days)
+        top_sales_day = _rank_products(all_product_rows, limit=10, sort_key='line_sales', divisor=range_days)
 
         return {
             'header': {
@@ -828,11 +873,11 @@ def summary_report(
                 'generated_by': _resolve_generated_by(c, params),
             },
             'sales_summary': {
-                'paid_receipt_count': len(paid_rows),
-                'gross_sales': _to_float(gross_sales),
-                'less_refund_outflow': refund_total,
-                'less_vendor_outflow': vendor_total,
-                'net_after_outflows': _to_float(net_after_outflows),
+                'paid_receipt_count': _to_float(len(paid_rows)) / range_days,
+                'gross_sales': _to_float(gross_sales) / range_days,
+                'less_refund_outflow': refund_total / range_days,
+                'less_vendor_outflow': vendor_total / range_days,
+                'net_after_outflows': _to_float(net_after_outflows) / range_days,
             },
             'sales_by_hour': sales_by_hour,
             'peak_hour': peak_hour,

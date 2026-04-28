@@ -36,7 +36,8 @@ def _apply_role_default_state(dlg: QDialog, *, is_admin: bool) -> None:
     date_range.setEnabled(is_admin)
 
     # Role-aware defaults.
-    (detail if is_admin else summary).setChecked(True)
+    #(detail if is_admin else summary).setChecked(True)
+    summary.setChecked(True)
     today.setChecked(True)
 
     # Initial focus is assigned later at dialog-level (viewReportBtn).
