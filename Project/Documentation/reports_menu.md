@@ -17,6 +17,16 @@ This document summarizes the current functional design for report-menu wiring, f
   - Wires `viewReportBtn` to resolve selected report type, fetch detailed,
     summary, or inactivity data when needed, and open viewer via
     `modules/menu/report_viewers.py`.
+  - Wires `savePdfReportBtn` and `saveExcelReportBtn` to the shared export
+    helper module `modules/menu/report_exports.py`.
+  - Export files are written to `Path.home() / 'POS_Exports' / 'Reports'`.
+  - Filename templates follow the report type and format, for example:
+    - `Audit_report_pdf_11apr2026_12-44.pdf`
+    - `Audit_report_xlsx_11apr2026_12-44.xlsx`
+    - `Insight_report_pdf_11apr2026_12-44.pdf`
+    - `Inactivity_report_xlsx_11apr2026_12-44.xlsx`
+  - `chartReportRadioBtn` supports PDF export only; `saveExcelReportBtn` is
+    disabled while chart is selected.
   - Sets default landing focus to `viewReportBtn` (deferred to next event loop tick).
 
 - `_apply_role_default_state(dlg, is_admin)`
@@ -78,6 +88,44 @@ This document summarizes the current functional design for report-menu wiring, f
 - Viewer closes via native window titlebar `X` button (no in-dialog Close push button).
 - Applies dim overlay while viewer is open.
 
+## Export Module
+### `modules/menu/report_exports.py`
+- Owns shared export helpers for report PDF and XLSX generation.
+- Reuses the report text formatters from `report_viewers.py` for PDF output.
+- Builds XLSX files from structured report data with one sheet per report section.
+- Uses the shared export folder `Path.home() / 'POS_Exports' / 'Reports'`.
+
+### Export fail-safe behavior
+- PDF export is guarded before rendering starts for every implemented report
+  type: `detail`, `summary`, and `inactivity`.
+  - The controller estimates report size from the raw report data structure,
+    not from the rendered PDF text.
+  - The current cutoff is `5000` estimated render units.
+  - This is a conservative safety cutoff to prevent long or unstable PDF
+    rendering jobs.
+  - How the estimate is derived:
+    - `detail`: counts payment rows, category headers, category products,
+      top-products rows, outflow rows, summary fields, and excluded fields.
+    - `summary`: counts hourly rows, grouped product rows, day ranking rows,
+      summary fields, excluded fields, and header metadata.
+    - `inactivity`: counts section rows, inactive product rows, summary fields,
+      and header metadata.
+  - If the estimated size is greater than `5000`, PDF export is stopped
+    immediately and the dialog shows: `Report is too large to export to PDF.`
+  - Reason: Qt's text-to-PDF rendering can stall or produce a damaged PDF when
+    the report becomes too large, so the app decides before layout begins.
+  - Chart reports remain deferred for later implementation; the current chart
+    branch still uses the placeholder export path.
+- Excel export does not use a row-count threshold.
+  - The save path checks whether `openpyxl` is available in the current Python
+    environment.
+  - If `openpyxl` is missing, the dialog shows a short friendly message and
+    writes the failure to `log/error.log`.
+  - Reason: this is a dependency failure, not a size failure. When the package
+    is available, Excel export proceeds normally, even for large reports.
+- In both PDF and Excel paths, the controller logs unexpected failures and
+  updates the report status label so the user sees a safe, short message.
+
 ## Shared Date Gating Module
 ### `modules/date_time/date_gating.py`
 - `set_locked_property(widget, locked)`
@@ -138,6 +186,11 @@ This document summarizes the current functional design for report-menu wiring, f
 - Focus landing and progressive focus jump to `viewReportBtn` are implemented.
 - `resetReportBtn` restores report type/date defaults and lands focus on `viewReportBtn`.
 - `viewReportBtn` now routes through `report_viewers.py` shared shell + per-report renderer architecture.
+- Save buttons now export to PDF/XLSX through `report_exports.py`, with charts
+  limited to PDF only.
+- PDF export uses a pre-render fail-safe based on raw report dimensions for
+  detail, summary, and inactivity reports.
+- Excel export uses a dependency fail-safe for `openpyxl` and logs the failure safely.
 - Viewer styling hooks are centralized in `assets/dialog.qss` using viewer object names.
 
 See the report generator adapter and data-layer notes: Documentation/report_generator.md

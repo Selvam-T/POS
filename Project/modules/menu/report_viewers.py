@@ -193,7 +193,7 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
         '',
         net_line,
         '',
-        '2. Payment Method Breakdown',
+        '2. Revenue By Tender Type',
         '-' * 72,
     ]
 
@@ -235,7 +235,7 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
     #blue_lines.update({cash_line, cash_outflow_line, cash_after_line})
     blue_lines.add(cash_after_line)
 
-    lines.extend(['', '4. Category Breakdown with Products', '-' * 72])
+    lines.extend(['', '4. Categorized Inventory Movement By Revenue', '-' * 72])
     name_w = 30
     qty_unit_w = 14
     money_w = 12
@@ -268,7 +268,7 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
     else:
         lines.append('No category/product rows.')
 
-    lines.extend(['', '5. Top 10 Products', '-' * 72])
+    lines.extend(['', '5. Top 10 Products By Total Revenue', '-' * 72])
     if top_products:
         top_name_w = 30
         top_header = f"{'Rank':>4} {'Product Name':<{top_name_w}} {'Qty Sold':>{qty_unit_w}} {'Amount':>{money_w}}"
@@ -313,7 +313,7 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
     lines.extend(
         [
             '',
-            '7. Excluded / Operational Section',
+            '7. Non-Revenue Activity Log',
             '-' * 72,
             f"{'UNPAID Receipts Count':<28} : {_to_int(excluded.get('unpaid_receipts_count')):>8}",
             f"{'UNPAID Receipts Total':<28} : {_fmt_money(excluded.get('unpaid_receipts_total')):>12}",

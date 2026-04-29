@@ -469,8 +469,13 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
 
             _set_export_status(f'Product List XLSX file exported to {out_dir}', ok=True)
         except Exception as e:
-            log_error_message(f'admin_menu export Product List XLSX failed: {e}')
-            _set_export_status('Product List XLSX export failed.', ok=False)
+            if 'openpyxl' in str(e).lower():
+                msg = 'Excel export unavailable: openpyxl is missing from this Python environment.'
+                log_error_message(f'admin_menu export Product List XLSX failed: {msg}')
+                _set_export_status(msg, ok=False)
+            else:
+                log_error_message(f'admin_menu export Product List XLSX failed: {e}')
+                _set_export_status('Product List XLSX export failed.', ok=False)
 
     def _sql_literal(v):
         if v is None:
