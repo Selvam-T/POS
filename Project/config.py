@@ -19,13 +19,8 @@ DIALOG_RATIOS = {
     'MaxRowsDialog': (0.25, 0.25)
 }
 
-# Report viewer size ratios (width_ratio, height_ratio) as fraction of parent window
-REPORT_VIEWER_RATIOS = {
-	'detail': (0.6, 0.85),
-	'summary': (0.6, 0.85),
-	'chart': (0.85, 0.75),
-	'inactivity': (0.6, 0.85),
-}
+# Shared report viewer size ratio (width_ratio, height_ratio) as a fraction of the parent window.
+REPORT_VIEWER_RATIOS = (0.6, 0.85)
 
 # Product Categories (Don't exceed 25 Characters)
 PRODUCT_CATEGORIES = [

@@ -895,6 +895,90 @@ def summary_report(
             c.close()
 
 
+def chart_report(
+    params: Dict[str, Any],
+    *,
+    conn: Optional[sqlite3.Connection] = None,
+) -> Dict[str, Any]:
+    """Return the chart report payload."""
+    period_from, period_to = _safe_period(params)
+    own = conn is None
+    c = conn or get_conn()
+    try:
+        paid_rows = _fetch_paid_receipt_rows(c, period_from=period_from, period_to=period_to)
+        paid_ids = [row.get('receipt_id') for row in paid_rows if row.get('receipt_id') is not None]
+        paid_nos = [str(row.get('receipt_no') or '') for row in paid_rows if row.get('receipt_no')]
+        gross_sales = sum(_to_float(row.get('total')) for row in paid_rows)
+
+        payment_breakdown = _fetch_payment_breakdown(c, receipt_ids=paid_ids, receipt_nos=paid_nos)
+        outflows, outflow_subtotals = _fetch_outflows(c, period_from=period_from, period_to=period_to)
+        refund_total = _to_float(outflow_subtotals.get('REFUND_OUT'))
+        vendor_total = _to_float(outflow_subtotals.get('VENDOR_OUT'))
+        net_after_outflows = gross_sales - refund_total - vendor_total
+
+        paid_item_rows = _fetch_paid_item_rows(c, paid_rows)
+        range_days = _period_day_count(period_from, period_to, paid_rows)
+        if range_days <= 0:
+            range_days = 1
+
+        hour_sales: Dict[int, Dict[str, Any]] = {}
+        for hour in range(24):
+            hour_sales[hour] = {
+                'hour_order': hour,
+                'hour_slot': _format_hour_slot(hour),
+                'sales_amount': 0.0,
+            }
+
+        for row in paid_item_rows:
+            hour_order = _to_int(row.get('hour_order')) % 24
+            hour_sales.setdefault(
+                hour_order,
+                {
+                    'hour_order': hour_order,
+                    'hour_slot': _format_hour_slot(hour_order),
+                    'sales_amount': 0.0,
+                },
+            )
+            hour_sales[hour_order]['sales_amount'] = _to_float(hour_sales[hour_order]['sales_amount']) + _to_float(row.get('line_sales'))
+
+        sales_by_hour: List[Dict[str, Any]] = []
+        for hour in range(24):
+            row = dict(hour_sales.get(hour) or {'hour_order': hour, 'hour_slot': _format_hour_slot(hour), 'sales_amount': 0.0})
+            row['sales_amount'] = _to_float(row.get('sales_amount')) / range_days
+            sales_by_hour.append(row)
+
+        peak_hour = max(sales_by_hour, key=lambda r: _to_float(r.get('sales_amount')), default=None)
+        top_products_by_sales_day = _rank_products(paid_item_rows, limit=10, sort_key='line_sales', divisor=range_days)
+
+        return {
+            'header': {
+                'period_from': period_from,
+                'period_to': period_to,
+                'generated_at': now_iso(),
+                'generated_by': _resolve_generated_by(c, params),
+            },
+            'sales_summary': {
+                'paid_receipt_count': _to_float(len(paid_rows)) / range_days,
+                'gross_sales': _to_float(gross_sales) / range_days,
+                'less_refund_outflow': refund_total / range_days,
+                'less_vendor_outflow': vendor_total / range_days,
+                'net_after_outflows': _to_float(net_after_outflows) / range_days,
+            },
+            'sales_by_hour': sales_by_hour,
+            'peak_hour': peak_hour,
+            'payment_breakdown': [
+                {'method': str(row.get('method') or ''), 'amount': _to_float(row.get('amount')) / range_days}
+                for row in payment_breakdown
+            ],
+            'top_products_by_sales_day': top_products_by_sales_day,
+            'cash_outflows': outflows,
+            'outflow_subtotals': outflow_subtotals,
+        }
+    finally:
+        if own:
+            c.close()
+
+
 def inactivity_report(
     params: Dict[str, Any],
     *,

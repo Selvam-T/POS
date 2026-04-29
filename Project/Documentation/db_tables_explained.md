@@ -159,10 +159,11 @@ Below is a mapping of functions in `modules/db_operation/` related to each datab
 - modules/db_operation/reports_repo.py:
 	- detailed_report  -- Builds the Detailed Sales Report by joining `receipts`,
 	  `receipt_items`, `receipt_payments`, `cash_outflows` and `users`.
-	- summary_report   -- Builds the SALES INSIGHTS REPORT with average hourly
+	- summary_report   -- Builds the Sales Trends & Patterns with average hourly
 	  sales, average section 1 totals, average-over-range top products by
 	  hour/day, and payment breakdown.
-	- chart_series     -- (planned) Series data for time-based charts (sales by hour).
+	- chart_report     -- Builds the Chart Report with average sales by hour,
+	  average payment-method totals, and average daily top products by earnings.
 	- inactivity_report-- Builds the Inactive Products Report using `Product_list`
 	  as the master product list and paid `receipts` + `receipt_items` history to
 	  compute last-sold dates and inactivity buckets.

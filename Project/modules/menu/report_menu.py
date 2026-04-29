@@ -117,6 +117,8 @@ def _build_report_data(dlg: QDialog, host_window, report_type: str) -> dict:
         return report_generator.get_detailed_report(params)
     if rpt == 'summary':
         return report_generator.get_summary_report(params)
+    if rpt == 'chart':
+        return report_generator.get_chart_report(params)
     if rpt == 'inactivity':
         return report_generator.get_inactivity_report(params)
     return {}
@@ -454,7 +456,9 @@ def launch_reports_dialog(host_window):
         try:
             rpt = _current_report_type(dlg)
             if rpt == 'chart':
-                set_dialog_info(dlg, 'Chart reports can only be saved as PDF.', duration=3000)
+                message = 'Chart reports can only be saved as PDF.'
+                _set_report_status(message, ok=False)
+                set_dialog_info(dlg, message, duration=3000)
                 return
             data = _build_report_data(dlg, host_window, rpt)
             out_path = report_exports.save_report_xlsx(rpt, report_data=data)
@@ -481,6 +485,7 @@ def launch_reports_dialog(host_window):
             _defer_focus(view_btn)
         except Exception as e:
             try:
+                _set_report_status(f'Report viewer failed: {e}', ok=False)
                 log_error_message(f"Failed to open report viewer: {e}")
             except Exception:
                 pass

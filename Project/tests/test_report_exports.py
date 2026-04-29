@@ -138,7 +138,7 @@ class ReportExportsTest(unittest.TestCase):
 
     def test_pdf_text_helper_uses_report_formatter(self):
         text = report_exports._report_text_for_pdf('detail', DETAIL_SAMPLE)
-        self.assertIn('SALES AUDIT REPORT', text)
+        self.assertIn('Sales Record & Totals', text)
         self.assertIn('Gross Sales', text)
 
     def test_save_report_pdf_inactivity_rejects_oversized_reports(self):
@@ -203,6 +203,17 @@ class ReportExportsTest(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             report_exports.save_report_pdf('summary', report_data=large_report, out_dir=tempfile.gettempdir(), filename='large_summary.pdf')
+
+    def test_save_report_pdf_chart_creates_file(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            out_path = report_exports.save_report_pdf(
+                'chart',
+                report_data=SUMMARY_SAMPLE,
+                out_dir=temp_dir,
+                filename='chart.pdf',
+            )
+
+            self.assertTrue(Path(out_path).exists())
 
     @unittest.skipUnless(OPENPYXL_AVAILABLE, 'openpyxl is required for XLSX export tests')
     def test_save_report_xlsx_detail_creates_sheet_layout(self):

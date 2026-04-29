@@ -6,6 +6,14 @@
 	...
 
 Import from config.py wherever dialog sizing is needed.
+
+## Shared Report Viewer Size Ratio
+- `REPORT_VIEWER_RATIOS`: Shared `(width_ratio, height_ratio)` tuple used by
+	the report viewer shell for `detail`, `summary`, `chart`, and `inactivity`
+	reports.
+- Current default: `(0.6, 0.85)`.
+- The report viewer applies this one shared size policy for all report types,
+	with a pixel fallback if the tuple is missing or invalid.
 # config.py — POS System Configuration
 
 This file centralizes key configuration values for the POS application. It is imported by multiple modules to ensure consistent settings across the project.

@@ -348,9 +348,9 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
 
     # EXPORT tab wiring (product_list exports only).
     def _exports_dir() -> Path:
-        # User-requested location: Documents/POS_Exports
-        return Path.home() / 'POS_Exports'
-
+        # User-requested location: Documents/POS_Exports/Inventory
+        return Path.home() / 'POS_Exports'/ 'Inventory'
+        
     def _timestamp_for_filename() -> str:
         # Windows-safe replacement for requested hh:mm format.
         return datetime.now().strftime('%d%b%Y_%H-%M').lower()

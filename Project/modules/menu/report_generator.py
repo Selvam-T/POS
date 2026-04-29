@@ -17,6 +17,11 @@ def get_summary_report(params: Dict[str, Any]) -> Dict[str, Any]:
    return reports_repo.summary_report(params)
 
 
+def get_chart_report(params: Dict[str, Any]) -> Dict[str, Any]:
+   """Return chart report data."""
+   return reports_repo.chart_report(params)
+
+
 def get_inactivity_report(params: Dict[str, Any]) -> Dict[str, Any]:
    """Return inactivity report data."""
    return reports_repo.inactivity_report(params)

@@ -319,6 +319,26 @@ class ReportsRepoTest(unittest.TestCase):
         finally:
             conn.close()
 
+    def test_chart_report_averages_and_ranking(self):
+        conn = self._build_conn()
+        try:
+            params = {'from': '2026-06-02T00:00:00', 'to': '2026-06-03T23:59:59', 'user_id': 1}
+            rpt = reports_repo.chart_report(params, conn=conn)
+
+            self.assertIsInstance(rpt, dict)
+            self.assertAlmostEqual(rpt['sales_summary']['gross_sales'], 44.75)
+            self.assertAlmostEqual(rpt['sales_summary']['paid_receipt_count'], 1.0)
+            self.assertEqual(len(rpt['sales_by_hour']), 24)
+            self.assertEqual(rpt['sales_by_hour'][9]['hour_slot'], '09:00 - 10:00')
+            self.assertAlmostEqual(rpt['sales_by_hour'][9]['sales_amount'], 19.75)
+            self.assertEqual(len(rpt['payment_breakdown']), 1)
+            self.assertAlmostEqual(rpt['payment_breakdown'][0]['amount'], 28.75)
+            self.assertEqual(rpt['top_products_by_sales_day'][0]['product_name'], 'Detergent')
+            self.assertAlmostEqual(rpt['top_products_by_sales_day'][0]['line_sales'], 16.0)
+            self.assertLessEqual(len(rpt['top_products_by_sales_day']), 10)
+        finally:
+            conn.close()
+
     def test_inactivity_report_buckets(self):
         conn = self._build_inactivity_conn()
         try:

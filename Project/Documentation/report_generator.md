@@ -17,8 +17,10 @@ Current status
   Sales Report data from the same repository.
 - `get_inactivity_report(params)` is implemented and returns structured
   Inactive Products Report data from the same repository.
+- `get_chart_report(params)` is implemented and returns structured chart
+  report data from the same repository.
 - `modules/menu/report_menu.py` now calls this adapter when
-  `detailReportRadioBtn`, `summaryReportRadioBtn`, or
+  `detailReportRadioBtn`, `summaryReportRadioBtn`, `chartReportRadioBtn`, or
   `inactivityReportRadioBtn` is selected.
 - Viewer/UI rendering is intentionally separated into
   `modules/menu/report_viewers.py` (shared shell + per-report content renderer).
@@ -28,12 +30,23 @@ Current status
     appropriate for complex HTML/CSS reports; for the current simple
     textual layout `QPlainTextEdit` keeps rendering lightweight and
     dependency-free.
-- Report viewer sizes are controlled by `REPORT_VIEWER_SIZES` in
-  `report_viewers.py`.
+- Report viewer sizes are controlled by the shared `REPORT_VIEWER_RATIOS`
+  tuple in `config.py` and applied by `report_viewers.py`.
 - Viewer exit is via native titlebar `X` close button.
 
+Chart report note
+- The Chart report is rendered in the viewer window using chart widgets and
+  exported to PDF only.
+- Chart data is normalized to the selected date range, so the chart values are
+  expressed as averages per day rather than raw totals.
+- The data layer reuses the same paid-receipt and receipt-item helpers used by
+  the summary report; chart-specific aggregation lives in
+  `modules/db_operation/reports_repo.py`.
+- If the chart renderer is unavailable or chart generation fails, the caller
+  should log the error and show a safe fallback message rather than crashing.
+
 Summary report note
-- The Summary report is now presented as SALES INSIGHTS REPORT.
+- The Summary report is now presented as Sales Trends & Patterns.
 - Section 1 uses average values over the selected date range, and the hourly
   and day product sections continue to rank products by average quantity or
   sales rather than raw totals. This keeps the report normalized to the length

@@ -991,7 +991,7 @@
        <item>
         <widget class="QLabel" name="exportHeaderLabel2">
          <property name="text">
-          <string>Export file to C:Users...POS_Exports</string>
+          <string>Export file to C:Users...POS_Exports/Inventory</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>

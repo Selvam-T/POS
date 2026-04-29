@@ -10,6 +10,7 @@ from typing import Any, Iterable
 from PyQt5.QtGui import QFont, QTextDocument
 from PyQt5.QtPrintSupport import QPrinter
 
+from modules.menu import report_charts
 from modules.menu import report_viewers
 
 
@@ -157,6 +158,12 @@ def estimate_report_render_units(report_type: Any, report_data: dict | None) -> 
             + len(payload.get('header') or {})
         )
 
+    if rpt == 'chart':
+        sales_by_hour = payload.get('sales_by_hour') or []
+        payment_breakdown = payload.get('payment_breakdown') or []
+        top_products = payload.get('top_products_by_sales_day') or payload.get('top_products') or []
+        return len(sales_by_hour) + len(payment_breakdown) + len(top_products) + len(payload.get('header') or {})
+
     if rpt == 'inactivity':
         header = payload.get('header') or {}
         sections = payload.get('sections') or []
@@ -183,6 +190,12 @@ def save_report_pdf(
     folder = _ensure_exports_folder(out_dir)
     file_name = filename or build_report_filename(rpt, 'pdf')
     out_path = folder / file_name
+
+    if rpt == 'chart':
+        estimated_units = estimate_report_render_units(rpt, report_data)
+        if estimated_units > PDF_RENDER_UNIT_THRESHOLD:
+            raise RuntimeError('Report is too large to export to PDF. Reduce the date range.')
+        return report_charts.save_chart_report_pdf(report_data or {}, out_path)
 
     estimated_units = estimate_report_render_units(rpt, report_data)
     if estimated_units > PDF_RENDER_UNIT_THRESHOLD:

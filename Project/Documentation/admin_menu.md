@@ -114,9 +114,9 @@ The EXPORT tab allows exporting the application's `Product_list` table in three 
 
 Behaviour and wiring:
 - Buttons wired in controller: `csvExportBtn`, `xlsxExportBtn`, `sqlExportBtn` (see `modules/menu/admin_menu.py`).
-- Exports are written to the user Documents folder under `Documents/POS_Exports`.
+- Exports are written to the user Documents folder under `Documents/POS_Exports/Inventory`.
 - Filenames follow the pattern: `product_list_{kind}_ddmmmyyyy_hh-mm.ext` (timestamp uses `ddMmmYYYY_HH-MM` with `:` replaced by `-` for Windows-safe filenames).
-- After a successful export the UI shows a concise status message in `exportStatusLabel` of the form: `"<FILETYPE> file exported to <full-path>"` (e.g. `CSV file exported to C:/Users/.../Documents/POS_Exports/product_list_csv_03apr2026_21-30.csv`).
+- After a successful export the UI shows a concise status message in `exportStatusLabel` of the form: `"<FILETYPE> file exported to <full-path>"` (e.g. `CSV file exported to C:/Users/.../Documents/POS_Exports/Inventory product_list_csv_03apr2026_21-30.csv`).
 
 Notes:
 - The XLSX export uses `openpyxl`. If `openpyxl` is not installed the controller will report an error and the XLSX export will fail; install via `pip install openpyxl` or include it in your environment requirements. The project `requirements.txt` already lists `openpyxl>=3.1`.

@@ -15,7 +15,7 @@ This document summarizes the current functional design for report-menu wiring, f
   - Wires shared date gating via `DateRangeGateController`.
   - Wires `resetReportBtn` to restore defaults for report type and date frame.
   - Wires `viewReportBtn` to resolve selected report type, fetch detailed,
-    summary, or inactivity data when needed, and open viewer via
+    summary, chart, or inactivity data when needed, and open viewer via
     `modules/menu/report_viewers.py`.
   - Wires `savePdfReportBtn` and `saveExcelReportBtn` to the shared export
     helper module `modules/menu/report_exports.py`.
@@ -27,6 +27,8 @@ This document summarizes the current functional design for report-menu wiring, f
     - `Inactivity_report_xlsx_11apr2026_12-44.xlsx`
   - `chartReportRadioBtn` supports PDF export only; `saveExcelReportBtn` is
     disabled while chart is selected.
+  - Chart report generation uses shared repository helpers and opens a chart
+    viewer window instead of the text report viewer.
   - Sets default landing focus to `viewReportBtn` (deferred to next event loop tick).
 
 - `_apply_role_default_state(dlg, is_admin)`
@@ -60,6 +62,15 @@ This document summarizes the current functional design for report-menu wiring, f
     layout as detailed, but with summary-specific sections:
     sales by hour, top products by hour/day, and top 5 product lists.
 
+- Chart report integration
+  - For `chart` selection, `viewReportBtn` calls
+    `modules.menu.report_generator.get_chart_report(...)`.
+  - Chart rendering is done in a dedicated viewer window with actual chart
+    widgets.
+  - Chart export is PDF-only; Excel export is disabled and the controller
+    shows a friendly message if the user tries to save XLSX.
+  - Chart metrics are averaged over the selected date range before rendering.
+
 - Inactivity report integration
   - For `inactivity` selection, `viewReportBtn` calls
     `modules.menu.report_generator.get_inactivity_report(...)`.
@@ -84,7 +95,8 @@ This document summarizes the current functional design for report-menu wiring, f
     for complex HTML/CSS layouts; PDF export would require additional
     dependencies and is unnecessary for this simple, fixed-width design.
   - other types (`chart` and unknown values): placeholder content renderer
-- Uses `REPORT_VIEWER_SIZES` as the size policy map by report type, with default fallback.
+- Uses the shared `REPORT_VIEWER_RATIOS` tuple from `config.py` for viewer
+  sizing, with a pixel fallback when the tuple is unavailable.
 - Viewer closes via native window titlebar `X` button (no in-dialog Close push button).
 - Applies dim overlay while viewer is open.
 
@@ -188,6 +200,8 @@ This document summarizes the current functional design for report-menu wiring, f
 - `viewReportBtn` now routes through `report_viewers.py` shared shell + per-report renderer architecture.
 - Save buttons now export to PDF/XLSX through `report_exports.py`, with charts
   limited to PDF only.
+- Chart viewer/export failures are handled safely: the controller logs the
+  error and keeps the reports dialog usable.
 - PDF export uses a pre-render fail-safe based on raw report dimensions for
   detail, summary, and inactivity reports.
 - Excel export uses a dependency fail-safe for `openpyxl` and logs the failure safely.
