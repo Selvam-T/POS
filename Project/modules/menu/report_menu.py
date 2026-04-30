@@ -36,14 +36,21 @@ def _apply_role_default_state(dlg: QDialog, *, is_admin: bool) -> None:
         return
 
     # Role permissions for report/date mode radios.
-    detail.setEnabled(is_admin)
+    # Detail is now enabled for both Admin and Staff
+    detail.setEnabled(True)
+    set_locked_property(detail, False)
+    # Summary is restricted to Admin; Staff users see it disabled/greyed
+    summary.setEnabled(is_admin)
+    set_locked_property(summary, not is_admin)
     chart.setEnabled(is_admin)
+    set_locked_property(chart, not is_admin)
     inactivity.setEnabled(is_admin)
+    set_locked_property(inactivity, not is_admin)
     date_range.setEnabled(is_admin)
+    set_locked_property(date_range, not is_admin)
 
-    # Role-aware defaults.
-    #(detail if is_admin else summary).setChecked(True)
-    summary.setChecked(True)
+    # Both Admin and Staff now land in Detailed report by default.
+    detail.setChecked(True)
     today.setChecked(True)
 
     # Initial focus is assigned later at dialog-level (viewReportBtn).
@@ -114,7 +121,10 @@ def _build_report_data(dlg: QDialog, host_window, report_type: str) -> dict:
     params = _build_report_params(dlg, host_window)
     rpt = str(report_type or 'summary').strip().lower()
     if rpt == 'detail':
-        return report_generator.get_detailed_report(params)
+        data = report_generator.get_detailed_report(params)
+        if not bool(getattr(host_window, 'current_is_admin', False)):
+            data['detail_variant'] = 'minimal'
+        return data
     if rpt == 'summary':
         return report_generator.get_summary_report(params)
     if rpt == 'chart':
@@ -251,11 +261,28 @@ def launch_reports_dialog(host_window):
 
         try:
             if rpt == 'chart':
-                set_locked_property(save_excel_btn, True)
-                save_excel_btn.setEnabled(False)
+                set_locked_property(save_excel_btn, False)
+                save_excel_btn.setEnabled(True)
             else:
                 set_locked_property(save_excel_btn, locked)
                 save_excel_btn.setEnabled(not locked)
+        except Exception:
+            pass
+
+        # Apply gating lock to Summary radio button based on date range selection
+        # Only for Admin users; Staff users keep Summary locked regardless
+        try:
+            summary = dlg.findChild(QRadioButton, 'summaryReportRadioBtn')
+            if summary is not None and is_admin_user:
+                date_range = dlg.findChild(QRadioButton, 'dateRangeRadioBtn')
+                if date_range is not None and date_range.isChecked():
+                    # When date_range is active, lock summary radio (Admin only)
+                    set_locked_property(summary, True)
+                    summary.setEnabled(False)
+                else:
+                    # When today is active, unlock summary radio (Admin only)
+                    set_locked_property(summary, False)
+                    summary.setEnabled(True)
         except Exception:
             pass
 
@@ -456,7 +483,7 @@ def launch_reports_dialog(host_window):
         try:
             rpt = _current_report_type(dlg)
             if rpt == 'chart':
-                message = 'Chart reports can only be saved as PDF.'
+                message = 'Chart saving to Excel is not available.'
                 _set_report_status(message, ok=False)
                 set_dialog_info(dlg, message, duration=3000)
                 return

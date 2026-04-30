@@ -16,6 +16,53 @@ import config
 DEFAULT_REPORT_VIEWER_SIZE = (760, 520)
 
 
+def _detail_report_variant(report: dict) -> str:
+    """Return the detailed-report presentation variant."""
+    if not isinstance(report, dict):
+        return 'full'
+    variant = str(report.get('detail_variant') or report.get('_detail_variant') or 'full').strip().lower()
+    return 'minimal' if variant == 'minimal' else 'full'
+
+
+def _format_qty_unit(qty, unit) -> tuple[str, str]:
+    """Format quantity and unit for report display."""
+    try:
+        qty_float = float(qty or 0.0)
+    except Exception:
+        qty_float = 0.0
+
+    raw_unit = str(unit or '').strip()
+    unit_lower = raw_unit.lower()
+
+    if unit_lower in ('each', 'ea'):
+        if 0 < qty_float < 1:
+            return f'{qty_float:.2f}', 'ea'
+        return str(int(round(qty_float))), 'ea'
+
+    unit_txt = raw_unit or '-'
+    if 'kg' in unit_lower:
+        if qty_float < 1.0:
+            gram_qty = qty_float * 1000
+            if 0 < qty_float < 1.0:
+                if gram_qty < 1:
+                    return f'{gram_qty:.2f}', 'g'
+                return f'{gram_qty:.0f}', 'g'
+            return '0', 'g'
+        return f'{qty_float:.2f}', 'kg'
+
+    if 0 < qty_float < 1:
+        return f'{qty_float:.2f}', unit_txt
+    return f'{qty_float:.3f}', unit_txt
+
+
+def _to_float(value) -> float:
+    """Coerce a value to float with a 0.0 fallback."""
+    try:
+        return float(value or 0.0)
+    except Exception:
+        return 0.0
+
+
 def _create_overlay(parent_dlg: QDialog):
     """Create a dim background overlay above the report menu dialog."""
     try:
@@ -116,12 +163,6 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
     if not isinstance(report, dict):
         report = {}
 
-    def _to_float(value) -> float:
-        try:
-            return float(value or 0.0)
-        except Exception:
-            return 0.0
-
     def _to_int(value) -> int:
         try:
             return int(value or 0)
@@ -129,7 +170,11 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
             return 0
 
     def _fmt_money(value) -> str:
-        return f"$ {_to_float(value):,.2f}"
+        try:
+            amount = float(value or 0.0)
+        except Exception:
+            amount = 0.0
+        return f"$ {amount:,.2f}"
 
     def _truncate(text: str, width: int) -> str:
         s = str(text or '')
@@ -138,28 +183,6 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
         if width <= 3:
             return s[:width]
         return s[: width - 3] + '...'
-
-    def _fmt_qty_unit(qty, unit) -> tuple[str, str]:
-        raw_unit = str(unit or '').strip()
-        unit_lower = raw_unit.lower()
-        if unit_lower in ('each', 'ea'):
-            return str(int(round(_to_float(qty)))), 'ea'
-
-        unit_txt = raw_unit or '-'
-        if 'kg' in unit_lower:
-            # Use grams for sub-1kg weights.
-            if qty < 1.0:
-                gram_qty = qty * 1000
-                qty_txt = f"{gram_qty:.0f}"  # Whole number for grams
-                unit_txt = 'g'
-            else:
-                # Keep kg for 1.0 and above.
-                qty_txt = f"{qty:.2f}"
-                unit_txt = 'kg' 
-        else:
-            # Default for non-weight units.
-            qty_txt = f"{qty:.3f}"
-        return qty_txt, unit_txt
 
     sales = report.get('sales_summary') or {}
     payments = report.get('payment_breakdown') or []
@@ -199,6 +222,7 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
 
     blue_lines.add(gross_line)
     blue_lines.add(net_line)
+    is_minimal = _detail_report_variant(report) == 'minimal'
 
     if payments:
         pay_header = f"{'Method':<24}   {'Amount':>12}"
@@ -235,58 +259,60 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
     #blue_lines.update({cash_line, cash_outflow_line, cash_after_line})
     blue_lines.add(cash_after_line)
 
-    lines.extend(['', '4. Sales Broken Down by Category', '-' * 72])
-    name_w = 30
     qty_unit_w = 14
-    money_w = 12
-    # Keep header/body columns on identical geometry (including index prefix).
-    prod_header = f"{'No.':<4}{'Product Name':<{name_w}} {'Qty Sold':>{qty_unit_w}} {'Amount':>{money_w}}"
-    if categories:
-        for cat in categories:
-            cat_name = str(cat.get('category_name') or 'Uncategorized')
-            cat_total = _to_float(cat.get('category_total'))
-            lines.append(cat_name)
-            bold_lines.add(cat_name)
-            lines.append('')
-            lines.append(prod_header)
-            table_header_lines.add(prod_header)
-            for idx, prod in enumerate((cat.get('products') or []), start=1):
-                qty_txt, unit_txt = _fmt_qty_unit(prod.get('qty_sold'), prod.get('unit'))
-                product_name = _truncate(str(prod.get('product_name') or ''), name_w)
+    money_w = 14
+    if not is_minimal:
+        lines.extend(['', '4. Earnings Broken Down by Category', '-' * 72])
+        name_w = 30
+        # Keep header/body columns on identical geometry (including index prefix).
+        prod_header = f"{'No.':<4}{'Product Name':<{name_w}} {'Qty Sold':>{qty_unit_w}} {'Amount':>{money_w}}"
+        if categories:
+            for cat in categories:
+                cat_name = str(cat.get('category_name') or 'Uncategorized')
+                cat_total = _to_float(cat.get('category_total'))
+                lines.append(cat_name)
+                bold_lines.add(cat_name)
+                lines.append('')
+                lines.append(prod_header)
+                table_header_lines.add(prod_header)
+                for idx, prod in enumerate((cat.get('products') or []), start=1):
+                    qty_txt, unit_txt = _format_qty_unit(prod.get('qty_sold'), prod.get('unit'))
+                    product_name = _truncate(str(prod.get('product_name') or ''), name_w)
+                    qty_unit_txt = f"{qty_txt} {unit_txt}".strip()
+                    lines.append(
+                        f"{str(idx) + '.':>3} {product_name:<{name_w}} "
+                        f"{qty_unit_txt:>{qty_unit_w}} {_fmt_money(prod.get('line_sales')):>{money_w}}"
+                    )
+                lines.append('')
+                total_label_w = 4 + name_w + 1 + qty_unit_w
+                total_line = f"{'Total':<{total_label_w}} {_fmt_money(cat_total):>{money_w}}"
+                lines.append(total_line)
+                blue_lines.add(total_line)
+                lines.append('.' * 72)
+                lines.append('')
+        else:
+            lines.append('No category/product rows.')
+
+        lines.extend(['', '5. Top 10 Best Sellers (By Earnings)', '-' * 72])
+        if top_products:
+            top_name_w = 30
+            top_header = f"{'Rank':>4} {'Product Name':<{top_name_w}} {'Qty Sold':>{qty_unit_w}} {'Amount':>{money_w}}"
+            lines.append(top_header)
+            table_header_lines.add(top_header)
+
+            for row in top_products:
+                qty_txt, unit_txt = _format_qty_unit(row.get('qty_sold'), row.get('unit'))
+                pname = _truncate(str(row.get('product_name') or ''), top_name_w)
                 qty_unit_txt = f"{qty_txt} {unit_txt}".strip()
                 lines.append(
-                    f"{str(idx) + '.':>3} {product_name:<{name_w}} "
-                    f"{qty_unit_txt:>{qty_unit_w}} {_fmt_money(prod.get('line_sales')):>{money_w}}"
+                    f"{_to_int(row.get('rank')):>3}. {pname:<{top_name_w}} "
+                    f"{qty_unit_txt:>{qty_unit_w}} {_fmt_money(row.get('line_sales')):>{money_w}}"
                 )
-            lines.append('')
-            total_label_w = 4 + name_w + 1 + qty_unit_w
-            total_line = f"{'Total':<{total_label_w}} {_fmt_money(cat_total):>{money_w}}"
-            lines.append(total_line)
-            blue_lines.add(total_line)
-            lines.append('.' * 72)
-            lines.append('')
-    else:
-        lines.append('No category/product rows.')
+        else:
+            lines.append('No product rows.')
 
-    lines.extend(['', '5. Top 10 Best Sellers (By Earnings)', '-' * 72])
-    if top_products:
-        top_name_w = 30
-        top_header = f"{'Rank':>4} {'Product Name':<{top_name_w}} {'Qty Sold':>{qty_unit_w}} {'Amount':>{money_w}}"
-        lines.append(top_header)
-        table_header_lines.add(top_header)
-
-        for row in top_products:
-            qty_txt, unit_txt = _fmt_qty_unit(row.get('qty_sold'), row.get('unit'))
-            pname = _truncate(str(row.get('product_name') or ''), top_name_w)
-            qty_unit_txt = f"{qty_txt} {unit_txt}".strip()
-            lines.append(
-                f"{_to_int(row.get('rank')):>3}. {pname:<{top_name_w}} "
-                f"{qty_unit_txt:>{qty_unit_w}} {_fmt_money(row.get('line_sales')):>{money_w}}"
-            )
-    else:
-        lines.append('No product rows.')
-
-    lines.extend(['', '6. Cash Outflows Detail', '-' * 72])
+    outflow_section_no = 4 if is_minimal else 6
+    lines.extend(['', f'{outflow_section_no}. Cash Outflows Detail', '-' * 72])
     if outflows:
         out_header = f"{'Type':<12} {'Date/Time':<20} {'Cashier':<10} {'Amount':>12}  Note"
         lines.append(out_header)
@@ -313,7 +339,7 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
     lines.extend(
         [
             '',
-            '7. Other Activity (Unpaid & Cancelled)',
+            f'{5 if is_minimal else 7}. Other Activity (Unpaid & Cancelled)',
             '-' * 72,
             f"{'UNPAID Receipts Count':<28} : {_to_int(excluded.get('unpaid_receipts_count')):>8}",
             f"{'UNPAID Receipts Total':<28} : {_fmt_money(excluded.get('unpaid_receipts_total')):>12}",
@@ -501,12 +527,6 @@ def _format_summary_report_text(report: dict) -> tuple[str, set[str], set[str], 
     if not isinstance(report, dict):
         report = {}
 
-    def _to_float(value) -> float:
-        try:
-            return float(value or 0.0)
-        except Exception:
-            return 0.0
-
     def _to_int(value) -> int:
         try:
             return int(value or 0)
@@ -526,25 +546,6 @@ def _format_summary_report_text(report: dict) -> tuple[str, set[str], set[str], 
         if width <= 3:
             return s[:width]
         return s[: width - 3] + '...'
-
-    def _fmt_qty_unit(qty, unit) -> tuple[str, str]:
-        raw_unit = str(unit or '').strip()
-        unit_lower = raw_unit.lower()
-        if unit_lower in ('each', 'ea'):
-            return str(int(round(_to_float(qty)))), 'ea'
-
-        unit_txt = raw_unit or '-'
-        if 'kg' in unit_lower:
-            if qty < 1.0:
-                gram_qty = qty * 1000
-                qty_txt = f"{gram_qty:.0f}"
-                unit_txt = 'g'
-            else:
-                qty_txt = f"{qty:.2f}"
-                unit_txt = 'kg'
-        else:
-            qty_txt = f"{qty:.3f}"
-        return qty_txt, unit_txt
 
     header = report.get('header') or {}
     sales = report.get('sales_summary') or {}
@@ -605,55 +606,110 @@ def _format_summary_report_text(report: dict) -> tuple[str, set[str], set[str], 
     blue_lines.add(peak_line)
 
     name_w = 28
-    qty_unit_w = 14
+    qty_unit_w = 16
     sales_w = 12
-    top_header = f"{'Rank':>4} {'Product Name':<{name_w}} {'Avg Qty':>{qty_unit_w}} {'Avg Revenue':>{sales_w}}"
+    # Add extra horizontal gap between Avg Qty and Avg Revenue by inserting two spaces
+    top_header = f"{'Rank':>4} {'Product Name':<{name_w}} {'Avg Qty':>{qty_unit_w}}  {'Avg Revenue':>{sales_w}}"
 
-    def _append_group_section(title: str, groups: List[Dict[str, Any]], section_no: int) -> None:
+    def _split_by_unit_type(products: List[Dict[str, Any]]) -> tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        """Split products into pieces (each/ea) and weight (kg/g) groups."""
+        pieces = []
+        weight = []
+        for p in products:
+            unit_lower = str(p.get('unit', '')).lower()
+            if unit_lower in ('each', 'ea'):
+                pieces.append(p)
+            elif 'kg' in unit_lower or 'g' in unit_lower:
+                weight.append(p)
+        return pieces, weight
+
+    def _sort_products_for_display(products: List[Dict[str, Any]], primary_metric: str = 'qty') -> List[Dict[str, Any]]:
+        """Sort products by primary metric desc, secondary by line_sales desc for tie-break."""
+        if primary_metric == 'qty':
+            return sorted(products, key=lambda p: (_to_float(p.get('qty_sold', 0)), _to_float(p.get('line_sales', 0))), reverse=True)
+        else:  # primary_metric == 'sales' or 'earnings'
+            return sorted(products, key=lambda p: (_to_float(p.get('line_sales', 0)), _to_float(p.get('qty_sold', 0))), reverse=True)
+
+    def _render_product_list(products: List[Dict[str, Any]], limit: int | None = None) -> None:
+        """Render a list of products with optional limit."""
+        if limit:
+            products = products[:limit]
+        
+        if not products:
+            return
+        
+        lines.append(top_header)
+        table_header_lines.add(top_header)
+        
+        for idx, row in enumerate(products, start=1):
+            qty_txt, unit_txt = _format_qty_unit(row.get('qty_sold'), row.get('unit'))
+            qty_unit_txt = f"{qty_txt} {unit_txt}".strip()
+            pname = _truncate(str(row.get('product_name') or ''), name_w)
+            lines.append(
+                f"{idx:>3}. {pname:<{name_w}} "
+                # two spaces inserted before revenue column to increase gap
+                f"{qty_unit_txt:>{qty_unit_w}}  {_fmt_money(row.get('line_sales')):>{sales_w}}"
+            )
+
+    def _append_group_section_split(title: str, groups: List[Dict[str, Any]], section_no: int, primary_metric: str = 'qty', per_unit_limit: int = 3) -> None:
+        """Render hourly groups split by unit type (pieces and weight)."""
         lines.extend(['', f'{section_no}. {title}', '-' * 70])
         for group in groups:
             hour_slot = str(group.get('hour_slot') or '')
             products = group.get('products') or []
             lines.append(hour_slot)
             bold_lines.add(hour_slot)
+            
             if products:
-                lines.append(top_header)
-                table_header_lines.add(top_header)
-
-                for row in products:
-                    qty_txt, unit_txt = _fmt_qty_unit(row.get('qty_sold'), row.get('unit'))
-                    qty_unit_txt = f"{qty_txt} {unit_txt}".strip()
-                    pname = _truncate(str(row.get('product_name') or ''), name_w)
-                    lines.append(
-                        f"{_to_int(row.get('rank')):>3}. {pname:<{name_w}} "
-                        f"{qty_unit_txt:>{qty_unit_w}} {_fmt_money(row.get('line_sales')):>{sales_w}}"
-                    )
+                pieces, weight = _split_by_unit_type(products)
+                pieces = _sort_products_for_display(pieces, primary_metric)
+                weight = _sort_products_for_display(weight, primary_metric)
+                
+                # Render pieces sub-list
+                if pieces:
+                    _render_product_list(pieces, limit=per_unit_limit)
+                
+                # Render weight sub-list with separator
+                if weight:
+                    lines.append('')  # Blank row separator
+                    _render_product_list(weight, limit=per_unit_limit)
+                
+                if not pieces and not weight:
+                    lines.append('No product rows.')
             else:
                 lines.append('No product rows.')
             lines.append('')
 
-    _append_group_section('Most Popular Items (By Hour)', top_qty_by_hour, 3)
-    _append_group_section('Top Earning Items (By Hour)', top_sales_by_hour, 4)
-
-    def _append_day_section(title: str, rows: List[Dict[str, Any]], section_no: int) -> None:
+    def _append_day_section_split(title: str, rows: List[Dict[str, Any]], section_no: int, primary_metric: str = 'qty', pieces_limit: int = 10, weight_limit: int = 5) -> None:
+        """Render daily sellers split by unit type (pieces and weight)."""
         lines.extend(['', f'{section_no}. {title}', '-' * 70])
+        
         if rows:
-            lines.append(top_header)
-            table_header_lines.add(top_header)
-
-            for row in rows:
-                qty_txt, unit_txt = _fmt_qty_unit(row.get('qty_sold'), row.get('unit'))
-                qty_unit_txt = f"{qty_txt} {unit_txt}".strip()
-                pname = _truncate(str(row.get('product_name') or ''), name_w)
-                lines.append(
-                    f"{_to_int(row.get('rank')):>3}. {pname:<{name_w}} "
-                    f"{qty_unit_txt:>{qty_unit_w}} {_fmt_money(row.get('line_sales')):>{sales_w}}"
-                )
+            pieces, weight = _split_by_unit_type(rows)
+            pieces = _sort_products_for_display(pieces, primary_metric)
+            weight = _sort_products_for_display(weight, primary_metric)
+            
+            # Render pieces sub-list
+            if pieces:
+                _render_product_list(pieces, limit=pieces_limit)
+            
+            # Render weight sub-list with separator
+            if weight:
+                lines.append('')  # Blank row separator
+                _render_product_list(weight, limit=weight_limit)
+            
+            if not pieces and not weight:
+                lines.append('No product rows.')
         else:
             lines.append('No product rows.')
 
-    _append_day_section('Most Consistent Sellers (By Quantity)', top_qty_day, 5)
-    _append_day_section('Most Consistent Sellers (By Earnings)', top_sales_day, 6)
+    # Sections 3 & 4: swap positions of hourly sections
+    _append_group_section_split('Top Earning Items (By Hour)', top_sales_by_hour, 3, primary_metric='sales')
+    _append_group_section_split('Most Popular Items (By Hour)', top_qty_by_hour, 4, primary_metric='qty')
+
+    # Sections 5 & 6: swap positions of daily consistent sellers
+    _append_day_section_split('Most Consistent Sellers (By Earnings)', top_sales_day, 5, primary_metric='sales')
+    _append_day_section_split('Most Consistent Sellers (By Quantity)', top_qty_day, 6, primary_metric='qty')
 
     lines.extend(['', 'END OF REPORT'])
 

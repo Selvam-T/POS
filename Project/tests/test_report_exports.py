@@ -55,6 +55,10 @@ DETAIL_SAMPLE = {
 }
 
 
+MINIMAL_DETAIL_SAMPLE = dict(DETAIL_SAMPLE)
+MINIMAL_DETAIL_SAMPLE['detail_variant'] = 'minimal'
+
+
 SUMMARY_SAMPLE = {
     'header': {
         'period_from': '2026-04-01T00:00:00',
@@ -115,15 +119,15 @@ class ReportExportsTest(unittest.TestCase):
         ts = '11apr2026_12-44'
         self.assertEqual(
             report_exports.build_report_filename('detail', 'pdf', timestamp=ts),
-            'Audit_report_pdf_11apr2026_12-44.pdf',
+            'Sales_record_pdf_11apr2026_12-44.pdf',
         )
         self.assertEqual(
             report_exports.build_report_filename('detail', 'xlsx', timestamp=ts),
-            'Audit_report_xlsx_11apr2026_12-44.xlsx',
+            'Sales_record_xlsx_11apr2026_12-44.xlsx',
         )
         self.assertEqual(
             report_exports.build_report_filename('summary', 'pdf', timestamp=ts),
-            'Insight_report_pdf_11apr2026_12-44.pdf',
+            'Sales_trends_pdf_11apr2026_12-44.pdf',
         )
         self.assertEqual(
             report_exports.build_report_filename('inactivity', 'xlsx', timestamp=ts),
@@ -140,6 +144,13 @@ class ReportExportsTest(unittest.TestCase):
         text = report_exports._report_text_for_pdf('detail', DETAIL_SAMPLE)
         self.assertIn('Sales Record & Totals', text)
         self.assertIn('Gross Sales', text)
+
+    def test_pdf_text_helper_uses_minimal_detail_variant(self):
+        text = report_exports._report_text_for_pdf('detail', MINIMAL_DETAIL_SAMPLE)
+        self.assertIn('4. Cash Outflows Detail', text)
+        self.assertIn('5. Other Activity (Unpaid & Cancelled)', text)
+        self.assertNotIn('Earnings Broken Down by Category', text)
+        self.assertNotIn('Top 10 Best Sellers (By Earnings)', text)
 
     def test_save_report_pdf_inactivity_rejects_oversized_reports(self):
         threshold = int(getattr(report_exports, 'PDF_RENDER_UNIT_THRESHOLD', 18000))
@@ -235,6 +246,25 @@ class ReportExportsTest(unittest.TestCase):
             self.assertEqual(workbook['Payments']['A2'].value, 'CASH')
             self.assertEqual(workbook['Categories']['A2'].value, 'Dairy')
             self.assertEqual(workbook['Top Products']['B2'].value, 'Milk')
+
+    @unittest.skipUnless(OPENPYXL_AVAILABLE, 'openpyxl is required for XLSX export tests')
+    def test_save_report_xlsx_detail_minimal_omits_breakdown_sheets(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            out_path = report_exports.save_report_xlsx(
+                'detail',
+                report_data=MINIMAL_DETAIL_SAMPLE,
+                out_dir=temp_dir,
+                filename='detail_minimal.xlsx',
+            )
+
+            self.assertTrue(Path(out_path).exists())
+
+            from openpyxl import load_workbook
+
+            workbook = load_workbook(out_path)
+            self.assertEqual(workbook.sheetnames, ['Summary', 'Payments', 'Outflows', 'Excluded'])
+            self.assertNotIn('Categories', workbook.sheetnames)
+            self.assertNotIn('Top Products', workbook.sheetnames)
 
     @unittest.skipUnless(OPENPYXL_AVAILABLE, 'openpyxl is required for XLSX export tests')
     def test_save_report_xlsx_inactivity_creates_bucket_sheets(self):

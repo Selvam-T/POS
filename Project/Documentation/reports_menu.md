@@ -21,25 +21,36 @@ This document summarizes the current functional design for report-menu wiring, f
     helper module `modules/menu/report_exports.py`.
   - Export files are written to `Path.home() / 'POS_Exports' / 'Reports'`.
   - Filename templates follow the report type and format, for example:
-    - `Audit_report_pdf_11apr2026_12-44.pdf`
-    - `Audit_report_xlsx_11apr2026_12-44.xlsx`
-    - `Insight_report_pdf_11apr2026_12-44.pdf`
+    - `Sales_record_pdf_11apr2026_12-44.pdf`
+    - `Sales_record_xlsx_11apr2026_12-44.xlsx`
+    - `Sales_trends_pdf_11apr2026_12-44.pdf`
     - `Inactivity_report_xlsx_11apr2026_12-44.xlsx`
   - `chartReportRadioBtn` supports PDF export only; `saveExcelReportBtn` is
-    disabled while chart is selected.
+    enabled while chart is selected but clicking it shows a friendly message: "Chart saving to Excel is not available."
   - Chart report generation uses shared repository helpers and opens a chart
     viewer window instead of the text report viewer.
   - Sets default landing focus to `viewReportBtn` (deferred to next event loop tick).
 
 - `_apply_role_default_state(dlg, is_admin)`
-  - Admin defaults:
-    - `detailReportRadioBtn` selected
-    - `todayRadioBtn` selected
-    - all report-type/date-range radios enabled
-  - Staff defaults:
-    - `summaryReportRadioBtn` selected
-    - `todayRadioBtn` selected
-    - `detailReportRadioBtn`, `chartReportRadioBtn`, `inactivityReportRadioBtn`, `dateRangeRadioBtn` disabled
+  - **Both Admin and Staff now land on Detailed report by default.**
+  - Admin role permissions:
+    - `detailReportRadioBtn`: enabled (not locked)
+    - `summaryReportRadioBtn`: enabled, subject to date-range gating (see below)
+    - `chartReportRadioBtn`: enabled
+    - `inactivityReportRadioBtn`: enabled
+    - `dateRangeRadioBtn`: enabled
+    - `todayRadioBtn`: selected (default)
+  - Staff role permissions:
+    - `detailReportRadioBtn`: enabled (not locked) — Staff can access detailed reports
+    - `summaryReportRadioBtn`: **disabled, greyed out, not clickable** (gating applied; Staff cannot access)
+    - `chartReportRadioBtn`: disabled, greyed out (Staff cannot access)
+    - `inactivityReportRadioBtn`: disabled, greyed out (Staff cannot access)
+    - `dateRangeRadioBtn`: disabled, greyed out (Staff locked to "Today" mode)
+    - `todayRadioBtn`: selected (default)
+  - **Date-range gating for Summary radio (Admin only):**
+    - When Admin selects "Date Range", Summary radio is locked (disabled, greyed)
+    - When Admin selects "Today", Summary radio is unlocked (enabled, clickable)
+    - Staff users always see Summary locked regardless of date mode
 
 - `_defer_focus(widget)`
   - Utility to apply focus on the next event-loop tick (`QTimer.singleShot(0, ...)`) for reliable focus landing.
@@ -54,6 +65,14 @@ This document summarizes the current functional design for report-menu wiring, f
   - For `detail` selection, `viewReportBtn` calls
     `modules.menu.report_generator.get_detailed_report(...)`.
   - Viewer rendering is delegated to `modules.menu.report_viewers.open_report_viewer(...)`.
+  - Staff users receive the **minimal detailed report** variant:
+    - Sections 4 and 5 are omitted
+    - The remaining sections are renumbered so Cash Outflows Detail becomes section 4 and Other Activity becomes section 5
+    - The same report payload is reused for viewer, PDF, and Excel export; the presentation layer switches the section set based on the Staff detail variant flag
+  - **Column layout (sections 4–5):**
+    - Section 4 (Earnings Broken Down by Category): Amount column width increased to 14 characters
+    - Section 5 (Top 10 Best Sellers By Earnings): Amount column width increased to 14 characters
+    - Improves readability and alignment of currency values.
 
 - Summary report integration
   - For `summary` selection, `viewReportBtn` calls
@@ -61,6 +80,16 @@ This document summarizes the current functional design for report-menu wiring, f
   - Summary rendering uses the same shared viewer shell and searchable text
     layout as detailed, but with summary-specific sections:
     sales by hour, top products by hour/day, and top 5 product lists.
+  - **Summary report access control:**
+    - **Admin users:** Can access Summary report; subject to date-range gating.
+      When Admin selects "Date Range", Summary radio is locked and disabled.
+      When Admin selects "Today", Summary radio is unlocked and re-enabled.
+    - **Staff users:** Cannot access Summary report; radio is permanently disabled,
+      greyed out, and non-clickable.
+  - **Column layout (sections 3–6):**
+    - "Avg Qty" column width: 16 characters
+    - Extra spacing (2 spaces) between "Avg Qty" and "Avg Revenue" columns
+    - Improves visual separation and readability of product rankings
 
 - Chart report integration
   - For `chart` selection, `viewReportBtn` calls
@@ -98,6 +127,23 @@ This document summarizes the current functional design for report-menu wiring, f
 - Uses the shared `REPORT_VIEWER_RATIOS` tuple from `config.py` for viewer
   sizing, with a pixel fallback when the tuple is unavailable.
 - Viewer closes via native window titlebar `X` button (no in-dialog Close push button).
+
+### Quantity Display Formatting
+- When displaying quantities (`qty_sold`), the viewer applies the following rules:
+  - **For 'ea' (each) units:**
+    - If `qty >= 1`, display as an integer (rounded) e.g., "5 ea" or "2 ea" for 1.5
+    - If `0 < qty < 1`, display with two decimal places (e.g., "0.50 ea")
+    - This avoids showing "0 ea" for small non-zero averages while keeping larger
+      counts succinct.
+  - **For 'kg' (weight) units:**
+    - If `qty >= 1.0 kg`, display as "X.XX kg" (two decimal places)
+    - If `0 < qty < 1.0 kg`, convert to grams and display as whole grams when >= 1 g (e.g., "500 g")
+    - If converted grams < 1 g, display as a two-decimal gram value (e.g., "0.50 g")
+  - **Default for other units:**
+    - If `0 < qty < 1`, display with two decimal places; otherwise show a 3-decimal fallback
+      for larger fractional values.
+  - **Rationale:** Consistent two-decimal presentation for small quantities prevents
+    misleading zero displays while keeping unit conversions readable.
 - Applies dim overlay while viewer is open.
 
 ## Export Module
@@ -137,6 +183,47 @@ This document summarizes the current functional design for report-menu wiring, f
     is available, Excel export proceeds normally, even for large reports.
 - In both PDF and Excel paths, the controller logs unexpected failures and
   updates the report status label so the user sees a safe, short message.
+
+## Summary Report Section Structure
+### Report Sections (On-screen Viewer & XLSX Export)
+
+The summary report displays business trends and patterns with the following structure:
+
+1. **Average Sales Summary** — High-level overview of daily averages (receipt count, gross sales, outflows, net)
+2. **Average Hourly Earnings** — Summary table and peak hour indicator
+3. **Top Earning Items (By Hour)** — Products ranked by earnings within each hourly bucket
+   - **Split by unit type** (to avoid comparing pieces vs. weights):
+     - Pieces (unit = Each/ea): top 3 per hour
+     - Weight (unit = kg/g): top 3 per hour
+   - Rendered with a blank row separating each unit-type sub-list
+   - Sorted by earnings (line_sales) descending; ties broken by quantity ascending
+   
+4. **Most Popular Items (By Hour)** — Products ranked by quantity sold within each hourly bucket
+   - **Split by unit type**:
+     - Pieces (unit = Each/ea): top 3 per hour
+     - Weight (unit = kg/g): top 3 per hour
+   - Rendered with a blank row separating each unit-type sub-list
+   - Sorted by quantity descending; ties broken by earnings ascending
+
+5. **Most Consistent Sellers (By Earnings)** — Products with highest total earnings across the period
+   - **Split by unit type**:
+     - Pieces (unit = Each/ea): top 10
+     - Weight (unit = kg/g): top 5
+   - Rendered with a blank row separating each unit-type sub-list
+   - Sorted by earnings (line_sales) descending; ties broken by quantity ascending
+
+6. **Most Consistent Sellers (By Quantity)** — Products with highest total quantity sold across the period
+   - **Split by unit type**:
+     - Pieces (unit = Each/ea): top 10
+     - Weight (unit = kg/g): top 5
+   - Rendered with a blank row separating each unit-type sub-list
+   - Sorted by quantity descending; ties broken by earnings ascending
+
+### Rationale for Unit Type Splitting
+- Comparing pieces (counted as individual items) with weights (measured in kg/grams) is misleading.
+  For example, ranking 1000 pieces of sponges alongside 5 kg of apples would incorrectly suggest
+  the sponges are more popular, even if apples generated more revenue or volume.
+- By splitting, the report shows true rankings within each unit category, allowing fair comparisons.
 
 ## Shared Date Gating Module
 ### `modules/date_time/date_gating.py`

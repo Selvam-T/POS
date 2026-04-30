@@ -10,14 +10,13 @@ from typing import Any, Iterable
 from PyQt5.QtGui import QFont, QTextDocument
 from PyQt5.QtPrintSupport import QPrinter
 
-from modules.menu import report_charts
 from modules.menu import report_viewers
 
 
 EXPORT_ROOT = Path.home() / 'POS_Exports' / 'Reports'
 _REPORT_STEMS = {
-    'detail': 'Audit_report',
-    'summary': 'Insight_report',
+    'detail': 'Sales_record',
+    'summary': 'Sales_trends',
     'chart': 'Charts',
     'inactivity': 'Inactivity_report',
 }
@@ -36,7 +35,7 @@ def _timestamp_for_filename(now: datetime | None = None) -> str:
 
 
 def _report_stem(report_type: Any) -> str:
-    return _REPORT_STEMS.get(_normalize_report_type(report_type), 'Insight_report')
+    return _REPORT_STEMS.get(_normalize_report_type(report_type), 'Sales_trends')
 
 
 def build_report_filename(report_type: Any, fmt: str, *, timestamp: str | None = None) -> str:
@@ -119,12 +118,14 @@ def estimate_report_render_units(report_type: Any, report_data: dict | None) -> 
         top_products = payload.get('top_products') or []
         outflows = payload.get('cash_outflows') or []
         excluded = payload.get('excluded') or {}
-        category_products = sum(len(category.get('products') or []) for category in categories if isinstance(category, dict))
+        detail_variant = report_viewers._detail_report_variant(payload)
+        include_breakdowns = detail_variant != 'minimal'
+        category_products = sum(len(category.get('products') or []) for category in categories if isinstance(category, dict)) if include_breakdowns else 0
         return (
             len(payments)
-            + len(categories)
+            + (len(categories) if include_breakdowns else 0)
             + category_products
-            + len(top_products)
+            + (len(top_products) if include_breakdowns else 0)
             + len(outflows)
             + len(excluded)
             + len(sales)
@@ -158,12 +159,6 @@ def estimate_report_render_units(report_type: Any, report_data: dict | None) -> 
             + len(payload.get('header') or {})
         )
 
-    if rpt == 'chart':
-        sales_by_hour = payload.get('sales_by_hour') or []
-        payment_breakdown = payload.get('payment_breakdown') or []
-        top_products = payload.get('top_products_by_sales_day') or payload.get('top_products') or []
-        return len(sales_by_hour) + len(payment_breakdown) + len(top_products) + len(payload.get('header') or {})
-
     if rpt == 'inactivity':
         header = payload.get('header') or {}
         sections = payload.get('sections') or []
@@ -190,12 +185,6 @@ def save_report_pdf(
     folder = _ensure_exports_folder(out_dir)
     file_name = filename or build_report_filename(rpt, 'pdf')
     out_path = folder / file_name
-
-    if rpt == 'chart':
-        estimated_units = estimate_report_render_units(rpt, report_data)
-        if estimated_units > PDF_RENDER_UNIT_THRESHOLD:
-            raise RuntimeError('Report is too large to export to PDF. Reduce the date range.')
-        return report_charts.save_chart_report_pdf(report_data or {}, out_path)
 
     estimated_units = estimate_report_render_units(rpt, report_data)
     if estimated_units > PDF_RENDER_UNIT_THRESHOLD:
@@ -286,6 +275,8 @@ def _detail_workbook_data(report_data: dict) -> dict[str, list[list[Any]] | list
     top_products = report_data.get('top_products') or []
     outflows = report_data.get('cash_outflows') or []
     excluded = report_data.get('excluded') or {}
+    detail_variant = report_viewers._detail_report_variant(report_data)
+    include_breakdowns = detail_variant != 'minimal'
 
     summary_rows: list[tuple[Any, Any]] = [
         ('Period From', header.get('period_from') or '-'),
@@ -302,18 +293,21 @@ def _detail_workbook_data(report_data: dict) -> dict[str, list[list[Any]] | list
     payment_rows = [[row.get('method') or '', row.get('amount') or 0] for row in payments]
 
     category_rows: list[list[Any]] = []
-    for category in categories:
-        cat_name = category.get('category_name') or 'Uncategorized'
-        for product in category.get('products') or []:
-            category_rows.append([
-                cat_name,
-                product.get('product_name') or '',
-                product.get('unit') or '',
-                product.get('qty_sold') or 0,
-                product.get('line_sales') or 0,
-            ])
+    if include_breakdowns:
+        for category in categories:
+            cat_name = category.get('category_name') or 'Uncategorized'
+            for product in category.get('products') or []:
+                category_rows.append([
+                    cat_name,
+                    product.get('product_name') or '',
+                    product.get('unit') or '',
+                    product.get('qty_sold') or 0,
+                    product.get('line_sales') or 0,
+                ])
 
-    top_rows = [[row.get('rank') or '', row.get('product_name') or '', row.get('qty_sold') or 0, row.get('unit') or '', row.get('line_sales') or 0] for row in top_products]
+    top_rows = []
+    if include_breakdowns:
+        top_rows = [[row.get('rank') or '', row.get('product_name') or '', row.get('qty_sold') or 0, row.get('unit') or '', row.get('line_sales') or 0] for row in top_products]
 
     outflow_rows = [[row.get('outflow_type') or '', row.get('created_at') or '', row.get('cashier') or '', row.get('amount') or 0, row.get('note') or ''] for row in outflows]
 
@@ -325,6 +319,7 @@ def _detail_workbook_data(report_data: dict) -> dict[str, list[list[Any]] | list
     ]
 
     return {
+        'detail_variant': detail_variant,
         'summary_rows': summary_rows,
         'payment_rows': payment_rows,
         'category_rows': category_rows,
@@ -360,20 +355,80 @@ def _summary_workbook_data(report_data: dict) -> dict[str, list[list[Any]] | lis
 
     by_hour_rows = [[row.get('hour_slot') or '', row.get('sales_amount') or 0] for row in sales_by_hour]
 
-    def _flatten_grouped(groups: list[dict[str, Any]]) -> list[list[Any]]:
-        rows: list[list[Any]] = []
+    def _split_by_unit_type_export(products: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        """Split products into pieces (each/ea) and weight (kg/g) groups."""
+        pieces = []
+        weight = []
+        for p in products:
+            unit_lower = str(p.get('unit', '')).lower()
+            if unit_lower in ('each', 'ea'):
+                pieces.append(p)
+            elif 'kg' in unit_lower or 'g' in unit_lower:
+                weight.append(p)
+        return pieces, weight
+
+    def _sort_products_export(products: list[dict[str, Any]], primary_metric: str = 'qty') -> list[dict[str, Any]]:
+        """Sort products by primary metric desc, secondary by line_sales desc."""
+        if primary_metric == 'qty':
+            return sorted(products, key=lambda p: (float(p.get('qty_sold', 0)), float(p.get('line_sales', 0))), reverse=True)
+        else:
+            return sorted(products, key=lambda p: (float(p.get('line_sales', 0)), float(p.get('qty_sold', 0))), reverse=True)
+
+    def _flatten_grouped_split(groups: list[dict[str, Any]], primary_metric: str = 'qty', per_unit_limit: int = 3) -> tuple[list[list[Any]], list[list[Any]]]:
+        """Flatten hourly groups split by unit type: returns (pieces_rows, weight_rows)."""
+        pieces_rows: list[list[Any]] = []
+        weight_rows: list[list[Any]] = []
+        
         for group in groups:
             hour_slot = group.get('hour_slot') or ''
-            for row in group.get('products') or []:
-                rows.append([
+            products = group.get('products') or []
+            
+            pieces, weight = _split_by_unit_type_export(products)
+            pieces = _sort_products_export(pieces, primary_metric)[:per_unit_limit]
+            weight = _sort_products_export(weight, primary_metric)[:per_unit_limit]
+            
+            for idx, row in enumerate(pieces, start=1):
+                pieces_rows.append([
                     hour_slot,
-                    row.get('rank') or '',
+                    idx,
                     row.get('product_name') or '',
                     row.get('qty_sold') or 0,
                     row.get('unit') or '',
                     row.get('line_sales') or 0,
                 ])
-        return rows
+            
+            for idx, row in enumerate(weight, start=1):
+                weight_rows.append([
+                    hour_slot,
+                    idx,
+                    row.get('product_name') or '',
+                    row.get('qty_sold') or 0,
+                    row.get('unit') or '',
+                    row.get('line_sales') or 0,
+                ])
+        
+        return pieces_rows, weight_rows
+
+    def _day_section_split(rows: list[dict[str, Any]], primary_metric: str = 'qty', pieces_limit: int = 10, weight_limit: int = 5) -> tuple[list[list[Any]], list[list[Any]]]:
+        """Split daily sellers by unit type: returns (pieces_rows, weight_rows)."""
+        pieces, weight = _split_by_unit_type_export(rows)
+        pieces = _sort_products_export(pieces, primary_metric)[:pieces_limit]
+        weight = _sort_products_export(weight, primary_metric)[:weight_limit]
+        
+        pieces_rows = [[idx, row.get('product_name') or '', row.get('qty_sold') or 0, row.get('unit') or '', row.get('line_sales') or 0] 
+                       for idx, row in enumerate(pieces, start=1)]
+        weight_rows = [[idx, row.get('product_name') or '', row.get('qty_sold') or 0, row.get('unit') or '', row.get('line_sales') or 0] 
+                       for idx, row in enumerate(weight, start=1)]
+        
+        return pieces_rows, weight_rows
+
+    # Flatten hourly groups (sections 3 & 4 are now swapped in viewer)
+    sales_hour_pieces, sales_hour_weight = _flatten_grouped_split(top_sales_by_hour, primary_metric='sales')
+    qty_hour_pieces, qty_hour_weight = _flatten_grouped_split(top_qty_by_hour, primary_metric='qty')
+    
+    # Day sections (sections 5 & 6 are now swapped in viewer)
+    sales_day_pieces, sales_day_weight = _day_section_split(top_sales_day, primary_metric='sales')
+    qty_day_pieces, qty_day_weight = _day_section_split(top_qty_day, primary_metric='qty')
 
     excluded_rows = [
         ('Unpaid Receipts Count', excluded.get('unpaid_receipts_count') or 0),
@@ -385,10 +440,14 @@ def _summary_workbook_data(report_data: dict) -> dict[str, list[list[Any]] | lis
     return {
         'summary_rows': summary_rows,
         'sales_by_hour_rows': by_hour_rows,
-        'qty_by_hour_rows': _flatten_grouped(top_qty_by_hour),
-        'sales_by_hour_top_rows': _flatten_grouped(top_sales_by_hour),
-        'top_qty_day_rows': [[row.get('rank') or '', row.get('product_name') or '', row.get('qty_sold') or 0, row.get('unit') or '', row.get('line_sales') or 0] for row in top_qty_day],
-        'top_sales_day_rows': [[row.get('rank') or '', row.get('product_name') or '', row.get('qty_sold') or 0, row.get('unit') or '', row.get('line_sales') or 0] for row in top_sales_day],
+        'sales_hour_pieces': sales_hour_pieces,
+        'sales_hour_weight': sales_hour_weight,
+        'qty_hour_pieces': qty_hour_pieces,
+        'qty_hour_weight': qty_hour_weight,
+        'sales_day_pieces': sales_day_pieces,
+        'sales_day_weight': sales_day_weight,
+        'qty_day_pieces': qty_day_pieces,
+        'qty_day_weight': qty_day_weight,
         'excluded_rows': excluded_rows,
     }
 
@@ -462,18 +521,23 @@ def save_report_xlsx(
         data = _detail_workbook_data(payload)
         _add_key_value_sheet(workbook, 'Summary', data['summary_rows'])
         _add_table_sheet(workbook, 'Payments', ['Method', 'Amount'], data['payment_rows'])
-        _add_table_sheet(workbook, 'Categories', ['Category', 'Product Name', 'Unit', 'Qty Sold', 'Line Sales'], data['category_rows'])
-        _add_table_sheet(workbook, 'Top Products', ['Rank', 'Product Name', 'Qty Sold', 'Unit', 'Amount'], data['top_rows'])
+        if data.get('detail_variant') != 'minimal':
+            _add_table_sheet(workbook, 'Categories', ['Category', 'Product Name', 'Unit', 'Qty Sold', 'Line Sales'], data['category_rows'])
+            _add_table_sheet(workbook, 'Top Products', ['Rank', 'Product Name', 'Qty Sold', 'Unit', 'Amount'], data['top_rows'])
         _add_table_sheet(workbook, 'Outflows', ['Type', 'Date/Time', 'Cashier', 'Amount', 'Note'], data['outflow_rows'])
         _add_key_value_sheet(workbook, 'Excluded', data['excluded_rows'])
     elif rpt == 'summary':
         data = _summary_workbook_data(payload)
         _add_key_value_sheet(workbook, 'Summary', data['summary_rows'])
         _add_table_sheet(workbook, 'Sales By Hour', ['Hour Slot', 'Avg Revenue'], data['sales_by_hour_rows'])
-        _add_table_sheet(workbook, 'Top Qty By Hour', ['Hour Slot', 'Rank', 'Product Name', 'Avg Qty', 'Unit', 'Avg Revenue'], data['qty_by_hour_rows'])
-        _add_table_sheet(workbook, 'Top Sales By Hour', ['Hour Slot', 'Rank', 'Product Name', 'Avg Qty', 'Unit', 'Avg Revenue'], data['sales_by_hour_top_rows'])
-        _add_table_sheet(workbook, 'Top Qty By Day', ['Rank', 'Product Name', 'Avg Qty', 'Unit', 'Avg Revenue'], data['top_qty_day_rows'])
-        _add_table_sheet(workbook, 'Top Sales By Day', ['Rank', 'Product Name', 'Avg Qty', 'Unit', 'Avg Revenue'], data['top_sales_day_rows'])
+        _add_table_sheet(workbook, 'Top Sales By Hour - Pieces', ['Hour Slot', 'Rank', 'Product Name', 'Avg Qty', 'Unit', 'Avg Revenue'], data['sales_hour_pieces'])
+        _add_table_sheet(workbook, 'Top Sales By Hour - Weight', ['Hour Slot', 'Rank', 'Product Name', 'Avg Qty', 'Unit', 'Avg Revenue'], data['sales_hour_weight'])
+        _add_table_sheet(workbook, 'Top Qty By Hour - Pieces', ['Hour Slot', 'Rank', 'Product Name', 'Avg Qty', 'Unit', 'Avg Revenue'], data['qty_hour_pieces'])
+        _add_table_sheet(workbook, 'Top Qty By Hour - Weight', ['Hour Slot', 'Rank', 'Product Name', 'Avg Qty', 'Unit', 'Avg Revenue'], data['qty_hour_weight'])
+        _add_table_sheet(workbook, 'Top Sales By Day - Pieces', ['Rank', 'Product Name', 'Avg Qty', 'Unit', 'Avg Revenue'], data['sales_day_pieces'])
+        _add_table_sheet(workbook, 'Top Sales By Day - Weight', ['Rank', 'Product Name', 'Avg Qty', 'Unit', 'Avg Revenue'], data['sales_day_weight'])
+        _add_table_sheet(workbook, 'Top Qty By Day - Pieces', ['Rank', 'Product Name', 'Avg Qty', 'Unit', 'Avg Revenue'], data['qty_day_pieces'])
+        _add_table_sheet(workbook, 'Top Qty By Day - Weight', ['Rank', 'Product Name', 'Avg Qty', 'Unit', 'Avg Revenue'], data['qty_day_weight'])
         _add_key_value_sheet(workbook, 'Excluded', data['excluded_rows'])
     else:
         data = _inactivity_workbook_data(payload)

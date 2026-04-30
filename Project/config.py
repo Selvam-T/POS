@@ -19,7 +19,7 @@ DIALOG_RATIOS = {
     'MaxRowsDialog': (0.25, 0.25)
 }
 
-# Shared report viewer size ratio (width_ratio, height_ratio) as a fraction of the parent window.
+# Shared report viewer size ratio (width_ratio, height_ratio)
 REPORT_VIEWER_RATIOS = (0.6, 0.85)
 
 # Product Categories (Don't exceed 25 Characters)
