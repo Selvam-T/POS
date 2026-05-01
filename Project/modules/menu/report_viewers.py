@@ -63,6 +63,30 @@ def _to_float(value) -> float:
         return 0.0
 
 
+def _to_ampm_hour_label(hour_slot: Any) -> str:
+    """Convert an hour range like '09:00 - 10:00' to AM/PM format."""
+    text = str(hour_slot or '').strip()
+    if not text:
+        return ''
+
+    try:
+        parts = [part.strip() for part in text.split('-', 1)]
+        if len(parts) != 2:
+            return text
+        start_txt, end_txt = parts
+
+        from datetime import datetime
+
+        start_dt = datetime.strptime(start_txt, '%H:%M')
+        end_dt = datetime.strptime(end_txt, '%H:%M')
+
+        start_label = start_dt.strftime('%I:%M %p').lstrip('0')
+        end_label = end_dt.strftime('%I:%M %p').lstrip('0')
+        return f'{start_label} - {end_label}'
+    except Exception:
+        return text
+
+
 def _create_overlay(parent_dlg: QDialog):
     """Create a dim background overlay above the report menu dialog."""
     try:
@@ -592,13 +616,13 @@ def _format_summary_report_text(report: dict) -> tuple[str, set[str], set[str], 
         table_header_lines.add(hour_header)
 
         for row in sales_by_hour:
-            hour_slot = str(row.get('hour_slot') or '')
+            hour_slot = _to_ampm_hour_label(row.get('hour_slot'))
             amount = _fmt_money(row.get('sales_amount'))
             lines.append(f"{hour_slot:<24} {amount:>12}")
     else:
         lines.append('No sales by hour rows.')
 
-    peak_hour_label = str(peak_hour.get('hour_slot') or '-')
+    peak_hour_label = _to_ampm_hour_label(peak_hour.get('hour_slot')) or '-'
     peak_hour_amount = _fmt_money(peak_hour.get('sales_amount')) if peak_hour else _fmt_money(0.0)
     peak_line = f"{'Peak Avg Hour':<24} {peak_hour_label:<14} ({peak_hour_amount})"
     lines.append('')
@@ -655,7 +679,7 @@ def _format_summary_report_text(report: dict) -> tuple[str, set[str], set[str], 
         """Render hourly groups split by unit type (pieces and weight)."""
         lines.extend(['', f'{section_no}. {title}', '-' * 70])
         for group in groups:
-            hour_slot = str(group.get('hour_slot') or '')
+            hour_slot = _to_ampm_hour_label(group.get('hour_slot'))
             products = group.get('products') or []
             lines.append(hour_slot)
             bold_lines.add(hour_slot)

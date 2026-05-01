@@ -269,23 +269,6 @@ def launch_reports_dialog(host_window):
         except Exception:
             pass
 
-        # Apply gating lock to Summary radio button based on date range selection
-        # Only for Admin users; Staff users keep Summary locked regardless
-        try:
-            summary = dlg.findChild(QRadioButton, 'summaryReportRadioBtn')
-            if summary is not None and is_admin_user:
-                date_range = dlg.findChild(QRadioButton, 'dateRangeRadioBtn')
-                if date_range is not None and date_range.isChecked():
-                    # When date_range is active, lock summary radio (Admin only)
-                    set_locked_property(summary, True)
-                    summary.setEnabled(False)
-                else:
-                    # When today is active, unlock summary radio (Admin only)
-                    set_locked_property(summary, False)
-                    summary.setEnabled(True)
-        except Exception:
-            pass
-
     # report cancel button.
     try:
         if report_cancel_btn is not None:
@@ -308,41 +291,38 @@ def launch_reports_dialog(host_window):
 
     gate_controller = None
     inactivity_restore_mode = {'radio': None}
+    def _sync_report_mode_state() -> None:
+        """Shared report-mode sync for the report/date gating state."""
+        try:
+            if inactivity is not None and inactivity.isChecked():
+                if date_range is not None:
+                    inactivity_restore_mode['radio'] = 'date_range' if date_range.isChecked() else 'today'
+                    date_range.setEnabled(False)
+                    set_locked_property(date_range, True)
+                if today is not None:
+                    today.setText('Upto Today')
+                    today.setChecked(True)
+            else:
+                if date_range is not None:
+                    date_range.setEnabled(is_admin_user)
+                    set_locked_property(date_range, not is_admin_user)
+                    if inactivity_restore_mode.get('radio') == 'date_range' and date_range.isEnabled():
+                        date_range.setChecked(True)
+                    elif today is not None:
+                        today.setChecked(True)
+                if today is not None:
+                    today.setText('Today')
+
+            if gate_controller is not None:
+                gate_controller.apply_state()
+
+            _defer_focus(view_btn)
+        except Exception:
+            pass
+
     if all((today, date_range, from_date, to_date)):
         def _focus_first_action() -> None:
             _defer_focus(view_btn)
-
-        def _set_inactivity_gate(active: bool) -> None:
-            try:
-                if active:
-                    if date_range is not None:
-                        inactivity_restore_mode['radio'] = 'date_range' if date_range.isChecked() else 'today'
-                        date_range.setEnabled(False)
-                        set_locked_property(date_range, True)
-                    if today is not None:
-                        today.setText('Upto Today')
-                        today.setChecked(True)
-                    if gate_controller is not None:
-                        gate_controller.apply_state()
-                    _defer_focus(view_btn)
-                else:
-                    if date_range is not None:
-                        date_range.setEnabled(is_admin_user)
-                        set_locked_property(date_range, not is_admin_user)
-                        if inactivity_restore_mode.get('radio') == 'date_range':
-                            date_range.setChecked(True)
-                        else:
-                            today.setChecked(True)
-                    if today is not None:
-                        today.setText('Today')
-                    if gate_controller is not None:
-                        gate_controller.apply_state()
-                    _defer_focus(view_btn)
-            except Exception:
-                pass
-
-        def _on_inactivity_toggled(checked: bool) -> None:
-            _set_inactivity_gate(bool(checked))
 
         try:
             gate_controller = DateRangeGateController(
@@ -379,13 +359,7 @@ def launch_reports_dialog(host_window):
                 pass
 
         try:
-            if inactivity is not None:
-                inactivity.toggled.connect(_on_inactivity_toggled)
-        except Exception:
-            pass
-
-        try:
-            _set_inactivity_gate(False)
+            _sync_report_mode_state()
         except Exception:
             pass
 
@@ -398,17 +372,15 @@ def launch_reports_dialog(host_window):
         except Exception:
             pass
 
+    def _pdf_too_large_message() -> str:
+        return getattr(report_exports, 'PDF_TOO_LARGE_MESSAGE', 'PDF export skipped: the selected report is too large to render safely. Try a shorter date range or use Excel export.')
+
     try:
         _apply_role_default_state(dlg, is_admin=is_admin_user)
         # Initialize date/actions gating after role defaults are applied.
         if gate_controller is not None:
             gate_controller.init_date_bounds()
             gate_controller.apply_state()
-            if inactivity is not None and inactivity.isChecked():
-                try:
-                    _set_inactivity_gate(True)
-                except Exception:
-                    pass
         else:
             # Safe fallback if gate controller is unavailable.
             for btn in action_buttons:
@@ -459,20 +431,21 @@ def launch_reports_dialog(host_window):
         try:
             rpt = _current_report_type(dlg)
             data = _build_report_data(dlg, host_window, rpt)
-            estimated_units = report_exports.estimate_report_render_units(rpt, data)
-            if estimated_units > report_exports.PDF_RENDER_UNIT_THRESHOLD:
-                message = 'Report is too large to export to PDF.'
+            allowed, blocked_message, _estimated_units = report_exports.validate_pdf_export(rpt, data)
+            if not allowed:
+                message = blocked_message or _pdf_too_large_message()
                 _set_report_status(message, ok=False)
-                set_dialog_info(dlg, message, duration=4000)
+                set_dialog_info(dlg, message, duration=4500)
                 return
             out_path = report_exports.save_report_pdf(rpt, report_data=data)
             _report_save_status(out_path, 'PDF report')
             _defer_focus(view_btn)
         except Exception as e:
             try:
-                if 'too large' in str(e).lower():
-                    message = 'Report is too large to export to PDF.'
+                if 'too large' in str(e).lower() or 'render safely' in str(e).lower():
+                    message = _pdf_too_large_message()
                     _set_report_status(message, ok=False)
+                    set_dialog_info(dlg, message, duration=4500)
                 else:
                     _set_report_status(f'PDF export failed: {e}', ok=False)
                     log_error_message(f"Failed to save report PDF: {e}")
@@ -546,6 +519,9 @@ def launch_reports_dialog(host_window):
         summary = dlg.findChild(QRadioButton, 'summaryReportRadioBtn')
         chart = dlg.findChild(QRadioButton, 'chartReportRadioBtn')
         inactivity = dlg.findChild(QRadioButton, 'inactivityReportRadioBtn')
+        for radio in (detail, summary, chart, inactivity):
+            if radio is not None:
+                radio.toggled.connect(lambda checked: checked and _sync_report_mode_state())
         for radio in (detail, summary, chart, inactivity):
             if radio is not None:
                 radio.toggled.connect(_sync_report_export_buttons)

@@ -215,6 +215,22 @@ class ReportExportsTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             report_exports.save_report_pdf('summary', report_data=large_report, out_dir=tempfile.gettempdir(), filename='large_summary.pdf')
 
+    def test_validate_pdf_export_reports_blocked_reason(self):
+        threshold = int(getattr(report_exports, 'PDF_RENDER_UNIT_THRESHOLD', 18000))
+        oversized = threshold + 1
+        large_report = dict(SUMMARY_SAMPLE)
+        large_report['sales_by_hour'] = [
+            {'hour_slot': f'{index:02d}:00 - {index:02d}:59', 'sales_amount': 1.0}
+            for index in range(oversized)
+        ]
+
+        allowed, message, units = report_exports.validate_pdf_export('summary', large_report)
+
+        self.assertFalse(allowed)
+        self.assertIsNotNone(message)
+        self.assertGreater(units, threshold)
+        self.assertIn('render safely', message)
+
     def test_save_report_pdf_chart_creates_file(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             out_path = report_exports.save_report_pdf(
@@ -300,9 +316,21 @@ class ReportExportsTest(unittest.TestCase):
             from openpyxl import load_workbook
 
             workbook = load_workbook(out_path)
-            self.assertEqual(workbook.sheetnames, ['Summary', 'Sales By Hour', 'Top Qty By Hour', 'Top Sales By Hour', 'Top Qty By Day', 'Top Sales By Day', 'Excluded'])
+            self.assertEqual(workbook.sheetnames, [
+                'Summary',
+                'Sales By Hour',
+                'Top Sales By Hour - Pieces',
+                'Top Sales By Hour - Weight',
+                'Top Qty By Hour - Pieces',
+                'Top Qty By Hour - Weight',
+                'Top Sales By Day - Pieces',
+                'Top Sales By Day - Weight',
+                'Top Qty By Day - Pieces',
+                'Top Qty By Day - Weight',
+                'Excluded',
+            ])
             self.assertEqual(workbook['Sales By Hour']['A2'].value, '09:00 - 10:00')
-            self.assertEqual(workbook['Top Qty By Day']['B2'].value, 'Milk')
+            self.assertEqual(workbook['Top Qty By Day - Pieces']['B2'].value, 'Milk')
 
 
 if __name__ == '__main__':

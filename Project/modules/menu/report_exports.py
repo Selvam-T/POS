@@ -9,6 +9,7 @@ from typing import Any, Iterable
 
 from PyQt5.QtGui import QFont, QTextDocument
 from PyQt5.QtPrintSupport import QPrinter
+from PyQt5.QtWidgets import QApplication
 
 from modules.menu import report_viewers
 
@@ -23,6 +24,7 @@ _REPORT_STEMS = {
 PDF_RENDER_UNIT_THRESHOLD = 5000
 # Backward-compatible alias.
 INACTIVITY_PDF_ROW_THRESHOLD = PDF_RENDER_UNIT_THRESHOLD
+PDF_TOO_LARGE_MESSAGE = 'PDF export skipped: the selected report is too large to render safely.'
 
 
 def _normalize_report_type(report_type: Any) -> str:
@@ -174,6 +176,20 @@ def estimate_inactivity_report_rows(report_data: dict | None) -> int:
     return estimate_report_render_units('inactivity', report_data)
 
 
+def validate_pdf_export(report_type: Any, report_data: dict | None, *, threshold: int | None = None) -> tuple[bool, str | None, int]:
+    """Check whether a report is safe to render to PDF.
+
+    Returns:
+        (is_allowed, message_if_blocked, estimated_units)
+    """
+    rpt = _normalize_report_type(report_type)
+    estimated_units = estimate_report_render_units(rpt, report_data)
+    limit = PDF_RENDER_UNIT_THRESHOLD if threshold is None else int(threshold)
+    if estimated_units > limit:
+        return False, PDF_TOO_LARGE_MESSAGE, estimated_units
+    return True, None, estimated_units
+
+
 def save_report_pdf(
     report_type: Any,
     *,
@@ -186,9 +202,12 @@ def save_report_pdf(
     file_name = filename or build_report_filename(rpt, 'pdf')
     out_path = folder / file_name
 
-    estimated_units = estimate_report_render_units(rpt, report_data)
-    if estimated_units > PDF_RENDER_UNIT_THRESHOLD:
-        raise RuntimeError('Report is too large to export to PDF. Reduce the date range.')
+    if QApplication.instance() is None:
+        _qt_app = QApplication([])
+
+    allowed, message, _estimated_units = validate_pdf_export(rpt, report_data)
+    if not allowed:
+        raise RuntimeError(message or PDF_TOO_LARGE_MESSAGE)
 
     text = _report_text_for_pdf(rpt, report_data)
 

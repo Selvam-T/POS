@@ -7,6 +7,38 @@ from modules.menu.report_viewers import _format_summary_report_text
 class TestSummaryReportFormatting(unittest.TestCase):
     """Test that summary report output matches specifications."""
 
+    def test_section2_hours_render_in_ampm(self):
+        """Verify section 2 and peak hour display AM/PM labels."""
+        report = {
+            'header': {
+                'period_from': '2026-04-01',
+                'period_to': '2026-04-30',
+                'generated_at': '2026-04-30 10:00:00',
+                'generated_by': 'cashier_1',
+            },
+            'sales_summary': {
+                'paid_receipt_count': 100,
+                'gross_sales': 5000,
+                'less_refund_outflow': 200,
+                'less_vendor_outflow': 300,
+                'net_after_outflows': 4500,
+            },
+            'sales_by_hour': [
+                {'hour_slot': '09:00 - 10:00', 'sales_amount': 120.0},
+            ],
+            'peak_hour': {'hour_slot': '09:00 - 10:00', 'sales_amount': 120.0},
+            'top_products_by_qty_hour': [],
+            'top_products_by_sales_hour': [],
+            'top_products_by_qty_day': [],
+            'top_products_by_sales_day': [],
+            'excluded': {},
+        }
+
+        text, _, _, _ = _format_summary_report_text(report)
+
+        self.assertIn('9:00 AM - 10:00 AM', text)
+        self.assertIn('Peak Avg Hour', text)
+
     def test_hourly_split_output_format(self):
         """Verify hourly section output format with unit type split."""
         report = {
@@ -48,12 +80,12 @@ class TestSummaryReportFormatting(unittest.TestCase):
         
         # Verify structure
         self.assertIn('4. Most Popular Items (By Hour)', text, "Section 4 header should be present")
-        self.assertIn('11:00 - 12:00', text, "Hour slot should be present and bold")
+        self.assertIn('11:00 AM - 12:00 PM', text, "Hour slot should be present and bold")
         self.assertIn('Black Pepper', text, "Piece product should be in output")
         self.assertIn('Apple', text, "Weight product should be in output")
         
         # Verify the hour slot is marked as bold
-        self.assertIn('11:00 - 12:00', bold_lines, "Hour slot should be in bold_lines set")
+        self.assertIn('11:00 AM - 12:00 PM', bold_lines, "Hour slot should be in bold_lines set")
         
         # Verify ranking is sequential (1, 2, 3) for both pieces and weight
         lines = text.split('\n')
