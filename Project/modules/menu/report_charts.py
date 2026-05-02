@@ -9,6 +9,8 @@ from PyQt5.QtGui import QColor, QFont, QLinearGradient, QPainter, QPen, QBrush, 
 from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtWidgets import QApplication, QDialog, QFrame, QGridLayout, QLabel, QScrollArea, QSizePolicy, QVBoxLayout, QWidget
 
+from modules.date_time.formatters import format_report_timestamp
+
 
 DEFAULT_CHART_VIEWER_SIZE = (1080, 920)
 _APP_INSTANCE = None
@@ -40,7 +42,7 @@ def _hour_label(hour: int) -> str:
     display = hour % 12
     if display == 0:
         display = 12
-    return f'{display}{suffix}'
+    return f'{display}\n{suffix}'
 
 
 def _truncate(text: Any, width: int) -> str:
@@ -49,7 +51,7 @@ def _truncate(text: Any, width: int) -> str:
         return value
     if width <= 3:
         return value[:width]
-    return value[:width]
+    return value[:width - 3] + '...'
 
 
 def _safe_report(report_data: Any) -> dict:
@@ -65,15 +67,15 @@ class _ChartCard(QFrame):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         self.setStyleSheet(
             'QFrame#chartCard { background: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 12px; }'
-            'QLabel#chartCardTitle { color: #1F2937; font-weight: 700; font-size: 16px; }'
-            'QLabel#chartCardSubtitle { color: #6B7280; font-size: 11px; }'
-            'QLabel#chartMetricLabel { color: #374151; font-size: 11px; }'
-            'QLabel#chartMetricValue { color: #111827; font-weight: 700; font-size: 12px; }'
+            'QLabel#chartCardTitle { color: #1F2937; font-weight: 600; font-size: 18px; }'
+            'QLabel#chartCardSubtitle { color: #6B7280; font-size: 18px; }'
+            'QLabel#chartMetricLabel { color: #374151; font-weight: 500; font-size: 16px; }'
+            'QLabel#chartMetricValue { color: #111827; font-weight: 500; font-size: 16px; }'
         )
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(14, 14, 14, 14)
-        layout.setSpacing(8)
+        layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(20)
 
         title_lbl = QLabel(title)
         title_lbl.setObjectName('chartCardTitle')
@@ -83,6 +85,7 @@ class _ChartCard(QFrame):
 
         layout.addWidget(title_lbl)
         layout.addWidget(subtitle_lbl)
+        layout.addSpacing(25)
         layout.addWidget(chart_widget, 1)
 
 
@@ -94,7 +97,7 @@ class _BaseChartWidget(QWidget):
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
     def _plot_rect(self) -> QRectF:
-        return QRectF(self.rect()).adjusted(58, 22, -24, -44)
+        return QRectF(self.rect()).adjusted(95, 18, -40, -48)
 
 
 class _HourlySalesChart(_BaseChartWidget):
@@ -138,20 +141,32 @@ class _HourlySalesChart(_BaseChartWidget):
         painter.setPen(QPen(QColor('#D1D5DB'), 1))
         painter.drawRect(plot)
 
+        # Y-axis grid and labels (bold, with padding)
         painter.setFont(QFont('Segoe UI', 10))
         painter.setPen(QColor('#6B7280'))
+        label_padding = 8
         for step in range(5):
             y = plot.bottom() - (plot.height() * step / 4)
             painter.drawLine(int(plot.left()), int(y), int(plot.right()), int(y))
             value = max_value * step / 4
-            painter.drawText(4, int(y) + 4, 52, 14, Qt.AlignRight, _fmt_money(value))
+            # drawText with padding so labels don't clip into axis
+            painter.drawText(int(label_padding), int(y) - 20, int(plot.left() - label_padding - 6), 18, Qt.AlignRight, _fmt_money(value))
 
+        # Build line points at hourly positions and interpolated 30-min midpoints
         points: List[QPointF] = []
+        interp_midpoints: List[QPointF] = []
         count = max(1, len(values) - 1)
         for idx, value in enumerate(values):
             x = plot.left() + (plot.width() * idx / count if count else 0)
             y = plot.bottom() - (plot.height() * value / max_value)
-            points.append(QPointF(x, y))
+            points.append(QPointF(int(x), int(y)))
+            # compute midpoint between this and next (30-min marker)
+            if idx < len(values) - 1:
+                next_val = values[idx + 1]
+                mid_x = plot.left() + (plot.width() * (idx + 0.5) / count)
+                mid_y_val = (value + next_val) / 2.0
+                mid_y = plot.bottom() - (plot.height() * mid_y_val / max_value)
+                interp_midpoints.append(QPointF(int(mid_x), int(mid_y)))
 
         if points:
             poly_points = [QPointF(plot.left(), plot.bottom())] + points + [QPointF(plot.right(), plot.bottom())]
@@ -163,6 +178,13 @@ class _HourlySalesChart(_BaseChartWidget):
             painter.setBrush(Qt.NoBrush)
             painter.drawPolyline(QPolygonF(points))
 
+            # draw interpolated 30-minute markers (smaller)
+            painter.setPen(QPen(QColor('#0F4ED1'), 1))
+            painter.setBrush(QBrush(QColor('#1E70FF')))
+            for pt in interp_midpoints:
+                painter.drawEllipse(pt, 2.0, 2.0)
+
+            # draw main hourly markers
             painter.setPen(QPen(QColor('#0F4ED1'), 1))
             painter.setBrush(QBrush(QColor('#1E70FF')))
             for pt in points:
@@ -172,10 +194,10 @@ class _HourlySalesChart(_BaseChartWidget):
         painter.setFont(QFont('Segoe UI', 9))
         for idx, label in enumerate(labels):
             x = plot.left() + (plot.width() * idx / count if count else 0)
-            painter.drawText(QRectF(x - 18, plot.bottom() + 6, 36, 18), Qt.AlignCenter, label)
+            painter.drawText(QRectF(x - 18, plot.bottom() + 6, 36, 36), Qt.AlignCenter, label)
 
 
-class _PaymentDonutChart(_BaseChartWidget):
+class _PaymentHistogramChart(_BaseChartWidget):
     _palette = [
         QColor('#1E70FF'),
         QColor('#F59E0B'),
@@ -188,77 +210,74 @@ class _PaymentDonutChart(_BaseChartWidget):
     ]
 
     def __init__(self, rows: Sequence[Dict[str, Any]]):
-        super().__init__(min_height=250)
-        self._rows = list(rows)
+        super().__init__(min_height=300)
+        # normalize labels and amounts and sort by descending amount for histogram
+        normalized: List[Dict[str, Any]] = []
+        for row in rows:
+            label = str(row.get('method') or 'VOUCHER').upper()
+            if label in {'OTHER', ''}:
+                label = 'VOUCHER'
+            normalized.append({'method': label, 'amount': _to_float(row.get('amount'))})
+        self._rows = sorted(normalized, key=lambda r: r['amount'], reverse=True)
 
     def sizeHint(self) -> QSize:
-        return QSize(900, 250)
+        return QSize(900, 300)
 
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing, True)
         painter.fillRect(self.rect(), QColor('#FFFFFF'))
 
-        amounts = [_to_float(row.get('amount')) for row in self._rows]
-        labels = []
-        for row in self._rows:
-            label = str(row.get('method') or 'VOUCHER').upper()
-            if label in {'OTHER', ''}:
-                label = 'VOUCHER'
-            labels.append(label)
-        total = sum(amounts)
-
-        chart_rect = self.rect().adjusted(10, 12, -180, -12)
-        if chart_rect.width() <= 0 or chart_rect.height() <= 0:
-            return
-
-        center = chart_rect.center()
-        size = min(chart_rect.width(), chart_rect.height())
-        outer = QRectF(center.x() - size / 2 + 6, center.y() - size / 2 + 6, size - 12, size - 12)
-        if total <= 0:
+        rows = self._rows
+        if not rows:
             painter.setPen(QColor('#6B7280'))
             painter.setFont(QFont('Segoe UI', 12, QFont.Bold))
             painter.drawText(self.rect(), Qt.AlignCenter, 'No data available')
             return
-        else:
-            start_angle = 0
-            for idx, amount in enumerate(amounts):
-                span = int(round(5760 * (amount / total)))
-                color = self._palette[idx % len(self._palette)]
-                painter.setPen(QPen(QColor('#FFFFFF'), 2))
-                painter.setBrush(color)
-                painter.drawPie(outer, start_angle, span)
-                start_angle += span
 
-            inner = outer.adjusted(size * 0.22, size * 0.22, -size * 0.22, -size * 0.22)
-            painter.setPen(Qt.NoPen)
-            painter.setBrush(QColor('#FFFFFF'))
-            painter.drawEllipse(inner)
+        amounts = [r['amount'] for r in rows]
+        labels = [r['method'] for r in rows]
 
-        painter.setPen(QColor('#111827'))
-        painter.setFont(QFont('Segoe UI', 13, QFont.Bold))
-        painter.drawText(outer, Qt.AlignCenter, _fmt_money(total))
+        # left area for histogram, right area for legend (increased padding)
+        chart_rect = self.rect().adjusted(40, 22, -40, -22)
+        if chart_rect.width() <= 0 or chart_rect.height() <= 0:
+            return
 
-        legend_x = self.width() - 190
-        legend_y = 34
-        painter.setFont(QFont('Segoe UI', 10))
+        # draw axes
+        painter.setPen(QPen(QColor('#E5E7EB'), 1))
+
+        max_value = max(amounts) if amounts else 1.0
+        bar_area = QRectF(chart_rect.left() + 8, chart_rect.top() + 8, chart_rect.width() - 16, chart_rect.height() - 60)
+        n = len(rows)
+        bar_w = max(14, (bar_area.width() - (n - 1) * 10) / max(1, n))
+
+        # draw bars (vertical histogram, left->right sorted tall->short)
         for idx, (label, amount) in enumerate(zip(labels, amounts)):
-            row_y = legend_y + idx * 28
+            x = bar_area.left() + idx * (bar_w + 10)
+            h = (amount / max_value) * bar_area.height() if max_value else 0
+            y = bar_area.bottom() - h
             color = self._palette[idx % len(self._palette)]
             painter.setPen(Qt.NoPen)
-            painter.setBrush(color)
-            painter.drawRoundedRect(legend_x, row_y + 3, 14, 14, 4, 4)
+            painter.setBrush(QBrush(color))
+            painter.drawRect(QRectF(int(x), int(y), int(bar_w), int(h)))
+            # amount label above bar
+            painter.setPen(QColor('#111827'))
+            painter.setFont(QFont('Segoe UI', 9))
+            painter.drawText(QRectF(x, y - 25, bar_w, 16), Qt.AlignCenter, _fmt_money(amount))
+            # short label under bar
             painter.setPen(QColor('#374151'))
-            painter.drawText(legend_x + 22, row_y + 15, f'{label[:14]:<14} {_fmt_money(amount)}')
+            painter.setFont(QFont('Segoe UI', 9))
+            painter.drawText(QRectF(x, bar_area.bottom() + 12, bar_w, 18), Qt.AlignCenter, _truncate(label, 12))
+
 
 
 class _TopProductsBarChart(_BaseChartWidget):
     def __init__(self, rows: Sequence[Dict[str, Any]]):
-        super().__init__(min_height=320)
+        super().__init__(min_height=500)
         self._rows = sorted(list(rows), key=lambda row: _to_float(row.get('line_sales')), reverse=True)[:10]
 
     def _plot_rect(self) -> QRectF:
-        return QRectF(self.rect()).adjusted(120, 22, -70, -44)
+        return QRectF(self.rect()).adjusted(230, 22, -150, -54)
 
     def sizeHint(self) -> QSize:
         return QSize(900, 320)
@@ -280,33 +299,34 @@ class _TopProductsBarChart(_BaseChartWidget):
             return
 
         values = [_to_float(row.get('line_sales')) for row in rows]
-        labels = [_truncate(row.get('product_name'), 10) for row in rows]
+        labels = [str(row.get('product_name') or '') for row in rows]
         max_value = max(values) if values else 0.0
         if max_value <= 0:
             max_value = 1.0
 
-        row_h = plot.height() / max(1, len(rows))
-        bar_h = min(22, max(14, row_h * 0.62))
+        bar_h = 28
+        row_gap = 15
         gradient = QLinearGradient(plot.left(), 0, plot.right(), 0)
         gradient.setColorAt(0.0, QColor('#60A5FA'))
         gradient.setColorAt(1.0, QColor('#1E70FF'))
 
-        painter.setPen(QPen(QColor('#E5E7EB'), 1))
-        painter.drawRect(plot)
         painter.setFont(QFont('Segoe UI', 10))
 
         for idx, row in enumerate(rows):
-            y = plot.top() + idx * row_h + (row_h - bar_h) / 2
+            total_row = bar_h + row_gap
+            y = plot.top() + idx * total_row + (row_gap / 2)
             label = labels[idx] if idx < len(labels) else ''
             value = _to_float(row.get('line_sales'))
             bar_w = plot.width() * (value / max_value)
+            # draw full product name in the left margin area (expanded)
+            label_rect = QRectF(8, y, plot.left() - 26, bar_h + 4)
             painter.setPen(QColor('#374151'))
-            painter.drawText(8, int(y) + int(bar_h) - 2, 104, 14, Qt.AlignRight, label)
+            painter.drawText(label_rect, Qt.AlignRight | Qt.AlignVCenter, _truncate(label, 20))
             painter.setPen(Qt.NoPen)
             painter.setBrush(QBrush(gradient))
             painter.drawRoundedRect(QRectF(plot.left(), y, bar_w, bar_h), 6, 6)
             painter.setPen(QColor('#111827'))
-            painter.drawText(QRectF(plot.left() + bar_w + 8, y - 1, 120, bar_h + 4), Qt.AlignVCenter, _fmt_money(value))
+            painter.drawText(QRectF(plot.left() + bar_w + 12, y - 1, 180, bar_h + 4), Qt.AlignVCenter, _fmt_money(value))
 
 
 class _ChartReportCanvas(QWidget):
@@ -329,37 +349,47 @@ class _ChartReportCanvas(QWidget):
 
         title = QLabel('Chart Report')
         title.setStyleSheet('font-size: 24px; font-weight: 800; color: #111827;')
-        subtitle = QLabel(
-            f"Period: {header.get('period_from') or '-'} to {header.get('period_to') or '-'}"
-            f" | Generated by: {header.get('generated_by') or '-'}"
-        )
-        subtitle.setWordWrap(True)
-        subtitle.setStyleSheet('color: #6B7280; font-size: 11px;')
+        period_from_lbl = QLabel(f"Period From    :  {format_report_timestamp(header.get('period_from'))}")
+        period_from_lbl.setWordWrap(True)
+        period_from_lbl.setStyleSheet('color: #111827; font-size: 18px;')
+        period_to_lbl = QLabel(f"Period To       :  {format_report_timestamp(header.get('period_to'))}")
+        period_to_lbl.setWordWrap(True)
+        period_to_lbl.setStyleSheet('color: #111827; font-size: 18px;')
+        generated_by_lbl = QLabel(f"Generated by  :  {header.get('generated_by') or '-'}")
+        generated_by_lbl.setWordWrap(True)
+        generated_by_lbl.setStyleSheet('color: #111827; font-size: 18px;')
         layout.addWidget(title)
-        layout.addWidget(subtitle)
+        layout.addSpacing(20)
+        layout.addWidget(period_from_lbl)
+        layout.addSpacing(4)
+        layout.addWidget(period_to_lbl)
+        layout.addSpacing(6)
+        layout.addWidget(generated_by_lbl)
+        layout.addSpacing(20)
 
         metrics = QFrame()
         metrics.setStyleSheet('QFrame { background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 12px; }')
         metrics_layout = QGridLayout(metrics)
         metrics_layout.setContentsMargins(14, 14, 14, 14)
-        metrics_layout.setHorizontalSpacing(20)
-        metrics_layout.setVerticalSpacing(8)
+        metrics_layout.setHorizontalSpacing(5)
+        metrics_layout.setVerticalSpacing(20)
 
         metric_rows = [
-            ('Avg Paid Receipts / Day', f"{_to_float(sales_summary.get('paid_receipt_count')):,.2f}"),
-            ('Avg Gross Sales / Day', _fmt_money(sales_summary.get('gross_sales'))),
-            ('Avg Net After Outflows / Day', _fmt_money(sales_summary.get('net_after_outflows'))),
-            ('Peak Avg Hour', str(peak_hour.get('hour_slot') or '-')),
+            ('Daily Avg Gross Sales', _fmt_money(sales_summary.get('gross_sales'))),
+            ('Peak Sales Window', str(peak_hour.get('hour_slot') or '-')),
+            ('Peak Hourly Avg', _fmt_money(peak_hour.get('sales_amount')) if peak_hour and peak_hour.get('sales_amount') is not None else '-'),
         ]
-        for index, (label, value) in enumerate(metric_rows):
-            row = index // 2
-            col = (index % 2) * 2
+        for row, (label, value) in enumerate(metric_rows):
             label_widget = QLabel(label)
             value_widget = QLabel(value)
             label_widget.setObjectName('chartMetricLabel')
             value_widget.setObjectName('chartMetricValue')
-            metrics_layout.addWidget(label_widget, row, col)
-            metrics_layout.addWidget(value_widget, row, col + 1)
+            label_widget.setStyleSheet('font-size: 20px; border: None; color: #374151;')
+            value_widget.setStyleSheet('font-size: 20px; border: None; color: #111827;')
+            metrics_layout.addWidget(label_widget, row, 0)
+            metrics_layout.addWidget(value_widget, row, 1)
+        metrics_layout.setColumnStretch(0, 1)
+        metrics_layout.setColumnStretch(1, 3)
 
         layout.addWidget(metrics)
 
@@ -374,8 +404,8 @@ class _ChartReportCanvas(QWidget):
         layout.addWidget(
             _ChartCard(
                 '2. Preferred Payment Methods',
-                'Average payment mix over the selected range.',
-                _PaymentDonutChart(payment_breakdown),
+                'Average payment histogram over the selected range.',
+                _PaymentHistogramChart(payment_breakdown),
                 min_height=300,
             )
         )
@@ -437,8 +467,12 @@ def save_chart_report_pdf(report_data: dict | None, out_path) -> Any:
         raise RuntimeError('Unable to start PDF rendering for chart report.')
 
     try:
-        page_rect = printer.pageRect()
-        scale = min(page_rect.width() / max(1, canvas.width()), page_rect.height() / max(1, canvas.height()), 1.0)
+        page_rect = printer.pageRect(QPrinter.DevicePixel)
+        # Calculate scale to fit canvas on page (allow upscaling)
+        scale_x = page_rect.width() / max(1, canvas.width())
+        scale_y = page_rect.height() / max(1, canvas.height())
+        scale = min(scale_x, scale_y)
+        painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
         painter.translate(page_rect.left(), page_rect.top())
         painter.scale(scale, scale)
         canvas.render(painter)
