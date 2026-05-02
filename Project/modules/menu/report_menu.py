@@ -25,10 +25,11 @@ def _friendly_openpyxl_message() -> str:
 
 def _apply_role_default_state(dlg: QDialog, *, is_admin: bool) -> None:
     """Apply role defaults and permissions."""
-    detail = dlg.findChild(QRadioButton, 'detailReportRadioBtn')
-    summary = dlg.findChild(QRadioButton, 'summaryReportRadioBtn')
-    chart = dlg.findChild(QRadioButton, 'chartReportRadioBtn')
-    inactivity = dlg.findChild(QRadioButton, 'inactivityReportRadioBtn')
+    # Report type selectors: prefer new QPushButton names, fall back to legacy QRadioButton
+    detail = dlg.findChild(QPushButton, 'detailReportBtn') or dlg.findChild(QRadioButton, 'detailReportRadioBtn')
+    summary = dlg.findChild(QPushButton, 'summaryReportBtn') or dlg.findChild(QRadioButton, 'summaryReportRadioBtn')
+    chart = dlg.findChild(QPushButton, 'chartReportBtn') or dlg.findChild(QRadioButton, 'chartReportRadioBtn')
+    inactivity = dlg.findChild(QPushButton, 'inactivityReportBtn') or dlg.findChild(QRadioButton, 'inactivityReportRadioBtn')
     today = dlg.findChild(QRadioButton, 'todayRadioBtn')
     date_range = dlg.findChild(QRadioButton, 'dateRangeRadioBtn')
 
@@ -36,9 +37,17 @@ def _apply_role_default_state(dlg: QDialog, *, is_admin: bool) -> None:
         return
 
     # Role permissions for report/date mode radios.
-    # Detail is now enabled for both Admin and Staff
-    detail.setEnabled(True)
-    set_locked_property(detail, False)
+    # Staff users cannot change report type, but Detail remains the default selected report.
+    # Ensure QPushButton selectors are checkable so they behave like radios
+    for w in (detail, summary, chart, inactivity):
+        try:
+            if isinstance(w, QPushButton):
+                w.setCheckable(True)
+        except Exception:
+            pass
+
+    detail.setEnabled(is_admin)
+    set_locked_property(detail, not is_admin)
     # Summary is restricted to Admin; Staff users see it disabled/greyed
     summary.setEnabled(is_admin)
     set_locked_property(summary, not is_admin)
@@ -77,17 +86,17 @@ def _defer_focus(widget) -> None:
 def _current_report_type(dlg: QDialog) -> str:
     """Return normalized report type based on selected report radio."""
     try:
-        detail = dlg.findChild(QRadioButton, 'detailReportRadioBtn')
-        summary = dlg.findChild(QRadioButton, 'summaryReportRadioBtn')
-        chart = dlg.findChild(QRadioButton, 'chartReportRadioBtn')
-        inactivity = dlg.findChild(QRadioButton, 'inactivityReportRadioBtn')
-        if detail is not None and detail.isChecked():
+        detail = dlg.findChild(QPushButton, 'detailReportBtn') or dlg.findChild(QRadioButton, 'detailReportRadioBtn')
+        summary = dlg.findChild(QPushButton, 'summaryReportBtn') or dlg.findChild(QRadioButton, 'summaryReportRadioBtn')
+        chart = dlg.findChild(QPushButton, 'chartReportBtn') or dlg.findChild(QRadioButton, 'chartReportRadioBtn')
+        inactivity = dlg.findChild(QPushButton, 'inactivityReportBtn') or dlg.findChild(QRadioButton, 'inactivityReportRadioBtn')
+        if detail is not None and getattr(detail, 'isChecked', lambda: False)():
             return 'detail'
-        if summary is not None and summary.isChecked():
+        if summary is not None and getattr(summary, 'isChecked', lambda: False)():
             return 'summary'
-        if chart is not None and chart.isChecked():
+        if chart is not None and getattr(chart, 'isChecked', lambda: False)():
             return 'chart'
-        if inactivity is not None and inactivity.isChecked():
+        if inactivity is not None and getattr(inactivity, 'isChecked', lambda: False)():
             return 'inactivity'
     except Exception:
         pass
@@ -221,7 +230,7 @@ def launch_reports_dialog(host_window):
 
     # Report action/date widgets for gating flow
     date_range = dlg.findChild(QRadioButton, 'dateRangeRadioBtn')
-    inactivity = dlg.findChild(QRadioButton, 'inactivityReportRadioBtn')
+    inactivity = dlg.findChild(QPushButton, 'inactivityReportBtn') or dlg.findChild(QRadioButton, 'inactivityReportRadioBtn')
     today = dlg.findChild(QRadioButton, 'todayRadioBtn')
     from_date = dlg.findChild(QDateEdit, 'reportFromDateEdit')
     to_date = dlg.findChild(QDateEdit, 'reportToDateEdit')
@@ -515,16 +524,47 @@ def launch_reports_dialog(host_window):
         pass
 
     try:
-        detail = dlg.findChild(QRadioButton, 'detailReportRadioBtn')
-        summary = dlg.findChild(QRadioButton, 'summaryReportRadioBtn')
-        chart = dlg.findChild(QRadioButton, 'chartReportRadioBtn')
-        inactivity = dlg.findChild(QRadioButton, 'inactivityReportRadioBtn')
-        for radio in (detail, summary, chart, inactivity):
-            if radio is not None:
-                radio.toggled.connect(lambda checked: checked and _sync_report_mode_state())
-        for radio in (detail, summary, chart, inactivity):
-            if radio is not None:
-                radio.toggled.connect(_sync_report_export_buttons)
+        # Prefer new QPushButton selectors; fall back to legacy QRadioButton where present
+        detail = dlg.findChild(QPushButton, 'detailReportBtn') or dlg.findChild(QRadioButton, 'detailReportRadioBtn')
+        summary = dlg.findChild(QPushButton, 'summaryReportBtn') or dlg.findChild(QRadioButton, 'summaryReportRadioBtn')
+        chart = dlg.findChild(QPushButton, 'chartReportBtn') or dlg.findChild(QRadioButton, 'chartReportRadioBtn')
+        inactivity = dlg.findChild(QPushButton, 'inactivityReportBtn') or dlg.findChild(QRadioButton, 'inactivityReportRadioBtn')
+
+        selectors = [w for w in (detail, summary, chart, inactivity) if w is not None]
+
+        # Ensure QPushButton selectors are checkable and wire exclusive behavior
+        for w in selectors:
+            try:
+                if isinstance(w, QPushButton):
+                    w.setCheckable(True)
+            except Exception:
+                pass
+
+        def _on_selector_checked(selected_widget):
+            try:
+                for w in selectors:
+                    if w is None or w is selected_widget:
+                        continue
+                    try:
+                        w.blockSignals(True)
+                        # Uncheck only if widget supports setChecked
+                        try:
+                            w.setChecked(False)
+                        except Exception:
+                            pass
+                        w.blockSignals(False)
+                    except Exception:
+                        pass
+                _sync_report_mode_state()
+                _sync_report_export_buttons()
+            except Exception:
+                pass
+
+        for w in selectors:
+            try:
+                w.toggled.connect(lambda checked, obj=w: checked and _on_selector_checked(obj))
+            except Exception:
+                pass
     except Exception:
         pass
 

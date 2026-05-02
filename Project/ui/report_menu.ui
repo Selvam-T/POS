@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>780</width>
-    <height>550</height>
+    <height>540</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>760</width>
-    <height>550</height>
+    <height>540</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -151,38 +151,28 @@
          <number>10</number>
         </property>
         <item>
-         <widget class="QLabel" name="reportViewFieldLbl">
-          <property name="text">
-           <string>Report View :</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="detailReportRadioBtn">
+         <widget class="QPushButton" name="detailReportBtn">
           <property name="text">
            <string>DETAILED</string>
           </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="summaryReportRadioBtn">
+         <widget class="QPushButton" name="summaryReportBtn">
           <property name="text">
            <string>SUMMARY</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="chartReportRadioBtn">
+         <widget class="QPushButton" name="chartReportBtn">
           <property name="text">
            <string>CHART</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="inactivityReportRadioBtn">
+         <widget class="QPushButton" name="inactivityReportBtn">
           <property name="text">
            <string>INACTIVITY</string>
           </property>
@@ -202,7 +192,7 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>20</width>
-         <height>20</height>
+         <height>10</height>
         </size>
        </property>
       </spacer>
@@ -555,6 +545,22 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>detailReportBtn</tabstop>
+  <tabstop>summaryReportBtn</tabstop>
+  <tabstop>chartReportBtn</tabstop>
+  <tabstop>inactivityReportBtn</tabstop>
+  <tabstop>todayRadioBtn</tabstop>
+  <tabstop>dateRangeRadioBtn</tabstop>
+  <tabstop>reportFromDateEdit</tabstop>
+  <tabstop>reportToDateEdit</tabstop>
+  <tabstop>viewReportBtn</tabstop>
+  <tabstop>savePdfReportBtn</tabstop>
+  <tabstop>saveExcelReportBtn</tabstop>
+  <tabstop>resetReportBtn</tabstop>
+  <tabstop>btnReportCancel</tabstop>
+  <tabstop>customCloseBtn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

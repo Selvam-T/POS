@@ -297,37 +297,6 @@ QDateEdit[locked="false"] {
     border: 1px solid #c7cdd6;
 }
 
-/* Report menu: gated action buttons (view/pdf/excel). */
-QPushButton[objectName="viewReportBtn"][locked="true"],
-QPushButton[objectName="savePdfReportBtn"][locked="true"],
-QPushButton[objectName="saveExcelReportBtn"][locked="true"] {
-    background-color: #b8bdc4;
-    border: 1px solid #9ea4ad;
-    color: #e8eaed;
-}
-
-QPushButton[objectName="viewReportBtn"][locked="false"],
-QPushButton[objectName="savePdfReportBtn"][locked="false"],
-QPushButton[objectName="saveExcelReportBtn"][locked="false"] {
-    color: white;
-}
-
-QFrame#reportDateFrame[locked="true"] QLabel[objectName$="FieldLbl"] {
-    color: #5c5e5fb1 !important;
-}
-
-QFrame#reportDateFrame[locked="true"] QDateEdit {
-    background-color: #f0f0f0;
-    color: transparent;
-    border: 1px solid #dcdcdc;
-}
-
-QFrame#reportDateFrame[locked="true"] QDateEdit:disabled,
-QFrame#reportDateFrame[locked="true"] QDateEdit QLineEdit,
-QFrame#reportDateFrame[locked="true"] QDateEdit QLineEdit:disabled {
-    color: transparent;
-}
-
 /* ComboBox Dropdown Arrow */
 QComboBox::down-arrow {
     image: url(assets/icons/down_arrow.svg);
@@ -658,8 +627,7 @@ QFrame#exportFrame QPushButton[objectName*="ExportBtn"]:focus {
 QFrame#receiptSearchFrame,
 QFrame#receiptDateFrame,
 QFrame#receiptStatusFrame,
-QFrame#receiptActionFrame, 
-QFrame#reportDateFrame { /* report menu */
+QFrame#receiptActionFrame{
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #f8fafa, stop:1 #f8fafaf5);
     border: 1px solid #c2c4c4;
     padding: 0px 10px 0px 10px;
@@ -727,6 +695,10 @@ QPushButton#voidReceiptBtn:pressed {
 /* =============================================================
      report menu
     ============================================================= */
+QFrame#reportDateFrame{
+    border: 1px solid #c2c4c4;
+    padding: 0px 10px 0px 10px;
+}
 
 /* View Report */
 QPushButton#viewReportBtn {
@@ -779,7 +751,11 @@ QPushButton#saveExcelReportBtn:pressed {
 QPushButton#viewReportBtn:focus,
 QPushButton#savePdfReportBtn:focus,
 QPushButton#saveExcelReportBtn:focus,
-QPushButton#resetReportBtn:focus {
+QPushButton#resetReportBtn:focus,
+QPushButton#detailReportBtn:focus,
+QPushButton#summaryReportBtn:focus,
+QPushButton#chartReportBtn:focus,
+QPushButton#inactivityReportBtn:focus {
     outline: none;
     border: 2px solid orange;
 }
@@ -801,6 +777,40 @@ QPushButton#resetReportBtn:pressed {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
                                       stop:0 #8a96a8, stop:1 #bdc7d4);
     padding-top: 2px;
+}
+
+/* Report-type selectors */
+QPushButton#detailReportBtn,
+QPushButton#summaryReportBtn,
+QPushButton#chartReportBtn,
+QPushButton#inactivityReportBtn {
+    background-color: transparent;
+    border: none;
+    color: #0078d7;
+    font-weight: bold;
+}
+
+QPushButton#detailReportBtn:checked,
+QPushButton#summaryReportBtn:checked,
+QPushButton#chartReportBtn:checked,
+QPushButton#inactivityReportBtn:checked {
+    color: #ffffff;
+    background-color: #0078d7;
+}
+
+QPushButton#detailReportBtn:hover,
+QPushButton#summaryReportBtn:hover,
+QPushButton#chartReportBtn:hover,
+QPushButton#inactivityReportBtn:hover {
+    font-size: 14pt;
+}
+
+/* Gating locked for Staff restrictions */
+
+QPushButton#summaryReportBtn[locked="true"]:disabled,
+QPushButton#chartReportBtn[locked="true"]:disabled,
+QPushButton#inactivityReportBtn[locked="true"]:disabled {
+    color: white;
 }
 
 QRadioButton#todayRadioBtn,
