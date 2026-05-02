@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import json
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Iterable
@@ -67,17 +66,6 @@ def _safe_text_lines(value: Any) -> list[str]:
     return [str(value)]
 
 
-def _chart_report_text(report_data: Any) -> str:
-    lines = ['CHARTS REPORT', '=' * 72, 'No chart content is available for export.']
-    if isinstance(report_data, dict) and report_data:
-        lines.extend(['', 'Report Data', '-' * 72])
-        try:
-            lines.extend(_safe_text_lines(json.dumps(report_data, indent=2, sort_keys=True, default=str)))
-        except Exception:
-            lines.extend(_safe_text_lines(str(report_data)))
-    return '\n'.join(lines)
-
-
 def _report_text_for_pdf(report_type: Any, report_data: dict | None) -> str:
     rpt = _normalize_report_type(report_type)
     payload = report_data or {}
@@ -91,7 +79,7 @@ def _report_text_for_pdf(report_type: Any, report_data: dict | None) -> str:
     if rpt == 'inactivity':
         text, _, _, _ = report_viewers._format_inactivity_report_text(payload)
         return text
-    return _chart_report_text(payload)
+    raise ValueError(f'Unsupported PDF report type: {report_type}')
 
 
 def _count_nested_items(value: Any) -> int:
@@ -208,6 +196,11 @@ def save_report_pdf(
     allowed, message, _estimated_units = validate_pdf_export(rpt, report_data)
     if not allowed:
         raise RuntimeError(message or PDF_TOO_LARGE_MESSAGE)
+
+    if rpt == 'chart':
+        from modules.menu import report_charts
+
+        return report_charts.save_chart_report_pdf(report_data or {}, out_path)
 
     text = _report_text_for_pdf(rpt, report_data)
 
