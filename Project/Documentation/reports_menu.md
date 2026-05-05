@@ -25,7 +25,7 @@ This document summarizes the current functional design for report-menu wiring, f
     - `Sales_record_xlsx_11apr2026_12-44.xlsx`
     - `Sales_trends_pdf_11apr2026_12-44.pdf`
     - `Inactivity_report_xlsx_11apr2026_12-44.xlsx`
-  - `chartReportRadioBtn` supports PDF export only; `saveExcelReportBtn` is
+  - `chartReportBtn` supports PDF export only; `saveExcelReportBtn` is
     enabled while chart is selected but clicking it shows a friendly message: "Chart saving to Excel is not available."
   - Chart report generation uses shared repository helpers and opens a chart
     viewer window instead of the text report viewer.
@@ -34,29 +34,50 @@ This document summarizes the current functional design for report-menu wiring, f
 - `_apply_role_default_state(dlg, is_admin)`
   - **Both Admin and Staff now land on Detailed report by default.**
   - Admin role permissions:
-    - `detailReportRadioBtn`: enabled (not locked)
-    - `summaryReportRadioBtn`: enabled, subject to date-range gating (see below)
-    - `chartReportRadioBtn`: enabled
-    - `inactivityReportRadioBtn`: enabled
+    - `salesReportBtn`: enabled (not locked)
+    - `insightReportBtn`: enabled, subject to date-range gating (see below)
+    - `chartReportBtn`: enabled
+    - `inactivityReportBtn`: enabled
     - `dateRangeRadioBtn`: enabled
     - `todayRadioBtn`: selected (default)
-  - Staff role permissions:
-    - `detailReportRadioBtn`: enabled (not locked) — Staff can access detailed reports
-    - `summaryReportRadioBtn`: **disabled, greyed out, not clickable** (gating applied; Staff cannot access)
-    - `chartReportRadioBtn`: disabled, greyed out (Staff cannot access)
-    - `inactivityReportRadioBtn`: disabled, greyed out (Staff cannot access)
+  - **Staff role permissions:**
+    - `salesReportBtn`: **disabled** with locked property applied — Staff can only view Detail reports; button is auto-selected without requiring user interaction
+    - `insightReportBtn`: **disabled with locked property** (Staff cannot access)
+    - `chartReportBtn`: **disabled with locked property** (Staff cannot access)
+    - `inactivityReportBtn`: **disabled with locked property** (Staff cannot access)
     - `dateRangeRadioBtn`: disabled, greyed out (Staff locked to "Today" mode)
     - `todayRadioBtn`: selected (default)
-  - **Date-range gating for Summary radio (Admin only):**
-    - When Admin selects "Date Range", Summary radio is locked (disabled, greyed)
-    - When Admin selects "Today", Summary radio is unlocked (enabled, clickable)
-    - Staff users always see Summary locked regardless of date mode
+
+  - **Staff Report Button Restrictions — Implementation Detail:**
+    - **Reason for disabling all report buttons:** All `*ReportBtn` buttons are disabled for Staff to prevent QSS pseudo-selector effects (`:hover` and `:focus`) from displaying incorrectly on the default-selected `salesReportBtn`. By disabling all report buttons, the `:disabled` pseudo-selector takes precedence in the stylesheet, preventing unintended visual feedback.
+    - **Locked property + QSS styling:** Each report button has the `locked` dynamic property set to `true` via `set_locked_property(button, true)`. The stylesheet rule `QPushButton[locked="true"]:disabled` applies a grey background (#b8bdc4), dimmed border (#9ea4ad), and white text color (#e8eaed) to create a visually locked appearance.
+    - **Hidden buttons via white font:** Non-default buttons (`insightReportBtn`, `chartReportBtn`, `inactivityReportBtn`) use the same white text color in the locked/disabled state, making them visually indistinguishable from the background and effectively hidden while remaining accessible to screen readers and keyboard navigation.
+    - **Auto-default selection without user interaction:** `salesReportBtn` is always set to `.setChecked(True)` regardless of user role. For Staff users, this means the Detail report is automatically selected when the dialog opens, without requiring any button click. The button remains disabled to prevent the user from attempting other report types.
+    - **Controller implementation:**
+      ```python
+      detail.setEnabled(not is_admin)      # salesReportBtn disabled for Staff
+      set_locked_property(detail, not is_admin)  # locked=true for Staff
+      detail.setChecked(True)               # Always checked by default
+      ```
+    - **QSS rule (assets/dialog.qss):**
+      ```css
+      QPushButton[locked="true"]:disabled {
+          background-color: #b8bdc4;
+          border: 1px solid #9ea4ad;
+          color: #e8eaed;
+      }
+      ```
+
+  - **Date-range gating for Summary button (Admin only):**
+    - When Admin selects "Date Range", Insight button is locked (disabled, greyed)
+    - When Admin selects "Today", Insight button is unlocked (enabled, clickable)
+    - Staff users always see Insight locked regardless of date mode
 
 - `_defer_focus(widget)`
   - Utility to apply focus on the next event-loop tick (`QTimer.singleShot(0, ...)`) for reliable focus landing.
 
 - `_current_report_type(dlg)`
-  - Resolves selected report type from report radio buttons (`detail|summary|chart|inactivity`).
+  - Resolves selected report type from report buttons (`detail|summary|chart|inactivity`).
 
 - `_build_report_params(dlg, host_window)`
   - Collects date range + user context params for report data requests.
@@ -82,9 +103,9 @@ This document summarizes the current functional design for report-menu wiring, f
     sales by hour, top products by hour/day, and top 5 product lists.
   - **Summary report access control:**
     - **Admin users:** Can access Summary report; subject to date-range gating.
-      When Admin selects "Date Range", Summary radio is locked and disabled.
-      When Admin selects "Today", Summary radio is unlocked and re-enabled.
-    - **Staff users:** Cannot access Summary report; radio is permanently disabled,
+      When Admin selects "Date Range", Summary button is locked and disabled.
+      When Admin selects "Today", Summary button is unlocked and re-enabled.
+    - **Staff users:** Cannot access Summary report; button is permanently disabled,
       greyed out, and non-clickable.
   - **Column layout (sections 3–6):**
     - "Avg Qty" column width: 16 characters
@@ -106,9 +127,9 @@ This document summarizes the current functional design for report-menu wiring, f
   - Inactivity rendering uses the same shared viewer shell and searchable text
     layout as detailed/summary, with fixed-width tables for inactive product
     buckets and the summary count block.
-  - While `inactivityReportRadioBtn` is selected, the date-range frame is
+  - While `inactivityReportBtn` is selected, the date-range frame is
     temporarily locked: `dateRangeRadioBtn` is disabled, the date edits are
-    read-only/greyed, and the field labels are dimmed. When the radio is
+    read-only/greyed, and the field labels are dimmed. When the button is
     deselected, the current date-mode selection is restored.
 
 ## Viewer/UI Module

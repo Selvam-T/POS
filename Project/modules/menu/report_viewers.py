@@ -82,7 +82,7 @@ def _to_ampm_hour_label(hour_slot: Any) -> str:
 
         start_label = start_dt.strftime('%I:%M %p').lstrip('0')
         end_label = end_dt.strftime('%I:%M %p').lstrip('0')
-        return f'{start_label} - {end_label}'
+        return f'{start_label:>8} - {end_label}'
     except Exception:
         return text
 
@@ -431,7 +431,7 @@ class _ReportTextHighlighter(QSyntaxHighlighter):
         # Base formatting for alignment.
         self.setFormat(0, len(text), self._body_fmt)
 
-        if text in ('Sales Record & Totals', 'Sales Trends & Patterns', 'INACTIVE PRODUCTS REPORT'):
+        if text in ('Sales Record & Totals', 'Sales Insight', 'INACTIVE PRODUCTS REPORT'):
             self.setFormat(0, len(text), self._title_fmt)
             return
 
@@ -593,7 +593,7 @@ def _format_summary_report_text(report: dict) -> tuple[str, set[str], set[str], 
     net_line = f"{'Avg Net After Outflows':<24} : {_fmt_money(sales.get('net_after_outflows')):>12}"
 
     lines = [
-        'Sales Trends & Patterns',
+        'Sales Insight',
         '=' * 72,
         f"Period From   : {format_report_timestamp(header.get('period_from'))}",
         f"Period To     : {format_report_timestamp(header.get('period_to'))}",
@@ -628,8 +628,9 @@ def _format_summary_report_text(report: dict) -> tuple[str, set[str], set[str], 
 
     peak_hour_label = _to_ampm_hour_label(peak_hour.get('hour_slot')) or '-'
     peak_hour_amount = _fmt_money(peak_hour.get('sales_amount')) if peak_hour else _fmt_money(0.0)
-    peak_line = f"{'Peak Avg Hour':<24} {peak_hour_label:<14} ({peak_hour_amount})"
     lines.append('')
+    lines.append('Peak Avg Hour:')
+    peak_line = f"{peak_hour_label:<24} {peak_hour_amount:>12}"
     lines.append(peak_line)
     blue_lines.add(peak_line)
 

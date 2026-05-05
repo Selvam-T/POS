@@ -5,12 +5,12 @@
 
 import os
 from pathlib import Path
-from PyQt5 import uic
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QPushButton, QRadioButton, QDateEdit, QLabel
+from PyQt5.QtWidgets import QDialog, QPushButton, QRadioButton, QDateEdit, QLabel
 from modules.ui_utils.error_logger import log_error_message
-from modules.ui_utils.dialog_utils import set_dialog_info
+from modules.ui_utils.dialog_utils import set_dialog_info, build_dialog_from_ui, build_error_fallback_dialog, require_widgets
 from modules.ui_utils import ui_feedback
+from modules.ui_utils.focus_utils import FieldCoordinator
 from modules.date_time.date_gating import DateRangeGateController, set_locked_property
 from modules.menu import report_generator, report_viewers, report_exports
 
@@ -25,9 +25,9 @@ def _friendly_openpyxl_message() -> str:
 
 def _apply_role_default_state(dlg: QDialog, *, is_admin: bool) -> None:
     """Apply role defaults and permissions."""
-    # Report type selectors: prefer new QPushButton names, fall back to legacy QRadioButton
-    detail = dlg.findChild(QPushButton, 'detailReportBtn') or dlg.findChild(QRadioButton, 'detailReportRadioBtn')
-    summary = dlg.findChild(QPushButton, 'summaryReportBtn') or dlg.findChild(QRadioButton, 'summaryReportRadioBtn')
+    # Report type selectors use the current QPushButton widget IDs from the UI.
+    detail = dlg.findChild(QPushButton, 'salesReportBtn')
+    summary = dlg.findChild(QPushButton, 'insightReportBtn')
     chart = dlg.findChild(QPushButton, 'chartReportBtn') or dlg.findChild(QRadioButton, 'chartReportRadioBtn')
     inactivity = dlg.findChild(QPushButton, 'inactivityReportBtn') or dlg.findChild(QRadioButton, 'inactivityReportRadioBtn')
     today = dlg.findChild(QRadioButton, 'todayRadioBtn')
@@ -83,11 +83,11 @@ def _defer_focus(widget) -> None:
         _apply_focus()
 
 
-def _current_report_type(dlg: QDialog) -> str:
-    """Return normalized report type based on selected report radio."""
+def _current_report_type(dlg: QDialog) -> str | None:
+    """Return normalized report type based on selected report button, or None."""
     try:
-        detail = dlg.findChild(QPushButton, 'detailReportBtn') or dlg.findChild(QRadioButton, 'detailReportRadioBtn')
-        summary = dlg.findChild(QPushButton, 'summaryReportBtn') or dlg.findChild(QRadioButton, 'summaryReportRadioBtn')
+        detail = dlg.findChild(QPushButton, 'salesReportBtn')
+        summary = dlg.findChild(QPushButton, 'insightReportBtn')
         chart = dlg.findChild(QPushButton, 'chartReportBtn') or dlg.findChild(QRadioButton, 'chartReportRadioBtn')
         inactivity = dlg.findChild(QPushButton, 'inactivityReportBtn') or dlg.findChild(QRadioButton, 'inactivityReportRadioBtn')
         if detail is not None and getattr(detail, 'isChecked', lambda: False)():
@@ -100,7 +100,7 @@ def _current_report_type(dlg: QDialog) -> str:
             return 'inactivity'
     except Exception:
         pass
-    return 'summary'
+    return None
 
 
 def _build_report_params(dlg: QDialog, host_window) -> dict:
@@ -128,7 +128,9 @@ def _build_report_params(dlg: QDialog, host_window) -> dict:
 
 def _build_report_data(dlg: QDialog, host_window, report_type: str) -> dict:
     params = _build_report_params(dlg, host_window)
-    rpt = str(report_type or 'summary').strip().lower()
+    rpt = str(report_type).strip().lower() if report_type else ''
+    if not rpt:
+        return {}
     if rpt == 'detail':
         data = report_generator.get_detailed_report(params)
         if not bool(getattr(host_window, 'current_is_admin', False)):
@@ -155,38 +157,38 @@ def launch_reports_dialog(host_window):
     Returns:
         QDialog instance ready for DialogWrapper.open_dialog_scanner_blocked() to execute
     """
+    # Use shared dialog builder for consistent error handling and logging
     ui_path = os.path.join(UI_DIR, 'report_menu.ui')
-    if not os.path.exists(ui_path):
-        return None
+    dlg = build_dialog_from_ui(ui_path, host_window=host_window, dialog_name='report_menu', qss_path=QSS_PATH)
+    if dlg is None:
+        return build_error_fallback_dialog(host_window, 'Reports', QSS_PATH)
 
-    # Load the UI file as a QWidget
-    content = uic.loadUi(ui_path)
-    # Wrap in QDialog if needed
-    if isinstance(content, QDialog):
-        dlg = content
-    else:
-        dlg = QDialog(host_window)
-        lay = QVBoxLayout(dlg)
-        lay.setContentsMargins(0, 0, 0, 0)
-        lay.addWidget(content)
-
-    # Frameless + modal
-    dlg.setParent(host_window)
-    dlg.setModal(True)
-    dlg.setWindowModality(Qt.ApplicationModal)
-    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-    is_admin_user = bool(getattr(host_window, 'current_is_admin', False))
-
-    # Apply stylesheet
-    if os.path.exists(QSS_PATH):
+    # Resolve required widgets (hard-fail if UI changed)
+    try:
+        require_widgets(dlg, {
+            'detail': (QPushButton, 'salesReportBtn'),
+            'summary': (QPushButton, 'insightReportBtn'),
+            'chart': (QPushButton, 'chartReportBtn'),
+            'inactivity': (QPushButton, 'inactivityReportBtn'),
+            'today': (QRadioButton, 'todayRadioBtn'),
+            'date_range': (QRadioButton, 'dateRangeRadioBtn'),
+            'from_date': (QDateEdit, 'reportFromDateEdit'),
+            'to_date': (QDateEdit, 'reportToDateEdit'),
+            'view_btn': (QPushButton, 'viewReportBtn'),
+            'save_pdf_btn': (QPushButton, 'savePdfReportBtn'),
+            'save_excel_btn': (QPushButton, 'saveExcelReportBtn'),
+            'reset_btn': (QPushButton, 'resetReportBtn'),
+            'cancel_btn': (QPushButton, 'btnReportCancel'),
+            'status_lbl': (QLabel, 'reportStatusLabel'),
+        }, hard_fail=True)
+    except Exception as e:
         try:
-            with open(QSS_PATH, 'r', encoding='utf-8') as f:
-                dlg.setStyleSheet(f.read())
-        except Exception as e:
-            try:
-                log_error_message(f"Failed to load dialog.qss: {e}")
-            except Exception:
-                pass
+            log_error_message(f"report_menu: require_widgets failed: {e}")
+        except Exception:
+            pass
+        return dlg
+
+    is_admin_user = bool(getattr(host_window, 'current_is_admin', False))
 
     # Preserve original reject so handlers can bypass wrapper when needed.
     try:
@@ -244,39 +246,30 @@ def launch_reports_dialog(host_window):
     report_status_lbl = dlg.findChild(QLabel, 'reportStatusLabel')
     action_buttons = [view_btn, save_pdf_btn, save_excel_btn]
     date_field_labels = [from_label, to_label]
+    fc = FieldCoordinator(dlg)
 
     def _set_report_status(message: str, *, ok: bool) -> None:
         try:
-            ui_feedback.set_status_label(report_status_lbl, message, ok=ok, duration=3500 if ok else 0)
+            ui_feedback.set_status_label(report_status_lbl, message, ok=ok, duration=3500)
         except Exception:
             pass
 
-    def _sync_report_export_buttons() -> None:
+    def _set_report_warning(message: str) -> None:
         try:
-            rpt = _current_report_type(dlg)
+            ui_feedback.set_warning_status_label(report_status_lbl, message, duration=3500)
         except Exception:
-            rpt = 'summary'
+            pass
 
-        if save_excel_btn is None:
+    def _link_report_status(widget) -> None:
+        if widget is None:
             return
-
         try:
-            locked = bool(save_excel_btn.property('reportGateLocked'))
-        except Exception:
-            try:
-                locked = bool(save_excel_btn.property('locked'))
-            except Exception:
-                locked = not bool(save_excel_btn.isEnabled())
-
-        try:
-            if rpt == 'chart':
-                set_locked_property(save_excel_btn, False)
-                save_excel_btn.setEnabled(True)
-            else:
-                set_locked_property(save_excel_btn, locked)
-                save_excel_btn.setEnabled(not locked)
+            fc.add_link(widget, target_map={}, status_label=report_status_lbl)
         except Exception:
             pass
+
+    for _widget in (from_date, to_date, today, date_range, view_btn, save_pdf_btn, save_excel_btn, reset_btn, report_cancel_btn):
+        _link_report_status(_widget)
 
     # report cancel button.
     try:
@@ -356,7 +349,6 @@ def launch_reports_dialog(host_window):
                             save_excel_btn.setProperty('reportGateLocked', bool(save_excel_btn.property('locked')))
                     except Exception:
                         pass
-                    _sync_report_export_buttons()
 
                 gate_controller.apply_state = _apply_state_with_export_sync
             except Exception:
@@ -376,13 +368,51 @@ def launch_reports_dialog(host_window):
         try:
             out_dir = Path(file_path).parent if file_path is not None else ''
             message = f'{kind} file exported to {out_dir}'
-            _set_report_status(message, ok=True)
-            set_dialog_info(dlg, message, duration=3000)
+            _report_success_status(message)
+        except Exception:
+            pass
+
+    def _report_success_status(message: str) -> None:
+        try:
+            def _apply_success() -> None:
+                try:
+                    _set_report_status(message, ok=True)
+                    set_dialog_info(dlg, message, duration=3500)
+                except Exception:
+                    pass
+
+            QTimer.singleShot(50, _apply_success)
+        except Exception:
+            pass 
+
+    def _handle_pdf_error(message: str) -> None:
+        """Updates UI with error status."""
+        _set_report_status(message, ok=False)
+
+    def _handle_viewer_error(message: str) -> None:
+        """Updates UI with error status for viewer."""
+        _set_report_status(message, ok=False)
+
+    def _handle_export_error(message: str, exc: Exception = None) -> None:
+        """Helper to unify UI feedback and logging for export failures.
+
+        Shows a failure message in the status label and logs the error with
+        exception context when available.
+        """
+        try:
+            _set_report_status(message, ok=False)
+        except Exception:
+            pass
+        try:
+            if exc is not None:
+                log_error_message(f"Failed to save report Excel: {message} -- {repr(exc)}")
+            else:
+                log_error_message(f"Failed to save report Excel: {message}")
         except Exception:
             pass
 
     def _pdf_too_large_message() -> str:
-        return getattr(report_exports, 'PDF_TOO_LARGE_MESSAGE', 'PDF export skipped: the selected report is too large to render safely. Try a shorter date range or use Excel export.')
+        return getattr(report_exports, 'PDF_TOO_LARGE_MESSAGE', 'PDF export skipped: the selected report is too large to render safely.')
 
     try:
         _apply_role_default_state(dlg, is_admin=is_admin_user)
@@ -399,8 +429,6 @@ def launch_reports_dialog(host_window):
                     save_excel_btn.setProperty('reportGateLocked', False)
             except Exception:
                 pass
-
-        _sync_report_export_buttons()
 
         # Default landing focus for both Admin and Staff.
         if view_btn is not None and view_btn.isEnabled():
@@ -428,7 +456,6 @@ def launch_reports_dialog(host_window):
                         save_excel_btn.setProperty('reportGateLocked', False)
                 except Exception:
                     pass
-            _sync_report_export_buttons()
             _defer_focus(view_btn)
         except Exception as e:
             try:
@@ -439,65 +466,90 @@ def launch_reports_dialog(host_window):
     def _on_export_pdf_clicked() -> None:
         try:
             rpt = _current_report_type(dlg)
-            data = _build_report_data(dlg, host_window, rpt)
-            allowed, blocked_message, _estimated_units = report_exports.validate_pdf_export(rpt, data)
-            if not allowed:
-                message = blocked_message or _pdf_too_large_message()
-                _set_report_status(message, ok=False)
-                set_dialog_info(dlg, message, duration=4500)
+            if not rpt:
+                _set_report_warning('Select a report type first.')
                 return
-            out_path = report_exports.save_report_pdf(rpt, report_data=data)
-            _report_save_status(out_path, 'PDF report')
-            _defer_focus(view_btn)
-        except Exception as e:
+
+            # 1. Data Preparation
             try:
-                if 'too large' in str(e).lower() or 'render safely' in str(e).lower():
-                    message = _pdf_too_large_message()
-                    _set_report_status(message, ok=False)
-                    set_dialog_info(dlg, message, duration=4500)
-                else:
-                    _set_report_status(f'PDF export failed: {e}', ok=False)
-                    log_error_message(f"Failed to save report PDF: {e}")
-            except Exception:
-                pass
+                data = _build_report_data(dlg, host_window, rpt)
+            except Exception as e:
+                _handle_pdf_error(f'Report data build failed: {e}')
+                return
+
+            # 2. Validation (Pre-export check)
+            allowed, blocked_message = report_exports.validate_pdf_export(rpt, data)
+            if not allowed:
+                msg = blocked_message or _pdf_too_large_message()
+                _set_report_warning(msg)
+                return
+
+            # 3. Export Execution
+            out_path = report_exports.save_report_pdf(rpt, report_data=data)
+
+            # 4. Success UI Updates
+            _report_save_status(out_path, 'PDF report')
+            _defer_focus(save_pdf_btn)
+
+        except Exception as e:
+            # 5. Centralized Exception Handling
+            err_msg = str(e).lower()
+            if 'too large' in err_msg or 'render safely' in err_msg:
+                msg = _pdf_too_large_message()
+                _set_report_warning(msg)
+            else:
+                _handle_pdf_error(f'PDF export failed: {e}')
 
     def _on_export_excel_clicked() -> None:
         try:
             rpt = _current_report_type(dlg)
+            if not rpt:
+                _set_report_warning('Select a report type first.')
+                return
             if rpt == 'chart':
                 message = 'Chart saving to Excel is not available.'
-                _set_report_status(message, ok=False)
-                set_dialog_info(dlg, message, duration=3000)
+                _set_report_warning(message)
                 return
-            data = _build_report_data(dlg, host_window, rpt)
+            try:
+                data = _build_report_data(dlg, host_window, rpt)
+            except Exception as e:
+                _handle_export_error(f'Report data build failed: {e}', e)
+                return
             out_path = report_exports.save_report_xlsx(rpt, report_data=data)
             _report_save_status(out_path, 'Excel report')
-            _defer_focus(view_btn)
+            _defer_focus(save_excel_btn)
         except Exception as e:
             try:
-                if 'openpyxl' in str(e).lower():
-                    friendly = _friendly_openpyxl_message()
-                    _set_report_status(friendly, ok=False)
-                    log_error_message(f"Failed to save report Excel: {friendly}")
-                else:
-                    _set_report_status(f'Excel export failed: {e}', ok=False)
-                    log_error_message(f"Failed to save report Excel: {e}")
+                error_str = str(e).lower()
+                message = _friendly_openpyxl_message() if 'openpyxl' in error_str else f'Excel export failed: {e}'
+                _handle_export_error(message, e)
             except Exception:
                 pass
 
     def _on_view_report_clicked() -> None:
         try:
             rpt = _current_report_type(dlg)
-            data = _build_report_data(dlg, host_window, rpt)
+            if not rpt:
+                _set_report_warning('Select a report type first.')
+                return
 
-            report_viewers.open_report_viewer(dlg, report_type=rpt, report_data=data)
-            _defer_focus(view_btn)
-        except Exception as e:
+            # 1. Data Preparation
             try:
-                _set_report_status(f'Report viewer failed: {e}', ok=False)
-                log_error_message(f"Failed to open report viewer: {e}")
-            except Exception:
-                pass
+                data = _build_report_data(dlg, host_window, rpt)
+            except Exception as e:
+                _handle_viewer_error(f'Report data build failed: {e}')
+                return
+
+            # 2. Viewer Execution
+            report_viewers.open_report_viewer(dlg, report_type=rpt, report_data=data)
+
+            # 3. Success UI Updates
+            _report_success_status('Report viewer opened successfully.')
+            _defer_focus(view_btn)
+
+        except Exception as e:
+            # 4. Centralized Exception Handling
+            _handle_viewer_error(f'Report viewer failed: {e}')
 
     try:
         if reset_btn is not None:
@@ -524,9 +576,9 @@ def launch_reports_dialog(host_window):
         pass
 
     try:
-        # Prefer new QPushButton selectors; fall back to legacy QRadioButton where present
-        detail = dlg.findChild(QPushButton, 'detailReportBtn') or dlg.findChild(QRadioButton, 'detailReportRadioBtn')
-        summary = dlg.findChild(QPushButton, 'summaryReportBtn') or dlg.findChild(QRadioButton, 'summaryReportRadioBtn')
+        # Use the current QPushButton selectors defined in the UI.
+        detail = dlg.findChild(QPushButton, 'salesReportBtn')
+        summary = dlg.findChild(QPushButton, 'insightReportBtn')
         chart = dlg.findChild(QPushButton, 'chartReportBtn') or dlg.findChild(QRadioButton, 'chartReportRadioBtn')
         inactivity = dlg.findChild(QPushButton, 'inactivityReportBtn') or dlg.findChild(QRadioButton, 'inactivityReportRadioBtn')
 
@@ -556,7 +608,6 @@ def launch_reports_dialog(host_window):
                     except Exception:
                         pass
                 _sync_report_mode_state()
-                _sync_report_export_buttons()
             except Exception:
                 pass
 
@@ -565,11 +616,9 @@ def launch_reports_dialog(host_window):
                 w.toggled.connect(lambda checked, obj=w: checked and _on_selector_checked(obj))
             except Exception:
                 pass
-    except Exception:
-        pass
 
-    try:
-        _sync_report_export_buttons()
+        for _widget in selectors:
+            _link_report_status(_widget)
     except Exception:
         pass
 

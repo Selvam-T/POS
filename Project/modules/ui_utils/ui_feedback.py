@@ -2,44 +2,49 @@ from PyQt5.QtWidgets import QLabel, QStatusBar
 from PyQt5.QtCore import QTimer
 import weakref
 
-def set_status_label(label: QLabel, message: str, ok: bool, duration: int = 3000) -> bool:
-    """Sets status message and triggers QSS property change."""
+
+def _set_status_label_state(label: QLabel, message: str, state: str, duration: int = 3000) -> bool:
     if label is None:
         return False
 
     try:
         label.setText(message or "")
     except RuntimeError:
-        # Label got deleted (dialog closed) before update.
         return False
-    
-    # Apply the property defined in dialog.qss
-    status_val = "success" if ok else "error"
+
     try:
-        label.setProperty("status", status_val)
+        label.setProperty("status", state)
     except RuntimeError:
         return False
 
-    # Re-polish tells Qt to re-read the CSS for this specific widget
     try:
         label.style().unpolish(label)
         label.style().polish(label)
     except RuntimeError:
         return False
 
-    # Only clear success messages automatically. 
-    # Errors usually stay until the user interacts again.
-    if ok and duration > 0:
-        # Use singleShot with a weakref so we don't touch deleted widgets.
+    if duration > 0 and state in {"success", "warning", "error"}:
         ref = weakref.ref(label)
+
         def _clear_later():
             lbl = ref()
             if lbl is None:
                 return
             clear_status_label(lbl)
+
         QTimer.singleShot(duration, _clear_later)
-    
-    return ok
+
+    return state == "success"
+
+def set_status_label(label: QLabel, message: str, ok: bool, duration: int = 3000) -> bool:
+    """Sets status message and triggers QSS property change."""
+    status_val = "success" if ok else "error"
+    return _set_status_label_state(label, message, status_val, duration)
+
+
+def set_warning_status_label(label: QLabel, message: str, duration: int = 3000) -> bool:
+    """Sets a warning message with warning styling."""
+    return _set_status_label_state(label, message, "warning", duration)
 
 def clear_status_label(label: QLabel) -> bool:
     """Clears text and resets the QSS property."""

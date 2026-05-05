@@ -417,6 +417,14 @@ QLabel[status="error"] {
     border-radius: 4px;
 }
 
+/* Warning State - Triggered by .setProperty("status", "warning") */
+QLabel[status="warning"] {
+  color: #b45309;
+  background-color: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 4px;
+}
+
 /* =============================================================
    MENU FRAME (RIGHT SIDEBAR)
    ============================================================= */

@@ -185,6 +185,14 @@ QLabel[status="error"] {
     border-radius: 4px;
 }
 
+/* Warning State - Triggered by .setProperty("status", "warning") */
+QLabel[status="warning"] {
+    color: #b45309;
+    background-color: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 4px;
+}
+
 /* Default look for all SubLbl -- it is applied from somewhere hidden, I can't find
 QLabel[objectName$="SubLbl"] {
     color: #710b0b !important;
@@ -695,9 +703,27 @@ QPushButton#voidReceiptBtn:pressed {
 /* =============================================================
      report menu
     ============================================================= */
-QFrame#reportDateFrame{
+QGroupBox#reportGroupBox{
     border: 1px solid #c2c4c4;
-    padding: 0px 10px 0px 10px;
+    border-radius: 4px;
+    margin-top: 14px;
+    padding: 10px 10px 0px 10px;
+}
+
+/* Apply the font size to the widget itself */
+QGroupBox#reportGroupBox {
+    font-size: 11pt;
+    font-weight: 500;
+}
+
+/* Keep the positioning and color in the title subcontrol */
+QGroupBox#reportGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 10px;
+    padding: 0 8px;
+    background-color: #ffffff;
+    color: #504f4f;
 }
 
 /* View Report */
@@ -752,8 +778,8 @@ QPushButton#viewReportBtn:focus,
 QPushButton#savePdfReportBtn:focus,
 QPushButton#saveExcelReportBtn:focus,
 QPushButton#resetReportBtn:focus,
-QPushButton#detailReportBtn:focus,
-QPushButton#summaryReportBtn:focus,
+QPushButton#salesReportBtn:focus,
+QPushButton#insightReportBtn:focus,
 QPushButton#chartReportBtn:focus,
 QPushButton#inactivityReportBtn:focus {
     outline: none;
@@ -780,26 +806,27 @@ QPushButton#resetReportBtn:pressed {
 }
 
 /* Report-type selectors */
-QPushButton#detailReportBtn,
-QPushButton#summaryReportBtn,
+QPushButton#salesReportBtn,
+QPushButton#insightReportBtn,
 QPushButton#chartReportBtn,
 QPushButton#inactivityReportBtn {
     background-color: transparent;
     border: none;
     color: #0078d7;
     font-weight: bold;
+    padding: 10px 10px 10px 10px;
 }
 
-QPushButton#detailReportBtn:checked,
-QPushButton#summaryReportBtn:checked,
+QPushButton#salesReportBtn:checked,
+QPushButton#insightReportBtn:checked,
 QPushButton#chartReportBtn:checked,
 QPushButton#inactivityReportBtn:checked {
     color: #ffffff;
     background-color: #0078d7;
 }
 
-QPushButton#detailReportBtn:hover,
-QPushButton#summaryReportBtn:hover,
+QPushButton#salesReportBtn:hover,
+QPushButton#insightReportBtn:hover,
 QPushButton#chartReportBtn:hover,
 QPushButton#inactivityReportBtn:hover {
     font-size: 14pt;
@@ -807,7 +834,7 @@ QPushButton#inactivityReportBtn:hover {
 
 /* Gating locked for Staff restrictions */
 
-QPushButton#summaryReportBtn[locked="true"]:disabled,
+QPushButton#insightReportBtn[locked="true"]:disabled,
 QPushButton#chartReportBtn[locked="true"]:disabled,
 QPushButton#inactivityReportBtn[locked="true"]:disabled {
     color: white;

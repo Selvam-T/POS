@@ -10,6 +10,7 @@ from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtWidgets import QApplication, QDialog, QFrame, QGridLayout, QLabel, QScrollArea, QSizePolicy, QVBoxLayout, QWidget
 
 from modules.date_time.formatters import format_report_timestamp
+from modules.menu.report_viewers import _to_ampm_hour_label
 
 
 DEFAULT_CHART_VIEWER_SIZE = (1080, 920)
@@ -346,7 +347,11 @@ class _TopProductsBarChart(_BaseChartWidget):
             # draw full product name in the left margin area (expanded)
             label_rect = QRectF(8, y, plot.left() - 26, bar_h + 4)
             painter.setPen(QColor('#374151'))
-            painter.drawText(label_rect, Qt.AlignRight | Qt.AlignVCenter, _truncate(label, 20))
+            # Use QFontMetrics.elidedText for pixel-accurate text truncation
+            metrics = painter.fontMetrics()
+            available_width = label_rect.width() - 5
+            display_text = metrics.elidedText(label, Qt.ElideRight, int(available_width))
+            painter.drawText(label_rect, Qt.AlignRight | Qt.AlignVCenter, display_text)
             painter.setPen(Qt.NoPen)
             painter.setBrush(QBrush(gradient))
             painter.drawRoundedRect(QRectF(plot.left(), y, bar_w, bar_h), 6, 6)
@@ -404,9 +409,10 @@ class _ChartReportCanvasPage1(QWidget):
         metrics_layout.setHorizontalSpacing(5)
         metrics_layout.setVerticalSpacing(20)
 
+        peak_hour_label = _to_ampm_hour_label(peak_hour.get('hour_slot')) or '-'
         metric_rows = [
             ('Daily Avg Gross Sales', _fmt_money(sales_summary.get('gross_sales'))),
-            ('Peak Sales Window', str(peak_hour.get('hour_slot') or '-')),
+            ('Peak Sales Window', peak_hour_label),
             ('Peak Hourly Avg', _fmt_money(peak_hour.get('sales_amount')) if peak_hour and peak_hour.get('sales_amount') is not None else '-'),
         ]
         for row, (label, value) in enumerate(metric_rows):
@@ -522,9 +528,10 @@ class _ChartReportCanvas(QWidget):
         metrics_layout.setHorizontalSpacing(5)
         metrics_layout.setVerticalSpacing(20)
 
+        peak_hour_label2 = _to_ampm_hour_label(peak_hour.get('hour_slot')) or '-'
         metric_rows = [
             ('Daily Avg Gross Sales', _fmt_money(sales_summary.get('gross_sales'))),
-            ('Peak Sales Window', str(peak_hour.get('hour_slot') or '-')),
+            ('Peak Sales Window', peak_hour_label2),
             ('Peak Hourly Avg', _fmt_money(peak_hour.get('sales_amount')) if peak_hour and peak_hour.get('sales_amount') is not None else '-'),
         ]
         for row, (label, value) in enumerate(metric_rows):

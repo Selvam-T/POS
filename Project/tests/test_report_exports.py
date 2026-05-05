@@ -224,11 +224,10 @@ class ReportExportsTest(unittest.TestCase):
             for index in range(oversized)
         ]
 
-        allowed, message, units = report_exports.validate_pdf_export('summary', large_report)
+        allowed, message = report_exports.validate_pdf_export('summary', large_report)
 
         self.assertFalse(allowed)
         self.assertIsNotNone(message)
-        self.assertGreater(units, threshold)
         self.assertIn('render safely', message)
 
     def test_save_report_pdf_chart_creates_file(self):

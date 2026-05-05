@@ -20,8 +20,8 @@ Current status
 - `get_chart_report(params)` is implemented and returns structured chart
   report data from the same repository.
 - `modules/menu/report_menu.py` now calls this adapter when
-  `detailReportRadioBtn`, `summaryReportRadioBtn`, `chartReportRadioBtn`, or
-  `inactivityReportRadioBtn` is selected.
+  `salesReportBtn`, `insightReportBtn`, `chartReportBtn`, or
+  `inactivityReportBtn` is selected.
 - Viewer/UI rendering is intentionally separated into
   `modules/menu/report_viewers.py` (shared shell + per-report content renderer).
   - Note: The detailed viewer uses `QPlainTextEdit` (monospaced, searchable)
@@ -46,7 +46,7 @@ Chart report note
   should log the error and show a safe fallback message rather than crashing.
 
 Summary report note
-- The Summary report is now presented as Sales Trends & Patterns.
+- The Summary report is now presented as Sales Insight.
 - Section 1 uses average values over the selected date range, and the hourly
   and day product sections continue to rank products by average quantity or
   sales rather than raw totals. This keeps the report normalized to the length

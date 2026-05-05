@@ -136,38 +136,38 @@
        </property>
        <layout class="QHBoxLayout" name="reportTypeLayout">
         <property name="spacing">
-         <number>20</number>
+         <number>10</number>
         </property>
         <property name="leftMargin">
-         <number>35</number>
+         <number>10</number>
         </property>
         <property name="topMargin">
          <number>10</number>
         </property>
         <property name="rightMargin">
-         <number>25</number>
+         <number>10</number>
         </property>
         <property name="bottomMargin">
          <number>10</number>
         </property>
         <item>
-         <widget class="QPushButton" name="detailReportBtn">
+         <widget class="QPushButton" name="salesReportBtn">
           <property name="text">
-           <string>DETAILED</string>
+           <string>SALES RECORD</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="summaryReportBtn">
+         <widget class="QPushButton" name="insightReportBtn">
           <property name="text">
-           <string>SUMMARY</string>
+           <string>INSIGHT</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="chartReportBtn">
           <property name="text">
-           <string>CHART</string>
+           <string>CHARTS</string>
           </property>
          </widget>
         </item>
@@ -198,12 +198,9 @@
       </spacer>
      </item>
      <item>
-      <widget class="QFrame" name="reportDateFrame">
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Raised</enum>
+      <widget class="QGroupBox" name="reportGroupBox">
+       <property name="title">
+        <string>Date Select :</string>
        </property>
        <layout class="QVBoxLayout" name="reportDateLayout">
         <property name="spacing">
@@ -222,7 +219,7 @@
          <number>10</number>
         </property>
         <item>
-         <layout class="QHBoxLayout" name="reportDateRadioLayout" stretch="0,0,0,0">
+         <layout class="QHBoxLayout" name="reportDateRadioLayout" stretch="0,0,0,0,0">
           <property name="spacing">
            <number>20</number>
           </property>
@@ -239,11 +236,17 @@
            <number>5</number>
           </property>
           <item>
-           <widget class="QLabel" name="dateSelectFieldLbl">
-            <property name="text">
-             <string>Date Select :</string>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
             </property>
-           </widget>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <widget class="QRadioButton" name="todayRadioBtn">
@@ -254,6 +257,19 @@
              <bool>true</bool>
             </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_5">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <widget class="QRadioButton" name="dateRangeRadioBtn">
@@ -268,12 +284,12 @@
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::Preferred</enum>
+             <enum>QSizePolicy::Expanding</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
-              <height>30</height>
+              <width>20</width>
+              <height>20</height>
              </size>
             </property>
            </spacer>
@@ -546,8 +562,8 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>detailReportBtn</tabstop>
-  <tabstop>summaryReportBtn</tabstop>
+  <tabstop>salesReportBtn</tabstop>
+  <tabstop>insightReportBtn</tabstop>
   <tabstop>chartReportBtn</tabstop>
   <tabstop>inactivityReportBtn</tabstop>
   <tabstop>todayRadioBtn</tabstop>

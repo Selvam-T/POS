@@ -159,7 +159,7 @@ Below is a mapping of functions in `modules/db_operation/` related to each datab
 - modules/db_operation/reports_repo.py:
 	- detailed_report  -- Builds the Detailed Sales Report by joining `receipts`,
 	  `receipt_items`, `receipt_payments`, `cash_outflows` and `users`.
-	- summary_report   -- Builds the Sales Trends & Patterns with average hourly
+	- summary_report   -- Builds the Sales Insight with average hourly
 	  sales, average section 1 totals, average-over-range top products by
 	  hour/day, and payment breakdown.
 	- chart_report     -- Builds the Chart Report with average sales by hour,

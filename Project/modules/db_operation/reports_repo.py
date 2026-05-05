@@ -270,53 +270,6 @@ def _receipt_filter_clause(
     return " WHERE " + " AND ".join(where_parts), params
 
 
-def _collect_paid_receipts(
-    conn: sqlite3.Connection,
-    *,
-    period_from: Optional[str],
-    period_to: Optional[str],
-) -> Tuple[List[Dict[str, Any]], List[Any], List[str], float]:
-    cols = _table_columns(conn, "receipts")
-    if not cols:
-        return [], [], [], 0.0
-
-    id_col = _first_existing(cols, "receipt_id", "id")
-    no_col = _first_existing(cols, "receipt_no", "receipt_number")
-    total_col = _first_existing(cols, "grand_total", "total")
-    status_col = _first_existing(cols, "status")
-    paid_col = _first_existing(cols, "paid_at", "created_at")
-
-    select_parts = []
-    if id_col is not None:
-        select_parts.append(f"{id_col} AS receipt_id")
-    else:
-        select_parts.append("NULL AS receipt_id")
-    if no_col is not None:
-        select_parts.append(f"{no_col} AS receipt_no")
-    else:
-        select_parts.append("'' AS receipt_no")
-    if total_col is not None:
-        select_parts.append(f"{total_col} AS total")
-    else:
-        select_parts.append("0 AS total")
-
-    where_sql, where_params = _receipt_filter_clause(
-        status_col=status_col,
-        paid_col=paid_col,
-        period_from=period_from,
-        period_to=period_to,
-        status="PAID",
-    )
-    sql = f"SELECT {', '.join(select_parts)} FROM receipts{where_sql}"
-    rows = conn.execute(sql, tuple(where_params)).fetchall()
-
-    paid_rows = [dict(r) for r in rows]
-    receipt_ids: List[Any] = [r["receipt_id"] for r in paid_rows if r.get("receipt_id") is not None]
-    receipt_nos: List[str] = [str(r.get("receipt_no") or "") for r in paid_rows if r.get("receipt_no")]
-    gross_sales = sum(_to_float(r.get("total")) for r in paid_rows)
-    return paid_rows, receipt_ids, receipt_nos, gross_sales
-
-
 def _fetch_payment_breakdown(
     conn: sqlite3.Connection,
     *,
