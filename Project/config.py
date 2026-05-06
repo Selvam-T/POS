@@ -140,6 +140,35 @@ REQ_HEIGHT = 800
 REQ_RATIO = REQ_WIDTH / REQ_HEIGHT
 
 # =========================================================
+# Customer Display (Screen 2) settings
+# =========================================================
+# Enable the customer-facing display window. When False, no customer
+# display window will be created or shown.
+CUSTOMER_DISPLAY_ENABLED = True
+
+# When True the display will open as a normal window on the main monitor.
+# Use this during development when a second monitor is not available.
+CUSTOMER_DISPLAY_TEST_MODE = True  # development mode (False = real second screen)
+
+# Which screen index to place the customer display on. 0 = primary, 1 = second
+# monitor. Always check QApplication.screens() length before indexing.
+CUSTOMER_SCREEN_INDEX = 1
+
+# Default customer display size (used when not fullscreen)
+CUSTOMER_SCREEN_WIDTH = 1024
+CUSTOMER_SCREEN_HEIGHT = 600
+
+# Show the customer display fullscreen when placed on the secondary screen
+CUSTOMER_DISPLAY_FULLSCREEN = False
+
+# When True the app will auto-detect monitor connect/disconnect events
+# and attempt to show/hide the customer display automatically.
+CUSTOMER_DISPLAY_AUTO_DETECT = True
+
+# Seconds to wait before returning to Idle page after completed payment.
+CUSTOMER_DISPLAY_IDLE_TIMEOUT = 8
+
+# =========================================================
 # Validation / Input Constraints (moved from input_validation.py)
 # =========================================================
 

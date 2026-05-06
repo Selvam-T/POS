@@ -27,6 +27,7 @@ from modules.payment.refund import launch_refund_dialog
 from modules.payment.vendor import launch_vendor_dialog
 from modules.db_operation.paid_sale_committer import PaidSaleCommitter
 from modules.devices.barcode_manager import BarcodeManager
+from modules.customer_display import CustomerDisplayWindow
 from modules.wrappers.dialog_wrapper import DialogWrapper
 from modules.db_operation import PRODUCT_CACHE, ensure_cash_outflows_table
 from modules.ui_utils.dialog_utils import report_exception, report_to_statusbar
@@ -165,6 +166,8 @@ class MainLoader(QMainWindow):
         self.payment_panel_controller = setup_payment_panel(self, UI_DIR)
         if self.payment_panel_controller is not None:
             self._wire_payment_panel_signals()
+
+        self._init_customer_display()
 
         # Insert menu_frame.ui into placeholder named 'menuFrame'
         menu_placeholder = getattr(self, 'menuFrame', None)
@@ -559,6 +562,58 @@ class MainLoader(QMainWindow):
         panel.payRequested.connect(self._on_payment_requested)
         panel.paymentSuccess.connect(self._on_payment_success)
 
+    def _init_customer_display(self) -> None:
+        self.customer_display = None
+        if not bool(getattr(config, 'CUSTOMER_DISPLAY_ENABLED', True)):
+            return
+        try:
+            self.customer_display = CustomerDisplayWindow(self)
+        except Exception as exc:
+            try:
+                from modules.ui_utils.error_logger import log_error_message
+                log_error_message(f"Customer display init failed: {exc}")
+            except Exception:
+                pass
+
+    def _update_customer_display_from_sales(self, state: str | None = None) -> None:
+        display = getattr(self, 'customer_display', None)
+        if display is None:
+            return
+        sales_table = getattr(self, 'sales_table', None)
+        if sales_table is None:
+            display.show_idle()
+            return
+
+        try:
+            rows = get_sales_data(sales_table)
+        except Exception:
+            rows = []
+
+        items = []
+        total = 0.0
+        for row in rows:
+            qty = float(row.get('quantity') or 0.0)
+            name = str(row.get('product_name') or row.get('product') or '')
+            price = float(row.get('unit_price') or 0.0)
+            line_total = qty * price
+            total += line_total
+            items.append({
+                'quantity': qty,
+                'description': name,
+                'amount': line_total,
+            })
+
+        if not rows and state not in (display.STATE_PAYMENT, display.STATE_COMPLETED):
+            display.show_idle()
+            return
+
+        payload = {
+            'state': state or display.STATE_SCANNING,
+            'items': items,
+            'total': total,
+        }
+        display.update_transaction(payload)
+
     def _reset_receipt_context(self) -> None:
         # Safety invariant: context reset should only happen after clearing the cart.
         # This is logging-only (no behavior change).
@@ -652,6 +707,7 @@ class MainLoader(QMainWindow):
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:
             panel.set_payment_default(total, focus=True)
+        self._update_customer_display_from_sales()
 
     def _on_qty_commit_total_changed(self, total: float) -> None:
         panel = getattr(self, 'payment_panel_controller', None)
@@ -666,6 +722,7 @@ class MainLoader(QMainWindow):
         ctx['status'] = 'UNPAID'
         self._apply_hold_loaded_sales_lock(True)
         self._refresh_sales_label_from_context()
+        self._update_customer_display_from_sales()
 
     def _apply_hold_loaded_sales_lock(self, locked: bool) -> None:
         """Lock qty editing in the sales table when a hold receipt is loaded.
@@ -707,6 +764,7 @@ class MainLoader(QMainWindow):
 
     # Process payment requests from the payment panel.
     def _on_payment_requested(self, payment_split: dict) -> None:
+        self._update_customer_display_from_sales(state=CustomerDisplayWindow.STATE_PAYMENT)
         if self.pay_current_receipt(payment_split):
             panel = getattr(self, 'payment_panel_controller', None)
             if panel is not None:
@@ -714,6 +772,9 @@ class MainLoader(QMainWindow):
 
     # Clear state after successful payment completion.
     def _on_payment_success(self) -> None:
+        display = getattr(self, 'customer_display', None)
+        if display is not None:
+            display.show_completed()
         self._clear_sales_table_core()
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:
@@ -1026,6 +1087,7 @@ class MainLoader(QMainWindow):
                 if not found_match:
                     existing_rows.append(new_row)
             set_table_rows(self.sales_table, existing_rows)
+            self._update_customer_display_from_sales()
         except Exception:
             try:
                 import traceback
@@ -1043,6 +1105,9 @@ class MainLoader(QMainWindow):
             self.sales_table.setRowCount(0)
             from modules.table import recompute_total
             recompute_total(self.sales_table)
+            display = getattr(self, 'customer_display', None)
+            if display is not None:
+                display.show_idle()
         except Exception as e:
             try:
                 from modules.ui_utils.error_logger import log_error_message

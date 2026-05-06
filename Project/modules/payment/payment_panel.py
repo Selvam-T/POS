@@ -170,6 +170,15 @@ class PaymentPanel(QObject):
             except Exception:
                 pass
 
+        # Temporary wiring: open Screen 2 preview for testing
+        second_btn = self.widget.findChild(QPushButton, 'key2ndScreenBtn')
+        if second_btn is not None:
+            second_btn.clicked.connect(self._open_second_screen)
+            try:
+                second_btn.installEventFilter(self)
+            except Exception:
+                pass
+
     def _open_refund_dialog(self) -> None:
         host = self._main_window
         if host is not None and hasattr(host, 'open_refund_dialog'):
@@ -189,6 +198,102 @@ class PaymentPanel(QObject):
             except Exception as exc:
                 log_error_message(f"Vendor dialog launch failed: {exc}")
         report_to_statusbar(host, "Error: Vendor dialog unavailable.", is_error=True, duration=4000)
+
+    def _open_second_screen(self) -> None:
+        """Temporarily open `ui/screen2.ui` in a dialog for quick testing."""
+        host = self._main_window
+        try:
+            from PyQt5.QtWidgets import QDialog
+
+            ui_path = os.path.abspath(
+                os.path.join(os.path.dirname(__file__), '..', '..', 'ui', 'screen2.ui')
+            )
+            # Log and show a brief status to help debug click handling.
+            try:
+                report_to_statusbar(host, "Opening Screen2 preview...", ok=True, duration=1500)
+            except Exception:
+                pass
+
+            if not os.path.exists(ui_path):
+                log_error_message(f"screen2.ui not found at {ui_path}")
+                try:
+                    report_to_statusbar(host, "Error: screen2.ui missing.", is_error=True, duration=4000)
+                except Exception:
+                    pass
+                return
+
+            dlg = QDialog(host) if host is not None else QDialog()
+            # Show a minimal titlebar with a close button. Avoid CustomizeWindowHint
+            # which can remove the titlebar entirely on some platforms.
+            try:
+                dlg.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.WindowCloseButtonHint | Qt.WindowSystemMenuHint)
+            except Exception:
+                pass
+            dlg.setObjectName('screen2PreviewDialog')
+            # Hide title text so the bar only shows the close button.
+            try:
+                dlg.setWindowTitle('')
+            except Exception:
+                pass
+            uic.loadUi(ui_path, dlg)
+
+            # Ensure the dialog has a reasonable initial size so both panels render.
+            try:
+                dlg.resize(1024, 768)
+            except Exception:
+                try:
+                    dlg.resize(dlg.sizeHint())
+                except Exception:
+                    pass
+
+            # Ensure left/right split is balanced: prefer explicit expanding size policies
+            try:
+                from PyQt5.QtWidgets import QSizePolicy
+
+                left = getattr(dlg, 'leftPurchasePanel', None)
+                right = getattr(dlg, 'screen2DisplayStack', None)
+                if left is not None and right is not None:
+                    left.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                    right.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+                    try:
+                        main_layout = getattr(dlg, 'mainHorizontalLayout', None)
+                        if main_layout is not None and hasattr(main_layout, 'setStretch'):
+                            main_layout.setStretch(0, 1)
+                            main_layout.setStretch(1, 1)
+                        else:
+                            # fallback to dialog layout if available
+                            layout = dlg.layout()
+                            if layout is not None and hasattr(layout, 'setStretch'):
+                                layout.setStretch(0, 1)
+                                layout.setStretch(1, 1)
+                    except Exception:
+                        pass
+                else:
+                    try:
+                        print("[debug] PaymentPanel: left or right widget not found after loadUi")
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+
+            # Keep a reference so the dialog isn't garbage-collected.
+            try:
+                self._screen2_dialog = dlg
+            except Exception:
+                pass
+
+            # Use exec_() to ensure the dialog becomes visible/modal for testing.
+            try:
+                dlg.exec_()
+            except Exception:
+                dlg.show()
+            return
+        except Exception as exc:
+            log_error_message(f"Screen2 preview launch failed: {exc}")
+            try:
+                report_to_statusbar(host, "Error: Screen2 preview unavailable.", is_error=True, duration=4000)
+            except Exception:
+                pass
 
     def _wire_inputs(self) -> None:
         # Connect field change/validation handlers and install line-edit event filters.
