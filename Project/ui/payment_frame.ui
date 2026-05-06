@@ -490,7 +490,7 @@ RECEIPT</string>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="key2ndScreenBtn">
+         <widget class="QPushButton" name="keyTodoBtn">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
             <horstretch>0</horstretch>
@@ -498,8 +498,7 @@ RECEIPT</string>
            </sizepolicy>
           </property>
           <property name="text">
-           <string>2ND
-SCREEN</string>
+           <string>TODO</string>
           </property>
          </widget>
         </item>

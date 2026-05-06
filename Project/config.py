@@ -10,6 +10,7 @@ DIALOG_RATIOS = {
 	'receipt_menu': (0.75, 0.9),
 	'report_menu': (0.45, 0.6),
 	'greeting_menu': (0.3, 0.3),
+	'todo': (0.45, 0.6),
 	'product_menu': (0.5, 0.7),
 	'vegetable_menu': (0.32, 0.7),
 	'hold_sales': (0.4, 0.3),

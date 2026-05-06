@@ -272,7 +272,7 @@ QPushButton#resetPayOpsBtn:focus,
 QPushButton#printPayOpsBtn:focus,
 QPushButton#keyVendorBtn:focus,
 QPushButton#keyRefundBtn:focus,
-QPushButton#key2ndScreenBtn:focus {
+QPushButton#keyTodoBtn:focus {
     outline: none;
     font-size: 24px;
     border: 3px solid yellow;
@@ -352,7 +352,7 @@ QPushButton#key2ndScreenBtn:focus {
 }
 
 /* 7. Keypad keyOpsFrame QPushButtons */
-#keyRefundBtn, #keyVendorBtn, #key2ndScreenBtn {
+#keyRefundBtn, #keyVendorBtn, #keyTodoBtn {
     color: white;
     font-size: 20px;
     font-weight: bold;
@@ -384,14 +384,14 @@ QPushButton#key2ndScreenBtn:focus {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #61527f, stop:1 #554771);
 }
 
-#key2ndScreenBtn {
+#keyTodoBtn {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #8a7b57, stop:1 #7e6f4f);
     border: 1px solid #6d6044;
 }
-#key2ndScreenBtn:hover {
+#keyTodoBtn:hover {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #97896a, stop:1 #8a7d60);
 }
-#key2ndScreenBtn:pressed {
+#keyTodoBtn:pressed {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #7b6c4d, stop:1 #716347);
 }
 
