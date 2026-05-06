@@ -894,4 +894,3 @@ QPlainTextEdit#reportViewerTextEdit {
     font-family: "Consolas", "Courier New", monospace;
     font-size: 10.5pt;
 }
-

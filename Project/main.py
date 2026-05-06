@@ -601,6 +601,7 @@ class MainLoader(QMainWindow):
                 'quantity': qty,
                 'description': name,
                 'amount': line_total,
+                'unit': row.get('unit') if isinstance(row, dict) else None,
             })
 
         if not rows and state not in (display.STATE_PAYMENT, display.STATE_COMPLETED):
@@ -1170,6 +1171,9 @@ def main():
 
             # Qt message types: Debug=0, Warning=1, Critical=2, Fatal=3, Info=4
             if mt in (1, 2, 3):
+                # Suppress non-focusable fullscreen window activation warnings.
+                if "requestActivate()" in message and "WindowDoesNotAcceptFocus" in message:
+                    return
                 try:
                     log_error_message(f"Qt: {message}")
                 except Exception:

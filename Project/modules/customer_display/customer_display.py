@@ -7,7 +7,7 @@ from typing import Iterable
 
 from PyQt5 import uic
 from PyQt5.QtCore import QDateTime, QTimer, Qt
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtWidgets import (
     QApplication,
     QDialog,
@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import (
     QStackedWidget,
     QTableWidget,
     QTableWidgetItem,
+    QFrame,
 )
 
 from modules.ui_utils.dialog_utils import report_to_statusbar
@@ -32,6 +33,14 @@ from config import (
     DATE_FMT,
     TIME_FMT,
 )
+
+# Resolve project paths and assets (used to apply main QSS to this dialog)
+THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
+UI_DIR = os.path.join(BASE_DIR, 'ui')
+ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
+QSS_PATH = os.path.join(ASSETS_DIR, 'main.qss')
+from modules.table.unit_helpers import canonicalize_unit, UNIT_KG, UNIT_EACH
 
 
 class CustomerDisplayWindow(QDialog):
@@ -56,6 +65,7 @@ class CustomerDisplayWindow(QDialog):
         self._table = None
         self._total_label = None
         self._date_label = None
+        self._time_label = None
         self._company_label = None
         self._qr_label = None
         self._state = self.STATE_IDLE
@@ -71,14 +81,24 @@ class CustomerDisplayWindow(QDialog):
         self.refresh_display_visibility(initial=True)
 
     def _load_ui(self) -> None:
-        ui_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "..", "ui", "screen2.ui")
-        )
+        ui_path = os.path.abspath(os.path.join(UI_DIR, 'screen2.ui'))
         if not os.path.exists(ui_path):
             report_to_statusbar(self._host, "Error: screen2.ui missing.", is_error=True, duration=4000)
             return
         uic.loadUi(ui_path, self)
         self._ui_loaded = True
+        # Apply main QSS (if present) to this dialog so Screen 2 matches app styling.
+        try:
+            if os.path.exists(QSS_PATH):
+                with open(QSS_PATH, 'r', encoding='utf-8') as _f:
+                    q = _f.read()
+                    if q:
+                        try:
+                            self.setStyleSheet(q)
+                        except Exception:
+                            pass
+        except Exception:
+            pass
 
     def _apply_window_flags(self) -> None:
         try:
@@ -92,6 +112,7 @@ class CustomerDisplayWindow(QDialog):
         self._table = self.findChild(QTableWidget, "screen2SalesTable")
         self._total_label = self.findChild(QLabel, "screen2ValueLabel")
         self._date_label = self.findChild(QLabel, "screen2DateLabel")
+        self._time_label = self.findChild(QLabel, "screen2TimeLabel")
         self._company_label = self.findChild(QLabel, "screen2CompanyLabel")
         self._qr_label = self.findChild(QLabel, "screen2QrLabel")
 
@@ -106,11 +127,90 @@ class CustomerDisplayWindow(QDialog):
         table.setSelectionMode(QTableWidget.NoSelection)
         table.setFocusPolicy(Qt.NoFocus)
         table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+        # Hide vertical header (row numbers)
+        try:
+            vh = table.verticalHeader()
+            vh.setVisible(False)
+        except Exception:
+            pass
+
+        # Ensure gridlines and a visible frame so styles aren't visually missing
+        try:
+            table.setShowGrid(True)
+        except Exception:
+            pass
+        try:
+            table.setGridStyle(Qt.SolidLine)
+        except Exception:
+            pass
+        try:
+            table.setFrameShape(QFrame.Box)
+            table.setLineWidth(1)
+        except Exception:
+            pass
+
+        # Apply a readable default font for rows in case stylesheet cascade misses it
+        try:
+            table.setFont(QFont("Segoe UI", 16))
+        except Exception:
+            pass
+
         header = table.horizontalHeader()
         if header is not None:
-            header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-            header.setSectionResizeMode(1, QHeaderView.Stretch)
-            header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+            # Ensure header is visible and has a reasonable minimum height so
+            # stylesheet changes don't collapse it to zero height.
+            try:
+                header.setVisible(True)
+            except Exception:
+                pass
+            try:
+                header.setMinimumHeight(36)
+            except Exception:
+                pass
+            try:
+                header.setDefaultAlignment(Qt.AlignCenter)
+            except Exception:
+                pass
+            # Prefer fixed widths for Qty and Amount to control layout on screen2
+            try:
+                header.setSectionResizeMode(0, QHeaderView.Fixed)
+                header.setSectionResizeMode(1, QHeaderView.Stretch)
+                header.setSectionResizeMode(2, QHeaderView.Fixed)
+                header.setStretchLastSection(False)
+                # Desired fixed widths (px)
+                col0_w = 160
+                col2_w = 180
+                header.resizeSection(0, col0_w)
+                header.resizeSection(2, col2_w)
+
+                # Defer enforcing exact column widths until after the widget is laid out
+                def _apply_column_widths():
+                    try:
+                        try:
+                            vpw = table.viewport().width()
+                        except Exception:
+                            vpw = table.width()
+                        # Ensure the middle (product) column gets the remaining space
+                        col1_w = max(40, vpw - col0_w - col2_w)
+                        table.setColumnWidth(0, col0_w)
+                        table.setColumnWidth(1, col1_w)
+                        table.setColumnWidth(2, col2_w)
+                    except Exception:
+                        pass
+
+                try:
+                    QTimer.singleShot(0, _apply_column_widths)
+                except Exception:
+                    _apply_column_widths()
+            except Exception:
+                # Fall back to content-based sizing if fixed sizing fails
+                try:
+                    header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+                    header.setSectionResizeMode(1, QHeaderView.Stretch)
+                    header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+                except Exception:
+                    pass
 
     def _configure_qr_label(self) -> None:
         if self._qr_label is None:
@@ -126,10 +226,11 @@ class CustomerDisplayWindow(QDialog):
         self._update_clock()
 
     def _update_clock(self) -> None:
-        if self._date_label is None:
-            return
-        fmt = f"{DATE_FMT} {TIME_FMT}".strip()
-        self._date_label.setText(QDateTime.currentDateTime().toString(fmt))
+        now = QDateTime.currentDateTime()
+        if self._date_label is not None:
+            self._date_label.setText(now.toString(DATE_FMT))
+        if self._time_label is not None:
+            self._time_label.setText(now.toString(TIME_FMT))
 
     def _wire_screen_events(self) -> None:
         app = QApplication.instance()
@@ -224,12 +325,47 @@ class CustomerDisplayWindow(QDialog):
         rows = list(items or [])
         self._table.setRowCount(len(rows))
         for row_idx, item in enumerate(rows):
-            qty = item.get("quantity", "")
+            qty_raw = item.get("quantity", 0.0)
+            try:
+                qty = float(qty_raw)
+            except Exception:
+                qty = 0.0
             desc = item.get("description", "")
-            amount = item.get("amount", "")
-            self._table.setItem(row_idx, 0, QTableWidgetItem(str(qty)))
-            self._table.setItem(row_idx, 1, QTableWidgetItem(str(desc)))
-            self._table.setItem(row_idx, 2, QTableWidgetItem(self._format_money(amount)))
+            amount = item.get("amount", 0.0)
+            unit = canonicalize_unit(item.get('unit', ''))
+
+            # Format quantity for display
+            if unit == UNIT_EACH:
+                try:
+                    qty_text = f"{int(qty)} ea"
+                except Exception:
+                    qty_text = f"{int(round(qty))} ea"
+            elif unit == UNIT_KG:
+                if qty < 1.0:
+                    grams = int(round(qty * 1000))
+                    qty_text = f"{grams} g"
+                else:
+                    s = f"{qty:.2f}".rstrip('0').rstrip('.')
+                    qty_text = f"{s} kg"
+            else:
+                s = f"{qty:.2f}".rstrip('0').rstrip('.')
+                qty_text = s
+
+            # Create items with alignment and non-editable flags
+            item_qty = QTableWidgetItem(qty_text)
+            item_qty.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            item_qty.setFlags(item_qty.flags() & ~Qt.ItemIsEditable)
+            self._table.setItem(row_idx, 0, item_qty)
+
+            item_desc = QTableWidgetItem(str(desc))
+            item_desc.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            item_desc.setFlags(item_desc.flags() & ~Qt.ItemIsEditable)
+            self._table.setItem(row_idx, 1, item_desc)
+
+            item_amt = QTableWidgetItem(self._format_money(amount))
+            item_amt.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
+            item_amt.setFlags(item_amt.flags() & ~Qt.ItemIsEditable)
+            self._table.setItem(row_idx, 2, item_amt)
         if rows:
             self._table.scrollToBottom()
 

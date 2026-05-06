@@ -525,3 +525,75 @@ QScrollBar::handle:horizontal:pressed { background: #3a6a94; }
 QFrame#manualFrame { background: #daf197; }
 QLabel#manualLabel1, QLabel#manualLabel2 { font-size: 18px; font-weight: bold; }
 QTextEdit#manualText { font-size: 18px; font-weight: bold; }
+
+/* =============================================================
+   Customer Facing Screen
+   ============================================================= */
+
+/* Base container style */
+QFrame#screen2PurchaseFrame {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #96d8a7, stop:1 #8abdf0);
+    border: 1px solid #333333;
+    border-radius: 8px;
+    font-family: "Segoe UI", Arial, sans-serif;
+    
+}
+
+/* Grouping all Labels to set a common base color and weight */
+#screen2PurchaseFrame QLabel {
+    color: #222222;
+    font-weight: 500;
+}
+
+/* Specific Font Sizes */
+#screen2CompanyLabel, 
+#screen2TotalLabel { font-size: 25px; }
+
+#screen2ValueLabel   { font-size: 40px; }
+
+#screen2FooterLabel  { font-size: 12.5px; }
+
+/* Date and Time use a heavier weight */
+#screen2DateLabel, 
+#screen2TimeLabel {
+    font-size: 20px;
+    font-weight: 500;
+}
+
+/* 1. Style the entire Table background and grid */
+QTableWidget#screen2SalesTable {
+    background-color: #f4f0f0;
+    gridline-color: #b7a7a7;
+    border: 1px solid #cdc5c5;
+    font-family: "Segoe UI", Arial;
+}
+
+/* 2. Style the Column Header background/area */
+/* Sets the text and height for the whole bar */
+QHeaderView {
+    font-size: 18px;
+    font-weight: 700;
+    color: #222222;
+    min-height: 40px; 
+    background-color: #f8f8f8;
+}
+
+/* Sets the borders and padding for the individual column boxes */
+QTableWidget#screen2SalesTable QHeaderView::section {
+    background-color: #f8f8f8;
+    border: 1px solid #cdc5c5;
+    border-bottom: 1px solid #333333;
+    padding: 8px 12px;
+    color: #222222;
+    /* Font inherited from QHeaderView above */
+}
+
+/* 4. Style the Row Text (the data inside the cells) */
+QTableWidget#screen2SalesTable::item {
+    color: #222222;
+    font-size: 18px;
+    font-weight: 500;
+    padding: 8px 12px;
+    min-height: 36px;
+    height: 36px;
+}

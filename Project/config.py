@@ -155,10 +155,11 @@ CUSTOMER_DISPLAY_TEST_MODE = True  # development mode (False = real second scree
 CUSTOMER_SCREEN_INDEX = 1
 
 # Default customer display size (used when not fullscreen)
-CUSTOMER_SCREEN_WIDTH = 1024
-CUSTOMER_SCREEN_HEIGHT = 600
+CUSTOMER_SCREEN_WIDTH = 1536 # 1280 # 1024 # 1536
+CUSTOMER_SCREEN_HEIGHT = 900 # 750 # 600 # 900
 
 # Show the customer display fullscreen when placed on the secondary screen
+# no borders, no resizing, no visible desktop, so it looks like a dedicated signage screen.
 CUSTOMER_DISPLAY_FULLSCREEN = False
 
 # When True the app will auto-detect monitor connect/disconnect events
