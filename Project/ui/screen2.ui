@@ -13,206 +13,45 @@
   <property name="windowTitle">
    <string>Selvam Pos</string>
   </property>
-  <layout class="QHBoxLayout" name="mainHorizontalLayout" stretch="1,1">
+  <layout class="QVBoxLayout" name="rootLayout">
    <property name="spacing">
     <number>0</number>
    </property>
    <property name="leftMargin">
-    <number>10</number>
+    <number>0</number>
    </property>
    <property name="topMargin">
-    <number>10</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
-    <number>10</number>
+    <number>0</number>
    </property>
    <property name="bottomMargin">
-    <number>10</number>
+    <number>0</number>
    </property>
    <item>
-    <widget class="QFrame" name="screen2PurchaseFrame">
-     <layout class="QVBoxLayout" name="leftVLayout">
-      <property name="spacing">
-       <number>20</number>
-      </property>
-      <property name="leftMargin">
-       <number>20</number>
-      </property>
-      <property name="topMargin">
-       <number>20</number>
-      </property>
-      <property name="rightMargin">
-       <number>20</number>
-      </property>
-      <property name="bottomMargin">
-       <number>20</number>
-      </property>
-      <item>
-       <widget class="QLabel" name="screen2CompanyLabel">
-        <property name="font">
-         <font/>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="screen2DateLabel">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="screen2TimeLabel">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QTableWidget" name="screen2SalesTable">
-        <property name="columnCount">
-         <number>3</number>
-        </property>
-        <attribute name="horizontalHeaderStretchLastSection">
-         <bool>true</bool>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>Qty</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Description</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Amount</string>
-         </property>
-        </column>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-    <item>
-     <widget class="QFrame" name="screen2CountFrame">
-      <layout class="QHBoxLayout" name="countHLayout">
-       <item>
-        <widget class="QLabel" name="screen2ItemsLabel">
-         <property name="text">
-        <string>Number of Items:</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="screen2NumLabel">
-         <property name="text">
-        <string>0</string>
-         </property>
-         <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-      <item>
-       <widget class="QFrame" name="screen2TotalFrame">
-        <layout class="QHBoxLayout" name="totalHLayout">
-         <item>
-          <widget class="QLabel" name="screen2TotalLabel">
-           <property name="font">
-            <font/>
-           </property>
-           <property name="text">
-            <string>Total Payable:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="screen2ValueLabel">
-           <property name="font">
-            <font/>
-           </property>
-           <property name="text">
-            <string>$ 0.00</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
-      <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Preferred</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QLabel" name="screen2FooterLabel">
-        <property name="text">
-         <string>Selvam Pos</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QStackedWidget" name="screen2AdDisplayStack">
+    <widget class="QStackedWidget" name="screen2ModeStack">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
-     <widget class="QWidget" name="pageIdle">
-      <layout class="QVBoxLayout" name="idleLayout">
+     <widget class="QWidget" name="pageIdleFull">
+      <layout class="QVBoxLayout" name="idleFullLayout">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
-        <widget class="QLabel" name="idleAdsLabel">
+        <widget class="QLabel" name="screen2IdleFullLabel">
          <property name="text">
-          <string>Rolling Ads</string>
+          <string>Images not available</string>
          </property>
          <property name="scaledContents">
           <bool>true</bool>
@@ -224,73 +63,48 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="pageScanning">
-      <layout class="QVBoxLayout" name="scanningLayout">
-       <item>
-        <widget class="QLabel" name="scanningAdsLabel">
-         <property name="text">
-          <string>Ads/Promotions</string>
-         </property>
-         <property name="scaledContents">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="pagePayment">
-      <layout class="QVBoxLayout" name="paymentVLayout">
+     <widget class="QWidget" name="pageSplit">
+      <layout class="QHBoxLayout" name="mainHorizontalLayout" stretch="1,1">
        <property name="spacing">
-        <number>20</number>
+        <number>0</number>
+       </property>
+       <property name="leftMargin">
+        <number>10</number>
+       </property>
+       <property name="topMargin">
+        <number>10</number>
+       </property>
+       <property name="rightMargin">
+        <number>10</number>
+       </property>
+       <property name="bottomMargin">
+        <number>10</number>
        </property>
        <item>
-        <widget class="QLabel" name="paymentInfoLabel">
-         <property name="font">
-          <font/>
-         </property>
-         <property name="text">
-          <string>Payment Summary</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter|Qt::AlignHCenter|Qt::AlignTop|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="screen2QrFrame">
-         <layout class="QHBoxLayout" name="qrHLayout">
+        <widget class="QFrame" name="screen2PurchaseFrame">
+         <layout class="QVBoxLayout" name="leftVLayout">
+          <property name="spacing">
+           <number>20</number>
+          </property>
+          <property name="leftMargin">
+           <number>20</number>
+          </property>
+          <property name="topMargin">
+           <number>20</number>
+          </property>
+          <property name="rightMargin">
+           <number>20</number>
+          </property>
+          <property name="bottomMargin">
+           <number>20</number>
+          </property>
           <item>
-           <spacer name="qrLeftSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="screen2QrLabel">
-            <property name="minimumSize">
-             <size>
-              <width>250</width>
-              <height>250</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>250</width>
-              <height>250</height>
-             </size>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::Box</enum>
+           <widget class="QLabel" name="screen2CompanyLabel">
+            <property name="font">
+             <font/>
             </property>
             <property name="text">
-             <string>QR CODE</string>
+             <string/>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -298,92 +112,333 @@
            </widget>
           </item>
           <item>
-           <spacer name="qrRightSpacer">
+           <widget class="QLabel" name="screen2DateLabel">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="screen2TimeLabel">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QTableWidget" name="screen2SalesTable">
+            <property name="columnCount">
+             <number>3</number>
+            </property>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>true</bool>
+            </attribute>
+            <column>
+             <property name="text">
+              <string>Qty</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Description</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Amount</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_2">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>0</width>
-              <height>0</height>
+              <width>20</width>
+              <height>20</height>
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QFrame" name="screen2CountFrame">
+            <layout class="QHBoxLayout" name="countHLayout">
+             <item>
+              <widget class="QLabel" name="screen2ItemsLabel">
+               <property name="text">
+                <string>Number of Items:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="screen2NumLabel">
+               <property name="text">
+                <string>0</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="screen2TotalFrame">
+            <layout class="QHBoxLayout" name="totalHLayout">
+             <item>
+              <widget class="QLabel" name="screen2TotalLabel">
+               <property name="font">
+                <font/>
+               </property>
+               <property name="text">
+                <string>Total Payable:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="screen2ValueLabel">
+               <property name="font">
+                <font/>
+               </property>
+               <property name="text">
+                <string>$ 0.00</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Preferred</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="screen2FooterLabel">
+            <property name="text">
+             <string>Selvam Pos</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
        </item>
        <item>
-        <spacer name="paymentBottomSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
+        <widget class="QStackedWidget" name="screen2AdDisplayStack">
+         <property name="currentIndex">
+          <number>3</number>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="pageCompleted">
-      <layout class="QVBoxLayout" name="completedLayout">
-       <item>
-        <spacer name="compTopSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="screen2SuccessLabel">
-         <property name="minimumSize">
-          <size>
-           <width>150</width>
-           <height>150</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>:-)</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
+         <widget class="QWidget" name="pageIdle">
+          <layout class="QVBoxLayout" name="idleLayout">
+           <item>
+            <widget class="QLabel" name="idleAdsLabel">
+             <property name="text">
+              <string>Rolling Ads</string>
+             </property>
+             <property name="scaledContents">
+              <bool>true</bool>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="pageScanning">
+          <layout class="QVBoxLayout" name="scanningLayout">
+           <item>
+            <widget class="QLabel" name="scanningAdsLabel">
+             <property name="text">
+              <string>Ads/Promotions</string>
+             </property>
+             <property name="scaledContents">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="pagePayment">
+          <layout class="QVBoxLayout" name="paymentVLayout">
+           <property name="spacing">
+            <number>20</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="paymentInfoLabel">
+             <property name="font">
+              <font/>
+             </property>
+             <property name="text">
+              <string>Payment Summary</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter|Qt::AlignHCenter|Qt::AlignTop|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="screen2QrFrame">
+             <layout class="QHBoxLayout" name="qrHLayout">
+              <item>
+               <spacer name="qrLeftSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="screen2QrLabel">
+                <property name="minimumSize">
+                 <size>
+                  <width>250</width>
+                  <height>250</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>250</width>
+                  <height>250</height>
+                 </size>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::Box</enum>
+                </property>
+                <property name="text">
+                 <string>QR CODE</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="qrRightSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="paymentBottomSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="pageCompleted">
+          <layout class="QVBoxLayout" name="completedLayout">
+           <item>
+            <spacer name="compTopSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="screen2SuccessLabel">
+             <property name="minimumSize">
+              <size>
+               <width>150</width>
+               <height>150</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>:-)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="screen2GreetingLabel">
+             <property name="font">
+              <font/>
+             </property>
+             <property name="text">
+              <string>Thank You!</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="compBotSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
         </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="screen2GreetingLabel">
-         <property name="font">
-          <font/>
-         </property>
-         <property name="text">
-          <string>Thank You!</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="compBotSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>0</width>
-           <height>0</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>

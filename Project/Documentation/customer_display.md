@@ -51,6 +51,38 @@ The screen uses `ui/screen2.ui` with two main regions:
   - index 2: `pagePayment`
   - index 3: `pageCompleted`
 
+### New Top-Level Mode Stack (Recent updates)
+
+- The UI now contains a top-level `QStackedWidget` named `screen2ModeStack`.
+  - `pageIdleFull` (index 0): a fullscreen idle page used when there are no
+    items in the sales table. This page contains `screen2IdleFullLabel` which
+    displays fullscreen ads from `assets/ads` or fallback text when images
+    aren't available.
+  - `pageSplit` (index 1): the original split layout with the purchase frame
+    on the left and `screen2AdDisplayStack` on the right.
+
+Notes:
+- Mode selection is driven solely by whether the main `sales_table` has rows
+  (i.e. uses the existing `get_sales_data()` / `is_transaction_active()`
+  semantics). If the sales table is empty the display switches to
+  `pageIdleFull`; otherwise it shows `pageSplit`.
+
+### Controller Changes
+
+- `CustomerDisplayWindow` (`modules/customer_display/customer_display.py`) now
+  exposes two lightweight helpers: `set_mode_full_idle()` and
+  `set_mode_split()` to change the top-level mode.
+- When entering full-idle mode the window will load images from
+  `assets/ads` and run a timed rotation (slideshow) of available images.
+- If an ad image fails to load at runtime the controller logs the failure to
+  the application error logger via `modules.ui_utils.error_logger.log_error_message`.
+
+### Configuration
+
+- New config key: `CUSTOMER_DISPLAY_IDLE_AD_INTERVAL` (seconds) controls the
+  rotation interval for fullscreen idle ads. See `config.py` under the
+  Customer Display settings section.
+
 ## Data Flow
 
 The customer display must not read the cashier sales table directly.

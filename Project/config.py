@@ -170,6 +170,9 @@ CUSTOMER_DISPLAY_AUTO_DETECT = True
 # Seconds to wait before returning to Idle page after completed payment.
 CUSTOMER_DISPLAY_IDLE_TIMEOUT = 8
 
+# Seconds between fullscreen idle ads (pageIdleFull rotation interval).
+CUSTOMER_DISPLAY_IDLE_AD_INTERVAL = 7
+
 # =========================================================
 # Validation / Input Constraints (moved from input_validation.py)
 # =========================================================

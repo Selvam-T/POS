@@ -581,6 +581,7 @@ class MainLoader(QMainWindow):
             return
         sales_table = getattr(self, 'sales_table', None)
         if sales_table is None:
+            display.set_mode_full_idle()
             display.show_idle()
             return
 
@@ -588,6 +589,11 @@ class MainLoader(QMainWindow):
             rows = get_sales_data(sales_table)
         except Exception:
             rows = []
+
+        if rows:
+            display.set_mode_split()
+        else:
+            display.set_mode_full_idle()
 
         items = []
         total = 0.0

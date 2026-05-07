@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import re
 from typing import Iterable
 
 from PyQt5 import uic
@@ -20,18 +21,21 @@ from PyQt5.QtWidgets import (
 )
 
 from modules.ui_utils.dialog_utils import report_to_statusbar
+from modules.ui_utils.error_logger import log_error_message
 from config import (
     COMPANY_NAME,
     CUSTOMER_DISPLAY_AUTO_DETECT,
     CUSTOMER_DISPLAY_ENABLED,
     CUSTOMER_DISPLAY_FULLSCREEN,
     CUSTOMER_DISPLAY_IDLE_TIMEOUT,
+    CUSTOMER_DISPLAY_IDLE_AD_INTERVAL,
     CUSTOMER_DISPLAY_TEST_MODE,
     CUSTOMER_SCREEN_HEIGHT,
     CUSTOMER_SCREEN_INDEX,
     CUSTOMER_SCREEN_WIDTH,
     DATE_FMT,
     TIME_FMT,
+    ALLOWED_EXTS,
 )
 
 # Resolve project paths and assets (used to apply main QSS to this dialog)
@@ -39,6 +43,7 @@ THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
+ADS_DIR = os.path.join(ASSETS_DIR, 'ads')
 QSS_PATH = os.path.join(ASSETS_DIR, 'main.qss')
 from modules.table.unit_helpers import canonicalize_unit, UNIT_KG, UNIT_EACH
 
@@ -60,8 +65,10 @@ class CustomerDisplayWindow(QDialog):
         self._connected = False
         self._idle_timer = QTimer(self)
         self._clock_timer = QTimer(self)
+        self._idle_ads_timer = QTimer(self)
         self._ui_loaded = False
         self._stack = None
+        self._mode_stack = None
         self._table = None
         self._total_label = None
         self._count_label = None
@@ -69,12 +76,16 @@ class CustomerDisplayWindow(QDialog):
         self._time_label = None
         self._company_label = None
         self._qr_label = None
+        self._idle_full_label = None
+        self._idle_ads_paths = []
+        self._idle_ads_index = 0
         self._state = self.STATE_IDLE
         self._load_ui()
         self._apply_window_flags()
         self._cache_widgets()
         self._configure_table()
         self._configure_qr_label()
+        self._configure_idle_ads()
         self._start_clock()
         self.show_idle()
         if CUSTOMER_DISPLAY_AUTO_DETECT:
@@ -110,6 +121,7 @@ class CustomerDisplayWindow(QDialog):
 
     def _cache_widgets(self) -> None:
         self._stack = self.findChild(QStackedWidget, "screen2AdDisplayStack")
+        self._mode_stack = self.findChild(QStackedWidget, "screen2ModeStack")
         self._table = self.findChild(QTableWidget, "screen2SalesTable")
         self._total_label = self.findChild(QLabel, "screen2ValueLabel")
         self._count_label = self.findChild(QLabel, "screen2NumLabel")
@@ -117,9 +129,16 @@ class CustomerDisplayWindow(QDialog):
         self._time_label = self.findChild(QLabel, "screen2TimeLabel")
         self._company_label = self.findChild(QLabel, "screen2CompanyLabel")
         self._qr_label = self.findChild(QLabel, "screen2QrLabel")
+        self._idle_full_label = self.findChild(QLabel, "screen2IdleFullLabel")
 
         if self._company_label is not None:
             self._company_label.setText(COMPANY_NAME)
+
+        if self._idle_full_label is not None:
+            try:
+                self._idle_full_label.setAlignment(Qt.AlignCenter)
+            except Exception:
+                pass
 
     def _configure_table(self) -> None:
         table = self._table
@@ -222,6 +241,11 @@ class CustomerDisplayWindow(QDialog):
         except Exception:
             pass
 
+    def _configure_idle_ads(self) -> None:
+        interval_ms = max(1000, int(CUSTOMER_DISPLAY_IDLE_AD_INTERVAL * 1000))
+        self._idle_ads_timer.setInterval(interval_ms)
+        self._idle_ads_timer.timeout.connect(self._advance_idle_ad)
+
     def _start_clock(self) -> None:
         self._clock_timer.timeout.connect(self._update_clock)
         self._clock_timer.start(1000)
@@ -287,10 +311,151 @@ class CustomerDisplayWindow(QDialog):
             self.hide()
 
     def show_idle(self) -> None:
+        self.set_mode_full_idle()
         self._set_state(self.STATE_IDLE)
         self.clear_items()
         self.set_total(0.0)
         self.set_item_count(0)
+
+    def set_mode_full_idle(self) -> None:
+        if self._mode_stack is None:
+            return
+        try:
+            self._mode_stack.setCurrentIndex(0)
+        except Exception:
+            pass
+        self._start_idle_ads()
+
+    def set_mode_split(self) -> None:
+        if self._mode_stack is None:
+            return
+        try:
+            self._mode_stack.setCurrentIndex(1)
+        except Exception:
+            pass
+        self._stop_idle_ads()
+
+    def _start_idle_ads(self) -> None:
+        if self._idle_full_label is None:
+            return
+        # If the ads directory doesn't exist, log an error and show fallback text.
+        if not os.path.isdir(ADS_DIR):
+            try:
+                log_error_message(f"CustomerDisplay: ads directory not found: {ADS_DIR}")
+            except Exception:
+                pass
+            try:
+                self._show_image_unavailable()
+            except Exception:
+                pass
+            return
+
+        # Directory exists: list ad files. If none, show fallback text (no log).
+        self._idle_ads_paths = self._list_idle_ad_files()
+        self._idle_ads_index = 0
+        if not self._idle_ads_paths:
+            try:
+                # No images present: show unified fallback text without logging.
+                self._show_image_unavailable()
+            except Exception:
+                pass
+            return
+
+        # Render first ad and start rotation if multiple images are present.
+        self._render_idle_ad()
+        if len(self._idle_ads_paths) > 1:
+            self._idle_ads_timer.start()
+
+    def _stop_idle_ads(self) -> None:
+        try:
+            self._idle_ads_timer.stop()
+        except Exception:
+            pass
+
+    def _advance_idle_ad(self) -> None:
+        if not self._idle_ads_paths:
+            return
+        self._idle_ads_index = (self._idle_ads_index + 1) % len(self._idle_ads_paths)
+        self._render_idle_ad()
+
+    def _render_idle_ad(self) -> None:
+        label = self._idle_full_label
+        if label is None:
+            return
+        if not self._idle_ads_paths:
+            label.setText("Image not available")
+            label.setPixmap(QPixmap())
+            return
+
+        path = self._idle_ads_paths[self._idle_ads_index]
+        pix = QPixmap(path)
+        if pix.isNull():
+            try:
+                log_error_message(f"CustomerDisplay: failed to load ad image: {path}")
+            except Exception:
+                pass
+            try:
+                self._show_image_unavailable()
+            except Exception:
+                pass
+            return
+
+        size = label.size()
+        if size.width() > 0 and size.height() > 0:
+            scaled = pix.scaled(size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        else:
+            scaled = pix
+        # Clear any fallback styling when an image is rendered so text remains readable
+        try:
+            label.setStyleSheet("")
+        except Exception:
+            pass
+        label.setPixmap(scaled)
+        label.setText("")
+
+    def _list_idle_ad_files(self) -> list[str]:
+        files = []
+        try:
+            for name in os.listdir(ADS_DIR):
+                _, ext = os.path.splitext(name)
+                if ext.lower() in ALLOWED_EXTS:
+                    files.append(name)
+        except FileNotFoundError:
+            return []
+        except Exception:
+            return []
+        files.sort(key=self._ad_sort_key)
+        return [os.path.join(ADS_DIR, name) for name in files]
+
+    def _show_image_unavailable(self) -> None:
+        """Show a unified, high-contrast fallback message on the full-idle label."""
+        lbl = self._idle_full_label
+        if lbl is None:
+            return
+        try:
+            lbl.setPixmap(QPixmap())
+        except Exception:
+            pass
+        try:
+            lbl.setText("Image not available")
+            lbl.setAlignment(Qt.AlignCenter)
+            lbl.setWordWrap(True)
+            # Styling for a/b failure: brown background, sky-blue text, reduced font
+            lbl.setStyleSheet(
+                "color: #FFFFFF; background-color: #6F4E37; font-size: 20px; font-weight: bold; padding: 12px;"
+            )
+            lbl.setVisible(True)
+            lbl.repaint()
+        except Exception:
+            pass
+
+    @staticmethod
+    def _ad_sort_key(filename: str):
+        base = os.path.basename(filename)
+        match = re.match(r'^(\d+)_', base)
+        if match:
+            return int(match.group(1)), base.lower()
+        return 9999, base.lower()
 
     def show_scanning(self) -> None:
         self._set_state(self.STATE_SCANNING)
