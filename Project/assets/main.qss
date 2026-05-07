@@ -547,7 +547,10 @@ QFrame#screen2PurchaseFrame {
 
 /* Specific Font Sizes */
 #screen2CompanyLabel, 
-#screen2TotalLabel { font-size: 25px; }
+#screen2TotalLabel,
+#screen2ItemsLabel { font-size: 25px; }
+
+#screen2NumLabel   { font-size: 35px; }
 
 #screen2ValueLabel   { font-size: 40px; }
 

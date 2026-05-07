@@ -64,6 +64,7 @@ class CustomerDisplayWindow(QDialog):
         self._stack = None
         self._table = None
         self._total_label = None
+        self._count_label = None
         self._date_label = None
         self._time_label = None
         self._company_label = None
@@ -111,6 +112,7 @@ class CustomerDisplayWindow(QDialog):
         self._stack = self.findChild(QStackedWidget, "screen2AdDisplayStack")
         self._table = self.findChild(QTableWidget, "screen2SalesTable")
         self._total_label = self.findChild(QLabel, "screen2ValueLabel")
+        self._count_label = self.findChild(QLabel, "screen2NumLabel")
         self._date_label = self.findChild(QLabel, "screen2DateLabel")
         self._time_label = self.findChild(QLabel, "screen2TimeLabel")
         self._company_label = self.findChild(QLabel, "screen2CompanyLabel")
@@ -288,6 +290,7 @@ class CustomerDisplayWindow(QDialog):
         self._set_state(self.STATE_IDLE)
         self.clear_items()
         self.set_total(0.0)
+        self.set_item_count(0)
 
     def show_scanning(self) -> None:
         self._set_state(self.STATE_SCANNING)
@@ -318,12 +321,14 @@ class CustomerDisplayWindow(QDialog):
         if self._table is None:
             return
         self._table.setRowCount(0)
+        self.set_item_count(0)
 
     def set_items(self, items: Iterable[dict]) -> None:
         if self._table is None:
             return
         rows = list(items or [])
         self._table.setRowCount(len(rows))
+        item_count = 0
         for row_idx, item in enumerate(rows):
             qty_raw = item.get("quantity", 0.0)
             try:
@@ -351,6 +356,15 @@ class CustomerDisplayWindow(QDialog):
                 s = f"{qty:.2f}".rstrip('0').rstrip('.')
                 qty_text = s
 
+            if unit == UNIT_KG:
+                if qty > 0:
+                    item_count += 1
+            else:
+                try:
+                    item_count += max(0, int(round(qty)))
+                except Exception:
+                    pass
+
             # Create items with alignment and non-editable flags
             item_qty = QTableWidgetItem(qty_text)
             item_qty.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
@@ -368,11 +382,20 @@ class CustomerDisplayWindow(QDialog):
             self._table.setItem(row_idx, 2, item_amt)
         if rows:
             self._table.scrollToBottom()
+        self.set_item_count(item_count)
 
     def set_total(self, total: float) -> None:
         if self._total_label is None:
             return
         self._total_label.setText(self._format_money(total))
+
+    def set_item_count(self, count: int) -> None:
+        if self._count_label is None:
+            return
+        try:
+            self._count_label.setText(str(max(0, int(count))))
+        except Exception:
+            self._count_label.setText("0")
 
     def set_qr_image(self, pixmap: QPixmap | None) -> None:
         if self._qr_label is None:

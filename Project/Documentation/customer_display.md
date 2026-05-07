@@ -72,6 +72,16 @@ Payload shape:
 - Payment completed: Completed page, then return to Idle after timeout.
 - Sale cleared: Idle page.
 
+## Item Count Rule
+
+Screen 2 shows a "Number of Items" summary. The count is calculated as:
+- Each/unit items: sum of quantities (rounded to whole items).
+- Kg items: counted as 1 item per line.
+
+Reason: weighted produce can be fractional and should not inflate the item count
+based on grams. Customers and cashiers expect one weighed product to read as one
+item even if the weight is 0.25 kg or 1.75 kg.
+
 ## Work Pending
 
 MainWindow integration and event hooks are done. Pending:

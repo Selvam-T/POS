@@ -121,6 +121,29 @@
         </property>
        </spacer>
       </item>
+    <item>
+     <widget class="QFrame" name="screen2CountFrame">
+      <layout class="QHBoxLayout" name="countHLayout">
+       <item>
+        <widget class="QLabel" name="screen2ItemsLabel">
+         <property name="text">
+        <string>Number of Items:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="screen2NumLabel">
+         <property name="text">
+        <string>0</string>
+         </property>
+         <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
       <item>
        <widget class="QFrame" name="screen2TotalFrame">
         <layout class="QHBoxLayout" name="totalHLayout">
