@@ -1104,7 +1104,7 @@ class MainLoader(QMainWindow):
                 pass
 
     # Clear table rows and reset payment panel after cancel.
-    def _clear_sales_table_core(self) -> None:
+    def _clear_sales_table_core(self, update_display: bool = True) -> None:
         """Clear sales table rows and recompute total without dialog checks."""
         if not hasattr(self, 'sales_table'):
             return
@@ -1112,9 +1112,10 @@ class MainLoader(QMainWindow):
             self.sales_table.setRowCount(0)
             from modules.table import recompute_total
             recompute_total(self.sales_table)
-            display = getattr(self, 'customer_display', None)
-            if display is not None:
-                display.show_idle()
+            if update_display:
+                display = getattr(self, 'customer_display', None)
+                if display is not None:
+                    display.show_idle()
         except Exception as e:
             try:
                 from modules.ui_utils.error_logger import log_error_message
@@ -1132,7 +1133,7 @@ class MainLoader(QMainWindow):
             if dlg is None or dlg.result() != QDialog.Accepted:
                 return
 
-            self._clear_sales_table_core()
+            self._clear_sales_table_core(update_display=False)
             panel = getattr(self, 'payment_panel_controller', None)
             if panel is not None:
                 panel.clear_payment_frame()

@@ -19,6 +19,40 @@ _COMMON_FORMATS = (
     "%d-%b-%Y",
 )
 
+_QT_FORMAT_TOKENS = (
+    ("yyyy", "%Y"),
+    ("yy", "%y"),
+    ("MMMM", "%B"),
+    ("MMM", "%b"),
+    ("MM", "%m"),
+    ("ddd", "%a"),
+    ("dddd", "%A"),
+    ("dd", "%d"),
+    ("d", "%d"),
+    ("HH", "%H"),
+    ("H", "%H"),
+    ("hh", "%I"),
+    ("h", "%I"),
+    ("mm", "%M"),
+    ("ss", "%S"),
+    ("AP", "%p"),
+    ("ap", "%p"),
+)
+
+
+def _normalize_format(fmt: str) -> str:
+    """Convert Qt-style format strings to strftime when needed."""
+    if not fmt:
+        return fmt
+    if "%" in fmt:
+        return fmt
+    if not any(token in fmt for token, _ in _QT_FORMAT_TOKENS):
+        return fmt
+    out = fmt
+    for token, repl in _QT_FORMAT_TOKENS:
+        out = out.replace(token, repl)
+    return out
+
 
 def parse_to_datetime(value) -> Optional[datetime.datetime]:
     """Coerce value into datetime or return None on failure."""
@@ -87,6 +121,7 @@ def format_datetime(value, fmt: str = "%d %b %Y  %I:%M %p", lower_ampm: bool = T
         except Exception:
             return ""
 
+    fmt = _normalize_format(fmt)
     out = dt.strftime(fmt)
     if lower_ampm:
         out = out.replace("AM", "am").replace("PM", "pm")
@@ -103,6 +138,7 @@ def format_date(value, fmt: str = "%d %b %Y") -> str:
             return str(value)
         except Exception:
             return ""
+    fmt = _normalize_format(fmt)
     return dt.strftime(fmt)
 
 
@@ -116,6 +152,7 @@ def format_time(value, fmt: str = "%I:%M %p", lower_ampm: bool = True) -> str:
             return str(value)
         except Exception:
             return ""
+    fmt = _normalize_format(fmt)
     out = dt.strftime(fmt)
     if lower_ampm:
         out = out.replace("AM", "am").replace("PM", "pm")

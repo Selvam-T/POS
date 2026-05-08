@@ -195,7 +195,7 @@ QLabel[status="warning"] {
 
 /* Default look for all SubLbl -- it is applied from somewhere hidden, I can't find
 QLabel[objectName$="SubLbl"] {
-    color: #710b0b !important;
+    color: #710b0b !important; 
 }*/
 
 /* =========================================================

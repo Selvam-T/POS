@@ -173,6 +173,10 @@ CUSTOMER_DISPLAY_IDLE_TIMEOUT = 8
 # Seconds between fullscreen idle ads (pageIdleFull rotation interval).
 CUSTOMER_DISPLAY_IDLE_AD_INTERVAL = 7
 
+# Screen 2 date/time display formats (fallback uses these as well)
+CUSTOMER_DISPLAY_DATE_FMT = DATE_FMT
+CUSTOMER_DISPLAY_TIME_FMT = TIME_FMT
+
 # =========================================================
 # Validation / Input Constraints (moved from input_validation.py)
 # =========================================================

@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 import os
 import re
+import config
 from typing import Iterable
 
 from PyQt5 import uic
-from PyQt5.QtCore import QDateTime, QTimer, Qt
+from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtWidgets import (
     QApplication,
@@ -22,6 +24,7 @@ from PyQt5.QtWidgets import (
 
 from modules.ui_utils.dialog_utils import report_to_statusbar
 from modules.ui_utils.error_logger import log_error_message
+from modules.date_time.formatters import format_date, format_time
 from config import (
     COMPANY_NAME,
     CUSTOMER_DISPLAY_AUTO_DETECT,
@@ -30,11 +33,11 @@ from config import (
     CUSTOMER_DISPLAY_IDLE_TIMEOUT,
     CUSTOMER_DISPLAY_IDLE_AD_INTERVAL,
     CUSTOMER_DISPLAY_TEST_MODE,
+    CUSTOMER_DISPLAY_DATE_FMT,
+    CUSTOMER_DISPLAY_TIME_FMT,
     CUSTOMER_SCREEN_HEIGHT,
     CUSTOMER_SCREEN_INDEX,
     CUSTOMER_SCREEN_WIDTH,
-    DATE_FMT,
-    TIME_FMT,
     ALLOWED_EXTS,
 )
 
@@ -80,13 +83,16 @@ class CustomerDisplayWindow(QDialog):
         self._idle_ads_paths = []
         self._idle_ads_index = 0
         self._state = self.STATE_IDLE
+        self._using_fallback_ui = False
         self._load_ui()
         self._apply_window_flags()
         self._cache_widgets()
         self._configure_table()
         self._configure_qr_label()
         self._configure_idle_ads()
-        self._start_clock()
+        self._clock_timer.timeout.connect(self._update_clock)
+        self._clock_timer.start(1000)
+        self._update_clock()
         self.show_idle()
         if CUSTOMER_DISPLAY_AUTO_DETECT:
             self._wire_screen_events()
@@ -94,28 +100,49 @@ class CustomerDisplayWindow(QDialog):
 
     def _load_ui(self) -> None:
         ui_path = os.path.abspath(os.path.join(UI_DIR, 'screen2.ui'))
-        if not os.path.exists(ui_path):
-            report_to_statusbar(self._host, "Error: screen2.ui missing.", is_error=True, duration=4000)
-            return
-        uic.loadUi(ui_path, self)
-        self._ui_loaded = True
-        # Apply main QSS (if present) to this dialog so Screen 2 matches app styling.
         try:
-            if os.path.exists(QSS_PATH):
+            if not os.path.exists(ui_path):
+                raise FileNotFoundError(ui_path)
+            uic.loadUi(ui_path, self)
+            self._ui_loaded = True
+        except Exception as exc:
+            import traceback
+
+            tb = traceback.format_exc()
+            try:
+                log_error_message(f"CustomerDisplay: screen2.ui load failed: {exc}\n{tb}")
+            except Exception:
+                pass
+            report_to_statusbar(self._host, "Customer display UI missing - using fallback.", is_error=True, duration=6000)
+            try:
+                from modules.customer_display.fallback_screen2 import create_fallback_ui
+
+                create_fallback_ui(self)
+                self._ui_loaded = True
+                self._using_fallback_ui = True
+            except Exception:
+                try:
+                    log_error_message(f"CustomerDisplay: fallback creation failed:\n{traceback.format_exc()}")
+                except Exception:
+                    pass
+                return
+        # Apply main QSS (if present) to this dialog so Screen 2 matches app styling.
+        if os.path.exists(QSS_PATH):
+            try:
                 with open(QSS_PATH, 'r', encoding='utf-8') as _f:
                     q = _f.read()
-                    if q:
-                        try:
-                            self.setStyleSheet(q)
-                        except Exception:
-                            pass
-        except Exception:
-            pass
+                if q:
+                    self.setStyleSheet(q)
+            except Exception:
+                pass
 
     def _apply_window_flags(self) -> None:
+        self.setWindowFlag(Qt.WindowDoesNotAcceptFocus, True)
+        self.setAttribute(Qt.WA_ShowWithoutActivating, True)
+
+    def _safe_log(self, message: str) -> None:
         try:
-            self.setWindowFlag(Qt.WindowDoesNotAcceptFocus, True)
-            self.setAttribute(Qt.WA_ShowWithoutActivating, True)
+            log_error_message(message)
         except Exception:
             pass
 
@@ -135,10 +162,7 @@ class CustomerDisplayWindow(QDialog):
             self._company_label.setText(COMPANY_NAME)
 
         if self._idle_full_label is not None:
-            try:
-                self._idle_full_label.setAlignment(Qt.AlignCenter)
-            except Exception:
-                pass
+            self._idle_full_label.setAlignment(Qt.AlignCenter)
 
     def _configure_table(self) -> None:
         table = self._table
@@ -150,123 +174,84 @@ class CustomerDisplayWindow(QDialog):
         table.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         # Hide vertical header (row numbers)
-        try:
-            vh = table.verticalHeader()
-            vh.setVisible(False)
-        except Exception:
-            pass
+        vh = table.verticalHeader()
+        vh.setVisible(False)
 
         # Ensure gridlines and a visible frame so styles aren't visually missing
-        try:
-            table.setShowGrid(True)
-        except Exception:
-            pass
-        try:
-            table.setGridStyle(Qt.SolidLine)
-        except Exception:
-            pass
-        try:
-            table.setFrameShape(QFrame.Box)
-            table.setLineWidth(1)
-        except Exception:
-            pass
+        table.setShowGrid(True)
+        table.setGridStyle(Qt.SolidLine)
+        table.setFrameShape(QFrame.Box)
+        table.setLineWidth(1)
 
         # Apply a readable default font for rows in case stylesheet cascade misses it
-        try:
-            table.setFont(QFont("Segoe UI", 16))
-        except Exception:
-            pass
+        table.setFont(QFont("Segoe UI", 16))
 
         header = table.horizontalHeader()
         if header is not None:
             # Ensure header is visible and has a reasonable minimum height so
             # stylesheet changes don't collapse it to zero height.
-            try:
-                header.setVisible(True)
-            except Exception:
-                pass
-            try:
-                header.setMinimumHeight(36)
-            except Exception:
-                pass
-            try:
-                header.setDefaultAlignment(Qt.AlignCenter)
-            except Exception:
-                pass
+            header.setVisible(True)
+            header.setMinimumHeight(36)
+            header.setDefaultAlignment(Qt.AlignCenter)
             # Prefer fixed widths for Qty and Amount to control layout on screen2
-            try:
-                header.setSectionResizeMode(0, QHeaderView.Fixed)
-                header.setSectionResizeMode(1, QHeaderView.Stretch)
-                header.setSectionResizeMode(2, QHeaderView.Fixed)
-                header.setStretchLastSection(False)
-                # Desired fixed widths (px)
-                col0_w = 160
-                col2_w = 180
-                header.resizeSection(0, col0_w)
-                header.resizeSection(2, col2_w)
-
-                # Defer enforcing exact column widths until after the widget is laid out
-                def _apply_column_widths():
-                    try:
-                        try:
-                            vpw = table.viewport().width()
-                        except Exception:
-                            vpw = table.width()
-                        # Ensure the middle (product) column gets the remaining space
-                        col1_w = max(40, vpw - col0_w - col2_w)
-                        table.setColumnWidth(0, col0_w)
-                        table.setColumnWidth(1, col1_w)
-                        table.setColumnWidth(2, col2_w)
-                    except Exception:
-                        pass
-
+            header.setSectionResizeMode(0, QHeaderView.Fixed)
+            header.setSectionResizeMode(1, QHeaderView.Stretch)
+            header.setSectionResizeMode(2, QHeaderView.Fixed)
+            header.setStretchLastSection(False)
+            # Desired fixed widths (px)
+            col0_w = 160
+            col2_w = 180
+            # If the programmatic fallback UI is active, prefer larger fixed
+            # widths and enforce them so global QSS/layout doesn't squeeze them.
+            if getattr(self, '_using_fallback_ui', False):
+                col0_w = 420
+                col2_w = 260
                 try:
-                    QTimer.singleShot(0, _apply_column_widths)
-                except Exception:
-                    _apply_column_widths()
-            except Exception:
-                # Fall back to content-based sizing if fixed sizing fails
-                try:
-                    header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+                    header.setSectionResizeMode(0, QHeaderView.Fixed)
                     header.setSectionResizeMode(1, QHeaderView.Stretch)
-                    header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
+                    header.setSectionResizeMode(2, QHeaderView.Fixed)
+                    header.setStretchLastSection(False)
+                    header.setSectionsMovable(False)
+                    header.resizeSection(0, col0_w)
+                    header.resizeSection(2, col2_w)
                 except Exception:
                     pass
+                table.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+                table.setMinimumWidth(col0_w + col2_w + 320)
+
+            table.setColumnWidth(0, col0_w)
+            table.setColumnWidth(2, col2_w)
 
     def _configure_qr_label(self) -> None:
         if self._qr_label is None:
             return
-        try:
-            self._qr_label.setFixedSize(250, 250)
-        except Exception:
-            pass
+        self._qr_label.setFixedSize(250, 250)
 
     def _configure_idle_ads(self) -> None:
         interval_ms = max(1000, int(CUSTOMER_DISPLAY_IDLE_AD_INTERVAL * 1000))
         self._idle_ads_timer.setInterval(interval_ms)
         self._idle_ads_timer.timeout.connect(self._advance_idle_ad)
 
-    def _start_clock(self) -> None:
-        self._clock_timer.timeout.connect(self._update_clock)
-        self._clock_timer.start(1000)
-        self._update_clock()
-
     def _update_clock(self) -> None:
-        now = QDateTime.currentDateTime()
+        now = datetime.now()
         if self._date_label is not None:
-            self._date_label.setText(now.toString(DATE_FMT))
+            self._date_label.setText(format_date(now, CUSTOMER_DISPLAY_DATE_FMT))
         if self._time_label is not None:
-            self._time_label.setText(now.toString(TIME_FMT))
+            self._time_label.setText(format_time(now, CUSTOMER_DISPLAY_TIME_FMT))
 
     def _wire_screen_events(self) -> None:
         app = QApplication.instance()
         if app is None:
             return
-        try:
-            app.screenAdded.connect(self._handle_screen_change)
-            app.screenRemoved.connect(self._handle_screen_change)
-        except Exception:
-            pass
+        app.screenAdded.connect(self._handle_screen_change)
+        app.screenRemoved.connect(self._handle_screen_change)
+
+    def _show_display(self) -> None:
+        if CUSTOMER_DISPLAY_FULLSCREEN:
+            self.showFullScreen()
+        else:
+            self.resize(CUSTOMER_SCREEN_WIDTH, CUSTOMER_SCREEN_HEIGHT)
+            self.show()
 
     def _handle_screen_change(self, *args, **kwargs) -> None:
         self.refresh_display_visibility(initial=False)
@@ -279,11 +264,7 @@ class CustomerDisplayWindow(QDialog):
 
         if CUSTOMER_DISPLAY_TEST_MODE:
             self._connected = True
-            if CUSTOMER_DISPLAY_FULLSCREEN:
-                self.showFullScreen()
-            else:
-                self.resize(CUSTOMER_SCREEN_WIDTH, CUSTOMER_SCREEN_HEIGHT)
-                self.show()
+            self._show_display()
             if not initial:
                 report_to_statusbar(self._host, "Customer display connected", ok=True, duration=1500)
             return
@@ -292,16 +273,9 @@ class CustomerDisplayWindow(QDialog):
         if len(screens) > CUSTOMER_SCREEN_INDEX:
             screen = screens[CUSTOMER_SCREEN_INDEX]
             geometry = screen.geometry()
-            try:
-                self.move(geometry.x(), geometry.y())
-            except Exception:
-                pass
+            self.move(geometry.x(), geometry.y())
             self._connected = True
-            if CUSTOMER_DISPLAY_FULLSCREEN:
-                self.showFullScreen()
-            else:
-                self.resize(CUSTOMER_SCREEN_WIDTH, CUSTOMER_SCREEN_HEIGHT)
-                self.show()
+            self._show_display()
             if not initial:
                 report_to_statusbar(self._host, "Customer display connected", ok=True, duration=1500)
         else:
@@ -316,6 +290,12 @@ class CustomerDisplayWindow(QDialog):
         self.clear_items()
         self.set_total(0.0)
         self.set_item_count(0)
+        overlay = getattr(self, '_completed_overlay', None)
+        if overlay is not None:
+            try:
+                overlay.setVisible(False)
+            except Exception:
+                pass
 
     def set_mode_full_idle(self) -> None:
         if self._mode_stack is None:
@@ -340,25 +320,16 @@ class CustomerDisplayWindow(QDialog):
             return
         # If the ads directory doesn't exist, log an error and show fallback text.
         if not os.path.isdir(ADS_DIR):
-            try:
-                log_error_message(f"CustomerDisplay: ads directory not found: {ADS_DIR}")
-            except Exception:
-                pass
-            try:
-                self._show_image_unavailable()
-            except Exception:
-                pass
+            self._safe_log(f"CustomerDisplay: ads directory not found: {ADS_DIR}")
+            self._show_image_unavailable()
             return
 
         # Directory exists: list ad files. If none, show fallback text (no log).
         self._idle_ads_paths = self._list_idle_ad_files()
         self._idle_ads_index = 0
         if not self._idle_ads_paths:
-            try:
-                # No images present: show unified fallback text without logging.
-                self._show_image_unavailable()
-            except Exception:
-                pass
+            # No images present: show unified fallback text without logging.
+            self._show_image_unavailable()
             return
 
         # Render first ad and start rotation if multiple images are present.
@@ -367,10 +338,7 @@ class CustomerDisplayWindow(QDialog):
             self._idle_ads_timer.start()
 
     def _stop_idle_ads(self) -> None:
-        try:
-            self._idle_ads_timer.stop()
-        except Exception:
-            pass
+        self._idle_ads_timer.stop()
 
     def _advance_idle_ad(self) -> None:
         if not self._idle_ads_paths:
@@ -390,14 +358,8 @@ class CustomerDisplayWindow(QDialog):
         path = self._idle_ads_paths[self._idle_ads_index]
         pix = QPixmap(path)
         if pix.isNull():
-            try:
-                log_error_message(f"CustomerDisplay: failed to load ad image: {path}")
-            except Exception:
-                pass
-            try:
-                self._show_image_unavailable()
-            except Exception:
-                pass
+            self._safe_log(f"CustomerDisplay: failed to load ad image: {path}")
+            self._show_image_unavailable()
             return
 
         size = label.size()
@@ -406,56 +368,45 @@ class CustomerDisplayWindow(QDialog):
         else:
             scaled = pix
         # Clear any fallback styling when an image is rendered so text remains readable
-        try:
-            label.setStyleSheet("")
-        except Exception:
-            pass
+        label.setStyleSheet("")
         label.setPixmap(scaled)
         label.setText("")
 
     def _list_idle_ad_files(self) -> list[str]:
-        files = []
         try:
-            for name in os.listdir(ADS_DIR):
-                _, ext = os.path.splitext(name)
-                if ext.lower() in ALLOWED_EXTS:
-                    files.append(name)
+            names = [
+                name for name in os.listdir(ADS_DIR)
+                if os.path.splitext(name)[1].lower() in ALLOWED_EXTS
+            ]
         except FileNotFoundError:
             return []
         except Exception:
             return []
-        files.sort(key=self._ad_sort_key)
-        return [os.path.join(ADS_DIR, name) for name in files]
+
+        def sort_key(name: str) -> tuple[int, str]:
+            match = re.match(r'^(\d+)_', name)
+            if match:
+                return int(match.group(1)), name.lower()
+            return 9999, name.lower()
+
+        names.sort(key=sort_key)
+        return [os.path.join(ADS_DIR, name) for name in names]
 
     def _show_image_unavailable(self) -> None:
         """Show a unified, high-contrast fallback message on the full-idle label."""
         lbl = self._idle_full_label
         if lbl is None:
             return
-        try:
-            lbl.setPixmap(QPixmap())
-        except Exception:
-            pass
-        try:
-            lbl.setText("Image not available")
-            lbl.setAlignment(Qt.AlignCenter)
-            lbl.setWordWrap(True)
-            # Styling for a/b failure: brown background, sky-blue text, reduced font
-            lbl.setStyleSheet(
-                "color: #FFFFFF; background-color: #6F4E37; font-size: 20px; font-weight: bold; padding: 12px;"
-            )
-            lbl.setVisible(True)
-            lbl.repaint()
-        except Exception:
-            pass
-
-    @staticmethod
-    def _ad_sort_key(filename: str):
-        base = os.path.basename(filename)
-        match = re.match(r'^(\d+)_', base)
-        if match:
-            return int(match.group(1)), base.lower()
-        return 9999, base.lower()
+        lbl.setPixmap(QPixmap())
+        lbl.setText("Screen active. Image not available")
+        lbl.setAlignment(Qt.AlignCenter)
+        lbl.setWordWrap(True)
+        # Styling for a/b failure: brown background, sky-blue text, reduced font
+        lbl.setStyleSheet(
+            "color: #FFFFFF; background-color: #6F4E37; font-size: 20px; font-weight: bold; padding: 12px;"
+        )
+        lbl.setVisible(True)
+        lbl.repaint()
 
     def show_scanning(self) -> None:
         self._set_state(self.STATE_SCANNING)
@@ -469,6 +420,21 @@ class CustomerDisplayWindow(QDialog):
         self._idle_timer.setSingleShot(True)
         self._idle_timer.timeout.connect(self.show_idle)
         self._idle_timer.start(max(1, int(CUSTOMER_DISPLAY_IDLE_TIMEOUT * 1000)))
+        overlay = getattr(self, '_completed_overlay', None)
+        if overlay is not None:
+            title_label = getattr(self, '_completed_title_label', None)
+            greeting_label = getattr(self, '_completed_greeting_label', None)
+            try:
+                if title_label is not None:
+                    title_label.setText('Thank you for payment')
+                if greeting_label is not None:
+                    greeting = getattr(config, 'GREETING_SELECTED', '') or 'Thanks for shopping with us!'
+                    greeting_label.setText(str(greeting))
+                overlay.setGeometry(0, 0, self.width() or 900, self.height() or 700)
+                overlay.setVisible(True)
+                overlay.raise_()
+            except Exception:
+                pass
 
     def _set_state(self, state: str) -> None:
         self._state = state
@@ -564,6 +530,14 @@ class CustomerDisplayWindow(QDialog):
 
     def set_qr_image(self, pixmap: QPixmap | None) -> None:
         if self._qr_label is None:
+            return
+        if getattr(self, '_using_fallback_ui', False):
+            try:
+                self._qr_label.setVisible(False)
+                self._qr_label.setPixmap(QPixmap())
+                self._qr_label.setText("")
+            except Exception:
+                pass
             return
         if pixmap is None or pixmap.isNull():
             self._qr_label.setText("QR CODE")
