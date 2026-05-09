@@ -58,7 +58,6 @@ class CustomerDisplayWindow(QDialog):
     """
 
     STATE_IDLE = "idle"
-    STATE_SCANNING = "scanning"
     STATE_PAYMENT = "payment"
     STATE_COMPLETED = "completed"
 
@@ -437,9 +436,6 @@ class CustomerDisplayWindow(QDialog):
         lbl.setVisible(True)
         lbl.repaint()
 
-    def show_scanning(self) -> None:
-        self._set_state(self.STATE_SCANNING)
-
     def show_payment(self) -> None:
         self._set_state(self.STATE_PAYMENT)
 
@@ -471,9 +467,8 @@ class CustomerDisplayWindow(QDialog):
             return
         index = {
             self.STATE_IDLE: 0,
-            self.STATE_SCANNING: 1,
-            self.STATE_PAYMENT: 2,
-            self.STATE_COMPLETED: 3,
+            self.STATE_PAYMENT: 1,
+            self.STATE_COMPLETED: 2,
         }.get(state, 0)
         self._stack.setCurrentIndex(index)
         self._sync_idle_ads_for_context()
@@ -583,7 +578,7 @@ class CustomerDisplayWindow(QDialog):
             self.show_idle()
             return
 
-        state = payload.get("state", self.STATE_SCANNING)
+        state = payload.get("state", self.STATE_IDLE)
         items = payload.get("items", [])
         total = payload.get("total", 0.0)
 

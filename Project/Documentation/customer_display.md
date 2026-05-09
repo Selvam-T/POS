@@ -45,16 +45,17 @@ Responsibilities:
 
 The screen uses `ui/screen2.ui` with two main regions:
 - Left panel: `screen2PurchaseFrame` and `screen2SalesTable`.
-- Right panel: `screen2AdDisplayStack` with pages:
-  - index 0: `pageIdle`
-  - index 1: `pageScanning`
-  - index 2: `pagePayment`
-  - index 3: `pageCompleted`
+### Right Panel State Pages
 
-Note: the UI `screen2AdDisplayStack` now defaults to index `0` (idle) in
+The right panel `screen2AdDisplayStack` now contains 3 pages (scanning state removed):
+- index 0: `pageIdle` — displays rotating idle ads or promotions
+- index 1: `pagePayment` — displays payment information (PAYNOW method only)
+- index 2: `pageCompleted` — displays completion message and greeting
+
+Note: the UI `screen2AdDisplayStack` defaults to index `0` (idle) in
 `ui/screen2.ui`. `CustomerDisplayWindow` also defensively initializes both
 `screen2AdDisplayStack` and `screen2ModeStack` to their idle/full-idle
-positions on load to avoid showing the completed page at startup.
+positions on load to avoid showing an unintended page at startup.
 
 ### New Top-Level Mode Stack (Recent updates)
 
@@ -102,12 +103,11 @@ Payload shape:
 
 ## Behavior
 
-- App starts: Idle page.
-- First item added: Scanning page.
-- Items updated: remain on Scanning page.
-- Payment started: Payment page.
-- Payment completed: Completed page, then return to Idle after timeout.
-- Sale cleared: Idle page.
+- App starts: Idle page (full screen if no rows, split if rows exist).
+- Items added: Split mode with idle ads on right panel.
+- PAYNOW payment initiated: Payment page with payment info and QR code.
+- Payment completed: Completed page with greeting, then return to Idle after timeout.
+- Sale cleared: Idle page (full screen or split, depending on context).
 
 ## Item Count Rule
 

@@ -610,6 +610,7 @@ class MainLoader(QMainWindow):
                 'unit': row.get('unit') if isinstance(row, dict) else None,
             })
 
+        # Display returns to idle if no rows and state is neither payment nor completed
         if not rows and state not in (display.STATE_PAYMENT, display.STATE_COMPLETED):
             display.show_idle()
             return

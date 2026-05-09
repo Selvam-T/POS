@@ -299,20 +299,6 @@
            </item>
           </layout>
          </widget>
-         <widget class="QWidget" name="pageScanning">
-          <layout class="QVBoxLayout" name="scanningLayout">
-           <item>
-            <widget class="QLabel" name="scanningAdsLabel">
-             <property name="text">
-              <string>Ads/Promotions</string>
-             </property>
-             <property name="scaledContents">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
          <widget class="QWidget" name="pagePayment">
           <layout class="QVBoxLayout" name="paymentVLayout">
            <property name="spacing">
