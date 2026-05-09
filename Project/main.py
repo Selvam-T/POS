@@ -615,7 +615,9 @@ class MainLoader(QMainWindow):
             return
 
         payload = {
-            'state': state or display.STATE_SCANNING,
+            # Default to idle so split-mode right panel can show rotating ads
+            # until explicit scanning/payment/completed states are triggered.
+            'state': state or display.STATE_IDLE,
             'items': items,
             'total': total,
         }

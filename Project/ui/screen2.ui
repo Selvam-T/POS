@@ -254,9 +254,33 @@
         </widget>
        </item>
        <item>
-        <widget class="QStackedWidget" name="screen2AdDisplayStack">
+        <widget class="QFrame" name="screen2AdDisplayFrame">
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <layout class="QVBoxLayout" name="adDisplayFrameLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QStackedWidget" name="screen2AdDisplayStack">
          <property name="currentIndex">
-          <number>3</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="pageIdle">
           <layout class="QVBoxLayout" name="idleLayout">
@@ -438,6 +462,9 @@
            </item>
           </layout>
          </widget>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>

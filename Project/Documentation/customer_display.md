@@ -51,6 +51,11 @@ The screen uses `ui/screen2.ui` with two main regions:
   - index 2: `pagePayment`
   - index 3: `pageCompleted`
 
+Note: the UI `screen2AdDisplayStack` now defaults to index `0` (idle) in
+`ui/screen2.ui`. `CustomerDisplayWindow` also defensively initializes both
+`screen2AdDisplayStack` and `screen2ModeStack` to their idle/full-idle
+positions on load to avoid showing the completed page at startup.
+
 ### New Top-Level Mode Stack (Recent updates)
 
 - The UI now contains a top-level `QStackedWidget` named `screen2ModeStack`.

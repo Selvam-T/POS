@@ -80,6 +80,7 @@ class CustomerDisplayWindow(QDialog):
         self._company_label = None
         self._qr_label = None
         self._idle_full_label = None
+        self._idle_split_label = None
         self._idle_ads_paths = []
         self._idle_ads_index = 0
         self._state = self.STATE_IDLE
@@ -87,6 +88,18 @@ class CustomerDisplayWindow(QDialog):
         self._load_ui()
         self._apply_window_flags()
         self._cache_widgets()
+        # Defensive initialization: ensure right-panel starts on idle page (index 0)
+        try:
+            if self._stack is not None:
+                self._stack.setCurrentIndex(0)
+        except Exception:
+            pass
+        # Ensure mode stack defaults to full idle
+        try:
+            if self._mode_stack is not None:
+                self._mode_stack.setCurrentIndex(0)
+        except Exception:
+            pass
         self._configure_table()
         self._configure_qr_label()
         self._configure_idle_ads()
@@ -157,12 +170,16 @@ class CustomerDisplayWindow(QDialog):
         self._company_label = self.findChild(QLabel, "screen2CompanyLabel")
         self._qr_label = self.findChild(QLabel, "screen2QrLabel")
         self._idle_full_label = self.findChild(QLabel, "screen2IdleFullLabel")
+        self._idle_split_label = self.findChild(QLabel, "idleAdsLabel")
 
         if self._company_label is not None:
             self._company_label.setText(COMPANY_NAME)
 
         if self._idle_full_label is not None:
             self._idle_full_label.setAlignment(Qt.AlignCenter)
+        if self._idle_split_label is not None:
+            self._idle_split_label.setAlignment(Qt.AlignCenter)
+            self._idle_split_label.setWordWrap(True)
 
     def _configure_table(self) -> None:
         table = self._table
@@ -201,24 +218,6 @@ class CustomerDisplayWindow(QDialog):
             # Desired fixed widths (px)
             col0_w = 160
             col2_w = 180
-            # If the programmatic fallback UI is active, prefer larger fixed
-            # widths and enforce them so global QSS/layout doesn't squeeze them.
-            if getattr(self, '_using_fallback_ui', False):
-                col0_w = 420
-                col2_w = 260
-                try:
-                    header.setSectionResizeMode(0, QHeaderView.Fixed)
-                    header.setSectionResizeMode(1, QHeaderView.Stretch)
-                    header.setSectionResizeMode(2, QHeaderView.Fixed)
-                    header.setStretchLastSection(False)
-                    header.setSectionsMovable(False)
-                    header.resizeSection(0, col0_w)
-                    header.resizeSection(2, col2_w)
-                except Exception:
-                    pass
-                table.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-                table.setMinimumWidth(col0_w + col2_w + 320)
-
             table.setColumnWidth(0, col0_w)
             table.setColumnWidth(2, col2_w)
 
@@ -304,7 +303,7 @@ class CustomerDisplayWindow(QDialog):
             self._mode_stack.setCurrentIndex(0)
         except Exception:
             pass
-        self._start_idle_ads()
+        self._sync_idle_ads_for_context()
 
     def set_mode_split(self) -> None:
         if self._mode_stack is None:
@@ -313,10 +312,40 @@ class CustomerDisplayWindow(QDialog):
             self._mode_stack.setCurrentIndex(1)
         except Exception:
             pass
+        self._sync_idle_ads_for_context()
+
+    def _active_idle_label(self) -> QLabel | None:
+        if self._mode_stack is not None:
+            try:
+                if self._mode_stack.currentIndex() == 0:
+                    return self._idle_full_label
+            except Exception:
+                pass
+        return self._idle_split_label
+
+    def _sync_idle_ads_for_context(self) -> None:
+        """Run ad rotation only for full-idle mode or right-panel idle state."""
+        if self._mode_stack is None:
+            self._stop_idle_ads()
+            return
+        try:
+            mode_idx = self._mode_stack.currentIndex()
+        except Exception:
+            mode_idx = 0
+
+        if mode_idx == 0:
+            self._start_idle_ads()
+            return
+
+        if mode_idx == 1 and self._state == self.STATE_IDLE:
+            self._start_idle_ads()
+            return
+
         self._stop_idle_ads()
 
     def _start_idle_ads(self) -> None:
-        if self._idle_full_label is None:
+        target = self._active_idle_label()
+        if target is None:
             return
         # If the ads directory doesn't exist, log an error and show fallback text.
         if not os.path.isdir(ADS_DIR):
@@ -347,7 +376,7 @@ class CustomerDisplayWindow(QDialog):
         self._render_idle_ad()
 
     def _render_idle_ad(self) -> None:
-        label = self._idle_full_label
+        label = self._active_idle_label()
         if label is None:
             return
         if not self._idle_ads_paths:
@@ -394,7 +423,7 @@ class CustomerDisplayWindow(QDialog):
 
     def _show_image_unavailable(self) -> None:
         """Show a unified, high-contrast fallback message on the full-idle label."""
-        lbl = self._idle_full_label
+        lbl = self._active_idle_label()
         if lbl is None:
             return
         lbl.setPixmap(QPixmap())
@@ -447,6 +476,7 @@ class CustomerDisplayWindow(QDialog):
             self.STATE_COMPLETED: 3,
         }.get(state, 0)
         self._stack.setCurrentIndex(index)
+        self._sync_idle_ads_for_context()
 
     def clear_items(self) -> None:
         if self._table is None:
@@ -558,9 +588,10 @@ class CustomerDisplayWindow(QDialog):
         total = payload.get("total", 0.0)
 
         if state == self.STATE_IDLE:
-            self.show_idle()
-            return
-        if state == self.STATE_PAYMENT:
+            # Keep the current mode decision (full-idle vs split) from caller;
+            # only set right-panel stack to idle so split mode remains visible.
+            self._set_state(self.STATE_IDLE)
+        elif state == self.STATE_PAYMENT:
             self.show_payment()
         elif state == self.STATE_COMPLETED:
             self.show_completed()

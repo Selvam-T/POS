@@ -530,7 +530,7 @@ QTextEdit#manualText { font-size: 18px; font-weight: bold; }
    Customer Facing Screen
    ============================================================= */
 QWidget#pageSplit {
-    background-color: white;
+    background-color: red;
 }
 
 /* Base container style */
