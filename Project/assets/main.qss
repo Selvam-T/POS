@@ -533,6 +533,69 @@ QWidget#pageSplit {
     background-color: red;
 }
 
+/* Payment result lightbox overlay */
+QFrame#paymentResultOverlay {
+  background-color: rgba(0, 0, 0, 180);
+}
+
+QFrame#paymentResultCard {
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 12px;
+  padding: 5px;
+  border: 18px solid transparent;
+  min-width: 460px;
+  min-height: 360px;
+  max-width: 560px;
+  max-height: 460px;
+}
+
+QFrame#paymentResultCard[status="success"] {
+  border: 18px solid #4CAF50;
+}
+
+QFrame#paymentResultCard[status="error"] {
+  border: 18px solid #F44336;
+}
+
+QFrame#paymentResultCard QLabel {
+  background: transparent;
+  border: none;
+}
+
+QFrame#paymentResultCard[status="success"] QLabel#paymentResultTitle,
+QFrame#paymentResultCard[status="success"] QLabel#paymentResultSubtitle,
+QFrame#paymentResultCard[status="success"] QLabel#paymentResultTotal,
+QFrame#paymentResultCard[status="success"] QLabel#paymentResultGreeting {
+  color: #4CAF50;
+}
+
+QFrame#paymentResultCard[status="error"] QLabel#paymentResultTitle,
+QFrame#paymentResultCard[status="error"] QLabel#paymentResultSubtitle,
+QFrame#paymentResultCard[status="error"] QLabel#paymentResultTotal,
+QFrame#paymentResultCard[status="error"] QLabel#paymentResultGreeting {
+  color: #F44336;
+}
+
+QLabel#paymentResultTitle {
+  font-size: 40px;
+  font-weight: bold;
+}
+
+QLabel#paymentResultSubtitle {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+QLabel#paymentResultTotal {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+QLabel#paymentResultGreeting {
+  font-size: 25px;
+  font-weight: bold;
+}
+
 /* Base container style */
 QFrame#screen2PurchaseFrame {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #96d8a7, stop:1 #8abdf0);

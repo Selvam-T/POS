@@ -394,3 +394,59 @@ When both layers are implemented correctly, the QR:
 - scans reliably
 - works across Singapore banking apps
 - looks professional on POS displays.
+
+---
+
+# 19. Current QR Generator Location
+
+The existing QR generator implementation is currently in:
+
+- `modules/payment/test_qr.py`
+
+Key existing functions in that file:
+
+- `build_paynow_payload(amount_value, ref_value)`
+- `generate_qr_image(payload, expiry_text)`
+- `overlay_logo(qr_img)`
+- `add_qr_card(qr_img)`
+
+Note:
+- Keep these existing functions for now.
+- Future work should add new reduced-scope functions instead of replacing the current ones.
+
+---
+
+# 20. Scope Reduction Note for Future QR Work
+
+The current implementation guidance is to reduce the QR scope to a generic PayNow merchant QR.
+
+Rationale:
+
+- The QR should be reusable and not tied to a specific amount.
+- The QR can be shown earlier in the transaction, before payment input is complete.
+- This improves queue speed because the customer can scan early and wait only for the final total.
+
+Expected behavior for the reduced scope:
+
+- Use a generic PayNow QR.
+- Do not include amount in the QR payload.
+- Show the QR during active sale, either by default on the right panel or alongside rotating ads.
+- During payment mode, show the PayNow QR clearly with instruction text.
+- Payment success/failure overlays should be independent from whether the QR is visible.
+
+Suggested display text:
+
+- Above QR: PayNow QR
+- Below QR: Scan first. Enter final amount when cashier confirms total.
+
+Operational notes:
+
+- Customer may scan early.
+- Cashier verifies the final amount before pressing PAY.
+- Mixed payments should only show the QR when PayNow is relevant.
+- Overlay success/failure behavior should not depend on the QR being visible.
+
+Implementation note:
+
+- Preserve the existing QR generator functions.
+- Add new functions for the reduced-scope QR flow when implementation work begins.

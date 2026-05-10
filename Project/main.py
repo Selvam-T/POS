@@ -786,6 +786,12 @@ class MainLoader(QMainWindow):
         if display is not None:
             display.hide_payment_result_overlay()
         
+        # Store current payment total for use in success handler
+        try:
+            self._current_payment_total = float(payment_split.get('total', 0.0) or 0.0)
+        except Exception:
+            self._current_payment_total = 0.0
+        
         self._update_customer_display_from_sales(state=CustomerDisplayWindow.STATE_PAYMENT)
         if self.pay_current_receipt(payment_split):
             panel = getattr(self, 'payment_panel_controller', None)
@@ -796,7 +802,8 @@ class MainLoader(QMainWindow):
     def _on_payment_success(self) -> None:
         display = getattr(self, 'customer_display', None)
         if display is not None:
-            display.show_payment_result(is_success=True)
+            total = getattr(self, '_current_payment_total', 0.0)
+            display.show_payment_result(is_success=True, total=total)
         self._clear_sales_table_core()
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:

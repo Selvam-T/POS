@@ -1,0 +1,9 @@
+2026-05-10T18:58:04.000826 - Payment processing: RuntimeError('TEST PAYMENT FAILURE')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 972, in pay_current_receipt
+    receipt_no = committer.commit_paid_sale(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\db_operation\paid_sale_committer.py", line 105, in commit_paid_sale
+    raise RuntimeError("TEST PAYMENT FAILURE")
+RuntimeError: TEST PAYMENT FAILURE
+

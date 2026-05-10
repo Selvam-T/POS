@@ -39,6 +39,8 @@ from config import (
     CUSTOMER_SCREEN_INDEX,
     CUSTOMER_SCREEN_WIDTH,
     ALLOWED_EXTS,
+    GREETING_STRINGS,
+    GREETING_SELECTED,
 )
 
 # Resolve project paths and assets (used to apply main QSS to this dialog)
@@ -82,6 +84,11 @@ class CustomerDisplayWindow(QDialog):
         self._idle_split_label = None
         self._payment_result_overlay = None
         self._result_overlay_label = None
+        self._payment_result_card = None
+        self._payment_result_title = None
+        self._payment_result_subtitle = None
+        self._payment_result_total = None
+        self._payment_result_greeting = None
         self._idle_ads_paths = []
         self._idle_ads_index = 0
         self._state = self.STATE_IDLE
@@ -174,6 +181,12 @@ class CustomerDisplayWindow(QDialog):
         self._idle_split_label = self.findChild(QLabel, "idleAdsLabel")
         self._payment_result_overlay = self.findChild(QFrame, "paymentResultOverlay")
         self._result_overlay_label = self.findChild(QLabel, "paymentResultLabel")
+        # New card-based overlay widgets (Lightbox)
+        self._payment_result_card = self.findChild(QFrame, "paymentResultCard")
+        self._payment_result_title = self.findChild(QLabel, "paymentResultTitle")
+        self._payment_result_subtitle = self.findChild(QLabel, "paymentResultSubtitle")
+        self._payment_result_total = self.findChild(QLabel, "paymentResultTotal")
+        self._payment_result_greeting = self.findChild(QLabel, "paymentResultGreeting")
 
         if self._company_label is not None:
             self._company_label.setText(COMPANY_NAME)
@@ -578,14 +591,19 @@ class CustomerDisplayWindow(QDialog):
         self.set_items(items)
         self.set_total(total)
 
-    def show_payment_result(self, is_success: bool) -> None:
-        """Display payment result overlay (success or failure message).
+    def show_payment_result(self, is_success: bool, total: float | None = None, greeting: str | None = None) -> None:
+        """Display payment result overlay (success or failure message with optional total and greeting).
+        
+        Args:
+            is_success: True for success (green), False for failure (red).
+            total: Optional transaction total to display on success.
+            greeting: Optional greeting text; defaults to GREETING_SELECTED from config.
         
         Starts a single-shot timer to auto-hide the overlay.
         Stops any previous timer to avoid signal conflicts.
         Ensures overlay covers entire dialog and is brought to front.
         """
-        if self._payment_result_overlay is None or self._result_overlay_label is None:
+        if self._payment_result_overlay is None:
             return
         
         # Stop previous timer and disconnect all its signals
@@ -595,19 +613,98 @@ class CustomerDisplayWindow(QDialog):
         except Exception:
             pass
         
-        # Set message based on result
-        message = "Payment Completed.\nThank You!" if is_success else "Payment Failed.\nPlease Retry."
-        self._result_overlay_label.setText(message)
-        
-        # Apply styling (different colors for success vs failure)
+        # Determine state based on success/failure
         if is_success:
-            color = "#4CAF50"  # Green for success
+            result_status = "success"
+            title_text = "Payment is successful."
+            subtitle_text = "Thank you for your purchase."
+            footer_text = "Have a nice day."
         else:
-            color = "#F44336"  # Red for failure
-        self._result_overlay_label.setStyleSheet(
-            f"color: white; font-size: 36px; font-weight: bold; "
-            f"background-color: {color}; padding: 30px; border-radius: 10px;"
-        )
+            result_status = "error"
+            title_text = "We are sorry !"
+            subtitle_text = "An error occurred when processing your payment."
+            footer_text = "Please try again !"
+        
+        if self._payment_result_card is not None:
+            # Set card status then repolish the card first so QSS selectors
+            # that depend on [status="..."] apply before we refresh child widgets.
+            self._payment_result_card.setProperty("status", result_status)
+            self._refresh_widget_style(self._payment_result_card)
+
+        # Populate title
+        if self._payment_result_title is not None:
+            self._payment_result_title.setText(title_text)
+
+        if self._payment_result_subtitle is not None:
+            self._payment_result_subtitle.setText(subtitle_text)
+            self._payment_result_subtitle.setVisible(True)
+        
+        # Populate total (show only on success, or hide if no total provided)
+        if self._payment_result_total is not None:
+            if is_success and total is not None:
+                try:
+                    total_val = float(total)
+                    self._payment_result_total.setText(f"Total : $ {total_val:.2f}")
+                    self._payment_result_total.setVisible(True)
+                except Exception:
+                    self._payment_result_total.setVisible(False)
+            else:
+                self._payment_result_total.setVisible(False)
+        
+        # Populate greeting
+        if self._payment_result_greeting is not None:
+            greeting_text = footer_text if greeting is None else greeting
+            self._payment_result_greeting.setText(greeting_text)
+
+        # Now that all child text values are set, repolish children so their
+        # colors/styles resolve against the updated card status.
+        self._refresh_widget_style(self._payment_result_title)
+        self._refresh_widget_style(self._payment_result_subtitle)
+        self._refresh_widget_style(self._payment_result_total)
+        self._refresh_widget_style(self._payment_result_greeting)
+        # Finally repolish the card again to ensure border/style applied.
+        self._refresh_widget_style(self._payment_result_card)
+        # As a fallback, ensure the card paints an opaque white background
+        # at runtime in case stylesheet ordering prevents QSS from taking effect.
+        try:
+            if self._payment_result_card is not None:
+                from PyQt5.QtGui import QPalette, QColor
+                # Ensure widget paints its own background (not transparent)
+                self._payment_result_card.setAttribute(Qt.WA_StyledBackground, True)
+                self._payment_result_card.setAutoFillBackground(True)
+                pal = self._payment_result_card.palette()
+                pal.setColor(QPalette.Window, QColor(255, 255, 255))
+                self._payment_result_card.setPalette(pal)
+                # Ensure child labels are transparent so they render over the
+                # card rather than painting their own backgrounds.
+                for lbl in (
+                    self._payment_result_title,
+                    self._payment_result_subtitle,
+                    self._payment_result_total,
+                    self._payment_result_greeting,
+                ):
+                    try:
+                        if lbl is not None:
+                            lbl.setStyleSheet("background: transparent;")
+                            try:
+                                lbl.setAutoFillBackground(False)
+                            except Exception:
+                                pass
+                    except Exception:
+                        pass
+                # Force an explicit inline white background style on the card
+                # to override any transparency/parent background issues.
+                # Do NOT set border inline so QSS status selectors can control border color.
+                self._payment_result_card.setStyleSheet(
+                    "QFrame#paymentResultCard { "
+                    "background-color: white; "
+                    "border-radius: 12px; "
+                    "padding: 12px; "
+                    "}"
+                )
+                self._payment_result_card.update()
+        except Exception:
+            pass
         
         # Ensure overlay fills entire parent dialog
         try:
@@ -626,6 +723,17 @@ class CustomerDisplayWindow(QDialog):
         self._result_overlay_timer.setSingleShot(True)
         self._result_overlay_timer.timeout.connect(self.hide_payment_result_overlay)
         self._result_overlay_timer.start(timeout_ms)
+
+    def _refresh_widget_style(self, widget) -> None:
+        if widget is None:
+            return
+        try:
+            style = widget.style()
+            style.unpolish(widget)
+            style.polish(widget)
+            widget.update()
+        except Exception:
+            pass
 
     def hide_payment_result_overlay(self) -> None:
         """Hide payment result overlay and stop/disconnect timer."""

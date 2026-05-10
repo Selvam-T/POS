@@ -427,17 +427,126 @@
      </spacer>
     </item>
     <item>
-     <widget class="QLabel" name="paymentResultLabel">
-      <property name="text">
-       <string>Payment Completed</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-      <property name="styleSheet">
-       <string>color: white; font-size: 36px; font-weight: bold;</string>
-      </property>
-     </widget>
+     <layout class="QHBoxLayout" name="cardHLayout">
+      <item>
+       <spacer name="cardLeftSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QFrame" name="paymentResultCard">
+        <property name="minimumSize">
+         <size>
+          <width>400</width>
+          <height>300</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>500</width>
+          <height>400</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string></string>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <layout class="QVBoxLayout" name="cardVLayout">
+         <property name="spacing">
+          <number>15</number>
+         </property>
+         <property name="leftMargin">
+          <number>25</number>
+         </property>
+         <property name="topMargin">
+          <number>25</number>
+         </property>
+         <property name="rightMargin">
+          <number>25</number>
+         </property>
+         <property name="bottomMargin">
+          <number>25</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="paymentResultTitle">
+           <property name="text">
+          <string>Your payment is successful.</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="styleSheet">
+          <string></string>
+           </property>
+          </widget>
+         </item>
+         <item>
+         <widget class="QLabel" name="paymentResultSubtitle">
+          <property name="text">
+          <string>Thank you for your purchase.</string>
+          </property>
+          <property name="alignment">
+          <set>Qt::AlignCenter</set>
+          </property>
+          <property name="styleSheet">
+          <string></string>
+          </property>
+          <property name="wordWrap">
+          <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+          <widget class="QLabel" name="paymentResultTotal">
+           <property name="text">
+          <string>Total : $ 0.00</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="styleSheet">
+          <string></string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="paymentResultGreeting">
+           <property name="text">
+          <string>Have a nice day.</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+           <property name="styleSheet">
+          <string></string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="cardBottomSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <spacer name="cardRightSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </spacer>
+      </item>
+     </layout>
     </item>
     <item>
      <spacer name="bottomSpacer">

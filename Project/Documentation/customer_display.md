@@ -76,28 +76,24 @@ Mode selection is driven solely by whether the main `sales_table` has rows
 If the sales table is empty the display switches to `pageIdleFull`; otherwise
 it shows `pageSplit`.
 
-### Payment Result Overlay (New)
+### Payment Result Overlay (Lightbox)
 
-- `paymentResultOverlay` is a full-screen `QFrame` widget that sits above all content
-  with semi-transparent background (`rgba(0, 0, 0, 180)`).
-- Initially hidden; displayed only during payment result display.
-- Positioned absolutely outside the layout to ensure Z-order priority.
-- Contains `paymentResultLabel` which shows success/failure messages with color coding:
-  - **Success**: Green background (#4CAF50) + "Payment Completed. Thank You!"
-  - **Failure**: Red background (#F44336) + "Payment Failed. Please Retry."
-- Auto-hides after `CUSTOMER_DISPLAY_IDLE_TIMEOUT` seconds via single-shot timer.
-- Can be immediately hidden if new items are scanned/entered or user retries payment.
-- Uses `raise_()` and geometry management to ensure it stays on top.
-- `resizeEvent()` handler keeps overlay synchronized with dialog resize.
+Displays payment success/failure with auto-hide timer.
 
-### Controller Methods
+**Structure:**
+- `paymentResultOverlay`: full-screen semi-transparent dark overlay
+- `paymentResultCard`: white background with colored border and centered labels
 
-- `set_mode_full_idle()` and `set_mode_split()`: change top-level mode.
-- `show_payment_result(is_success: bool)`: display payment overlay with appropriate message and auto-hide.
-- `hide_payment_result_overlay()`: immediately hide overlay and disconnect timer.
-- When entering full-idle mode the window loads images from `assets/ads`
-  and runs a timed rotation (slideshow) of available images.
-- If an ad image fails at runtime the controller logs via `modules.ui_utils.error_logger.log_error_message`.
+**Card Styling:**
+- Success: green border (#4CAF50)
+- Failure: red border (#F44336)
+- Auto-hides after `CUSTOMER_DISPLAY_IDLE_TIMEOUT` seconds
+
+**Method:**
+- `show_payment_result(is_success: bool, total: float | None = None, greeting: str | None = None)`
+  - `is_success`: True for success (green), False for failure (red)
+  - `total`: optional transaction total (success only)
+  - `greeting`: optional custom greeting text
 
 ### Configuration
 
