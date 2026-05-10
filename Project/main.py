@@ -424,6 +424,10 @@ class MainLoader(QMainWindow):
     # Request the vegetable entry dialog and merge its results.
     def launch_vegetable_entry_dialog(self):
         """Open Add Vegetable panel."""
+        display = getattr(self, 'customer_display', None)
+        if display is not None:
+            display.hide_payment_result_overlay()
+        
         if self._is_hold_loaded_in_cart():
             from modules.ui_utils.ui_feedback import show_temp_status
             sb = getattr(self, 'statusbar', None)
@@ -440,6 +444,10 @@ class MainLoader(QMainWindow):
     # Present manual entry dialog unless sale is held.
     def launch_manual_entry_dialog(self):
         """Open Manual Product Entry panel."""
+        display = getattr(self, 'customer_display', None)
+        if display is not None:
+            display.hide_payment_result_overlay()
+        
         if self._is_hold_loaded_in_cart():
             from modules.ui_utils.ui_feedback import show_temp_status
             sb = getattr(self, 'statusbar', None)
@@ -610,8 +618,8 @@ class MainLoader(QMainWindow):
                 'unit': row.get('unit') if isinstance(row, dict) else None,
             })
 
-        # Display returns to idle if no rows and state is neither payment nor completed
-        if not rows and state not in (display.STATE_PAYMENT, display.STATE_COMPLETED):
+        # Display returns to idle if no rows and state is not payment
+        if not rows and state not in (display.STATE_PAYMENT,):
             display.show_idle()
             return
 
@@ -774,6 +782,10 @@ class MainLoader(QMainWindow):
 
     # Process payment requests from the payment panel.
     def _on_payment_requested(self, payment_split: dict) -> None:
+        display = getattr(self, 'customer_display', None)
+        if display is not None:
+            display.hide_payment_result_overlay()
+        
         self._update_customer_display_from_sales(state=CustomerDisplayWindow.STATE_PAYMENT)
         if self.pay_current_receipt(payment_split):
             panel = getattr(self, 'payment_panel_controller', None)
@@ -784,7 +796,7 @@ class MainLoader(QMainWindow):
     def _on_payment_success(self) -> None:
         display = getattr(self, 'customer_display', None)
         if display is not None:
-            display.show_completed()
+            display.show_payment_result(is_success=True)
         self._clear_sales_table_core()
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:
@@ -971,6 +983,10 @@ class MainLoader(QMainWindow):
             return True
 
         except Exception as e:
+            display = getattr(self, 'customer_display', None)
+            if display is not None:
+                display.show_payment_result(is_success=False)
+            
             report_exception(
                 self,
                 "Payment processing",
@@ -995,6 +1011,11 @@ class MainLoader(QMainWindow):
         Reads dialog results (vegetable_rows or manual_entry_result), normalizes to row format,
         merges with existing sales table rows (handles duplicates), and rebuilds the table.
         """
+        # Hide payment result overlay when items are being added
+        display = getattr(self, 'customer_display', None)
+        if display is not None:
+            display.hide_payment_result_overlay()
+        
         if not hasattr(self, 'sales_table'):
             return
 

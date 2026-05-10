@@ -59,7 +59,6 @@ class CustomerDisplayWindow(QDialog):
 
     STATE_IDLE = "idle"
     STATE_PAYMENT = "payment"
-    STATE_COMPLETED = "completed"
 
     def __init__(self, host=None):
         super().__init__(host)
@@ -68,6 +67,7 @@ class CustomerDisplayWindow(QDialog):
         self._idle_timer = QTimer(self)
         self._clock_timer = QTimer(self)
         self._idle_ads_timer = QTimer(self)
+        self._result_overlay_timer = QTimer(self)
         self._ui_loaded = False
         self._stack = None
         self._mode_stack = None
@@ -80,6 +80,8 @@ class CustomerDisplayWindow(QDialog):
         self._qr_label = None
         self._idle_full_label = None
         self._idle_split_label = None
+        self._payment_result_overlay = None
+        self._result_overlay_label = None
         self._idle_ads_paths = []
         self._idle_ads_index = 0
         self._state = self.STATE_IDLE
@@ -170,6 +172,8 @@ class CustomerDisplayWindow(QDialog):
         self._qr_label = self.findChild(QLabel, "screen2QrLabel")
         self._idle_full_label = self.findChild(QLabel, "screen2IdleFullLabel")
         self._idle_split_label = self.findChild(QLabel, "idleAdsLabel")
+        self._payment_result_overlay = self.findChild(QFrame, "paymentResultOverlay")
+        self._result_overlay_label = self.findChild(QLabel, "paymentResultLabel")
 
         if self._company_label is not None:
             self._company_label.setText(COMPANY_NAME)
@@ -237,6 +241,15 @@ class CustomerDisplayWindow(QDialog):
         if self._time_label is not None:
             self._time_label.setText(format_time(now, CUSTOMER_DISPLAY_TIME_FMT))
 
+    def resizeEvent(self, event) -> None:
+        """Keep payment result overlay synchronized with dialog resize."""
+        super().resizeEvent(event)
+        try:
+            if self._payment_result_overlay is not None and self._payment_result_overlay.isVisible():
+                self._payment_result_overlay.setGeometry(self.rect())
+        except Exception:
+            pass
+
     def _wire_screen_events(self) -> None:
         app = QApplication.instance()
         if app is None:
@@ -288,12 +301,6 @@ class CustomerDisplayWindow(QDialog):
         self.clear_items()
         self.set_total(0.0)
         self.set_item_count(0)
-        overlay = getattr(self, '_completed_overlay', None)
-        if overlay is not None:
-            try:
-                overlay.setVisible(False)
-            except Exception:
-                pass
 
     def set_mode_full_idle(self) -> None:
         if self._mode_stack is None:
@@ -439,28 +446,6 @@ class CustomerDisplayWindow(QDialog):
     def show_payment(self) -> None:
         self._set_state(self.STATE_PAYMENT)
 
-    def show_completed(self) -> None:
-        self._set_state(self.STATE_COMPLETED)
-        self._idle_timer.stop()
-        self._idle_timer.setSingleShot(True)
-        self._idle_timer.timeout.connect(self.show_idle)
-        self._idle_timer.start(max(1, int(CUSTOMER_DISPLAY_IDLE_TIMEOUT * 1000)))
-        overlay = getattr(self, '_completed_overlay', None)
-        if overlay is not None:
-            title_label = getattr(self, '_completed_title_label', None)
-            greeting_label = getattr(self, '_completed_greeting_label', None)
-            try:
-                if title_label is not None:
-                    title_label.setText('Thank you for payment')
-                if greeting_label is not None:
-                    greeting = getattr(config, 'GREETING_SELECTED', '') or 'Thanks for shopping with us!'
-                    greeting_label.setText(str(greeting))
-                overlay.setGeometry(0, 0, self.width() or 900, self.height() or 700)
-                overlay.setVisible(True)
-                overlay.raise_()
-            except Exception:
-                pass
-
     def _set_state(self, state: str) -> None:
         self._state = state
         if self._stack is None:
@@ -468,7 +453,6 @@ class CustomerDisplayWindow(QDialog):
         index = {
             self.STATE_IDLE: 0,
             self.STATE_PAYMENT: 1,
-            self.STATE_COMPLETED: 2,
         }.get(state, 0)
         self._stack.setCurrentIndex(index)
         self._sync_idle_ads_for_context()
@@ -588,13 +572,74 @@ class CustomerDisplayWindow(QDialog):
             self._set_state(self.STATE_IDLE)
         elif state == self.STATE_PAYMENT:
             self.show_payment()
-        elif state == self.STATE_COMPLETED:
-            self.show_completed()
         else:
-            self.show_scanning()
+            self._set_state(self.STATE_IDLE)
 
         self.set_items(items)
         self.set_total(total)
+
+    def show_payment_result(self, is_success: bool) -> None:
+        """Display payment result overlay (success or failure message).
+        
+        Starts a single-shot timer to auto-hide the overlay.
+        Stops any previous timer to avoid signal conflicts.
+        Ensures overlay covers entire dialog and is brought to front.
+        """
+        if self._payment_result_overlay is None or self._result_overlay_label is None:
+            return
+        
+        # Stop previous timer and disconnect all its signals
+        try:
+            self._result_overlay_timer.stop()
+            self._result_overlay_timer.timeout.disconnect()
+        except Exception:
+            pass
+        
+        # Set message based on result
+        message = "Payment Completed.\nThank You!" if is_success else "Payment Failed.\nPlease Retry."
+        self._result_overlay_label.setText(message)
+        
+        # Apply styling (different colors for success vs failure)
+        if is_success:
+            color = "#4CAF50"  # Green for success
+        else:
+            color = "#F44336"  # Red for failure
+        self._result_overlay_label.setStyleSheet(
+            f"color: white; font-size: 36px; font-weight: bold; "
+            f"background-color: {color}; padding: 30px; border-radius: 10px;"
+        )
+        
+        # Ensure overlay fills entire parent dialog
+        try:
+            parent_rect = self.rect()
+            self._payment_result_overlay.setGeometry(parent_rect)
+        except Exception:
+            pass
+        
+        # Show overlay and bring to front
+        self._payment_result_overlay.setVisible(True)
+        self._payment_result_overlay.raise_()
+        self._payment_result_overlay.setFocus()
+        
+        # Start single-shot timer to auto-hide
+        timeout_ms = max(1, int(CUSTOMER_DISPLAY_IDLE_TIMEOUT * 1000))
+        self._result_overlay_timer.setSingleShot(True)
+        self._result_overlay_timer.timeout.connect(self.hide_payment_result_overlay)
+        self._result_overlay_timer.start(timeout_ms)
+
+    def hide_payment_result_overlay(self) -> None:
+        """Hide payment result overlay and stop/disconnect timer."""
+        if self._payment_result_overlay is None:
+            return
+        
+        self._payment_result_overlay.setVisible(False)
+        
+        # Stop and disconnect timer
+        try:
+            self._result_overlay_timer.stop()
+            self._result_overlay_timer.timeout.disconnect()
+        except Exception:
+            pass
 
     @staticmethod
     def _format_money(amount) -> str:
