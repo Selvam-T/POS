@@ -25,6 +25,7 @@ from PyQt5.QtWidgets import (
 from modules.ui_utils.dialog_utils import report_to_statusbar
 from modules.ui_utils.error_logger import log_error_message
 from modules.date_time.formatters import format_date, format_time
+from modules.menu.greeting_menu import _load_greeting
 from config import (
     COMPANY_NAME,
     CUSTOMER_DISPLAY_AUTO_DETECT,
@@ -591,11 +592,10 @@ class CustomerDisplayWindow(QDialog):
         self.set_items(items)
         self.set_total(total)
 
-    def show_payment_result(self, is_success: bool, total: float | None = None, greeting: str | None = None) -> None:
-        """Display payment result overlay (success or failure message with optional total and greeting).
+    def show_payment_result(self, total: float | None = None, greeting: str | None = None) -> None:
+        """Display the success payment overlay with optional total and greeting.
         
         Args:
-            is_success: True for success (green), False for failure (red).
             total: Optional transaction total to display on success.
             greeting: Optional greeting text; defaults to GREETING_SELECTED from config.
         
@@ -613,17 +613,10 @@ class CustomerDisplayWindow(QDialog):
         except Exception:
             pass
         
-        # Determine state based on success/failure
-        if is_success:
-            result_status = "success"
-            title_text = "Payment is successful."
-            subtitle_text = "Thank you for your purchase."
-            footer_text = "Have a nice day."
-        else:
-            result_status = "error"
-            title_text = "We are sorry !"
-            subtitle_text = "An error occurred when processing your payment."
-            footer_text = "Please try again !"
+        result_status = "success"
+        title_text = "Payment is successful."
+        subtitle_text = "Thank you for your purchase."
+        footer_text = _load_greeting() or GREETING_SELECTED or "Thanks for shopping with us!"
         
         if self._payment_result_card is not None:
             # Set card status then repolish the card first so QSS selectors
@@ -639,12 +632,12 @@ class CustomerDisplayWindow(QDialog):
             self._payment_result_subtitle.setText(subtitle_text)
             self._payment_result_subtitle.setVisible(True)
         
-        # Populate total (show only on success, or hide if no total provided)
+        # Populate total (show if provided)
         if self._payment_result_total is not None:
-            if is_success and total is not None:
+            if total is not None:
                 try:
                     total_val = float(total)
-                    self._payment_result_total.setText(f"Total : $ {total_val:.2f}")
+                    self._payment_result_total.setText(f"$ {total_val:.2f}")
                     self._payment_result_total.setVisible(True)
                 except Exception:
                     self._payment_result_total.setVisible(False)
@@ -705,7 +698,7 @@ class CustomerDisplayWindow(QDialog):
                 self._payment_result_card.update()
         except Exception:
             pass
-        
+
         # Ensure overlay fills entire parent dialog
         try:
             parent_rect = self.rect()

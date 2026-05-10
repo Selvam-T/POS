@@ -793,6 +793,8 @@ class MainLoader(QMainWindow):
             self._current_payment_total = 0.0
         
         self._update_customer_display_from_sales(state=CustomerDisplayWindow.STATE_PAYMENT)
+        if display is not None:
+            display.show_payment_result(total=self._current_payment_total)
         if self.pay_current_receipt(payment_split):
             panel = getattr(self, 'payment_panel_controller', None)
             if panel is not None:
@@ -800,10 +802,6 @@ class MainLoader(QMainWindow):
 
     # Clear state after successful payment completion.
     def _on_payment_success(self) -> None:
-        display = getattr(self, 'customer_display', None)
-        if display is not None:
-            total = getattr(self, '_current_payment_total', 0.0)
-            display.show_payment_result(is_success=True, total=total)
         self._clear_sales_table_core()
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:
@@ -990,10 +988,6 @@ class MainLoader(QMainWindow):
             return True
 
         except Exception as e:
-            display = getattr(self, 'customer_display', None)
-            if display is not None:
-                display.show_payment_result(is_success=False)
-            
             report_exception(
                 self,
                 "Payment processing",

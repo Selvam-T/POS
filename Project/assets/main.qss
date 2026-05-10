@@ -530,7 +530,7 @@ QTextEdit#manualText { font-size: 18px; font-weight: bold; }
    Customer Facing Screen
    ============================================================= */
 QWidget#pageSplit {
-    background-color: red;
+    background-color: beige;
 }
 
 /* Payment result lightbox overlay */
@@ -540,7 +540,7 @@ QFrame#paymentResultOverlay {
 
 QFrame#paymentResultCard {
   background-color: rgba(255, 255, 255, 1);
-  border-radius: 12px;
+  border-radius: 18px;
   padding: 5px;
   border: 18px solid transparent;
   min-width: 460px;
@@ -551,10 +551,6 @@ QFrame#paymentResultCard {
 
 QFrame#paymentResultCard[status="success"] {
   border: 18px solid #4CAF50;
-}
-
-QFrame#paymentResultCard[status="error"] {
-  border: 18px solid #F44336;
 }
 
 QFrame#paymentResultCard QLabel {
@@ -569,13 +565,6 @@ QFrame#paymentResultCard[status="success"] QLabel#paymentResultGreeting {
   color: #4CAF50;
 }
 
-QFrame#paymentResultCard[status="error"] QLabel#paymentResultTitle,
-QFrame#paymentResultCard[status="error"] QLabel#paymentResultSubtitle,
-QFrame#paymentResultCard[status="error"] QLabel#paymentResultTotal,
-QFrame#paymentResultCard[status="error"] QLabel#paymentResultGreeting {
-  color: #F44336;
-}
-
 QLabel#paymentResultTitle {
   font-size: 40px;
   font-weight: bold;
@@ -587,7 +576,7 @@ QLabel#paymentResultSubtitle {
 }
 
 QLabel#paymentResultTotal {
-  font-size: 30px;
+  font-size: 40px;
   font-weight: bold;
 }
 
@@ -597,7 +586,8 @@ QLabel#paymentResultGreeting {
 }
 
 /* Base container style */
-QFrame#screen2PurchaseFrame {
+QFrame#screen2PurchaseFrame ,
+QFrame#screen2AdDisplayFrame {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #96d8a7, stop:1 #8abdf0);
     border: 1px solid #333333;
     border-radius: 8px;

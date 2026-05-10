@@ -1,6 +1,8 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QComboBox, QPushButton
 import os
+import json
+from pathlib import Path
 from modules.ui_utils.error_logger import log_error_message
 from modules.ui_utils import ui_feedback
 from modules.ui_utils.dialog_utils import set_dialog_main_status, build_dialog_from_ui, build_error_fallback_dialog
@@ -14,6 +16,19 @@ QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
 
 # Import greeting strings from config
 import config
+
+
+def _project_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
+
+def _load_greeting() -> str:
+    path = _project_root() / "AppData" / "greeting.json"
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return str(data.get("selected", "")).strip()
+    except Exception:
+        return ""
 
 def launch_greeting_dialog(parent=None):
     """Open greeting selection dialog; result stored in `dlg.greeting_result`.
@@ -44,7 +59,7 @@ def launch_greeting_dialog(parent=None):
     if combo is not None:
         combo.clear()
         combo.addItems(config.GREETING_STRINGS)
-        default_greeting = config.GREETING_SELECTED or 'Thanks for shopping with us!'
+        default_greeting = _load_greeting() or config.GREETING_SELECTED or 'Thanks for shopping with us!'
         if default_greeting in config.GREETING_STRINGS:
             combo.setCurrentText(default_greeting)
         else:

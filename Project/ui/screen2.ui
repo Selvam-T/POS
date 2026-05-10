@@ -32,7 +32,7 @@
    <item>
     <widget class="QStackedWidget" name="screen2ModeStack">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="pageIdleFull">
       <layout class="QVBoxLayout" name="idleFullLayout">
@@ -66,7 +66,7 @@
      <widget class="QWidget" name="pageSplit">
       <layout class="QHBoxLayout" name="mainHorizontalLayout" stretch="1,1">
        <property name="spacing">
-        <number>0</number>
+        <number>20</number>
        </property>
        <property name="leftMargin">
         <number>10</number>
@@ -279,89 +279,105 @@
           </property>
           <item>
            <widget class="QStackedWidget" name="screen2AdDisplayStack">
-         <property name="currentIndex">
-          <number>0</number>
-         </property>
-         <widget class="QWidget" name="pageIdle">
-          <layout class="QVBoxLayout" name="idleLayout">
-           <item>
-            <widget class="QLabel" name="idleAdsLabel">
-             <property name="text">
-              <string>Rolling Ads</string>
-             </property>
-             <property name="scaledContents">
-              <bool>true</bool>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-         <widget class="QWidget" name="pagePayment">
-          <layout class="QVBoxLayout" name="paymentVLayout">
-           <property name="spacing">
-            <number>20</number>
-           </property>
-           <item>
-            <widget class="QLabel" name="paymentInfoLabel">
-             <property name="font">
-              <font/>
-             </property>
-             <property name="text">
-              <string>Payment Summary</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter|Qt::AlignHCenter|Qt::AlignTop|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QFrame" name="screen2QrFrame">
-             <layout class="QHBoxLayout" name="qrHLayout">
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <widget class="QWidget" name="pageIdle">
+             <layout class="QVBoxLayout" name="idleLayout">
               <item>
-               <spacer name="qrLeftSpacer">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>0</width>
-                  <height>0</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QLabel" name="screen2QrLabel">
-                <property name="minimumSize">
-                 <size>
-                  <width>250</width>
-                  <height>250</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>250</width>
-                  <height>250</height>
-                 </size>
-                </property>
-                <property name="frameShape">
-                 <enum>QFrame::Box</enum>
-                </property>
+               <widget class="QLabel" name="idleAdsLabel">
                 <property name="text">
-                 <string>QR CODE</string>
+                 <string>Rolling Ads</string>
+                </property>
+                <property name="scaledContents">
+                 <bool>true</bool>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignCenter</set>
                 </property>
                </widget>
               </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="pagePayment">
+             <layout class="QVBoxLayout" name="paymentVLayout">
+              <property name="spacing">
+               <number>20</number>
+              </property>
               <item>
-               <spacer name="qrRightSpacer">
+               <widget class="QLabel" name="paymentInfoLabel">
+                <property name="font">
+                 <font/>
+                </property>
+                <property name="text">
+                 <string>Payment Summary</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter|Qt::AlignHCenter|Qt::AlignTop|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QFrame" name="screen2QrFrame">
+                <layout class="QHBoxLayout" name="qrHLayout">
+                 <item>
+                  <spacer name="qrLeftSpacer">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="screen2QrLabel">
+                   <property name="minimumSize">
+                    <size>
+                     <width>250</width>
+                     <height>250</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>250</width>
+                     <height>250</height>
+                    </size>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::Box</enum>
+                   </property>
+                   <property name="text">
+                    <string>QR CODE</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="qrRightSpacer">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <spacer name="paymentBottomSpacer">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Vertical</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
@@ -373,23 +389,6 @@
               </item>
              </layout>
             </widget>
-           </item>
-           <item>
-            <spacer name="paymentBottomSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </widget>
-
            </widget>
           </item>
          </layout>
@@ -409,11 +408,11 @@
      <height>768</height>
     </rect>
    </property>
-   <property name="styleSheet">
-    <string>background-color: rgba(0, 0, 0, 180);</string>
-   </property>
    <property name="visible">
     <bool>false</bool>
+   </property>
+   <property name="styleSheet">
+    <string>background-color: rgba(0, 0, 0, 180);</string>
    </property>
    <property name="frameShape">
     <enum>QFrame::NoFrame</enum>
@@ -450,7 +449,7 @@
          </size>
         </property>
         <property name="styleSheet">
-         <string></string>
+         <string/>
         </property>
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
@@ -473,56 +472,56 @@
          </property>
          <item>
           <widget class="QLabel" name="paymentResultTitle">
+           <property name="styleSheet">
+            <string/>
+           </property>
            <property name="text">
-          <string>Your payment is successful.</string>
+            <string>Your payment is successful.</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
-           </property>
-           <property name="styleSheet">
-          <string></string>
            </property>
           </widget>
          </item>
          <item>
-         <widget class="QLabel" name="paymentResultSubtitle">
-          <property name="text">
-          <string>Thank you for your purchase.</string>
-          </property>
-          <property name="alignment">
-          <set>Qt::AlignCenter</set>
-          </property>
-          <property name="styleSheet">
-          <string></string>
-          </property>
-          <property name="wordWrap">
-          <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item>
-          <widget class="QLabel" name="paymentResultTotal">
+          <widget class="QLabel" name="paymentResultSubtitle">
+           <property name="styleSheet">
+            <string/>
+           </property>
            <property name="text">
-          <string>Total : $ 0.00</string>
+            <string>Thank you for your purchase.</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
            </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="paymentResultTotal">
            <property name="styleSheet">
-          <string></string>
+            <string/>
+           </property>
+           <property name="text">
+            <string>Total : $ 0.00</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
          <item>
           <widget class="QLabel" name="paymentResultGreeting">
+           <property name="styleSheet">
+            <string/>
+           </property>
            <property name="text">
-          <string>Have a nice day.</string>
+            <string>Have a nice day.</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>
-           </property>
-           <property name="styleSheet">
-          <string></string>
            </property>
            <property name="wordWrap">
             <bool>true</bool>

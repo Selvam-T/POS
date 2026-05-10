@@ -2,27 +2,13 @@
 
 from __future__ import annotations
 
-import json
 from datetime import datetime
-from pathlib import Path
 from typing import List
 
 import config
 from modules.db_operation import receipt_repo
 from modules.db_operation.users_repo import get_username_by_id
-
-
-def _project_root() -> Path:
-    return Path(__file__).resolve().parents[2]
-
-
-def _load_greeting() -> str:
-    path = _project_root() / "AppData" / "greeting.json"
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-        return str(data.get("selected", "")).strip()
-    except Exception:
-        return "Have a nice day !"
+from modules.menu.greeting_menu import _load_greeting
 
 
 def _format_datetime(raw: str) -> str:

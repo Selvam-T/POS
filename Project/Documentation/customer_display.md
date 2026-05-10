@@ -8,7 +8,7 @@ refunds, database writes, or cashier actions.
 
 Status: refactored to use overlay-based payment results instead of stacked pages.
 Simplified state machine from 4 states to 2 states (idle, payment).
-Full-screen overlay displays payment success/failure messages with auto-hide timer.
+Full-screen overlay displays a success payment message with auto-hide timer.
 MainWindow integration complete in `main.py`.
 
 ## Configuration
@@ -78,7 +78,7 @@ it shows `pageSplit`.
 
 ### Payment Result Overlay (Lightbox)
 
-Displays payment success/failure with auto-hide timer.
+Displays the payment success message with auto-hide timer.
 
 **Structure:**
 - `paymentResultOverlay`: full-screen semi-transparent dark overlay
@@ -86,14 +86,19 @@ Displays payment success/failure with auto-hide timer.
 
 **Card Styling:**
 - Success: green border (#4CAF50)
-- Failure: red border (#F44336)
 - Auto-hides after `CUSTOMER_DISPLAY_IDLE_TIMEOUT` seconds
 
 **Method:**
-- `show_payment_result(is_success: bool, total: float | None = None, greeting: str | None = None)`
-  - `is_success`: True for success (green), False for failure (red)
-  - `total`: optional transaction total (success only)
+- `show_payment_result(total: float | None = None, greeting: str | None = None)`
+  - `total`: optional transaction total
   - `greeting`: optional custom greeting text
+
+**Design Decision - Payment Error Handling:**
+Payment database errors (e.g., connection failures, commit rollbacks) are NOT propagated to the customer display.
+- The overlay is displayed immediately when PAY is clicked, before database operations complete.
+- This ensures customers always see a positive acknowledgment regardless of backend processing success or failure.
+- Database failures are logged to the cashier status bar (cashier-only view) for troubleshooting, but do not affect the customer experience.
+- Rationale: Payment DB issues are system-level failures, not customer-facing errors. Showing error messages to customers damages trust and creates confusion at the point of sale.
 
 ### Configuration
 
@@ -114,7 +119,7 @@ Payload shape:
 - `total`: float or numeric string
 
 Payment result display is separate from state machine:
-- `show_payment_result(is_success: bool)` — displays overlay with result message
+- `show_payment_result(total: float | None = None, greeting: str | None = None)` — displays overlay with success message
 - `hide_payment_result_overlay()` — hides overlay and stops auto-hide timer
 
 ## Behavior
@@ -122,10 +127,15 @@ Payment result display is separate from state machine:
 - **App starts**: Idle page (full screen if no rows, split if rows exist).
 - **Items added**: Split mode with idle ads on right panel.
 - **Payment initiated**: Payment page with payment info and QR code.
-- **Payment success**: Green overlay with success message appears, auto-hides after timeout, cart clears.
-- **Payment failure**: Red overlay with failure message appears, auto-hides after timeout, cart remains for retry.
+- **PAY clicked**: Green success overlay appears immediately with transaction total and greeting, auto-hides after timeout.
 - **Sale cleared**: Idle page (full screen or split, depending on context).
 - **New items scanned during overlay**: Overlay immediately hides, items merge into cart.
+
+**Payment Success Overlay Behavior:**
+- The overlay displays on PAY click, not after payment confirmation from the database.
+- The overlay is always a success message; there is no failure state shown to customers.
+- If the database commit fails (transaction rollback, DB unavailable), the cashier sees an error in the status bar, but the customer sees the success overlay unchanged.
+- After the timeout, the overlay auto-hides and the cart is cleared (assuming payment commit succeeded; if it failed, the cart is preserved for retry).
 
 ## Item Count Rule
 
@@ -141,7 +151,6 @@ item even if the weight is 0.25 kg or 1.75 kg.
 
 The payment result overlay can be customized via `show_payment_result()` method:
 - Change message text
-- Add success/failure icons
 - Add greeting message (e.g., from `config.GREETING_SELECTED`)
 - Adjust colors, fonts, and styling
 - Modify auto-hide timeout via `CUSTOMER_DISPLAY_IDLE_TIMEOUT`
@@ -164,11 +173,11 @@ from sales and payment events.
 Update hooks:
 - Sales total updates → Payment state (updated items/total).
 - Hold receipt loaded → Payment state (updated items/total).
-- Payment requested → `hide_payment_result_overlay()` + Payment state.
-- Payment success → `show_payment_result(is_success=True)` + overlay display.
-- Payment failure → `show_payment_result(is_success=False)` + overlay display.
+- Payment requested → `show_payment_result(total=...)` + overlay display (triggered immediately on PAY click).
 - Item entry (vegetable/manual) → `hide_payment_result_overlay()`.
 - Cart cleared → Idle state.
 
-Note: `show_payment_result()` handles all payment result display logic.
-The state machine only manages display between Idle and Payment modes.
+**Payment Processing Note:**
+The success overlay is triggered by the PAY request signal, not by payment success/failure callbacks.
+Database commit failures do not trigger any customer-facing response; they are logged to the cashier status bar only.
+This decouples customer experience (always positive) from backend robustness (failures handled internally).
