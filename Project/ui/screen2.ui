@@ -81,7 +81,7 @@
         <number>10</number>
        </property>
        <item>
-        <widget class="QFrame" name="screen2PurchaseFrame">
+        <widget class="QFrame" name="screen2LeftFrame">
          <layout class="QVBoxLayout" name="leftVLayout">
           <property name="spacing">
            <number>20</number>
@@ -254,7 +254,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="screen2AdDisplayFrame">
+        <widget class="QFrame" name="screen2RightFrame">
          <property name="frameShape">
           <enum>QFrame::NoFrame</enum>
          </property>
@@ -280,9 +280,9 @@
           <item>
            <widget class="QStackedWidget" name="screen2AdDisplayStack">
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
-            <widget class="QWidget" name="pageIdle">
+            <widget class="QWidget" name="pageIdleSplit">
              <layout class="QVBoxLayout" name="idleLayout">
               <item>
                <widget class="QLabel" name="idleAdsLabel">
@@ -316,6 +316,19 @@
                  <set>Qt::AlignCenter|Qt::AlignHCenter|Qt::AlignTop|Qt::AlignVCenter</set>
                 </property>
                </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </spacer>
               </item>
               <item>
                <widget class="QFrame" name="screen2QrFrame">

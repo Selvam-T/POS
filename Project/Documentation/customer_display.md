@@ -46,11 +46,12 @@ Responsibilities:
 ## UI Elements
 
 The screen uses `ui/screen2.ui` with two main regions:
-- Left panel: `screen2PurchaseFrame` and `screen2SalesTable`.
+- Left panel: `screen2LeftFrame` and `screen2SalesTable`.
+  - `screen2QrLabel`: a `QLabel` (250x250) placed on the `pagePayment` view. The generated QR `QPixmap` is set here by `CustomerDisplayWindow.generate_and_set_qr()`.
 ### Right Panel State Pages
 
 The right panel `screen2AdDisplayStack` now contains 2 pages:
-- index 0: `pageIdle` — displays rotating idle ads or promotions
+- index 0: `pageIdleSplit` — displays rotating idle ads or promotions
 - index 1: `pagePayment` — displays payment information and QR code
 
 Note: `pageCompleted` has been removed. Payment results now display via

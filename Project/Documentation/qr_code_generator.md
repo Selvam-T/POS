@@ -399,54 +399,55 @@ When both layers are implemented correctly, the QR:
 
 # 19. Current QR Generator Location
 
-The existing QR generator implementation is currently in:
+The active QR generator implementation is currently in:
 
-- `modules/payment/test_qr.py`
+- `modules/payment/qr_generator.py`
 
-Key existing functions in that file:
+Key functions in that file:
 
-- `build_paynow_payload(amount_value, ref_value)`
+- `build_paynow_payload(ref_value=None, amount_value=None)`
+- `generate_qr_pixmap(ref_value=None, amount_value=None, target_size=250)`
 - `generate_qr_image(payload, expiry_text)`
 - `overlay_logo(qr_img)`
 - `add_qr_card(qr_img)`
 
 Note:
-- Keep these existing functions for now.
-- Future work should add new reduced-scope functions instead of replacing the current ones.
+- `modules/payment/test_qr.py` remains a standalone experiment/reference script.
+- Application code should use `modules/payment/qr_generator.py`.
 
 ---
 
-# 20. Scope Reduction Note for Future QR Work
+# 20. Amount Flag Behavior
 
-The current implementation guidance is to reduce the QR scope to a generic PayNow merchant QR.
+The PayNow QR can operate in two modes controlled by `config.py`:
 
-Rationale:
+`PAYNOW_INCLUDE_AMOUNT = False`
 
-- The QR should be reusable and not tied to a specific amount.
-- The QR can be shown earlier in the transaction, before payment input is complete.
-- This improves queue speed because the customer can scan early and wait only for the final total.
+Default behavior. The QR is a generic PayNow merchant QR:
 
-Expected behavior for the reduced scope:
+- includes merchant proxy details
+- includes currency tag `53`
+- does not include amount tag `54`
+- customer enters the PayNow amount manually in the banking app
 
-- Use a generic PayNow QR.
-- Do not include amount in the QR payload.
-- Show the QR during active sale, either by default on the right panel or alongside rotating ads.
-- During payment mode, show the PayNow QR clearly with instruction text.
-- Payment success/failure overlays should be independent from whether the QR is visible.
+`PAYNOW_INCLUDE_AMOUNT = True`
 
-Suggested display text:
+Amount-specific behavior. The QR includes:
 
-- Above QR: PayNow QR
-- Below QR: Scan first. Enter final amount when cashier confirms total.
+- merchant account tag `03` with value `0`, meaning amount is fixed/not editable
+- currency tag `53`, derived from `config.currency` using the numeric code, for example `SGD -> 702`
+- amount tag `54`, formatted to two decimal places
 
-Operational notes:
+The amount value comes from the payment panel PayNow field:
 
-- Customer may scan early.
-- Cashier verifies the final amount before pressing PAY.
-- Mixed payments should only show the QR when PayNow is relevant.
-- Overlay success/failure behavior should not depend on the QR being visible.
+- `modules/payment/payment_panel.py`
+- payload key: `paynow`
+- source widget: `paynowPayLineEdit`
 
-Implementation note:
+That value is passed through `main.py` to the customer display payload as `paynow_amount`, then into:
 
-- Preserve the existing QR generator functions.
-- Add new functions for the reduced-scope QR flow when implementation work begins.
+- `CustomerDisplayWindow.generate_and_set_qr(amount=...)`
+- `qr_generator.generate_qr_pixmap(amount_value=...)`
+- `qr_generator.build_paynow_payload(amount_value=...)`
+
+If `PAYNOW_INCLUDE_AMOUNT` is enabled and the PayNow amount is missing or not greater than zero, the QR payload builder raises a `ValueError` instead of generating an invalid amount-specific QR.

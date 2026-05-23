@@ -52,6 +52,10 @@ ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
 ADS_DIR = os.path.join(ASSETS_DIR, 'ads')
 QSS_PATH = os.path.join(ASSETS_DIR, 'main.qss')
 from modules.table.unit_helpers import canonicalize_unit, UNIT_KG, UNIT_EACH
+try:
+    from modules.payment import qr_generator as qr_generator
+except Exception:
+    qr_generator = None
 
 
 class CustomerDisplayWindow(QDialog):
@@ -570,6 +574,29 @@ class CustomerDisplayWindow(QDialog):
         self._qr_label.setPixmap(scaled)
         self._qr_label.setText("")
 
+    def generate_and_set_qr(self, ref: str | None = None, amount: float | None = None, size: int = 250) -> None:
+        """Generate a QR pixmap via `modules.payment.qr_generator` and set it.
+
+        If the generator is unavailable, falls back to clearing the label.
+        """
+        if qr_generator is None:
+            try:
+                self._qr_label.setText("QR CODE")
+                self._qr_label.setPixmap(QPixmap())
+            except Exception:
+                pass
+            return
+
+        try:
+            pix = qr_generator.generate_qr_pixmap(ref, amount_value=amount, target_size=size)
+            self.set_qr_image(pix)
+        except Exception:
+            try:
+                self._qr_label.setText("QR CODE")
+                self._qr_label.setPixmap(QPixmap())
+            except Exception:
+                pass
+
     def update_transaction(self, payload: dict) -> None:
         """Update customer display from clean transaction data."""
         if not payload:
@@ -579,6 +606,7 @@ class CustomerDisplayWindow(QDialog):
         state = payload.get("state", self.STATE_IDLE)
         items = payload.get("items", [])
         total = payload.get("total", 0.0)
+        paynow_amount = payload.get("paynow_amount")
 
         if state == self.STATE_IDLE:
             # Keep the current mode decision (full-idle vs split) from caller;
@@ -586,6 +614,11 @@ class CustomerDisplayWindow(QDialog):
             self._set_state(self.STATE_IDLE)
         elif state == self.STATE_PAYMENT:
             self.show_payment()
+            # Generate and display QR for the payment page.
+            try:
+                self.generate_and_set_qr(amount=paynow_amount)
+            except Exception:
+                pass
         else:
             self._set_state(self.STATE_IDLE)
 

@@ -583,7 +583,7 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
 
-    def _update_customer_display_from_sales(self, state: str | None = None) -> None:
+    def _update_customer_display_from_sales(self, state: str | None = None, payment_split: dict | None = None) -> None:
         display = getattr(self, 'customer_display', None)
         if display is None:
             return
@@ -630,6 +630,11 @@ class MainLoader(QMainWindow):
             'items': items,
             'total': total,
         }
+        if payment_split is not None:
+            try:
+                payload['paynow_amount'] = float(payment_split.get('paynow', 0.0) or 0.0)
+            except Exception:
+                payload['paynow_amount'] = 0.0
         display.update_transaction(payload)
 
     def _reset_receipt_context(self) -> None:
@@ -792,7 +797,7 @@ class MainLoader(QMainWindow):
         except Exception:
             self._current_payment_total = 0.0
         
-        self._update_customer_display_from_sales(state=CustomerDisplayWindow.STATE_PAYMENT)
+        self._update_customer_display_from_sales(state=CustomerDisplayWindow.STATE_PAYMENT, payment_split=payment_split)
         if display is not None:
             display.show_payment_result(total=self._current_payment_total)
         if self.pay_current_receipt(payment_split):

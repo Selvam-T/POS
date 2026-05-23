@@ -586,8 +586,8 @@ QLabel#paymentResultGreeting {
 }
 
 /* Base container style */
-QFrame#screen2PurchaseFrame ,
-QFrame#screen2AdDisplayFrame {
+QFrame#screen2LeftFrame ,
+QFrame#screen2RightFrame {
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #96d8a7, stop:1 #8abdf0);
     border: 1px solid #333333;
     border-radius: 8px;
@@ -596,7 +596,7 @@ QFrame#screen2AdDisplayFrame {
 }
 
 /* Grouping all Labels to set a common base color and weight */
-#screen2PurchaseFrame QLabel {
+#screen2LeftFrame QLabel {
     color: #222222;
     font-weight: 500;
 }

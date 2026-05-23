@@ -52,7 +52,7 @@ def _get_greeting_text() -> str:
 
 def _make_main_page(parent: QWidget) -> QWidget:
 	frame = QFrame(parent)
-	frame.setObjectName('screen2PurchaseFrame')
+	frame.setObjectName('screen2LeftFrame')
 	frame.setStyleSheet('background-color: #f3efe9; color: #1f1f1f;')
 	frame.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 	frame.setMinimumSize(500, 500)
