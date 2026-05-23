@@ -86,7 +86,6 @@ class CustomerDisplayWindow(QDialog):
         self._company_label = None
         self._qr_label = None
         self._idle_full_label = None
-        self._idle_split_label = None
         self._payment_result_overlay = None
         self._result_overlay_label = None
         self._payment_result_card = None
@@ -183,7 +182,6 @@ class CustomerDisplayWindow(QDialog):
         self._company_label = self.findChild(QLabel, "screen2CompanyLabel")
         self._qr_label = self.findChild(QLabel, "screen2QrLabel")
         self._idle_full_label = self.findChild(QLabel, "screen2IdleFullLabel")
-        self._idle_split_label = self.findChild(QLabel, "idleAdsLabel")
         self._payment_result_overlay = self.findChild(QFrame, "paymentResultOverlay")
         self._result_overlay_label = self.findChild(QLabel, "paymentResultLabel")
         # New card-based overlay widgets (Lightbox)
@@ -198,9 +196,6 @@ class CustomerDisplayWindow(QDialog):
 
         if self._idle_full_label is not None:
             self._idle_full_label.setAlignment(Qt.AlignCenter)
-        if self._idle_split_label is not None:
-            self._idle_split_label.setAlignment(Qt.AlignCenter)
-            self._idle_split_label.setWordWrap(True)
 
     def _configure_table(self) -> None:
         table = self._table
@@ -338,17 +333,8 @@ class CustomerDisplayWindow(QDialog):
             pass
         self._sync_idle_ads_for_context()
 
-    def _active_idle_label(self) -> QLabel | None:
-        if self._mode_stack is not None:
-            try:
-                if self._mode_stack.currentIndex() == 0:
-                    return self._idle_full_label
-            except Exception:
-                pass
-        return self._idle_split_label
-
     def _sync_idle_ads_for_context(self) -> None:
-        """Run ad rotation only for full-idle mode or right-panel idle state."""
+        """Run ad rotation only for full-idle mode."""
         if self._mode_stack is None:
             self._stop_idle_ads()
             return
@@ -361,14 +347,10 @@ class CustomerDisplayWindow(QDialog):
             self._start_idle_ads()
             return
 
-        if mode_idx == 1 and self._state == self.STATE_IDLE:
-            self._start_idle_ads()
-            return
-
         self._stop_idle_ads()
 
     def _start_idle_ads(self) -> None:
-        target = self._active_idle_label()
+        target = self._idle_full_label
         if target is None:
             return
         # If the ads directory doesn't exist, log an error and show fallback text.
@@ -400,7 +382,7 @@ class CustomerDisplayWindow(QDialog):
         self._render_idle_ad()
 
     def _render_idle_ad(self) -> None:
-        label = self._active_idle_label()
+        label = self._idle_full_label
         if label is None:
             return
         if not self._idle_ads_paths:
@@ -447,7 +429,7 @@ class CustomerDisplayWindow(QDialog):
 
     def _show_image_unavailable(self) -> None:
         """Show a unified, high-contrast fallback message on the full-idle label."""
-        lbl = self._active_idle_label()
+        lbl = self._idle_full_label
         if lbl is None:
             return
         lbl.setPixmap(QPixmap())
@@ -470,7 +452,7 @@ class CustomerDisplayWindow(QDialog):
             return
         index = {
             self.STATE_IDLE: 0,
-            self.STATE_PAYMENT: 1,
+            self.STATE_PAYMENT: 0,
         }.get(state, 0)
         self._stack.setCurrentIndex(index)
         self._sync_idle_ads_for_context()
@@ -574,7 +556,7 @@ class CustomerDisplayWindow(QDialog):
         self._qr_label.setPixmap(scaled)
         self._qr_label.setText("")
 
-    def generate_and_set_qr(self, ref: str | None = None, amount: float | None = None, size: int = 250) -> None:
+    def generate_and_set_qr(self, ref: str | None = None, size: int = 250) -> None:
         """Generate a QR pixmap via `modules.payment.qr_generator` and set it.
 
         If the generator is unavailable, falls back to clearing the label.
@@ -588,7 +570,7 @@ class CustomerDisplayWindow(QDialog):
             return
 
         try:
-            pix = qr_generator.generate_qr_pixmap(ref, amount_value=amount, target_size=size)
+            pix = qr_generator.generate_qr_pixmap(ref, target_size=size)
             self.set_qr_image(pix)
         except Exception:
             try:
@@ -606,7 +588,6 @@ class CustomerDisplayWindow(QDialog):
         state = payload.get("state", self.STATE_IDLE)
         items = payload.get("items", [])
         total = payload.get("total", 0.0)
-        paynow_amount = payload.get("paynow_amount")
 
         if state == self.STATE_IDLE:
             # Keep the current mode decision (full-idle vs split) from caller;
@@ -616,7 +597,7 @@ class CustomerDisplayWindow(QDialog):
             self.show_payment()
             # Generate and display QR for the payment page.
             try:
-                self.generate_and_set_qr(amount=paynow_amount)
+                self.generate_and_set_qr()
             except Exception:
                 pass
         else:
@@ -772,6 +753,21 @@ class CustomerDisplayWindow(QDialog):
         try:
             self._result_overlay_timer.stop()
             self._result_overlay_timer.timeout.disconnect()
+        except Exception:
+            pass
+
+    def keep_payment_result_overlay_visible(self) -> None:
+        """Keep the current payment result overlay visible until explicitly hidden."""
+        if self._payment_result_overlay is None:
+            return
+        try:
+            self._result_overlay_timer.stop()
+            self._result_overlay_timer.timeout.disconnect()
+        except Exception:
+            pass
+        try:
+            self._payment_result_overlay.setVisible(True)
+            self._payment_result_overlay.raise_()
         except Exception:
             pass
 

@@ -1,12 +1,11 @@
 import os
-from typing import Any
 import qrcode
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime, timedelta
 import config
 
-# By default this QR is a merchant PayNow identifier only. When
-# config.PAYNOW_INCLUDE_AMOUNT is True, tag 54 carries the PayNow amount.
+# This QR is a generic merchant PayNow identifier only. It does not include an
+# amount, so customers enter the cashier-confirmed value in their banking app.
 
 
 
@@ -54,39 +53,19 @@ def make_expiry_yyyymmdd():
     return dt.strftime("%Y%m%d")
 
 
-def _amount_enabled() -> bool:
-    return bool(getattr(config, "PAYNOW_INCLUDE_AMOUNT", False))
-
-
-def _normalize_amount(amount_value: Any) -> float:
-    try:
-        amount = float(amount_value)
-    except (TypeError, ValueError) as exc:
-        raise ValueError("PayNow QR amount is required when PAYNOW_INCLUDE_AMOUNT is True.") from exc
-    if amount <= 0:
-        raise ValueError("PayNow QR amount must be greater than zero.")
-    return amount
-
-
-def build_paynow_payload(ref_value: str | None = None, amount_value: float | None = None):
-    """Build a PayNow dynamic QR payload.
+def build_paynow_payload(ref_value: str | None = None):
+    """Build a generic PayNow dynamic QR payload without embedding an amount.
 
     The `ref_value` defaults to the configured `COMPANY_NAME` when omitted.
-    When config.PAYNOW_INCLUDE_AMOUNT is True, `amount_value` is encoded as
-    EMV tag 54 and should come from the PayNow payment field.
     """
     expiry = make_expiry_yyyymmdd()
     currency_numeric = get_currency_numeric(config.currency)
     proxy_type_value = get_proxy_type_value(config.paynow_proxy_type)
-    include_amount = _amount_enabled()
-    amount = _normalize_amount(amount_value) if include_amount else None
 
     merchant_account_info = ""
     merchant_account_info += tlv("00", "SG.PAYNOW")
     merchant_account_info += tlv("01", proxy_type_value)
     merchant_account_info += tlv("02", str(config.paynow_proxy_value))
-    if include_amount:
-        merchant_account_info += tlv("03", "0")
     merchant_account_info += tlv("04", expiry)
 
     if ref_value is None:
@@ -102,8 +81,6 @@ def build_paynow_payload(ref_value: str | None = None, amount_value: float | Non
     payload += tlv("26", merchant_account_info)           # Merchant Account Info
     payload += tlv("52", str(config.mcc))                 # MCC
     payload += tlv("53", currency_numeric)                # Currency
-    if include_amount and amount is not None:
-        payload += tlv("54", f"{amount:.2f}")              # Amount
     payload += tlv("58", config.country_code)             # Country
     # Use COMPANY_NAME as the merchant name for clearer identification
     merchant_display_name = (getattr(config, 'COMPANY_NAME', None) or getattr(config, 'merchant_name', ''))
@@ -219,11 +196,10 @@ def overlay_logo(qr_img):
     return qr_img
 
 
-def generate_qr_pixmap(ref_value: str | None = None, amount_value: float | None = None, target_size: int = 250):
+def generate_qr_pixmap(ref_value: str | None = None, target_size: int = 250):
     """Return a PyQt5 QPixmap containing the generated QR code card.
 
     - Uses `COMPANY_NAME` as default reference when `ref_value` is None.
-    - Optionally encodes `amount_value` when PAYNOW_INCLUDE_AMOUNT is enabled.
     - Produces a square image roughly `target_size` pixels wide.
     """
     try:
@@ -231,7 +207,7 @@ def generate_qr_pixmap(ref_value: str | None = None, amount_value: float | None 
     except Exception:
         raise RuntimeError("PyQt5 is required to produce a QPixmap")
 
-    payload, expiry = build_paynow_payload(ref_value, amount_value)
+    payload, expiry = build_paynow_payload(ref_value)
     img = generate_qr_image(payload, expiry)
     img = overlay_logo(img)
     card = add_qr_card(img)

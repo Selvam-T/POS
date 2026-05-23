@@ -583,7 +583,7 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
 
-    def _update_customer_display_from_sales(self, state: str | None = None, payment_split: dict | None = None) -> None:
+    def _update_customer_display_from_sales(self, state: str | None = None) -> None:
         display = getattr(self, 'customer_display', None)
         if display is None:
             return
@@ -624,17 +624,11 @@ class MainLoader(QMainWindow):
             return
 
         payload = {
-            # Default to idle so split-mode right panel can show rotating ads
-            # until explicit scanning/payment/completed states are triggered.
-            'state': state or display.STATE_IDLE,
+            # Active sales default to the payment QR page in the right frame.
+            'state': state or (display.STATE_PAYMENT if rows else display.STATE_IDLE),
             'items': items,
             'total': total,
         }
-        if payment_split is not None:
-            try:
-                payload['paynow_amount'] = float(payment_split.get('paynow', 0.0) or 0.0)
-            except Exception:
-                payload['paynow_amount'] = 0.0
         display.update_transaction(payload)
 
     def _reset_receipt_context(self) -> None:
@@ -797,13 +791,17 @@ class MainLoader(QMainWindow):
         except Exception:
             self._current_payment_total = 0.0
         
-        self._update_customer_display_from_sales(state=CustomerDisplayWindow.STATE_PAYMENT, payment_split=payment_split)
         if display is not None:
             display.show_payment_result(total=self._current_payment_total)
         if self.pay_current_receipt(payment_split):
             panel = getattr(self, 'payment_panel_controller', None)
             if panel is not None:
                 panel.notify_payment_success()
+        elif display is not None:
+            try:
+                display.keep_payment_result_overlay_visible()
+            except Exception:
+                pass
 
     # Clear state after successful payment completion.
     def _on_payment_success(self) -> None:
@@ -997,7 +995,7 @@ class MainLoader(QMainWindow):
                 self,
                 "Payment processing",
                 e,
-                user_message="Payment failed. Please retry.",
+                user_message="Payment failed to update DB. Please retry.",
                 duration=6000,
             )
             return False
@@ -1162,6 +1160,10 @@ class MainLoader(QMainWindow):
             dlg = self.dialog_wrapper._last_dialog
             if dlg is None or dlg.result() != QDialog.Accepted:
                 return
+
+            display = getattr(self, 'customer_display', None)
+            if display is not None:
+                display.hide_payment_result_overlay()
 
             self._clear_sales_table_core(update_display=False)
             panel = getattr(self, 'payment_panel_controller', None)

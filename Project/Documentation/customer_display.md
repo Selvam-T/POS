@@ -36,9 +36,9 @@ Class: `CustomerDisplayWindow`
 
 Responsibilities:
 - Load `ui/screen2.ui`.
-- Manage page states (Idle, Scanning, Payment, Completed).
+- Manage the idle/full-screen and active-sale split display.
 - Render the sales table and total.
-- Render the QR label at fixed 250 x 250.
+- Render the generic PayNow QR label at fixed 250 x 250 during active sales.
 - Handle screen placement and connect/disconnect events.
 - Avoid stealing focus from the cashier screen.
 - Keep the sales table auto-scrolled with scrollbar hidden.
@@ -47,17 +47,21 @@ Responsibilities:
 
 The screen uses `ui/screen2.ui` with two main regions:
 - Left panel: `screen2LeftFrame` and `screen2SalesTable`.
-  - `screen2QrLabel`: a `QLabel` (250x250) placed on the `pagePayment` view. The generated QR `QPixmap` is set here by `CustomerDisplayWindow.generate_and_set_qr()`.
-### Right Panel State Pages
+- Right panel: `screen2RightFrame` and `screen2AdDisplayStack`.
+  - `screen2QrLabel`: a `QLabel` (250x250) placed on the `pagePayment` view. The generated generic PayNow QR `QPixmap` is set here by `CustomerDisplayWindow.generate_and_set_qr()`.
+### Right Panel State Page
 
-The right panel `screen2AdDisplayStack` now contains 2 pages:
-- index 0: `pageIdleSplit` — displays rotating idle ads or promotions
-- index 1: `pagePayment` — displays payment information and QR code
+The right panel `screen2AdDisplayStack` contains one active-sale page:
+- index 0: `pagePayment` - displays payment information and the generic PayNow QR code
 
 Note: `pageCompleted` has been removed. Payment results now display via
 `paymentResultOverlay` (full-screen overlay with semi-transparent background).
 
-The UI `screen2AdDisplayStack` defaults to index `0` (idle) in
+Current behavior: when the sales table has rows, `pageSplit` is active and the
+right panel defaults to `pagePayment` so the customer can scan the generic
+PayNow QR early.
+
+The UI `screen2AdDisplayStack` defaults to index `0` (`pagePayment`) in
 `ui/screen2.ui`. `CustomerDisplayWindow` also defensively initializes both
 `screen2AdDisplayStack` and `screen2ModeStack` to their idle/full-idle
 positions on load to avoid showing an unintended page at startup.
@@ -115,19 +119,19 @@ It accepts clean transaction data from the main window via:
 - `CustomerDisplayWindow.update_transaction(payload)`
 
 Payload shape:
-- `state`: `idle | payment` (state machine now simplified to 2 states)
+- `state`: `idle | payment` (active sale defaults to `payment`)
 - `items`: list of {quantity, description, amount, unit}
 - `total`: float or numeric string
 
 Payment result display is separate from state machine:
-- `show_payment_result(total: float | None = None, greeting: str | None = None)` — displays overlay with success message
-- `hide_payment_result_overlay()` — hides overlay and stops auto-hide timer
+- `show_payment_result(total: float | None = None, greeting: str | None = None)` - displays overlay with success message
+- `hide_payment_result_overlay()` - hides overlay and stops auto-hide timer
 
 ## Behavior
 
 - **App starts**: Idle page (full screen if no rows, split if rows exist).
-- **Items added**: Split mode with idle ads on right panel.
-- **Payment initiated**: Payment page with payment info and QR code.
+- **Items added**: Split mode with sales details on the left and generic PayNow QR on the right.
+- **Payment initiated**: PAY shows the payment result overlay; it does not control the QR page.
 - **PAY clicked**: Green success overlay appears immediately with transaction total and greeting, auto-hides after timeout.
 - **Sale cleared**: Idle page (full screen or split, depending on context).
 - **New items scanned during overlay**: Overlay immediately hides, items merge into cart.
@@ -136,7 +140,7 @@ Payment result display is separate from state machine:
 - The overlay displays on PAY click, not after payment confirmation from the database.
 - The overlay is always a success message; there is no failure state shown to customers.
 - If the database commit fails (transaction rollback, DB unavailable), the cashier sees an error in the status bar, but the customer sees the success overlay unchanged.
-- After the timeout, the overlay auto-hides and the cart is cleared (assuming payment commit succeeded; if it failed, the cart is preserved for retry).
+- After the timeout, the overlay auto-hides when payment commit succeeds and the cart is cleared. If the database commit fails, the overlay remains visible and the cart is preserved until staff clears it manually.
 
 ## Item Count Rule
 
@@ -157,7 +161,7 @@ The payment result overlay can be customized via `show_payment_result()` method:
 - Modify auto-hide timeout via `CUSTOMER_DISPLAY_IDLE_TIMEOUT`
 - Adjust transparency via stylesheet
 
-All customization occurs in `customer_display.py` → `show_payment_result()` method.
+All customization occurs in `customer_display.py` -> `show_payment_result()` method.
 
 ## Work Pending
 
@@ -172,13 +176,14 @@ when `CUSTOMER_DISPLAY_ENABLED` is True. It updates the customer display
 from sales and payment events.
 
 Update hooks:
-- Sales total updates → Payment state (updated items/total).
-- Hold receipt loaded → Payment state (updated items/total).
-- Payment requested → `show_payment_result(total=...)` + overlay display (triggered immediately on PAY click).
-- Item entry (vegetable/manual) → `hide_payment_result_overlay()`.
-- Cart cleared → Idle state.
+- Sales total updates -> Payment state (updated items/total).
+- Hold receipt loaded -> Payment state (updated items/total).
+- Payment requested -> `show_payment_result(total=...)` + overlay display (triggered immediately on PAY click).
+- Item entry (vegetable/manual) -> `hide_payment_result_overlay()`.
+- Cart cleared -> Idle state.
 
 **Payment Processing Note:**
 The success overlay is triggered by the PAY request signal, not by payment success/failure callbacks.
 Database commit failures do not trigger any customer-facing response; they are logged to the cashier status bar only.
 This decouples customer experience (always positive) from backend robustness (failures handled internally).
+

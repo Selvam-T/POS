@@ -253,8 +253,6 @@ error_correction = 'H'
 box_size = 10
 border = 3
 expiry_seconds = 600
-PAYNOW_INCLUDE_AMOUNT = True
-
 # PayNow Logo overlay
 logo = 'paynow_logo.png'
 

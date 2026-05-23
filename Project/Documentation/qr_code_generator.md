@@ -405,8 +405,8 @@ The active QR generator implementation is currently in:
 
 Key functions in that file:
 
-- `build_paynow_payload(ref_value=None, amount_value=None)`
-- `generate_qr_pixmap(ref_value=None, amount_value=None, target_size=250)`
+- `build_paynow_payload(ref_value=None)`
+- `generate_qr_pixmap(ref_value=None, target_size=250)`
 - `generate_qr_image(payload, expiry_text)`
 - `overlay_logo(qr_img)`
 - `add_qr_card(qr_img)`
@@ -417,37 +417,16 @@ Note:
 
 ---
 
-# 20. Amount Flag Behavior
+# 20. Current Amount Behavior
 
-The PayNow QR can operate in two modes controlled by `config.py`:
-
-`PAYNOW_INCLUDE_AMOUNT = False`
-
-Default behavior. The QR is a generic PayNow merchant QR:
+The current customer display flow uses a generic PayNow merchant QR:
 
 - includes merchant proxy details
 - includes currency tag `53`
 - does not include amount tag `54`
 - customer enters the PayNow amount manually in the banking app
 
-`PAYNOW_INCLUDE_AMOUNT = True`
-
-Amount-specific behavior. The QR includes:
-
-- merchant account tag `03` with value `0`, meaning amount is fixed/not editable
-- currency tag `53`, derived from `config.currency` using the numeric code, for example `SGD -> 702`
-- amount tag `54`, formatted to two decimal places
-
-The amount value comes from the payment panel PayNow field:
-
-- `modules/payment/payment_panel.py`
-- payload key: `paynow`
-- source widget: `paynowPayLineEdit`
-
-That value is passed through `main.py` to the customer display payload as `paynow_amount`, then into:
-
-- `CustomerDisplayWindow.generate_and_set_qr(amount=...)`
-- `qr_generator.generate_qr_pixmap(amount_value=...)`
-- `qr_generator.build_paynow_payload(amount_value=...)`
-
-If `PAYNOW_INCLUDE_AMOUNT` is enabled and the PayNow amount is missing or not greater than zero, the QR payload builder raises a `ValueError` instead of generating an invalid amount-specific QR.
+This is the intended POS flow because payment confirmation is not integrated
+with the banking app. The cashier verifies and records the final payment
+manually, and a generic QR avoids stale or incorrect amount QR codes when the
+cart or payment allocation changes.

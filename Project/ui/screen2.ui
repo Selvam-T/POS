@@ -280,25 +280,8 @@
           <item>
            <widget class="QStackedWidget" name="screen2AdDisplayStack">
             <property name="currentIndex">
-             <number>1</number>
+             <number>0</number>
             </property>
-            <widget class="QWidget" name="pageIdleSplit">
-             <layout class="QVBoxLayout" name="idleLayout">
-              <item>
-               <widget class="QLabel" name="idleAdsLabel">
-                <property name="text">
-                 <string>Rolling Ads</string>
-                </property>
-                <property name="scaledContents">
-                 <bool>true</bool>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
             <widget class="QWidget" name="pagePayment">
              <layout class="QVBoxLayout" name="paymentVLayout">
               <property name="spacing">
