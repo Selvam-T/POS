@@ -243,6 +243,10 @@ QPushButton#voucherPaySlcBtn:focus {
 #payPayOpsBtn:pressed {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #4CAF50, stop:1 #388E3C);
 }
+#payPayOpsBtn[paymentErrorLocked="true"],
+#payPayOpsBtn[paymentErrorLocked="true"]:disabled {
+    color: #D32F2F;
+}
 
 #printPayOpsBtn {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #42A5F5, stop:1 #2196F3);

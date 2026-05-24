@@ -62,10 +62,13 @@ def _clear_sales_table(self):
 
 **Actions performed on CONFIRM:**
 1. Checks dialog result (`QDialog.Accepted`)
-2. Clears all rows: `self.sales_table.setRowCount(0)`
-3. Resets total to $0.00 via `recompute_total(self.sales_table)`
-4. Updates bound `totalValue` label automatically
-5. Clears the payment panel via `payment_panel_controller.clear_payment_frame()` to reset totals, inputs, highlights, status, and disable pay/tender widgets
+2. If the payment DB failure lock is active (`PAY err` after three failed commits), reads cash allocation before clearing payment fields.
+3. If that locked recovery sale had cash allocated, opens the cash drawer for manual recovery.
+4. Resets the payment failure retry/lock state so PAY returns to normal behavior.
+5. Clears all rows: `self.sales_table.setRowCount(0)`
+6. Resets total to $0.00 via `recompute_total(self.sales_table)`
+7. Updates bound `totalValue` label automatically
+8. Clears the payment panel via `payment_panel_controller.clear_payment_frame()` to reset totals, inputs, highlights, status, and disable pay/tender widgets
 
 ---
 
@@ -74,6 +77,9 @@ def _clear_sales_table(self):
 ### Immediate Effects:
 - **Sales table:** All rows removed
 - **Total display:** Shows `$ 0.00`
+- **Payment failure recovery:** If Clear Cart was used while PAY was locked as
+  `PAY err`, the retry counter is reset, PAY returns to normal text/style, and
+  the drawer is opened only when the locked recovery sale had cash allocated.
 - **Product menu:** REMOVE/UPDATE tabs re-enable (no longer blocked by active sale)
 
 ### Future Considerations:

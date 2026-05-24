@@ -103,6 +103,10 @@ Payment database errors (e.g., connection failures, commit rollbacks) are NOT pr
 - The overlay is displayed immediately when PAY is clicked, before database operations complete.
 - This ensures customers always see a positive acknowledgment regardless of backend processing success or failure.
 - Database failures are logged to the cashier status bar (cashier-only view) for troubleshooting, but do not affect the customer experience.
+- Cashier-side recovery after repeated DB failures is handled entirely on the
+  main/payment panel: after three failed attempts PAY is locked as `PAY err`,
+  Print can produce a `TEMP-DB-FAIL` snapshot receipt, and Clear Cart resets the
+  flow. None of these recovery details are shown on the customer display.
 - Rationale: Payment DB issues are system-level failures, not customer-facing errors. Showing error messages to customers damages trust and creates confusion at the point of sale.
 
 ### Configuration
@@ -140,7 +144,7 @@ Payment result display is separate from state machine:
 - The overlay displays on PAY click, not after payment confirmation from the database.
 - The overlay is always a success message; there is no failure state shown to customers.
 - If the database commit fails (transaction rollback, DB unavailable), the cashier sees an error in the status bar, but the customer sees the success overlay unchanged.
-- After the timeout, the overlay auto-hides when payment commit succeeds and the cart is cleared. If the database commit fails, the overlay remains visible and the cart is preserved until staff clears it manually.
+- After the timeout, the overlay auto-hides when payment commit succeeds and the cart is cleared. If the database commit fails, the overlay remains visible and the cart is preserved until staff retries or clears it manually. After three failed retries, cashier-side recovery may print a `TEMP-DB-FAIL` receipt before clearing.
 
 ## Item Count Rule
 

@@ -79,6 +79,10 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
     `modules/db_operation/paid_sale_committer.py`.
   - The service performs all DB writes (receipt counter, receipts header,
     receipt_items, receipt_payments) in one atomic transaction.
+  - Payment DB failures are counted in `main.py`; after three failed attempts,
+    PAY locks as `PAY err`, Print can produce a `TEMP-DB-FAIL` snapshot via
+    `modules/payment/recovery_receipt.py`, and Clear Cart resets the recovery
+    state.
   - See `Documentation/payment_processing.md` for full details and the
     new-sale vs held-receipt distinction.
 

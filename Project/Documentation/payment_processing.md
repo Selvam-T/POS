@@ -77,21 +77,38 @@ Snapshot model reminder:
   - shown as a concise message on the MainWindow status bar.
 - On commit failure, the current sale is intentionally preserved (sales table is
   not cleared) so cashiers can retry payment or choose an explicit fallback.
+- Payment DB failures are counted in `main.py`. After three failed commit
+  attempts for the current sale, the PAY button enters a recovery lock:
+  `payPayOpsBtn` is disabled, its text changes to `PAY err`, and the StatusBar
+  shows "Print receipt and clear salesTable to proceed".
+- While the recovery lock is active, `printPayOpsBtn` is enabled even though the
+  cart still has a total. It prints a temporary snapshot receipt using
+  `modules/payment/recovery_receipt.py`. This receipt is labeled
+  `TEMP-DB-FAIL` and is not inserted into any database table.
+- Clearing the sales table while the recovery lock is active resets the retry
+  count and restores the PAY button. If the payment panel has a cash allocation,
+  the cash drawer is opened before payment fields are cleared. Ordinary clear
+  cart actions do not use this drawer recovery path.
 
 DB CRUD failure fallback (operations runbook)
 ---------------------------------------------
 When payment commit fails, do **not** move to the next customer immediately.
 
 Recommended cashier action order:
-1. Retry PAY once after confirming network/DB availability.
-2. If it fails again, place the sale on HOLD (preserve cart and continue queue).
-3. Escalate persistent failures to supervisor/IT and use `log/error.log`
+1. Retry PAY until the StatusBar shows the recovery instruction, up to three
+   total failed attempts.
+2. When PAY shows `PAY err`, print the temporary recovery receipt if needed.
+3. Clear the sales table to reset the payment panel and continue.
+4. Escalate persistent failures to supervisor/IT and use `log/error.log`
    traceback entries for diagnosis.
 
 Why this is required:
 - Atomic transaction rollback means no partial receipt is saved on failure.
 - Because the sale is still in the UI, clearing it blindly would risk revenue
   loss or mismatch between physical payment and DB records.
+- The `TEMP-DB-FAIL` receipt is an operator recovery artifact only. It does not
+  reserve a receipt number and does not persist `receipts`, `receipt_items`, or
+  `receipt_payments` rows.
 
 Testing recommendations
 -----------------------
@@ -111,7 +128,11 @@ Testing recommendations
   - status bar shows payment failure,
   - traceback is written to `log/error.log`,
   - sales table is not cleared,
-  - user can retry or put sale on hold.
+  - attempts 1 and 2 allow retry,
+  - attempt 3 locks PAY as `PAY err` and enables Print,
+  - Print outputs a `TEMP-DB-FAIL` snapshot receipt,
+  - clear-cart restores PAY to normal and opens the drawer only if the locked
+    recovery sale had a cash allocation.
 
 References
 ----------

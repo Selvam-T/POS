@@ -40,10 +40,19 @@
 	- Console receipt text prints only when `ENABLE_PRINTER_PRINT` is `False`.
 	- Network print runs when `ENABLE_PRINTER_PRINT` is `True`.
 	- Current call uses **blocking** mode for immediate success/failure handling.
+	- During the payment DB failure lock, Print uses
+	  `modules/payment/recovery_receipt.py` to build a `TEMP-DB-FAIL` snapshot
+	  receipt from the current UI state. The same helper then prints it to
+	  console or printer according to `ENABLE_PRINTER_PRINT`.
 
 - In `main.py::pay_current_receipt()`:
 	- After commit success, cash drawer open is attempted through `modules.devices.printer_and_drawer.open_cash_drawer(...)`
 		when `ENABLE_CASH_DRAWER` is on and payment includes cash+tender.
+
+- In the payment DB failure recovery flow:
+	- After three failed commit attempts, PAY is locked as `PAY err`.
+	- If the cashier clears the sales table and cash was allocated, `main.py`
+	  opens the cash drawer before clearing the payment fields.
 
 ## See also
 - `Documentation/Payment_panel.md`

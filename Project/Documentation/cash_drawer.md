@@ -15,12 +15,29 @@ Cash drawer pulse is attempted only when all conditions below are true:
 2. Payment is successfully committed in `MainLoader.pay_current_receipt(...)`
 3. Payment includes cash: `cash > 0` (tender/change are not part of drawer gating)
 
+Special recovery exception:
+- If payment DB commit fails three times, the PAY button enters the `PAY err`
+  recovery lock.
+- When the cashier then confirms Clear Cart, `main.py` reads
+  `cashPayLineEdit` before clearing the payment panel.
+- If the locked recovery sale has cash allocated, the drawer is opened even
+  though the DB commit did not succeed. This is only for manual cashier
+  recovery; ordinary Clear Cart actions do not open the drawer this way.
+
 ## Runtime Flow
 1. `PaymentPanel.handle_pay_clicked()` emits `payRequested(payload)`.
 2. `MainLoader._on_payment_requested(...)` calls `pay_current_receipt(payload)`.
 3. `PaidSaleCommitter.commit_payment(...)` persists payment and returns `receipt_no`.
 4. `MainLoader._open_cash_drawer_if_needed(payload)` is called.
 5. `modules/devices.printer_and_drawer.open_cash_drawer(...)` sends ESC/POS drawer pulse.
+
+Recovery flow:
+1. Payment DB commit fails three times.
+2. `payPayOpsBtn` is locked as `PAY err`.
+3. Cashier prints the `TEMP-DB-FAIL` receipt if needed.
+4. Cashier clears the sales table.
+5. If cash was allocated, `MainLoader._open_cash_drawer_if_needed({'cash': amount})`
+   opens the drawer before payment fields are cleared.
 
 ## Why Logic is Split Across `main.py` and `printer.py`
 
@@ -92,3 +109,6 @@ Typical messages include:
 ## Notes
 - Current integration uses blocking drawer call (`blocking=True`) so failure is known immediately.
 - Commit success is not rolled back when drawer pulse fails; payment remains completed and failure is reported/logged.
+- The recovery drawer pulse does not imply a DB receipt exists. The failed DB
+  transaction remains rolled back, and any `TEMP-DB-FAIL` receipt is a printed
+  snapshot only.

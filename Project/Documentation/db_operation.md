@@ -81,6 +81,16 @@ Atomic, multi-table writer used to finalize payments. It inserts/updates:
 Key entry point:
 - `PaidSaleCommitter.commit_paid_sale(...)` (single transaction; rollback on failure)
 
+Payment DB failure recovery:
+- `commit_paid_sale(...)` raises on failure; `main.py` catches the exception,
+  reports it to the cashier StatusBar, and keeps the sale/payment state for
+  retry.
+- After three failed commit attempts, `main.py` locks PAY as `PAY err` and
+  enables Print for a temporary `TEMP-DB-FAIL` receipt.
+- `TEMP-DB-FAIL` is generated from the current UI snapshot by
+  `modules/payment/recovery_receipt.py`. It is not stored in `receipts`,
+  `receipt_items`, or `receipt_payments`.
+
 ### `modules/db_operation/cash_outflows_repo.py` (SQL only)
 
 SQL-only repository for the `cash_outflows` table used by Refund and Vendor flows.

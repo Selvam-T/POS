@@ -1,466 +1,113 @@
-24 MAY 2026, 13 : 08 : 27 .341723 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 08 : 34 .353041 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 08 : 41 .349685 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 08 : 48 .351575 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 08 : 55 .358971 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 09 : 02 .360417 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 09 : 09 .351572 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 09 : 16 .348308 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 09 : 23 .403464 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 09 : 30 .404797 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 09 : 37 .406998 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 09 : 44 .401621 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 09 : 51 .414270 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 09 : 58 .424572 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 10 : 05 .424898 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 10 : 12 .425676 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 10 : 19 .419404 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 10 : 26 .417678 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 10 : 33 .421352 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 10 : 40 .412020 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 10 : 47 .425999 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 10 : 54 .423448 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 11 : 01 .425931 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 11 : 08 .418990 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 11 : 15 .427543 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 11 : 22 .433572 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 11 : 29 .430889 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 11 : 36 .439640 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 11 : 43 .437653 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 11 : 50 .434695 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 11 : 57 .442725 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 12 : 04 .453943 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 12 : 11 .466012 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 12 : 18 .474263 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 12 : 25 .464711 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 12 : 32 .473490 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 12 : 39 .467388 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 12 : 46 .459406 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 12 : 53 .469072 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 13 : 00 .471759 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 13 : 07 .481237 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 13 : 14 .486685 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 13 : 21 .482822 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 13 : 28 .474157 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 13 : 35 .480467 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 13 : 42 .487117 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 13 : 49 .488453 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 13 : 56 .489356 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 14 : 03 .505911 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 14 : 10 .514812 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 14 : 17 .520901 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 14 : 24 .546237 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 14 : 31 .539285 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 14 : 38 .549383 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 14 : 45 .551221 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 14 : 52 .553883 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 14 : 59 .636441 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 15 : 06 .562925 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 15 : 13 .564060 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 15 : 20 .566975 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 15 : 27 .577664 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 15 : 34 .579720 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 15 : 41 .574498 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 15 : 48 .589755 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 15 : 55 .595819 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 16 : 02 .602586 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 16 : 09 .613266 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 16 : 16 .618324 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 16 : 23 .623428 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 16 : 30 .626981 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 16 : 37 .618873 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 16 : 44 .628459 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 16 : 51 .620897 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 16 : 58 .622596 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 17 : 05 .637915 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 17 : 12 .633744 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 17 : 19 .633475 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 17 : 26 .642480 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 17 : 33 .637742 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 17 : 40 .641517 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 17 : 47 .648931 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 17 : 54 .659602 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 18 : 01 .660692 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 18 : 08 .674917 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 18 : 15 .665125 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 18 : 22 .673220 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 18 : 29 .661317 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 18 : 36 .687448 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 18 : 43 .686535 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 18 : 50 .689562 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 18 : 57 .677754 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 19 : 04 .695648 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 19 : 11 .699693 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 19 : 18 .703984 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 19 : 25 .695076 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 19 : 32 .715303 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 19 : 39 .731398 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 19 : 46 .736121 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 19 : 53 .736082 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 20 : 00 .737164 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 20 : 07 .745811 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 20 : 14 .747147 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 20 : 21 .747950 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 20 : 28 .749603 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 20 : 35 .756143 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 20 : 42 .758957 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 20 : 49 .760544 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 20 : 56 .781318 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 21 : 03 .783444 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 21 : 10 .785984 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 21 : 17 .787914 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 21 : 24 .806042 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 21 : 31 .810635 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 21 : 38 .812647 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 21 : 45 .816089 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 21 : 52 .801704 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 21 : 59 .804306 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 22 : 06 .804539 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 22 : 13 .828091 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 22 : 20 .828469 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 22 : 27 .835606 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 22 : 34 .851639 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 22 : 41 .868549 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 22 : 48 .872112 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 22 : 55 .881554 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 23 : 02 .879460 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 23 : 09 .897405 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 23 : 16 .898924 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 23 : 23 .908682 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 23 : 30 .913528 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 23 : 37 .916062 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 23 : 44 .921754 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 23 : 51 .919729 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 23 : 58 .930202 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 24 : 05 .933594 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 24 : 12 .939744 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 24 : 19 .938844 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 24 : 26 .926580 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 24 : 33 .937756 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 24 : 40 .939915 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 24 : 47 .935312 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 24 : 54 .938875 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 25 : 01 .933513 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 25 : 08 .934041 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 25 : 15 .942134 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 25 : 22 .965387 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 25 : 29 .984598 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 25 : 36 .987044 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 25 : 43 .990406 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 25 : 50 .974736 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 25 : 57 .977706 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 26 : 04 .998339 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 26 : 12 .001340 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 26 : 19 .002432 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 26 : 26 .005386 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 26 : 32 .991658 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 26 : 39 .995034 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 26 : 46 .992945 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 26 : 54 .004103 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 27 : 01 .003177 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 27 : 08 .006084 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 27 : 15 .023913 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 27 : 22 .043960 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 27 : 29 .046521 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 27 : 36 .050361 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 27 : 43 .052306 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 27 : 50 .037054 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 27 : 57 .058767 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 28 : 04 .059093 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 28 : 11 .065447 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 28 : 18 .063764 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 28 : 25 .066215 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 28 : 32 .066648 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 28 : 39 .072332 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 28 : 46 .074946 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 28 : 53 .080745 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 29 : 00 .085879 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 29 : 07 .085029 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 29 : 14 .093994 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 29 : 21 .106579 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 29 : 28 .109090 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 29 : 35 .116081 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 29 : 42 .131986 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 29 : 49 .158888 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 29 : 56 .160621 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 30 : 03 .145367 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 30 : 10 .147752 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 30 : 17 .160777 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 30 : 24 .178946 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 30 : 31 .191587 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 30 : 38 .189218 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 30 : 45 .186975 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 30 : 52 .190338 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 30 : 59 .192240 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 31 : 06 .179653 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 31 : 13 .180885 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 31 : 20 .182770 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 31 : 27 .197120 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 31 : 34 .205658 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 31 : 41 .198994 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 31 : 48 .211058 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 31 : 55 .230507 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 32 : 02 .238250 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 32 : 09 .236865 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 32 : 16 .239543 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 32 : 23 .247131 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 32 : 30 .259167 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 32 : 37 .256965 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 32 : 44 .265706 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 32 : 51 .269521 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 32 : 58 .270875 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 33 : 05 .291456 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 33 : 12 .310990 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 33 : 19 .312548 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 33 : 26 .314941 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 33 : 33 .316134 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 33 : 40 .320315 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 33 : 47 .339542 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 33 : 54 .358259 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 34 : 01 .362918 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 34 : 08 .363155 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 34 : 15 .366898 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 34 : 22 .376312 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 34 : 29 .390867 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 34 : 36 .391838 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 34 : 43 .395632 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 34 : 50 .396859 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 34 : 57 .417277 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 35 : 04 .436722 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 35 : 11 .456204 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 35 : 18 .458247 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 35 : 25 .476371 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 35 : 32 .496202 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 35 : 39 .498917 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 35 : 46 .501845 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 35 : 53 .504163 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 36 : 00 .490506 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 36 : 07 .510234 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 36 : 14 .513868 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 36 : 21 .511630 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 36 : 28 .517597 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 36 : 35 .520559 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 36 : 42 .539627 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 36 : 49 .542183 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 36 : 56 .546077 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 37 : 03 .562897 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 37 : 10 .560425 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 37 : 17 .553306 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 37 : 24 .572507 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 37 : 31 .592312 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 37 : 38 .589407 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 37 : 45 .593533 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 37 : 52 .582859 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 37 : 59 .584663 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 38 : 06 .606247 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 38 : 13 .607534 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 38 : 20 .616251 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 38 : 27 .629449 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 38 : 34 .629691 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 38 : 41 .651803 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 38 : 48 .660255 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 38 : 55 .656964 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 39 : 02 .674309 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 39 : 09 .679838 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 39 : 16 .754196 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 39 : 23 .751873 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 39 : 30 .742357 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 39 : 37 .757583 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 39 : 44 .774668 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 39 : 51 .779751 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 39 : 58 .797446 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 40 : 05 .800107 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 40 : 12 .803905 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 40 : 19 .822349 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 40 : 26 .825660 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 40 : 33 .828095 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 40 : 40 .834215 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 40 : 47 .846445 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 40 : 54 .842390 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 41 : 01 .838847 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 41 : 08 .839047 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 41 : 15 .853857 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 41 : 22 .852746 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 41 : 29 .866657 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 41 : 36 .879512 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 41 : 43 .894399 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 41 : 50 .907727 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 41 : 57 .910811 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 42 : 04 .926571 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 42 : 11 .932886 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 42 : 18 .948278 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 42 : 25 .967220 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 42 : 32 .965892 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 42 : 39 .974059 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 42 : 46 .981053 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 42 : 53 .988389 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 43 : 00 .981835 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 13 : 43 : 07 .986711 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\anumani_logo_1280_800.png
-24 MAY 2026, 13 : 43 : 14 .982471 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_meiji_8x5.png
-24 MAY 2026, 13 : 43 : 21 .986623 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_cheetah_16x10.jpeg
-24 MAY 2026, 13 : 43 : 28 .986679 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_giraffe_16x10.png
-24 MAY 2026, 13 : 43 : 35 .980086 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_bull_16x10.jpg
-24 MAY 2026, 13 : 43 : 42 .983625 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_test_image_16_10.jpg
-24 MAY 2026, 14 : 06 : 02 .742749 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 06 : 16 .749911 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 06 : 30 .745164 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 06 : 44 .744186 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 39 : 03 .154373 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 39 : 17 .152102 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 39 : 45 .156636 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 39 : 52 .154431 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 39 : 59 .150911 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 40 : 06 .156046 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 40 : 27 .160346 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 40 : 34 .158971 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 40 : 41 .165200 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 40 : 48 .178080 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 40 : 55 .190727 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 41 : 02 .181388 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 41 : 09 .182829 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 41 : 23 .189224 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 41 : 37 .189376 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 41 : 44 .179216 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 41 : 51 .186932 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 42 : 05 .178130 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 42 : 19 .180327 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 42 : 26 .181223 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 42 : 33 .197637 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 42 : 40 .200313 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 42 : 47 .193786 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 42 : 54 .203895 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 43 : 01 .201161 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 43 : 08 .220449 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 43 : 15 .224089 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 43 : 22 .227446 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 43 : 29 .229474 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 43 : 36 .248873 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 43 : 43 .240255 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 43 : 50 .253233 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 43 : 57 .247839 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 44 : 04 .258522 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 44 : 11 .256212 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 44 : 18 .261885 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 44 : 25 .267477 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 44 : 32 .283208 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 44 : 39 .290786 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 44 : 46 .286133 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 44 : 53 .300334 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 45 : 00 .308742 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 45 : 07 .311192 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 45 : 14 .313481 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 45 : 21 .321742 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 45 : 28 .332890 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 45 : 35 .341501 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 45 : 42 .347865 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 45 : 49 .346836 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 45 : 56 .343321 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 46 : 03 .350420 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 46 : 10 .360001 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 46 : 17 .361621 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 46 : 24 .359744 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 46 : 31 .364484 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 46 : 38 .382181 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 46 : 45 .385900 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 46 : 52 .399305 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 46 : 59 .421131 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 47 : 06 .427599 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 47 : 13 .440865 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 47 : 20 .444211 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 47 : 27 .448525 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 47 : 34 .454542 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 47 : 41 .475358 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 47 : 48 .476761 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 47 : 55 .481785 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 48 : 02 .502203 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 48 : 09 .502602 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 48 : 16 .500613 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 48 : 23 .503752 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 48 : 30 .491029 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 48 : 37 .510911 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 48 : 44 .511919 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 48 : 51 .529611 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 48 : 58 .532981 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 49 : 05 .535337 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 49 : 12 .525828 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 49 : 19 .527531 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 49 : 26 .541620 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 49 : 33 .561412 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 49 : 40 .565402 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 49 : 47 .572191 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 49 : 54 .594242 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 50 : 01 .596658 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 50 : 08 .599179 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 50 : 15 .602238 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 50 : 22 .604291 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 50 : 29 .622684 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 50 : 36 .630327 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 50 : 43 .643748 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 50 : 50 .631929 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_anumani_logo_large.png
-24 MAY 2026, 14 : 50 : 57 .647111 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_meiji_milk.png
-24 MAY 2026, 14 : 51 : 04 .669376 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_magnolia_milk.png
-24 MAY 2026, 14 : 51 : 11 .670453 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Top_up_available.png
-24 MAY 2026, 14 : 51 : 18 .691299 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Simba_plans.png
-24 MAY 2026, 14 : 51 : 25 .692104 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_magnolia_milk.png
-24 MAY 2026, 14 : 51 : 51 .357389 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Simba_plans.png
-24 MAY 2026, 14 : 51 : 58 .351724 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Top_up_available.png
-24 MAY 2026, 14 : 52 : 05 .352373 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_anumani_logo_large.png
-24 MAY 2026, 14 : 52 : 12 .358996 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_Simba_plans.png
-24 MAY 2026, 14 : 52 : 19 .360435 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_magnolia_milk.png
-24 MAY 2026, 14 : 52 : 26 .364286 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_anumani_logo_large.png
-24 MAY 2026, 14 : 52 : 33 .377605 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Simba_plans.png
-24 MAY 2026, 14 : 52 : 40 .373542 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Top_up_available.png
-24 MAY 2026, 14 : 52 : 47 .371112 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_anumani_logo_large.png
-24 MAY 2026, 14 : 52 : 54 .364090 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_Simba_plans.png
-24 MAY 2026, 14 : 53 : 01 .379929 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_magnolia_milk.png
-24 MAY 2026, 14 : 53 : 08 .377208 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_anumani_logo_large.png
-24 MAY 2026, 14 : 53 : 15 .417243 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Simba_plans.png
-24 MAY 2026, 14 : 53 : 22 .490759 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Top_up_available.png
-24 MAY 2026, 14 : 53 : 36 .406282 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_Simba_plans.png
-24 MAY 2026, 14 : 53 : 43 .412809 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_magnolia_milk.png
-24 MAY 2026, 14 : 53 : 50 .426750 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_anumani_logo_large.png
-24 MAY 2026, 14 : 53 : 57 .435894 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Simba_plans.png
-24 MAY 2026, 14 : 54 : 04 .453519 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Top_up_available.png
-24 MAY 2026, 14 : 54 : 18 .452943 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_Simba_plans.png
-24 MAY 2026, 14 : 54 : 25 .459454 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_magnolia_milk.png
-24 MAY 2026, 14 : 54 : 32 .466329 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_anumani_logo_large.png
-24 MAY 2026, 14 : 54 : 39 .482588 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Simba_plans.png
-24 MAY 2026, 14 : 54 : 46 .486148 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Top_up_available.png
-24 MAY 2026, 14 : 55 : 00 .499868 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_Simba_plans.png
-24 MAY 2026, 14 : 55 : 07 .511185 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_magnolia_milk.png
-24 MAY 2026, 14 : 55 : 14 .521665 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_anumani_logo_large.png
-24 MAY 2026, 14 : 55 : 21 .533649 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Simba_plans.png
-24 MAY 2026, 14 : 55 : 28 .530315 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Top_up_available.png
-24 MAY 2026, 14 : 55 : 42 .549355 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_Simba_plans.png
-24 MAY 2026, 14 : 55 : 49 .557153 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_magnolia_milk.png
-24 MAY 2026, 14 : 55 : 56 .561874 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_anumani_logo_large.png
-24 MAY 2026, 14 : 56 : 03 .552047 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_Simba_plans.png
-24 MAY 2026, 14 : 56 : 10 .561433 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_Top_up_available.png
-24 MAY 2026, 14 : 57 : 10 .234577 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_Simba_plans.png
-24 MAY 2026, 14 : 57 : 43 .186712 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_Simba_plans.png
-24 MAY 2026, 14 : 57 : 50 .199624 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_magnolia_milk.png
-24 MAY 2026, 15 : 02 : 21 .044218 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_Simba_plans.png
-24 MAY 2026, 15 : 02 : 35 .067246 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_meiji_milk.png
-24 MAY 2026, 15 : 02 : 42 .080692 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_anumani_logo_large.png
-24 MAY 2026, 15 : 02 : 49 .232451 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_test_image_1280x800.png
-24 MAY 2026, 15 : 02 : 56 .090290 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_Top_up_available.png
-24 MAY 2026, 15 : 03 : 03 .101669 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_Simba_plans.png
-24 MAY 2026, 15 : 03 : 10 .111220 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_magnolia_milk.png
-24 MAY 2026, 15 : 03 : 17 .109791 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_meiji_milk.png
-24 MAY 2026, 15 : 04 : 47 .225504 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_meiji_milk.png
-24 MAY 2026, 15 : 04 : 54 .239003 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_anumani_logo_large.png
-24 MAY 2026, 15 : 05 : 01 .255646 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\6_giraffe_16x10.png
-24 MAY 2026, 15 : 05 : 08 .257765 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_Top_up_available.png
-24 MAY 2026, 15 : 05 : 38 .077769 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_anumani_logo_large.png
-24 MAY 2026, 15 : 05 : 52 .074455 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_Simba_plans.png
-24 MAY 2026, 15 : 05 : 59 .073490 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_magnolia_milk.png
-24 MAY 2026, 15 : 06 : 06 .072159 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_meiji_milk.png
-24 MAY 2026, 15 : 06 : 13 .076491 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_anumani_logo_large.png
-24 MAY 2026, 15 : 06 : 27 .078021 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_Simba_plans.png
-24 MAY 2026, 15 : 06 : 34 .077738 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_magnolia_milk.png
-24 MAY 2026, 15 : 06 : 41 .077735 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_meiji_milk.png
-24 MAY 2026, 15 : 06 : 48 .072193 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\4_anumani_logo_large.png
-24 MAY 2026, 15 : 06 : 55 .095630 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\5_giraffe_16x10.png
-24 MAY 2026, 15 : 07 : 02 .100142 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\1_Simba_plans.png
-24 MAY 2026, 15 : 07 : 09 .114035 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\2_magnolia_milk.png
-24 MAY 2026, 15 : 07 : 16 .127145 - CustomerDisplay: failed to load ad image: C:\Users\SELVAM\OneDrive\Desktop\POS\Project\assets\ads\3_meiji_milk.png
+24 MAY 2026, 17 : 18 : 08 .049336 - Payment processing: RuntimeError('Testing payment failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 1014, in pay_current_receipt
+    receipt_no = committer.commit_paid_sale(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\db_operation\paid_sale_committer.py", line 105, in commit_paid_sale
+    raise RuntimeError("Testing payment failure")
+RuntimeError: Testing payment failure
+
+24 MAY 2026, 17 : 18 : 14 .130284 - Payment processing: RuntimeError('Testing payment failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 1014, in pay_current_receipt
+    receipt_no = committer.commit_paid_sale(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\db_operation\paid_sale_committer.py", line 105, in commit_paid_sale
+    raise RuntimeError("Testing payment failure")
+RuntimeError: Testing payment failure
+
+24 MAY 2026, 17 : 18 : 18 .281521 - Payment processing: RuntimeError('Testing payment failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 1014, in pay_current_receipt
+    receipt_no = committer.commit_paid_sale(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\db_operation\paid_sale_committer.py", line 105, in commit_paid_sale
+    raise RuntimeError("Testing payment failure")
+RuntimeError: Testing payment failure
+
+24 MAY 2026, 17 : 19 : 57 .777520 - Payment processing: RuntimeError('Testing payment failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 1014, in pay_current_receipt
+    receipt_no = committer.commit_paid_sale(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\db_operation\paid_sale_committer.py", line 105, in commit_paid_sale
+    raise RuntimeError("Testing payment failure")
+RuntimeError: Testing payment failure
+
+24 MAY 2026, 17 : 19 : 59 .279224 - Payment processing: RuntimeError('Testing payment failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 1014, in pay_current_receipt
+    receipt_no = committer.commit_paid_sale(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\db_operation\paid_sale_committer.py", line 105, in commit_paid_sale
+    raise RuntimeError("Testing payment failure")
+RuntimeError: Testing payment failure
+
+24 MAY 2026, 17 : 20 : 02 .005943 - Payment processing: RuntimeError('Testing payment failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 1014, in pay_current_receipt
+    receipt_no = committer.commit_paid_sale(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\db_operation\paid_sale_committer.py", line 105, in commit_paid_sale
+    raise RuntimeError("Testing payment failure")
+RuntimeError: Testing payment failure
+
+24 MAY 2026, 17 : 21 : 13 .411875 - Payment processing: RuntimeError('Testing payment failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 1014, in pay_current_receipt
+    receipt_no = committer.commit_paid_sale(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\db_operation\paid_sale_committer.py", line 105, in commit_paid_sale
+    raise RuntimeError("Testing payment failure")
+RuntimeError: Testing payment failure
+
+24 MAY 2026, 17 : 21 : 14 .840783 - Payment processing: RuntimeError('Testing payment failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 1014, in pay_current_receipt
+    receipt_no = committer.commit_paid_sale(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\db_operation\paid_sale_committer.py", line 105, in commit_paid_sale
+    raise RuntimeError("Testing payment failure")
+RuntimeError: Testing payment failure
+
+24 MAY 2026, 17 : 21 : 15 .455918 - Payment processing: RuntimeError('Testing payment failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 1014, in pay_current_receipt
+    receipt_no = committer.commit_paid_sale(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\db_operation\paid_sale_committer.py", line 105, in commit_paid_sale
+    raise RuntimeError("Testing payment failure")
+RuntimeError: Testing payment failure
+
+24 MAY 2026, 17 : 22 : 14 .034984 - Qt: Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\devices\barcode_manager.py", line 208, in eventFilter
+    def eventFilter(self, obj, event):
+
+KeyboardInterrupt
+24 MAY 2026, 17 : 24 : 41 .179802 - Payment processing: RuntimeError('Testing payment failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 1015, in pay_current_receipt
+    receipt_no = committer.commit_paid_sale(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\db_operation\paid_sale_committer.py", line 105, in commit_paid_sale
+    raise RuntimeError("Testing payment failure")
+RuntimeError: Testing payment failure
+
+24 MAY 2026, 17 : 24 : 42 .386526 - Payment processing: RuntimeError('Testing payment failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 1015, in pay_current_receipt
+    receipt_no = committer.commit_paid_sale(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\db_operation\paid_sale_committer.py", line 105, in commit_paid_sale
+    raise RuntimeError("Testing payment failure")
+RuntimeError: Testing payment failure
+
+24 MAY 2026, 17 : 24 : 43 .247077 - Payment processing: RuntimeError('Testing payment failure')
+Traceback (most recent call last):
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\main.py", line 1015, in pay_current_receipt
+    receipt_no = committer.commit_paid_sale(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\SELVAM\OneDrive\Desktop\POS\Project\modules\db_operation\paid_sale_committer.py", line 105, in commit_paid_sale
+    raise RuntimeError("Testing payment failure")
+RuntimeError: Testing payment failure
+

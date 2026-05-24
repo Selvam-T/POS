@@ -38,8 +38,13 @@ class PaymentPanel(QObject):
         self._validation_message = ""
         self._pay_select_buttons = {}
         self._last_invalid_widget = None
+        self._pay_error_locked = False
+        self._pay_button_default_text = "PAY"
         self._attach_to_placeholder()
         self._cache_widgets()
+        pay_btn = self._widgets.get('pay_button')
+        if pay_btn is not None:
+            self._pay_button_default_text = pay_btn.text() or "PAY"
         self._wire_buttons()
         self._wire_inputs()
         self._keypad = KeypadController(
@@ -74,6 +79,26 @@ class PaymentPanel(QObject):
     def notify_payment_success(self) -> None:
         # Emit payment success signal for downstream workflow updates.
         self.paymentSuccess.emit()
+
+    def set_pay_error_locked(self, locked: bool) -> None:
+        """Temporarily lock/unlock PAY after repeated DB commit failures."""
+        self._pay_error_locked = bool(locked)
+        pay_btn = self._widgets.get('pay_button')
+        if pay_btn is not None:
+            pay_btn.setText("PAY err" if self._pay_error_locked else self._pay_button_default_text)
+            try:
+                pay_btn.setProperty("paymentErrorLocked", self._pay_error_locked)
+                style = pay_btn.style()
+                style.unpolish(pay_btn)
+                style.polish(pay_btn)
+                pay_btn.update()
+            except Exception:
+                pass
+        self.update_pay_button_state()
+
+    def get_allocated_cash_amount(self) -> float:
+        """Return current cash allocation without mutating payment fields."""
+        return self._get_validated_amount(self._widgets.get('cash'))
 
     # Layout and wiring helpers
     def _attach_to_placeholder(self) -> None:
@@ -634,14 +659,21 @@ class PaymentPanel(QObject):
         # Respect global payment-in-progress flag from main window to avoid
         # allowing Reset/Pay while a commit is underway.
         busy = getattr(self._main_window, '_payment_in_progress', False)
+        payment_error_locked = self._pay_error_locked or getattr(self._main_window, '_payment_failure_lock_active', False)
 
         if reset_btn is not None:
             reset_btn.setEnabled(total > 0 and not busy)
 
         if print_btn is not None:
-            print_btn.setEnabled(total <= 0)
+            print_btn.setEnabled((total <= 0 or payment_error_locked) and not busy)
 
         if pay_btn is None:
+            return
+
+        if payment_error_locked:
+            pay_btn.setEnabled(False)
+            for btn in self._pay_select_buttons.values():
+                btn.setEnabled(False)
             return
 
         ctx = getattr(self._main_window, 'receipt_context', {}) or {}
@@ -922,6 +954,25 @@ class PaymentPanel(QObject):
 
     def handle_print_clicked(self) -> None:
         # Print the last completed receipt to console (v1 behavior).
+        if getattr(self._main_window, '_payment_failure_lock_active', False):
+            try:
+                payload = self._collect_payment_split()
+                payload['total'] = self._get_total_amount()
+                payload['tender'] = self._get_validated_amount(self._widgets.get('tender'))
+                payload['change'] = self._get_float_value(self._widgets.get('balance'))
+                if hasattr(self._main_window, 'print_payment_failure_receipt'):
+                    self._main_window.print_payment_failure_receipt(payload)
+                    return
+            except Exception as exc:
+                log_error_message(f"Payment failure receipt print setup failed: {exc}")
+                report_to_statusbar(
+                    self._main_window,
+                    "Receipt print failed.",
+                    is_error=True,
+                    duration=3000,
+                )
+                return
+
         ctx = getattr(self._main_window, 'receipt_context', {}) or {}
         receipt_no = ctx.get('last_receipt_no')
         if not receipt_no:

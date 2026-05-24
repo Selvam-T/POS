@@ -114,6 +114,9 @@ class MainLoader(QMainWindow):
         self.current_is_admin = False
         self._payment_in_progress = False
         self._payment_busy_status_ms = 3000
+        self._payment_db_failure_count = 0
+        self._payment_db_failure_limit = 3
+        self._payment_failure_lock_active = False
         try:
             ensure_cash_outflows_table()
         except Exception as exc:
@@ -875,6 +878,7 @@ class MainLoader(QMainWindow):
                 'category': cat,
                 'quantity': qty,
                 'unit': str(row.get('unit') or ''),
+                'unit_price': unit_price,
                 'price': unit_price,
                 'line_total': round(qty * unit_price, 2),
             })
@@ -925,6 +929,44 @@ class MainLoader(QMainWindow):
             except Exception:
                 pass
 
+    def _set_payment_failure_lock(self, locked: bool) -> None:
+        self._payment_failure_lock_active = bool(locked)
+        panel = getattr(self, 'payment_panel_controller', None)
+        if panel is not None:
+            try:
+                panel.set_pay_error_locked(self._payment_failure_lock_active)
+            except Exception:
+                pass
+
+    def _reset_payment_failure_retry_state(self) -> None:
+        self._payment_db_failure_count = 0
+        self._set_payment_failure_lock(False)
+
+    def _record_payment_db_failure(self) -> None:
+        self._payment_db_failure_count += 1
+        if self._payment_db_failure_count >= self._payment_db_failure_limit:
+            self._set_payment_failure_lock(True)
+            report_to_statusbar(
+                self,
+                "Print receipt and clear salesTable to proceed",
+                is_error=True,
+                duration=6000,
+            )
+            return
+
+        report_to_statusbar(
+            self,
+            (
+                "Payment failed to update DB. Please retry. "
+                f"({self._payment_db_failure_count}/{self._payment_db_failure_limit})"
+            ),
+            is_error=True,
+            duration=6000,
+        )
+
+    def print_payment_failure_receipt(self, payment_split: dict) -> None:
+        from modules.payment.recovery_receipt import print_payment_failure_receipt
+        print_payment_failure_receipt(self, payment_split)
 
     def pay_current_receipt(self, payment_split: dict) -> bool:
         """Process current payment via PaidSaleCommitter atomic service."""
@@ -979,6 +1021,7 @@ class MainLoader(QMainWindow):
             )
 
             self.receipt_context['last_receipt_no'] = str(receipt_no)
+            self._reset_payment_failure_retry_state()
 
             self._open_cash_drawer_if_needed(payment_split)
 
@@ -998,6 +1041,7 @@ class MainLoader(QMainWindow):
                 user_message="Payment failed to update DB. Please retry.",
                 duration=6000,
             )
+            self._record_payment_db_failure()
             return False
 
         finally:
@@ -1165,8 +1209,22 @@ class MainLoader(QMainWindow):
             if display is not None:
                 display.hide_payment_result_overlay()
 
-            self._clear_sales_table_core(update_display=False)
+            payment_failure_lock_active = bool(getattr(self, '_payment_failure_lock_active', False))
             panel = getattr(self, 'payment_panel_controller', None)
+            cash_allocated = 0.0
+            if payment_failure_lock_active and panel is not None:
+                try:
+                    cash_allocated = float(panel.get_allocated_cash_amount() or 0.0)
+                except Exception:
+                    cash_allocated = 0.0
+
+            if payment_failure_lock_active and cash_allocated > 0:
+                self._open_cash_drawer_if_needed({'cash': cash_allocated})
+
+            if payment_failure_lock_active:
+                self._reset_payment_failure_retry_state()
+
+            self._clear_sales_table_core(update_display=False)
             if panel is not None:
                 panel.clear_payment_frame()
 

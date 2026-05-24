@@ -289,6 +289,7 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
 def generate_receipt_text_from_snapshot(
     *,
     items: list[dict],
+    payments: list[dict] | None = None,
     receipt_no: str = "TEMP",
     status: str = "UNPAID",
     created_at: str | None = None,
@@ -322,7 +323,7 @@ def generate_receipt_text_from_snapshot(
     _append_payment_breakdown(
         lines,
         status=status,
-        payments=None,
+        payments=payments,
         payable_total=total_amount,
         width=width,
     )
