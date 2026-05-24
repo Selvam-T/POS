@@ -8,7 +8,7 @@ from PyQt5.QtGui import QImage, QPixmap, QIcon
 from PyQt5.QtWidgets import QFileDialog, QListWidget, QListWidgetItem, QLabel, QPushButton
 
 from modules.ui_utils import ui_feedback
-from config import MAX_ADS, ALLOWED_EXTS, REQ_WIDTH, REQ_HEIGHT, REQ_RATIO
+from config import MAX_ADS, ALLOWED_EXTS, REQ_WIDTH, REQ_HEIGHT, ADS_SIZE_TOLERANCE_PCT
 
 THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
@@ -85,6 +85,13 @@ class Screen2AdsController:
         if ok is None:
             ok = False
         ui_feedback.set_status_label(self._status, message, ok=ok, duration=duration)
+
+    def _focus_widget(self, widget) -> None:
+        try:
+            if widget is not None:
+                widget.setFocus()
+        except Exception:
+            pass
 
     # Update count label with current total.
     def _update_count(self, count: int) -> None:
@@ -165,6 +172,7 @@ class Screen2AdsController:
         current = self._list_ad_files()
         if len(current) >= MAX_ADS:
             self._set_status(f"Max {MAX_ADS} images reached.", ok=False)
+            self._focus_widget(self._remove_btn)
             return
 
         files, _ = QFileDialog.getOpenFileNames(
@@ -174,15 +182,30 @@ class Screen2AdsController:
             'Images (*.jpg *.jpeg *.png)',
         )
         if not files:
+            self._focus_widget(self._add_btn)
             return
+
+        def _normalized_base(name: str) -> str:
+            return self._strip_prefix(os.path.basename(name)).lower()
+
+        existing_bases = {
+            _normalized_base(path)
+            for path in self._list_ad_files()
+        }
+        seen_bases: set[str] = set()
 
         remaining = MAX_ADS - len(current)
         accepted: List[str] = []
         rejected: List[tuple[str, str]] = []
         for path in files:
+            base_key = _normalized_base(path)
+            if base_key in existing_bases or base_key in seen_bases:
+                rejected.append((path, 'Duplicate filename'))
+                continue
             ok, reason = self._validate_image(path)
             if ok:
                 accepted.append(path)
+                seen_bases.add(base_key)
             else:
                 rejected.append((path, reason))
 
@@ -203,8 +226,12 @@ class Screen2AdsController:
 
         self.refresh(select_index=len(current))
         self._set_status(self._build_add_status(to_add, rejected, remaining), ok=bool(to_add))
+        if self._list.count() >= MAX_ADS:
+            self._focus_widget(self._remove_btn)
+        else:
+            self._focus_widget(self._add_btn)
 
-    # Validate format, size, and ratio.
+    # Validate format, aspect ratio, then size tolerance around the base resolution.
     def _validate_image(self, path: str) -> tuple[bool, str]:
         _, ext = os.path.splitext(path)
         if ext.lower() not in ALLOWED_EXTS:
@@ -216,12 +243,20 @@ class Screen2AdsController:
 
         width = image.width()
         height = image.height()
-        #if width != REQ_WIDTH or height != REQ_HEIGHT:
-        #    return False, 'Wrong resolution'
 
-        ratio = width / height if height else 0
-        if abs(ratio - REQ_RATIO) > 0.001:
-            return False, 'Wrong aspect ratio'
+        # 1) Check aspect ratio first.
+        uploaded_ratio = width / height if height else 0
+        target_ratio = REQ_WIDTH / REQ_HEIGHT
+        size_drift = ADS_SIZE_TOLERANCE_PCT / 100
+        ratio_tolerance = target_ratio * ((1 + size_drift) / (1 - size_drift) - 1)
+        if abs(uploaded_ratio - target_ratio) > ratio_tolerance:
+            return False, 'Invalid image proportions (Aspect Ratio must be 16:10)'
+
+        # 2) Then allow a small tolerance around the exact 1280x800 size.
+        width_limit = REQ_WIDTH * (ADS_SIZE_TOLERANCE_PCT / 100)
+        height_limit = REQ_HEIGHT * (ADS_SIZE_TOLERANCE_PCT / 100)
+        if abs(width - REQ_WIDTH) > width_limit or abs(height - REQ_HEIGHT) > height_limit:
+            return False, f'Image size must be close to {REQ_WIDTH}x{REQ_HEIGHT} pixels'
 
         return True, ''
 
@@ -261,31 +296,49 @@ class Screen2AdsController:
         item = self._list.currentItem()
         if item is None:
             self._set_status('Select an image to remove.', ok=False)
+            self._focus_widget(self._remove_btn)
             return
+        row = self._list.currentRow()
         path = item.data(Qt.UserRole)
         try:
             os.remove(path)
         except Exception:
             self._set_status('Failed to remove image.', ok=False)
+            self._focus_widget(self._remove_btn)
             return
 
         self._renumber_files()
-        self.refresh()
+        remaining = len(self._list_ad_files())
+        select_index = min(row, remaining - 1) if remaining > 0 else -1
+        self.refresh(select_index=select_index)
         self._set_status('Image removed.', ok=True)
+        self._focus_widget(self._remove_btn)
 
     # Move selected row up.
     def _move_selected_up(self) -> None:
         row = self._list.currentRow()
         if row <= 0:
+            self._focus_widget(self._down_btn)
             return
-        self._swap_rows(row, row - 1)
+        new_row = row - 1
+        self._swap_rows(row, new_row)
+        if new_row == 0:
+            self._focus_widget(self._down_btn)
+        else:
+            self._focus_widget(self._up_btn)
 
     # Move selected row down.
     def _move_selected_down(self) -> None:
         row = self._list.currentRow()
         if row < 0 or row >= self._list.count() - 1:
+            self._focus_widget(self._up_btn)
             return
-        self._swap_rows(row, row + 1)
+        new_row = row + 1
+        self._swap_rows(row, new_row)
+        if new_row >= self._list.count() - 1:
+            self._focus_widget(self._up_btn)
+        else:
+            self._focus_widget(self._down_btn)
 
     # Swap two list rows and persist order.
     def _swap_rows(self, row_a: int, row_b: int) -> None:

@@ -139,6 +139,8 @@ REQ_WIDTH = 1280
 REQ_HEIGHT = 800
 # Aspect ratio derived from required width/height
 REQ_RATIO = REQ_WIDTH / REQ_HEIGHT
+# Temporary Screen 2 dimension tolerance used by the upload gate.
+ADS_SIZE_TOLERANCE_PCT = 2.5
 
 # =========================================================
 # Customer Display (Screen 2) settings

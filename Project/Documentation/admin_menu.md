@@ -86,9 +86,12 @@ Storage model:
 - Order is determined by numeric prefix and persisted by renaming files
 
 Behavior summary:
-- Add images via file picker; accepted formats: JPG, JPEG, PNG
-- Validation: resolution must be exactly 1280x800 (16:10)
-- Limit: max 6 images
+ - Add images via file picker; accepted formats: JPG, JPEG, PNG
+ - Validation: images must be loadable by Qt and pass the following gates (in order):
+	 1. Aspect-ratio check (16:10) — evaluated first to reject distorted images. The validator derives a ratio tolerance from the configured per-dimension size tolerance so ratio and size rules stay aligned.
+	 2. Size check — per-dimension tolerance around the base resolution `1280x800`. The configured tolerance is `ADS_SIZE_TOLERANCE_PCT` in `config.py` (default: `2.5`).
+ - Duplicate filename check: rejects if the source filename (after stripping any leading numeric prefix) matches an existing ad file or another selected file (case-insensitive).
+ - Limit: max 6 images
 - Thumbnails are generated in memory and shown in the list
 - Preview is displayed in `screen2PreviewLabel`
 - Reorder uses Up/Down and persists by renumbering files
@@ -101,8 +104,23 @@ Gating rules:
 - Down is disabled on the last item or if nothing is selected
 
 Status messaging:
-- Errors and success messages are routed through `screen2StatusLabel` via `ui_feedback.set_status_label(...)`
-- Clearing status uses `ui_feedback.clear_status_label(...)`
+ - Errors and success messages are routed through `screen2StatusLabel` via `ui_feedback.set_status_label(...)`
+ - Clearing status uses `ui_feedback.clear_status_label(...)`
+
+Image acceptance details
+ - Config source: `ADS_SIZE_TOLERANCE_PCT` in `config.py` (default `2.5` meaning 2.5%).
+ - Gate 1 — Aspect ratio: the uploaded image's `width / height` is compared to the target `1280 / 800` (1.6). The validator computes a ratio tolerance from `ADS_SIZE_TOLERANCE_PCT` so that allowable pixel drift and allowable ratio drift are consistent.
+ - Gate 2 — Size tolerance: each dimension (width and height) must be within ±(ADS_SIZE_TOLERANCE_PCT%) of the target. With the default 2.5% that corresponds to ±32.0 pixels horizontally and ±20.0 pixels vertically (practically rounded by the code).
+ - Failure messages returned to the UI:
+	 - `Invalid image proportions (Aspect Ratio must be 16:10)` when the ratio gate fails.
+	 - `Image size must be close to 1280x800 pixels` when the per-dimension size gate fails.
+ - Examples (default tolerance = 2.5%):
+	 - `1280 × 800` — accepted (exact match).
+	 - `1280 × 796` — accepted (within height tolerance); previously rejected by a fixed ratio check but now allowed because ratio tolerance is derived from size tolerance.
+	 - `1274 × 800` — accepted (within width tolerance).
+	 - `3840 × 2400` — rejected by the size gate despite perfect 16:10 ratio (protects against huge uploads).
+
+Implementation note: validators live in `modules/menu/screen2_ads_helper.py` and read `ADS_SIZE_TOLERANCE_PCT` from `config.py` so you can adjust the percentage centrally.
 
 ## EXPORT Tab
 

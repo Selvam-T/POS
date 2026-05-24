@@ -9,7 +9,7 @@ import config
 from typing import Iterable
 
 from PyQt5 import uic
-from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtCore import QTimer, Qt, QFileSystemWatcher
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtWidgets import (
     QApplication,
@@ -75,6 +75,7 @@ class CustomerDisplayWindow(QDialog):
         self._clock_timer = QTimer(self)
         self._idle_ads_timer = QTimer(self)
         self._result_overlay_timer = QTimer(self)
+        self._ads_watcher = QFileSystemWatcher(self)
         self._ui_loaded = False
         self._stack = None
         self._mode_stack = None
@@ -115,6 +116,7 @@ class CustomerDisplayWindow(QDialog):
         self._configure_table()
         self._configure_qr_label()
         self._configure_idle_ads()
+        self._wire_ads_watcher()
         self._clock_timer.timeout.connect(self._update_clock)
         self._clock_timer.start(1000)
         self._update_clock()
@@ -247,6 +249,27 @@ class CustomerDisplayWindow(QDialog):
         self._idle_ads_timer.setInterval(interval_ms)
         self._idle_ads_timer.timeout.connect(self._advance_idle_ad)
 
+    def _wire_ads_watcher(self) -> None:
+        try:
+            if os.path.isdir(ADS_DIR):
+                self._ads_watcher.addPath(ADS_DIR)
+        except Exception:
+            pass
+        try:
+            self._ads_watcher.directoryChanged.connect(self._handle_ads_directory_change)
+        except Exception:
+            pass
+
+    def _handle_ads_directory_change(self, *args) -> None:
+        # Keep only the live full-idle screen synchronized; split mode already
+        # shows the payment page and will rescan when it returns to idle.
+        try:
+            if self._mode_stack is None or self._mode_stack.currentIndex() != 0:
+                return
+        except Exception:
+            return
+        self._refresh_idle_ads_from_disk(preserve_current=True)
+
     def _update_clock(self) -> None:
         now = datetime.now()
         if self._date_label is not None:
@@ -349,37 +372,74 @@ class CustomerDisplayWindow(QDialog):
 
         self._stop_idle_ads()
 
+    def _current_idle_ad_path(self) -> str | None:
+        try:
+            if self._idle_ads_paths and 0 <= self._idle_ads_index < len(self._idle_ads_paths):
+                return self._idle_ads_paths[self._idle_ads_index]
+        except Exception:
+            pass
+        return None
+
+    def _refresh_idle_ads_from_disk(self, *, preserve_current: bool = True, advance: bool = False) -> None:
+        target = self._idle_full_label
+        if target is None:
+            return
+
+        try:
+            mode_idx = self._mode_stack.currentIndex() if self._mode_stack is not None else 1
+        except Exception:
+            mode_idx = 1
+        if mode_idx != 0:
+            return
+
+        if not os.path.isdir(ADS_DIR):
+            self._idle_ads_paths = []
+            self._idle_ads_index = 0
+            self._stop_idle_ads()
+            self._show_image_unavailable()
+            return
+
+        new_paths = self._list_idle_ad_files()
+        if not new_paths:
+            self._idle_ads_paths = []
+            self._idle_ads_index = 0
+            self._stop_idle_ads()
+            self._show_image_unavailable()
+            return
+
+        previous_path = self._current_idle_ad_path()
+        self._idle_ads_paths = new_paths
+
+        if advance:
+            if previous_path in new_paths:
+                self._idle_ads_index = (new_paths.index(previous_path) + 1) % len(new_paths)
+            else:
+                self._idle_ads_index = min(self._idle_ads_index + 1, len(new_paths) - 1)
+        elif preserve_current and previous_path in new_paths:
+            self._idle_ads_index = new_paths.index(previous_path)
+        else:
+            self._idle_ads_index = min(self._idle_ads_index, len(new_paths) - 1)
+
+        self._render_idle_ad()
+
+        if len(new_paths) > 1:
+            self._idle_ads_timer.start()
+        else:
+            self._stop_idle_ads()
+
     def _start_idle_ads(self) -> None:
         target = self._idle_full_label
         if target is None:
             return
-        # If the ads directory doesn't exist, log an error and show fallback text.
-        if not os.path.isdir(ADS_DIR):
-            self._safe_log(f"CustomerDisplay: ads directory not found: {ADS_DIR}")
-            self._show_image_unavailable()
-            return
-
-        # Directory exists: list ad files. If none, show fallback text (no log).
-        self._idle_ads_paths = self._list_idle_ad_files()
+        # Reload from disk so newly added, removed, or reordered images are reflected immediately.
         self._idle_ads_index = 0
-        if not self._idle_ads_paths:
-            # No images present: show unified fallback text without logging.
-            self._show_image_unavailable()
-            return
-
-        # Render first ad and start rotation if multiple images are present.
-        self._render_idle_ad()
-        if len(self._idle_ads_paths) > 1:
-            self._idle_ads_timer.start()
+        self._refresh_idle_ads_from_disk(preserve_current=False)
 
     def _stop_idle_ads(self) -> None:
         self._idle_ads_timer.stop()
 
     def _advance_idle_ad(self) -> None:
-        if not self._idle_ads_paths:
-            return
-        self._idle_ads_index = (self._idle_ads_index + 1) % len(self._idle_ads_paths)
-        self._render_idle_ad()
+        self._refresh_idle_ads_from_disk(preserve_current=True, advance=True)
 
     def _render_idle_ad(self) -> None:
         label = self._idle_full_label
