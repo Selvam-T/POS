@@ -12,6 +12,7 @@ import config
 
 amount = 1.01
 reference = "Vijay pos testing"   # alphanumeric only is safest
+QR_CARD_MARGIN = 30
 
 
 def pad2(n):
@@ -105,22 +106,24 @@ def get_qr_error_level(level: str):
 def add_footer_text(img, text):
     img = img.convert("RGB")
     width, height = img.size
-    footer_h = 60
 
-    canvas = Image.new("RGB", (width, height + footer_h), "white")
-    canvas.paste(img, (0, 0))
-
-    draw = ImageDraw.Draw(canvas)
+    measure = ImageDraw.Draw(Image.new("RGB", (1, 1), "white"))
     try:
         font = ImageFont.truetype("arial.ttf", 26)
     except Exception:
         font = ImageFont.load_default()
 
-    bbox = draw.textbbox((0, 0), text, font=font)
+    bbox = measure.textbbox((0, 0), text, font=font)
     text_w = bbox[2] - bbox[0]
     text_h = bbox[3] - bbox[1]
+    footer_gap = QR_CARD_MARGIN
+
+    canvas = Image.new("RGB", (width, height + footer_gap + text_h), "white")
+    canvas.paste(img, (0, 0))
+    draw = ImageDraw.Draw(canvas)
+
     x = (width - text_w) // 2
-    y = height + (footer_h - text_h) // 2
+    y = height + footer_gap - bbox[1]
 
     draw.text((x, y), text, fill="#8F1F7C", font=font)
     return canvas
@@ -146,7 +149,7 @@ def generate_qr_image(payload, expiry_text):
 def add_qr_card(qr_img):
     qr_img = qr_img.convert("RGBA")
 
-    margin = 30
+    margin = QR_CARD_MARGIN
     radius = 30
 
     new_w = qr_img.width + margin * 2
@@ -202,6 +205,8 @@ def main():
     img = generate_qr_image(payload, expiry)
     img = overlay_logo(img)
     img = add_qr_card(img)
+    # img.save("paynow_qr_test.png")
+    # print("Saved: paynow_qr_test.png")
     img.show()
 
 if __name__ == "__main__":

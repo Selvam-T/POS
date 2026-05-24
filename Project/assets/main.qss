@@ -616,9 +616,15 @@ QFrame#screen2RightFrame {
 
 #screen2FooterLabel  { font-size: 12.5px; }
 
+QLabel#screen2QrLabel {
+    background: transparent;
+    border: none;
+}
+
 /* Date and Time use a heavier weight */
 #screen2DateLabel, 
-#screen2TimeLabel {
+#screen2TimeLabel,
+#paymentInfoLabel {
     font-size: 20px;
     font-weight: 500;
 }

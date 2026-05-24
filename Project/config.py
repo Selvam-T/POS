@@ -131,7 +131,7 @@ CATEGORIES_JSON_SCHEMA = {
 # Screen 2 Ads settings
 # =========================================================
 # Maximum number of images allowed for the customer-facing Screen 2 ads
-MAX_ADS = 6
+MAX_ADS = 10
 # Allowed image file extensions (lowercase)
 ALLOWED_EXTS = {'.jpg', '.jpeg', '.png'}
 # Required image resolution for Screen 2 (width x height)

@@ -58,6 +58,14 @@ except Exception:
     qr_generator = None
 
 
+QR_WIDTH_RATIO = 0.67
+QR_HEIGHT_RATIO = 0.57
+QR_FALLBACK_SIZE = max(
+    1,
+    round(min(((CUSTOMER_SCREEN_WIDTH - 40) / 2) * QR_WIDTH_RATIO, (CUSTOMER_SCREEN_HEIGHT - 20) * QR_HEIGHT_RATIO)),
+)
+
+
 class CustomerDisplayWindow(QDialog):
     """Secondary customer display window.
 
@@ -86,6 +94,11 @@ class CustomerDisplayWindow(QDialog):
         self._time_label = None
         self._company_label = None
         self._qr_label = None
+        self._qr_frame = None
+        self._right_frame = None
+        self._qr_pixmap = None
+        self._qr_ref = None
+        self._qr_target_size = 0
         self._idle_full_label = None
         self._payment_result_overlay = None
         self._result_overlay_label = None
@@ -183,6 +196,8 @@ class CustomerDisplayWindow(QDialog):
         self._time_label = self.findChild(QLabel, "screen2TimeLabel")
         self._company_label = self.findChild(QLabel, "screen2CompanyLabel")
         self._qr_label = self.findChild(QLabel, "screen2QrLabel")
+        self._qr_frame = self.findChild(QFrame, "screen2QrFrame")
+        self._right_frame = self.findChild(QFrame, "screen2RightFrame")
         self._idle_full_label = self.findChild(QLabel, "screen2IdleFullLabel")
         self._payment_result_overlay = self.findChild(QFrame, "paymentResultOverlay")
         self._result_overlay_label = self.findChild(QLabel, "paymentResultLabel")
@@ -242,7 +257,26 @@ class CustomerDisplayWindow(QDialog):
     def _configure_qr_label(self) -> None:
         if self._qr_label is None:
             return
-        self._qr_label.setFixedSize(250, 250)
+        self._qr_label.setAlignment(Qt.AlignCenter)
+        self._apply_qr_label_size()
+
+    def _get_qr_display_size(self) -> int:
+        frame = self._right_frame or self._qr_frame
+        if frame is None:
+            return QR_FALLBACK_SIZE
+
+        width = frame.width()
+        height = frame.height()
+        if width <= 0 or height <= 0:
+            return QR_FALLBACK_SIZE
+
+        return max(1, round(min(width * QR_WIDTH_RATIO, height * QR_HEIGHT_RATIO)))
+
+    def _apply_qr_label_size(self) -> int:
+        size = self._get_qr_display_size()
+        if self._qr_label is not None:
+            self._qr_label.setFixedSize(size, size)
+        return size
 
     def _configure_idle_ads(self) -> None:
         interval_ms = max(1000, int(CUSTOMER_DISPLAY_IDLE_AD_INTERVAL * 1000))
@@ -280,11 +314,21 @@ class CustomerDisplayWindow(QDialog):
     def resizeEvent(self, event) -> None:
         """Keep payment result overlay synchronized with dialog resize."""
         super().resizeEvent(event)
+        QTimer.singleShot(0, self._refresh_qr_for_current_size)
         try:
             if self._payment_result_overlay is not None and self._payment_result_overlay.isVisible():
                 self._payment_result_overlay.setGeometry(self.rect())
         except Exception:
             pass
+
+    def _refresh_qr_for_current_size(self) -> None:
+        if self._qr_label is None:
+            return
+        size = self._apply_qr_label_size()
+        if self._qr_pixmap is not None and not self._qr_pixmap.isNull() and size != self._qr_target_size:
+            self.generate_and_set_qr(self._qr_ref, size=size)
+        else:
+            self.set_qr_image(self._qr_pixmap)
 
     def _wire_screen_events(self) -> None:
         app = QApplication.instance()
@@ -612,11 +656,12 @@ class CustomerDisplayWindow(QDialog):
             self._qr_label.setText("QR CODE")
             self._qr_label.setPixmap(QPixmap())
             return
-        scaled = pixmap.scaled(250, 250, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        size = self._apply_qr_label_size()
+        scaled = pixmap.scaled(size, size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self._qr_label.setPixmap(scaled)
         self._qr_label.setText("")
 
-    def generate_and_set_qr(self, ref: str | None = None, size: int = 250) -> None:
+    def generate_and_set_qr(self, ref: str | None = None, size: int | None = None) -> None:
         """Generate a QR pixmap via `modules.payment.qr_generator` and set it.
 
         If the generator is unavailable, falls back to clearing the label.
@@ -630,7 +675,11 @@ class CustomerDisplayWindow(QDialog):
             return
 
         try:
-            pix = qr_generator.generate_qr_pixmap(ref, target_size=size)
+            target_size = size or self._apply_qr_label_size()
+            pix = qr_generator.generate_qr_pixmap(ref, target_size=target_size)
+            self._qr_pixmap = pix
+            self._qr_ref = ref
+            self._qr_target_size = target_size
             self.set_qr_image(pix)
         except Exception:
             try:

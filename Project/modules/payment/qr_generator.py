@@ -7,6 +7,8 @@ import config
 # This QR is a generic merchant PayNow identifier only. It does not include an
 # amount, so customers enter the cashier-confirmed value in their banking app.
 
+QR_CARD_MARGIN = 30
+
 
 
 def pad2(n):
@@ -56,37 +58,37 @@ def make_expiry_yyyymmdd():
 def build_paynow_payload(ref_value: str | None = None):
     """Build a generic PayNow dynamic QR payload without embedding an amount.
 
-    The `ref_value` defaults to the configured `COMPANY_NAME` when omitted.
+    The visual output intentionally mirrors `test_qr.py`; only tag 54
+    (transaction amount) is omitted so customers enter the amount manually.
     """
+    editable = "0"
     expiry = make_expiry_yyyymmdd()
     currency_numeric = get_currency_numeric(config.currency)
     proxy_type_value = get_proxy_type_value(config.paynow_proxy_type)
 
-    merchant_account_info = ""
-    merchant_account_info += tlv("00", "SG.PAYNOW")
-    merchant_account_info += tlv("01", proxy_type_value)
-    merchant_account_info += tlv("02", str(config.paynow_proxy_value))
-    merchant_account_info += tlv("04", expiry)
+    merchant_account_info = (
+        tlv("00", "SG.PAYNOW") +
+        tlv("01", proxy_type_value) +
+        tlv("02", str(config.paynow_proxy_value)) +
+        tlv("03", editable) +
+        tlv("04", expiry)
+    )
 
     if ref_value is None:
-        # Prefer COMPANY_NAME when available; fall back to merchant_name
-        ref_value = getattr(config, 'COMPANY_NAME', None) or getattr(config, 'merchant_name', '')
+        ref_value = getattr(config, "merchant_name", "")
 
-    # Additional data field - trim to a reasonable length for QR payload
-    additional_data = tlv("01", str(ref_value)[:25])
+    additional_data = tlv("01", str(ref_value))
 
     payload = ""
     payload += tlv("00", "01")                          # Payload Format Indicator
     payload += tlv("01", "12")                          # Dynamic QR
-    payload += tlv("26", merchant_account_info)           # Merchant Account Info
-    payload += tlv("52", str(config.mcc))                 # MCC
-    payload += tlv("53", currency_numeric)                # Currency
-    payload += tlv("58", config.country_code)             # Country
-    # Use COMPANY_NAME as the merchant name for clearer identification
-    merchant_display_name = (getattr(config, 'COMPANY_NAME', None) or getattr(config, 'merchant_name', ''))
-    payload += tlv("59", str(merchant_display_name)[:25])  # Merchant Name
-    payload += tlv("60", config.merchant_city[:15])       # Merchant City
-    payload += tlv("62", additional_data)                 # Reference / bill number
+    payload += tlv("26", merchant_account_info)         # Merchant Account Info
+    payload += tlv("52", str(config.mcc))               # MCC
+    payload += tlv("53", currency_numeric)              # Currency
+    payload += tlv("58", config.country_code)           # Country
+    payload += tlv("59", config.merchant_name[:25])     # Merchant Name
+    payload += tlv("60", config.merchant_city[:15])     # Merchant City
+    payload += tlv("62", additional_data)               # Reference / bill number
 
     payload_for_crc = payload + "6304"
     crc = crc16_ccitt_false(payload_for_crc)
@@ -107,22 +109,24 @@ def get_qr_error_level(level: str):
 def add_footer_text(img, text):
     img = img.convert("RGB")
     width, height = img.size
-    footer_h = 60
 
-    canvas = Image.new("RGB", (width, height + footer_h), "white")
-    canvas.paste(img, (0, 0))
-
-    draw = ImageDraw.Draw(canvas)
+    measure = ImageDraw.Draw(Image.new("RGB", (1, 1), "white"))
     try:
         font = ImageFont.truetype("arial.ttf", 26)
     except Exception:
         font = ImageFont.load_default()
 
-    bbox = draw.textbbox((0, 0), text, font=font)
+    bbox = measure.textbbox((0, 0), text, font=font)
     text_w = bbox[2] - bbox[0]
     text_h = bbox[3] - bbox[1]
+    footer_gap = QR_CARD_MARGIN
+
+    canvas = Image.new("RGB", (width, height + footer_gap + text_h), "white")
+    canvas.paste(img, (0, 0))
+    draw = ImageDraw.Draw(canvas)
+
     x = (width - text_w) // 2
-    y = height + (footer_h - text_h) // 2
+    y = height + footer_gap - bbox[1]
 
     draw.text((x, y), text, fill="#8F1F7C", font=font)
     return canvas
@@ -148,7 +152,7 @@ def generate_qr_image(payload, expiry_text):
 def add_qr_card(qr_img):
     qr_img = qr_img.convert("RGBA")
 
-    margin = 30
+    margin = QR_CARD_MARGIN
     radius = 30
 
     new_w = qr_img.width + margin * 2
@@ -199,8 +203,8 @@ def overlay_logo(qr_img):
 def generate_qr_pixmap(ref_value: str | None = None, target_size: int = 250):
     """Return a PyQt5 QPixmap containing the generated QR code card.
 
-    - Uses `COMPANY_NAME` as default reference when `ref_value` is None.
-    - Produces a square image roughly `target_size` pixels wide.
+    - Mirrors the card rendered by `test_qr.py`.
+    - Fits the card within `target_size` while preserving aspect and alpha.
     """
     try:
         from PyQt5.QtGui import QImage, QPixmap
@@ -212,20 +216,16 @@ def generate_qr_pixmap(ref_value: str | None = None, target_size: int = 250):
     img = overlay_logo(img)
     card = add_qr_card(img)
 
-    # Ensure square output and scale to target_size preserving aspect
-    w, h = card.size
-    side = max(w, h)
-    if w != h:
-        bg = Image.new("RGBA", (side, side), "white")
-        bg.paste(card, ((side - w) // 2, (side - h) // 2), card)
-        card = bg
-
-    card = card.resize((target_size, target_size), Image.LANCZOS)
+    if target_size:
+        w, h = card.size
+        scale = min(target_size / w, target_size / h)
+        resized_size = (max(1, round(w * scale)), max(1, round(h * scale)))
+        card = card.resize(resized_size, Image.LANCZOS)
 
     # Convert PIL image to QPixmap
-    rgb = card.convert("RGB")
-    data = rgb.tobytes("raw", "RGB")
-    qimg = QImage(data, rgb.width, rgb.height, QImage.Format_RGB888)
+    rgba = card.convert("RGBA")
+    data = rgba.tobytes("raw", "RGBA")
+    qimg = QImage(data, rgba.width, rgba.height, QImage.Format_RGBA8888)
     pix = QPixmap.fromImage(qimg)
     return pix
 

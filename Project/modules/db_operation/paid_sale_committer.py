@@ -102,7 +102,7 @@ class PaidSaleCommitter:
         paid_at: Optional[str] = None,
         cashier_id: Optional[int] = None,
     ) -> str:
-        #raise RuntimeError("Testing payment failure")
+        # raise RuntimeError("Testing payment failure")
         if not sales_items:
             raise RuntimeError("No sale items to pay")
         if not payment_rows:
