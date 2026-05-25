@@ -12,6 +12,8 @@ from config import (
     VOUCHER_MIN,
     VOUCHER_MAX,
 	STRING_MAX_LENGTH,
+    TODO_ITEM_MAX_LEN,
+    TODO_ROWS,
 	PASSWORD_MIN_LENGTH,
 	EMAIL_REGEX,
 	ALPHANUMERIC_REGEX,
@@ -332,6 +334,33 @@ def validate_note(value):
         return False, err
     return True, ""	
 #--- 8. Note end ---
+
+#--- 8b. todo item start ---
+
+def validate_todo_item(value):
+    ok, err = validate_note(value)
+    if not ok:
+        return False, err
+    s = str(value or '').strip()
+    if s and len(s) > int(TODO_ITEM_MAX_LEN):
+        return False, f"Todo item must be at most {int(TODO_ITEM_MAX_LEN)} characters"
+    return True, ""
+
+
+def validate_todo_items(items):
+    if not isinstance(items, list):
+        return False, "items must be a list"
+    if len(items) > int(TODO_ROWS):
+        return False, f"todo items exceed max rows ({int(TODO_ROWS)})"
+    for item in items:
+        if not isinstance(item, str):
+            return False, "todo items must be strings"
+        ok, err = validate_todo_item(item)
+        if not ok:
+            return False, err
+    return True, ""
+
+#--- 8b. todo item end ---
  
 #--- 9. tender amount start ---
 def validate_currency(value, asset_type="Amount"):

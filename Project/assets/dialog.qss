@@ -258,6 +258,48 @@ QLineEdit[validation="error"] {
     background-color: #fff1f0;
 }
 
+/* =========================================================
+   TODO DIALOG ROW STYLES
+   ========================================================= */
+
+QTableWidget#todoTableWidget {
+    border: 1px solid #c7cdd6;
+    gridline-color: transparent;
+}
+
+QTableWidget#todoTableWidget QHeaderView::section {
+    border: none;
+    background: transparent;
+}
+
+QFrame#todoInputFrame {  
+    border: 1px solid #7e7f7e;
+    border-radius: 10px;
+    background-color: #2196f3;  
+}
+
+QFrame#todoInputFrame QLineEdit#todoInputLineEdit {
+    min-height: 44px;
+    border: none;
+    border-radius: 9px;
+}
+
+QLabel[todoRowCell="number"],
+QLineEdit[todoRowCell="text"],
+QPushButton[todoRowCell="delete"] {
+    font-size: 10.5pt;
+    font-weight: 400;
+    border: none;
+    border-bottom: 1px solid #c7cdd6;
+    background: transparent;
+}
+
+QPushButton[todoRowCell="delete"] {
+    padding: 0px;
+    min-width: 44px;
+    min-height: 44px;
+}
+
 /* View Hold: */
 
 QLineEdit#viewHoldSearchLineEdit:focus,

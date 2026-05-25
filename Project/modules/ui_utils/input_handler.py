@@ -68,6 +68,26 @@ def handle_note_input(line_edit: QLineEdit) -> str:
     _raise_if_invalid(input_validation.validate_note(note))
     return note
 
+
+def handle_todo_input(line_edit: QLineEdit) -> str:
+    todo = canonicalize_title_text(line_edit.text())
+    max_len = int(input_validation.TODO_ITEM_MAX_LEN)
+    try:
+        line_edit.setProperty('input_warning', '')
+    except Exception:
+        pass
+    if len(todo) > max_len:
+        todo = todo[:max_len].rstrip()
+        try:
+            line_edit.setProperty(
+                'input_warning',
+                f"Message was truncated to {max_len} characters",
+            )
+        except Exception:
+            pass
+    _raise_if_invalid(input_validation.validate_todo_item(todo))
+    return todo
+
 def handle_unit_input_combo(combo_box: QComboBox) -> str:
     unit = combo_box.currentText().strip()
     _raise_if_invalid(input_validation.validate_unit(unit))

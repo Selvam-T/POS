@@ -48,6 +48,10 @@ PRODUCT_CATEGORIES = [
 # Maximum allowed rows in active sales table
 MAX_TABLE_ROWS = 50
 
+# TODO List settings
+
+TODO_ROWS = 12
+TODO_ITEM_MAX_LEN = 40
 
 # Table row colors
 ROW_COLOR_EVEN = '#add8e6'      # Even row color

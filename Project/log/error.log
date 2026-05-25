@@ -1,0 +1,3 @@
+26 MAY 2026, 4:23:02 am - Qt: QEventDispatcherWin32::wakeUp: Failed to post a message (Invalid window handle.)
+26 MAY 2026, 4:23:10 am - Qt: QEventDispatcherWin32::wakeUp: Failed to post a message (Invalid window handle.)
+26 MAY 2026, 4:23:10 am - Qt: QObject::~QObject: Timers cannot be stopped from another thread
