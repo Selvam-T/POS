@@ -22,9 +22,13 @@ _MONTHS = (
 
 def _format_timestamp(now: datetime) -> str:
     month = _MONTHS[now.month - 1]
+    hour = now.hour % 12 or 12
+    period = "am" if now.hour < 12 else "pm"
+
     return (
         f"{now.day:02d} {month} {now.year}, "
-        f"{now.hour:02d} : {now.minute:02d} : {now.second:02d} .{now.microsecond:06d}"
+        #f"{now.hour:02d}:{now.minute:02d}:{now.second:02d} .{now.microsecond:06d}"
+        f"{hour}:{now.minute:02d}:{now.second:02d} {period}"
     )
 
 

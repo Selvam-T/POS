@@ -147,14 +147,14 @@ ADS_SIZE_TOLERANCE_PCT = 2.5
 # =========================================================
 # Enable the customer-facing display window. When False, no customer
 # display window will be created or shown.
-CUSTOMER_DISPLAY_ENABLED = True
+CUSTOMER_DISPLAY_ENABLED = False
 
 # When True the display will open as a normal window on the main monitor.
 # Use this during development when a second monitor is not available.
 CUSTOMER_DISPLAY_TEST_MODE = True  # development mode (False = real second screen)
 
-# Which screen index to place the customer display on. 0 = primary, 1 = second
-# monitor. Always check QApplication.screens() length before indexing.
+# Which screen index to place the customer display on. 0 = primary, 1 = second monitor. 
+# Always check QApplication.screens() length before indexing.
 CUSTOMER_SCREEN_INDEX = 1
 
 # Default customer display size (used when not fullscreen)
@@ -167,13 +167,14 @@ CUSTOMER_DISPLAY_FULLSCREEN = False
 
 # When True the app will auto-detect monitor connect/disconnect events
 # and attempt to show/hide the customer display automatically.
+# In CUSTOMER_DISPLAY_TEST_MODE=True AUTO_DETECT is irrelevant.
 CUSTOMER_DISPLAY_AUTO_DETECT = True
 
 # Seconds to wait before returning to Idle page after completed payment.
-CUSTOMER_DISPLAY_IDLE_TIMEOUT = 8
+CUSTOMER_DISPLAY_IDLE_TIMEOUT = 5
 
 # Seconds between fullscreen idle ads (pageIdleFull rotation interval).
-CUSTOMER_DISPLAY_IDLE_AD_INTERVAL = 7
+CUSTOMER_DISPLAY_IDLE_AD_INTERVAL = 6
 
 # Screen 2 date/time display formats (fallback uses these as well)
 CUSTOMER_DISPLAY_DATE_FMT = DATE_FMT

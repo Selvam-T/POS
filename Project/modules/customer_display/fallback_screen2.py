@@ -141,10 +141,6 @@ def _make_main_page(parent: QWidget) -> QWidget:
 	footer.setStyleSheet('font-size: 15px; color: #333333;')
 	layout.addWidget(footer)
 
-	"""qr_label = QLabel('QR CODE', frame)
-	qr_label.setObjectName('screen2QrLabel')
-	qr_label.setVisible(False)"""
-
 	return frame
 
 
@@ -179,20 +175,49 @@ def create_fallback_ui(dialog: QWidget) -> None:
 
 		# Completed overlay (hidden by default)
 		overlay = QFrame(dialog)
-		overlay.setObjectName('_completed_overlay')
-		overlay.setStyleSheet('background-color: rgba(0,0,0,0.78); color: #ffffff;')
+		overlay.setObjectName('paymentResultOverlay')
+		overlay.setStyleSheet('background-color: rgba(0,0,0,0.78);')
 		overlay_layout = QVBoxLayout(overlay)
-		overlay_layout.setContentsMargins(30, 30, 30, 30)
-		title_label = QLabel('Thank you for payment', overlay)
+		overlay_layout.setContentsMargins(0, 0, 0, 0)
+
+		card = QFrame(overlay)
+		card.setObjectName('paymentResultCard')
+		card.setStyleSheet(
+			'background-color: white; border-radius: 12px; padding: 12px;'
+		)
+		card_layout = QVBoxLayout(card)
+		card_layout.setContentsMargins(30, 30, 30, 30)
+		card_layout.setSpacing(12)
+
+		title_label = QLabel('Payment is successful.', card)
+		title_label.setObjectName('paymentResultTitle')
 		title_label.setAlignment(Qt.AlignCenter)
-		title_label.setStyleSheet('font-size: 28px; font-weight: 700;')
-		greeting_label = QLabel(_get_greeting_text(), overlay)
+		title_label.setStyleSheet('font-size: 40px; font-weight: 700; color: #4CAF50; background: transparent;')
+
+		subtitle_label = QLabel('Thank you for your purchase.', card)
+		subtitle_label.setObjectName('paymentResultSubtitle')
+		subtitle_label.setAlignment(Qt.AlignCenter)
+		subtitle_label.setStyleSheet('font-size: 25px; font-weight: 700; color: #4CAF50; background: transparent;')
+
+		total_label = QLabel('$ 0.00', card)
+		total_label.setObjectName('paymentResultTotal')
+		total_label.setAlignment(Qt.AlignCenter)
+		total_label.setStyleSheet('font-size: 40px; font-weight: 700; color: #4CAF50; background: transparent;')
+
+		greeting_label = QLabel(_get_greeting_text(), card)
+		greeting_label.setObjectName('paymentResultGreeting')
 		greeting_label.setAlignment(Qt.AlignCenter)
-		greeting_label.setStyleSheet('font-size: 18px;')
+		greeting_label.setStyleSheet('font-size: 25px; font-weight: 700; color: #4CAF50; background: transparent;')
+
+		card_layout.addStretch()
+		card_layout.addWidget(title_label)
+		card_layout.addWidget(subtitle_label)
+		card_layout.addWidget(total_label)
+		card_layout.addWidget(greeting_label)
+		card_layout.addStretch()
+
 		overlay_layout.addStretch()
-		overlay_layout.addWidget(title_label)
-		overlay_layout.addSpacing(10)
-		overlay_layout.addWidget(greeting_label)
+		overlay_layout.addWidget(card, 0, Qt.AlignCenter)
 		overlay_layout.addStretch()
 		overlay.setVisible(False)
 		overlay.setGeometry(0, 0, dialog.width() or 900, dialog.height() or 700)
@@ -269,9 +294,6 @@ def create_fallback_ui(dialog: QWidget) -> None:
 		QTimer.singleShot(250, _center_dialog)
 
 		setattr(dialog, '_using_fallback_ui', True)
-		setattr(dialog, '_completed_overlay', overlay)
-		setattr(dialog, '_completed_title_label', title_label)
-		setattr(dialog, '_completed_greeting_label', greeting_label)
 
 	except Exception:
 		try:

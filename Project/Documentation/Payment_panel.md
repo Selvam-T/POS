@@ -40,7 +40,7 @@ change = tender - cash
 - **Pay-select buttons**: Choosing a method fills that method with the full total (voucher uses int), clears the other methods, recalculates, and moves focus (cash→tender, others→Pay). A second click just focuses/selects.
 - **Enter navigation**: Context-aware routing—cash with `unalloc <= 0` jumps to tender; pay fields with `unalloc <= 0` jump to Pay; tender enforces `tender >= cash` before advancing and will jump back/select-all if short; if tender>cash while `unalloc > 0`, focus jumps to the next pay field.
 - **Pay button gating**: Requires `total > 0`, `unalloc <= 0`, no validation errors, receipt status in (`NONE`, `UNPAID`), and when `cash > 0`, `tender >= cash`. Reset is enabled only when total>0; Print normally only when total is zero/empty.
-- **Payment DB failure lock**: After three failed DB commit attempts, `main.py` locks `payPayOpsBtn`, changes its text to `PAY err`, and applies the red locked style. The lock is reversible and is cleared when the sales table is cleared through the recovery flow.
+- **Payment DB failure lock**: After three failed DB commit attempts, `main.py` locks `payPayOpsBtn`, changes its text to `PAY err`, applies the red locked style, and keeps the recovery StatusBar message visible until the sales table is cleared. The lock is reversible and is cleared when the sales table is cleared through the recovery flow.
 - **Print during failure lock**: While the DB failure lock is active, `printPayOpsBtn` is enabled even though the cart total is still present. It routes to `modules/payment/recovery_receipt.py` to print a `TEMP-DB-FAIL` snapshot receipt from the current sales table and payment split. This printout is not a DB receipt and does not write any rows.
 
 ## Pay-Select Behavior

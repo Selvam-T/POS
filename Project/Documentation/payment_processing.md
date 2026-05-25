@@ -80,7 +80,8 @@ Snapshot model reminder:
 - Payment DB failures are counted in `main.py`. After three failed commit
   attempts for the current sale, the PAY button enters a recovery lock:
   `payPayOpsBtn` is disabled, its text changes to `PAY err`, and the StatusBar
-  shows "Print receipt and clear salesTable to proceed".
+  persistently shows "Print receipt and clear salesTable to proceed" until the
+  sales table is cleared.
 - While the recovery lock is active, `printPayOpsBtn` is enabled even though the
   cart still has a total. It prints a temporary snapshot receipt using
   `modules/payment/recovery_receipt.py`. This receipt is labeled

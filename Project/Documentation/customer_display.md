@@ -109,6 +109,20 @@ Payment database errors (e.g., connection failures, commit rollbacks) are NOT pr
   flow. None of these recovery details are shown on the customer display.
 - Rationale: Payment DB issues are system-level failures, not customer-facing errors. Showing error messages to customers damages trust and creates confusion at the point of sale.
 
+### Fallback UI
+
+If `ui/screen2.ui` cannot be loaded, `modules/customer_display/fallback_screen2.py`
+builds a minimal customer display in code.
+
+Fallback includes:
+- Basic sale item table, item count, total, company, date, and time.
+- Payment success overlay using the same `paymentResult*` widget names as the
+  normal UI so `show_payment_result()` works through the standard code path.
+
+Fallback intentionally omits:
+- Fullscreen idle ad rotation.
+- PayNow QR display.
+
 ### Configuration
 
 - New config key: `CUSTOMER_DISPLAY_IDLE_AD_INTERVAL` (seconds) controls the

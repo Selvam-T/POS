@@ -117,6 +117,12 @@ class MainLoader(QMainWindow):
         self._payment_db_failure_count = 0
         self._payment_db_failure_limit = 3
         self._payment_failure_lock_active = False
+        self._payment_failure_status_message = "Print receipt (Optional) and clear salesTable to proceed"
+        self._payment_failure_status_reapply_pending = False
+        try:
+            self.statusbar.messageChanged.connect(self._on_statusbar_message_changed)
+        except Exception:
+            pass
         try:
             ensure_cash_outflows_table()
         except Exception as exc:
@@ -494,7 +500,26 @@ class MainLoader(QMainWindow):
                 show_temp_status(sb, "No active sale to place on hold.", 3000)
             return
 
-        self.dialog_wrapper.open_dialog_scanner_blocked(launch_hold_sales_dialog, dialog_key='hold_sales')
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            launch_hold_sales_dialog,
+            dialog_key='hold_sales',
+            on_finish=self._on_hold_sales_completed,
+        )
+
+    def _on_hold_sales_completed(self) -> None:
+        dlg = getattr(self.dialog_wrapper, '_last_dialog', None)
+        if dlg is None or not getattr(dlg, 'held_receipt_no', None):
+            return
+
+        self._reset_receipt_context()
+        self._update_customer_display_from_sales()
+
+        display = getattr(self, 'customer_display', None)
+        if display is not None:
+            try:
+                display.show_hold_result_message(duration_ms=3000)
+            except Exception:
+                pass
 
     # Display the view hold panel when no sale is running.
     def open_viewhold_panel(self):
@@ -937,21 +962,54 @@ class MainLoader(QMainWindow):
                 panel.set_pay_error_locked(self._payment_failure_lock_active)
             except Exception:
                 pass
+        if self._payment_failure_lock_active:
+            self._show_payment_failure_status()
+        else:
+            self._clear_payment_failure_status()
 
     def _reset_payment_failure_retry_state(self) -> None:
         self._payment_db_failure_count = 0
         self._set_payment_failure_lock(False)
 
+    def _show_payment_failure_status(self) -> None:
+        sb = getattr(self, 'statusbar', None)
+        if sb is None:
+            return
+        try:
+            sb.setStyleSheet("color: red;")
+            sb.showMessage(self._payment_failure_status_message, 0)
+        except Exception:
+            pass
+
+    def _clear_payment_failure_status(self) -> None:
+        sb = getattr(self, 'statusbar', None)
+        if sb is None:
+            return
+        try:
+            if sb.currentMessage() == self._payment_failure_status_message:
+                sb.clearMessage()
+        except Exception:
+            pass
+
+    def _on_statusbar_message_changed(self, message: str) -> None:
+        if not bool(getattr(self, '_payment_failure_lock_active', False)):
+            return
+        if message == self._payment_failure_status_message:
+            return
+        if self._payment_failure_status_reapply_pending:
+            return
+        self._payment_failure_status_reapply_pending = True
+        QTimer.singleShot(0, self._restore_payment_failure_status_if_needed)
+
+    def _restore_payment_failure_status_if_needed(self) -> None:
+        self._payment_failure_status_reapply_pending = False
+        if bool(getattr(self, '_payment_failure_lock_active', False)):
+            self._show_payment_failure_status()
+
     def _record_payment_db_failure(self) -> None:
         self._payment_db_failure_count += 1
         if self._payment_db_failure_count >= self._payment_db_failure_limit:
             self._set_payment_failure_lock(True)
-            report_to_statusbar(
-                self,
-                "Print receipt and clear salesTable to proceed",
-                is_error=True,
-                duration=6000,
-            )
             return
 
         report_to_statusbar(
@@ -1218,17 +1276,18 @@ class MainLoader(QMainWindow):
                 except Exception:
                     cash_allocated = 0.0
 
-            if payment_failure_lock_active and cash_allocated > 0:
-                self._open_cash_drawer_if_needed({'cash': cash_allocated})
-
             if payment_failure_lock_active:
                 self._reset_payment_failure_retry_state()
+
+            if payment_failure_lock_active and cash_allocated > 0:
+                self._open_cash_drawer_if_needed({'cash': cash_allocated})
 
             self._clear_sales_table_core(update_display=False)
             if panel is not None:
                 panel.clear_payment_frame()
 
             self._reset_receipt_context()
+            self._update_customer_display_from_sales()
         except Exception as e:
             try:
                 import traceback

@@ -213,6 +213,7 @@ class CustomerDisplayWindow(QDialog):
 
         if self._idle_full_label is not None:
             self._idle_full_label.setAlignment(Qt.AlignCenter)
+            self._idle_full_label.setScaledContents(False)
 
     def _configure_table(self) -> None:
         table = self._table
@@ -315,6 +316,7 @@ class CustomerDisplayWindow(QDialog):
         """Keep payment result overlay synchronized with dialog resize."""
         super().resizeEvent(event)
         QTimer.singleShot(0, self._refresh_qr_for_current_size)
+        QTimer.singleShot(0, self._refresh_idle_ad_for_current_size)
         try:
             if self._payment_result_overlay is not None and self._payment_result_overlay.isVisible():
                 self._payment_result_overlay.setGeometry(self.rect())
@@ -329,6 +331,16 @@ class CustomerDisplayWindow(QDialog):
             self.generate_and_set_qr(self._qr_ref, size=size)
         else:
             self.set_qr_image(self._qr_pixmap)
+
+    def _refresh_idle_ad_for_current_size(self) -> None:
+        if self._idle_full_label is None or not self._idle_ads_paths:
+            return
+        try:
+            if self._mode_stack is None or self._mode_stack.currentIndex() != 0:
+                return
+        except Exception:
+            return
+        self._render_idle_ad()
 
     def _wire_screen_events(self) -> None:
         app = QApplication.instance()
@@ -757,6 +769,7 @@ class CustomerDisplayWindow(QDialog):
         
         # Populate total (show if provided)
         if self._payment_result_total is not None:
+            self._payment_result_total.setStyleSheet("background: transparent;")
             if total is not None:
                 try:
                     total_val = float(total)
@@ -769,6 +782,8 @@ class CustomerDisplayWindow(QDialog):
         
         # Populate greeting
         if self._payment_result_greeting is not None:
+            self._payment_result_greeting.setVisible(True)
+            self._payment_result_greeting.setStyleSheet("background: transparent;")
             greeting_text = footer_text if greeting is None else greeting
             self._payment_result_greeting.setText(greeting_text)
 
@@ -839,6 +854,54 @@ class CustomerDisplayWindow(QDialog):
         self._result_overlay_timer.setSingleShot(True)
         self._result_overlay_timer.timeout.connect(self.hide_payment_result_overlay)
         self._result_overlay_timer.start(timeout_ms)
+
+    def show_hold_result_message(self, duration_ms: int = 1000) -> None:
+        """Briefly acknowledge a held receipt before returning to idle ads."""
+        if self._payment_result_overlay is None:
+            return
+
+        try:
+            self._result_overlay_timer.stop()
+            self._result_overlay_timer.timeout.disconnect()
+        except Exception:
+            pass
+
+        if self._payment_result_card is not None:
+            self._payment_result_card.setProperty("status", "success")
+            self._refresh_widget_style(self._payment_result_card)
+
+        if self._payment_result_title is not None:
+            self._payment_result_title.setText("Receipts placed on hold")
+
+        if self._payment_result_subtitle is not None:
+            self._payment_result_subtitle.setText("")
+            self._payment_result_subtitle.setVisible(False)
+
+        if self._payment_result_total is not None:
+            self._payment_result_total.setText("")
+            self._payment_result_total.setVisible(False)
+
+        if self._payment_result_greeting is not None:
+            self._payment_result_greeting.setText("")
+            self._payment_result_greeting.setVisible(False)
+
+        self._refresh_widget_style(self._payment_result_title)
+        self._refresh_widget_style(self._payment_result_subtitle)
+        self._refresh_widget_style(self._payment_result_total)
+        self._refresh_widget_style(self._payment_result_greeting)
+        self._refresh_widget_style(self._payment_result_card)
+
+        try:
+            self._payment_result_overlay.setGeometry(self.rect())
+        except Exception:
+            pass
+
+        self._payment_result_overlay.setVisible(True)
+        self._payment_result_overlay.raise_()
+
+        self._result_overlay_timer.setSingleShot(True)
+        self._result_overlay_timer.timeout.connect(self.hide_payment_result_overlay)
+        self._result_overlay_timer.start(max(1, int(duration_ms)))
 
     def _refresh_widget_style(self, widget) -> None:
         if widget is None:
