@@ -2,7 +2,7 @@ import os
 import re
 # Dialog size ratios (width_ratio, height_ratio) as fraction of main window
 DIALOG_RATIOS = {
-    'login': (0.45, 0.9),
+    'login': (0.25, 0.3),
 	'vegetable_entry': (0.5, 0.9),
 	'manual_entry': (0.4, 0.3),
 	'logout_menu': (0.25, 0.25),
@@ -99,6 +99,9 @@ CASH_DRAWER_TIMEOUT = 2.0
 _BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 DB_PATH = os.path.join(os.path.dirname(_BASE_DIR), 'db', 'Anumani.db')
 
+# Login dialog background image. Set to None to use the stylesheet background.
+LOGIN_BACKGROUND = os.path.join(_BASE_DIR, 'assets', 'images', 'anumani_logo.png')
+
 # Debug flags (disabled; console logging removed)
 DEBUG_SCANNER_FOCUS = False
 DEBUG_FOCUS_CHANGES = False
@@ -151,7 +154,7 @@ ADS_SIZE_TOLERANCE_PCT = 2.5
 # =========================================================
 # Enable the customer-facing display window. When False, no customer
 # display window will be created or shown.
-CUSTOMER_DISPLAY_ENABLED = False
+CUSTOMER_DISPLAY_ENABLED = True
 
 # When True the display will open as a normal window on the main monitor.
 # Use this during development when a second monitor is not available.

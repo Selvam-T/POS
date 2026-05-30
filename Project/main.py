@@ -1330,6 +1330,12 @@ def main():
                 # Suppress non-focusable fullscreen window activation warnings.
                 if "requestActivate()" in message and "WindowDoesNotAcceptFocus" in message:
                     return
+                # Suppress noisy Qt teardown messages seen on Windows when the
+                # event dispatcher wakes or stops timers after a handle is gone.
+                if "QEventDispatcherWin32::wakeUp: Failed to post a message" in message:
+                    return
+                if "QObject::~QObject: Timers cannot be stopped from another thread" in message:
+                    return
                 try:
                     log_error_message(f"Qt: {message}")
                 except Exception:

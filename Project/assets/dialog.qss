@@ -275,7 +275,7 @@ QTableWidget#todoTableWidget QHeaderView::section {
 QFrame#todoInputFrame {  
     border: 1px solid #7e7f7e;
     border-radius: 10px;
-    background-color: #2196f3;  
+    background-color: #0046b3;  
 }
 
 QFrame#todoInputFrame QLineEdit#todoInputLineEdit {

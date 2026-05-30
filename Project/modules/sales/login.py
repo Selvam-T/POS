@@ -1,23 +1,103 @@
 import os
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QObject, QEvent
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QDialog, QLineEdit, QComboBox, QLabel, QPushButton, QApplication
-import config
+from config import COMPANY_NAME, DIALOG_RATIOS, LOGIN_BACKGROUND
 
 _THIS_DIR = os.path.dirname(os.path.abspath(__file__))
 _PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
 UI_PATH = os.path.join(_PROJECT_DIR, "ui", "login.ui")
 QSS_PATH = os.path.join(_PROJECT_DIR, "assets", "main.qss")
 
+
+def _apply_login_dialog_geometry(dlg, parent=None):
+    ratio = DIALOG_RATIOS.get("login")
+    if not ratio:
+        return
+
+    width_ratio, height_ratio = ratio
+    base_rect = None
+
+    if parent is not None:
+        try:
+            base_rect = parent.frameGeometry()
+        except Exception:
+            base_rect = None
+
+    if base_rect is None or base_rect.isEmpty():
+        screen = None
+        if parent is not None:
+            try:
+                screen = parent.screen()
+            except Exception:
+                screen = None
+        if screen is None:
+            screen = QApplication.primaryScreen()
+        if screen is None:
+            return
+        base_rect = screen.availableGeometry()
+
+    target_width = int(base_rect.width() * width_ratio)
+    target_height = int(base_rect.height() * height_ratio)
+    final_width = max(dlg.minimumWidth(), target_width)
+    final_height = max(dlg.minimumHeight(), target_height)
+
+    dlg.resize(final_width, final_height)
+    dlg.move(
+        base_rect.x() + (base_rect.width() - dlg.width()) // 2,
+        base_rect.y() + (base_rect.height() - dlg.height()) // 2,
+    )
+
+
+def _install_login_background(dlg):
+    if not LOGIN_BACKGROUND or not os.path.exists(LOGIN_BACKGROUND):
+        return
+
+    source_pixmap = QPixmap(LOGIN_BACKGROUND)
+    if source_pixmap.isNull():
+        return
+
+    background_label = QLabel(dlg)
+    background_label.setObjectName("loginBackgroundLabel")
+    background_label.setAttribute(Qt.WA_TransparentForMouseEvents)
+    background_label.setAlignment(Qt.AlignCenter)
+
+    def update_background():
+        size = dlg.size()
+        if size.isEmpty():
+            return
+        scaled = source_pixmap.scaled(
+            size,
+            Qt.KeepAspectRatio,
+            Qt.SmoothTransformation,
+        )
+        background_label.setGeometry(dlg.rect())
+        background_label.setPixmap(scaled)
+        background_label.lower()
+
+    class _BackgroundResizeFilter(QObject):
+        def eventFilter(self, obj, event):
+            if event.type() in (QEvent.Resize, QEvent.Show):
+                update_background()
+            return False
+
+    dlg._login_background_label = background_label
+    dlg._login_background_filter = _BackgroundResizeFilter(dlg)
+    dlg.installEventFilter(dlg._login_background_filter)
+    update_background()
+
 def launch_login_dialog(parent=None, *, return_user: bool = False):
     dlg = uic.loadUi(UI_PATH, parent)
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
-    dlg.customTitle.setText(config.COMPANY_NAME)
+    dlg.customTitle.setText(COMPANY_NAME)
     try:
         with open(QSS_PATH, "r") as f:
             dlg.setStyleSheet(f.read())
     except Exception:
         pass
+    _apply_login_dialog_geometry(dlg, parent)
+    _install_login_background(dlg)
 
     close_btn = dlg.findChild(QPushButton, "customCloseBtn")
     forget_btn = dlg.findChild(QPushButton, "loginForgetBtn")

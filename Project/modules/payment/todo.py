@@ -9,6 +9,7 @@ from modules.ui_utils import input_handler, ui_feedback, todo_state
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui,
     require_widgets,
+    set_dialog_error,
     set_dialog_info,
 )
 
@@ -303,6 +304,13 @@ def launch_todo_dialog(parent=None):
         pass
 
     dlg._todo_items = todo_state.load_todos()
+    try:
+        load_error = todo_state.get_last_load_error()
+        if load_error:
+            set_dialog_error(dlg, load_error, duration=6000)
+            ui_feedback.set_status_label(status_lbl, load_error, ok=False, duration=6000)
+    except Exception:
+        pass
     dlg._todo_added = False
     _configure_table()
     _refresh_table()
