@@ -478,13 +478,14 @@ QGroupBox {
 }
 
 /* =============================================================
-     vegEntryTable
+     vegEntryTable + All tables
     ============================================================= */
 
 /* 1. Table Header Styling */
 QWidget#vegEntryDialog QHeaderView::section,
 QTableWidget#salesTable QHeaderView::section,
-QTableWidget#receiptsTable QHeaderView::section  {
+QTableWidget#viewHoldTable QHeaderView::section,
+QTableWidget#receiptTable QHeaderView::section  {
     font-size: 10pt;
     font-weight: bold;
     font-family: "Verdana";
@@ -499,7 +500,8 @@ QTableWidget#receiptsTable QHeaderView::section  {
 /* 2. Table Styling */
 QWidget#vegEntryDialog QTableWidget#vegEntryTable,
 QWidget#SalesFrame QTableWidget#salesTable,
-QWidget#ViewHoldDialog QTableWidget#receiptsTable{
+QWidget#ViewHoldDialog QTableWidget#viewHoldTable,
+QWidget#receiptTableFrame QTableWidget#receiptTable {
     font-size: 10pt;
     font-weight: bold;
     color: #434d44;
@@ -507,7 +509,7 @@ QWidget#ViewHoldDialog QTableWidget#receiptsTable{
     border: 1px solid #b7adad;; /* outer border of table */
 }
 
-QWidget#ViewHoldDialog QTableWidget#receiptsTable::item:selected {
+QWidget#ViewHoldDialog QTableWidget#viewHoldTable::item:selected {
     background-color: #e3f2fd;
     color: #1565c0;
 }
@@ -674,9 +676,9 @@ QFrame#exportFrame QPushButton[objectName*="ExportBtn"]:focus {
 /* =============================================================
      receipt menu
     ============================================================= */
+QFrame#receiptPreviewFrame,
 QFrame#receiptSearchFrame,
-QFrame#receiptDateFrame,
-QFrame#receiptStatusFrame,
+QFrame#receiptFilterFrame,
 QFrame#receiptActionFrame{
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #f8fafa, stop:1 #f8fafaf5);
     border: 1px solid #c2c4c4;
@@ -714,33 +716,6 @@ QPushButton#resetReceiptBtn:pressed {
     background-color: #aa7eb9;; 
     padding-top: 10px;
 }
-
-/* Print Button */
-
-QPushButton#printReceiptBtn {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #42A5F5, stop:1 #2196F3);
-    border: 1px solid #1976D2;
-}
-QPushButton#printReceiptBtn:hover {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #64B5F6, stop:1 #42A5F5);
-}
-QPushButton#printReceiptBtn:pressed {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #2196F3, stop:1 #1976D2);
-}
-
-/* Void Button */
-
-QPushButton#voidReceiptBtn {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #EF5350, stop:1 #F44336);
-    border: 1px solid #D32F2F;
-}
-QPushButton#voidReceiptBtn:hover {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #E57373, stop:1 #EF5350);
-}
-QPushButton#voidReceiptBtn:pressed {
-    background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #F44336, stop:1 #D32F2F);
-}
-
 
 /* =============================================================
      report menu

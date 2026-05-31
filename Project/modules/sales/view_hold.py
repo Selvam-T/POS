@@ -151,7 +151,7 @@ def launch_viewhold_dialog(parent=None):
     # Resolve required widgets from the loaded UI
     widgets = require_widgets(dlg, {
         'search_in': (QLineEdit, 'viewHoldSearchLineEdit'),
-        'table': (QTableWidget, 'receiptsTable'),
+        'table': (QTableWidget, 'viewHoldTable'),
         'note_in': (QLineEdit, 'viewHoldNoteLineEdit'),
         'status_lbl': (QLabel, 'viewHoldStatusLabel'),
         'ok_btn': (QPushButton, 'btnViewHoldOk'),

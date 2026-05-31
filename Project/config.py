@@ -154,7 +154,7 @@ ADS_SIZE_TOLERANCE_PCT = 2.5
 # =========================================================
 # Enable the customer-facing display window. When False, no customer
 # display window will be created or shown.
-CUSTOMER_DISPLAY_ENABLED = True
+CUSTOMER_DISPLAY_ENABLED = False
 
 # When True the display will open as a normal window on the main monitor.
 # Use this during development when a second monitor is not available.

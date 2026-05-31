@@ -114,7 +114,7 @@
       <number>20</number>
      </property>
      <item>
-      <layout class="QVBoxLayout" name="receiptLeftLayout" stretch="7,0,0,2">
+      <layout class="QVBoxLayout" name="receiptLeftLayout" stretch="7,1,1">
        <property name="spacing">
         <number>10</number>
        </property>
@@ -168,52 +168,16 @@
             <property name="sortingEnabled">
              <bool>true</bool>
             </property>
-            <property name="rowCount">
-             <number>0</number>
-            </property>
-            <property name="columnCount">
-             <number>6</number>
-            </property>
             <attribute name="verticalHeaderVisible">
              <bool>false</bool>
             </attribute>
-            <column>
-             <property name="text">
-              <string>S/N</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Receipt No</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Transaction Date</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Payment Date</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Cancellation Date</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>Amount</string>
-             </property>
-            </column>
            </widget>
           </item>
          </layout>
         </widget>
        </item>
        <item>
-        <widget class="QFrame" name="receiptStatusFrame">
+        <widget class="QFrame" name="receiptFilterFrame">
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -264,37 +228,28 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QComboBox" name="receiptStatusComboBox"/>
+             <widget class="QComboBox" name="receiptStatusComboBox">
+              <property name="placeholderText">
+               <string>-- Select Receipt Status --</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="receiptDateTypeFieldLbl">
+              <property name="text">
+               <string>Filter by Date Type :</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="receiptDateTypeComboBox">
+              <property name="placeholderText">
+               <string>-- Select Date Type --</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
-         </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QFrame" name="receiptDateFrame">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QVBoxLayout" name="receiptDateLayout">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
           <item>
            <layout class="QHBoxLayout" name="receiptDateRangeLayout" stretch="0,1,0,0,0,1">
             <property name="spacing">
@@ -493,6 +448,9 @@
               <property name="editable">
                <bool>true</bool>
               </property>
+              <property name="placeholderText">
+               <string>-- Select Product Name --</string>
+              </property>
              </widget>
             </item>
            </layout>
@@ -632,13 +590,13 @@
          </property>
          <layout class="QVBoxLayout" name="receiptActionLayout">
           <property name="spacing">
-           <number>20</number>
+           <number>10</number>
           </property>
           <property name="leftMargin">
            <number>30</number>
           </property>
           <property name="topMargin">
-           <number>10</number>
+           <number>20</number>
           </property>
           <property name="rightMargin">
            <number>30</number>
@@ -647,18 +605,40 @@
            <number>10</number>
           </property>
           <item>
-           <widget class="QPushButton" name="printReceiptBtn">
-            <property name="text">
-             <string>PRINT Receipt</string>
+           <layout class="QHBoxLayout" name="receiptActionRadioLayout">
+            <property name="spacing">
+             <number>30</number>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="voidReceiptBtn">
-            <property name="text">
-             <string>VOID Receipt</string>
+            <property name="leftMargin">
+             <number>0</number>
             </property>
-           </widget>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QRadioButton" name="receiptPrintRadioBtn">
+              <property name="text">
+               <string>Print</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="receiptVoidRadioBtn">
+              <property name="text">
+               <string>Void</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
            <widget class="QGroupBox" name="receiptNoteGroupBox">
@@ -688,7 +668,7 @@
              <item>
               <widget class="QLineEdit" name="receiptNoteLineEdit">
                <property name="placeholderText">
-                <string>-- Explain why receipt is Voided --</string>
+                <string>-- Optional --</string>
                </property>
               </widget>
              </item>
@@ -706,11 +686,34 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btnReceiptCancel">
-            <property name="text">
-             <string>CANCEL</string>
+           <layout class="QHBoxLayout" name="receiptActionBtnsLayout">
+            <property name="spacing">
+             <number>40</number>
             </property>
-           </widget>
+            <property name="leftMargin">
+             <number>30</number>
+            </property>
+            <property name="rightMargin">
+             <number>30</number>
+            </property>
+            <item>
+             <widget class="QPushButton" name="btnReceiptOk">
+              <property name="text">
+               <string>OK</string>
+              </property>
+              <property name="default">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnReceiptCancel">
+              <property name="text">
+               <string>CANCEL</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>

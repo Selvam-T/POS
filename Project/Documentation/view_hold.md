@@ -66,7 +66,7 @@ The controller uses shared dialog utilities:
 Required controls (objectName):
 
 - `viewHoldSearchLineEdit` (search)
-- `receiptsTable` (table)
+- `viewHoldTable` (table)
 - `viewHoldNoteLineEdit` (note for VOID)
 - `viewHoldStatusLabel` (dialog-local feedback)
 - `btnViewHoldOk`, `btnViewHoldCancel`
