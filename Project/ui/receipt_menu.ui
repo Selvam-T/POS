@@ -97,9 +97,9 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="receiptBodyLayout" stretch="3,2">
+    <layout class="QHBoxLayout" name="receiptBodyLayout" stretch="12,7">
      <property name="spacing">
-      <number>30</number>
+      <number>10</number>
      </property>
      <property name="leftMargin">
       <number>15</number>
@@ -568,12 +568,15 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="receiptPreviewPlaceholderLabel">
-            <property name="text">
+           <widget class="QPlainTextEdit" name="receiptPreviewLabel">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="plainText">
              <string>Selected receipt preview appears here</string>
             </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+            <property name="centerOnScroll">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
@@ -634,11 +637,27 @@
             <item>
              <widget class="QRadioButton" name="receiptVoidRadioBtn">
               <property name="text">
-               <string>Void</string>
+               <string>Void (UNPAID only)</string>
               </property>
              </widget>
             </item>
            </layout>
+          </item>
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <widget class="QGroupBox" name="receiptNoteGroupBox">

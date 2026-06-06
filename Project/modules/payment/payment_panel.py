@@ -250,7 +250,7 @@ class PaymentPanel(QObject):
                     os.path.join(os.path.dirname(__file__), '..', '..', 'ui', 'todo.ui')
                 )
                 try:
-                    report_to_statusbar(host, "Opening TODO dialog...", ok=True, duration=1500)
+                    report_to_statusbar(host, "Opening TODO dialog...", is_error=False, duration=1500)
                 except Exception:
                     pass
 

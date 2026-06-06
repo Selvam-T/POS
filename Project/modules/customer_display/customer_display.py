@@ -369,7 +369,7 @@ class CustomerDisplayWindow(QDialog):
             self._connected = True
             self._show_display()
             if not initial:
-                report_to_statusbar(self._host, "Customer display connected", ok=True, duration=1500)
+                report_to_statusbar(self._host, "Customer display connected", is_error=False, duration=1500)
             return
 
         screens = QApplication.screens()
@@ -380,10 +380,10 @@ class CustomerDisplayWindow(QDialog):
             self._connected = True
             self._show_display()
             if not initial:
-                report_to_statusbar(self._host, "Customer display connected", ok=True, duration=1500)
+                report_to_statusbar(self._host, "Customer display connected", is_error=False, duration=1500)
         else:
             if self._connected or initial:
-                report_to_statusbar(self._host, "Customer display disconnected", ok=True, duration=1500)
+                report_to_statusbar(self._host, "Customer display disconnected", is_error=False, duration=1500)
             self._connected = False
             self.hide()
 

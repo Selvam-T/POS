@@ -20,6 +20,10 @@ from .hold_receipts_repo import (
     search_unpaid_receipts_by_customer,
     void_receipt,
 )
+from .receipt_repo import (
+    search_receipts,
+    void_unpaid_receipt,
+)
 from .cash_outflows_repo import (
     ensure_table as ensure_cash_outflows_table,
     add_outflow,
@@ -168,6 +172,8 @@ __all__ = [
     'list_unpaid_receipts',
     'search_unpaid_receipts_by_customer',
     'void_receipt',
+    'search_receipts',
+    'void_unpaid_receipt',
     'ensure_cash_outflows_table',
     'add_outflow',
     'list_outflows',

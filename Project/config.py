@@ -154,11 +154,11 @@ ADS_SIZE_TOLERANCE_PCT = 2.5
 # =========================================================
 # Enable the customer-facing display window. When False, no customer
 # display window will be created or shown.
-CUSTOMER_DISPLAY_ENABLED = False
+CUSTOMER_DISPLAY_ENABLED = True
 
 # When True the display will open as a normal window on the main monitor.
-# Use this during development when a second monitor is not available.
-CUSTOMER_DISPLAY_TEST_MODE = True  # development mode (False = real second screen)
+# False = display onreal second screen
+CUSTOMER_DISPLAY_TEST_MODE = False  
 
 # Which screen index to place the customer display on. 0 = primary, 1 = second monitor. 
 # Always check QApplication.screens() length before indexing.
@@ -176,7 +176,6 @@ CUSTOMER_DISPLAY_FULLSCREEN = False
 # and attempt to show/hide the customer display automatically.
 # In CUSTOMER_DISPLAY_TEST_MODE=True AUTO_DETECT is irrelevant.
 CUSTOMER_DISPLAY_AUTO_DETECT = True
-
 # Seconds to wait before returning to Idle page after completed payment.
 CUSTOMER_DISPLAY_IDLE_TIMEOUT = 5
 

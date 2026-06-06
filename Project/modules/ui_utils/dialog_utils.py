@@ -57,8 +57,21 @@ def center_dialog_relative_to(dlg: QDialog, host) -> None:
         pass
 
 
-def report_to_statusbar(host_window, message: str, *, is_error: bool = True, duration: int = 4000) -> None:
-    """Best-effort: show a transient message on the MainWindow status bar."""
+def report_to_statusbar(
+    host_window,
+    message: str,
+    *,
+    is_error: bool = True,
+    ok: Optional[bool] = None,
+    duration: int = 4000,
+) -> None:
+    """Best-effort: show a transient message on the MainWindow status bar.
+
+    ``ok`` is kept as a compatibility alias used by a few callers. Passing
+    ``ok=True`` means the message is informational, not an error.
+    """
+    if ok is not None:
+        is_error = not bool(ok)
     try:
         ui_feedback.show_main_status(host_window, message, is_error=is_error, duration=duration)
     except Exception:

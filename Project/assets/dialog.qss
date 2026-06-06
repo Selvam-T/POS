@@ -514,6 +514,11 @@ QWidget#ViewHoldDialog QTableWidget#viewHoldTable::item:selected {
     color: #1565c0;
 }
 
+QWidget#receiptTableFrame QTableWidget#receiptTable::item:selected {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
 /* 3. Alternating row colors are set programmatically in Python due to embedded widgets. */
 
 /* 4. --- Quantity Input Field --- */
@@ -683,6 +688,28 @@ QFrame#receiptActionFrame{
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #f8fafa, stop:1 #f8fafaf5);
     border: 1px solid #c2c4c4;
     padding: 0px 10px 0px 10px;
+}
+
+QFrame#receiptPreviewFrame{
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #f8fafa, stop:1 #f8fafaf5);
+    border: 1px solid #c2c4c4;
+    padding: 0px;
+}
+
+QLineEdit#receiptNoteLineEdit[locked="true"],
+QLineEdit#receiptNoteLineEdit[locked="true"]:disabled {
+    color: #5c5e5fb1;
+    placeholder-text-color: #5c5e5fb1;
+    background-color: #f5f5f5;
+    border: 1px solid #dcdcdc;
+}
+
+QPlainTextEdit#receiptPreviewLabel {
+    background-color: transparent;
+    color: #222222;
+    border: none;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 10pt;
 }
 
 /* Search Button */

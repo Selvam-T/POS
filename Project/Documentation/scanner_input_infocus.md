@@ -51,6 +51,7 @@ This document explains how barcode scanner input is handled across the POS UI to
   - Default-button behavior in GUIs can cause Enter to activate buttons if not suppressed.
 - Timing-based burst detection is heuristic:
   - Extremely fast typists or atypical scanners could mimic similar timings.
+  - Current side effect: very fast manual typing in non-product-code fields can be interpreted as scanner input. During that active scan window, `BarcodeManager` restores the pre-scan text for forbidden fields, so characters may appear to be swallowed unless the user types more slowly. This has been observed in Receipt History fields such as `receiptNoteLineEdit`.
 
 ## Mitigations in this build
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 from typing import Any, Dict, List, Optional
 
-from .db import get_conn, transaction
+from .db import get_conn, now_iso, transaction
 
 
 def _table_columns(conn: sqlite3.Connection, table_name: str) -> set[str]:
@@ -162,6 +162,235 @@ def list_receipt_payments_by_no(
 
         rows = c.execute(sql, (where_val,)).fetchall()
         return [dict(r) for r in rows]
+    finally:
+        if own:
+            c.close()
+
+
+def _receipt_cols(conn: sqlite3.Connection) -> Dict[str, Optional[str]]:
+    cols = _table_columns(conn, "receipts")
+    return {
+        "id_col": _first_existing(cols, "id", "receipt_id"),
+        "no_col": _first_existing(cols, "receipt_no", "receipt_number"),
+        "status_col": _first_existing(cols, "status"),
+        "created_col": _first_existing(cols, "created_at"),
+        "paid_col": _first_existing(cols, "paid_at"),
+        "cancelled_col": _first_existing(cols, "cancelled_at"),
+        "note_col": _first_existing(cols, "note", "notes"),
+    }
+
+
+def _receipt_item_cols(conn: sqlite3.Connection) -> Dict[str, Optional[str]]:
+    cols = _table_columns(conn, "receipt_items")
+    return {
+        "link_col": _first_existing(cols, "receipt_id", "receipt_no", "receipt_number"),
+        "code_col": _first_existing(cols, "product_code"),
+        "name_col": _first_existing(cols, "product_name", "name"),
+        "line_total_col": _first_existing(cols, "line_total"),
+        "qty_col": _first_existing(cols, "quantity", "qty"),
+        "price_col": _first_existing(cols, "unit_price", "price"),
+    }
+
+
+def _date_match_expr(col: str) -> str:
+    return f"{col} IS NOT NULL AND date({col}) >= date(?) AND date({col}) <= date(?)"
+
+
+def search_receipts(
+    *,
+    status: str = "ALL",
+    date_type: str = "ALL",
+    from_date: Optional[str] = None,
+    to_date: Optional[str] = None,
+    receipt_no: str = "",
+    product_code: str = "",
+    product_name: str = "",
+    limit: Optional[int] = None,
+    conn: Optional[sqlite3.Connection] = None,
+) -> List[Dict[str, Any]]:
+    """Return receipt rows for the receipt-management dialog.
+
+    Date filters use SQLite date() so stored values with either ``T`` or space
+    separators compare correctly. ``date_type='ALL'`` checks created, paid, and
+    cancelled dates but returns each receipt once.
+    """
+    own = conn is None
+    c = conn or get_conn()
+    try:
+        rcols = _receipt_cols(c)
+        icols = _receipt_item_cols(c)
+        no_col = rcols.get("no_col")
+        if no_col is None:
+            return []
+
+        id_col = rcols.get("id_col")
+        status_col = rcols.get("status_col")
+        created_col = rcols.get("created_col")
+        paid_col = rcols.get("paid_col")
+        cancelled_col = rcols.get("cancelled_col")
+
+        select_parts = [
+            _select_alias(id_col, "receipt_id", "NULL"),
+            _select_alias(no_col, "receipt_no", "''"),
+            _select_alias(status_col, "status", "''"),
+            _select_alias(created_col, "created_at", "''"),
+            _select_alias(paid_col, "paid_at", "''"),
+            _select_alias(cancelled_col, "cancelled_at", "''"),
+        ]
+
+        amount_expr = "0"
+        item_link_col = icols.get("link_col")
+        line_total_col = icols.get("line_total_col")
+        if item_link_col is not None:
+            if line_total_col is not None:
+                line_expr = f"COALESCE({line_total_col}, 0)"
+            else:
+                qty_col = icols.get("qty_col")
+                price_col = icols.get("price_col")
+                if qty_col is not None and price_col is not None:
+                    line_expr = f"COALESCE({qty_col}, 0) * COALESCE({price_col}, 0)"
+                else:
+                    line_expr = "0"
+
+            if item_link_col == "receipt_id" and id_col is not None:
+                amount_expr = (
+                    f"(SELECT COALESCE(SUM({line_expr}), 0) FROM receipt_items ri "
+                    f"WHERE ri.{item_link_col} = receipts.{id_col})"
+                )
+            else:
+                amount_expr = (
+                    f"(SELECT COALESCE(SUM({line_expr}), 0) FROM receipt_items ri "
+                    f"WHERE ri.{item_link_col} = receipts.{no_col})"
+                )
+        select_parts.append(f"{amount_expr} AS amount")
+
+        where_parts: List[str] = []
+        params: List[Any] = []
+
+        status_clean = str(status or "ALL").strip().upper()
+        if status_clean and status_clean != "ALL" and status_col is not None:
+            where_parts.append(f"{status_col} = ? COLLATE NOCASE")
+            params.append(status_clean)
+
+        date_map = {
+            "TRANSACTION": created_col,
+            "TRANSACTION DATE": created_col,
+            "PAYMENT": paid_col,
+            "PAYMENT DATE": paid_col,
+            "CANCELLATION": cancelled_col,
+            "CANCELLATION DATE": cancelled_col,
+            "CANCELLED": cancelled_col,
+            "CANCELLED DATE": cancelled_col,
+        }
+        date_type_clean = str(date_type or "ALL").strip().upper()
+        date_cols: List[str] = []
+        if date_type_clean == "ALL":
+            date_cols = [col for col in (created_col, paid_col, cancelled_col) if col is not None]
+        else:
+            selected = date_map.get(date_type_clean)
+            if selected is not None:
+                date_cols = [selected]
+
+        if from_date and to_date and date_cols:
+            if len(date_cols) == 1:
+                where_parts.append(_date_match_expr(date_cols[0]))
+                params.extend([from_date, to_date])
+            else:
+                where_parts.append("(" + " OR ".join(_date_match_expr(col) for col in date_cols) + ")")
+                for _col in date_cols:
+                    params.extend([from_date, to_date])
+
+        receipt_no_text = str(receipt_no or "").strip()
+        if receipt_no_text:
+            where_parts.append(f"{no_col} LIKE ? COLLATE NOCASE")
+            params.append(f"%{receipt_no_text}%")
+
+        def _item_exists_clause(item_col: Optional[str], value: str) -> None:
+            text = str(value or "").strip()
+            if not text or item_col is None or item_link_col is None:
+                return
+            if item_link_col == "receipt_id" and id_col is not None:
+                link_expr = f"ri.{item_link_col} = receipts.{id_col}"
+            else:
+                link_expr = f"ri.{item_link_col} = receipts.{no_col}"
+            where_parts.append(
+                f"EXISTS (SELECT 1 FROM receipt_items ri WHERE {link_expr} "
+                f"AND ri.{item_col} LIKE ? COLLATE NOCASE)"
+            )
+            params.append(f"%{text}%")
+
+        _item_exists_clause(icols.get("code_col"), product_code)
+        _item_exists_clause(icols.get("name_col"), product_name)
+
+        sql = f"SELECT {', '.join(select_parts)} FROM receipts"
+        if where_parts:
+            sql += " WHERE " + " AND ".join(where_parts)
+
+        order_col = created_col or paid_col or cancelled_col or no_col
+        if order_col:
+            sql += f" ORDER BY {order_col} DESC"
+        if no_col:
+            sql += f", {no_col} DESC" if " ORDER BY " in sql else f" ORDER BY {no_col} DESC"
+        if limit and int(limit) > 0:
+            sql += f" LIMIT {int(limit)}"
+
+        rows = c.execute(sql, tuple(params)).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        if own:
+            c.close()
+
+
+def void_unpaid_receipt(
+    *,
+    receipt_id: Optional[int] = None,
+    receipt_no: Optional[str] = None,
+    note: Optional[str] = None,
+    conn: Optional[sqlite3.Connection] = None,
+) -> bool:
+    """Mark an UNPAID receipt CANCELLED. PAID receipts are never voided here."""
+    if receipt_id is None and not receipt_no:
+        raise ValueError("receipt_id or receipt_no is required")
+
+    own = conn is None
+    c = conn or get_conn()
+    try:
+        cols = _receipt_cols(c)
+        status_col = cols.get("status_col")
+        if status_col is None:
+            raise RuntimeError("receipts table missing status column")
+
+        id_col = cols.get("id_col")
+        no_col = cols.get("no_col")
+        where_parts: List[str] = [f"{status_col} = ? COLLATE NOCASE"]
+        params: List[Any] = ["UNPAID"]
+
+        if receipt_id is not None and id_col is not None:
+            where_parts.append(f"{id_col} = ?")
+            params.append(int(receipt_id))
+        elif receipt_no and no_col is not None:
+            where_parts.append(f"{no_col} = ? COLLATE NOCASE")
+            params.append(str(receipt_no))
+        else:
+            raise RuntimeError("Unable to resolve receipt identifier for void")
+
+        set_parts = [f"{status_col} = ?"]
+        set_params: List[Any] = ["CANCELLED"]
+
+        cancelled_col = cols.get("cancelled_col")
+        if cancelled_col is not None:
+            set_parts.append(f"{cancelled_col} = ?")
+            set_params.append(now_iso())
+
+        note_col = cols.get("note_col")
+        if note_col is not None:
+            set_parts.append(f"{note_col} = ?")
+            set_params.append(str(note or "").strip())
+
+        sql = f"UPDATE receipts SET {', '.join(set_parts)} WHERE {' AND '.join(where_parts)}"
+        with transaction(c):
+            cur = c.execute(sql, tuple(set_params + params))
+        return bool(cur.rowcount)
     finally:
         if own:
             c.close()
