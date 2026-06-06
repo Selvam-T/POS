@@ -27,56 +27,80 @@ from modules.ui_utils import ui_feedback, input_handler
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate
 from modules.ui_utils.error_logger import log_error_message
 from modules.date_time import format_date, format_time
+from modules.table.table_widget_helpers import (
+    apply_table_columns,
+    configure_readonly_row_selection_table,
+)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 VIEW_HOLD_UI = os.path.join(UI_DIR, 'view_hold.ui')
 
 
-def _configure_receipts_table(table: QTableWidget) -> None:
-    """Configure the receipts table columns, header layout and basic behavior.
-
-    This sets column counts, header labels/alignment, resize modes and
-    enables interactive sorting (users can click headers to re-sort).
-    """
-    table.setColumnCount(5)
-    table.setHorizontalHeaderLabels([
-        'Receipt No ↑↓', 'Customer Name ↑↓', 'Grand Total ↑↓', 'Date ↑↓', 'Time ↑↓'
-    ])
-    header = table.horizontalHeader()
-    header.setSectionResizeMode(0, QHeaderView.Fixed)
-    header.setSectionResizeMode(1, QHeaderView.Stretch)
-    header.setSectionResizeMode(2, QHeaderView.Fixed)
-    header.setSectionResizeMode(3, QHeaderView.Fixed)
-    header.setSectionResizeMode(4, QHeaderView.Fixed)
-    header.resizeSection(0, 200)
-    header.resizeSection(2, 150)
-    header.resizeSection(3, 150)
-    header.resizeSection(4, 150)
-
-    header_align = {
-        0: Qt.AlignCenter,
-        1: Qt.AlignLeft | Qt.AlignVCenter,
-        2: Qt.AlignLeft | Qt.AlignVCenter,
-        3: Qt.AlignCenter,
-        4: Qt.AlignCenter,
-    }
-    for col, align in header_align.items():
+class ViewHoldTableItem(QTableWidgetItem):
+    def __lt__(self, other):
         try:
-            item = table.horizontalHeaderItem(col)
-            if item is not None:
-                item.setTextAlignment(align)
+            left = self.data(Qt.UserRole + 10)
+            right = other.data(Qt.UserRole + 10)
+            if left is not None and right is not None:
+                return left < right
         except Exception:
             pass
-    table.setSelectionBehavior(QTableWidget.SelectRows)
-    table.setSelectionMode(QTableWidget.SingleSelection)
-    table.setEditTriggers(QTableWidget.NoEditTriggers)
-    table.setSortingEnabled(True)
-    table.setAlternatingRowColors(True)
+        return super().__lt__(other)
+
+
+def _configure_receipts_table(table: QTableWidget) -> None:
+    """Configure the receipts table for explicit header-click sorting.
+
+    Shared helpers handle the common list-table column setup, header
+    tooltips, and read-only row-selection behavior. View Hold keeps its
+    sort keys and header-click sorting local because the row shape and
+    selection workflow are dialog-specific.
+    """
+    apply_table_columns(table, [
+        {
+            'label': 'Receipt No ↑↓',
+            'mode': QHeaderView.Fixed,
+            'width': 200,
+            'align': Qt.AlignCenter,
+            'tooltip': 'Receipt number',
+        },
+        {
+            'label': 'Customer Name ↑↓',
+            'mode': QHeaderView.Stretch,
+            'align': Qt.AlignLeft | Qt.AlignVCenter,
+            'tooltip': 'Customer name',
+        },
+        {
+            'label': 'Grand Total ↑↓',
+            'mode': QHeaderView.Fixed,
+            'width': 150,
+            'align': Qt.AlignLeft | Qt.AlignVCenter,
+            'tooltip': 'Grand total',
+        },
+        {
+            'label': 'Date ↑↓',
+            'mode': QHeaderView.Fixed,
+            'width': 150,
+            'align': Qt.AlignCenter,
+            'tooltip': 'Transaction date',
+        },
+        {
+            'label': 'Time ↑↓',
+            'mode': QHeaderView.Fixed,
+            'width': 150,
+            'align': Qt.AlignCenter,
+            'tooltip': 'Transaction time',
+        },
+    ])
+    header = table.horizontalHeader()
     try:
-        table.verticalHeader().setVisible(False)
+        header.setSectionsClickable(True)
+        header.setSortIndicatorShown(True)
+        header.setSortIndicator(0, Qt.AscendingOrder)
     except Exception:
         pass
+    configure_readonly_row_selection_table(table, sorting_enabled=False)
 
 
 def _fill_receipts_table(table: QTableWidget, rows: list[dict]) -> None:
@@ -84,6 +108,8 @@ def _fill_receipts_table(table: QTableWidget, rows: list[dict]) -> None:
 
     Sorting is temporarily disabled while rows are inserted to avoid
     re-ordering or visual jitter; user sorting preference is restored.
+    Cell rendering stays local to this dialog; only header/selection setup
+    is shared through `modules.table.table_widget_helpers`.
     """
     was_sorting = False
     try:
@@ -109,8 +135,16 @@ def _fill_receipts_table(table: QTableWidget, rows: list[dict]) -> None:
             format_date(row.get('created_at')),
             format_time(row.get('created_at')),
         ]
+        sort_keys = [
+            str(row.get('receipt_no') or '').strip().casefold(),
+            str(row.get('customer_name') or '').strip().casefold(),
+            float(row.get('grand_total') or 0.0),
+            str(row.get('created_at') or '').strip(),
+            str(row.get('created_at') or '').strip(),
+        ]
         for c, text in enumerate(values):
-            item = QTableWidgetItem(text)
+            item = ViewHoldTableItem(text)
+            item.setData(Qt.UserRole + 10, sort_keys[c])
             if c == 0:
                 try:
                     item.setData(Qt.UserRole, row.get('receipt_id') or row.get('id'))
@@ -468,6 +502,46 @@ def launch_viewhold_dialog(parent=None):
         _refresh_note_state()
         if select_first and show_selected_message:
             _show_selected_receipt_message()
+
+    _sort_state = {'column': None, 'order': Qt.AscendingOrder}
+
+    def _sort_receipts_by_column(column: int) -> None:
+        try:
+            selected_id, selected_no = _selected_receipt_identifiers()
+        except Exception:
+            selected_id, selected_no = None, ""
+
+        if _sort_state.get('column') == column:
+            order = Qt.DescendingOrder if _sort_state.get('order') == Qt.AscendingOrder else Qt.AscendingOrder
+        else:
+            order = Qt.AscendingOrder
+        _sort_state['column'] = column
+        _sort_state['order'] = order
+
+        try:
+            table.sortItems(column, order)
+            table.horizontalHeader().setSortIndicator(column, order)
+        except Exception:
+            pass
+
+        for row_idx in range(table.rowCount()):
+            item = table.item(row_idx, 0)
+            if item is None:
+                continue
+            try:
+                receipt_id = item.data(Qt.UserRole)
+            except Exception:
+                receipt_id = None
+            receipt_no = str(item.text() or "")
+            if (selected_id is not None and receipt_id == selected_id) or (
+                selected_id is None and selected_no and receipt_no == selected_no
+            ):
+                table.selectRow(row_idx)
+                table.setCurrentItem(item)
+                return
+
+        if table.rowCount() > 0:
+            table.selectRow(0)
 
     # Load UNPAID receipts from the DB and apply them to the table
     def _load_unpaid_receipts() -> None:
@@ -872,6 +946,7 @@ def launch_viewhold_dialog(parent=None):
             pass
 
     table.itemSelectionChanged.connect(_on_selection_changed)
+    table.horizontalHeader().sectionClicked.connect(_sort_receipts_by_column)
     void_radio.toggled.connect(_on_action_changed)
     load1_radio.toggled.connect(_on_action_changed)
     load2_radio.toggled.connect(_on_action_changed)
@@ -889,5 +964,3 @@ def launch_viewhold_dialog(parent=None):
 
     #set_dialog_main_status_max(dlg, "View Hold opened.", level='info', duration=2000)
     return dlg
-
-

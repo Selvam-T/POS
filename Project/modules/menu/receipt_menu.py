@@ -34,6 +34,10 @@ from modules.ui_utils.dialog_utils import (
 )
 from modules.ui_utils.error_logger import log_error_message
 from modules.date_time import format_date, format_datetime, set_locked_property
+from modules.table.table_widget_helpers import (
+    apply_table_columns,
+    configure_readonly_row_selection_table,
+)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UI_DIR = os.path.join(BASE_DIR, "ui")
@@ -164,23 +168,65 @@ def _format_dt_full(value: Any) -> str:
 
 
 def _configure_receipt_table(table: QTableWidget) -> None:
-    table.setColumnCount(len(TABLE_COLUMNS))
-    table.setHorizontalHeaderLabels(TABLE_COLUMNS)
+    """Configure the receipt history table.
+
+    Shared helpers handle the common list-table column setup, header
+    tooltips, and read-only row-selection behavior. Receipt History keeps
+    row item creation, row tooltips, sort keys, and header-click sorting
+    local because they depend on this dialog's receipt data shape.
+    """
+    apply_table_columns(table, [
+        {
+            "label": TABLE_COLUMNS[0],
+            "mode": QHeaderView.Fixed,
+            "width": 50,
+            "align": Qt.AlignCenter,
+            "tooltip": TABLE_HEADER_TOOLTIPS[0],
+        },
+        {
+            "label": TABLE_COLUMNS[1],
+            "mode": QHeaderView.Stretch,
+            "align": Qt.AlignCenter,
+            "tooltip": TABLE_HEADER_TOOLTIPS[1],
+        },
+        {
+            "label": TABLE_COLUMNS[2],
+            "mode": QHeaderView.Fixed,
+            "width": 105,
+            "align": Qt.AlignCenter,
+            "tooltip": TABLE_HEADER_TOOLTIPS[2],
+        },
+        {
+            "label": TABLE_COLUMNS[3],
+            "mode": QHeaderView.Fixed,
+            "width": 150,
+            "align": Qt.AlignCenter,
+            "tooltip": TABLE_HEADER_TOOLTIPS[3],
+        },
+        {
+            "label": TABLE_COLUMNS[4],
+            "mode": QHeaderView.Fixed,
+            "width": 150,
+            "align": Qt.AlignCenter,
+            "tooltip": TABLE_HEADER_TOOLTIPS[4],
+        },
+        {
+            "label": TABLE_COLUMNS[5],
+            "mode": QHeaderView.Fixed,
+            "width": 150,
+            "align": Qt.AlignCenter,
+            "tooltip": TABLE_HEADER_TOOLTIPS[5],
+        },
+        {
+            "label": TABLE_COLUMNS[6],
+            "mode": QHeaderView.Fixed,
+            "width": 115,
+            "align": Qt.AlignCenter,
+            "tooltip": TABLE_HEADER_TOOLTIPS[6],
+        },
+    ])
 
     header = table.horizontalHeader()
-    header.setSectionResizeMode(0, QHeaderView.Fixed)
-    header.setSectionResizeMode(1, QHeaderView.Stretch)
-    header.setSectionResizeMode(2, QHeaderView.Fixed)
-    header.setSectionResizeMode(3, QHeaderView.Fixed)
-    header.setSectionResizeMode(4, QHeaderView.Fixed)
-    header.setSectionResizeMode(5, QHeaderView.Fixed)
-    header.setSectionResizeMode(6, QHeaderView.Fixed)
-    header.resizeSection(0, 50)
-    header.resizeSection(2, 105)
-    header.resizeSection(3, 150)
-    header.resizeSection(4, 150)
-    header.resizeSection(5, 150)
-    header.resizeSection(6, 115)
     try:
         header.setSectionsClickable(True)
         header.setSortIndicatorShown(True)
@@ -188,24 +234,7 @@ def _configure_receipt_table(table: QTableWidget) -> None:
     except Exception:
         pass
 
-    for col in range(len(TABLE_COLUMNS)):
-        item = table.horizontalHeaderItem(col)
-        if item is not None:
-            item.setTextAlignment(Qt.AlignCenter)
-            try:
-                item.setToolTip(TABLE_HEADER_TOOLTIPS[col])
-            except Exception:
-                pass
-
-    table.setSelectionBehavior(QTableWidget.SelectRows)
-    table.setSelectionMode(QTableWidget.SingleSelection)
-    table.setEditTriggers(QTableWidget.NoEditTriggers)
-    table.setSortingEnabled(False)
-    table.setAlternatingRowColors(True)
-    try:
-        table.verticalHeader().setVisible(False)
-    except Exception:
-        pass
+    configure_readonly_row_selection_table(table, sorting_enabled=False)
 
 
 def _selected_receipt(table: QTableWidget) -> Optional[Dict[str, Any]]:
