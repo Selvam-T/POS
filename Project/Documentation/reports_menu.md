@@ -262,6 +262,17 @@ The summary report displays business trends and patterns with the following stru
 - `set_buttons_locked(buttons, locked)`
   - Enables/disables button list and applies `locked` style property.
 
+- `init_date_range_bounds(from_date_edit, to_date_edit, today=None)`
+  - Initializes both date edits to today.
+  - Prevents future date selection by setting both maximum dates to today.
+  - Applies the shared range constraint that To date cannot be earlier than From date.
+
+- `clamp_date_range_bounds(from_date_edit, to_date_edit, today=None)`
+  - Keeps both date edits capped at today.
+  - Sets `to_date_edit.minimumDate` from the current From date.
+  - Auto-clamps To date if it becomes earlier than From date.
+  - This helper is also used directly by Receipt History, which has an always-active date range and does not use report's radio/action gating flow.
+
 - `DateRangeGateController(...)`
   - Shared progressive gating controller for today/date-range flow.
   - Inputs:
@@ -281,6 +292,7 @@ The summary report displays business trends and patterns with the following stru
       - action buttons remain locked until Enter on To
       - on To Enter unlock, callback can move focus (used for `viewReportBtn`)
     - date consistency:
+      - both date edits are capped at today through shared date-range helpers
       - `to_date_edit` minimum date follows selected From date
       - To date auto-clamped if it becomes earlier than From date
     - label lock behavior:

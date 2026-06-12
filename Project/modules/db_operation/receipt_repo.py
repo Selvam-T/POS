@@ -217,6 +217,8 @@ def search_receipts(
     own = conn is None
     c = conn or get_conn()
     try:
+        # uncomment to test receipt search failure handling
+        # raise RuntimeError("Testing receipt search failure") # debug
         rcols = _receipt_cols(c)
         icols = _receipt_item_cols(c)
         no_col = rcols.get("no_col")
@@ -355,6 +357,8 @@ def void_unpaid_receipt(
     own = conn is None
     c = conn or get_conn()
     try:
+        # uncomment to test receipt void failure handling
+        # raise RuntimeError("Testing receipt void failure")
         cols = _receipt_cols(c)
         status_col = cols.get("status_col")
         if status_col is None:

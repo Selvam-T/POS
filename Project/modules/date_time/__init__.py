@@ -13,6 +13,8 @@ from .date_gating import (
     set_locked_property,
     set_dateedit_locked,
     set_buttons_locked,
+    init_date_range_bounds,
+    clamp_date_range_bounds,
     DateRangeGateController,
 )
 
@@ -25,5 +27,7 @@ __all__ = [
     "set_locked_property",
     "set_dateedit_locked",
     "set_buttons_locked",
+    "init_date_range_bounds",
+    "clamp_date_range_bounds",
     "DateRangeGateController",
 ]

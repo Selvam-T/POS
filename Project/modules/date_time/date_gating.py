@@ -85,6 +85,45 @@ def set_buttons_locked(buttons, locked: bool) -> None:
         set_locked_property(btn, locked)
 
 
+def init_date_range_bounds(from_date_edit: QDateEdit, to_date_edit: QDateEdit, *, today: QDate | None = None) -> None:
+    """Initialize a date range to today, with no future dates and To >= From."""
+    day = today or QDate.currentDate()
+    try:
+        from_date_edit.setDate(day)
+        from_date_edit.setMaximumDate(day)
+    except Exception:
+        pass
+    try:
+        to_date_edit.setDate(day)
+        to_date_edit.setMaximumDate(day)
+    except Exception:
+        pass
+    clamp_date_range_bounds(from_date_edit, to_date_edit, today=day)
+
+
+def clamp_date_range_bounds(from_date_edit: QDateEdit, to_date_edit: QDateEdit, *, today: QDate | None = None) -> None:
+    """Clamp date range widgets so neither date is future and To is not before From."""
+    day = today or QDate.currentDate()
+    try:
+        from_date_edit.setMaximumDate(day)
+        to_date_edit.setMaximumDate(day)
+    except Exception:
+        pass
+    try:
+        if from_date_edit.date() > day:
+            from_date_edit.setDate(day)
+        if to_date_edit.date() > day:
+            to_date_edit.setDate(day)
+    except Exception:
+        pass
+    try:
+        to_date_edit.setMinimumDate(from_date_edit.date())
+        if to_date_edit.date() < from_date_edit.date():
+            to_date_edit.setDate(from_date_edit.date())
+    except Exception:
+        pass
+
+
 class _DateEnterFilter(QObject):
     def __init__(self, parent, *, from_edit: QDateEdit, to_edit: QDateEdit, on_from_enter, on_to_enter):
         super().__init__(parent)
@@ -177,39 +216,24 @@ class DateRangeGateController(QObject):
             pass
 
     def init_date_bounds(self, *, today: QDate | None = None) -> None:
-        day = today or QDate.currentDate()
-        try:
-            self.from_date_edit.setDate(day)
-            self.from_date_edit.setMaximumDate(day)
-        except Exception:
-            pass
-        try:
-            self.to_date_edit.setDate(day)
-            self.to_date_edit.setMaximumDate(day)
-        except Exception:
-            pass
+        init_date_range_bounds(self.from_date_edit, self.to_date_edit, today=today)
 
-    def _clamp_to_min(self) -> None:
-        try:
-            self.to_date_edit.setMinimumDate(self.from_date_edit.date())
-            if self.to_date_edit.date() < self.from_date_edit.date():
-                self.to_date_edit.setDate(self.from_date_edit.date())
-        except Exception:
-            pass
+    def _clamp_date_range(self) -> None:
+        clamp_date_range_bounds(self.from_date_edit, self.to_date_edit)
 
     def _on_from_changed(self, _date: QDate) -> None:
         if not self.date_range_radio.isChecked():
             return
         self.from_committed = False
         self.to_committed = False
-        self._clamp_to_min()
+        self._clamp_date_range()
         self.apply_state()
 
     def _on_to_changed(self, _date: QDate) -> None:
         if not self.date_range_radio.isChecked():
             return
         self.to_committed = False
-        self._clamp_to_min()
+        self._clamp_date_range()
         self.apply_state()
 
     def _on_from_enter(self) -> None:
@@ -217,7 +241,7 @@ class DateRangeGateController(QObject):
             return
         self.from_committed = True
         self.to_committed = False
-        self._clamp_to_min()
+        self._clamp_date_range()
         self.apply_state()
         try:
             self.to_date_edit.setFocus(Qt.OtherFocusReason)
@@ -227,7 +251,7 @@ class DateRangeGateController(QObject):
     def _on_to_enter(self) -> None:
         if not self.date_range_radio.isChecked() or not self.from_committed:
             return
-        self._clamp_to_min()
+        self._clamp_date_range()
         self.to_committed = True
         self.apply_state()
         try:

@@ -26,7 +26,7 @@ Important object names:
 - `receiptToDateEdit`
 - `receiptNumberLineEdit`
 - `receiptProductCodeLineEdit`
-- `receiptProductNameComboBox`
+- `receiptProductNameLineEdit`
 - `receiptPreviewLabel`
 - `receiptPrintRadioBtn`
 - `receiptVoidRadioBtn`
@@ -34,8 +34,6 @@ Important object names:
 - `btnReceiptOk`
 - `btnReceiptCancel`
 - `receiptStatusLabel`
-
-`receiptPreviewLabel` is a read-only `QPlainTextEdit`, not a `QLabel`. It is used because long generated receipts need vertical scrolling.
 
 ## Receipt Table
 
@@ -113,15 +111,30 @@ Default state:
 - From date: today
 - To date: today
 
+Date range behavior:
+
+- `receiptFromDateEdit` and `receiptToDateEdit` are initialized through the shared date-range helpers in `modules.date_time.date_gating`.
+- Both date edits are capped at today, so future dates cannot be selected.
+- `receiptToDateEdit` cannot be earlier than `receiptFromDateEdit`.
+- If From Date is moved after To Date, To Date is clamped forward to match From Date.
+
 When Date Type is `All`, a receipt appears if any of `created_at`, `paid_at`, or `cancelled_at` falls in the selected date range. A receipt is returned once even if more than one date column matches.
 
 Search inputs:
 
 - `receiptNumberLineEdit` filters by receipt number.
 - `receiptProductCodeLineEdit` filters by matching `receipt_items.product_code`.
-- `receiptProductNameComboBox` filters by matching `receipt_items.product_name` / `name`.
+- `receiptProductNameLineEdit` is a lookup helper that fills `receiptProductCodeLineEdit`; product-name text is not sent separately in search params.
 
-The controller validates that From Date is not after To Date. Validation messages appear in `receiptStatusLabel`.
+Focus and search behavior:
+
+- Pressing Enter in `receiptStatusComboBox` or `receiptDateTypeComboBox` moves focus to `searchReceiptBtn`.
+- Pressing Enter in `receiptFromDateEdit` moves focus to `receiptToDateEdit`.
+- Pressing Enter in `receiptToDateEdit` moves focus to `searchReceiptBtn`.
+- Pressing Enter in `receiptNumberLineEdit` moves focus to `searchReceiptBtn`; it does not validate or search by itself.
+- Clicking `searchReceiptBtn` applies the current filters, receipt number, and product code, refreshes `receiptTable`, and then moves focus to `resetReceiptBtn`.
+
+Search does not perform separate input validation for the filter/search widgets. The date edits are clamped while the user selects dates, so future dates and To-before-From ranges are prevented before search. If receipts are found, `receiptStatusLabel` shows the receipt count. If no rows match, it shows `No receipts found.` Runtime/DB failures are shown in `receiptStatusLabel` and logged.
 
 ## Product Code And Name Sync
 
@@ -129,10 +142,13 @@ Product lookup uses `modules.db_operation.PRODUCT_CACHE` via `input_handler.get_
 
 Behavior:
 
-- Typing or scanning a product code can fill `receiptProductNameComboBox`.
+- Typing or scanning a product code can fill `receiptProductNameLineEdit`.
 - Selecting or typing an exact product name can fill `receiptProductCodeLineEdit`.
 - Editing one product field clears the other until a valid lookup is committed.
-- Pressing Enter in product code or product name syncs fields and runs the search.
+- Pressing Enter in an empty product field moves focus to `searchReceiptBtn`.
+- Pressing Enter with a valid product code or exact product name cross-fills the paired field and moves focus to `searchReceiptBtn`.
+- Pressing Enter with an invalid product code or product name selects the invalid text, keeps focus in that field, applies the red input-error border, and shows the lookup error in `receiptStatusLabel`.
+- Product code/name Enter handling does not refresh `receiptTable`; only `searchReceiptBtn` does that.
 
 Barcode behavior:
 
@@ -180,13 +196,14 @@ Action radios:
 
 `btnReceiptOk` behavior:
 
-- If Print is selected, generates receipt text and calls `print_receipt(...)`.
+- If Print is selected, generates receipt text and calls `print_receipt_with_fallback(...)`.
 - If Void is selected, voids the selected unpaid receipt.
 
 Print behavior:
 
 - Uses the same generated receipt text as preview.
-- Sends text through `modules.devices.printer_and_drawer.print_receipt(...)`.
+- Sends text through `modules.devices.print_helper.print_receipt_with_fallback(...)`.
+- Honors `config.ENABLE_PRINTER_PRINT`: network printer when enabled, console fallback when disabled.
 - Success or failure appears in `receiptStatusLabel`.
 - Runtime failures are logged and routed to the post-close StatusBar message pipeline.
 
@@ -198,7 +215,7 @@ Void behavior:
 - Note is optional.
 - `receiptNoteLineEdit` is locked unless Void is selected for an unpaid receipt.
 - `receiptNoteFieldLbl` is also given the `locked` dynamic property so QSS can gray it.
-- Pressing Enter in the note field while Void is selected also performs the void action.
+- Pressing Enter in the note field while Void is selected moves focus to `btnReceiptOk`; the void DB update only runs from `btnReceiptOk`.
 
 Successful void:
 

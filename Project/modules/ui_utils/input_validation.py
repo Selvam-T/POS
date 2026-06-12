@@ -387,3 +387,4 @@ def validate_voucher_amount(value):
         return False, f"Maximum voucher value is {VOUCHER_MAX}"
     return True, ""
 #--- 10. voucher amount end ---
+

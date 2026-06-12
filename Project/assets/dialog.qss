@@ -347,6 +347,10 @@ QDateEdit[locked="false"] {
     border: 1px solid #c7cdd6;
 }
 
+QDateEdit:focus {
+    border: 1px solid #2196f3;
+} 
+
 /* ComboBox Dropdown Arrow */
 QComboBox::down-arrow {
     image: url(assets/icons/down_arrow.svg);
@@ -567,7 +571,7 @@ QPushButton#removeBtn:pressed {
    QRadioButton: Base Text Style
 ------------------------------------------------------------------- */
 QRadioButton {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
     color: #0786db;
     spacing: 5px; /* Space between indicator and text */
@@ -704,6 +708,14 @@ QLineEdit#receiptNoteLineEdit[locked="true"]:disabled {
     border: 1px solid #dcdcdc;
 }
 
+QLineEdit#receiptProductCodeLineEdit[input_error="true"],
+QLineEdit#receiptProductNameLineEdit[input_error="true"] {
+    border: 2px solid #d93025;
+    background-color: #fff6f5;
+    selection-background-color: #f4b7b2;
+    selection-color: #1f1f1f;
+}
+
 QPlainTextEdit#receiptPreviewLabel {
     background-color: transparent;
     color: #222222;
@@ -742,6 +754,12 @@ QPushButton#resetReceiptBtn:hover {
 QPushButton#resetReceiptBtn:pressed {
     background-color: #aa7eb9;; 
     padding-top: 10px;
+}
+
+QPushButton#searchReceiptBtn:focus,
+QPushButton#resetReceiptBtn:focus {
+    outline: none;
+    border: 2px solid orange;
 }
 
 /* =============================================================

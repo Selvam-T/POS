@@ -115,6 +115,7 @@ def handle_voucher_input(line_edit: QLineEdit) -> int:
     _raise_if_invalid(input_validation.validate_voucher_amount(text))
     return int(text) if text else 0
 
+
 def handle_veg_choose_combo(combo_box: QComboBox) -> str:
     """Returns selected vegetable slot (no strict validation)."""
     return combo_box.currentText().strip()

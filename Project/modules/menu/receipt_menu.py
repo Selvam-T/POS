@@ -21,19 +21,26 @@ from PyQt5.QtWidgets import (
 )
 
 import modules.db_operation as dbop
-from modules.devices.printer_and_drawer import print_receipt
+from modules.devices import print_helper
 from modules.payment.receipt_generator import generate_receipt_text
 from modules.ui_utils import input_handler, ui_feedback
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui,
     build_error_fallback_dialog,
     log_exception_traceback_and_postclose_statusBar,
+    log_error_message_and_postclose_statusBar,
     require_widgets,
     set_dialog_info,
     set_dialog_main_status_max,
 )
 from modules.ui_utils.error_logger import log_error_message
-from modules.date_time import format_date, format_datetime, set_locked_property
+from modules.date_time import (
+    clamp_date_range_bounds,
+    format_date,
+    format_datetime,
+    init_date_range_bounds,
+    set_locked_property,
+)
 from modules.table.table_widget_helpers import (
     apply_table_columns,
     configure_readonly_row_selection_table,
@@ -121,9 +128,9 @@ def _date_text(widget: QDateEdit) -> str:
 
 def _format_amount(value: Any) -> str:
     try:
-        return f"{float(value or 0.0):.2f}"
+        return f"$ {float(value or 0.0):.2f}"
     except Exception:
-        return "0.00"
+        return "$0.00"
 
 
 def _sort_amount(value: Any) -> float:
@@ -293,7 +300,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
                 "to_date": (QDateEdit, "receiptToDateEdit"),
                 "receipt_no": (QLineEdit, "receiptNumberLineEdit"),
                 "product_code": (QLineEdit, "receiptProductCodeLineEdit"),
-                "product_name": (QComboBox, "receiptProductNameComboBox"),
+                "product_name": (QLineEdit, "receiptProductNameLineEdit"),
                 "preview": (QPlainTextEdit, "receiptPreviewLabel"),
                 "search_btn": (QPushButton, "searchReceiptBtn"),
                 "reset_btn": (QPushButton, "resetReceiptBtn"),
@@ -319,7 +326,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
     date_type_combo: QComboBox = widgets["date_type_combo"]
     from_date: QDateEdit = widgets["from_date"]
     to_date: QDateEdit = widgets["to_date"]
-    product_name_combo: QComboBox = widgets["product_name"]
+    product_name_line: QLineEdit = widgets["product_name"]
     preview: QPlainTextEdit = widgets["preview"]
     status_lbl: QLabel = widgets["status_lbl"]
     note_lbl: QLabel = widgets["note_lbl"]
@@ -381,30 +388,36 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
         names.sort(key=str.casefold)
 
         try:
-            product_name_combo.blockSignals(True)
-            product_name_combo.clear()
-            product_name_combo.addItems(names)
-            product_name_combo.setCurrentIndex(-1)
-            product_name_combo.setEditText("")
-        finally:
-            try:
-                product_name_combo.blockSignals(False)
-            except Exception:
-                pass
-        try:
-            line = product_name_combo.lineEdit()
-            if line is not None:
-                input_handler.setup_name_search_lineedit(
-                    line,
-                    names,
-                    trigger_on_finish=False,
-                )
+            product_name_line.clear()
+            input_handler.setup_name_search_lineedit(
+                product_name_line,
+                names,
+                trigger_on_finish=False,
+            )
         except Exception:
             pass
 
     def _set_product_name_text(name_text: str) -> None:
+        product_name_line.setText(str(name_text or "").strip())
+
+    def _set_input_error(widget, has_error: bool) -> None:
         try:
-            product_name_combo.setEditText(str(name_text or "").strip())
+            widget.setProperty("input_error", bool(has_error))
+            widget.style().unpolish(widget)
+            widget.style().polish(widget)
+            widget.update()
+        except Exception:
+            pass
+
+    def _focus_search_btn() -> None:
+        QTimer.singleShot(0, lambda: widgets["search_btn"].setFocus(Qt.OtherFocusReason))
+
+    def _mark_product_error(widget, message: str) -> None:
+        _set_input_error(widget, True)
+        _set_status(status_lbl, message, ok=False)
+        try:
+            widget.setFocus(Qt.OtherFocusReason)
+            widget.selectAll()
         except Exception:
             pass
 
@@ -424,69 +437,70 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
         code_text = _line_text(widgets["product_code"])
         if not code_text:
             _set_product_name_text("")
+            _set_input_error(widgets["product_code"], False)
             return None
         result = _lookup_product_by_code(code_text)
         if result:
-            try:
-                widgets["product_code"].setText(str(result.get("code") or code_text))
-            except Exception:
-                pass
+            widgets["product_code"].setText(str(result.get("code") or code_text))
             _set_product_name_text(str(result.get("name") or ""))
+            _set_input_error(widgets["product_code"], False)
+            _set_input_error(product_name_line, False)
             return result
         _set_product_name_text("")
         if show_error:
-            _set_status(status_lbl, "Product code not found.", ok=False)
+            _mark_product_error(widgets["product_code"], "Product code not found.")
         return None
 
     def _sync_product_from_name(*, show_error: bool = False) -> Optional[Dict[str, Any]]:
-        name_text = _combo_text(product_name_combo)
+        name_text = _line_text(product_name_line)
         if not name_text:
-            try:
-                widgets["product_code"].clear()
-            except Exception:
-                pass
+            widgets["product_code"].clear()
+            _set_input_error(product_name_line, False)
             return None
         result = _lookup_product_by_name(name_text)
         if result:
-            try:
-                widgets["product_code"].setText(str(result.get("code") or ""))
-            except Exception:
-                pass
+            widgets["product_code"].setText(str(result.get("code") or ""))
             _set_product_name_text(str(result.get("name") or name_text))
+            _set_input_error(product_name_line, False)
+            _set_input_error(widgets["product_code"], False)
             return result
-        try:
-            widgets["product_code"].clear()
-        except Exception:
-            pass
+        widgets["product_code"].clear()
         if show_error:
-            _set_status(status_lbl, "Product name not found.", ok=False)
+            _mark_product_error(product_name_line, "Product name not found.")
         return None
 
     def _clear_product_name_when_code_edited(_text=None) -> None:
-        try:
-            _set_product_name_text("")
-        except Exception:
-            pass
+        _set_input_error(widgets["product_code"], False)
+        _set_product_name_text("")
 
     def _clear_product_code_when_name_edited(_text=None) -> None:
-        try:
-            widgets["product_code"].clear()
-        except Exception:
-            pass
+        _set_input_error(product_name_line, False)
+        widgets["product_code"].clear()
+
+    def _commit_product_code() -> None:
+        if not _line_text(widgets["product_code"]):
+            _set_input_error(widgets["product_code"], False)
+            _focus_search_btn()
+            return
+        if _sync_product_from_code(show_error=True):
+            _focus_search_btn()
+
+    def _commit_product_name() -> None:
+        if not _line_text(product_name_line):
+            _set_input_error(product_name_line, False)
+            _focus_search_btn()
+            return
+        if _sync_product_from_name(show_error=True):
+            _focus_search_btn()
 
     def _barcode_override(barcode: str) -> bool:
         code = str(barcode or "").strip()
         if not code:
             return True
-        try:
-            widgets["product_code"].setText(code)
-        except Exception:
-            pass
+        widgets["product_code"].setText(code)
         _sync_product_from_code(show_error=True)
-        try:
-            widgets["search_btn"].setFocus(Qt.OtherFocusReason)
-        except Exception:
-            pass
+        if not bool(widgets["product_code"].property("input_error")):
+            _focus_search_btn()
         return True
 
     def _set_note_locked(locked: bool) -> None:
@@ -530,7 +544,6 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
             "to_date": _date_text(to_date),
             "receipt_no": _line_text(widgets["receipt_no"]),
             "product_code": _line_text(widgets["product_code"]),
-            "product_name": _combo_text(product_name_combo),
         }
 
     def _render_preview(row: Optional[Dict[str, Any]]) -> None:
@@ -654,7 +667,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
                         item.setToolTip(tooltips[col])
                     except Exception:
                         pass
-                    if col in (0, 2, 3, 4, 5, 6):
+                    if col in (0, 2, 3, 4, 5):
                         item.setTextAlignment(Qt.AlignCenter)
                     else:
                         item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
@@ -678,7 +691,10 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
             rows = dbop.search_receipts(**params)
             _fill_table(rows)
             if show_count:
-                _set_status(status_lbl, f"{len(rows)} receipt(s) found.", ok=True)
+                if rows:
+                    _set_status(status_lbl, f"{len(rows)} receipt(s) found.", ok=True)
+                else:
+                    _set_status(status_lbl, "No receipts found.", ok=False)
         except Exception as exc:
             _fill_table([])
             _set_status(status_lbl, f"Receipt search failed: {exc}", ok=False)
@@ -691,17 +707,22 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
                 duration=5000,
             )
 
+    def _run_search() -> None:
+        _refresh_receipts(show_count=True)
+        try:
+            widgets["reset_btn"].setFocus(Qt.OtherFocusReason)
+        except Exception:
+            pass
+
     def _reset_filters() -> None:
         today = QDate.currentDate()
         try:
             status_combo.setCurrentText("All")
             date_type_combo.setCurrentText("All")
-            from_date.setDate(today)
-            to_date.setDate(today)
+            init_date_range_bounds(from_date, to_date, today=today)
             widgets["receipt_no"].clear()
             widgets["product_code"].clear()
-            product_name_combo.setCurrentIndex(-1)
-            product_name_combo.setEditText("")
+            product_name_line.clear()
             print_radio.setChecked(True)
             note.clear()
         except Exception:
@@ -723,11 +744,26 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
         receipt_no = str(row.get("receipt_no") or "").strip()
         try:
             receipt_text = generate_receipt_text(receipt_no)
-            if print_receipt(receipt_text):
-                _set_status(status_lbl, f"Receipt {receipt_no} sent to printer.", ok=True)
+            print_result = print_helper.print_receipt_with_fallback(
+                receipt_text,
+                blocking=True,
+                context="Receipt History",
+            )
+            if print_result.get("ok"):
+                mode = str(print_result.get("mode") or "printer")
+                target = "console" if mode == "console" else "printer"
+                _set_status(status_lbl, f"Receipt {receipt_no} sent to {target}.", ok=True)
                 set_dialog_info(dlg, f"Receipt {receipt_no} printed.", duration=3500)
             else:
                 _set_status(status_lbl, "Printer unavailable or receipt not sent.", ok=False)
+                log_error_message_and_postclose_statusBar(
+                    dlg,
+                    "Receipt print failed",
+                    f"Printer send failed for receipt {receipt_no}: {print_result.get('error') or 'unknown'}",
+                    user_message=f"Error: Receipt print failed for {receipt_no}",
+                    level="error",
+                    duration=5000,
+                )
         except Exception as exc:
             _set_status(status_lbl, f"Print failed: {exc}", ok=False)
             log_exception_traceback_and_postclose_statusBar(
@@ -758,6 +794,14 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
             )
             if not ok:
                 _set_status(status_lbl, "Receipt was not voided. It may already be paid or cancelled.", ok=False)
+                log_error_message_and_postclose_statusBar(
+                    dlg,
+                    "Receipt void failed",
+                    f"void_unpaid_receipt returned false for receipt {receipt_no}",
+                    user_message=f"Error: Receipt {receipt_no} was not voided.",
+                    level="error",
+                    duration=5000,
+                )
                 return
             _set_status(status_lbl, f"Receipt {receipt_no} voided.", ok=True)
             set_dialog_main_status_max(
@@ -781,10 +825,13 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
             )
 
     def _on_ok() -> None:
-        if void_radio.isChecked():
-            _void_selected()
-        else:
-            _print_selected()
+        try:
+            if void_radio.isChecked():
+                _void_selected()
+            else:
+                _print_selected()
+        finally:
+            QTimer.singleShot(0, lambda: widgets["cancel_btn"].setFocus(Qt.OtherFocusReason))
 
     def _cancel_close() -> None:
         try:
@@ -799,6 +846,31 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
 
     class _ReceiptTableFilter(QObject):
         def eventFilter(self, obj, event):
+            if event.type() == QEvent.KeyPress and event.key() in (Qt.Key_Return, Qt.Key_Enter):
+                if obj is widgets["product_code"]:
+                    _commit_product_code()
+                    return True
+                if obj is product_name_line:
+                    _commit_product_name()
+                    return True
+                if obj in (status_combo, date_type_combo, widgets["receipt_no"]):
+                    try:
+                        widgets["search_btn"].setFocus(Qt.OtherFocusReason)
+                    except Exception:
+                        pass
+                    return True
+                if obj is from_date or obj is getattr(from_date, "lineEdit", lambda: None)():
+                    try:
+                        to_date.setFocus(Qt.OtherFocusReason)
+                    except Exception:
+                        pass
+                    return True
+                if obj is to_date or obj is getattr(to_date, "lineEdit", lambda: None)():
+                    try:
+                        widgets["search_btn"].setFocus(Qt.OtherFocusReason)
+                    except Exception:
+                        pass
+                    return True
             if obj is table and event.type() == QEvent.KeyPress:
                 if event.key() in (Qt.Key_Return, Qt.Key_Enter):
                     _render_preview(_selected_receipt(table))
@@ -806,7 +878,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
             if obj is note and event.type() == QEvent.KeyPress:
                 if event.key() in (Qt.Key_Return, Qt.Key_Enter):
                     if void_radio.isChecked() and note.isEnabled():
-                        _void_selected()
+                        widgets["ok_btn"].setFocus(Qt.OtherFocusReason)
                         return True
             return False
 
@@ -814,6 +886,17 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
     try:
         table.installEventFilter(_event_filter)
         note.installEventFilter(_event_filter)
+        status_combo.installEventFilter(_event_filter)
+        date_type_combo.installEventFilter(_event_filter)
+        from_date.installEventFilter(_event_filter)
+        to_date.installEventFilter(_event_filter)
+        if from_date.lineEdit() is not None:
+            from_date.lineEdit().installEventFilter(_event_filter)
+        if to_date.lineEdit() is not None:
+            to_date.lineEdit().installEventFilter(_event_filter)
+        widgets["receipt_no"].installEventFilter(_event_filter)
+        widgets["product_code"].installEventFilter(_event_filter)
+        product_name_line.installEventFilter(_event_filter)
         dlg._receipt_event_filter = _event_filter
     except Exception:
         pass
@@ -822,8 +905,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
     _populate_product_names()
     today = QDate.currentDate()
     try:
-        from_date.setDate(today)
-        to_date.setDate(today)
+        init_date_range_bounds(from_date, to_date, today=today)
         from_date.setCalendarPopup(True)
         to_date.setCalendarPopup(True)
     except Exception:
@@ -839,22 +921,17 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
     try:
         table.itemSelectionChanged.connect(_on_selection_changed)
         table.horizontalHeader().sectionClicked.connect(_sort_receipts_by_column)
-        widgets["search_btn"].clicked.connect(lambda: _refresh_receipts(show_count=True))
+        from_date.dateChanged.connect(lambda _date: clamp_date_range_bounds(from_date, to_date))
+        to_date.dateChanged.connect(lambda _date: clamp_date_range_bounds(from_date, to_date))
+        widgets["search_btn"].clicked.connect(_run_search)
         widgets["reset_btn"].clicked.connect(_reset_filters)
         widgets["ok_btn"].clicked.connect(_on_ok)
         widgets["cancel_btn"].clicked.connect(_cancel_close)
         widgets["close_btn"].clicked.connect(_cancel_close)
         print_radio.toggled.connect(lambda _checked: _sync_action_state())
         void_radio.toggled.connect(lambda checked: (_sync_action_state(), checked and note.setFocus(Qt.OtherFocusReason)))
-        widgets["receipt_no"].returnPressed.connect(lambda: _refresh_receipts(show_count=True))
         widgets["product_code"].textEdited.connect(_clear_product_name_when_code_edited)
-        widgets["product_code"].editingFinished.connect(lambda: _sync_product_from_code(show_error=False))
-        widgets["product_code"].returnPressed.connect(lambda: (_sync_product_from_code(show_error=True), _refresh_receipts(show_count=True)))
-        product_name_combo.activated.connect(lambda _idx: _sync_product_from_name(show_error=False))
-        if product_name_combo.lineEdit() is not None:
-            product_name_combo.lineEdit().textEdited.connect(_clear_product_code_when_name_edited)
-            product_name_combo.lineEdit().editingFinished.connect(lambda: _sync_product_from_name(show_error=False))
-            product_name_combo.lineEdit().returnPressed.connect(lambda: (_sync_product_from_name(show_error=True), _refresh_receipts(show_count=True)))
+        product_name_line.textEdited.connect(_clear_product_code_when_name_edited)
     except Exception as exc:
         try:
             log_error_message(f"receipt_menu: signal wiring failed: {exc}")
