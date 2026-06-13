@@ -71,6 +71,12 @@ def launch_refund_dialog(parent=None):
     cancel_btn = widgets['cancel_btn']
     close_btn = widgets['close_btn']
 
+    barcode_warning = ui_feedback.create_auto_clearing_warning_label(
+        status,
+        ui_feedback.BARCODE_WARNING_TEXT,
+        duration=4500,
+    )
+
     # Remember and hide note placeholder while inputs are locked (opt-in)
     try:
         # Opt-in: let FocusGate manage placeholder visibility for `note`.
@@ -226,6 +232,7 @@ def launch_refund_dialog(parent=None):
     code.textEdited.connect(lambda *_: _clear_lookup_error_style())
     name.textEdited.connect(lambda *_: _clear_lookup_error_style())
     price.textEdited.connect(lambda *_: _set_error_state(price, False))
+    code.textEdited.connect(lambda *_: barcode_warning.clear() if not code.text().strip() else None)
 
     product_names = [rec[0] for rec in (dbop.PRODUCT_CACHE or {}).values() if rec and rec[0]]
     input_handler.setup_name_search_lineedit(

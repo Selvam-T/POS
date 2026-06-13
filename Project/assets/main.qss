@@ -7,8 +7,6 @@ QMainWindow {
 }
 
 QStatusBar#statusbar {
-  font-family: 'consolas', 'Dubai', Helvetica, sans-serif;
-  font-size: 14pt;
   background: transparent;
   border: none;
 }
@@ -26,11 +24,6 @@ QLabel#errorLogStatusLabel {
   color: #055b39;
 }
 
-QLabel#statusMessageLabel {
-  font-family: 'consolas', 'Dubai', Helvetica, sans-serif;
-  font-size: 14pt;
-}
-
 QFrame#errorLogFrame[hasError="true"] {
     background-color: #9ccff4;
     border: 1px solid #7e7f7e;
@@ -44,7 +37,7 @@ QFrame#errorLogFrame[hasError="false"] {
 
 QLabel#errorLogStatusLabel[hasError="true"] {
     background-color: #f5cc46;
-    border: 2px solid #7e7f7e;
+    border: 1px solid #5f605f;
     border-radius: 12px;
     padding: 0px 4px 0px 12px;
 }
@@ -57,6 +50,7 @@ QLabel#errorLogStatusLabel[hasError="false"] {
 
 QPushButton#exportErrorLogBtn,
 QPushButton#clearErrorLogBtn {
+    font-family: 'consolas', Helvetica, sans-serif;
     background: transparent;
     border: none;
     border-radius: 0;
@@ -68,13 +62,13 @@ QPushButton#clearErrorLogBtn {
 QPushButton#exportErrorLogBtn:hover,
 QPushButton#clearErrorLogBtn:hover {
     font-size: 16px;
-    color: green;
+    color: #127012;
 }
 
 QPushButton#exportErrorLogBtn:pressed,
 QPushButton#clearErrorLogBtn:pressed {
     font-size: 18px;
-    color: yellow;
+    color: #207020;
 }
 
 QPushButton#exportErrorLogBtn[hasError="false"],

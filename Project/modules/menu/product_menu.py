@@ -105,6 +105,40 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         'cat_status': (QLabel, 'categoryStatusLabel'),
     })
 
+    add_barcode_warning = ui_feedback.create_auto_clearing_warning_label(
+        widgets['add_status'],
+        ui_feedback.BARCODE_WARNING_TEXT,
+        duration=4500,
+    )
+    rem_barcode_warning = ui_feedback.create_auto_clearing_warning_label(
+        widgets['rem_status'],
+        ui_feedback.BARCODE_WARNING_TEXT,
+        duration=4500,
+    )
+    upd_barcode_warning = ui_feedback.create_auto_clearing_warning_label(
+        widgets['upd_status'],
+        ui_feedback.BARCODE_WARNING_TEXT,
+        duration=4500,
+    )
+
+    def _wire_barcode_warning_clear(code_widget, warning_helper) -> None:
+        def _clear_when_empty(_text=None) -> None:
+            try:
+                if code_widget.text().strip():
+                    return
+            except Exception:
+                return
+            warning_helper.clear()
+
+        try:
+            code_widget.textEdited.connect(_clear_when_empty)
+        except Exception:
+            pass
+
+    _wire_barcode_warning_clear(widgets['add_code'], add_barcode_warning)
+    _wire_barcode_warning_clear(widgets['rem_code'], rem_barcode_warning)
+    _wire_barcode_warning_clear(widgets['upd_code'], upd_barcode_warning)
+
 
     _dialog_anchor = {'pos': None}
 

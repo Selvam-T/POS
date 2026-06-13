@@ -46,7 +46,7 @@ class MainStatusFooterController(QWidget):
             if self.loggedInUserLabel is None:
                 return
             value = str(username or '').strip()
-            self.loggedInUserLabel.setText(f"Logged in: {value}" if value else "Logged in: -")
+            self.loggedInUserLabel.setText(f"Cashier: {value}" if value else "Logged in: -")
         except Exception:
             pass
 
