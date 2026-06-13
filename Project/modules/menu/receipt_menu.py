@@ -74,7 +74,6 @@ TABLE_HEADER_TOOLTIPS = (
     "Receipt amount",
 )
 
-
 class ReceiptTableItem(QTableWidgetItem):
     def __lt__(self, other):
         try:
@@ -329,6 +328,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
     product_name_line: QLineEdit = widgets["product_name"]
     preview: QPlainTextEdit = widgets["preview"]
     status_lbl: QLabel = widgets["status_lbl"]
+    product_code_line: QLineEdit = widgets["product_code"]
     note_lbl: QLabel = widgets["note_lbl"]
     note: QLineEdit = widgets["note"]
     print_radio: QRadioButton = widgets["print_radio"]
@@ -412,6 +412,12 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
     def _focus_search_btn() -> None:
         QTimer.singleShot(0, lambda: widgets["search_btn"].setFocus(Qt.OtherFocusReason))
 
+    barcode_warning = ui_feedback.create_auto_clearing_warning_label(
+        status_lbl,
+        ui_feedback.BARCODE_WARNING_TEXT,
+        duration=4500,
+    )
+
     def _mark_product_error(widget, message: str) -> None:
         _set_input_error(widget, True)
         _set_status(status_lbl, message, ok=False)
@@ -472,6 +478,14 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
     def _clear_product_name_when_code_edited(_text=None) -> None:
         _set_input_error(widgets["product_code"], False)
         _set_product_name_text("")
+
+    def _clear_barcode_warning_when_code_cleared(_text=None) -> None:
+        try:
+            if _line_text(product_code_line):
+                return
+        except Exception:
+            return
+        barcode_warning.clear()
 
     def _clear_product_code_when_name_edited(_text=None) -> None:
         _set_input_error(product_name_line, False)
@@ -723,6 +737,8 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
             widgets["receipt_no"].clear()
             widgets["product_code"].clear()
             product_name_line.clear()
+            _set_input_error(widgets["product_code"], False)
+            _set_input_error(product_name_line, False)
             print_radio.setChecked(True)
             note.clear()
         except Exception:
@@ -931,6 +947,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
         print_radio.toggled.connect(lambda _checked: _sync_action_state())
         void_radio.toggled.connect(lambda checked: (_sync_action_state(), checked and note.setFocus(Qt.OtherFocusReason)))
         widgets["product_code"].textEdited.connect(_clear_product_name_when_code_edited)
+        widgets["product_code"].textEdited.connect(_clear_barcode_warning_when_code_cleared)
         product_name_line.textEdited.connect(_clear_product_code_when_name_edited)
     except Exception as exc:
         try:

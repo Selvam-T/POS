@@ -56,6 +56,21 @@ def launch_manual_entry_dialog(parent):
     widgets['unit'].setReadOnly(True)
     widgets['unit'].setFocusPolicy(Qt.NoFocus)
 
+    # Setup auto-clearing barcode warning
+    barcode_warning = ui_feedback.create_auto_clearing_warning_label(
+        widgets['status'],
+        ui_feedback.BARCODE_WARNING_TEXT,
+        duration=4500,
+    )
+
+    def _clear_barcode_warning_when_code_cleared(_text=None) -> None:
+        try:
+            if widgets['code'].text().strip():
+                return
+        except Exception:
+            return
+        barcode_warning.clear()
+
     # Gate logic: Lock Qty and OK button until product is identified
     gate = FocusGate([widgets['qty'], widgets['ok_btn']], lock_enabled=True)
     try:
@@ -151,6 +166,12 @@ def launch_manual_entry_dialog(parent):
         on_selected=_name_selected,
         trigger_on_finish=False,
     )
+
+    # Wire clear handler to code field
+    try:
+        widgets['code'].textEdited.connect(_clear_barcode_warning_when_code_cleared)
+    except Exception:
+        pass
 
     def _commit_name_srch() -> None:
         try:

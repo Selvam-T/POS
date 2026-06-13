@@ -67,10 +67,15 @@ class BarcodeManager(QObject):
                     self._cleanup_scanner_leak(fw, barcode)
                     # Show error in a status label if present (try to find any QLabel ending with StatusLabel)
                     dlg = QApplication.activeModalWidget() or QApplication.activeWindow()
+                    try:
+                        if dlg is not None and bool(dlg.property('suppressBarcodeWarning')):
+                            return
+                    except Exception:
+                        pass
                     if dlg is not None:
                         # Try to find a status label with a common naming pattern
                         status_lbl = None
-                        for lbl_name in ['addStatusLabel', 'removeStatusLabel', 'updateStatusLabel', 'refundStatusLabel', 'receiptStatusLabel']:
+                        for lbl_name in ['addStatusLabel', 'removeStatusLabel', 'updateStatusLabel', 'manualStatusLabel', 'refundStatusLabel', 'receiptStatusLabel']:
                             status_lbl = dlg.findChild(QLabel, lbl_name)
                             if status_lbl is not None:
                                 break
