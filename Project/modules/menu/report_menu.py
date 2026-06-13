@@ -5,13 +5,19 @@
 
 import os
 from pathlib import Path
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import QObject, QEvent, Qt, QTimer
 from PyQt5.QtWidgets import QDialog, QPushButton, QRadioButton, QDateEdit, QLabel
 from modules.ui_utils.error_logger import log_error_message
 from modules.ui_utils.dialog_utils import set_dialog_info, build_dialog_from_ui, build_error_fallback_dialog, require_widgets
 from modules.ui_utils import ui_feedback
 from modules.ui_utils.focus_utils import FieldCoordinator
-from modules.date_time.date_gating import DateRangeGateController, set_locked_property
+from modules.date_time import (
+    clamp_date_range_bounds,
+    init_date_range_bounds,
+    set_buttons_locked,
+    set_dateedit_locked,
+    set_locked_property,
+)
 from modules.menu import report_generator, report_viewers, report_exports
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -291,14 +297,65 @@ def launch_reports_dialog(host_window):
     except Exception:
         pass
 
-    gate_controller = None
-    inactivity_restore_mode = {'radio': None}
+    normal_date_mode = {'radio': 'today'}
+
+    def _set_report_gate_locked(locked: bool) -> None:
+        set_buttons_locked(action_buttons, bool(locked))
+        try:
+            if save_excel_btn is not None:
+                save_excel_btn.setProperty('reportGateLocked', bool(locked))
+        except Exception:
+            pass
+
+    def _selected_normal_date_mode() -> str:
+        try:
+            if date_range is not None and date_range.isChecked() and date_range.isEnabled():
+                return 'date_range'
+        except Exception:
+            pass
+        return 'today'
+
+    def _remember_normal_date_mode() -> None:
+        try:
+            if inactivity is not None and inactivity.isChecked():
+                return
+        except Exception:
+            pass
+        normal_date_mode['radio'] = _selected_normal_date_mode()
+
+    def _apply_date_gate_state() -> None:
+        try:
+            date_range_active = bool(
+                date_range is not None
+                and date_range.isEnabled()
+                and date_range.isChecked()
+            )
+        except Exception:
+            date_range_active = False
+
+        labels_locked = not date_range_active
+        for lbl in date_field_labels:
+            set_locked_property(lbl, labels_locked)
+
+        set_dateedit_locked(from_date, not date_range_active)
+        set_dateedit_locked(to_date, not date_range_active)
+        _set_report_gate_locked(False)
+
+    def _restore_normal_date_mode() -> None:
+        try:
+            if normal_date_mode.get('radio') == 'date_range' and date_range is not None and date_range.isEnabled():
+                date_range.setChecked(True)
+            elif today is not None:
+                today.setChecked(True)
+        except Exception:
+            pass
+
     def _sync_report_mode_state() -> None:
         """Shared report-mode sync for the report/date gating state."""
         try:
             if inactivity is not None and inactivity.isChecked():
+                normal_date_mode['radio'] = _selected_normal_date_mode()
                 if date_range is not None:
-                    inactivity_restore_mode['radio'] = 'date_range' if date_range.isChecked() else 'today'
                     date_range.setEnabled(False)
                     set_locked_property(date_range, True)
                 if today is not None:
@@ -308,54 +365,51 @@ def launch_reports_dialog(host_window):
                 if date_range is not None:
                     date_range.setEnabled(is_admin_user)
                     set_locked_property(date_range, not is_admin_user)
-                    if inactivity_restore_mode.get('radio') == 'date_range' and date_range.isEnabled():
-                        date_range.setChecked(True)
-                    elif today is not None:
-                        today.setChecked(True)
+                    _restore_normal_date_mode()
                 if today is not None:
                     today.setText('Today')
 
-            if gate_controller is not None:
-                gate_controller.apply_state()
-
+            _apply_date_gate_state()
             _defer_focus(view_btn)
         except Exception:
             pass
 
     if all((today, date_range, from_date, to_date)):
-        def _focus_first_action() -> None:
-            _defer_focus(view_btn)
+        class _ReportDateEnterFilter(QObject):
+            def eventFilter(self, obj, event):
+                try:
+                    if event.type() == QEvent.KeyPress and event.key() in (Qt.Key_Return, Qt.Key_Enter):
+                        from_line = from_date.lineEdit() if from_date is not None else None
+                        to_line = to_date.lineEdit() if to_date is not None else None
+                        if obj is from_date or obj is from_line:
+                            clamp_date_range_bounds(from_date, to_date)
+                            to_date.setFocus(Qt.OtherFocusReason)
+                            return True
+                        if obj is to_date or obj is to_line:
+                            clamp_date_range_bounds(from_date, to_date)
+                            _defer_focus(view_btn)
+                            return True
+                except Exception:
+                    pass
+                return False
+
+        _date_enter_filter = _ReportDateEnterFilter(dlg)
+        dlg._report_date_enter_filter = _date_enter_filter
 
         try:
-            gate_controller = DateRangeGateController(
-                dlg,
-                today_radio=today,
-                date_range_radio=date_range,
-                from_date_edit=from_date,
-                to_date_edit=to_date,
-                action_buttons=action_buttons,
-                field_labels=date_field_labels,
-                on_actions_unlocked=_focus_first_action,
-            )
-            dlg._report_date_gate_controller = gate_controller
-
-            try:
-                _gate_apply_state = gate_controller.apply_state
-
-                def _apply_state_with_export_sync() -> None:
-                    _gate_apply_state()
-                    try:
-                        if save_excel_btn is not None:
-                            save_excel_btn.setProperty('reportGateLocked', bool(save_excel_btn.property('locked')))
-                    except Exception:
-                        pass
-
-                gate_controller.apply_state = _apply_state_with_export_sync
-            except Exception:
-                pass
+            from_date.dateChanged.connect(lambda _date: (clamp_date_range_bounds(from_date, to_date), _apply_date_gate_state()))
+            to_date.dateChanged.connect(lambda _date: (clamp_date_range_bounds(from_date, to_date), _apply_date_gate_state()))
+            today.toggled.connect(lambda checked: checked and (_remember_normal_date_mode(), _apply_date_gate_state(), _defer_focus(view_btn)))
+            date_range.toggled.connect(lambda checked: checked and (_remember_normal_date_mode(), _apply_date_gate_state(), _defer_focus(from_date)))
+            from_date.installEventFilter(_date_enter_filter)
+            to_date.installEventFilter(_date_enter_filter)
+            if from_date.lineEdit() is not None:
+                from_date.lineEdit().installEventFilter(_date_enter_filter)
+            if to_date.lineEdit() is not None:
+                to_date.lineEdit().installEventFilter(_date_enter_filter)
         except Exception as e:
             try:
-                log_error_message(f"Failed to init report date gate controller: {e}")
+                log_error_message(f"Failed to init report date gate wiring: {e}")
             except Exception:
                 pass
 
@@ -416,19 +470,14 @@ def launch_reports_dialog(host_window):
 
     try:
         _apply_role_default_state(dlg, is_admin=is_admin_user)
-        # Initialize date/actions gating after role defaults are applied.
-        if gate_controller is not None:
-            gate_controller.init_date_bounds()
-            gate_controller.apply_state()
-        else:
-            # Safe fallback if gate controller is unavailable.
-            for btn in action_buttons:
-                set_locked_property(btn, False)
-            try:
-                if save_excel_btn is not None:
-                    save_excel_btn.setProperty('reportGateLocked', False)
-            except Exception:
-                pass
+        normal_date_mode['radio'] = 'today'
+        init_date_range_bounds(from_date, to_date)
+        try:
+            from_date.setCalendarPopup(True)
+            to_date.setCalendarPopup(True)
+        except Exception:
+            pass
+        _sync_report_mode_state()
 
         # Default landing focus for both Admin and Staff.
         if view_btn is not None and view_btn.isEnabled():
@@ -441,21 +490,12 @@ def launch_reports_dialog(host_window):
 
     def _reset_report_selection() -> None:
         try:
-            inactivity_restore_mode['radio'] = None
+            normal_date_mode['radio'] = 'today'
             _apply_role_default_state(dlg, is_admin=is_admin_user)
             if today is not None:
                 today.setText('Today')
-            if gate_controller is not None:
-                gate_controller.init_date_bounds()
-                gate_controller.apply_state()
-            else:
-                for btn in action_buttons:
-                    set_locked_property(btn, False)
-                try:
-                    if save_excel_btn is not None:
-                        save_excel_btn.setProperty('reportGateLocked', False)
-                except Exception:
-                    pass
+            init_date_range_bounds(from_date, to_date)
+            _sync_report_mode_state()
             _defer_focus(view_btn)
         except Exception as e:
             try:
