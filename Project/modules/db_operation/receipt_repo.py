@@ -230,6 +230,7 @@ def search_receipts(
         created_col = rcols.get("created_col")
         paid_col = rcols.get("paid_col")
         cancelled_col = rcols.get("cancelled_col")
+        note_col = rcols.get("note_col")
 
         select_parts = [
             _select_alias(id_col, "receipt_id", "NULL"),
@@ -238,6 +239,7 @@ def search_receipts(
             _select_alias(created_col, "created_at", "''"),
             _select_alias(paid_col, "paid_at", "''"),
             _select_alias(cancelled_col, "cancelled_at", "''"),
+            _select_alias(note_col, "note", "''"),
         ]
 
         amount_expr = "0"

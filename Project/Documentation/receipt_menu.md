@@ -37,22 +37,20 @@ Important object names:
 
 ## Receipt Table
 
-`receiptTable` is configured in the controller, not in the `.ui`.
+`receiptTable` is configured in code, not in the `.ui`.
 
-Columns:
+The controller delegates receipt-table setup, filling, selection, and sorting to
+`modules.table.receipt_table_helpers`.
 
-1. `No.`
-2. `Receipt`
-3. `Status`
-4. `Transact`
-5. `Paid`
-6. `Cancelled`
-7. `Amount`
+Visible columns depend on `receiptStatusComboBox`:
 
-The controller uses shared table helpers from `modules.table.table_widget_helpers`:
+- `All`: `No.`, `Receipt`, `Status`, `Transact`, `Paid`, `Cancelled`, `Amount`
+- `Paid`: `No.`, `Receipt`, `Status`, `Transact`, `Paid`, `Amount`
+- `Unpaid`: `No.`, `Receipt`, `Status`, `Transact`, `Amount`
+- `Cancelled`: `No.`, `Receipt`, `Status`, `Transact`, `Cancelled`, `Amount`, `Note`
 
-- `apply_table_columns(...)`
-- `configure_readonly_row_selection_table(...)`
+The table layout is refreshed when Search runs and the active status filter
+requires a different column set.
 
 Table behavior:
 
@@ -65,11 +63,12 @@ Table behavior:
 - Compact table date format is `dd/MM/yy HH:mm`, for example `06/06/26 15:45`.
 - Date tooltips use the fuller `format_datetime(...)` value, for example `06 Jun 2026  03:45 pm`.
 - Empty date cells display an em dash.
+- `Note` is shown only in the `Cancelled` status layout.
 
 Sorting behavior:
 
 - `No.` is display-only and not sortable.
-- Other columns sort when their header is clicked.
+- Other visible columns sort when their header is clicked.
 - Sorting uses hidden typed sort keys, not only visible text.
 - `Amount` sorts numerically.
 - After sorting, `No.` is renumbered from top to bottom.
