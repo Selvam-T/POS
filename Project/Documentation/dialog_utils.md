@@ -5,6 +5,10 @@ Updated: January 2026
 This document describes the shared dialog utilities in `modules/ui_utils/dialog_utils.py`.
 These helpers support the standardized dialog pipeline used by menu dialogs and sales dialogs.
 
+Main-window StatusBar messages are displayed through the custom centered footer
+managed by `modules/status_footer/status_footer.py`. See
+`Documentation/status_footer.md` for footer layout and error-log controls.
+
 ---
 
 ## Goals

@@ -56,6 +56,7 @@ from config import (
     ICON_LOGOUT,
 )
 from modules.info_section.info_section import InfoSectionController
+from modules.status_footer import MainStatusFooterController
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
@@ -81,6 +82,13 @@ def load_qss(app):
                 pass
 
 class MainLoader(QMainWindow):
+    def statusBar(self):
+        """Return the custom footer status bar loaded from main_window.ui."""
+        custom_statusbar = getattr(self, 'statusbar', None)
+        if custom_statusbar is not None:
+            return custom_statusbar
+        return super().statusBar()
+
     def launch_login_dialog_blocked(self):
         """Show login dialog in barcode-blocked mode, open main app on success."""
         from modules.sales.login import launch_login_dialog
@@ -119,6 +127,7 @@ class MainLoader(QMainWindow):
         self._payment_failure_lock_active = False
         self._payment_failure_status_message = "Print receipt (Optional) and clear salesTable to proceed"
         self._payment_failure_status_reapply_pending = False
+        self.status_footer = MainStatusFooterController().bind(self)
         try:
             self.statusbar.messageChanged.connect(self._on_statusbar_message_changed)
         except Exception:
@@ -1401,6 +1410,10 @@ def main():
             window.current_user_id = None
         window.current_username = str(login_user.get('username') or '')
         window.current_is_admin = bool(login_user.get('is_admin'))
+        try:
+            window.status_footer.set_username(window.current_username)
+        except Exception:
+            pass
         # Show the main window first so any subsequent dialogs use the
         # dialog wrapper overlay (modal over main window) like normal UI flows.
         try:

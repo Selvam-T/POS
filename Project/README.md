@@ -14,6 +14,7 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - Product menu + category management: `Documentation/product_menu.md`
 - Printer helper: `Documentation/printer.md`
 - Error handling pipeline: `Documentation/error_logging_and_fallback.md`
+- Main status footer and error-log controls: `Documentation/status_footer.md`
 - Dialog utilities/pipeline: `Documentation/dialog_utils.md`, `Documentation/dialog_pipeline.md`
 - Scanner routing: `Documentation/scanner_input_infocus.md`
 
@@ -58,6 +59,7 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - Graceful fallback when database or dialog UI files are unavailable
 - Dialogs (e.g., Clear Cart) use a minimal fallback if UI file is missing, with clear messaging and styled buttons
 - All dialog/UI errors are logged to `log/error.log` with timestamp using a shared logger
+- Main footer watches `log/error.log`, enables Export/Clear when entries exist, and exports UTF-8 `.txt` copies to `~/POS_Exports/Error_Log`
 - Windows-console-safe logging (ASCII only)
 
 ### Hard-fail vs Soft-fail (quick rules)
@@ -237,6 +239,24 @@ Implementation details:
    - `QLabel#labelDayTime { padding-right: 30px; }`
    - You can adjust padding in `assets/main.qss`.
 
+
+### Main status footer
+
+The bottom footer in `main_window.ui` is controlled by
+`modules/status_footer/status_footer.py`.
+
+- Left: logged-in username (`loggedInUserLabel`)
+- Center: compatibility StatusBar messages, visually centered
+- Right: `log/error.log` indicator with Export and Clear controls
+
+When `log/error.log` is empty, the footer shows `No Error` and disables
+Export/Clear. When the file has content, it shows `Error Log!`, enables the
+buttons, and applies the active QSS state.
+
+Export writes a UTF-8 text copy to `~/POS_Exports/Error_Log`.
+Clear truncates `log/error.log`.
+
+See `Documentation/status_footer.md` for implementation details.
 
 ### Adding Products to Sale
 

@@ -47,6 +47,7 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
   - Loads and assembles `main_window.ui`, `sales_frame.ui`, `payment_frame.ui`, and `menu_frame.ui` at runtime using PyQt5's `uic` module.
   - Applies a global QSS stylesheet from `assets/main.qss` for consistent theming.
   - Sets up header layout (`infoSection`) for date, company, and day/time display.
+  - Binds `MainStatusFooterController` for the bottom footer: logged-in user label, centered StatusBar messages, and error-log export/clear controls.
 
 - **Dialog and Panel Launching:**
   - All dialogs and panels (menu, sales, payment, etc.) are launched using a single unified wrapper: `DialogWrapper.open_dialog_scanner_blocked()`.
@@ -102,6 +103,7 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
 
 - **Window and Application Behavior:**
   - Disables the main window's close (X) button to enforce logout flow.
+  - Keeps `MainLoader.statusBar()` compatible with existing callers while routing messages to the custom centered footer statusbar.
   - Handles focus change logging and debug helpers.
   - Manages application exit and cleanup on logout.
 
@@ -185,6 +187,7 @@ Additional behavior:
 
 - `Documentation/dialog_pipeline.md`: Details on the unified dialog launching standard
 - `Documentation/error_logging_and_fallback.md`: Hard-fail vs soft-fail and StatusBar policy
+- `Documentation/status_footer.md`: Main footer layout, username display, centered status messages, and error-log export/clear behavior
 - `Project_Journal.md`: In-depth development notes and rationale
 - `Documentation/scanner_input_infocus.md`: Barcode scanner routing and debug options
 - `Documentation/logout_and_titlebar.md`: Logout dialog and custom title bar

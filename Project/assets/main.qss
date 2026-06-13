@@ -9,6 +9,92 @@ QMainWindow {
 QStatusBar#statusbar {
   font-family: 'consolas', 'Dubai', Helvetica, sans-serif;
   font-size: 14pt;
+  background: transparent;
+  border: none;
+}
+
+QFrame#mainStatusFooter {
+  background-color: #F7F7F7;
+  border-top: 1px solid #D1D5DB;
+}
+
+QLabel#loggedInUserLabel,
+QLabel#statusMessageLabel,
+QLabel#errorLogStatusLabel {
+  font-family: 'Dubai', Helvetica, sans-serif;
+  font-size: 12pt;
+  color: #055b39;
+}
+
+QLabel#statusMessageLabel {
+  font-family: 'consolas', 'Dubai', Helvetica, sans-serif;
+  font-size: 14pt;
+}
+
+QFrame#errorLogFrame[hasError="true"] {
+    background-color: #9ccff4;
+    border: 1px solid #7e7f7e;
+    border-radius: 12px;
+}
+
+QFrame#errorLogFrame[hasError="false"] {
+    background: transparent;
+    border: none;
+}
+
+QLabel#errorLogStatusLabel[hasError="true"] {
+    background-color: #f5cc46;
+    border: 2px solid #7e7f7e;
+    border-radius: 12px;
+    padding: 0px 4px 0px 12px;
+}
+
+QLabel#errorLogStatusLabel[hasError="false"] {
+    background: transparent;
+    border: none;
+    padding: 0px;
+}
+
+QPushButton#exportErrorLogBtn,
+QPushButton#clearErrorLogBtn {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    font-size: 14px;
+    color: black;
+    padding: 4px 4px;
+}
+
+QPushButton#exportErrorLogBtn:hover,
+QPushButton#clearErrorLogBtn:hover {
+    font-size: 16px;
+    color: green;
+}
+
+QPushButton#exportErrorLogBtn:pressed,
+QPushButton#clearErrorLogBtn:pressed {
+    font-size: 18px;
+    color: yellow;
+}
+
+QPushButton#exportErrorLogBtn[hasError="false"],
+QPushButton#clearErrorLogBtn[hasError="false"] {
+    color: transparent;
+    padding: 0px;
+    min-width: 0px;
+    max-width: 0px;
+    border: none;
+    background: transparent;
+}
+
+QPushButton#exportErrorLogBtn {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+QPushButton#clearErrorLogBtn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
 /* =============================================================
