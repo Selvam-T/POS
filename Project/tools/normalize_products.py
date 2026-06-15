@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Normalize Product_list text fields to consistent display casing.
+"""one-off/admin database cleanup script for product casing.
+Normalize Product_list text fields to consistent display casing.
 
 This script updates existing rows in the sqlite Product_list table by applying
 `_to_camel_case()` to:

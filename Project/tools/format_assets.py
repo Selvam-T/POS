@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """
+formats .ui and .qss files during development.
 Format Qt Designer .ui (XML) and .qss (Qt stylesheet) files.
 
 - .ui: pretty-printed via lxml with remove_blank_text=True.
@@ -35,18 +36,18 @@ def _tool_log(message: str) -> None:
     except Exception:
         pass
 
-# Optional imports with friendly messages
+# Optional imports with friendly messages. Do not hard-fail — allow partial runs.
+ET = None
+jsbeautifier = None
 try:
-    from lxml import etree as ET
+    from lxml import etree as ET  # type: ignore
 except Exception:
     _tool_log("Missing dependency: lxml. Install with: pip install lxml")
-    raise
 
 try:
-    import jsbeautifier
+    import jsbeautifier  # type: ignore
 except Exception:
     _tool_log("Missing dependency: jsbeautifier. Install with: pip install jsbeautifier")
-    raise
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 UI_DIR = PROJECT_ROOT / 'ui'
@@ -54,6 +55,9 @@ ASSETS_DIR = PROJECT_ROOT / 'assets'
 
 
 def format_ui_file(path: Path) -> bool:
+    if ET is None:
+        _tool_log(f"[ui] Skipped (missing lxml): {path}")
+        return False
     try:
         parser = ET.XMLParser(remove_blank_text=True)
         tree = ET.parse(str(path), parser)
@@ -65,6 +69,9 @@ def format_ui_file(path: Path) -> bool:
 
 
 def format_qss_file(path: Path) -> bool:
+    if jsbeautifier is None:
+        _tool_log(f"[qss] Skipped (missing jsbeautifier): {path}")
+        return False
     try:
         opts = jsbeautifier.default_options()
         opts.indent_size = 2

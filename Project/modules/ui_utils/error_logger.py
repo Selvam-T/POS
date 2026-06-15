@@ -1,8 +1,9 @@
 import os
 from datetime import datetime
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-LOG_PATH = os.path.join(BASE_DIR, 'log', 'error.log')
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+POS_DIR = os.path.dirname(PROJECT_DIR)
+LOG_PATH = os.path.join(POS_DIR, 'log', 'error.log')
 
 _MONTHS = (
     "JAN",
@@ -35,6 +36,7 @@ def _format_timestamp(now: datetime) -> str:
 def log_error_message(msg):
     """Append error message with timestamp to error.log."""
     try:
+        os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
         with open(LOG_PATH, 'a', encoding='utf-8') as f:
             f.write(f"{_format_timestamp(datetime.now())} - {msg}\n")
     except Exception:
