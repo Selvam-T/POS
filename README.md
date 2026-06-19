@@ -58,12 +58,12 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - Status bar notifications for invalid products and dialog errors
 - Graceful fallback when database or dialog UI files are unavailable
 - Dialogs (e.g., Clear Cart) use a minimal fallback if UI file is missing, with clear messaging and styled buttons
-- All dialog/UI errors are logged to `log/error.log` with timestamp using a shared logger
+- All dialog/UI errors are logged to `logs/error.log` with timestamp using a shared logger
 - Windows-console-safe logging (ASCII only)
 
 ### Hard-fail vs Soft-fail (quick rules)
 
-- **Hard-fail (unexpected exception):** caught by `DialogWrapper`; overlay/scanner is cleaned up; details go to `log/error.log`; a short StatusBar hint is shown.
+- **Hard-fail (unexpected exception):** caught by `DialogWrapper`; overlay/scanner is cleaned up; details go to `logs/error.log`; a short StatusBar hint is shown.
 - **Soft-fail (handled failure):** validation/business-rule issues are handled in the active UI flow so users can correct and retry; payment DB commit failures are surfaced from `main.py` on the MainWindow StatusBar while preserving the current sale for retry/hold.
 - **Success-with-warning:** if DB write succeeds but a post-success refresh (cache/completers) fails, show success in the dialog label but show the warning in the StatusBar after close (warning/error takes precedence).
 
@@ -75,7 +75,7 @@ If PAY fails during DB CRUD commit:
 
 1. Read the status bar message and retry PAY once.
 2. If retry fails, place the sale on HOLD and continue the queue.
-3. Escalate to supervisor/IT and share `log/error.log` for traceback details.
+3. Escalate to supervisor/IT and share `logs/error.log` for traceback details.
 
 Current behavior:
 - Failed commit does **not** clear the sales table (sale is preserved for retry/hold).

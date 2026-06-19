@@ -1,9 +1,7 @@
-import os
 from datetime import datetime
+from pathlib import Path
 
-PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-POS_DIR = os.path.dirname(PROJECT_DIR)
-LOG_PATH = os.path.join(POS_DIR, 'log', 'error.log')
+from config import LOG_PATH
 
 _MONTHS = (
     "JAN",
@@ -33,11 +31,33 @@ def _format_timestamp(now: datetime) -> str:
     )
 
 
-def log_error_message(msg):
+def ensure_error_log_file(log_path=None) -> str:
+    """Create the shared log directory and file when they do not exist."""
+    path = Path(log_path or LOG_PATH)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.touch(exist_ok=True)
+    return str(path)
+
+
+def truncate_error_log(log_path=None) -> str:
+    """Empty the shared log file without deleting it."""
+    path = Path(ensure_error_log_file(log_path))
+    with path.open('w', encoding='utf-8') as log_file:
+        log_file.truncate(0)
+    return str(path)
+
+
+def log_error_message(msg, log_path=None):
     """Append error message with timestamp to error.log."""
     try:
-        os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
-        with open(LOG_PATH, 'a', encoding='utf-8') as f:
-            f.write(f"{_format_timestamp(datetime.now())} - {msg}\n")
+        path = Path(ensure_error_log_file(log_path))
+        with path.open('a', encoding='utf-8') as log_file:
+            log_file.write(f"{_format_timestamp(datetime.now())} - {msg}\n")
     except Exception:
         pass
+
+
+try:
+    ensure_error_log_file()
+except Exception:
+    pass

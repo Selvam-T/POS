@@ -34,7 +34,7 @@ The controller now follows modern safety and UI standards:
 **How it works:**
 - Loads UI from `clear_cart.ui` if available; otherwise, shows a visually consistent fallback dialog and logs the error.
 - Fallback dialog includes a confirmation message and two styled buttons (Cancel/No, Yes/Clear All), with Cancel focused by default.
-- Error is logged to `log/error.log` with timestamp using the shared logger.
+- Error is logged to `logs/error.log` with timestamp using the shared logger.
 - Statusbar notification is shown to inform the user when fallback is used.
 
 ### Main Window Handler

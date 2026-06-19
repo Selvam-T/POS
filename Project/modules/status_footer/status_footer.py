@@ -4,7 +4,11 @@ from pathlib import Path
 from PyQt5.QtCore import Qt, QTimer, QFileSystemWatcher
 from PyQt5.QtWidgets import QLabel, QMainWindow, QPushButton, QStatusBar, QWidget
 
-from modules.ui_utils.error_logger import LOG_PATH
+from modules.ui_utils.error_logger import (
+    LOG_PATH,
+    ensure_error_log_file,
+    truncate_error_log,
+)
 
 
 class MainStatusFooterController(QWidget):
@@ -134,9 +138,7 @@ class MainStatusFooterController(QWidget):
 
     def _ensure_error_log_file(self) -> None:
         try:
-            log_path = Path(LOG_PATH)
-            log_path.parent.mkdir(parents=True, exist_ok=True)
-            log_path.touch(exist_ok=True)
+            ensure_error_log_file(LOG_PATH)
         except Exception:
             pass
 
@@ -263,8 +265,7 @@ class MainStatusFooterController(QWidget):
 
     def _clear_error_log(self) -> None:
         try:
-            with open(LOG_PATH, 'w', encoding='utf-8') as f:
-                f.truncate(0)
+            truncate_error_log(LOG_PATH)
             self.refresh_error_log_state()
             self._show_status("Error log cleared.", 4000)
             self._watch_error_log_path()

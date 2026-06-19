@@ -134,7 +134,7 @@ Context reset is not forcibly changed by this controller.
 
 Handled runtime exceptions inside controller:
 
-- Logged to log/error.log using log_exception_traceback_and_postclose_statusBar(...)
+- Logged to logs/error.log using log_exception_traceback_and_postclose_statusBar(...)
 - Generic post-close StatusBar error intent is set
 - Inline label can show a short failure message during dialog lifetime
 

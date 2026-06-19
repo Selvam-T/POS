@@ -94,3 +94,21 @@ C:\SelvamPOS\
   9 focused tests, the full 64-test suite, Python compilation, and 21 UI parses
   passed. The full suite used a disposable database copy.
 - Status: approved for commit.
+
+### Phase 3 - Shared External Error Log
+
+- Added shared `config.LOG_PATH` targeting `<CLIENT ROOT>/logs/error.log` in
+  both development and packaged layouts.
+- Updated the logger and footer controls to use the same path.
+- Added reusable creation and truncation helpers; Clear keeps `error.log` and
+  truncates it to zero bytes.
+- Ignored the runtime `logs/` directory in Git.
+- Added focused tests for shared path selection, creation, append, and
+  truncate-in-place behavior.
+- Updated active project and operator documentation to use `logs/error.log`.
+- Removed the superseded root `log/` directory after confirming it contained
+  only the empty legacy `error.log`.
+- Verification: 4 focused log tests, the full 68-test suite, Python
+  compilation, and 21 UI parses passed. The full suite used a disposable
+  database copy.
+- Status: approved for commit.

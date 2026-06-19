@@ -27,7 +27,7 @@ Controller responsibilities:
 - Construct and wire the dialog (UI load, widget binding, event connections, validation/handlers).
 - Set dialog-local feedback (status labels) during runtime.
 - Set **post-close StatusBar intent** on the dialog when appropriate.
-- For handled operational failures (soft-fail) that should be supportable/debuggable, write to `log/error.log` *from the controller* using shared helpers while also setting post-close StatusBar intent:
+- For handled operational failures (soft-fail) that should be supportable/debuggable, write to `logs/error.log` *from the controller* using shared helpers while also setting post-close StatusBar intent:
 	- DB CRUD returns `(ok=False, msg)` → `log_error_message_and_postclose_statusBar(...)` (+ dialog status label)
 	- caught exceptions during refresh/lookup → `log_exception_traceback_and_postclose_statusBar(...)`
 
@@ -46,7 +46,7 @@ Contract:
 - The controller should return `None` (hard-disable open) unless it intentionally provides a programmatic fallback dialog.
 
 User notification (standard):
-- UI failures are logged to `log/error.log`.
+- UI failures are logged to `logs/error.log`.
 - A StatusBar error is queued and then displayed by `DialogWrapper` *after overlay cleanup*.
 
 ### 2) Wrap + standard dialog frame

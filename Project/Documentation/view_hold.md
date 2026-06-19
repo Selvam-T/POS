@@ -215,7 +215,7 @@ On success:
 On failure:
 
 - StatusBar shows a short error
-- Failure is logged to `log/error.log`
+- Failure is logged to `logs/error.log`
 - No console fallback printing is used
 
 ### 3) VOID

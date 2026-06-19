@@ -100,7 +100,7 @@ Recommended cashier action order:
    total failed attempts.
 2. When PAY shows `PAY err`, print the temporary recovery receipt if needed.
 3. Clear the sales table to reset the payment panel and continue.
-4. Escalate persistent failures to supervisor/IT and use `log/error.log`
+4. Escalate persistent failures to supervisor/IT and use `logs/error.log`
    traceback entries for diagnosis.
 
 Why this is required:
@@ -127,7 +127,7 @@ Testing recommendations
   to raise an exception (or point DB path to an invalid/unavailable DB in a dev
   environment). Verify:
   - status bar shows payment failure,
-  - traceback is written to `log/error.log`,
+  - traceback is written to `logs/error.log`,
   - sales table is not cleared,
   - attempts 1 and 2 allow retry,
   - attempt 3 locks PAY as `PAY err` and enables Print,

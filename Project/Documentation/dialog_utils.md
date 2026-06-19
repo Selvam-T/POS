@@ -118,12 +118,12 @@ This is intended for unexpected DB/UI failures where users need a quick hint but
 
 Modal-safe exception routing:
 
-- logs detailed exception + traceback to `log/error.log`
+- logs detailed exception + traceback to `logs/error.log`
 - sets a post-close StatusBar intent on the dialog (so `DialogWrapper` shows it after `exec_()` returns)
 
 ### `log_exception_details(where, exc)`
 
-Logs a detailed exception + traceback to `log/error.log` without StatusBar messaging.
+Logs a detailed exception + traceback to `logs/error.log` without StatusBar messaging.
 
 Difference from `log_error_message(...)`:
 - `log_error_message(msg)` writes exactly the provided message with timestamp.
@@ -133,7 +133,7 @@ Difference from `log_error_message(...)`:
 
 For non-exception failures (typically DB functions returning `(ok=False, msg)`):
 
-- logs to `log/error.log`
+- logs to `logs/error.log`
 - sets post-close StatusBar intent on the dialog (severity precedence honored)
 
 ### Helper intent differences (quick reference)

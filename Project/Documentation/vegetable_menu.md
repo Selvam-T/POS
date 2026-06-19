@@ -153,7 +153,7 @@ Vegetable Menu uses dialog-local status (`vegMStatusLabel`) for immediate user f
 
 Additional routing:
 
-- DB exceptions are logged to `log/error.log` and queued as **post-close** StatusBar messages.
+- DB exceptions are logged to `logs/error.log` and queued as **post-close** StatusBar messages.
 - Rewrite failures (delete/add returning `(ok=False, msg)`) are logged, and a post-close StatusBar error is queued.
 - While the modal is open, the dialog avoids showing StatusBar messages directly (overlay UX).
 

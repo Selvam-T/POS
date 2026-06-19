@@ -163,7 +163,7 @@ To robustly enforce the global `MAX_TABLE_ROWS` limit for the sales table, the f
 - This prevents confusing error messages like "Expected QDialog, got <class 'NoneType'>" and ensures a smooth user experience.
 
 Additional behavior:
-- If a dialog throws an unexpected exception (hard-fail), `DialogWrapper` logs details to `log/error.log` and shows a short StatusBar hint after overlay/scanner cleanup.
+- If a dialog throws an unexpected exception (hard-fail), `DialogWrapper` logs details to `logs/error.log` and shows a short StatusBar hint after overlay/scanner cleanup.
 
 #### 4. Consistency
 - These guards are implemented in both `launch_vegetable_entry_dialog` and `launch_manual_entry_dialog`, and should be used in any future entry dialogs.

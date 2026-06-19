@@ -199,7 +199,7 @@ This document summarizes the current functional design for report-menu wiring, f
   - The save path checks whether `openpyxl` is available in the current Python
     environment.
   - If `openpyxl` is missing, the dialog shows a short friendly message and
-    writes the failure to `log/error.log`.
+    writes the failure to `logs/error.log`.
   - Reason: this is a dependency failure, not a size failure. When the package
     is available, Excel export proceeds normally, even for large reports.
 - In both PDF and Excel paths, the controller logs unexpected failures and
