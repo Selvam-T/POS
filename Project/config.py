@@ -1,5 +1,47 @@
 import os
 import re
+import sys
+
+
+def _resolve_path_layout(module_file=None, executable=None, frozen=None):
+    """Resolve development and packaged roots without relying on the CWD."""
+    runtime_dir = os.path.abspath(os.path.dirname(module_file or __file__))
+    is_packaged = bool(
+        getattr(sys, 'frozen', False) if frozen is None else frozen
+    )
+    if is_packaged:
+        app_dir = os.path.abspath(os.path.dirname(executable or sys.executable))
+        client_root = os.path.dirname(app_dir)
+    else:
+        app_dir = runtime_dir
+        client_root = os.path.dirname(runtime_dir)
+
+    return {
+        'is_packaged': is_packaged,
+        'runtime_dir': runtime_dir,
+        'app_dir': app_dir,
+        'client_root': client_root,
+        'assets_dir': os.path.join(runtime_dir, 'assets'),
+        'ui_dir': os.path.join(runtime_dir, 'ui'),
+        'db_dir': os.path.join(client_root, 'db'),
+        'logs_dir': os.path.join(client_root, 'logs'),
+        'backups_dir': os.path.join(client_root, 'backups'),
+        'data_dir': os.path.join(client_root, 'data'),
+    }
+
+
+_PATHS = _resolve_path_layout()
+IS_PACKAGED = _PATHS['is_packaged']
+RUNTIME_DIR = _PATHS['runtime_dir']
+APP_DIR = _PATHS['app_dir']
+CLIENT_ROOT = _PATHS['client_root']
+ASSETS_DIR = _PATHS['assets_dir']
+UI_DIR = _PATHS['ui_dir']
+DB_DIR = _PATHS['db_dir']
+LOGS_DIR = _PATHS['logs_dir']
+BACKUPS_DIR = _PATHS['backups_dir']
+DATA_DIR = _PATHS['data_dir']
+
 # Dialog size ratios (width_ratio, height_ratio) as fraction of main window
 DIALOG_RATIOS = {
     'login': (0.25, 0.3),
@@ -95,9 +137,9 @@ ENABLE_CASH_DRAWER = False # set to True to enable cash drawer
 CASH_DRAWER_PIN = 2
 CASH_DRAWER_TIMEOUT = 2.0
 
-# Database path (absolute)
-_BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DB_PATH = os.path.join(os.path.dirname(_BASE_DIR), 'db', 'Anumani.db')
+# Database path (absolute and external to the packaged app directory)
+_BASE_DIR = RUNTIME_DIR  # Backward-compatible alias for existing resource paths.
+DB_PATH = os.path.join(DB_DIR, 'Anumani.db')
 
 # Login dialog background image. Set to None to use the stylesheet background.
 LOGIN_BACKGROUND = os.path.join(_BASE_DIR, 'assets', 'images', 'anumani_logo.png')
