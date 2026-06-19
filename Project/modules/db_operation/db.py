@@ -13,44 +13,48 @@ def _project_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def _resolve_db_file(path_value: str) -> Path:
+    path = Path(path_value).expanduser()
+    if not path.is_absolute():
+        path = _project_root() / path
+    return path.resolve()
+
+
+def _require_db_file(path: Path) -> str:
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Database file not found: {path}. "
+            "Set POS_DB_PATH only when an explicit database override is required."
+        )
+    return str(path)
+
+
 def get_db_path() -> str:
-    """Resolve SQLite DB path from env, config, then defaults."""
-    env_path = os.environ.get("POS_DB_PATH") or os.environ.get("DB_PATH")
+    """Return the configured external database path, which must already exist."""
+    env_path = os.environ.get("POS_DB_PATH")
     if env_path:
-        p = Path(env_path)
-        if not p.is_absolute():
-            p = _project_root() / p
-        return str(p.resolve())
+        return _require_db_file(_resolve_db_file(env_path))
 
     try:
         import config as app_config  # type: ignore
-        cfg_path = getattr(app_config, "DB_PATH", None)
-        if cfg_path:
-            p = Path(str(cfg_path))
-            if not p.is_absolute():
-                p = _project_root() / p
-            return str(p.resolve())
-    except Exception:
-        pass
+    except Exception as exc:
+        raise RuntimeError("Unable to import config.DB_PATH") from exc
 
-    proj = _project_root()
-    candidates = [
-        proj / "db" / "pos.db",
-        proj.parent / "db" / "pos.db",
-        proj / "db.sqlite3",
-        proj / "pos.db",
-    ]
-    for c in candidates:
-        if c.exists():
-            return str(c.resolve())
-
-    return str((proj / "db" / "pos.db").resolve())
+    cfg_path = getattr(app_config, "DB_PATH", None)
+    if not cfg_path:
+        raise RuntimeError("config.DB_PATH is not configured")
+    return _require_db_file(_resolve_db_file(str(cfg_path)))
 
 
 def get_conn(db_path: Optional[str] = None, timeout: float = 5.0) -> sqlite3.Connection:
     """Open a sqlite3 connection with default PRAGMAs."""
-    path = db_path or get_db_path()
-    conn = sqlite3.connect(path, timeout=timeout)
+    path = (
+        _require_db_file(_resolve_db_file(str(db_path)))
+        if db_path is not None
+        else get_db_path()
+    )
+    db_uri = f"{Path(path).as_uri()}?mode=rw"
+    conn = sqlite3.connect(db_uri, timeout=timeout, uri=True)
     conn.row_factory = sqlite3.Row
 
     try:

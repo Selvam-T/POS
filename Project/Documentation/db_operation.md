@@ -17,10 +17,14 @@ Use this for DB path resolution, connections, and transactions.
 
 - `get_db_path()`
   - Priority:
-    1) environment variables `POS_DB_PATH` / `DB_PATH`
+    1) environment variable `POS_DB_PATH` (explicit override)
     2) `config.DB_PATH`
-    3) reasonable defaults under the Project folder
+  - Requires the selected database file to exist. It does not guess fallback
+    filenames or allow SQLite to create an unintended empty database.
 - `get_conn(db_path=None, timeout=5.0)`
+  - Requires an existing database file, including when `db_path` is supplied.
+  - Opens SQLite with URI `mode=rw`, preventing implicit file creation at the
+    connection boundary.
   - Returns a `sqlite3.Connection` configured with:
     - `row_factory = sqlite3.Row`
     - `PRAGMA foreign_keys = ON`

@@ -3,6 +3,11 @@ import os
 import config
 
 
+def test_replaceable_deployment_filenames_are_used():
+    assert os.path.basename(config.DB_PATH) == config.DATABASE_FILENAME
+    assert os.path.basename(config.LOGIN_BACKGROUND) == config.LOGIN_LOGO_FILENAME
+
+
 def test_development_path_layout(tmp_path):
     project_dir = tmp_path / 'Project'
     layout = config._resolve_path_layout(

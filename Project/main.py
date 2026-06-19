@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QLabel,
     QDialog,
+    QMessageBox,
 )
 from PyQt5.QtCore import Qt, QSize, QTimer, qInstallMessageHandler
 from PyQt5.QtGui import QIcon
@@ -1369,6 +1370,22 @@ def main():
 
     cache_load_failed = False
 
+    try:
+        from modules.db_operation.db import get_db_path
+        get_db_path()
+    except FileNotFoundError as exc:
+        try:
+            from modules.ui_utils.error_logger import log_error_message
+            log_error_message(f"Startup database validation failed: {exc}")
+        except Exception:
+            pass
+        QMessageBox.critical(
+            None,
+            'Database Not Found',
+            f'{exc}\n\nThe application will close.',
+        )
+        return 1
+
     # Load product cache once at startup so name/code lookups and completers
     # can rely on in-memory PRODUCT_CACHE during runtime.
     try:
@@ -1465,4 +1482,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

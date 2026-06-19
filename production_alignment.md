@@ -59,6 +59,27 @@ C:\SelvamPOS\
 - Defined roots for resources, database, logs, backups, and future writable
   data without moving or creating client files.
 - Added development and simulated packaged-layout tests.
-- Verification: 2 path tests and the full 57-test suite passed; Python source
+- Centralized the replaceable database and login-logo filenames as
+  `DATABASE_FILENAME` and `LOGIN_LOGO_FILENAME` in `Project/config.py`.
+- Verification: 3 path tests and the full 58-test suite passed; Python source
   compilation passed.
-- Status: pending review and approval.
+- Initial path-model commit: `66da214 feat: centralize development and
+  packaged paths`.
+- Filename-constant follow-up: approved for commit with Phase 2.
+
+### Phase 2 - External Database Contract
+
+- Restricted database selection to the explicit `POS_DB_PATH` override or
+  `config.DB_PATH`.
+- Removed guessed `pos.db` fallback locations and the generic `DB_PATH`
+  environment-variable alias.
+- Added an existence check before every shared SQLite connection so a missing
+  production database cannot be silently replaced with an empty file.
+- Opened SQLite in read/write-only URI mode and added a blocking startup error
+  that closes the application when the configured database is missing.
+- Added focused tests for default selection, override selection, missing-file
+  failures, and successful connections.
+- Verification: 6 database-contract tests, the full 64-test suite, Python
+  compilation, and 21 UI parses passed. The full suite used a disposable copy
+  of the database.
+- Status: approved for commit.

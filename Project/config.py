@@ -42,6 +42,10 @@ LOGS_DIR = _PATHS['logs_dir']
 BACKUPS_DIR = _PATHS['backups_dir']
 DATA_DIR = _PATHS['data_dir']
 
+# Replaceable deployment filenames
+DATABASE_FILENAME = 'Anumani.db'
+LOGIN_LOGO_FILENAME = 'anumani_logo.png'
+
 # Dialog size ratios (width_ratio, height_ratio) as fraction of main window
 DIALOG_RATIOS = {
     'login': (0.25, 0.3),
@@ -139,10 +143,12 @@ CASH_DRAWER_TIMEOUT = 2.0
 
 # Database path (absolute and external to the packaged app directory)
 _BASE_DIR = RUNTIME_DIR  # Backward-compatible alias for existing resource paths.
-DB_PATH = os.path.join(DB_DIR, 'Anumani.db')
+DB_PATH = os.path.join(DB_DIR, DATABASE_FILENAME)
 
 # Login dialog background image. Set to None to use the stylesheet background.
-LOGIN_BACKGROUND = os.path.join(_BASE_DIR, 'assets', 'images', 'anumani_logo.png')
+LOGIN_BACKGROUND = os.path.join(
+    _BASE_DIR, 'assets', 'images', LOGIN_LOGO_FILENAME
+)
 
 # Debug flags (disabled; console logging removed)
 DEBUG_SCANNER_FOCUS = False
