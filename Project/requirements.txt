@@ -4,3 +4,5 @@ lxml>=4.9
 jsbeautifier>=1.14
 python-escpos>=3.1
 openpyxl>=3.1
+qrcode>=7.4
+Pillow>=9.5
