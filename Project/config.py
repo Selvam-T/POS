@@ -3,6 +3,10 @@ import re
 import sys
 
 
+# -----------------------------------------------------------------------------
+# Deployment paths
+# -----------------------------------------------------------------------------
+
 def _resolve_path_layout(module_file=None, executable=None, frozen=None):
     """Resolve development and packaged roots without relying on the CWD."""
     runtime_dir = os.path.abspath(os.path.dirname(module_file or __file__))
@@ -42,69 +46,95 @@ LOGS_DIR = _PATHS['logs_dir']
 BACKUPS_DIR = _PATHS['backups_dir']
 DATA_DIR = _PATHS['data_dir']
 
-# Replaceable deployment filenames
 DATABASE_FILENAME = 'Anumani.db'
 LOGIN_LOGO_FILENAME = 'anumani_logo.png'
 
-# Dialog size ratios (width_ratio, height_ratio) as fraction of main window
-DIALOG_RATIOS = {
-    'login': (0.25, 0.3),
-	'vegetable_entry': (0.5, 0.9),
-	'manual_entry': (0.4, 0.3),
-	'logout_menu': (0.25, 0.25),
-	'admin_menu': (0.45, 0.4),
-	'receipt_menu': (0.75, 0.9),
-	'report_menu': (0.45, 0.6),
-	'greeting_menu': (0.3, 0.3),
-	'todo': (0.45, 0.6),
-	'product_menu': (0.5, 0.7),
-	'vegetable_menu': (0.32, 0.7),
-	'hold_sales': (0.4, 0.3),
-	'view_hold': (0.5, 0.7),
-	'clear_cart': (0.25, 0.25),
-	'refund': (0.35, 0.5),
-    'MaxRowsDialog': (0.25, 0.25)
-}
+# Existing modules still use this alias for runtime resource paths.
+_BASE_DIR = RUNTIME_DIR
+DB_PATH = os.path.join(DB_DIR, DATABASE_FILENAME)
+LOGIN_BACKGROUND = os.path.join(
+    ASSETS_DIR, 'images', LOGIN_LOGO_FILENAME
+)
 
-# Shared report viewer size ratio (width_ratio, height_ratio)
-REPORT_VIEWER_RATIOS = (0.6, 0.85)
+# Writable data remains here until the Phase 4 migration to DATA_DIR.
+APPDATA_DIR = os.path.join(RUNTIME_DIR, 'AppData')
 
-# Product Categories (Don't exceed 25 Characters)
-PRODUCT_CATEGORIES = [
-    '--Select Category--',
-    'Alcohol',
-	'Beverages',
-	'Bread & Bakery',
-	'Canned & Packaged Foods',
-	'Dairy Products',
-	'Frozen Foods',
-	'Household Supplies',
-	'Ice cream',
-    'Magnolia',
-    'Marigold',
-	'Personal Care',
-	'Snacks & Confectionery',
-	'Telecom',
-	'Tobacco',
-	'Stationary',
-	'Vegetables',
-	'Other'
+
+# -----------------------------------------------------------------------------
+# Business identity and localization
+# -----------------------------------------------------------------------------
+
+COMPANY_NAME = 'Anumani Trading Pte Ltd'
+ADDRESS_LINE_1 = 'BLK 77 INDUS RD, #01-501'
+ADDRESS_LINE_2 = 'INDUS GARDEN SINGAPORE'
+
+DATE_FMT = 'd MMM yyyy'
+DAY_FMT = 'ddd'
+TIME_FMT = 'hh : mm ap'
+
+GREETING_STRINGS = [
+    'Happy Deepavali !',
+    'Happy New Year !!!',
+    'Merry Christmas !',
+    'Gōng xǐ fā cái !',
+    'Selamat Hari Raya !',
+    'Happy Vesak Day !',
+    'Selamat Hari Raya Haji !',
+    'Majulah Singapura !',
+    'Happy Labor Day !',
+    'Happy Good Friday !',
+    'Thanks for shopping with us!',
 ]
 
-# Maximum allowed rows in active sales table
-MAX_TABLE_ROWS = 50
+# Runtime selections can override this default through persisted app data.
+GREETING_SELECTED = 'Thanks for shopping with us!'
 
-# TODO List settings
 
-TODO_ROWS = 12
-TODO_ITEM_MAX_LEN = 40
+# -----------------------------------------------------------------------------
+# Runtime controls and diagnostics
+# -----------------------------------------------------------------------------
 
-# Table row colors
-ROW_COLOR_EVEN = '#add8e6'      # Even row color
-ROW_COLOR_ODD = '#ffffe0'       # Odd row color
-ROW_COLOR_DELETE_HIGHLIGHT = '#ff6b6b'  # Row deletion highlight
+# Set False during development to bypass the login dialog.
+LOGIN_ON = True
+AUTO_LOGIN_UID = 1
+AUTO_LOGIN_USERNAME = 'dev'
+AUTO_LOGIN_IS_ADMIN = True
 
-# Icon file paths
+DEBUG_SCANNER_FOCUS = False
+DEBUG_FOCUS_CHANGES = False
+DEBUG_CACHE_LOOKUP = False
+
+
+# -----------------------------------------------------------------------------
+# Main UI and dialog presentation
+# -----------------------------------------------------------------------------
+
+# Dialog size as a fraction of the main window: (width, height).
+DIALOG_RATIOS = {
+    'login': (0.25, 0.3),
+    'vegetable_entry': (0.5, 0.9),
+    'manual_entry': (0.4, 0.3),
+    'logout_menu': (0.25, 0.25),
+    'admin_menu': (0.45, 0.4),
+    'receipt_menu': (0.75, 0.9),
+    'report_menu': (0.45, 0.6),
+    'greeting_menu': (0.3, 0.3),
+    'todo': (0.45, 0.6),
+    'product_menu': (0.5, 0.7),
+    'vegetable_menu': (0.32, 0.7),
+    'hold_sales': (0.4, 0.3),
+    'view_hold': (0.5, 0.7),
+    'clear_cart': (0.25, 0.25),
+    'refund': (0.35, 0.5),
+    'MaxRowsDialog': (0.25, 0.25),
+}
+REPORT_VIEWER_RATIOS = (0.6, 0.85)
+
+ROW_COLOR_EVEN = '#add8e6'
+ROW_COLOR_ODD = '#ffffe0'
+ROW_COLOR_DELETE_HIGHLIGHT = '#ff6b6b'
+
+# These relative paths are resolved by the UI layer against runtime assets.
 ICON_DELETE = 'assets/icons/delete.svg'
 ICON_ADMIN = 'assets/icons/admin.svg'
 ICON_REPORTS = 'assets/icons/reports.svg'
@@ -114,129 +144,58 @@ ICON_GREETING = 'assets/icons/greeting.svg'
 ICON_RECEIPT = 'assets/icons/receipt.svg'
 ICON_LOGOUT = 'assets/icons/logout.svg'
 
-# Date/time display formats
-DATE_FMT = 'd MMM yyyy'
-DAY_FMT = 'ddd'
-TIME_FMT = 'hh : mm ap'
 
-# Company name for header and receipts
-COMPANY_NAME = 'Anumani Trading Pte Ltd'
-ADDRESS_LINE_1 = "BLK 77 INDUS RD, #01-501"
-ADDRESS_LINE_2 = "INDUS GARDEN SINGAPORE"
+# -----------------------------------------------------------------------------
+# Sales, products, and local feature data
+# -----------------------------------------------------------------------------
 
-# Receipt formatting
-RECEIPT_DEFAULT_WIDTH = 48
-RECEIPT_QTY_WIDTH = 10 # qty + unit
-RECEIPT_AMOUNT_WIDTH = 8  # $9999.99
-RECEIPT_GAP = 1
-
-# Network settings for printer
-PRINTER_IP = "192.168.0.10"
-PC_IP = "192.168.0.5"
-SUBNET_MASK = "255.255.255.0"
-PRINTER_PORT = 9100
-ENABLE_PRINTER_PRINT = False # set to True to enable network printing
-# Cash drawer settings
-ENABLE_CASH_DRAWER = False # set to True to enable cash drawer
-CASH_DRAWER_PIN = 2
-CASH_DRAWER_TIMEOUT = 2.0
-
-# Database path (absolute and external to the packaged app directory)
-_BASE_DIR = RUNTIME_DIR  # Backward-compatible alias for existing resource paths.
-DB_PATH = os.path.join(DB_DIR, DATABASE_FILENAME)
-
-# Login dialog background image. Set to None to use the stylesheet background.
-LOGIN_BACKGROUND = os.path.join(
-    _BASE_DIR, 'assets', 'images', LOGIN_LOGO_FILENAME
-)
-
-# Debug flags (disabled; console logging removed)
-DEBUG_SCANNER_FOCUS = False
-DEBUG_FOCUS_CHANGES = False
-DEBUG_CACHE_LOOKUP = False
-
-# Writable app data directory and feature constants
-APPDATA_DIR = os.path.join(_BASE_DIR, 'AppData')
+MAX_TABLE_ROWS = 50
 VEG_SLOTS = 16
+TODO_ROWS = 12
+TODO_ITEM_MAX_LEN = 40
 
-# Categories JSON storage (single-client runtime store)
-# File will live under `APPDATA_DIR` and is seeded from `PRODUCT_CATEGORIES` on first-run only.
-CATEGORIES_JSON_FILENAME = 'categories.json'
-CATEGORIES_JSON_PATH = os.path.join(APPDATA_DIR, CATEGORIES_JSON_FILENAME)
-# Backup prefix for rotated backups when writing updates
-CATEGORIES_JSON_BACKUP_PREFIX = 'categories.json.bak.'
-
-# Protected category names: cannot be renamed or deleted from the JSON store
+# Product category labels should not exceed 25 characters.
+PRODUCT_CATEGORIES = [
+    '--Select Category--',
+    'Alcohol',
+    'Beverages',
+    'Bread & Bakery',
+    'Canned & Packaged Foods',
+    'Dairy Products',
+    'Frozen Foods',
+    'Household Supplies',
+    'Ice cream',
+    'Magnolia',
+    'Marigold',
+    'Personal Care',
+    'Snacks & Confectionery',
+    'Telecom',
+    'Tobacco',
+    'Stationary',
+    'Vegetables',
+    'Other',
+]
 PROTECTED_CATEGORIES = ['Other', '--Select Category--']
 
-# Minimal JSON schema for `categories.json` (for validation / docs)
-# Expected format: { "categories": ["--Select Category--", "Alcohol", ..., "Other"] }
+# Seeded from PRODUCT_CATEGORIES only when the JSON store does not yet exist.
+CATEGORIES_JSON_FILENAME = 'categories.json'
+CATEGORIES_JSON_PATH = os.path.join(APPDATA_DIR, CATEGORIES_JSON_FILENAME)
+CATEGORIES_JSON_BACKUP_PREFIX = 'categories.json.bak.'
 CATEGORIES_JSON_SCHEMA = {
-	"type": "object",
-	"properties": {
-		"categories": {
-			"type": "array",
-			"items": {"type": "string"}
-		}
-	},
-	"required": ["categories"]
+    'type': 'object',
+    'properties': {
+        'categories': {
+            'type': 'array',
+            'items': {'type': 'string'},
+        }
+    },
+    'required': ['categories'],
 }
 
-# =========================================================
-# Screen 2 Ads settings
-# =========================================================
-# Maximum number of images allowed for the customer-facing Screen 2 ads
-MAX_ADS = 10
-# Allowed image file extensions (lowercase)
-ALLOWED_EXTS = {'.jpg', '.jpeg', '.png'}
-# Required image resolution for Screen 2 (width x height)
-REQ_WIDTH = 1280
-REQ_HEIGHT = 800
-# Aspect ratio derived from required width/height
-REQ_RATIO = REQ_WIDTH / REQ_HEIGHT
-# Temporary Screen 2 Image dimension tolerance in %
-ADS_SIZE_TOLERANCE_PCT = 2.5
 
-# =========================================================
-# Customer Display (Screen 2) settings
-# =========================================================
-# Enable the customer-facing display window. When False, no customer
-# display window will be created or shown.
-CUSTOMER_DISPLAY_ENABLED = True
-
-# When True the display will open as a normal window on the main monitor.
-# False = display onreal second screen
-CUSTOMER_DISPLAY_TEST_MODE = False  
-
-# Which screen index to place the customer display on. 0 = primary, 1 = second monitor. 
-# Always check QApplication.screens() length before indexing.
-CUSTOMER_SCREEN_INDEX = 1
-
-# Default customer display size (used when not fullscreen)
-CUSTOMER_SCREEN_WIDTH = 1536 # 1280 # 1024 # 1536
-CUSTOMER_SCREEN_HEIGHT = 900 # 750 # 600 # 900
-
-# Show the customer display fullscreen when placed on the secondary screen
-# no borders, no resizing, no visible desktop, so it looks like a dedicated signage screen.
-CUSTOMER_DISPLAY_FULLSCREEN = False
-
-# When True the app will auto-detect monitor connect/disconnect events
-# and attempt to show/hide the customer display automatically.
-# In CUSTOMER_DISPLAY_TEST_MODE=True AUTO_DETECT is irrelevant.
-CUSTOMER_DISPLAY_AUTO_DETECT = True
-# Seconds to wait before returning to Idle page after completed payment.
-CUSTOMER_DISPLAY_IDLE_TIMEOUT = 5
-
-# Seconds between fullscreen idle ads (pageIdleFull rotation interval).
-CUSTOMER_DISPLAY_IDLE_AD_INTERVAL = 6
-
-# Screen 2 date/time display formats (fallback uses these as well)
-CUSTOMER_DISPLAY_DATE_FMT = DATE_FMT
-CUSTOMER_DISPLAY_TIME_FMT = TIME_FMT
-
-# =========================================================
-# Validation / Input Constraints (moved from input_validation.py)
-# =========================================================
+# -----------------------------------------------------------------------------
+# Validation and input limits
+# -----------------------------------------------------------------------------
 
 PRODUCT_CODE_MIN_LEN = 4
 PRODUCT_CODE_MAX_LEN = 15
@@ -248,74 +207,94 @@ QUANTITY_MAX_UNIT = 9999
 
 UNIT_PRICE_MIN = 0.1
 UNIT_PRICE_MAX = 5000
-
 CURRENCY_MIN = 0.1
 CURRENCY_MAX = 100000
-
 VOUCHER_MIN = 1
 VOUCHER_MAX = 1000
 
-# STRING LENGTH for product_name, category, supplier, note
 STRING_MAX_LENGTH = 40
 PASSWORD_MIN_LENGTH = 8
 
-EMAIL_REGEX = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w+$")
+EMAIL_REGEX = re.compile(r'^[\w\.-]+@[\w\.-]+\.\w+$')
 ALPHANUMERIC_REGEX = re.compile(r"^[A-Za-z0-9 \-']+$")
 NAME_REGEX = re.compile(r"^[A-Za-z0-9\s.,'&()\-/]+$")
 
-# ALTERNATIVE: Field-specific configurations (not implemented yet with validate_field)
+# Field-specific rules retained for consumers that use STRING_CONFIG directly.
 STRING_CONFIG = {
     'product_code': {'min_len': 4, 'max_len': 14, 'required': True},
     'product_name': {'min_len': 4, 'max_len': 40, 'required': True},
     'supplier': {'min_len': 3, 'max_len': 15, 'required': False},
-    'customer': {'min_len': 3, 'max_len': 25, 'required': True},  
-    'note': {'min_len': 0, 'max_len': 40, 'required': False}, 
-    'category': {'min_len': 3, 'max_len': 25, 'required': False}
+    'customer': {'min_len': 3, 'max_len': 25, 'required': True},
+    'note': {'min_len': 0, 'max_len': 40, 'required': False},
+    'category': {'min_len': 3, 'max_len': 25, 'required': False},
 }
 
-# Greeting message options
-GREETING_STRINGS = [
-	"Happy Deepavali !",
-	"Happy New Year !!!",
-	"Merry Christmas !",
-	"Gōng xǐ fā cái !",
-	"Selamat Hari Raya !",
-	"Happy Vesak Day !",
-	"Selamat Hari Raya Haji !",
-	"Majulah Singapura !",
-	"Happy Labor Day !",
-	"Happy Good Friday !",
-	"Thanks for shopping with us!"
-]
 
-# Current greeting message (can be updated by admin)
-GREETING_SELECTED = "Thanks for shopping with us!"
+# -----------------------------------------------------------------------------
+# Receipts and PayNow
+# -----------------------------------------------------------------------------
 
-# QR Code and PayNow settings
+RECEIPT_DEFAULT_WIDTH = 48
+RECEIPT_QTY_WIDTH = 10  # Quantity plus unit.
+RECEIPT_AMOUNT_WIDTH = 8  # Up to $9999.99.
+RECEIPT_GAP = 1
 
+# Lowercase names are retained because qr_generator imports this public API.
 merchant_name = 'Anumani Trading Pte Ltd'
 merchant_city = 'Singapore'
 country_code = 'SG'
 currency = 'SGD'
-
-# PayNow Corporate proxy (UEN or UEN+suffix if you use one)
 paynow_proxy_type = 'UEN'
 paynow_proxy_value = '201940352W'
-
-# Optional merchant category code (often unused for PayNow QR)
 mcc = 0
 
-# QR image settings (your QR library uses these)
 error_correction = 'H'
 box_size = 10
 border = 3
 expiry_seconds = 600
-# PayNow Logo overlay
 logo = 'paynow_logo.png'
 
-# Development: toggle login on/off. Set to False to open main app directly.
-LOGIN_ON = True
-# When `LOGIN_ON` is False, these values define the auto-logged-in user.
-AUTO_LOGIN_UID = 1
-AUTO_LOGIN_USERNAME = 'dev'
-AUTO_LOGIN_IS_ADMIN = True
+
+# -----------------------------------------------------------------------------
+# Printer and cash drawer hardware
+# -----------------------------------------------------------------------------
+
+PRINTER_IP = '192.168.0.10'
+PC_IP = '192.168.0.5'
+SUBNET_MASK = '255.255.255.0'
+PRINTER_PORT = 9100
+ENABLE_PRINTER_PRINT = False
+
+ENABLE_CASH_DRAWER = False
+CASH_DRAWER_PIN = 2
+CASH_DRAWER_TIMEOUT = 2.0
+
+
+# -----------------------------------------------------------------------------
+# Customer display and advertisements
+# -----------------------------------------------------------------------------
+
+MAX_ADS = 10
+ALLOWED_EXTS = {'.jpg', '.jpeg', '.png'}
+REQ_WIDTH = 1280
+REQ_HEIGHT = 800
+REQ_RATIO = REQ_WIDTH / REQ_HEIGHT
+ADS_SIZE_TOLERANCE_PCT = 2.5
+
+# Disable to skip creating the customer-facing display window.
+CUSTOMER_DISPLAY_ENABLED = True
+
+# Test mode opens a normal window on the primary display.
+CUSTOMER_DISPLAY_TEST_MODE = False
+CUSTOMER_SCREEN_INDEX = 1
+CUSTOMER_SCREEN_WIDTH = 1536
+CUSTOMER_SCREEN_HEIGHT = 900
+CUSTOMER_DISPLAY_FULLSCREEN = False
+
+# Monitor auto-detection is ignored while test mode is enabled.
+CUSTOMER_DISPLAY_AUTO_DETECT = True
+CUSTOMER_DISPLAY_IDLE_TIMEOUT = 5
+CUSTOMER_DISPLAY_IDLE_AD_INTERVAL = 6
+
+CUSTOMER_DISPLAY_DATE_FMT = DATE_FMT
+CUSTOMER_DISPLAY_TIME_FMT = TIME_FMT

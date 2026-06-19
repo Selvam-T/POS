@@ -82,4 +82,15 @@ C:\SelvamPOS\
 - Verification: 6 database-contract tests, the full 64-test suite, Python
   compilation, and 21 UI parses passed. The full suite used a disposable copy
   of the database.
+- Commit: `5b102bd feat: enforce external database contract`.
+
+### Configuration Organization
+
+- Reordered `Project/config.py` into deployment, identity, runtime, UI,
+  sales/data, validation, payment, hardware, and customer-display sections.
+- Normalized indentation and replaced repetitive comments with concise section
+  guidance while preserving every existing setting name and value.
+- Verification: semantic comparison found no added, removed, or changed setting;
+  9 focused tests, the full 64-test suite, Python compilation, and 21 UI parses
+  passed. The full suite used a disposable database copy.
 - Status: approved for commit.
