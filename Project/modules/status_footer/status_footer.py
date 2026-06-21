@@ -1,7 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from PyQt5.QtCore import Qt, QTimer, QFileSystemWatcher
+from PyQt5.QtCore import QObject, Qt, QTimer, QFileSystemWatcher
 from PyQt5.QtWidgets import QLabel, QMainWindow, QPushButton, QStatusBar, QWidget
 
 from modules.ui_utils.error_logger import (
@@ -11,7 +11,7 @@ from modules.ui_utils.error_logger import (
 )
 
 
-class MainStatusFooterController(QWidget):
+class MainStatusFooterController(QObject):
     def __init__(self):
         super().__init__()
         self.root = None
