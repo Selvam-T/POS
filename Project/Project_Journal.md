@@ -6,6 +6,18 @@
 **Database:** Anumani.db (22,337 products)
 
 ---
+
+## Update Summary (June 21, 2026)
+
+Admin Inventory export enhancements:
+
+- Added an XLS Product List action to the Admin Menu EXPORT tab.
+- Wired `xlsExportBtn` to write legacy Excel `.xls` workbooks with `xlwt`.
+- Reused the existing inventory export directory, filename, database-row, status, and error-logging helpers.
+- Added explicit legacy XLS limits: 65,536 rows including the header and 256 columns.
+- Added `xlwt>=1.3.0` to `requirements.txt`; XLSX export continues to use `openpyxl`.
+
+---
  
 ## Update Summary (February 24, 2026)
 

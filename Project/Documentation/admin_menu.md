@@ -124,19 +124,21 @@ Implementation note: validators live in `modules/menu/screen2_ads_helper.py` and
 
 ## EXPORT Tab
 
-The EXPORT tab allows exporting the application's `Product_list` table in three formats:
+The EXPORT tab allows exporting the application's `Product_list` table in four formats:
 
-- CSV (`.csv`) — simple comma-separated values file.
-- XLSX (`.xlsx`) — Excel workbook (requires the `openpyxl` package).
-- SQL (`.sql`) — SQL file containing the `CREATE TABLE` statement and `INSERT` statements for every row.
+- CSV (`.csv`) - simple comma-separated values file.
+- XLS (`.xls`) - legacy Excel workbook (requires the `xlwt` package).
+- XLSX (`.xlsx`) - modern Excel workbook (requires the `openpyxl` package).
+- SQL (`.sql`) - SQL file containing the `CREATE TABLE` statement and `INSERT` statements for every row.
 
 Behaviour and wiring:
-- Buttons wired in controller: `csvExportBtn`, `xlsxExportBtn`, `sqlExportBtn` (see `modules/menu/admin_menu.py`).
-- Exports are written to the user Documents folder under `Documents/POS_Exports/Inventory`.
-- Filenames follow the pattern: `product_list_{kind}_ddmmmyyyy_hh-mm.ext` (timestamp uses `ddMmmYYYY_HH-MM` with `:` replaced by `-` for Windows-safe filenames).
-- After a successful export the UI shows a concise status message in `exportStatusLabel` of the form: `"<FILETYPE> file exported to <full-path>"` (e.g. `CSV file exported to C:/Users/.../Documents/POS_Exports/Inventory product_list_csv_03apr2026_21-30.csv`).
+- Buttons wired in controller: `csvExportBtn`, `xlsExportBtn`, `xlsxExportBtn`, `sqlExportBtn` (see `modules/menu/admin_menu.py`).
+- Exports are written under the user's home folder at `POS_Exports/Inventory`.
+- Filenames follow the pattern: `Product_List_{kind}_ddmmmyyyy_hh-mm.ext` (the timestamp is Windows-safe).
+- After a successful export the UI shows a concise status message in `exportStatusLabel` naming the file type and export directory.
 
 Notes:
+- The XLS export uses `xlwt`. The project `requirements.txt` lists `xlwt>=1.3.0`. Legacy XLS worksheets are limited to 65,536 rows (including the header) and 256 columns; the controller checks both limits before saving.
 - The XLSX export uses `openpyxl`. If `openpyxl` is not installed the controller will report an error and the XLSX export will fail; install via `pip install openpyxl` or include it in your environment requirements. The project `requirements.txt` already lists `openpyxl>=3.1`.
 - Exports are generated from a `SELECT * FROM Product_list ORDER BY name COLLATE NOCASE` query; ensure the `Product_list` table exists and the DB path is correct.
 

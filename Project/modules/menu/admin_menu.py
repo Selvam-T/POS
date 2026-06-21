@@ -70,6 +70,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
 
             # EXPORT
             'csvExportBtn': (QPushButton, 'csvExportBtn'),
+            'xlsExportBtn': (QPushButton, 'xlsExportBtn'),
             'xlsxExportBtn': (QPushButton, 'xlsxExportBtn'),
             'sqlExportBtn': (QPushButton, 'sqlExportBtn'),
             'csv2ExportBtn': (QPushButton, 'csv2ExportBtn'),
@@ -109,6 +110,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     screen2Up = widgets['screen2Up']
     screen2Down = widgets['screen2Down']
     csvExportBtn = widgets['csvExportBtn']
+    xlsExportBtn = widgets['xlsExportBtn']
     xlsxExportBtn = widgets['xlsxExportBtn']
     sqlExportBtn = widgets['sqlExportBtn']
     csv2ExportBtn = widgets.get('csv2ExportBtn')
@@ -440,6 +442,53 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             log_error_message(f'admin_menu export Product List CSV failed: {e}')
             _set_export_status('Product List CSV export failed.', ok=False)
 
+    def _export_xls() -> None:
+        try:
+            try:
+                import importlib
+                _xlwt = importlib.import_module('xlwt')
+                Workbook = getattr(_xlwt, 'Workbook')
+            except Exception as imp_err:
+                raise RuntimeError('Missing dependency: xlwt') from imp_err
+
+            out_dir = _ensure_exports_folder()
+            file_name = _base_export_file_stem().format(kind='xls') + '.xls'
+            out_path = out_dir / file_name
+
+            headers, rows = _fetch_product_rows_and_headers()
+            total_rows = len(rows) + (1 if headers else 0)
+            max_columns = max(
+                [len(headers)] + [len(row) for row in rows],
+                default=0,
+            )
+            if total_rows > 65536:
+                raise RuntimeError('XLS row limit exceeded (65,536 rows including header)')
+            if max_columns > 256:
+                raise RuntimeError('XLS column limit exceeded (256 columns)')
+
+            workbook = Workbook(encoding='utf-8')
+            sheet = workbook.add_sheet('Product_list')
+            row_index = 0
+            if headers:
+                for column_index, value in enumerate(headers):
+                    sheet.write(row_index, column_index, '' if value is None else value)
+                row_index += 1
+            for row in rows:
+                for column_index, value in enumerate(row):
+                    sheet.write(row_index, column_index, '' if value is None else value)
+                row_index += 1
+            workbook.save(str(out_path))
+
+            _set_export_status(f'Product List XLS file exported to {out_dir}', ok=True)
+        except Exception as e:
+            if 'xlwt' in str(e).lower():
+                msg = 'Legacy Excel export unavailable: xlwt is missing from this Python environment.'
+                log_error_message(f'admin_menu export Product List XLS failed: {msg}')
+                _set_export_status(msg, ok=False)
+            else:
+                log_error_message(f'admin_menu export Product List XLS failed: {e}')
+                _set_export_status('Product List XLS export failed.', ok=False)
+
     def _export_xlsx() -> None:
         try:
             try:
@@ -512,6 +561,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
 
     try:
         csvExportBtn.clicked.connect(_export_csv)
+        xlsExportBtn.clicked.connect(_export_xls)
         xlsxExportBtn.clicked.connect(_export_xlsx)
         sqlExportBtn.clicked.connect(_export_sql)
         # Wire categories CSV export button if present

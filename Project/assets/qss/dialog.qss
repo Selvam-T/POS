@@ -621,9 +621,14 @@ QFrame#csv2ExportFrame {
     background-color: #eb81d9;  
 }
 
+QFrame#xlsExportFrame,
+QFrame#xls2ExportFrame {
+    background-color: #81eb8a;
+}
+
 QFrame#xlsxExportFrame,
 QFrame#xlsx2ExportFrame {
-    background-color: #81eb8a;  
+    background-color: #21a366;
 }
 
 QFrame#sqlExportFrame,

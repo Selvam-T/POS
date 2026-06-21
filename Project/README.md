@@ -177,7 +177,8 @@ CREATE TABLE Product_list (
 ### Prerequisites
 - Python 3.7+
 - SQLite database at `../db/Anumani.db`
- - Optional: `openpyxl` — required only for XLSX export. Install via `pip install openpyxl` or include `requirements.txt` when creating your environment.
+- `openpyxl` - required for XLSX export.
+- `xlwt` - required for legacy XLS export.
 
 ### Installation (Windows)
 
@@ -429,6 +430,8 @@ See `requirements.txt` for full list. Main dependencies:
 - PyQt5 - GUI framework
 - sqlite3 - Database (built-in with Python)
 - pynput - Barcode scanner keyboard listener
+- openpyxl - modern Excel (`.xlsx`) export
+- xlwt - legacy Excel (`.xls`) export
 
 ## License
 
