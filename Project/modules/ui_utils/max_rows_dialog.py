@@ -2,7 +2,7 @@ import os
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QWidget
 from PyQt5.QtCore import Qt
 from config import QSS_DIR
-from modules.runtime_paths import load_stylesheet
+from modules.runtime.paths import load_stylesheet
 
 QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 

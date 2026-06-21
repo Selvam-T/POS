@@ -1,6 +1,6 @@
 """
-Table operations module for the POS system.
-Provides generic table setup and manipulation functions for product tables.
+UI table operations module for the POS system.
+Provides table setup and manipulation functions for application table widgets.
 """
 from .table_operations import (
     setup_sales_table,
@@ -30,4 +30,3 @@ __all__ = [
     'increment_row_quantity',
     'set_table_rows',
 ]
-

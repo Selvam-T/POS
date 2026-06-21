@@ -11,7 +11,7 @@ from modules.ui_utils.error_logger import log_error_message
 from modules.ui_utils.dialog_utils import build_dialog_from_ui, require_widgets, set_dialog_error, set_dialog_info, log_exception_traceback_and_postclose_statusBar, build_error_fallback_dialog
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, set_initial_focus
 from modules.ui_utils import input_handler
-from modules.db_operation.db import get_conn
+from modules.db_operation.sqlite_runtime import get_conn
 from modules.db_operation.products_repo import get_product_list_schema_and_rows
 from modules.db_operation.users_repo import verify_password, update_password, clear_must_change_password
 from modules.ui_utils import ui_feedback

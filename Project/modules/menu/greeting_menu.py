@@ -5,7 +5,7 @@ from modules.ui_utils.error_logger import log_error_message
 from modules.ui_utils import ui_feedback
 from modules.ui_utils.dialog_utils import set_dialog_main_status, build_dialog_from_ui, build_error_fallback_dialog
 from modules.ui_utils.greeting_state import load_greeting
-from modules.runtime_paths import load_stylesheet, stylesheet_path, ui_path
+from modules.runtime.paths import load_stylesheet, stylesheet_path, ui_path
 
 QSS_PATH = stylesheet_path('dialog.qss')
 

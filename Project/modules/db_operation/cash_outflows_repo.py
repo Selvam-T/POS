@@ -5,7 +5,7 @@ from __future__ import annotations
 import sqlite3
 from typing import Any, Dict, List, Optional
 
-from .db import get_conn, now_iso, transaction
+from .sqlite_runtime import get_conn, now_iso, transaction
 
 
 TABLE = "cash_outflows"

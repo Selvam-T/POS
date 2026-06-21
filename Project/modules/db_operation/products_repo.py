@@ -3,7 +3,7 @@
 import sqlite3
 from typing import Any, Dict, List, Optional, Tuple
 
-from .db import get_conn, now_iso, transaction
+from .sqlite_runtime import get_conn, now_iso, transaction
 
 
 TABLE = "Product_list"
@@ -254,4 +254,3 @@ def get_product_list_schema_and_rows(*, conn: Optional[sqlite3.Connection] = Non
     finally:
         if own:
             c.close()
-

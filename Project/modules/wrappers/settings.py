@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict, Any, Tuple
 
 from config import APPDATA_DIR, VEG_SLOTS
-from modules.runtime_data import ensure_appdata_dir
+from modules.runtime.data import ensure_appdata_dir
 
 
 def _ensure_appdata_dir() -> Path:

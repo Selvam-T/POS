@@ -21,8 +21,8 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QSize, QTimer, qInstallMessageHandler
 from PyQt5.QtGui import QIcon
 
-from modules.table.table_operations import get_sales_data
-from modules.sales.sales_frame_setup import setup_sales_frame
+from modules.table_ui.table_operations import get_sales_data
+from modules.sales.sales_panel import setup_sales_frame
 from modules.payment.payment_panel import setup_payment_panel
 from modules.payment.refund import launch_refund_dialog
 from modules.payment.vendor import launch_vendor_dialog
@@ -32,7 +32,7 @@ from modules.customer_display import CustomerDisplayWindow
 from modules.wrappers.dialog_wrapper import DialogWrapper
 from modules.db_operation import PRODUCT_CACHE, ensure_cash_outflows_table
 from modules.ui_utils.dialog_utils import report_exception, report_to_statusbar
-from modules.runtime_paths import load_stylesheet, stylesheet_path
+from modules.runtime.paths import load_stylesheet, stylesheet_path
 # --- Menu frame dialog controllers ---
 from modules.menu.logout_menu import launch_logout_dialog
 from modules.menu.admin_menu import launch_admin_dialog
@@ -354,7 +354,7 @@ class MainLoader(QMainWindow):
         # Standardize hard-fail handling: keep all launch-time work inside
         # DialogWrapper's try/except boundary.
         def _open(main_window):
-            from modules.table.table_operations import is_transaction_active
+            from modules.table_ui.table_operations import is_transaction_active
 
             local_kwargs = dict(kwargs or {})
 
@@ -574,7 +574,7 @@ class MainLoader(QMainWindow):
     # Prompt clear cart dialog only when a sale exists.
     def open_clearcart_dialog(self):
         """Open Clear Cart confirmation dialog, only if there is an active sale."""
-        from modules.table.table_operations import is_transaction_active
+        from modules.table_ui.table_operations import is_transaction_active
         from modules.ui_utils.ui_feedback import show_temp_status
 
         sales_table = getattr(self, 'sales_table', None)
@@ -1142,8 +1142,8 @@ class MainLoader(QMainWindow):
 
         try:
             from PyQt5.QtWidgets import QLineEdit
-            from modules.table.table_operations import set_table_rows
-            from modules.table.unit_helpers import canonicalize_unit
+            from modules.table_ui.table_operations import set_table_rows
+            from modules.domain.unit_helpers import canonicalize_unit
 
             # Get the dialog that just closed
             dlg = self.dialog_wrapper._last_dialog
@@ -1255,7 +1255,7 @@ class MainLoader(QMainWindow):
             return
         try:
             self.sales_table.setRowCount(0)
-            from modules.table import recompute_total
+            from modules.table_ui import recompute_total
             recompute_total(self.sales_table)
             if update_display:
                 display = getattr(self, 'customer_display', None)
@@ -1376,7 +1376,7 @@ def main():
     cache_load_failed = False
 
     try:
-        from modules.db_operation.db import get_db_path
+        from modules.db_operation.sqlite_runtime import get_db_path
         get_db_path()
     except FileNotFoundError as exc:
         try:

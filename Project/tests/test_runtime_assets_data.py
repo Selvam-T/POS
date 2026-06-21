@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import config
-from modules.runtime_data import ensure_ads_dir, ensure_appdata_dir
-from modules.runtime_paths import (
+from modules.runtime.data import ensure_ads_dir, ensure_appdata_dir
+from modules.runtime.paths import (
     asset_path,
     resolve_stylesheet_urls,
     stylesheet_path,

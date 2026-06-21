@@ -73,7 +73,7 @@ QPushButton#customCloseBtn:pressed {
 
 ## UI-only safety check (new)
 
-- The UI-loaded Logout dialog (when `ui/logout_menu.ui` successfully loads) now performs a guard before accepting logout: it checks the main window's `sales_table` for active rows using the shared helper `modules.table.table_operations.is_transaction_active`.
+- The UI-loaded Logout dialog (when `ui/logout_menu.ui` successfully loads) now performs a guard before accepting logout: it checks the main window's `sales_table` for active rows using the shared helper `modules.table_ui.table_operations.is_transaction_active`.
 - If the sales table contains one or more rows, the dialog will NOT accept (will remain open) and instead writes an error to the dialog-local `QLabel` named `logoutStatusLabel` (if present). If the label is missing, a transient message is shown on the main window status bar.
 - This check is applied only to the UI-loaded branch so the minimal fallback dialog remains lightweight and always allows logout in emergency scenarios.
 - Rationale: prevents accidental exit while a sale is in progress and keeps behavior consistent with other dialogs that rely on `is_transaction_active`.

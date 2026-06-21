@@ -129,9 +129,9 @@ class BarcodeManager(QObject):
             pass
 
         try:
-            from modules.table import handle_barcode_scanned
+            from modules.table_ui import handle_barcode_scanned
             try:
-                from modules.table.table_operations import get_product_info
+                from modules.table_ui.table_operations import get_product_info
                 found, _, _, _ = get_product_info(barcode)
             except Exception:
                 found = True

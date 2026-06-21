@@ -40,7 +40,7 @@ Important object names:
 `receiptTable` is configured in code, not in the `.ui`.
 
 The controller delegates receipt-table setup, filling, selection, and sorting to
-`modules.table.receipt_table_helpers`.
+`modules.table_ui.receipt_table_helpers`.
 
 Visible columns depend on `receiptStatusComboBox`:
 

@@ -1,6 +1,6 @@
 from config import PROTECTED_CATEGORIES
 from modules.db_operation import products_repo, refresh_product_cache
-from modules.db_operation.db import get_conn, transaction
+from modules.db_operation.sqlite_runtime import get_conn, transaction
 from modules.ui_utils import category_state
 from modules.ui_utils.error_logger import log_error_message
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Optional
 
-from modules.db_operation.db import get_conn, transaction, now_iso
+from modules.db_operation.sqlite_runtime import get_conn, transaction, now_iso
 from modules.db_operation.receipt_numbers import next_receipt_no
 from modules.db_operation.receipt_write_helpers import (
     table_columns,

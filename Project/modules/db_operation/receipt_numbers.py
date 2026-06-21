@@ -4,7 +4,7 @@ import sqlite3
 from datetime import date, datetime
 from typing import Optional
 
-from .db import get_conn, transaction
+from .sqlite_runtime import get_conn, transaction
 
 
 _COUNTER_TABLE_SQL = """

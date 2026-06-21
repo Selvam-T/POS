@@ -1,7 +1,7 @@
 
-# sales_frame_setup.py Documentation
+# sales_panel.py Documentation
 
-**Location:** `modules/sales/sales_frame_setup.py`
+**Location:** `modules/sales/sales_panel.py`
 
 ## Purpose
 This module encapsulates the sales frame controller that loads `sales_frame.ui`, mounts it into the placeholder on `MainLoader`, configures the table/total widgets, and exposes signals so the rest of the app can react to sales-frame actions without digging into the UI internals.
@@ -36,7 +36,7 @@ The total listener mentioned above keeps `saleTotalChanged` in sync with `bind_t
 
 **Example:**
 ```python
-from modules.sales.sales_frame_setup import setup_sales_frame
+from modules.sales.sales_panel import setup_sales_frame
 # ...
 setup_sales_frame(self, UI_DIR)
 # self.sales_table is now available for use

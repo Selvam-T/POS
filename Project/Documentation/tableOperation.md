@@ -1,4 +1,4 @@
-# Table Operations Module (`modules/table/table_operations.py`)
+# Table Operations Module (`modules/table_ui/table_operations.py`)
 
 ## Overview
 This module provides generic table operations for product tables in the POS system, including setup, row management, and automatic total value binding. Used by both the sales table and vegetable entry table.
@@ -75,7 +75,7 @@ This module provides generic table operations for product tables in the POS syst
 When tables contain both KG and EACH items, use this function to preserve per-row editable states. All merging, duplicate detection, and display logic is handled via a canonical data list and table rebuild:
 
 ```python
-from modules.table import set_table_rows
+from modules.table_ui import set_table_rows
 
 rows = [
     {
@@ -130,7 +130,7 @@ To ensure the total value is always up to date:
 
 **Example:**
 ```python
-from modules.table import setup_sales_table, bind_total_label
+from modules.table_ui import setup_sales_table, bind_total_label
 # ...
 sales_table = ...  # QTableWidget instance
 setup_sales_table(sales_table)
@@ -148,12 +148,12 @@ bind_total_label(sales_table, total_label)  # total_label is a QLabel instance
 - New DB writes should be canonicalized at the UI input boundary (see `modules/ui_utils/input_handler.py`).
 
 ## Integration
-- The sales table is set up and bound to the total label in `modules/sales/sales_frame_setup.py`.
+- The sales table is set up and bound to the total label in `modules/sales/sales_panel.py`.
 - The vegetable entry table uses the same functions with `editable=False` for weight-based products.
 - The main window (`main.py`) uses `setup_sales_frame` to ensure the table and total label are always correctly initialized and bound.
 
 ## Migration Notes
-- Migrated from `modules/sales/salesTable.py` to `modules/table/table_operations.py` on December 19, 2025
+- Migrated from `modules/sales/salesTable.py` to `modules/table_ui/table_operations.py` on December 19, 2025
 - All import statements updated across the codebase
 - Backward compatible: existing code works without modifications
 - New features: `editable` parameter, `display_text` support, numeric value storage

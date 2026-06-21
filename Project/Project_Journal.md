@@ -579,7 +579,7 @@ def get_row_color(row: int) -> QColor:
 
 ### Architecture: Preloaded Product Cache
 
-**Module:** `modules/db_operation/` (see `product_cache.py`, `products_repo.py`, `db.py`)
+**Module:** `modules/db_operation/` (see `product_cache.py`, `products_repo.py`, `sqlite_runtime.py`)
 
 **Database Details:**
 - **Path:** `../db/Anumani.db` (one level above Project folder)
@@ -1206,7 +1206,7 @@ def handle_barcode_scanned(table, barcode, status_bar):
 - Created `modules/db_operation/` folder
 - (Historical) Moved `product_crud.py` under `modules/db_operation/` and adjusted imports
 - (Current) `product_crud.py` was later retired in favor of:
-    - `db.py` (connections/transactions)
+    - `sqlite_runtime.py` (connections/transactions)
     - `products_repo.py` (SQL-only repository)
     - `product_cache.py` (in-memory `PRODUCT_CACHE` + `get_product_info()`)
     - `__init__.py` (public facade + compatibility wrappers)

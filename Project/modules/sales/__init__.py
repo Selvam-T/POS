@@ -1,7 +1,7 @@
 """
 Sales module for the POS system.
 """
-from modules.table import (
+from modules.table_ui import (
     setup_sales_table,
     recalc_row_total,
     get_row_color,

@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 import config
-from modules.db_operation.db import get_conn, get_db_path
+from modules.db_operation.sqlite_runtime import get_conn, get_db_path
 
 
 def test_default_database_path_comes_from_config(tmp_path, monkeypatch):
@@ -56,7 +56,7 @@ def test_connection_opens_existing_database(tmp_path):
 
 def test_missing_database_stops_application_startup(monkeypatch):
     import main
-    from modules.db_operation import db
+    from modules.db_operation import sqlite_runtime
     from modules.ui_utils import error_logger
 
     messages = []
@@ -67,7 +67,7 @@ def test_missing_database_stops_application_startup(monkeypatch):
     monkeypatch.setattr(main, 'QApplication', lambda _argv: object())
     monkeypatch.setattr(main, 'load_qss', lambda _app: None)
     monkeypatch.setattr(main, 'qInstallMessageHandler', lambda _handler: None)
-    monkeypatch.setattr(db, 'get_db_path', raise_missing_database)
+    monkeypatch.setattr(sqlite_runtime, 'get_db_path', raise_missing_database)
     monkeypatch.setattr(error_logger, 'log_error_message', lambda _message: None)
     monkeypatch.setattr(
         main.QMessageBox,

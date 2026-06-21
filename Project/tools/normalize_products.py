@@ -53,7 +53,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from modules.db_operation.db import get_conn, get_db_path, now_iso, transaction  # noqa: E402
+from modules.db_operation.sqlite_runtime import get_conn, get_db_path, now_iso, transaction  # noqa: E402
 from modules.db_operation.product_cache import _to_camel_case  # noqa: E402
 
 

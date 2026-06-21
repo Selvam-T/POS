@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt, QObject, QEvent
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QDialog, QLineEdit, QComboBox, QLabel, QPushButton, QApplication
 from config import COMPANY_NAME, DIALOG_RATIOS, LOGIN_BACKGROUND, QSS_DIR, UI_DIR
-from modules.runtime_paths import load_stylesheet
+from modules.runtime.paths import load_stylesheet
 
 UI_PATH = os.path.join(UI_DIR, "login.ui")
 QSS_PATH = os.path.join(QSS_DIR, "main.qss")

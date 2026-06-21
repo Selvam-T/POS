@@ -19,7 +19,7 @@ from PyQt5.QtGui import QFont
 
 from modules.ui_utils.error_logger import log_error_message
 from modules.ui_utils import ui_feedback
-from modules.runtime_paths import load_stylesheet
+from modules.runtime.paths import load_stylesheet
 
 
 def set_dialog_main_status(dlg, message: str, *, is_error: bool = False, duration: int = 4000) -> None:

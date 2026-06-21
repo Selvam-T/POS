@@ -10,7 +10,7 @@ import sqlite3
 from typing import Any, Dict, List, Optional, Tuple
 
 from ..date_time.formatters import parse_to_datetime
-from .db import get_conn, now_iso
+from .sqlite_runtime import get_conn, now_iso
 from . import products_repo, receipt_repo
 
 

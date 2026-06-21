@@ -8,7 +8,7 @@ from modules.ui_utils.dialog_utils import (
     set_dialog_main_status_max,
     set_dialog_error
 )
-from modules.table.table_operations import is_transaction_active
+from modules.table_ui.table_operations import is_transaction_active
 from modules.ui_utils.ui_feedback import set_status_label, show_temp_status
 from config import QSS_DIR, UI_DIR
 

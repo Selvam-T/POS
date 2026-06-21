@@ -27,7 +27,7 @@ from modules.ui_utils import ui_feedback, input_handler
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate
 from modules.ui_utils.error_logger import log_error_message
 from modules.date_time import format_date, format_time
-from modules.table.table_widget_helpers import (
+from modules.table_ui.table_widget_helpers import (
     apply_table_columns,
     configure_readonly_row_selection_table,
 )
@@ -108,7 +108,7 @@ def _fill_receipts_table(table: QTableWidget, rows: list[dict]) -> None:
     Sorting is temporarily disabled while rows are inserted to avoid
     re-ordering or visual jitter; user sorting preference is restored.
     Cell rendering stays local to this dialog; only header/selection setup
-    is shared through `modules.table.table_widget_helpers`.
+    is shared through `modules.table_ui.table_widget_helpers`.
     """
     was_sorting = False
     try:
@@ -737,8 +737,8 @@ def launch_viewhold_dialog(parent=None):
             return
 
         try:
-            from modules.table.table_operations import set_table_rows
-            from modules.table.unit_helpers import canonicalize_unit
+            from modules.table_ui.table_operations import set_table_rows
+            from modules.domain.unit_helpers import canonicalize_unit
 
             rows = []
             total = 0.0

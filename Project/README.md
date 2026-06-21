@@ -133,7 +133,7 @@ Project/
 └── modules/
    ├── db_operation/
    │   ├── __init__.py
-   │   ├── db.py                   # Shared sqlite plumbing (path/conn/transaction)
+   │   ├── sqlite_runtime.py       # Shared sqlite plumbing (path/conn/transaction)
    │   ├── products_repo.py        # Product_list SQL-only repository
    │   └── product_cache.py        # App-wide in-memory PRODUCT_CACHE + fast lookups
    ├── devices/

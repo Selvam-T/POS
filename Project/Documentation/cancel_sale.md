@@ -152,8 +152,8 @@ def _perform_logout(self): ...
 - `modules/sales/clear_cart.py` - Dialog controller and fallback logic
 - `modules/ui_utils/error_logger.py` - Shared error logger
 - `main.py` - Dialog launcher and post-action handler
-- `modules/sales/sales_frame_setup.py` - Button wiring (line ~90)
-- `modules/table/table_operations.py` - `recompute_total()` function
+- `modules/sales/sales_panel.py` - Button wiring (line ~90)
+- `modules/table_ui/table_operations.py` - `recompute_total()` function
 
 ---
 

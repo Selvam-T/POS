@@ -1,13 +1,13 @@
-"""sales_frame_setup.py - Controller for the sales frame UI with signal support."""
+"""sales_panel.py - Controller for the sales frame UI with signal support."""
 import os
 from PyQt5 import uic
 from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtGui import QFontMetrics
 from PyQt5.QtWidgets import QVBoxLayout, QSizePolicy, QPushButton, QWidget, QTableWidget, QLabel
 
-from modules.table import setup_sales_table, bind_total_label, add_total_listener, bind_qty_commit_listener
+from modules.table_ui import setup_sales_table, bind_total_label, add_total_listener, bind_qty_commit_listener
 from modules.ui_utils.error_logger import log_error_message
-from modules.runtime_paths import load_stylesheet, stylesheet_path
+from modules.runtime.paths import load_stylesheet, stylesheet_path
 
 
 

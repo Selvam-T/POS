@@ -25,7 +25,7 @@ Why the app layer performs DB commits
   all writes must occur inside a single DB transaction. The application
   orchestrator (`main.py`) owns the sales table and receipt context and is the
   natural place to coordinate this atomic operation.
-- The `transaction()` helper in `modules/db_operation/db.py` uses
+- The `transaction()` helper in `modules/db_operation/sqlite_runtime.py` uses
   `BEGIN IMMEDIATE` to acquire a write lock early and ensures `COMMIT` on
   success and `ROLLBACK` on exception.
 
@@ -137,7 +137,7 @@ Testing recommendations
 
 References
 ----------
-- `modules/db_operation/db.py` — transaction helper (`BEGIN IMMEDIATE`).
+- `modules/db_operation/sqlite_runtime.py` — transaction helper (`BEGIN IMMEDIATE`).
 - `modules/db_operation/receipt_numbers.py` — `next_receipt_no` (now safe
   to call inside an existing transaction when passed `conn`).
 - `modules/db_operation/paid_sale_committer.py` — dedicated atomic commit service.

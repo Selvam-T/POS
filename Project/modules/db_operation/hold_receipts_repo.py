@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from .db import get_conn, transaction, now_iso
+from .sqlite_runtime import get_conn, transaction, now_iso
 from .receipt_write_helpers import table_columns, first_existing, column_notnull
 
 

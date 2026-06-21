@@ -6,7 +6,7 @@ import sqlite3
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Add that parent directory to the system path
 sys.path.append(parent_dir)
-from modules.db_operation.db import get_db_path
+from modules.db_operation.sqlite_runtime import get_db_path
 
 def list_tables(cursor):
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")

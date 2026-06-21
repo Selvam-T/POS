@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QFileDialog, QListWidget, QListWidgetItem, QLabel, Q
 
 from modules.ui_utils import ui_feedback
 from config import ADS_DIR, MAX_ADS, ALLOWED_EXTS, REQ_WIDTH, REQ_HEIGHT, ADS_SIZE_TOLERANCE_PCT
-from modules.runtime_data import ensure_ads_dir
+from modules.runtime.data import ensure_ads_dir
 
 
 class Screen2AdsController:

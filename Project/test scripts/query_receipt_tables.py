@@ -12,7 +12,7 @@ PROJECT_ROOT = SCRIPT_DIR.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from modules.db_operation.db import get_db_path
+from modules.db_operation.sqlite_runtime import get_db_path
 LIMIT = 10
 
 def print_table(cursor, table_name: str, limit: int = 10) -> None:

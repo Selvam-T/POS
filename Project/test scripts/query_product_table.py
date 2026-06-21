@@ -8,7 +8,7 @@ sys.path.append(parent_dir)
 
 from modules.db_operation import get_product_info
 import sqlite3
-from modules.db_operation.db import get_db_path
+from modules.db_operation.sqlite_runtime import get_db_path
 
 codes = [f"veg0{i}" for i in range(1, 9)]
 

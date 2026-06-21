@@ -29,8 +29,8 @@ Design hard rule:
 
 Launch + wiring:
 - Main launch guard + wrapper open: `main.py` (`open_viewhold_panel`)
-- Button wiring: `modules/sales/sales_frame_setup.py` (`viewHoldBtn`)
-- Signal target: `modules/sales/sales_frame_setup.py` (`viewHoldLoaded(int, float)`) and `main.py` (`_on_view_hold_loaded`)
+- Button wiring: `modules/sales/sales_panel.py` (`viewHoldBtn`)
+- Signal target: `modules/sales/sales_panel.py` (`viewHoldLoaded(int, float)`) and `main.py` (`_on_view_hold_loaded`)
 
 DB layer:
 - SQL repo: `modules/db_operation/hold_receipts_repo.py`
@@ -179,8 +179,8 @@ Flow:
 3. Load items:
    - `receipt_repo.list_receipt_items_by_no(receipt_no, receipt_id=receipt_id)`
 4. Convert items into canonical sales rows:
-   - Uses `modules.table.table_operations.set_table_rows(...)`
-   - Canonicalizes unit via `modules.table.unit_helpers.canonicalize_unit(...)`
+   - Uses `modules.table_ui.table_operations.set_table_rows(...)`
+   - Canonicalizes unit via `modules.domain.unit_helpers.canonicalize_unit(...)`
 5. Apply payment defaults:
    - `payment_panel_controller.set_payment_default(total)`
 6. Emit held-load signal (to update ReceiptContext):

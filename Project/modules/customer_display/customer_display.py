@@ -24,8 +24,8 @@ from PyQt5.QtWidgets import (
 
 from modules.ui_utils.dialog_utils import report_to_statusbar
 from modules.ui_utils.error_logger import log_error_message
-from modules.runtime_data import ensure_ads_dir
-from modules.runtime_paths import load_stylesheet, stylesheet_path, ui_path
+from modules.runtime.data import ensure_ads_dir
+from modules.runtime.paths import load_stylesheet, stylesheet_path, ui_path
 from modules.date_time.formatters import format_date, format_time
 from modules.menu.greeting_menu import _load_greeting
 from config import (
@@ -48,7 +48,7 @@ from config import (
 )
 
 QSS_PATH = stylesheet_path('main.qss')
-from modules.table.unit_helpers import canonicalize_unit, UNIT_KG, UNIT_EACH
+from modules.domain.unit_helpers import canonicalize_unit, UNIT_KG, UNIT_EACH
 try:
     from modules.payment import qr_generator as qr_generator
 except Exception:

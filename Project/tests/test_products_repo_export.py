@@ -2,7 +2,7 @@ import os
 import sqlite3
 import tempfile
 import unittest
-from modules.db_operation.db import get_conn
+from modules.db_operation.sqlite_runtime import get_conn
 from modules.db_operation import products_repo
 
 

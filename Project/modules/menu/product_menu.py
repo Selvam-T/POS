@@ -27,8 +27,8 @@ from modules.ui_utils.input_validation import (
     product_code_exists,
     validate_category,
 )
-from modules.table import handle_barcode_scanned
-from modules.table.unit_helpers import canonicalize_unit
+from modules.table_ui import handle_barcode_scanned
+from modules.domain.unit_helpers import canonicalize_unit
 from modules.date_time import format_datetime
 from config import QSS_DIR, UI_DIR
 
@@ -37,7 +37,7 @@ UI_PATH = os.path.join(UI_DIR, 'product_menu.ui')
 QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 
 def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
-    from modules.table.table_operations import is_transaction_active
+    from modules.table_ui.table_operations import is_transaction_active
     sale_lock = is_transaction_active(getattr(main_window, 'sales_table', None))
 
     # 1. Attempt to load the real UI

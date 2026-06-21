@@ -7,7 +7,7 @@ PROJECT_ROOT = SCRIPT_DIR.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from modules.db_operation.db import get_db_path
+from modules.db_operation.sqlite_runtime import get_db_path
 
 
 def _table_exists(cur, table_name: str) -> bool:

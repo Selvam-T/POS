@@ -10,13 +10,13 @@ from modules.ui_utils.focus_utils import FieldCoordinator
 from modules.db_operation import get_product_info, get_product_full
 from modules.db_operation import PRODUCT_CACHE
 from modules.ui_utils import ui_feedback
-from modules.table.unit_helpers import canonicalize_unit
-from modules.table.table_operations import (
+from modules.domain.unit_helpers import canonicalize_unit
+from modules.table_ui.table_operations import (
     setup_sales_table, get_sales_data, set_table_rows, 
     bind_status_label, bind_next_focus_widget
 )
 from config import QSS_DIR, UI_DIR
-from modules.runtime_paths import load_stylesheet
+from modules.runtime.paths import load_stylesheet
 
 def weight_simulation() -> int:
     return 600

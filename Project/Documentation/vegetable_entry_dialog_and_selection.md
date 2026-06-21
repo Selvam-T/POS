@@ -99,7 +99,7 @@ else:
 ## Table Operations Integration
 
 ### Table Setup
-Uses `modules.table.table_operations.setup_sales_table()` for column configuration and styling.
+Uses `modules.table_ui.table_operations.setup_sales_table()` for column configuration and styling.
 
 ### Row Management
 - **Add row:** `_add_vegetable_row()` checks for duplicates and merges using canonical units and a single data list, then calls `set_table_rows()` to rebuild the table.

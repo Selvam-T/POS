@@ -1,6 +1,6 @@
 ## Refactoring: Sales Frame Setup
 
-The setup logic for the sales frame UI has been moved from `MainLoader.__init__` in `main.py` to a dedicated function in `modules/sales/sales_frame_setup.py`.
+The setup logic for the sales frame UI has been moved from `MainLoader.__init__` in `main.py` to a dedicated function in `modules/sales/sales_panel.py`.
 
 ### How it works
 - The function `setup_sales_frame(self, UI_DIR)` is called from `MainLoader.__init__`.

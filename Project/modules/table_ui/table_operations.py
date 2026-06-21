@@ -67,7 +67,7 @@ def setup_sales_table(table: QTableWidget) -> None:
 def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: Optional[QStatusBar] = None) -> None:
     """Populates the QTableWidget with data. Enforces MAX_TABLE_ROWS limit."""
     from modules.ui_utils.max_rows_dialog import open_max_rows_dialog
-    from modules.table.unit_helpers import get_display_unit
+    from modules.domain.unit_helpers import get_display_unit
 
     # Enforce Global Row Limit
     if len(rows) > MAX_TABLE_ROWS:
@@ -162,7 +162,7 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
 def get_sales_data(table: QTableWidget) -> List[Dict[str, Any]]:
     """Extracts data from the QTableWidget back into a dictionary list."""
     from modules.ui_utils import input_handler
-    from modules.table.unit_helpers import canonicalize_unit
+    from modules.domain.unit_helpers import canonicalize_unit
     
     rows = []
     for r in range(table.rowCount()):
@@ -377,7 +377,7 @@ def _highlight_row_by_button(table: QTableWidget, btn: QPushButton) -> None:
 def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Optional[QStatusBar] = None) -> None:
     """Processes scan. Enforces MAX_TABLE_ROWS for new items, but allows existing qty updates."""
     from modules.ui_utils.max_rows_dialog import open_max_rows_dialog
-    from modules.table.unit_helpers import canonicalize_unit
+    from modules.domain.unit_helpers import canonicalize_unit
 
     if not barcode: return
     if status_bar: show_temp_status(status_bar, f"Scanned: {barcode}", 3000)
@@ -413,7 +413,7 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
 
 def find_product_in_table(table: QTableWidget, product_code: str, unit_canon: str = None) -> Optional[int]:
     """Helper for duplicate detection in barcode scanning."""
-    from modules.table.unit_helpers import canonicalize_unit
+    from modules.domain.unit_helpers import canonicalize_unit
     found, product_name, _, unit = get_product_info(product_code)
     if not found: return None
     u_canon = unit_canon or canonicalize_unit(unit)
@@ -435,4 +435,3 @@ def _add_product_row(table: QTableWidget, product_code: str, name: str, price: f
     data = get_sales_data(table)
     data.append({'product_name': name, 'quantity': 1, 'unit_price': price, 'unit': unit, 'editable': True})
     set_table_rows(table, data)
-

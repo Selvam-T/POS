@@ -37,7 +37,7 @@ from modules.date_time import (
     init_date_range_bounds,
     set_locked_property,
 )
-from modules.table.receipt_table_helpers import (
+from modules.table_ui.receipt_table_helpers import (
     configure_receipt_table,
     fill_receipt_table,
     selected_receipt,

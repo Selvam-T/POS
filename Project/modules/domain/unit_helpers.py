@@ -1,4 +1,4 @@
-# table_operations.py - Unit helpers for POS system
+"""Product quantity unit normalization and display rules."""
 
 UNIT_KG = "Kg"
 UNIT_EACH = "Each"

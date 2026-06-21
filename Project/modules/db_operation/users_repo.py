@@ -2,7 +2,7 @@
 import hashlib
 import secrets
 import string
-from modules.db_operation.db import get_conn, now_iso
+from modules.db_operation.sqlite_runtime import get_conn, now_iso
 
 def hash_password(password: str) -> str:
     """Hash a password using SHA-256."""

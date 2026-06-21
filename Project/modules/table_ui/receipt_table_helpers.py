@@ -12,7 +12,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QHeaderView, QTableWidget, QTableWidgetItem
 
 from modules.date_time import format_date, format_datetime
-from modules.table.table_widget_helpers import (
+from modules.table_ui.table_widget_helpers import (
     apply_table_columns,
     configure_readonly_row_selection_table,
 )

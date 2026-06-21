@@ -11,7 +11,7 @@ This document explains the database layer layout after the refactor that removed
 
 ## Files and Responsibilities
 
-### `modules/db_operation/db.py` (shared plumbing)
+### `modules/db_operation/sqlite_runtime.py` (shared plumbing)
 
 Use this for DB path resolution, connections, and transactions.
 
