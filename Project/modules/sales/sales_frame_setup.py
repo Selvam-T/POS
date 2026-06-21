@@ -7,11 +7,8 @@ from PyQt5.QtWidgets import QVBoxLayout, QSizePolicy, QPushButton, QWidget, QTab
 
 from modules.table import setup_sales_table, bind_total_label, add_total_listener, bind_qty_commit_listener
 from modules.ui_utils.error_logger import log_error_message
+from modules.runtime_paths import load_stylesheet, stylesheet_path
 
-ASSETS_DIR = os.path.join(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-    'assets'
-)
 
 
 class SalesFrame(QObject):
@@ -34,11 +31,10 @@ class SalesFrame(QObject):
         self.viewHoldLoaded.emit(receipt_id, total)
 
     def _apply_styles(self) -> None:
-        qss_path = os.path.join(ASSETS_DIR, 'sales.qss')
+        qss_path = stylesheet_path('sales.qss')
         if os.path.exists(qss_path):
             try:
-                with open(qss_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
+                content = load_stylesheet(qss_path)
                 self.widget.setStyleSheet(content)
                 self._placeholder.setStyleSheet(content)
             except Exception as e:

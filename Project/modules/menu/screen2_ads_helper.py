@@ -8,12 +8,8 @@ from PyQt5.QtGui import QImage, QPixmap, QIcon
 from PyQt5.QtWidgets import QFileDialog, QListWidget, QListWidgetItem, QLabel, QPushButton
 
 from modules.ui_utils import ui_feedback
-from config import MAX_ADS, ALLOWED_EXTS, REQ_WIDTH, REQ_HEIGHT, ADS_SIZE_TOLERANCE_PCT
-
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
-ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-ADS_DIR = os.path.join(ASSETS_DIR, 'ads')
+from config import ADS_DIR, MAX_ADS, ALLOWED_EXTS, REQ_WIDTH, REQ_HEIGHT, ADS_SIZE_TOLERANCE_PCT
+from modules.runtime_data import ensure_ads_dir
 
 
 class Screen2AdsController:
@@ -73,7 +69,7 @@ class Screen2AdsController:
     # Create the ads folder if missing.
     def _ensure_ads_dir(self) -> None:
         try:
-            os.makedirs(ADS_DIR, exist_ok=True)
+            ensure_ads_dir(ADS_DIR)
         except Exception:
             pass
 

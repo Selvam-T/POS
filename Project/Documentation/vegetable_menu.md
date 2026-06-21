@@ -123,7 +123,7 @@ This refactor eliminates 150+ lines of repetitive code, replacing manual widget 
 - Focus: Brighter yellow (#FFF9C4), blue border (#4682B4)
 - Read-only: Gray background (#f5f5f5)
 - Buttons: Green (ACCEPT) and red (CANCEL) with hover/pressed states
-- All styling defined in `assets/dialog.qss`
+- All styling defined in `assets/qss/dialog.qss`
 
 ## Implementation Notes
 
@@ -182,7 +182,7 @@ See: `Documentation/error_logging_and_fallback.md` for hard-fail vs soft-fail de
 - Coordinator: `modules/ui_utils/focus_utils.py`
 - Validation: `modules/ui_utils/input_handler.py`, `modules/ui_utils/input_validation.py`
 - Feedback: `modules/ui_utils/ui_feedback.py`
-- Styles: `assets/dialog.qss`
+- Styles: `assets/qss/dialog.qss`
 
 ---
 

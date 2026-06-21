@@ -8,7 +8,7 @@ receipts, and void unpaid receipts.
 
 - Entry point: `modules.menu.receipt_menu.launch_receipt_dialog(host_window, ...)`
 - UI: `ui/receipt_menu.ui`
-- Stylesheet: `assets/dialog.qss`
+- Stylesheet: `assets/qss/dialog.qss`
 - Loading uses `build_dialog_from_ui(...)`.
 - If the UI cannot load, the controller returns the shared `build_error_fallback_dialog(...)`.
 - Required widgets are resolved with `require_widgets(..., hard_fail=True)`.

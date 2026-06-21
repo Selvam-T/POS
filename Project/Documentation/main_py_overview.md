@@ -45,7 +45,7 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
 
 - **UI Composition:**
   - Loads and assembles `main_window.ui`, `sales_frame.ui`, `payment_frame.ui`, and `menu_frame.ui` at runtime using PyQt5's `uic` module.
-  - Applies a global QSS stylesheet from `assets/main.qss` for consistent theming.
+  - Applies a global QSS stylesheet from `assets/qss/main.qss` for consistent theming.
   - Sets up header layout (`infoSection`) for date, company, and day/time display.
   - Binds `MainStatusFooterController` for the bottom footer: logged-in user label, centered StatusBar messages, and error-log export/clear controls.
 
@@ -175,7 +175,7 @@ Additional behavior:
 
 - `main.py` — Main application loader and orchestrator
 - `config.py` — Configuration constants (colors, paths, debug flags)
-- `assets/main.qss` — Global stylesheet
+- `assets/qss/main.qss` — Global stylesheet
 - `ui/` — Qt Designer UI files
 - `modules/` — Modular controllers for dialogs, sales, devices, etc.
   - `modules/info_section/info_section.py` — Header info controller (`InfoSectionController`)

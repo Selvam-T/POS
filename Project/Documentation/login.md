@@ -53,7 +53,7 @@ Forced password-change integration:
 	```
 
 - Placeholder styling:
-	- The placeholder text itself is defined in `ui/login.ui` (property `placeholderText` on `loginPassLineEdit`). Visual styling for the widget is in `assets/main.qss` under the `LOGIN DIALOG` section which styles `QLineEdit#loginPassLineEdit` (font, padding, color) and password echo.
+	- The placeholder text itself is defined in `ui/login.ui` (property `placeholderText` on `loginPassLineEdit`). Visual styling for the widget is in `assets/qss/main.qss` under the `LOGIN DIALOG` section which styles `QLineEdit#loginPassLineEdit` (font, padding, color) and password echo.
 	- Some Qt versions/stylesheets may not support the `::placeholder` pseudo-element. The dialog code includes a small palette fallback which sets the placeholder color via the widget `QPalette` so the placeholder appears in light gray even when `::placeholder` is unavailable.
 
 ## Notes

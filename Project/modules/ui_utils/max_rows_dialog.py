@@ -1,11 +1,10 @@
 import os
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QWidget
 from PyQt5.QtCore import Qt
+from config import QSS_DIR
+from modules.runtime_paths import load_stylesheet
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-UI_DIR = os.path.join(BASE_DIR, 'ui')
-ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
+QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 
 def open_max_rows_dialog(parent=None, message=None):
     """Show a modal dialog informing user max sales table rows reached. Only X Close in custom titlebar."""
@@ -19,8 +18,7 @@ def open_max_rows_dialog(parent=None, message=None):
     # Apply stylesheet if available
     if os.path.exists(QSS_PATH):
         try:
-            with open(QSS_PATH, 'r', encoding='utf-8') as f:
-                dlg.setStyleSheet(f.read())
+            dlg.setStyleSheet(load_stylesheet(QSS_PATH))
         except Exception:
             pass
     layout = QVBoxLayout(dlg)

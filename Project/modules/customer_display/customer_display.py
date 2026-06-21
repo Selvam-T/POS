@@ -24,6 +24,8 @@ from PyQt5.QtWidgets import (
 
 from modules.ui_utils.dialog_utils import report_to_statusbar
 from modules.ui_utils.error_logger import log_error_message
+from modules.runtime_data import ensure_ads_dir
+from modules.runtime_paths import load_stylesheet, stylesheet_path, ui_path
 from modules.date_time.formatters import format_date, format_time
 from modules.menu.greeting_menu import _load_greeting
 from config import (
@@ -42,15 +44,10 @@ from config import (
     ALLOWED_EXTS,
     GREETING_STRINGS,
     GREETING_SELECTED,
+    ADS_DIR,
 )
 
-# Resolve project paths and assets (used to apply main QSS to this dialog)
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
-UI_DIR = os.path.join(BASE_DIR, 'ui')
-ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-ADS_DIR = os.path.join(ASSETS_DIR, 'ads')
-QSS_PATH = os.path.join(ASSETS_DIR, 'main.qss')
+QSS_PATH = stylesheet_path('main.qss')
 from modules.table.unit_helpers import canonicalize_unit, UNIT_KG, UNIT_EACH
 try:
     from modules.payment import qr_generator as qr_generator
@@ -139,11 +136,11 @@ class CustomerDisplayWindow(QDialog):
         self.refresh_display_visibility(initial=True)
 
     def _load_ui(self) -> None:
-        ui_path = os.path.abspath(os.path.join(UI_DIR, 'screen2.ui'))
+        ui_file = ui_path('screen2.ui')
         try:
-            if not os.path.exists(ui_path):
-                raise FileNotFoundError(ui_path)
-            uic.loadUi(ui_path, self)
+            if not os.path.exists(ui_file):
+                raise FileNotFoundError(ui_file)
+            uic.loadUi(ui_file, self)
             self._ui_loaded = True
         except Exception as exc:
             import traceback
@@ -169,8 +166,7 @@ class CustomerDisplayWindow(QDialog):
         # Apply main QSS (if present) to this dialog so Screen 2 matches app styling.
         if os.path.exists(QSS_PATH):
             try:
-                with open(QSS_PATH, 'r', encoding='utf-8') as _f:
-                    q = _f.read()
+                q = load_stylesheet(QSS_PATH)
                 if q:
                     self.setStyleSheet(q)
             except Exception:
@@ -280,6 +276,10 @@ class CustomerDisplayWindow(QDialog):
         return size
 
     def _configure_idle_ads(self) -> None:
+        try:
+            ensure_ads_dir(ADS_DIR)
+        except Exception as exc:
+            log_error_message(f"Customer display ad directory creation failed: {exc}")
         interval_ms = max(1000, int(CUSTOMER_DISPLAY_IDLE_AD_INTERVAL * 1000))
         self._idle_ads_timer.setInterval(interval_ms)
         self._idle_ads_timer.timeout.connect(self._advance_idle_ad)

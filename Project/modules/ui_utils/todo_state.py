@@ -6,32 +6,14 @@ from typing import List
 from modules.ui_utils import input_validation
 from modules.ui_utils.error_logger import log_error_message
 
-try:
-    from config import APPDATA_DIR
-except Exception:
-    APPDATA_DIR = None
-
-try:
-    from modules.wrappers.settings import appdata_path
-except Exception:
-    appdata_path = None
+from modules.wrappers.settings import appdata_path
 
 _TODO_NAME = 'todo'
 _last_load_error = ''
 
 
 def _todo_path() -> Path:
-    if callable(appdata_path):
-        try:
-            return appdata_path(_TODO_NAME)
-        except Exception:
-            pass
-    if APPDATA_DIR:
-        path = Path(APPDATA_DIR) / f"{_TODO_NAME}.json"
-    else:
-        path = Path(__file__).resolve().parents[2] / 'AppData' / f"{_TODO_NAME}.json"
-    path.parent.mkdir(parents=True, exist_ok=True)
-    return path
+    return appdata_path(_TODO_NAME)
 
 
 def _normalize_items(items: List[str]) -> List[str]:

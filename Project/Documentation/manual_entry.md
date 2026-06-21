@@ -53,7 +53,7 @@ The Manual Entry dialog allows users to manually input product information when 
 - **Returns**: Dictionary with product data or None
 
 ### Styling
-- **File**: `assets/sales.qss`
+- **File**: `assets/qss/sales.qss`
 - **Selector**: `QWidget#manualEntryDialog`
 
 ## UI Layout Structure
@@ -349,7 +349,7 @@ The dialog is now shorter, easier to read, and matches the Product Menu Update t
 - `/modules/sales/vegetable_entry.py` - Similar dialog for vegetable selection
 - `/ui/vegetable_menu.ui` - Reference for similar button layout patterns
 - `/ui/vegetable_entry.ui` - Reference for dialog structure
-- `/assets/sales.qss` - Shared stylesheet
+- `/assets/qss/sales.qss` - Shared stylesheet
 
 ---
 

@@ -32,6 +32,7 @@ from modules.customer_display import CustomerDisplayWindow
 from modules.wrappers.dialog_wrapper import DialogWrapper
 from modules.db_operation import PRODUCT_CACHE, ensure_cash_outflows_table
 from modules.ui_utils.dialog_utils import report_exception, report_to_statusbar
+from modules.runtime_paths import load_stylesheet, stylesheet_path
 # --- Menu frame dialog controllers ---
 from modules.menu.logout_menu import launch_logout_dialog
 from modules.menu.admin_menu import launch_admin_dialog
@@ -59,9 +60,8 @@ from config import (
 from modules.info_section.info_section import InfoSectionController
 from modules.status_footer import MainStatusFooterController
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UI_DIR = os.path.join(BASE_DIR, 'ui')
-ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
+UI_DIR = config.UI_DIR
+ASSETS_DIR = config.ASSETS_DIR
 
 _saved_greeting = load_greeting()
 if _saved_greeting:
@@ -70,11 +70,10 @@ if _saved_greeting:
 
 # Load and apply the main stylesheet if it exists.
 def load_qss(app):
-    qss_path = os.path.join(ASSETS_DIR, 'main.qss')
+    qss_path = stylesheet_path('main.qss')
     if os.path.exists(qss_path):
         try:
-            with open(qss_path, 'r', encoding='utf-8') as f:
-                app.setStyleSheet(f.read())
+            app.setStyleSheet(load_stylesheet(qss_path))
         except Exception as e:
             try:
                 from modules.ui_utils.error_logger import log_error_message
@@ -215,20 +214,19 @@ class MainLoader(QMainWindow):
             'logoutBtn': ICON_LOGOUT,
         }
         try:
-            def set_btn_icon_path(btn: QPushButton, rel_path: str, size: int = 60) -> bool:
-                """Set a button icon from a config-defined relative path.
+            def set_btn_icon_path(btn: QPushButton, icon_path: str, size: int = 60) -> bool:
+                """Set a button icon from a config-defined runtime path.
                 Returns True on success, False if file missing or error.
                 """
                 try:
-                    abs_path = os.path.join(BASE_DIR, rel_path)
-                    if os.path.exists(abs_path):
-                        btn.setIcon(QIcon(abs_path))
+                    if os.path.exists(icon_path):
+                        btn.setIcon(QIcon(icon_path))
                         btn.setIconSize(QSize(size, size))
                         return True
                     # Icon file missing; fall back to text label
                     return False
                 except Exception as _e:
-                    # Ignore icon errors and fall back to text label                    
+                    # Ignore icon errors and fall back to text label.
                     return False
 
             menu_buttons = {

@@ -31,9 +31,8 @@ from modules.table.table_widget_helpers import (
     apply_table_columns,
     configure_readonly_row_selection_table,
 )
+from config import QSS_DIR, UI_DIR
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-UI_DIR = os.path.join(BASE_DIR, 'ui')
 VIEW_HOLD_UI = os.path.join(UI_DIR, 'view_hold.ui')
 
 
@@ -168,7 +167,7 @@ def launch_viewhold_dialog(parent=None):
 
     The dialog lists UNPAID receipts and allows Load, Print or Void actions.
     """
-    qss_path = os.path.join(BASE_DIR, 'assets', 'dialog.qss')
+    qss_path = os.path.join(QSS_DIR, 'dialog.qss')
     dlg = build_dialog_from_ui(
         VIEW_HOLD_UI,
         host_window=parent,

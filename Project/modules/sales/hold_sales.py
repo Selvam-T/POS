@@ -16,9 +16,8 @@ from modules.ui_utils.dialog_utils import (
     log_exception_traceback_and_postclose_statusBar,
 )
 from modules.ui_utils.focus_utils import FieldCoordinator
+from config import QSS_DIR, UI_DIR
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-UI_DIR = os.path.join(BASE_DIR, 'ui')
 HOLD_SALES_UI = os.path.join(UI_DIR, 'hold_sales.ui')
 
 def _build_sales_snapshot(parent) -> list[dict]:
@@ -34,7 +33,7 @@ def _build_sales_snapshot(parent) -> list[dict]:
 
 def launch_hold_sales_dialog(parent=None):
     # Build the dialog, with error fallback if loading fails
-    qss_path = os.path.join(BASE_DIR, 'assets', 'dialog.qss')
+    qss_path = os.path.join(QSS_DIR, 'dialog.qss')
     dlg = build_dialog_from_ui(
         HOLD_SALES_UI,
         host_window=parent,

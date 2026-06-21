@@ -25,7 +25,7 @@ Design hard rule:
 
 - Controller: `modules/sales/view_hold.py`
 - UI: `ui/view_hold.ui`
-- Dialog style: `assets/dialog.qss`
+- Dialog style: `assets/qss/dialog.qss`
 
 Launch + wiring:
 - Main launch guard + wrapper open: `main.py` (`open_viewhold_panel`)

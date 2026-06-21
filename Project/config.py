@@ -40,6 +40,7 @@ RUNTIME_DIR = _PATHS['runtime_dir']
 APP_DIR = _PATHS['app_dir']
 CLIENT_ROOT = _PATHS['client_root']
 ASSETS_DIR = _PATHS['assets_dir']
+QSS_DIR = os.path.join(ASSETS_DIR, 'qss')
 UI_DIR = _PATHS['ui_dir']
 DB_DIR = _PATHS['db_dir']
 LOGS_DIR = _PATHS['logs_dir']
@@ -58,8 +59,10 @@ LOGIN_BACKGROUND = os.path.join(
     ASSETS_DIR, 'images', LOGIN_LOGO_FILENAME
 )
 
-# Writable data remains here until the Phase 4 migration to DATA_DIR.
-APPDATA_DIR = os.path.join(RUNTIME_DIR, 'AppData')
+# Runtime resources are read-only; mutable state lives outside the app bundle.
+JSON_DATA_DIR = os.path.join(DATA_DIR, 'json')
+APPDATA_DIR = JSON_DATA_DIR
+ADS_DIR = os.path.join(DATA_DIR, 'ads')
 
 
 # -----------------------------------------------------------------------------
@@ -136,15 +139,15 @@ ROW_COLOR_EVEN = '#add8e6'
 ROW_COLOR_ODD = '#ffffe0'
 ROW_COLOR_DELETE_HIGHLIGHT = '#ff6b6b'
 
-# These relative paths are resolved by the UI layer against runtime assets.
-ICON_DELETE = 'assets/icons/delete.svg'
-ICON_ADMIN = 'assets/icons/admin.svg'
-ICON_REPORTS = 'assets/icons/reports.svg'
-ICON_VEGETABLE = 'assets/icons/vegetable.svg'
-ICON_PRODUCT = 'assets/icons/product.svg'
-ICON_GREETING = 'assets/icons/greeting.svg'
-ICON_RECEIPT = 'assets/icons/receipt.svg'
-ICON_LOGOUT = 'assets/icons/logout.svg'
+# Absolute runtime paths work in source and PyInstaller layouts.
+ICON_DELETE = os.path.join(ASSETS_DIR, 'icons', 'delete.svg')
+ICON_ADMIN = os.path.join(ASSETS_DIR, 'icons', 'admin.svg')
+ICON_REPORTS = os.path.join(ASSETS_DIR, 'icons', 'reports.svg')
+ICON_VEGETABLE = os.path.join(ASSETS_DIR, 'icons', 'vegetable.svg')
+ICON_PRODUCT = os.path.join(ASSETS_DIR, 'icons', 'product.svg')
+ICON_GREETING = os.path.join(ASSETS_DIR, 'icons', 'greeting.svg')
+ICON_RECEIPT = os.path.join(ASSETS_DIR, 'icons', 'receipt.svg')
+ICON_LOGOUT = os.path.join(ASSETS_DIR, 'icons', 'logout.svg')
 
 
 # -----------------------------------------------------------------------------
@@ -287,7 +290,7 @@ ADS_SIZE_TOLERANCE_PCT = 2.5
 CUSTOMER_DISPLAY_ENABLED = True
 
 # Test mode opens a normal window on the primary display.
-CUSTOMER_DISPLAY_TEST_MODE = False
+CUSTOMER_DISPLAY_TEST_MODE = True
 CUSTOMER_SCREEN_INDEX = 1
 CUSTOMER_SCREEN_WIDTH = 1536
 CUSTOMER_SCREEN_HEIGHT = 900

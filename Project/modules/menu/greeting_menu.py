@@ -1,41 +1,28 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QDialog, QComboBox, QPushButton
 import os
-import json
-from pathlib import Path
 from modules.ui_utils.error_logger import log_error_message
 from modules.ui_utils import ui_feedback
 from modules.ui_utils.dialog_utils import set_dialog_main_status, build_dialog_from_ui, build_error_fallback_dialog
+from modules.ui_utils.greeting_state import load_greeting
+from modules.runtime_paths import load_stylesheet, stylesheet_path, ui_path
 
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
-UI_DIR = os.path.join(BASE_DIR, 'ui')
-ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
+QSS_PATH = stylesheet_path('dialog.qss')
 
 
 # Import greeting strings from config
 import config
 
 
-def _project_root() -> Path:
-    return Path(__file__).resolve().parents[2]
-
-
 def _load_greeting() -> str:
-    path = _project_root() / "AppData" / "greeting.json"
-    try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-        return str(data.get("selected", "")).strip()
-    except Exception:
-        return ""
+    return load_greeting()
 
 def launch_greeting_dialog(parent=None):
     """Open greeting selection dialog; result stored in `dlg.greeting_result`.
     """
-    ui_path = os.path.join(UI_DIR, 'greeting_menu.ui')
+    greeting_ui = ui_path('greeting_menu.ui')
     # Use the shared dialog builder so a standardized fallback is returned on failure
-    dlg = build_dialog_from_ui(ui_path, host_window=parent, dialog_name='Greeting menu', qss_path=QSS_PATH)
+    dlg = build_dialog_from_ui(greeting_ui, host_window=parent, dialog_name='Greeting menu', qss_path=QSS_PATH)
     if not dlg:
         return build_error_fallback_dialog(parent, 'Greeting menu', QSS_PATH)
     from PyQt5.QtCore import Qt
@@ -46,8 +33,7 @@ def launch_greeting_dialog(parent=None):
     # Apply stylesheet
     if os.path.exists(QSS_PATH):
         try:
-            with open(QSS_PATH, 'r', encoding='utf-8') as f:
-                dlg.setStyleSheet(f.read())
+            dlg.setStyleSheet(load_stylesheet(QSS_PATH))
         except Exception as e:
             try:
                 log_error_message(f"Failed to load dialog.qss: {e}")

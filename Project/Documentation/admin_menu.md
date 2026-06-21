@@ -6,7 +6,7 @@ This document captures the current wiring and behavior for the Admin Menu dialog
 
 - UI: [ui/admin_menu.ui](ui/admin_menu.ui)
 - Controller: [modules/menu/admin_menu.py](modules/menu/admin_menu.py)
-- QSS: [assets/dialog.qss](assets/dialog.qss)
+- QSS: `assets/qss/dialog.qss`
 
 ## Purpose
 
@@ -81,7 +81,7 @@ Helper module:
 - [modules/menu/screen2_ads_helper.py](modules/menu/screen2_ads_helper.py)
 
 Storage model:
-- Folder: `assets/ads`
+- Writable folder: `<CLIENT ROOT>/data/ads`
 - Files are named with numeric prefixes (e.g., `1_image.jpg`, `2_image.jpg`)
 - Order is determined by numeric prefix and persisted by renaming files
 
@@ -143,7 +143,8 @@ Notes:
 ## Known Limits / Assumptions
 
 - ADMIN/STAFF ids are fixed in the database seed. If these change, update constants in the controller.
-- Screen 2 Ads uses file-system persistence in `assets/ads`. Ensure this folder is accessible to the app user.
+- Screen 2 Ads uses file-system persistence only in `<CLIENT ROOT>/data/ads`.
+  The directory is created automatically when the feature initializes.
 
 Security note:
 - The forced-change flow is only applied for the ADMIN account (user id 1). The `staff` account intentionally does not participate in forced password changes and the application will ignore `must_change_password` for staff (remains 0).

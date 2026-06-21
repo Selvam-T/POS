@@ -6,7 +6,7 @@
 ## Files
 - Controller: `modules/payment/payment_panel.py`
 - UI: `ui/payment_frame.ui`
-- Styles: `assets/main.qss`, `assets/dialog.qss`
+- Styles: `assets/qss/main.qss`, `assets/qss/dialog.qss`
 
 ## Signals
 **Outgoing**

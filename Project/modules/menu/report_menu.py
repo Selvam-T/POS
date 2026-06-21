@@ -19,11 +19,9 @@ from modules.date_time import (
     set_locked_property,
 )
 from modules.menu import report_generator, report_viewers, report_exports
+from config import QSS_DIR, UI_DIR
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-UI_DIR = os.path.join(BASE_DIR, 'ui')
-ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
+QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 
 
 def _friendly_openpyxl_message() -> str:

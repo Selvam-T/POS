@@ -58,7 +58,9 @@ This file centralizes key configuration values for the POS application. It is im
 - `DEBUG_CACHE_LOOKUP`: Log cache lookup result for every scanned code.
 
 ## App Data Directory
-- `APPDATA_DIR`: Path to the writable folder for JSON-based settings (e.g., `vegetables.json`).
+- `APPDATA_DIR`: External `<CLIENT ROOT>/data/json` folder for writable JSON-based settings (for example, `vegetables.json`).
+- `ADS_DIR`: External `<CLIENT ROOT>/data/ads` folder for editable customer-display ads.
+- `QSS_DIR`: Runtime `<APP RESOURCES>/assets/qss` folder containing application stylesheets.
 
 ## Category JSON Storage
 - `CATEGORIES_JSON_FILENAME`: File name for the categories store (default: `categories.json`).

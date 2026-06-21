@@ -65,7 +65,7 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 
 ## Category Source of Truth
 
-- Categories are stored in `AppData/categories.json` (seeded once from `config.PRODUCT_CATEGORIES`).
+- Categories are stored in `<CLIENT ROOT>/data/json/categories.json` (seeded once from `config.PRODUCT_CATEGORIES`).
 - The first item in the JSON list is treated as the placeholder (e.g. `--Select Category--`).
 - JSON order is canonical: placeholder first, sorted middle, `Other` last.
 - The Category tab is **admin-only**.
@@ -102,8 +102,8 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 
 ### Manual backup / restore (no UI)
 
-- Backups are created in `AppData/` as `categories.json.bak.YYYYMMDDThhmmss`.
-- Export: copy `AppData/categories.json` to a safe filename.
+- Backups are created in `data/json/` as `categories.json.bak.YYYYMMDDThhmmss`.
+- Export: copy `data/json/categories.json` to a safe filename.
 - Restore: rename a backup to `categories.json` (overwrite), then restart the app.
 
 ## Category tab — quick summary

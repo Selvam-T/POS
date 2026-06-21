@@ -80,7 +80,7 @@ The dynamic property is applied to:
 - `exportErrorLogBtn`
 - `clearErrorLogBtn`
 
-`assets/main.qss` uses these selectors to switch between the quiet inactive
+`assets/qss/main.qss` uses these selectors to switch between the quiet inactive
 state and the visible active state.
 
 ## Export Behavior
@@ -177,6 +177,6 @@ they are only test artifacts.
 
 - `ui/main_window.ui`: defines `mainStatusFooter` and footer widgets.
 - `modules/status_footer/status_footer.py`: footer controller.
-- `assets/main.qss`: `hasError` active/inactive styling.
+- `assets/qss/main.qss`: `hasError` active/inactive styling.
 - `modules/ui_utils/error_logger.py`: shared `LOG_PATH` and log writer.
 - `main.py`: binds the controller and keeps the `statusBar()` compatibility hook.

@@ -20,7 +20,7 @@ This dialog is launched from the Sales Frame Hold button and uses the shared Dia
 
 - Controller: modules/sales/hold_sales.py
 - UI file: ui/hold_sales.ui
-- Dialog style: assets/dialog.qss
+- Dialog style: `assets/qss/dialog.qss`
 - DB writer: modules/db_operation/held_sale_committer.py
 - Shared helpers: modules/ui_utils/* (dialog_utils, input_handler, input_validation, ui_feedback, error_logger)
 

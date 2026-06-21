@@ -43,11 +43,9 @@ from modules.table.receipt_table_helpers import (
     selected_receipt,
     sort_receipts_by_column,
 )
+from config import QSS_DIR, UI_DIR
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-UI_DIR = os.path.join(BASE_DIR, "ui")
-ASSETS_DIR = os.path.join(BASE_DIR, "assets")
-QSS_PATH = os.path.join(ASSETS_DIR, "dialog.qss")
+QSS_PATH = os.path.join(QSS_DIR, "dialog.qss")
 UI_PATH = os.path.join(UI_DIR, "receipt_menu.ui")
 
 

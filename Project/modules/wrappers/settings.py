@@ -3,20 +3,12 @@ import os
 from pathlib import Path
 from typing import Dict, Any, Tuple
 
-# External config with app constants
-try:
-    from config import APPDATA_DIR, VEG_SLOTS
-except Exception:
-    # Fallbacks if config is not yet updated; keep things working during dev
-    BASE_DIR = Path(__file__).resolve().parents[2]  # .../POS/Project
-    APPDATA_DIR = str(BASE_DIR / 'AppData')
-    VEG_SLOTS = 16
+from config import APPDATA_DIR, VEG_SLOTS
+from modules.runtime_data import ensure_appdata_dir
 
 
 def _ensure_appdata_dir() -> Path:
-    p = Path(APPDATA_DIR)
-    p.mkdir(parents=True, exist_ok=True)
-    return p
+    return ensure_appdata_dir(APPDATA_DIR)
 
 
 def appdata_path(name: str) -> Path:

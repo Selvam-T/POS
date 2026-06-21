@@ -19,6 +19,7 @@ from PyQt5.QtGui import QFont
 
 from modules.ui_utils.error_logger import log_error_message
 from modules.ui_utils import ui_feedback
+from modules.runtime_paths import load_stylesheet
 
 
 def set_dialog_main_status(dlg, message: str, *, is_error: bool = False, duration: int = 4000) -> None:
@@ -324,8 +325,7 @@ def build_dialog_from_ui(
 
     if qss_path and os.path.exists(qss_path):
         try:
-            with open(qss_path, 'r', encoding='utf-8') as f:
-                dlg.setStyleSheet(f.read())
+            dlg.setStyleSheet(load_stylesheet(qss_path))
         except Exception as e:
             try:
                 log_error_message(f"{dialog_name}: failed to load qss ({qss_path}): {e}")
@@ -398,8 +398,7 @@ def build_error_fallback_dialog(host_window, dialog_name: str, qss_path: str = N
     # 3. Apply QSS
     if qss_path and os.path.exists(qss_path):
         try:
-            with open(qss_path, 'r', encoding='utf-8') as f_qss:
-                dlg.setStyleSheet(f_qss.read())
+            dlg.setStyleSheet(load_stylesheet(qss_path))
         except Exception:
             pass
 

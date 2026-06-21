@@ -15,6 +15,8 @@ from modules.table.table_operations import (
     setup_sales_table, get_sales_data, set_table_rows, 
     bind_status_label, bind_next_focus_widget
 )
+from config import QSS_DIR, UI_DIR
+from modules.runtime_paths import load_stylesheet
 
 def weight_simulation() -> int:
     return 600
@@ -37,8 +39,7 @@ def launch_vegetable_entry_dialog(parent, main_sales_table):
         dlg_max.exec_()
         return None
 
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    veg_ui = os.path.join(BASE_DIR, 'ui', 'vegetable_entry.ui')
+    veg_ui = os.path.join(UI_DIR, 'vegetable_entry.ui')
     
     try:
         dlg = uic.loadUi(veg_ui)
@@ -58,9 +59,9 @@ def launch_vegetable_entry_dialog(parent, main_sales_table):
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
 
     # Styling
-    qss_path = os.path.join(BASE_DIR, 'assets', 'dialog.qss')
+    qss_path = os.path.join(QSS_DIR, 'dialog.qss')
     if os.path.exists(qss_path):
-        with open(qss_path, 'r', encoding='utf-8') as f: dlg.setStyleSheet(f.read())
+        dlg.setStyleSheet(load_stylesheet(qss_path))
 
     vtable = dlg.findChild(QTableWidget, 'vegEntryTable')
     status_lbl = dlg.findChild(QLabel, 'vegEStatusLabel')

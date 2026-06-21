@@ -14,7 +14,9 @@ Development:
 |-- db\Anumani.db
 |-- logs\error.log
 |-- backups\
-|-- data\                Writable application data (Phase 4)
+|-- data\
+|   |-- json\            Writable JSON/state
+|   `-- ads\             Writable customer ads
 `-- ico\selvam_pos.ico   Build icon only
 ```
 
@@ -28,7 +30,9 @@ C:\SelvamPOS\
 |-- db\Anumani.db
 |-- logs\error.log
 |-- backups\
-`-- data\                Writable application data
+`-- data\
+    |-- json\            Writable JSON/state
+    `-- ads\             Writable customer ads
 ```
 
 ## Path Rules
@@ -112,3 +116,25 @@ C:\SelvamPOS\
   compilation, and 21 UI parses passed. The full suite used a disposable
   database copy.
 - Status: approved for commit.
+
+### Phase 4 - Runtime Resources and Writable Data
+
+- Centralized UI and asset roots through `config.UI_DIR` and
+  `config.ASSETS_DIR` for source and packaged execution.
+- Added shared resource helpers and dynamic QSS rewriting for
+  `url(assets/...)` references.
+- Organized static stylesheets under `Project/assets/qss`; all runtime and
+  documentation references use the shared `QSS_DIR` path.
+- Moved JSON/state writes to `<CLIENT ROOT>/data/json` and editable ads to
+  `<CLIENT ROOT>/data/ads`.
+- Moved the five existing JSON/state files and ten existing ads into those
+  external development folders, then removed `Project/AppData` and
+  `Project/assets/ads` so user content is not bundled into `_internal`.
+- Ignored the runtime `data/` directory in Git.
+- Added focused resource, QSS, writable-path, and directory-creation tests.
+- Verification: 4 focused Phase 4 tests, 17 combined path/data contract tests,
+  the full 72-test suite, runtime import smoke checks, Python compilation, and
+  21 UI parses passed. The full suite used a disposable database copy.
+- The application creates missing `data/json` and `data/ads` directories but
+  does not seed or copy ads from static application resources.
+- Status: pending review and approval.

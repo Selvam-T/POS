@@ -12,11 +12,10 @@ from modules.ui_utils.dialog_utils import (
     log_exception_traceback_and_postclose_statusBar,
 )
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate
+from config import QSS_DIR, UI_DIR
 
-_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-_PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
-UI_PATH = os.path.join(_PROJECT_DIR, 'ui', 'vendor.ui')
-QSS_PATH = os.path.join(_PROJECT_DIR, 'assets', 'dialog.qss')
+UI_PATH = os.path.join(UI_DIR, 'vendor.ui')
+QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 
 
 def launch_vendor_dialog(parent=None):

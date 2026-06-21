@@ -10,12 +10,11 @@ from modules.ui_utils.dialog_utils import (
 )
 from modules.table.table_operations import is_transaction_active
 from modules.ui_utils.ui_feedback import set_status_label, show_temp_status
+from config import QSS_DIR, UI_DIR
 
 # Paths
-_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-_PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
-UI_PATH = os.path.join(_PROJECT_DIR, 'ui', 'logout_menu.ui')
-QSS_PATH = os.path.join(_PROJECT_DIR, 'assets', 'dialog.qss')
+UI_PATH = os.path.join(UI_DIR, 'logout_menu.ui')
+QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 
 def launch_logout_dialog(host_window):
     """

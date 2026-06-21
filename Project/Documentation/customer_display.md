@@ -71,7 +71,7 @@ positions on load to avoid showing an unintended page at startup.
 - The UI contains a top-level `QStackedWidget` named `screen2ModeStack`.
   - `pageIdleFull` (index 0): a fullscreen idle page used when there are no
     items in the sales table. This page contains `screen2IdleFullLabel` which
-    displays fullscreen ads from `assets/ads` or fallback text when images
+    displays fullscreen ads from `<CLIENT ROOT>/data/ads` or fallback text when images
     aren't available.
   - `pageSplit` (index 1): the original split layout with the purchase frame
     on the left and `screen2AdDisplayStack` on the right.

@@ -7,7 +7,7 @@ This document summarizes the current functional design for report-menu wiring, f
 ### `modules/menu/report_menu.py`
 - `launch_reports_dialog(host_window)`
   - Loads and returns the report dialog (`ui/report_menu.ui`) as modal + frameless.
-  - Applies shared dialog stylesheet (`assets/dialog.qss`).
+  - Applies shared dialog stylesheet (`assets/qss/dialog.qss`).
   - Wires `customCloseBtn` and `btnReportCancel` using admin-style reject flow:
     - `customCloseBtn`: closes dialog and posts default non-error status (`Report dialog closed.`) to main status bar.
     - `btnReportCancel`: closes dialog and posts cancel non-error status (`Report selection cancelled.`) to main status bar.
@@ -59,7 +59,7 @@ This document summarizes the current functional design for report-menu wiring, f
       set_locked_property(detail, not is_admin)  # locked=true for Staff
       detail.setChecked(True)               # Always checked by default
       ```
-    - **QSS rule (assets/dialog.qss):**
+    - **QSS rule (`assets/qss/dialog.qss`):**
       ```css
       QPushButton[locked="true"]:disabled {
           background-color: #b8bdc4;
@@ -300,7 +300,7 @@ The summary report displays business trends and patterns with the following stru
       - when date-range is selected/active, labels are restored (`locked=false`)
 
 ## Styling Hooks (QSS)
-### `assets/dialog.qss`
+### `assets/qss/dialog.qss`
 - `QDateEdit[locked="true"]` and nested selectors enforce gray/blank locked date fields.
 - `QDateEdit[locked="false"]` restores normal editable visuals.
 - `QPushButton[objectName="viewReportBtn|savePdfReportBtn|saveExcelReportBtn"][locked="true"]`
@@ -325,6 +325,6 @@ The summary report displays business trends and patterns with the following stru
 - PDF export uses a pre-render fail-safe based on raw report dimensions for
   detail, summary, and inactivity reports.
 - Excel export uses a dependency fail-safe for `openpyxl` and logs the failure safely.
-- Viewer styling hooks are centralized in `assets/dialog.qss` using viewer object names.
+- Viewer styling hooks are centralized in `assets/qss/dialog.qss` using viewer object names.
 
 See the report generator adapter and data-layer notes: Documentation/report_generator.md

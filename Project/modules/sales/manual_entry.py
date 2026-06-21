@@ -11,12 +11,11 @@ from modules.ui_utils.dialog_utils import (
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 from modules.ui_utils import input_handler, ui_feedback
 import modules.db_operation as dbop
+from config import QSS_DIR, UI_DIR
 
 # Paths
-_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-_PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
-UI_PATH = os.path.join(_PROJECT_DIR, 'ui', 'manual_entry.ui')
-QSS_PATH = os.path.join(_PROJECT_DIR, 'assets', 'dialog.qss')
+UI_PATH = os.path.join(UI_DIR, 'manual_entry.ui')
+QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 
 def launch_manual_entry_dialog(parent):
     # 1. Guards
@@ -51,7 +50,7 @@ def launch_manual_entry_dialog(parent):
         set_dialog_error(dlg, "Error: Manual Entry UI missing. Using fallback.")
 
     # --- SECTION 1: GATING & UI STATE ---
-    
+
     # Unit is always read-only (display only)
     widgets['unit'].setReadOnly(True)
     widgets['unit'].setFocusPolicy(Qt.NoFocus)
@@ -341,6 +340,3 @@ def _create_manual_entry_fallback_ui(parent):
     layout.addLayout(btns)
 
     return dlg, widgets
-
-
-    

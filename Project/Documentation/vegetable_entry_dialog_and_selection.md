@@ -156,7 +156,7 @@ self.dialog_wrapper.open_dialog_scanner_blocked(
 
 ## QSS Styling
 
-- Dialog-specific styles are loaded from `assets/sales.qss` and applied to the dialog.
+- Dialog-specific styles are loaded from `assets/qss/sales.qss` and applied to the dialog.
 - Styles for buttons, labels, and table headers are modularized for maintainability.
 
 
@@ -219,5 +219,5 @@ self.dialog_wrapper.open_dialog_scanner_blocked(
 ## Quick Reference
 
 - Entry dialog: `modules/sales/vegetable_entry.py: launch_vegetable_entry_dialog`
-- Stylesheet: `assets/sales.qss`
+- Stylesheet: `assets/qss/sales.qss`
 - UI file: `ui/vegetable_entry.ui`

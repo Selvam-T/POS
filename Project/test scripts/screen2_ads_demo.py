@@ -3,7 +3,7 @@
 
 Features:
 - Loads admin_menu.ui and focuses Screen 2 Ads tab.
-- Uses a local assets/ads/ folder as the source of truth.
+- Uses root data/ads/ as the source of truth.
 - Supports add/remove/reorder with file-based persistence.
 - Generates thumbnails in-memory via QPixmap.scaled().
 """
@@ -24,7 +24,7 @@ from PyQt5.QtWidgets import (
 
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 UI_PATH = os.path.join(BASE_DIR, "ui", "admin_menu.ui")
-ADS_DIR = os.path.join(BASE_DIR, "assets", "ads")
+ADS_DIR = os.path.join(os.path.dirname(BASE_DIR), "data", "ads")
 
 MAX_ADS = 6
 ALLOWED_EXTS = {".jpg", ".jpeg", ".png"}

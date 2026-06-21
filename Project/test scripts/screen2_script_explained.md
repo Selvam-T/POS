@@ -1,18 +1,18 @@
 # Screen 2 Ads Demo Script (screen2_ads_demo.py)
 
 ## Purpose
-This script is a standalone demo for the Screen 2 Ads tab in the admin menu UI. It loads the existing admin menu UI, focuses the Screen 2 Ads tab, and implements file-based add/remove/reorder/preview logic for ad images stored in the local assets/ads folder.
+This script is a standalone demo for the Screen 2 Ads tab in the admin menu UI. It loads the existing admin menu UI, focuses the Screen 2 Ads tab, and implements file-based add/remove/reorder/preview logic for ad images stored in root `data/ads`.
 
 It is intended for local testing and design validation before integrating the same behavior into the main POS app.
 
 ## How It Works
 - Loads [ui/admin_menu.ui](../ui/admin_menu.ui) using `uic.loadUi()`.
-- Uses Project/assets/ads as the "source of truth" for active ads.
+- Uses `<PROJECT ROOT>/data/ads` as the source of truth for active ads.
 - Displays thumbnails in the list via in-memory scaling (no thumbnail files written).
 - Persists order by renaming files with numeric prefixes (1_, 2_, 3_, ...).
 
 ## Storage Model
-- Folder: Project/assets/ads
+- Folder: `<PROJECT ROOT>/data/ads`
 - Any supported image file placed in this folder is considered part of the active rotation.
 - Order is determined by numeric prefix (example: 1_image.jpg, 2_image.jpg).
 - Reorder operations rename files to re-apply prefixes in list order.
@@ -24,7 +24,7 @@ Images are accepted only if all criteria pass:
 - Aspect ratio: 16:10
 - Quantity limit: max 6 images
 
-If any rule fails, the image is rejected and not copied into assets/ads.
+If any rule fails, the image is rejected and not copied into `data/ads`.
 
 ## Error / Status Messages
 Status messages are shown in the screen2StatusLabel.
@@ -49,7 +49,7 @@ Rejection reasons (short labels):
 - Loads the UI, ensures ads folder exists, wires signals, refreshes list, focuses Screen 2 tab.
 
 ### `_ensure_ads_dir()`
-- Creates assets/ads if missing.
+- Creates `data/ads` if missing.
 
 ### `_wire()`
 - Connects button handlers and list selection changes to their respective slots.
@@ -64,7 +64,7 @@ Rejection reasons (short labels):
 - Updates the "X / 6 images" count label.
 
 ### `_list_ad_files()`
-- Returns absolute paths for all allowed ads in assets/ads, sorted by numeric prefix.
+- Returns absolute paths for all allowed ads in `data/ads`, sorted by numeric prefix.
 
 ### `_sort_key(filename)`
 - Sorting helper; primary sort is numeric prefix, fallback to alpha.
@@ -85,7 +85,7 @@ Rejection reasons (short labels):
 - Scales selected image into the preview label using KeepAspectRatio.
 
 ### `_add_images()`
-- Opens file picker, validates selection, copies accepted files into assets/ads, and renames with prefix.
+- Opens file picker, validates selection, copies accepted files into `data/ads`, and renames with prefix.
 
 ### `_validate_image(path)`
 - Checks file extension, readability, resolution, and aspect ratio.

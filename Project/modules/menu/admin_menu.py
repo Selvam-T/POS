@@ -16,12 +16,9 @@ from modules.db_operation.products_repo import get_product_list_schema_and_rows
 from modules.db_operation.users_repo import verify_password, update_password, clear_must_change_password
 from modules.ui_utils import ui_feedback
 from modules.menu.screen2_ads_helper import Screen2AdsController
+from config import ASSETS_DIR, QSS_DIR, UI_DIR
 
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-BASE_DIR = os.path.dirname(os.path.dirname(THIS_DIR))
-UI_DIR = os.path.join(BASE_DIR, 'ui')
-ASSETS_DIR = os.path.join(BASE_DIR, 'assets')
-QSS_PATH = os.path.join(ASSETS_DIR, 'dialog.qss')
+QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 EYE_OPEN_ICON_PATH = os.path.join(ASSETS_DIR, 'icons', 'eye_open.svg')
 EYE_CLOSE_ICON_PATH = os.path.join(ASSETS_DIR, 'icons', 'eye_close.svg')
 
@@ -376,7 +373,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             pass
 
     def _export_csv2() -> None:
-        """Export categories to CSV (reads AppData/categories.json or falls back to in-memory list)."""
+        """Export categories to CSV from external data or the in-memory fallback."""
         try:
             out_dir = _ensure_exports_folder()
             file_name = f"Categories_csv_{_timestamp_for_filename()}.csv"

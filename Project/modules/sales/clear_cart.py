@@ -9,12 +9,11 @@ from modules.ui_utils.dialog_utils import (
     set_dialog_error
 )
 from modules.ui_utils.error_logger import log_error_message
+from config import QSS_DIR, UI_DIR
 
 # Paths
-_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-_PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
-UI_PATH = os.path.join(_PROJECT_DIR, 'ui', 'clear_cart.ui')
-QSS_PATH = os.path.join(_PROJECT_DIR, 'assets', 'dialog.qss')
+UI_PATH = os.path.join(UI_DIR, 'clear_cart.ui')
+QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 
 def launch_clearcart_dialog(host_window):
     """

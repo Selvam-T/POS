@@ -12,11 +12,10 @@ from modules.ui_utils.dialog_utils import (
     log_exception_traceback_and_postclose_statusBar,
 )
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
+from config import QSS_DIR, UI_DIR
 
-_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-_PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
-UI_PATH = os.path.join(_PROJECT_DIR, 'ui', 'refund.ui')
-QSS_PATH = os.path.join(_PROJECT_DIR, 'assets', 'dialog.qss')
+UI_PATH = os.path.join(UI_DIR, 'refund.ui')
+QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 
 def _set_error_state(widget: QLineEdit, on: bool) -> None:
     if widget is None:

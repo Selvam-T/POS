@@ -30,11 +30,11 @@ from modules.ui_utils.input_validation import (
 from modules.table import handle_barcode_scanned
 from modules.table.unit_helpers import canonicalize_unit
 from modules.date_time import format_datetime
+from config import QSS_DIR, UI_DIR
 
 # Constants
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-UI_PATH = os.path.join(BASE_DIR, 'ui', 'product_menu.ui')
-QSS_PATH = os.path.join(BASE_DIR, 'assets', 'dialog.qss')
+UI_PATH = os.path.join(UI_DIR, 'product_menu.ui')
+QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 
 def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     from modules.table.table_operations import is_transaction_active

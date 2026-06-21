@@ -24,11 +24,11 @@ Native title bars are drawn by the OS (Windows) and can’t be recolored with Qt
   - Status propagation: If the user clicks "Cancel" (NO), the dialog sets a main status message ("Logout cancelled.") using `set_dialog_main_status_max`, so the main window status bar is always up to date.
   - Security: Focus is explicitly set to the Cancel button to prevent accidental logouts from hitting Enter.
   - Fail-safe: If the .ui file is missing or widget names are wrong, the code falls back to a manual dialog, so logout is always possible.
-- Styles: `assets/dialog.qss`
+- Styles: `assets/qss/dialog.qss`
 
 ## Styling (QSS)
 
-Selectors you can customize in `assets/dialog.qss`:
+Selectors you can customize in `assets/qss/dialog.qss`:
 
 ```css
 /* Dialog background */

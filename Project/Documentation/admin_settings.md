@@ -66,11 +66,11 @@ This document describes the Admin Settings dialog, its UI structure, access rule
   - `True`: All change controls enabled (default).
   - `False`: Read-only presentation (Staff cannot modify settings); Save buttons disabled.
 - Eye buttons (`btnToggleAdminCurrent`, `btnToggleStaffCurrent`) toggle the echo mode between Password and Normal for their paired fields.
-- Save buttons are stubs for now (print to console). Real persistence can be implemented later (e.g., secure hash in AppData).
+- Save buttons are stubs for now (print to console). Real persistence can be implemented later (for example, a secure hash in the external `data/` directory).
 
 ## QSS Hooks
 
-Define shared dialog styles in `assets/dialog.qss` to keep a consistent look with other menu dialogs. Common selectors:
+Define shared dialog styles in `assets/qss/dialog.qss` to keep a consistent look with other menu dialogs. Common selectors:
 
 ```css
 /* Title bar */
@@ -110,7 +110,7 @@ QDialog#AdminDialog { /* dialog background, padding */ }
 
 ## Future Work
 
-- Implement secure password storage (hash + salt) in AppData.
+- Implement secure password storage (hash + salt) in external `data/`.
 - Add email format validation and persistence for `currentEmailLineEdit`.
 - Add feedback labels (success/error) near each Save button.
 - Optional: migrate to `BaseMenuDialog` shell to reuse the shared title bar and spacing from `ui/base_menu_dialog.ui`.

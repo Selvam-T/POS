@@ -118,7 +118,7 @@ Project/
 ├── tools/
 │   └── format_assets.py         # Formatter for .ui (lxml) and .qss (jsbeautifier)
 ├── assets/
-│   ├── main.qss                # Global stylesheet (QSS)
+│   ├── qss/                    # Application stylesheets
 │   └── icons/                   # SVG/PNG icons (menu, delete, etc.)
 ├── ui/
 │   ├── main_window.ui          # Main application window (info header + work area)
@@ -237,7 +237,7 @@ Implementation details:
 - QSS no longer forces header label alignment; we use padding for consistent spacing:
    - `QLabel#labelDate { padding-left: 30px; }`
    - `QLabel#labelDayTime { padding-right: 30px; }`
-   - You can adjust padding in `assets/main.qss`.
+   - You can adjust padding in `assets/qss/main.qss`.
 
 
 ### Main status footer
@@ -286,7 +286,7 @@ For a deep dive into the exact routing rules, protections, and debug options, se
  - Yes, Logout: stops the scanner and exits the app. Cancel returns to the app.
  - Safety check: the UI-loaded Logout dialog now prevents accepting logout if the Sales table contains items. When blocked, the dialog writes an error to the dialog-local `logoutStatusLabel` (preferred) or falls back to a transient main status bar message. The lightweight fallback dialog (used when the .ui file fails to load) is unchanged and still allows logout.
 - Styling the logout dialog:
-   - Title bar background: `QFrame#customTitleBar` in `assets/main.qss`
+   - Title bar background: `QFrame#customTitleBar` in `assets/qss/main.qss`
    - Close (X) button: `QPushButton#customCloseBtn` (font size, colors, hover/pressed)
    - Tip: Use 6‑digit hex `#RRGGBB` (or 8-digit `#ffRRGGBB`) for opaque colors. `#AARRGGBB` with a low AA will appear washed out.
 
@@ -413,7 +413,7 @@ See `Project_Journal.md` for detailed architecture documentation, design decisio
 **Solution:** Check database path and table schema. Verify `Product_list` table exists with correct columns.
 
 ### QSS Not Loading
-**Solution:** Verify `assets/main.qss` exists. Check console for error messages.
+**Solution:** Verify `assets/qss/main.qss` exists. Check console for error messages.
 
 ### Scanner types characters into the wrong field
 This can happen with HID “keyboard wedge” scanners before the app detects the scan burst (first-character leak). The app:

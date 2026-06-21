@@ -3,12 +3,11 @@ from PyQt5 import uic
 from PyQt5.QtCore import Qt, QObject, QEvent
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QDialog, QLineEdit, QComboBox, QLabel, QPushButton, QApplication
-from config import COMPANY_NAME, DIALOG_RATIOS, LOGIN_BACKGROUND
+from config import COMPANY_NAME, DIALOG_RATIOS, LOGIN_BACKGROUND, QSS_DIR, UI_DIR
+from modules.runtime_paths import load_stylesheet
 
-_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-_PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
-UI_PATH = os.path.join(_PROJECT_DIR, "ui", "login.ui")
-QSS_PATH = os.path.join(_PROJECT_DIR, "assets", "main.qss")
+UI_PATH = os.path.join(UI_DIR, "login.ui")
+QSS_PATH = os.path.join(QSS_DIR, "main.qss")
 
 
 def _apply_login_dialog_geometry(dlg, parent=None):
@@ -92,8 +91,7 @@ def launch_login_dialog(parent=None, *, return_user: bool = False):
     dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint)
     dlg.customTitle.setText(COMPANY_NAME)
     try:
-        with open(QSS_PATH, "r") as f:
-            dlg.setStyleSheet(f.read())
+        dlg.setStyleSheet(load_stylesheet(QSS_PATH))
     except Exception:
         pass
     _apply_login_dialog_geometry(dlg, parent)

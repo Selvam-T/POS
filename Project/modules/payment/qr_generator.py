@@ -177,9 +177,7 @@ def add_qr_card(qr_img):
 
 def overlay_logo(qr_img):
 
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    logo_path = os.path.join(base_dir, "..", "..", "assets", "images", config.logo)
-    logo_path = os.path.normpath(logo_path)
+    logo_path = os.path.join(config.ASSETS_DIR, 'images', config.logo)
 
     logo = Image.open(logo_path).convert("RGBA")
 

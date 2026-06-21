@@ -12,12 +12,11 @@ from modules.db_operation import (
     get_product_full, add_product, delete_product, 
     refresh_product_cache, PRODUCT_CACHE
 )
+from config import QSS_DIR, UI_DIR
 
 # Constants
-_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-_PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
-UI_PATH = os.path.join(_PROJECT_DIR, 'ui', 'vegetable_menu.ui')
-QSS_PATH = os.path.join(_PROJECT_DIR, 'assets', 'dialog.qss')
+UI_PATH = os.path.join(UI_DIR, 'vegetable_menu.ui')
+QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 VEG_SLOTS = 16
 DEFAULT_VEG_CATEGORY = 'Vegetable'
 

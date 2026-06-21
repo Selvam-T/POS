@@ -5,6 +5,7 @@ from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QIcon
 
 import config
+from config import ASSETS_DIR, QSS_DIR, UI_DIR
 from modules.ui_utils import input_handler, ui_feedback, todo_state
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui,
@@ -13,10 +14,8 @@ from modules.ui_utils.dialog_utils import (
     set_dialog_info,
 )
 
-_THIS_DIR = os.path.dirname(os.path.abspath(__file__))
-_PROJECT_DIR = os.path.dirname(os.path.dirname(_THIS_DIR))
-UI_PATH = os.path.join(_PROJECT_DIR, 'ui', 'todo.ui')
-QSS_PATH = os.path.join(_PROJECT_DIR, 'assets', 'dialog.qss')
+UI_PATH = os.path.join(UI_DIR, 'todo.ui')
+QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 
 
 def launch_todo_dialog(parent=None):
@@ -170,7 +169,7 @@ def launch_todo_dialog(parent=None):
                 del_btn.setObjectName(f"todoDeleteBtn_{r + 1}")
                 del_btn.setToolTip("Delete task")
                 del_btn.setText("")
-                icon_path = os.path.join(_PROJECT_DIR, 'assets', 'icons', 'delete_todo.svg')
+                icon_path = os.path.join(ASSETS_DIR, 'icons', 'delete_todo.svg')
                 del_btn.setIcon(QIcon(icon_path))
                 del_btn.setIconSize(QSize(36, 36))
                 del_btn.setFlat(True)
