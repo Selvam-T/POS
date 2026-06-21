@@ -846,7 +846,14 @@ class MainLoader(QMainWindow):
         if panel is not None:
             panel.clear_payment_frame()
         self._reset_receipt_context()
-        # Debug print removed; use status reporting elsewhere if needed.
+        sales_frame = getattr(self, 'sales_frame_controller', None)
+        if sales_frame is not None and sales_frame.widget is not None:
+            vegetable_entry_btn = sales_frame.widget.findChild(QPushButton, 'vegEntryBtn')
+            if vegetable_entry_btn is not None:
+                QTimer.singleShot(
+                    0,
+                    lambda: vegetable_entry_btn.setFocus(Qt.OtherFocusReason),
+                )
 
     # ========== Payment Processing ==========
     # Orchestrates payment; atomic DB commit is delegated to PaidSaleCommitter.
