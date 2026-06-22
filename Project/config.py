@@ -279,7 +279,7 @@ CASH_DRAWER_TIMEOUT = 2.0
 # Customer display and advertisements
 # -----------------------------------------------------------------------------
 
-MAX_ADS = 10
+MAX_ADS = 20
 ALLOWED_EXTS = {'.jpg', '.jpeg', '.png'}
 REQ_WIDTH = 1280
 REQ_HEIGHT = 800

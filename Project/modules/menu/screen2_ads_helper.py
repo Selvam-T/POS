@@ -167,7 +167,7 @@ class Screen2AdsController:
     def _add_images(self) -> None:
         current = self._list_ad_files()
         if len(current) >= MAX_ADS:
-            self._set_status(f"Max {MAX_ADS} images reached.", ok=False)
+            self._set_status('Image capacity reached. Remove an image before adding a new one.', ok=False)
             self._focus_widget(self._remove_btn)
             return
 
@@ -394,7 +394,6 @@ class Screen2AdsController:
         has_sel = row >= 0
 
         try:
-            self._add_btn.setEnabled(count < MAX_ADS)
             self._remove_btn.setEnabled(has_sel)
             self._up_btn.setEnabled(has_sel and row > 0)
             self._down_btn.setEnabled(has_sel and row < count - 1)
