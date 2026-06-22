@@ -48,6 +48,7 @@ def get_receipt_header_by_no(receipt_no: str, *, conn: Optional[sqlite3.Connecti
     own = conn is None
     c = conn or get_conn()
     try:
+        #raise RuntimeError("Testing receipt header retrieval failure")  # debug
         cols = _table_columns(c, "receipts")
         key_col = _first_existing(cols, "receipt_no", "receipt_number")
         if key_col is None:

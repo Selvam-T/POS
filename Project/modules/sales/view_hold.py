@@ -21,7 +21,8 @@ from modules.ui_utils.dialog_utils import (
     require_widgets,
     set_dialog_main_status_max,
     report_to_statusbar,
-    report_exception,
+    log_exception_traceback_and_postclose_statusBar,
+    log_error_message_and_postclose_statusBar,
 )
 from modules.ui_utils import ui_feedback, input_handler
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate
@@ -309,6 +310,14 @@ def launch_viewhold_dialog(parent=None):
                 receipt_id = None
 
         return receipt_id, receipt_no
+
+    def _selected_customer_name() -> str:
+        try:
+            row = table.currentRow()
+            item = table.item(row, 1) if row >= 0 else None
+            return str(item.text() or "").strip() if item is not None else ""
+        except Exception:
+            return ""
 
     _search_skip_sync = {'active': False}
 
@@ -692,6 +701,7 @@ def launch_viewhold_dialog(parent=None):
     # --- Action handlers: LOAD / PRINT / VOID / OK / CANCEL ---
     def _handle_load(*, load_as_active_sale: bool) -> None:
         receipt_id, receipt_no = _selected_receipt_identifiers()
+        customer_name = _selected_customer_name()
         if not receipt_no:
             ui_feedback.set_status_label(status_lbl, "Select a receipt.", ok=False)
             return
@@ -708,27 +718,17 @@ def launch_viewhold_dialog(parent=None):
             ui_feedback.set_status_label(status_lbl, "Unable to resolve receipt id.", ok=False)
             return
 
-        if load_as_active_sale:
-            try:
-                ok = void_receipt(
-                    receipt_id=receipt_id,
-                    receipt_no=receipt_no or None,
-                    note="System cancelled - ongoing shopping",
-                )
-            except Exception as exc:
-                report_exception(parent, "Cancel hold receipt", exc, user_message="DB Error: Unable to cancel ongoing shopping temp receipt.", duration=6000)
-                ui_feedback.set_status_label(status_lbl, "DB Error: Unable to cancel ongoing shopping temp receipt.", ok=False)
-                return
-
-            if not ok:
-                report_to_statusbar(parent, "Could not cancel ongoing shopping temp receipt.", is_error=True, duration=6000)
-                ui_feedback.set_status_label(status_lbl, "Could not cancel ongoing shopping temp receipt.", ok=False)
-                return
-
         try:
             items = receipt_repo.list_receipt_items_by_no(receipt_no, receipt_id=receipt_id)
         except Exception as exc:
-            report_exception(parent, "Load held receipt", exc, user_message="Error: Unable to load receipt", duration=6000)
+            log_exception_traceback_and_postclose_statusBar(
+                dlg,
+                "View Hold load receipt items",
+                exc,
+                user_message="Error: Unable to load receipt",
+                level="error",
+                duration=6000,
+            )
             ui_feedback.set_status_label(status_lbl, "Unable to load receipt items.", ok=False)
             return
 
@@ -805,12 +805,65 @@ def launch_viewhold_dialog(parent=None):
                         pass
 
             if load_as_active_sale:
+                log_context = (
+                    f"receipt_id={receipt_id}, receipt_no={receipt_no!r}, "
+                    f"customer_name={customer_name!r}"
+                )
+                try:
+                    ok = void_receipt(
+                        receipt_id=receipt_id,
+                        receipt_no=receipt_no or None,
+                        note="System cancelled - ongoing shopping",
+                    )
+                except Exception as exc:
+                    log_exception_traceback_and_postclose_statusBar(
+                        dlg,
+                        f"View Hold cancel held receipt ({log_context})",
+                        exc,
+                        user_message=(
+                            f"Error: Receipt {receipt_no} could not be cancelled; "
+                            "transaction continued."
+                        ),
+                        level="error",
+                        duration=6000,
+                    )
+                    ui_feedback.set_status_label(
+                        status_lbl,
+                        "Unable to cancel held receipt; continuing transaction.",
+                        ok=False,
+                    )
+                else:
+                    if not ok:
+                        log_error_message_and_postclose_statusBar(
+                            dlg,
+                            f"View Hold cancel held receipt ({log_context})",
+                            "void_receipt returned False; transaction loading continued",
+                            user_message=(
+                                f"Error: Receipt {receipt_no} could not be cancelled; "
+                                "transaction continued."
+                            ),
+                            level="error",
+                            duration=6000,
+                        )
+                        ui_feedback.set_status_label(
+                            status_lbl,
+                            "Could not cancel held receipt; continuing transaction.",
+                            ok=False,
+                        )
+
                 set_dialog_main_status_max(dlg, f"On Hold transaction loaded to continue shopping.", level='info', duration=4000)
             else:
                 set_dialog_main_status_max(dlg, f"Loaded receipt {receipt_no} to make Payment.", level='info', duration=4000)
             dlg.accept()
         except Exception as exc:
-            report_exception(parent, "Load held receipt", exc, user_message="Error: Unable to load receipt", duration=6000)
+            log_exception_traceback_and_postclose_statusBar(
+                dlg,
+                "View Hold apply loaded receipt",
+                exc,
+                user_message="Error: Unable to load receipt",
+                level="error",
+                duration=6000,
+            )
             ui_feedback.set_status_label(status_lbl, "Error loading receipt.", ok=False)
 
     def _handle_print() -> None:
@@ -837,10 +890,25 @@ def launch_viewhold_dialog(parent=None):
                 except Exception:
                     pass
             else:
-                report_to_statusbar(parent, f"Print failed for {receipt_no}", is_error=True, duration=6000)
+                log_error_message_and_postclose_statusBar(
+                    dlg,
+                    "View Hold print failed",
+                    f"Printer send failed for receipt {receipt_no}: "
+                    f"{print_result.get('error') or 'unknown'}",
+                    user_message=f"Print failed for {receipt_no}",
+                    level="error",
+                    duration=6000,
+                )
                 ui_feedback.set_status_label(status_lbl, f"Print failed for {receipt_no}", ok=False)
         except Exception as exc:
-            report_exception(parent, "Print receipt", exc, user_message="Error: Unable to print receipt", duration=6000)
+            log_exception_traceback_and_postclose_statusBar(
+                dlg,
+                "View Hold print receipt",
+                exc,
+                user_message="Error: Unable to print receipt",
+                level="error",
+                duration=6000,
+            )
             ui_feedback.set_status_label(status_lbl, "Print error.", ok=False)
 
     def _handle_void() -> None:
@@ -870,7 +938,14 @@ def launch_viewhold_dialog(parent=None):
         try:
             ok = void_receipt(receipt_id=receipt_id, receipt_no=receipt_no or None, note=note_arg)
         except Exception as exc:
-            report_exception(parent, "Void receipt", exc, user_message="Error: Unable to void receipt", duration=6000)
+            log_exception_traceback_and_postclose_statusBar(
+                dlg,
+                "View Hold void receipt",
+                exc,
+                user_message="Error: Unable to void receipt",
+                level="error",
+                duration=6000,
+            )
             ui_feedback.set_status_label(status_lbl, "Void failed.", ok=False)
             return
 
@@ -892,7 +967,12 @@ def launch_viewhold_dialog(parent=None):
             gated_applied = False
 
         if gated_applied:
-            ui_feedback.set_status_label(status_lbl, "No receipts remaining — cancel to close", ok=True, duration=4000)
+            ui_feedback.set_status_label(
+                status_lbl,
+                f"Receipt {receipt_no} voided. No receipts remaining; cancel to close.",
+                ok=True,
+                duration=4000,
+            )
         else:
             ui_feedback.set_status_label(status_lbl, f"Receipt {receipt_no} voided.", ok=True, duration=2000)
 

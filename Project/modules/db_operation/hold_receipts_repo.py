@@ -135,6 +135,7 @@ def void_receipt(
     own = conn is None
     c = conn or get_conn()
     try:
+        #raise RuntimeError("Test void failure") #debug
         cols = _receipt_cols(c)
         status_col = cols.get("status_col")
         if status_col is None:
