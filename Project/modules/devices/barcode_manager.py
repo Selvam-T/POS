@@ -128,6 +128,11 @@ class BarcodeManager(QObject):
         except Exception:
             pass
 
+        readiness_gate = getattr(parent, '_require_sales_table_ready', None)
+        if callable(readiness_gate) and not readiness_gate():
+            self._ignore_scan(barcode, reason='sales-table-unavailable')
+            return
+
         try:
             from modules.table_ui import handle_barcode_scanned
             try:
@@ -144,9 +149,19 @@ class BarcodeManager(QObject):
                 return
             # Product found - add to sales table
             if hasattr(parent, 'sales_table') and parent.sales_table is not None:
-                handle_barcode_scanned(parent.sales_table, barcode, status_bar)
+                try:
+                    handle_barcode_scanned(parent.sales_table, barcode, status_bar)
+                except Exception as exc:
+                    marker = getattr(parent, '_mark_sales_table_unavailable', None)
+                    if callable(marker):
+                        marker(exc, where="Populate sales table from barcode scan")
+                    return
             elif status_bar and hasattr(status_bar, 'showMessage'):
-                status_bar.showMessage(f"Scanned: {barcode}", 3000)
+                readiness_gate = getattr(parent, '_require_sales_table_ready', None)
+                if callable(readiness_gate):
+                    readiness_gate()
+                else:
+                    status_bar.showMessage(f"Scanned: {barcode}", 3000)
         except Exception:
             pass
 

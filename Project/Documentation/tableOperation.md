@@ -151,6 +151,11 @@ bind_total_label(sales_table, total_label)  # total_label is a QLabel instance
 - The sales table is set up and bound to the total label in `modules/sales/sales_panel.py`.
 - The vegetable entry table uses the same functions with `editable=False` for weight-based products.
 - The main window (`main.py`) uses `setup_sales_frame` to ensure the table and total label are always correctly initialized and bound.
+- Exceptions from rebuilding the main `salesTable` propagate to the owning
+  workflow. `MainLoader._mark_sales_table_unavailable(...)` then logs the
+  underlying failure once and activates the shared transaction readiness gate.
+  This application-level policy does not apply to temporary dialog tables such
+  as `vegEntryTable`.
 
 ## Migration Notes
 - Migrated from `modules/sales/salesTable.py` to `modules/table_ui/table_operations.py` on December 19, 2025
@@ -159,4 +164,4 @@ bind_total_label(sales_table, total_label)  # total_label is a QLabel instance
 - New features: `editable` parameter, `display_text` support, numeric value storage
 
 ---
-_Last updated: December 19, 2025_
+_Last updated: June 22, 2026_

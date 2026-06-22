@@ -35,6 +35,23 @@ The main window footer watches `logs/error.log` through
 See `Documentation/status_footer.md` for full footer behavior and QSS state
 details.
 
+### Sales table infrastructure failures
+
+`MainLoader` treats the main Sales table as a required subsystem. Initialization
+failure or an exception while rebuilding `salesTable` calls
+`_mark_sales_table_unavailable(...)`:
+
+- The exception and traceback are written to `log/error.log` once.
+- `_sales_table_ready` becomes `False` for the remainder of the process.
+- Transaction entry points call `_require_sales_table_ready()` before applying
+  ordinary empty/full/in-progress rules.
+- Each blocked button, PAY, or scan-to-cart attempt repeats the common
+  MainWindow StatusBar message without adding duplicate log entries.
+
+This is an infrastructure hard-fail with a controlled degraded UI: menu and
+error-log tools remain available, but transaction and payment processing require
+an application restart.
+
 ### Smoke-test side effects
 
 Instantiating `MainLoader()` in a smoke test runs normal startup checks,
@@ -129,4 +146,4 @@ Opt-in module:
 - `Project_Journal.md` for development history and rationale
 
 ---
-*Last updated: January 22, 2026*
+*Last updated: June 22, 2026*

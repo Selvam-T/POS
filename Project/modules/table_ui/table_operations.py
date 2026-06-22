@@ -77,7 +77,10 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
 
     table.setRowCount(0)
 
-    #raise RuntimeError("Testing sales table population failure") # debug
+    #raise RuntimeError("Testing sales table population failure")     # debug 1
+    #if table.objectName() == "salesTable" and rows:                  # debug 2
+    #    raise RuntimeError("Testing sales table population failure")
+
     for r, data in enumerate(rows):
         table.insertRow(r)
         row_color = get_row_color(r)

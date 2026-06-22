@@ -68,6 +68,16 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - **Soft-fail (handled failure):** validation/business-rule issues are handled in the active UI flow so users can correct and retry; payment DB commit failures are surfaced from `main.py` on the MainWindow StatusBar while preserving the current sale for retry or recovery.
 - **Success-with-warning:** if DB write succeeds but a post-success refresh (cache/completers) fails, show success in the dialog label but show the warning in the StatusBar after close (warning/error takes precedence).
 
+### Sales table readiness failure
+
+The Sales table is a required transaction subsystem. If it fails during startup
+or a runtime table rebuild, `MainLoader` marks it unavailable, writes the
+underlying exception to `log/error.log` once, and blocks Vegetable Entry,
+Manual Entry, Clear Cart, Hold Sale, View Hold, PAY, and scan-to-cart routing.
+Every blocked attempt shows the same MainWindow StatusBar message asking the
+operator to restart the application. Normal empty/full/in-progress rules apply
+only while the table is healthy.
+
 See details: `Documentation/error_logging_and_fallback.md`, `Documentation/dialog_pipeline.md`, `Documentation/dialog_utils.md`.
 
 ### Payment DB failure (quick operator steps)
@@ -317,7 +327,7 @@ To prevent inconsistencies between items already listed in the current sale and 
 - The `QLabel#totalValue` in `sales_frame.ui` is bound at runtime and always shows the sum of all row totals (column 4).
 - It updates immediately when rows are added, quantities change, prices change, or rows are deleted.
 - Scanner “leak” and reversal: if a transient character briefly changes a quantity and is then cleaned, the grand total is recomputed and returns to the correct value.
-- Developer helpers (in `modules/sales/salesTable.py`):
+- Developer helpers (in `modules/table_ui/table_operations.py`):
    - `bind_total_label(table, label)` — attach the label to a sales table instance (called in `main.py`).
    - `recompute_total(table) -> float` — recompute from column 4 and refresh the label.
    - `get_total(table) -> float` — read the last computed total (e.g., for Payment frame).

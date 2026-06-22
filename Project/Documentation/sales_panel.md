@@ -26,6 +26,24 @@ The sales frame setup moved out of `main.py` and is now embodied by the `SalesFr
 
 The total listener mentioned above keeps `saleTotalChanged` in sync with `bind_total_label` so the controller doesn't need to duplicate total math.
 
+## Sales Table Readiness Gate
+
+The Sales table is considered ready only after `setup_sales_frame(...)`
+completes and registers `main_window.sales_table`. `MainLoader` owns the shared
+health state and exposes:
+
+- `_require_sales_table_ready()`: returns `True` for a usable table; otherwise
+  shows the common transaction-disabled StatusBar message.
+- `_mark_sales_table_unavailable(exc, where=...)`: marks the subsystem
+  unavailable, records the failure reason, logs the exception once, and shows
+  the StatusBar message.
+
+The gate protects Vegetable Entry, Manual Entry, Clear Cart, Hold Sale, View
+Hold, PAY, and scan-to-cart routing. Runtime failures while rebuilding the main
+Sales table from dialogs, View Hold, or barcode scans also mark the subsystem
+unavailable. Repeated button clicks repeat the user-facing StatusBar message
+without duplicating the original error-log entry.
+
 ## Canonical Unit Handling and Robust Merging (2026 Update)
 
 - All sales table operations (add, update, delete, barcode scan, dialog transfer) use only canonical units: "Kg" or "Each".
@@ -50,7 +68,7 @@ setup_sales_frame(self, UI_DIR)
 ## Related Files
 - `main.py`: Calls `setup_sales_frame` during main window initialization.
 - `ui/sales_frame.ui`: The Qt Designer UI file loaded by this module.
-- `modules/sales/salesTable.py`: Provides `setup_sales_table` and `bind_total_label` for table and total value management.
+- `modules/table_ui/table_operations.py`: Provides `setup_sales_table`, row rebuilding, and total-value management.
 
 ---
-*Last updated: December 2, 2025*
+*Last updated: June 22, 2026*

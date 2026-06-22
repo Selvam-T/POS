@@ -777,7 +777,24 @@ def launch_viewhold_dialog(parent=None):
                 ui_feedback.set_status_label(status_lbl, "Sales table not available.", ok=False)
                 return
 
-            set_table_rows(sales_table, rows, status_bar=getattr(parent, 'statusbar', None))
+            try:
+                set_table_rows(sales_table, rows, status_bar=getattr(parent, 'statusbar', None))
+            except Exception as exc:
+                marker = getattr(parent, '_mark_sales_table_unavailable', None)
+                if callable(marker):
+                    marker(exc, where="Populate sales table from View Hold")
+                set_dialog_main_status_max(
+                    dlg,
+                    "Error: Sales table unavailable. Transaction was not loaded.",
+                    level="error",
+                    duration=6000,
+                )
+                ui_feedback.set_status_label(
+                    status_lbl,
+                    "Sales table unavailable. Transaction was not loaded.",
+                    ok=False,
+                )
+                return
 
             panel = getattr(parent, 'payment_panel_controller', None) if parent is not None else None
             if panel is not None:

@@ -21,6 +21,19 @@ Admin Inventory export enhancements:
  
 ## Update Summary (February 24, 2026)
 
+## June 22, 2026 - Sales-table readiness and View Hold recovery
+
+- Added a shared `MainLoader` readiness gate for the required main Sales table.
+- Startup and runtime population failures are logged once; transaction buttons,
+  PAY, and scan-to-cart routing show one consistent StatusBar error and stop.
+- Added focused readiness tests covering healthy, missing, and runtime-failed
+  table states.
+- View Hold LOAD/PRINT/VOID exceptions now use post-close error reporting.
+- LOAD to Continue restores items and active-sale context before attempting to
+  cancel the original hold. Cancellation failures log receipt ID, number, and
+  customer name but do not block continued trading.
+- Voiding the final displayed hold now combines success and empty-state feedback.
+
 Receipt/printing adjustments
 
 - `modules/db_operation/receipt_repo.py`

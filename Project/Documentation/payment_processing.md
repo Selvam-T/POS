@@ -31,15 +31,18 @@ Why the app layer performs DB commits
 
 High-level commit flow
 ----------------------
-1. Validation: `PaymentPanel` ensures payment totals and tender are valid and
+1. Sales-table readiness: `MainLoader` blocks PAY when the required Sales table
+   failed initialization or a runtime rebuild. The originating failure is
+   logged once and each blocked PAY attempt shows the shared StatusBar error.
+2. Validation: `PaymentPanel` ensures payment totals and tender are valid and
    enables the PAY action only when rules are satisfied.
-2. Build payload: `main.py` collects a snapshot of sale items and the
+3. Build payload: `main.py` collects a snapshot of sale items and the
    selected payment split from the UI payload.
-3. Double-submit guard: `main.py` checks `_payment_in_progress`. If a commit is
+4. Double-submit guard: `main.py` checks `_payment_in_progress`. If a commit is
   already running, it shows "Payment is already processing..." and exits.
-4. Open DB connection: obtain a single sqlite3 connection via `get_conn()`.
-5. Begin transaction: `with transaction(conn):` (this runs `BEGIN IMMEDIATE`).
-6. Within the transaction:
+5. Open DB connection: obtain a single sqlite3 connection via `get_conn()`.
+6. Begin transaction: `with transaction(conn):` (this runs `BEGIN IMMEDIATE`).
+7. Within the transaction:
    - If this is a new sale (`active_receipt_id` is None):
      - Call `next_receipt_no(conn=conn)` to atomically increment the daily
        counter and obtain a receipt number.
@@ -55,9 +58,9 @@ High-level commit flow
      method used (CASH, NETS, PAYNOW, VOUCHER, ...). CASH rows store both
      `amount` (applied to the receipt total) and `tendered` (cash received);
      non-cash rows set `tendered = amount`.
-7. Commit: if all statements succeed the transaction commits; otherwise
+8. Commit: if all statements succeed the transaction commits; otherwise
    an exception rolls back all changes and the calling UI layer is informed.
-8. Finalize UI state: `_payment_in_progress` is cleared and pay-button state is
+9. Finalize UI state: `_payment_in_progress` is cleared and pay-button state is
   recalculated in `finally` to avoid a stuck disabled button.
 
 Important implementation details
@@ -142,3 +145,4 @@ References
   to call inside an existing transaction when passed `conn`).
 - `modules/db_operation/paid_sale_committer.py` — dedicated atomic commit service.
 - `main.py` — payment orchestration, double-submit guard, and hard-fail routing.
+- `main.py` also owns the Sales-table readiness gate used before payment.

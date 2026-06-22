@@ -159,14 +159,23 @@ Goal: convert a held receipt into a fresh ACTIVE sale so it can be held again.
 
 Flow (differences vs normal load):
 
-1. Cancel the original held receipt before loading items:
-  - `void_receipt(receipt_id=..., receipt_no=..., note='System cancelled - ongoing shopping')`
-2. Load items into the Sales table as a new ACTIVE sale.
+1. Read and validate the held receipt items.
+2. Load items into the Sales table and apply the payment default.
 3. Reset `ReceiptContext` inside the dialog:
   - `active_receipt_id = None`
   - `source = 'ACTIVE_SALE'`
   - `status = 'NONE'`
-4. StatusBar message: “Load ongoing shopping items”.
+4. Attempt to cancel the original held receipt as the final meaningful action:
+  - `void_receipt(receipt_id=..., receipt_no=..., note='System cancelled - ongoing shopping')`
+5. Close the dialog.
+
+Cancellation is deliberately attempted only after the Sales table and context
+have been restored. If item retrieval or Sales-table population fails, the
+original receipt remains `UNPAID`. If cancellation itself raises or returns
+`False`, loading still completes; the error log identifies the original
+receipt ID, receipt number, and customer name so staff can manually void it
+after DB operations recover. The error-level StatusBar warning appears after
+the dialog closes and takes precedence over the load-success message.
 
 **LOAD to Pay** (`viewHoldLoad2RadioBtn`)
 
@@ -192,7 +201,7 @@ Flow:
 
 Every time a sale is placed on hold the system generates a receipt number and the receipt row is stored with status `UNPAID`.
 
-- LOAD to continue: the controller will void the original held receipt (calls `void_receipt(...)` and sets status → `CANCELLED`) before re-creating the items in the Sales table as a new active sale. Because the original receipt is voided it is no longer listed among `UNPAID` receipts and so will not appear in the View Hold table. The loaded items are treated as a fresh active cart — additional items can be appended to the cart or the cart can be cleared. This mode is useful when a customer temporarily leaves their in-progress shopping (we hold their cart so the cashier can serve the next customer) and later returns to continue shopping. Note: voiding a receipt is a status change (CANCELLED), not permanent deletion — the cancelled receipt remains retrievable in Receipt History under CANCELLED receipts.
+- LOAD to continue: after the items and active-sale context are restored, the controller calls `void_receipt(...)` to set the original receipt to `CANCELLED`. On success it is removed from the UNPAID list but remains retrievable in Receipt History. If cancellation fails, the original remains UNPAID and the continued transaction is still available to the cashier; the logged receipt/customer identifiers support later manual reconciliation.
 
 - LOAD to pay: this mode preserves the held receipt (keeps the `receipt_no` and `UNPAID` semantics) and loads its items into the Sales table in a payment-only context. The system requires a resolvable `receipt_id` so the payment can be recorded against the original receipt. While the items are shown in the Sales table the UI enforces a payment-focused workflow: appending new items to the loaded receipt is disallowed, but the cart may be cleared after payment. This mode is intended for customers who purchased on credit and return later to settle the outstanding amount — preserving the original receipt prevents mixing new purchases with unpaid items and avoids dispute scenarios where it's unclear which items belong to the original hold versus newly added items.
 
@@ -214,8 +223,9 @@ On success:
 
 On failure:
 
-- StatusBar shows a short error
-- Failure is logged to `logs/error.log`
+- The dialog status label shows immediate feedback
+- Raised exceptions are logged with traceback details; handled printer failures are logged as handled errors
+- An error-level StatusBar message is shown after the dialog closes
 - No console fallback printing is used
 
 ### 3) VOID
@@ -233,8 +243,8 @@ DB call:
 
 On success:
 
-- StatusBar shows “Receipt <receipt_no> voided.”
-- Status label shows “Voided.” (2000ms)
+- If rows remain, the status label shows `Receipt <receipt_no> voided.`
+- If the final displayed row was voided, it shows `Receipt <receipt_no> voided. No receipts remaining; cancel to close.`
 - Table refreshes using the current search text (so the user stays in-context)
 
 ## Error Handling Policy
@@ -243,6 +253,11 @@ On success:
   - Dialog-local feedback uses `viewHoldStatusLabel`
   - StatusBar feedback uses dialog utils (`report_to_statusbar`) or post-close intent (`set_dialog_main_status_max`)
 - Exceptions are logged via shared logging helpers (and shown with a user-safe message)
+- Raised LOAD, PRINT, and VOID exceptions use post-close traceback reporting;
+  handled PRINT failures use handled-error post-close reporting.
+- A main Sales-table rebuild failure activates `MainLoader`'s shared readiness
+  gate, leaves the original held receipt UNPAID, and prevents further
+  transaction actions until restart.
 
 ## DB Repo Notes (Schema Flexibility)
 
@@ -258,4 +273,4 @@ The SQL repo `modules/db_operation/hold_receipts_repo.py` is schema-tolerant:
 
 ---
 
-*Last updated: February 24, 2026*
+*Last updated: June 22, 2026*

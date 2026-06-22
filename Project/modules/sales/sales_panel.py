@@ -149,5 +149,9 @@ def setup_sales_frame(main_window, UI_DIR):
     try:
         return SalesFrame(main_window, sales_placeholder, sales_ui)
     except Exception as e:
-        log_error_message(f"Failed to initialize sales frame: {e}")
+        marker = getattr(main_window, '_mark_sales_table_unavailable', None)
+        if callable(marker):
+            marker(e, where="Sales frame initialization")
+        else:
+            log_error_message(f"Failed to initialize sales frame: {e}")
         return None

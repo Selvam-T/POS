@@ -120,6 +120,12 @@ class MainLoader(QMainWindow):
         self.current_user_id = None
         self.current_username = ""
         self.current_is_admin = False
+        self._sales_table_ready = False
+        self._sales_table_failure_logged = False
+        self._sales_table_error = ""
+        self._sales_table_unavailable_message = (
+            "Sales table unavailable. Transactions are disabled. Restart the application."
+        )
         self._payment_in_progress = False
         self._payment_busy_status_ms = 3000
         self._payment_db_failure_count = 0
@@ -176,7 +182,13 @@ class MainLoader(QMainWindow):
         # Insert sales_frame.ui into placeholder named 'salesFrame'
         self.sales_frame_controller = setup_sales_frame(self, UI_DIR)
         if self.sales_frame_controller is not None:
+            self._sales_table_ready = getattr(self, 'sales_table', None) is not None
             self._wire_sales_frame_signals()
+        elif not self._sales_table_failure_logged:
+            self._mark_sales_table_unavailable(
+                RuntimeError("Sales frame initialization did not produce a sales table"),
+                where="Sales table initialization",
+            )
 
         # Ensure sales label matches initial receipt context.
         self._refresh_sales_label_from_context()
@@ -438,9 +450,56 @@ class MainLoader(QMainWindow):
 
     # ========== Sales Frame Dialog Handlers ==========
 
+    def _show_sales_table_unavailable(self) -> None:
+        report_to_statusbar(
+            self,
+            self._sales_table_unavailable_message,
+            is_error=True,
+            duration=6000,
+        )
+
+    def _mark_sales_table_unavailable(self, exc: Exception, *, where: str) -> None:
+        self._sales_table_ready = False
+        self._sales_table_error = f"{where}: {exc!r}"
+        if not self._sales_table_failure_logged:
+            try:
+                import traceback
+                from modules.ui_utils.error_logger import log_error_message
+
+                details = traceback.format_exc()
+                message = self._sales_table_error
+                if details and details.strip() != "NoneType: None":
+                    message = f"{message}\n{details}"
+                log_error_message(message)
+            except Exception:
+                pass
+            self._sales_table_failure_logged = True
+        self._show_sales_table_unavailable()
+
+    def _require_sales_table_ready(self) -> bool:
+        table = getattr(self, 'sales_table', None)
+        if self._sales_table_ready and table is not None:
+            try:
+                table.rowCount()
+                return True
+            except Exception as exc:
+                self._mark_sales_table_unavailable(exc, where="Sales table readiness check")
+                return False
+
+        if not self._sales_table_failure_logged:
+            self._mark_sales_table_unavailable(
+                RuntimeError("Sales table is not initialized"),
+                where="Sales table readiness check",
+            )
+        else:
+            self._show_sales_table_unavailable()
+        return False
+
     # Request the vegetable entry dialog and merge its results.
     def launch_vegetable_entry_dialog(self):
         """Open Add Vegetable panel."""
+        if not self._require_sales_table_ready():
+            return
         display = getattr(self, 'customer_display', None)
         if display is not None:
             display.hide_payment_result_overlay()
@@ -461,6 +520,8 @@ class MainLoader(QMainWindow):
     # Present manual entry dialog unless sale is held.
     def launch_manual_entry_dialog(self):
         """Open Manual Product Entry panel."""
+        if not self._require_sales_table_ready():
+            return
         display = getattr(self, 'customer_display', None)
         if display is not None:
             display.hide_payment_result_overlay()
@@ -495,6 +556,9 @@ class MainLoader(QMainWindow):
     def launch_hold_sales_dialog(self):
         """Open On Hold panel."""
         from modules.ui_utils.ui_feedback import show_temp_status
+
+        if not self._require_sales_table_ready():
+            return
 
         if self._is_hold_loaded_in_cart():
             sb = getattr(self, 'statusbar', None)
@@ -533,6 +597,9 @@ class MainLoader(QMainWindow):
     def open_viewhold_panel(self):
         """Open View Hold panel."""
         from modules.ui_utils.ui_feedback import show_temp_status
+
+        if not self._require_sales_table_ready():
+            return
 
         if self._is_hold_loaded_in_cart():
             sb = getattr(self, 'statusbar', None)
@@ -576,6 +643,9 @@ class MainLoader(QMainWindow):
         """Open Clear Cart confirmation dialog, only if there is an active sale."""
         from modules.table_ui.table_operations import is_transaction_active
         from modules.ui_utils.ui_feedback import show_temp_status
+
+        if not self._require_sales_table_ready():
+            return
 
         sales_table = getattr(self, 'sales_table', None)
         if not is_transaction_active(sales_table):
@@ -817,6 +887,8 @@ class MainLoader(QMainWindow):
 
     # Process payment requests from the payment panel.
     def _on_payment_requested(self, payment_split: dict) -> None:
+        if not self._require_sales_table_ready():
+            return
         display = getattr(self, 'customer_display', None)
         if display is not None:
             display.hide_payment_result_overlay()
@@ -1043,6 +1115,8 @@ class MainLoader(QMainWindow):
 
     def pay_current_receipt(self, payment_split: dict) -> bool:
         """Process current payment via PaidSaleCommitter atomic service."""
+        if not self._require_sales_table_ready():
+            return False
         if self._payment_in_progress:
             report_to_statusbar(
                 self,
@@ -1238,7 +1312,14 @@ class MainLoader(QMainWindow):
 
                 if not found_match:
                     existing_rows.append(new_row)
-            set_table_rows(self.sales_table, existing_rows)
+            try:
+                set_table_rows(self.sales_table, existing_rows)
+            except Exception as exc:
+                self._mark_sales_table_unavailable(
+                    exc,
+                    where="Populate sales table from entry dialog",
+                )
+                return
             self._update_customer_display_from_sales()
         except Exception:
             try:

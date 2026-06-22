@@ -94,6 +94,12 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
   - **Barcode blocking:** KG items cannot be added via barcode scan (shows message to use Vegetable Entry).
   - **PRODUCT_CACHE integration:** Fetches product info as 4-tuple `(found, name, price, unit)` for unit-based behavior.
 
+- **Sales Table Readiness Gate (June 2026):**
+  - The table becomes ready only after the Sales frame successfully registers `main_window.sales_table`.
+  - Startup and runtime population failures call `_mark_sales_table_unavailable(...)`, which logs the underlying exception once.
+  - Vegetable Entry, Manual Entry, Clear Cart, Hold Sale, View Hold, PAY, and scan-to-cart routing call `_require_sales_table_ready()` before normal business-state checks.
+  - While unavailable, every blocked attempt shows the common MainWindow StatusBar error and requires an application restart.
+
 - **Sales Dialog Data Transfer (Refactored Dec 2025):**
   - **Unified handler:** `_add_items_to_sales_table(source_type)` processes results from both vegetable and manual entry dialogs.
   - **Data normalization:** Converts different dialog result formats (`vegetable_rows` property vs. `manual_entry_result` attribute) to unified row structure.
