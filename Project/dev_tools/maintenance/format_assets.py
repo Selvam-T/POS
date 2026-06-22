@@ -7,7 +7,7 @@ Format Qt Designer .ui (XML) and .qss (Qt stylesheet) files.
 - .qss: formatted via jsbeautifier with sensible defaults.
 
 Usage (from project root):
-    python tools/format_assets.py
+    python dev_tools/maintenance/format_assets.py
 
 This script formats:
 - All .ui under ./ui
@@ -26,7 +26,7 @@ from pathlib import Path
 
 def _tool_log(message: str) -> None:
     try:
-        root = Path(__file__).resolve().parents[1]
+        root = Path(__file__).resolve().parents[2]
         log_dir = root / "log"
         log_dir.mkdir(parents=True, exist_ok=True)
         log_file = log_dir / "tools.log"
@@ -49,7 +49,7 @@ try:
 except Exception:
     _tool_log("Missing dependency: jsbeautifier. Install with: pip install jsbeautifier")
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 UI_DIR = PROJECT_ROOT / 'ui'
 ASSETS_DIR = PROJECT_ROOT / 'assets'
 

@@ -1,8 +1,8 @@
 import sys
 import os
 
-# Get the directory of the current script, then go up one level
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Get the project root from dev_tools/database.
+parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Add that parent directory to the system path
 sys.path.append(parent_dir)
 

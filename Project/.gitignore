@@ -1,2 +1,14 @@
-__pycache__/ 
-*.pyc 
+# Project runtime output
+/data/
+/db/
+/log/
+/logs/
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Machine-specific diagnostic output
+/dev_tools/diagnostics/fonts_available.log

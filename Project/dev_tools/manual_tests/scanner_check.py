@@ -7,6 +7,11 @@ import datetime
 import os
 import sys
 from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget
 from PyQt5.QtCore import Qt
 from modules.devices import BarcodeScanner
@@ -14,13 +19,13 @@ from modules.devices import BarcodeScanner
 
 def _test_log(message: str) -> None:
     try:
-        root = Path(__file__).resolve().parents[1]
+        root = PROJECT_ROOT
         log_dir = root / "log"
         log_dir.mkdir(parents=True, exist_ok=True)
         log_file = log_dir / "tools.log"
         ts = datetime.datetime.now().isoformat(timespec="seconds")
         with log_file.open("a", encoding="utf-8") as f:
-            f.write(f"[{ts}] test_scanner: {message}{os.linesep}")
+            f.write(f"[{ts}] scanner_check: {message}{os.linesep}")
     except Exception:
         pass
 

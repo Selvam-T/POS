@@ -1,4 +1,4 @@
-# test_font.py
+# Interactive font preview utility.
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QScrollArea
 from PyQt5.QtGui import QFontDatabase, QFont

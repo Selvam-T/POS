@@ -1,5 +1,10 @@
+# Workspace runtime data
+/data/
 /db/
 /logs/
-/data/
-__pycache__/ 
-*.pyc 
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/

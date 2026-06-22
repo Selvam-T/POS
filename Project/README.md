@@ -114,9 +114,12 @@ Project/
 ├── requirements.txt             # Python dependencies
 ├── README.md                    # Setup and usage
 ├── Project_Journal.md           # Detailed development documentation
-├── test_scanner.py              # Minimal scanner verification app
-├── tools/
-│   └── format_assets.py         # Formatter for .ui (lxml) and .qss (jsbeautifier)
+├── dev_tools/                   # Development and maintenance utilities
+│   ├── database/               # Database query and clearing utilities
+│   ├── diagnostics/            # Code and font inspection utilities
+│   ├── maintenance/            # Asset formatting and data normalization
+│   └── manual_tests/            # Interactive font and scanner checks
+├── tests/                       # Automated test suite
 ├── assets/
 │   ├── qss/                    # Application stylesheets
 │   └── icons/                   # SVG/PNG icons (menu, delete, etc.)
@@ -201,7 +204,7 @@ CREATE TABLE Product_list (
 Optional: verify the barcode scanner with the minimal test app:
 
 ```cmd
-python test_scanner.py
+python dev_tools\manual_tests\scanner_check.py
 ```
 
 ### Installation (Linux/macOS)
@@ -371,7 +374,7 @@ Run from the project root:
 
 ```cmd
 pip install -r requirements.txt
-python tools\format_assets.py
+python dev_tools\maintenance\format_assets.py
 ```
 
 Notes:

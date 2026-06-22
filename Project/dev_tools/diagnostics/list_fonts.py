@@ -7,8 +7,7 @@ from PyQt5.QtGui import QFontDatabase
 
 def _tool_log(message: str) -> None:
     try:
-        root = Path(__file__).resolve().parents[1]
-        log_dir = root / "test scripts"
+        log_dir = Path(__file__).resolve().parent
         log_dir.mkdir(parents=True, exist_ok=True)
         log_file = log_dir / "fonts_available.log"
 

@@ -115,14 +115,14 @@ Product dialog safety rule: ADD-only while a sale has items.
 
 Repository formatting utility for UI and styles:
 
-- Added `tools/format_assets.py` to pretty-print `.ui` (via lxml) and `.qss` (via jsbeautifier).
+- Added `dev_tools/maintenance/format_assets.py` to pretty-print `.ui` (via lxml) and `.qss` (via jsbeautifier).
 - Updated `requirements.txt` to include `lxml` and `jsbeautifier`.
 - Ran the formatter: output summary `UI: 7/7 formatted | QSS: 1/1 formatted`.
 
 Developer usage:
 ```cmd
 pip install -r requirements.txt
-python tools\format_assets.py
+python dev_tools\maintenance\format_assets.py
 ```
 
 Notes:
@@ -234,7 +234,7 @@ This session introduced a compact right-side icon-only menu and finalized the ma
 - Constrained the menu width (min 80, max 100) and increased spacing between header and content.
 - Updated `manual_entry.ui` to expose `QTextEdit#manualText` for message injection; unknown barcodes open this dialog.
 - Strict product validation now uses `PRODUCT_CACHE` only (all test remapping removed).
-- Scanner logs changed to ASCII-only to avoid Windows console Unicode errors. `test_scanner.py` updated accordingly.
+- Scanner logs changed to ASCII-only to avoid Windows console Unicode errors. `dev_tools/manual_tests/scanner_check.py` updated accordingly.
 
 For a concise overview and updated project structure, see `README.md`.
 
@@ -281,7 +281,7 @@ Project/
 ## Main Window Structure
 
 ### Hierarchy: `main_window.ui`
-├── test_scanner.py         # Minimal scanner verification app
+├── dev_tools/manual_tests/scanner_check.py  # Minimal scanner verification app
 
 ```
 QMainWindow (MainLoader)
@@ -1135,7 +1135,7 @@ def handle_barcode_scanned(table, barcode, status_bar):
 - `_add_product_row()` - Appends new row to table (rebuilds table via `set_sales_rows()`)
 
 **Testing Strategy:**
-- Created `test_scanner.py` - Minimal Qt app to verify scanner signal emission
+- Created `dev_tools/manual_tests/scanner_check.py` - Minimal Qt app to verify scanner signal emission
 - Useful for debugging scanner without full POS UI
 - Console debug output shows timing, buffer state, signal emission
 

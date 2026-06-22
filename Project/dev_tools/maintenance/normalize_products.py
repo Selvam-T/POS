@@ -16,12 +16,12 @@ Why this exists:
   makes name-based searches more predictable.
 
 Usage (from project root):
-  python tools/normalize_products.py
-  python tools/normalize_products.py --apply
+  python dev_tools/maintenance/normalize_products.py
+  python dev_tools/maintenance/normalize_products.py --apply
 
 Optional:
-  python tools/normalize_products.py --db-path path/to/pos.db --apply
-  python tools/normalize_products.py --include-veg --apply
+  python dev_tools/maintenance/normalize_products.py --db-path path/to/pos.db --apply
+  python dev_tools/maintenance/normalize_products.py --include-veg --apply
 """
 
 from __future__ import annotations
@@ -39,7 +39,7 @@ from typing import Iterable, List, Optional, Tuple
 
 def _tool_log(message: str) -> None:
     try:
-        root = Path(__file__).resolve().parents[1]
+        root = Path(__file__).resolve().parents[2]
         log_dir = root / "log"
         log_dir.mkdir(parents=True, exist_ok=True)
         log_file = log_dir / "tools.log"
@@ -49,7 +49,7 @@ def _tool_log(message: str) -> None:
     except Exception:
         pass
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
