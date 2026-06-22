@@ -40,8 +40,12 @@ This document describes the workflow for the Vegetable Entry dialog, where users
 
 ### Button Grid (16 Buttons)
 - **Buttons:** `btnVeg01` to `vegEButton16` mapped to Veg01-Veg16 product codes
-- **Enabled buttons:** Show product name from database (fetched via `get_product_info()`)
+- **Enabled buttons:** Show product name, price, and unit from the in-memory `PRODUCT_CACHE` through `get_product_info()`.
 - **Disabled buttons:** Display "empty" when no product configured for slot
+
+Vegetable Entry does not issue a separate SQL query for each slot. If the
+cache is empty, the cache layer loads the product list once; subsequent slot
+lookups use the same runtime snapshot.
 
 ### Table (vegEntryTable) - 7 Columns
 - **Columns:** `['No.', 'Product', 'Quantity', '', 'Unit Price', 'Total', 'Del']`

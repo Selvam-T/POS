@@ -487,7 +487,6 @@ QGroupBox {
 
 /* 1. Table Header Styling */
 QWidget#vegEntryDialog QHeaderView::section,
-QTableWidget#salesTable QHeaderView::section,
 QTableWidget#viewHoldTable QHeaderView::section,
 QTableWidget#receiptTable QHeaderView::section  {
     font-size: 10pt;

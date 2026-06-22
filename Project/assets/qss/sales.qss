@@ -30,7 +30,7 @@ QTableWidget#salesTable {
 }
 
 QTableWidget#salesTable QHeaderView::section {
-    background-color: #4682b4;
+    background-color: #0961a8;
     color: white;
     border: 1px solid rgba(0,0,0,0.2);
     font-size: 10pt;

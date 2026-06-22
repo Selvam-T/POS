@@ -1,25 +1,35 @@
 import os
 from functools import partial
 
-from PyQt5 import uic
 from PyQt5.QtWidgets import QTableWidget, QPushButton, QLabel, QLineEdit
 from PyQt5.QtCore import Qt
 
 # Centralized Utilities
 from modules.ui_utils.focus_utils import FieldCoordinator
-from modules.db_operation import get_product_info, get_product_full
+from modules.db_operation import get_product_info
 from modules.db_operation import PRODUCT_CACHE
 from modules.ui_utils import ui_feedback
+from modules.ui_utils.dialog_utils import (
+    build_dialog_from_ui,
+    build_error_fallback_dialog,
+    log_exception_traceback_and_postclose_statusBar,
+    require_widgets,
+    set_dialog_main_status_max,
+)
 from modules.domain.unit_helpers import canonicalize_unit
 from modules.table_ui.table_operations import (
     setup_sales_table, get_sales_data, set_table_rows, 
     bind_status_label, bind_next_focus_widget
 )
 from config import QSS_DIR, UI_DIR
-from modules.runtime.paths import load_stylesheet
+
+
+UI_PATH = os.path.join(UI_DIR, 'vegetable_entry.ui')
+QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 
 def weight_simulation() -> int:
-    return 600
+    # raise RuntimeError("Testing scale failure") # debug
+    return 600  # imaginary 600g from the scale
 
 def launch_vegetable_entry_dialog(parent, main_sales_table):
     """
@@ -39,65 +49,68 @@ def launch_vegetable_entry_dialog(parent, main_sales_table):
         dlg_max.exec_()
         return None
 
-    veg_ui = os.path.join(UI_DIR, 'vegetable_entry.ui')
-    
-    try:
-        dlg = uic.loadUi(veg_ui)
-        coord = FieldCoordinator(dlg)
-        dlg._coord = coord 
-        # Store reference to main table for row limit checks during addition
-        dlg._main_sales_table = main_sales_table 
-    except Exception:
-        return None
-    
+    dlg = build_dialog_from_ui(
+        UI_PATH,
+        host_window=parent,
+        dialog_name='Vegetable Entry',
+        qss_path=QSS_PATH,
+    )
+    if dlg is None:
+        return build_error_fallback_dialog(parent, 'Vegetable Entry', QSS_PATH)
+
+    required = {
+        'table': (QTableWidget, 'vegEntryTable'),
+        'status': (QLabel, 'vegEStatusLabel'),
+        'ok_btn': (QPushButton, 'btnVegEOk'),
+        'cancel_btn': (QPushButton, 'btnVegECancel'),
+        'close_btn': (QPushButton, 'customCloseBtn'),
+    }
+    required.update({
+        f'veg_btn_{i}': (QPushButton, f'vegEButton{i}')
+        for i in range(1, 17)
+    })
+    widgets = require_widgets(dlg, required, hard_fail=True)
+
+    coord = FieldCoordinator(dlg)
+    dlg._coord = coord
+    dlg._veg_widgets = widgets
+    # Store reference to main table for row limit checks during addition
+    dlg._main_sales_table = main_sales_table
+
     for btn in dlg.findChildren(QPushButton):
         btn.setAutoDefault(False)
         btn.setDefault(False)
 
-    dlg.setParent(parent)
-    dlg.setModal(True)
-    dlg.setWindowFlags(Qt.Dialog | Qt.FramelessWindowHint | Qt.CustomizeWindowHint)
-
-    # Styling
-    qss_path = os.path.join(QSS_DIR, 'dialog.qss')
-    if os.path.exists(qss_path):
-        dlg.setStyleSheet(load_stylesheet(qss_path))
-
-    vtable = dlg.findChild(QTableWidget, 'vegEntryTable')
-    status_lbl = dlg.findChild(QLabel, 'vegEStatusLabel')
-    ok_btn = dlg.findChild(QPushButton, 'btnVegEOk')
-    cancel_btn = dlg.findChild(QPushButton, 'btnVegECancel')
-    close_btn = dlg.findChild(QPushButton, 'customCloseBtn')
+    vtable = widgets['table']
+    status_lbl = widgets['status']
+    ok_btn = widgets['ok_btn']
+    cancel_btn = widgets['cancel_btn']
+    close_btn = widgets['close_btn']
 
     # This allows Enter key to work on dialog buttons
     for btn in [ok_btn, cancel_btn, close_btn]:
-        if btn:
-            coord.add_link(btn)
+        coord.add_link(btn)
 
-    if vtable:
-        setup_sales_table(vtable)
-        bind_status_label(vtable, status_lbl)
-        if ok_btn: bind_next_focus_widget(vtable, ok_btn)
+    setup_sales_table(vtable)
+    bind_status_label(vtable, status_lbl)
+    bind_next_focus_widget(vtable, ok_btn)
 
     # Link OK button to coordinator so Enter clicks it when focused
-    if ok_btn:
-        coord.add_link(ok_btn, next_focus=None) 
+    coord.add_link(ok_btn, next_focus=None)
 
     # Initialize Veg Buttons
     for i in range(1, 17):
-        btn = dlg.findChild(QPushButton, f'vegEButton{i}')
-        if not btn: continue
+        btn = widgets[f'veg_btn_{i}']
 
         coord.add_link(btn)
         
         veg_code = f'VEG{i:02d}'
-        found, product_name, unit_price, _ = get_product_info(veg_code)
+        #raise RuntimeError("Testing Vegetable Entry product lookup failure") # debug
+        found, product_name, unit_price, unit = get_product_info(veg_code)
         
         if found:
             btn.setText(product_name); btn.setEnabled(True)
             btn.setFocusPolicy(Qt.StrongFocus); btn.setProperty('state', 'active')
-            _, details = get_product_full(veg_code)
-            unit = details.get('unit', 'Each') if details else 'Each'
             btn.clicked.connect(partial(_handle_vegetable_button_click, dlg, status_lbl, vtable, veg_code, product_name, unit_price, unit))
         else:
             btn.setText('empty'); btn.setEnabled(False)
@@ -106,40 +119,104 @@ def launch_vegetable_entry_dialog(parent, main_sales_table):
         btn.style().unpolish(btn); btn.style().polish(btn)
 
     def handle_cancel():
-        dlg.main_status_msg = "Vegetable entry cancelled."
+        set_dialog_main_status_max(
+            dlg,
+            "Vegetable entry cancelled.",
+            level="info",
+        )
         dlg.reject()
 
-    if ok_btn: ok_btn.clicked.connect(lambda: _handle_ok_all(dlg, vtable, status_lbl))
-    if cancel_btn: cancel_btn.clicked.connect(handle_cancel)
-    if close_btn: close_btn.clicked.connect(handle_cancel)
+    ok_btn.clicked.connect(lambda: _handle_ok_all(dlg, vtable, status_lbl))
+    cancel_btn.clicked.connect(handle_cancel)
+    close_btn.clicked.connect(handle_cancel)
 
     cancel_btn.setFocus()
     return dlg
 
 def _handle_vegetable_button_click(dlg, msg_label, vtable, code, name, price, unit):
     unit_canon = canonicalize_unit(unit)
-    
+
     if unit_canon == 'Kg':
         ui_feedback.set_status_label(msg_label, f"Place {name} on scale...", ok=True)
         try:
             w_grams = weight_simulation()
-            if w_grams <= 0:
-                ui_feedback.set_status_label(msg_label, "Error: Invalid weight", ok=False); return
-            
-            w_kg = w_grams / 1000.0
-            _add_vegetable_row(dlg, vtable, name, w_kg, price, editable=False)
-            ui_feedback.set_status_label(msg_label, f"Added {name}: {w_grams}g", ok=True)
-        except Exception as e:
-            ui_feedback.set_status_label(msg_label, f"Scale Error: {e}", ok=False)
+        except Exception as exc:
+            _report_vegetable_runtime_failure(
+                dlg,
+                msg_label,
+                f"Vegetable Entry scale ({code}, {name})",
+                exc,
+                local_message=f"Scale error. Unable to add {name}.",
+                user_message=f"Error: Unable to weigh {name}",
+            )
+            return
+
+        if w_grams <= 0:
+            ui_feedback.set_status_label(msg_label, "Error: Invalid weight", ok=False)
+            return
+
+        w_kg = w_grams / 1000.0
+        try:
+            added = _add_vegetable_row(
+                dlg, vtable, name, w_kg, price, editable=False
+            )
+        except Exception as exc:
+            _report_vegetable_runtime_failure(
+                dlg,
+                msg_label,
+                f"Vegetable Entry staging table ({code}, {name})",
+                exc,
+                local_message=f"Unable to add {name} to the vegetable table.",
+                user_message="Error: Vegetable table update failed",
+            )
+            return
+        if not added:
+            return
+        ui_feedback.set_status_label(msg_label, f"Added {name}: {w_grams}g", ok=True)
     else:
-        _add_vegetable_row(dlg, vtable, name, 1.0, price, editable=True)
+        try:
+            added = _add_vegetable_row(
+                dlg, vtable, name, 1.0, price, editable=True
+            )
+        except Exception as exc:
+            _report_vegetable_runtime_failure(
+                dlg,
+                msg_label,
+                f"Vegetable Entry staging table ({code}, {name})",
+                exc,
+                local_message=f"Unable to add {name} to the vegetable table.",
+                user_message="Error: Vegetable table update failed",
+            )
+            return
+        if not added:
+            return
         ui_feedback.set_status_label(msg_label, f"Added {name}", ok=True)
 
     # Shift focus to OK
-    ok_btn = dlg.findChild(QPushButton, 'btnVegEOk')
-    if ok_btn: ok_btn.setFocus()
+    dlg._veg_widgets['ok_btn'].setFocus()
 
-def _add_vegetable_row(dlg, vtable, name, quantity, price, editable):
+
+def _report_vegetable_runtime_failure(
+    dlg,
+    status_label,
+    where: str,
+    exc: Exception,
+    *,
+    local_message: str,
+    user_message: str,
+) -> None:
+    ui_feedback.set_status_label(status_label, local_message, ok=False)
+    log_exception_traceback_and_postclose_statusBar(
+        dlg,
+        where,
+        exc,
+        user_message=user_message,
+        level="error",
+        duration=6000,
+    )
+
+
+def _add_vegetable_row(dlg, vtable, name, quantity, price, editable) -> bool:
     """
     Adds/Updates a row in the vegetable entry table.
     Ensures combined (Main Table + Veg Table) row count <= MAX_TABLE_ROWS.
@@ -167,7 +244,7 @@ def _add_vegetable_row(dlg, vtable, name, quantity, price, editable):
         if (main_table_count + veg_table_count) >= MAX_TABLE_ROWS:
             dlg_max = open_max_rows_dialog(dlg, f"Adding this item would exceed the global limit of {MAX_TABLE_ROWS} items.")
             dlg_max.exec_()
-            return
+            return False
 
         # If limit not reached, append the new row
         current_data.append({
@@ -179,10 +256,11 @@ def _add_vegetable_row(dlg, vtable, name, quantity, price, editable):
         })
     
     # Refresh the vegetable dialog table
+    #raise RuntimeError("Testing vegEntryTable population failure")
     set_table_rows(vtable, current_data)
 
     # CRITICAL: Register the new table editors with the Coordinator
-    ok_btn = dlg.findChild(QPushButton, 'btnVegEOk')
+    ok_btn = dlg._veg_widgets['ok_btn']
     for r in range(vtable.rowCount()):
         qty_container = vtable.cellWidget(r, 2)
         if qty_container:
@@ -190,10 +268,16 @@ def _add_vegetable_row(dlg, vtable, name, quantity, price, editable):
             if editor and editor not in dlg._coord.links:
                 # Link editor to OK button for focus jump
                 dlg._coord.add_link(editor, next_focus=ok_btn)
+    return True
 
 def _handle_ok_all(dlg, vtable, status_lbl):
-    if not vtable or vtable.rowCount() == 0:
-        dlg.reject(); return
+    if vtable.rowCount() == 0:
+        ui_feedback.set_status_label(
+            status_lbl,
+            "Add at least one vegetable before continuing.",
+            ok=False,
+        )
+        return
 
     try:
         scraped_rows = get_sales_data(vtable)
@@ -205,7 +289,20 @@ def _handle_ok_all(dlg, vtable, status_lbl):
 
         dlg.vegetable_rows = rows_to_transfer
         count = len(rows_to_transfer)
-        dlg.main_status_msg = f"{count} vegetable/s added to sale."
+        set_dialog_main_status_max(
+            dlg,
+            f"{count} vegetable/s added to sale.",
+            level="info",
+        )
         dlg.accept()
     except ValueError as e:
         ui_feedback.set_status_label(status_lbl, str(e), ok=False)
+    except Exception as exc:
+        _report_vegetable_runtime_failure(
+            dlg,
+            status_lbl,
+            "Vegetable Entry prepare result",
+            exc,
+            local_message="Unable to prepare vegetable items.",
+            user_message="Error: Unable to prepare vegetable items",
+        )

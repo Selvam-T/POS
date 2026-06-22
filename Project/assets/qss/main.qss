@@ -559,9 +559,10 @@ QFrame#menuFrame QPushButton[iconFallback="true"]:pressed {
   border-color: #dddddd;
 }
 
-/* =============================================================
-   COMMON ELEMENTS
-   ============================================================= */
+/* ===============================================================
+   COMMON ELEMENTS applied to the entire QApplication as fallback
+   =============================================================== */
+
 QTableWidget { gridline-color: rgba(0, 0, 0, 0.2); }
 QTableWidget::item:selected { background-color: #99ccff; }
 QHeaderView::section {

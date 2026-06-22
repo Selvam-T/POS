@@ -99,7 +99,7 @@ set_table_rows(sales_table, rows)
 
 ### Editable State Determination
 Editable state is set automatically based on canonical unit type when products are added:
-- **Vegetable Entry dialog**: Checks canonical unit from `get_product_full()`, sets `editable=False` for KG
+- **Vegetable Entry dialog**: Reads the canonical unit from the cached `get_product_info()` result and sets `editable=False` for KG. It does not perform a per-slot SQL lookup.
 - **Barcode scan**: Blocks KG items entirely, only adds EACH items with `editable=True`
 - **Transfer operations**: Preserve `editable` flag from source table
 
