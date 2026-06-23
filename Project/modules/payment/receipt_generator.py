@@ -8,7 +8,7 @@ from typing import List
 import config
 from modules.db_operation import receipt_repo
 from modules.db_operation.users_repo import get_username_by_id
-from modules.menu.greeting_menu import _load_greeting
+from modules.ui_utils.greeting_state import current_greeting
 
 
 def _format_datetime(raw: str) -> str:
@@ -228,7 +228,7 @@ def _append_payment_breakdown(
 def _append_greeting(lines: List[str], *, status: str, width: int) -> None:
     if str(status or "").strip().upper() == "PAID":
         lines.append("")
-        lines.append(_center_line(_load_greeting(), width))
+        lines.append(_center_line(current_greeting(), width))
 
 
 def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_WIDTH) -> str:

@@ -4,7 +4,7 @@ import os
 from modules.ui_utils.error_logger import log_error_message
 from modules.ui_utils import ui_feedback
 from modules.ui_utils.dialog_utils import set_dialog_main_status, build_dialog_from_ui, build_error_fallback_dialog
-from modules.ui_utils.greeting_state import load_greeting
+from modules.ui_utils.greeting_state import current_greeting
 from modules.runtime.paths import load_stylesheet, stylesheet_path, ui_path
 
 QSS_PATH = stylesheet_path('dialog.qss')
@@ -13,9 +13,6 @@ QSS_PATH = stylesheet_path('dialog.qss')
 # Import greeting strings from config
 import config
 
-
-def _load_greeting() -> str:
-    return load_greeting()
 
 def launch_greeting_dialog(parent=None):
     """Open greeting selection dialog; result stored in `dlg.greeting_result`.
@@ -45,7 +42,7 @@ def launch_greeting_dialog(parent=None):
     if combo is not None:
         combo.clear()
         combo.addItems(config.GREETING_STRINGS)
-        default_greeting = _load_greeting() or config.GREETING_SELECTED or 'Thanks for shopping with us!'
+        default_greeting = current_greeting()
         if default_greeting in config.GREETING_STRINGS:
             combo.setCurrentText(default_greeting)
         else:

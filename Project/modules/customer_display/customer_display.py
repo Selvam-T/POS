@@ -27,7 +27,7 @@ from modules.ui_utils.error_logger import log_error_message
 from modules.runtime.data import ensure_ads_dir
 from modules.runtime.paths import load_stylesheet, stylesheet_path, ui_path
 from modules.date_time.formatters import format_date, format_time
-from modules.menu.greeting_menu import _load_greeting
+from modules.ui_utils.greeting_state import current_greeting
 from config import (
     COMPANY_NAME,
     CUSTOMER_DISPLAY_AUTO_DETECT,
@@ -42,8 +42,6 @@ from config import (
     CUSTOMER_SCREEN_INDEX,
     CUSTOMER_SCREEN_WIDTH,
     ALLOWED_EXTS,
-    GREETING_STRINGS,
-    GREETING_SELECTED,
     ADS_DIR,
 )
 
@@ -732,7 +730,7 @@ class CustomerDisplayWindow(QDialog):
         
         Args:
             total: Optional transaction total to display on success.
-            greeting: Optional greeting text; defaults to GREETING_SELECTED from config.
+            greeting: Optional greeting text; defaults to the configured greeting.
         
         Starts a single-shot timer to auto-hide the overlay.
         Stops any previous timer to avoid signal conflicts.
@@ -751,7 +749,7 @@ class CustomerDisplayWindow(QDialog):
         result_status = "success"
         title_text = "Payment is successful."
         subtitle_text = "Thank you for your purchase."
-        footer_text = _load_greeting() or GREETING_SELECTED or "Thanks for shopping with us!"
+        footer_text = current_greeting()
         
         if self._payment_result_card is not None:
             # Set card status then repolish the card first so QSS selectors
@@ -784,7 +782,7 @@ class CustomerDisplayWindow(QDialog):
         if self._payment_result_greeting is not None:
             self._payment_result_greeting.setVisible(True)
             self._payment_result_greeting.setStyleSheet("background: transparent;")
-            greeting_text = footer_text if greeting is None else greeting
+            greeting_text = footer_text if greeting is None else str(greeting).strip()
             self._payment_result_greeting.setText(greeting_text)
 
         # Now that all child text values are set, repolish children so their

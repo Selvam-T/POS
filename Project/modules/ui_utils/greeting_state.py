@@ -1,7 +1,9 @@
 import json
+import config
 from modules.wrappers.settings import appdata_path
 
 _GREETING_NAME = 'greeting'
+DEFAULT_GREETING = 'Thanks for shopping with us!'
 
 
 def load_greeting() -> str:
@@ -15,6 +17,11 @@ def load_greeting() -> str:
         return value
     except Exception:
         return ''
+
+
+def current_greeting() -> str:
+    configured = str(getattr(config, 'GREETING_SELECTED', '') or DEFAULT_GREETING).strip()
+    return load_greeting() or configured or DEFAULT_GREETING
 
 
 def save_greeting(selected: str) -> None:

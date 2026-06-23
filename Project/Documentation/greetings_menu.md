@@ -6,12 +6,13 @@
 
 ## Runtime flow
 1. `MainLoader.open_greeting_menu_dialog()` triggers the dialog through `DialogWrapper.open_dialog_scanner_blocked()` so scanner input is blocked while the customer-facing selection is happening.
-2. `modules/menu/greeting_menu.py` loads `greeting_menu.ui`, populates the combo box from `config.GREETING_STRINGS`, and initializes the default selection from `config.GREETING_SELECTED`.
+2. `modules/menu/greeting_menu.py` loads `greeting_menu.ui`, populates the combo box from `config.GREETING_STRINGS`, and initializes the default selection from `modules/ui_utils/greeting_state.current_greeting()`.
 3. When the dialog closes with `OK`, it stores the chosen greeting in `dlg.greeting_result` and the `MainLoader` `on_finish` handler reads that value.
 4. The handler assigns the selection to `config.GREETING_SELECTED` (so successive dialogs and other widgets read the new message) and delegates to `modules/ui_utils/greeting_state.py` to persist it.
 
 ## Persistence detail
 - `modules/ui_utils/greeting_state.py` serializes `{ "selected": "Your Message" }` into `<CLIENT ROOT>/data/json/greeting.json` (relative to `config.APPDATA_DIR`, via `modules.wrappers.settings.appdata_path`).
+- `modules/ui_utils/greeting_state.current_greeting()` is the shared resolver for receipt printing and customer display: saved greeting first, then `config.GREETING_SELECTED`, then the default thank-you text.
 - On startup `main.py` loads the JSON and overwrites `config.GREETING_SELECTED` so the saved greeting survives restarts without modifying source files.
 
 ### Why external data instead of editing config.py
