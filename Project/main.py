@@ -1489,15 +1489,20 @@ def main():
     # before opening login; this prevents scanner text leakage into login inputs.
     window = MainLoader()
 
+    from modules.runtime.trial import is_trial_expired, trial_expired_message
     from modules.sales.login import launch_login_dialog
     # Respect config.LOGIN_ON: set to False in `config.py` to skip login.
     try:
         if not bool(getattr(config, 'LOGIN_ON', True)):
-            login_user = {
-                'user_id': int(getattr(config, 'AUTO_LOGIN_UID', 1)),
-                'username': str(getattr(config, 'AUTO_LOGIN_USERNAME', 'dev') or 'dev'),
-                'is_admin': bool(getattr(config, 'AUTO_LOGIN_IS_ADMIN', True)),
-            }
+            if is_trial_expired():
+                QMessageBox.warning(None, 'Trial Expired', trial_expired_message())
+                login_user = None
+            else:
+                login_user = {
+                    'user_id': int(getattr(config, 'AUTO_LOGIN_UID', 1)),
+                    'username': str(getattr(config, 'AUTO_LOGIN_USERNAME', 'dev') or 'dev'),
+                    'is_admin': bool(getattr(config, 'AUTO_LOGIN_IS_ADMIN', True)),
+                }
         else:
             window.dialog_wrapper._show_overlay()
             window.dialog_wrapper._block_scanner()

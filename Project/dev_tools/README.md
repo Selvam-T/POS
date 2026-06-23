@@ -32,6 +32,7 @@ These are interactive checks, not automated pytest tests. Automated tests remain
 
 - `maintenance/format_assets.py`: Formats Qt `.ui` files and QSS stylesheets; requires `lxml` and `jsbeautifier`.
 - `maintenance/normalize_products.py`: Reports inconsistent product casing in dry-run mode and updates the database only when `--apply` is supplied.
+- `maintenance/write_trial_build_timestamp.py`: Refreshes `modules/runtime/trial_build.py` with the current UTC timestamp before creating a trial executable.
 
 Examples:
 
@@ -40,4 +41,5 @@ python dev_tools\database\query_all_tables_in_db.py
 python dev_tools\manual_tests\scanner_check.py
 python dev_tools\maintenance\format_assets.py
 python dev_tools\maintenance\normalize_products.py
+python dev_tools\maintenance\write_trial_build_timestamp.py
 ```

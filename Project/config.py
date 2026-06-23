@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+from datetime import date
 
 
 # -----------------------------------------------------------------------------
@@ -100,10 +101,16 @@ GREETING_SELECTED = 'Thanks for shopping with us!'
 # -----------------------------------------------------------------------------
 
 # Set False during development to bypass the login dialog.
-LOGIN_ON = True
+LOGIN_ON = False
 AUTO_LOGIN_UID = 1
 AUTO_LOGIN_USERNAME = 'dev'
 AUTO_LOGIN_IS_ADMIN = True
+
+# Trial builds are blocked after TRIAL_EXPIRY_DATE or if the system clock is
+# earlier than the embedded UTC build timestamp.
+TRIAL_BUILD_ENABLED = False
+TRIAL_EXPIRY_DATE = date(2026, 6, 30)
+TRIAL_EXPIRED_MESSAGE = 'Testing period expired. Please contact SelvamPOS support.'
 
 DEBUG_SCANNER_FOCUS = False
 DEBUG_FOCUS_CHANGES = False

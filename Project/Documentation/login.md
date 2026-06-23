@@ -9,6 +9,7 @@ The login dialog is the first UI shown on application startup. It blocks access 
 - Controls: `loginComboBox` (username), `loginPassLineEdit` (password), `loginStatusLabel` (status/error), optional `customCloseBtn` for the frameless titlebar
 - Submit flow: there is no `OK` button. Pressing Enter while focused on the password field triggers validation; on success the dialog returns Accepted and the main window launches. On failure the dialog remains open, the error is shown in `loginStatusLabel`, and the password text is selected for easy correction.
 - Cancel/close: if present, `customCloseBtn` or window reject closes the dialog (Rejected).
+- Trial builds: when `config.TRIAL_BUILD_ENABLED` is `True`, the login dialog blocks authentication after `config.TRIAL_EXPIRY_DATE` or when UTC clock rollback is detected. The configured trial-expired message is shown in `loginStatusLabel`.
 
 Forced-change UX notes:
 - When the Admin dialog is opened in forced-change mode, the dialog disables tab switching, disables Cancel and title-bar Close, and prevents programmatic `reject()` so the user cannot dismiss the dialog without successfully updating the password. On successful update the Admin controller clears the `must_change_password` flag in the DB.

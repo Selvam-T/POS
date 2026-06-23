@@ -112,10 +112,14 @@ def launch_login_dialog(parent=None, *, return_user: bool = False):
         get_user_id_by_username,
     )
     from modules.ui_utils import ui_feedback, input_validation
+    from modules.runtime.trial import is_trial_expired, trial_expired_message
 
     authenticated_user = None
 
     def clear_status():
+        if is_trial_expired():
+            set_error(trial_expired_message())
+            return
         if status_label:
             ui_feedback.clear_status_label(status_label)
 
@@ -156,6 +160,12 @@ def launch_login_dialog(parent=None, *, return_user: bool = False):
 
     def validate_now():
         nonlocal authenticated_user
+        if is_trial_expired():
+            authenticated_user = None
+            set_error(trial_expired_message())
+            focus_password()
+            return False
+
         username = username_combo.currentText().strip().lower() if username_combo else ""
         password = password_edit.text() if password_edit else ""
 
@@ -212,6 +222,10 @@ def launch_login_dialog(parent=None, *, return_user: bool = False):
     dlg.installEventFilter(dlg._enter_filter)
 
     def on_forget_clicked():
+        if is_trial_expired():
+            set_error(trial_expired_message())
+            return
+
         uid = current_user_id()
 
         if uid is None:
@@ -254,6 +268,9 @@ def launch_login_dialog(parent=None, *, return_user: bool = False):
 
     if close_btn:
         close_btn.clicked.connect(dlg.reject)
+
+    if is_trial_expired():
+        set_error(trial_expired_message())
 
     accepted = dlg.exec_() == QDialog.Accepted
     if return_user:

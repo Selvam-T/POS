@@ -57,6 +57,13 @@ This file centralizes key configuration values for the POS application. It is im
 - `DEBUG_FOCUS_CHANGES`: Log every Qt focus change (very verbose).
 - `DEBUG_CACHE_LOOKUP`: Log cache lookup result for every scanned code.
 
+## Trial Build Flags
+- `TRIAL_BUILD_ENABLED`: Enables trial expiry enforcement.
+- `TRIAL_EXPIRY_DATE`: Last UTC date on which login is allowed.
+- `TRIAL_EXPIRED_MESSAGE`: Message shown when a trial build is expired or clock rollback is detected.
+
+See `Documentation/trial_build.md`.
+
 ## App Data Directory
 - `APPDATA_DIR`: External `<CLIENT ROOT>/data/json` folder for writable JSON-based settings (for example, `vegetables.json`).
 - `ADS_DIR`: External `<CLIENT ROOT>/data/ads` folder for editable customer-display ads.
