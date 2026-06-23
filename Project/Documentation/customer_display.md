@@ -38,6 +38,8 @@ Responsibilities:
 - Load `ui/screen2.ui`.
 - Manage the idle/full-screen and active-sale split display.
 - Render the sales table and total.
+- Format displayed currency through `modules/ui_utils/money_format.format_currency(...)`
+  as `$ 1,234.56`.
 - Render the generic PayNow QR label at fixed 250 x 250 during active sales.
 - Handle screen placement and connect/disconnect events.
 - Avoid stealing focus from the cashier screen.
@@ -141,6 +143,10 @@ Payload shape:
 - `items`: list of {quantity, description, amount, unit}
 - `total`: float or numeric string
 
+Currency display is output-only: item amounts, sale total, and payment-result
+total are formatted for customers while retaining numeric metadata on the
+relevant Qt item/label where useful.
+
 Payment result display is separate from state machine:
 - `show_payment_result(total: float | None = None, greeting: str | None = None)` - displays overlay with success message
 - `hide_payment_result_overlay()` - hides overlay and stops auto-hide timer
@@ -204,4 +210,3 @@ Update hooks:
 The success overlay is triggered by the PAY request signal, not by payment success/failure callbacks.
 Database commit failures do not trigger any customer-facing response; they are logged to the cashier status bar only.
 This decouples customer experience (always positive) from backend robustness (failures handled internally).
-

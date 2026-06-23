@@ -20,6 +20,8 @@
 ## Data Rules
 - Voucher is integer-only.
 - NETS / PayNow / Cash accept 2-decimal floats.
+- Display-only money labels use shared currency formatting (`$ 1,234.50`) while keeping the raw numeric value on the widget as `numeric_value`.
+- Editable payment fields (`*PayLineEdit`, `*ValLineEdit`) remain plain numeric text so user input and validation are not affected by currency symbols.
 
 **Allocation formula:**
 ```

@@ -28,6 +28,7 @@ from modules.runtime.data import ensure_ads_dir
 from modules.runtime.paths import load_stylesheet, stylesheet_path, ui_path
 from modules.date_time.formatters import format_date, format_time
 from modules.ui_utils.greeting_state import current_greeting
+from modules.ui_utils.money_format import format_currency, money_value
 from config import (
     COMPANY_NAME,
     CUSTOMER_DISPLAY_AUTO_DETECT,
@@ -630,7 +631,8 @@ class CustomerDisplayWindow(QDialog):
             item_desc.setFlags(item_desc.flags() & ~Qt.ItemIsEditable)
             self._table.setItem(row_idx, 1, item_desc)
 
-            item_amt = QTableWidgetItem(self._format_money(amount))
+            item_amt = QTableWidgetItem(format_currency(amount))
+            item_amt.setData(Qt.UserRole, money_value(amount))
             item_amt.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
             item_amt.setFlags(item_amt.flags() & ~Qt.ItemIsEditable)
             self._table.setItem(row_idx, 2, item_amt)
@@ -641,7 +643,8 @@ class CustomerDisplayWindow(QDialog):
     def set_total(self, total: float) -> None:
         if self._total_label is None:
             return
-        self._total_label.setText(self._format_money(total))
+        self._total_label.setText(format_currency(total))
+        self._total_label.setProperty("numeric_value", money_value(total))
 
     def set_item_count(self, count: int) -> None:
         if self._count_label is None:
@@ -770,8 +773,9 @@ class CustomerDisplayWindow(QDialog):
             self._payment_result_total.setStyleSheet("background: transparent;")
             if total is not None:
                 try:
-                    total_val = float(total)
-                    self._payment_result_total.setText(f"$ {total_val:.2f}")
+                    total_val = money_value(total)
+                    self._payment_result_total.setText(format_currency(total_val))
+                    self._payment_result_total.setProperty("numeric_value", total_val)
                     self._payment_result_total.setVisible(True)
                 except Exception:
                     self._payment_result_total.setVisible(False)
@@ -940,11 +944,3 @@ class CustomerDisplayWindow(QDialog):
             self._payment_result_overlay.raise_()
         except Exception:
             pass
-
-    @staticmethod
-    def _format_money(amount) -> str:
-        try:
-            value = float(amount)
-        except Exception:
-            value = 0.0
-        return f"${value:.2f}"

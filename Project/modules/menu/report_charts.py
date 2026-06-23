@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import QApplication, QDialog, QFrame, QGridLayout, QLabel, 
 
 from modules.date_time.formatters import format_report_timestamp
 from modules.menu.report_viewers import _to_ampm_hour_label
+from modules.ui_utils.money_format import format_currency, money_value
 
 
 DEFAULT_CHART_VIEWER_SIZE = (1080, 920)
@@ -27,14 +28,11 @@ def _ensure_application() -> QApplication:
 
 
 def _to_float(value: Any) -> float:
-    try:
-        return float(value or 0.0)
-    except Exception:
-        return 0.0
+    return money_value(value)
 
 
 def _fmt_money(value: Any) -> str:
-    return f"$ {_to_float(value):,.2f}"
+    return format_currency(value)
 
 
 def _hour_label(hour: int) -> str:

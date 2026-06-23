@@ -15,6 +15,7 @@ from config import (
 )
 from modules.db_operation import get_product_info
 from modules.ui_utils.ui_feedback import show_temp_status
+from modules.ui_utils.money_format import format_currency, money_value, round_money
 
 # =========================================================
 # SECTION 1: UI INITIALIZATION & THEME
@@ -23,6 +24,22 @@ from modules.ui_utils.ui_feedback import show_temp_status
 def get_row_color(row: int) -> QColor:
     """Returns alternating row background color."""
     return QColor(ROW_COLOR_EVEN if row % 2 == 0 else ROW_COLOR_ODD)
+
+def _money_item(value: Any, alignment: Qt.AlignmentFlag = Qt.AlignRight | Qt.AlignVCenter) -> QTableWidgetItem:
+    numeric = round_money(value)
+    item = QTableWidgetItem(format_currency(numeric))
+    item.setData(Qt.UserRole, numeric)
+    item.setTextAlignment(alignment)
+    item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+    return item
+
+def _money_item_value(item: Optional[QTableWidgetItem]) -> float:
+    if item is None:
+        return 0.0
+    numeric = item.data(Qt.UserRole)
+    if numeric is not None:
+        return money_value(numeric)
+    return money_value(item.text())
 
 def setup_sales_table(table: QTableWidget) -> None:
     """Configures table headers, column widths, and basic interaction policies."""
@@ -90,11 +107,10 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         editable = data.get('editable', True)
         unit_canon = data.get('unit', '')
 
-        # Basic Cell Items (Col 0, 1, 4)
+        # Basic Cell Items (Col 0, 1)
         items = {
             0: (str(r + 1), Qt.AlignCenter),
             1: (product_name, Qt.AlignLeft | Qt.AlignVCenter),
-            4: (f"{u_price:.2f}", Qt.AlignRight | Qt.AlignVCenter)
         }
         for col, (text, align) in items.items():
             item = QTableWidgetItem(text)
@@ -103,6 +119,11 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
             item_bg = row_color
             item.setBackground(QBrush(item_bg))
             table.setItem(r, col, item)
+
+        # Col 4: Unit Price
+        item_price = _money_item(u_price)
+        item_price.setBackground(QBrush(row_color))
+        table.setItem(r, 4, item_price)
 
         # Col 2: Quantity Editor (Regex-locked for EACH, Read-only for KG)
         if not editable:
@@ -138,10 +159,8 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         table.setItem(r, 3, item_unit)
 
         # Col 5: Total calculation
-        row_total = float(qty_val) * float(u_price)
-        item_total = QTableWidgetItem(f"{row_total:.2f}")
-        item_total.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        item_total.setFlags(item_total.flags() & ~Qt.ItemIsEditable)
+        row_total = round_money(money_value(qty_val) * money_value(u_price))
+        item_total = _money_item(row_total)
         item_total.setBackground(QBrush(row_color))
         table.setItem(r, 5, item_total)
 
@@ -191,7 +210,7 @@ def get_sales_data(table: QTableWidget) -> List[Dict[str, Any]]:
         rows.append({
             'product_name': name_item.text(),
             'quantity': qty,
-            'unit_price': float(price_item.text() or 0.0),
+            'unit_price': _money_item_value(price_item),
             'unit': unit_canon,
             'editable': not editor.isReadOnly()
         })
@@ -227,10 +246,8 @@ def recalc_row_total(table: QTableWidget, row: int) -> None:
     except ValueError:
         qty = 0.0
 
-    price = float(price_item.text()) if price_item else 0.0
-    total_item = QTableWidgetItem(f"{qty * price:.2f}")
-    total_item.setTextAlignment(Qt.AlignRight | Qt.AlignVCenter)
-    total_item.setFlags(total_item.flags() & ~Qt.ItemIsEditable)
+    price = _money_item_value(price_item)
+    total_item = _money_item(round_money(qty * price))
     total_item.setBackground(QBrush(get_row_color(row)))
     table.setItem(row, 5, total_item)
     _update_total_value(table)
@@ -252,13 +269,15 @@ def recompute_total(table: QTableWidget) -> float:
         item = table.item(r, 5)
         if item:
             try:
-                total += float(item.text())
+                total += _money_item_value(item)
             except Exception:
                 pass
+    total = round_money(total)
     table._current_total = total
     label = getattr(table, '_total_label', None)
     if isinstance(label, QLabel):
-        label.setText(f"$ {total:.2f}")
+        label.setText(format_currency(total))
+        label.setProperty('numeric_value', total)
     listeners = getattr(table, '_total_listeners', None)
     if listeners:
         for callback in listeners:

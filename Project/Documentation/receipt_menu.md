@@ -64,13 +64,16 @@ Table behavior:
 - Date tooltips use the fuller `format_datetime(...)` value, for example `06 Jun 2026  03:45 pm`.
 - Empty date cells display an em dash.
 - `Note` is shown only in the `Cancelled` status layout.
+- `Amount` display uses `modules/ui_utils/money_format.format_currency(...)`
+  as `$ 1,234.56`.
 
 Sorting behavior:
 
 - `No.` is display-only and not sortable.
 - Other visible columns sort when their header is clicked.
 - Sorting uses hidden typed sort keys, not only visible text.
-- `Amount` sorts numerically.
+- `Amount` sorts numerically using the hidden typed sort key, independent of
+  the formatted currency text.
 - After sorting, `No.` is renumbered from top to bottom.
 - The previously selected receipt is preserved by receipt number where possible.
 
@@ -171,6 +174,12 @@ generate_receipt_text(receipt_no)
 
 from `modules.payment.receipt_generator`.
 
+Receipt text intentionally keeps local amount formatting inside
+`receipt_generator.py` instead of using the shared UI currency formatter. The
+printed receipt is fixed-width, printer-oriented text, so amounts must be
+right-aligned within `RECEIPT_AMOUNT_WIDTH` and fitted to the configured receipt
+line width.
+
 Preview properties:
 
 - Read-only.
@@ -201,6 +210,7 @@ Action radios:
 Print behavior:
 
 - Uses the same generated receipt text as preview.
+- Keeps receipt-specific amount formatting from `receipt_generator.py` so printed columns stay aligned within the configured receipt width.
 - Sends text through `modules.devices.print_helper.print_receipt_with_fallback(...)`.
 - Honors `config.ENABLE_PRINTER_PRINT`: network printer when enabled, console fallback when disabled.
 - Success or failure appears in `receiptStatusLabel`.

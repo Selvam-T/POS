@@ -13,6 +13,7 @@ from modules.ui_utils import ui_feedback
 from modules.ui_utils.focus_utils import FocusGate
 from modules.ui_utils.dialog_utils import report_to_statusbar
 from modules.ui_utils.error_logger import log_error_message
+from modules.ui_utils.money_format import format_currency, format_number, money_value
 from modules.payment import receipt_generator
 from modules.payment.keypad_controller import KeypadController
 from modules.devices import print_helper
@@ -407,11 +408,7 @@ class PaymentPanel(QObject):
     @staticmethod
     def _parse_amount(value: str) -> float:
         # Parse currency-like text into float, returning 0.0 on invalid input.
-        try:
-            stripped = value.strip().replace('$', '').replace(',', '')
-            return float(stripped) if stripped else 0.0
-        except ValueError:
-            return 0.0
+        return money_value(value)
 
     @staticmethod
     def _parse_int(value: str) -> int:
@@ -425,12 +422,12 @@ class PaymentPanel(QObject):
     @staticmethod
     def _format_money(amount: float) -> str:
         # Format amount as a display currency string with a dollar sign.
-        return f"${amount:.2f}"
+        return format_currency(amount)
 
     @staticmethod
     def _format_number(amount: float) -> str:
         # Format amount as a plain two-decimal numeric string.
-        return f"{amount:.2f}"
+        return format_number(amount, grouped=False)
 
     @staticmethod
     def _round_currency(amount: float) -> float:
@@ -452,6 +449,14 @@ class PaymentPanel(QObject):
             return
         widget.setText(text)
 
+    def _set_money_label_value(self, widget: QLabel, amount: float) -> None:
+        # Set display text and keep the numeric amount separate from the label text.
+        if widget is None:
+            return
+        numeric = money_value(amount)
+        widget.setText(self._format_money(numeric))
+        widget.setProperty("numeric_value", numeric)
+
     # Field accessors
     def _pay_field_order(self):
         # Return the ordered payment entry fields used for navigation.
@@ -465,6 +470,10 @@ class PaymentPanel(QObject):
     def _get_total_amount(self) -> float:
         # Read and parse the payable total from the total label.
         label = self._widgets.get('total_label')
+        if label is not None:
+            numeric = label.property("numeric_value")
+            if numeric is not None:
+                return money_value(numeric)
         return self._parse_amount(label.text() if label is not None else '')
 
     def _get_float_value(self, widget: QLineEdit) -> float:
@@ -500,7 +509,7 @@ class PaymentPanel(QObject):
             self.clear_payment_frame()
             return
         self._reset_validation_feedback()
-        self._set_label_text(self._widgets.get('total_label'), self._format_money(total))
+        self._set_money_label_value(self._widgets.get('total_label'), total)
         self._set_line_text(self._widgets.get('cash'), self._format_number(total))
         self._set_line_text(self._widgets.get('nets'), "")
         self._set_line_text(self._widgets.get('paynow'), "")
@@ -518,8 +527,8 @@ class PaymentPanel(QObject):
     def clear_payment_frame(self) -> None:
         # Clear all payment fields/state and return the panel to idle defaults.
         self._reset_validation_feedback()
-        self._set_label_text(self._widgets.get('total_label'), self._format_money(0.0))
-        self._set_label_text(self._widgets.get('unalloc_label'), self._format_money(0.0))
+        self._set_money_label_value(self._widgets.get('total_label'), 0.0)
+        self._set_money_label_value(self._widgets.get('unalloc_label'), 0.0)
         self._set_line_text(self._widgets.get('cash'), "")
         self._set_line_text(self._widgets.get('nets'), "")
         self._set_line_text(self._widgets.get('paynow'), "")
@@ -558,7 +567,7 @@ class PaymentPanel(QObject):
 
         unalloc = self._round_currency(total - (cash + nets + paynow + voucher))
         self._last_unalloc = unalloc
-        self._set_label_text(self._widgets.get('unalloc_label'), self._format_money(unalloc))
+        self._set_money_label_value(self._widgets.get('unalloc_label'), unalloc)
 
         self._update_unalloc_ui(unalloc)
         self.update_readonly_policy()

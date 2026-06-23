@@ -1,5 +1,10 @@
 
 from modules.payment.payment_panel import PaymentPanel
+from PyQt5.QtWidgets import QApplication, QLabel
+
+
+def ensure_app():
+    return QApplication.instance() or QApplication([])
 
 
 def make_panel(total, last_unalloc, voucher_amt, cash_val=0.0, tender_val=0.0, has_validation_error=False):
@@ -45,3 +50,28 @@ def test_over_alloc_less_than_voucher_with_cash_disallowed():
 def test_cash_tender_mismatch_disallows():
     p = make_panel(total=10.0, last_unalloc=0.0, voucher_amt=0, cash_val=5.0, tender_val=4.0)
     assert p._is_payment_valid() is False
+
+
+def test_payment_money_label_stores_numeric_value_and_formats_display():
+    _app = ensure_app()
+    label = QLabel()
+    p = PaymentPanel.__new__(PaymentPanel)
+
+    p._set_money_label_value(label, 1234.5)
+
+    assert label.text() == "$ 1,234.50"
+    assert label.property("numeric_value") == 1234.5
+
+
+def test_payment_total_prefers_numeric_label_value():
+    _app = ensure_app()
+    label = QLabel("$ 0.00")
+    label.setProperty("numeric_value", 1234.5)
+    p = PaymentPanel.__new__(PaymentPanel)
+    p._widgets = {"total_label": label}
+
+    assert p._get_total_amount() == 1234.5
+
+
+def test_payment_plain_number_format_remains_unprefixed_for_line_edits():
+    assert PaymentPanel._format_number(1234.5) == "1234.50"

@@ -94,6 +94,8 @@ This document summarizes the current functional design for report-menu wiring, f
     - Section 4 (Earnings Broken Down by Category): Amount column width increased to 14 characters
     - Section 5 (Top 10 Best Sellers By Earnings): Amount column width increased to 14 characters
     - Improves readability and alignment of currency values.
+  - Currency values are formatted through `modules/ui_utils/money_format.format_currency(...)`
+    as `$ 1,234.56`.
 
 - Summary report integration
   - For `summary` selection, `viewReportBtn` calls
@@ -117,6 +119,8 @@ This document summarizes the current functional design for report-menu wiring, f
     `modules.menu.report_generator.get_chart_report(...)`.
   - Chart rendering is done in a dedicated viewer window with actual chart
     widgets.
+  - Chart currency labels use `modules/ui_utils/money_format.format_currency(...)`
+    for the same `$ 1,234.56` display style as text reports.
   - Chart export is PDF-only; Excel export is disabled and the controller
     shows a friendly message if the user tries to save XLSX.
   - Chart metrics are averaged over the selected date range before rendering.

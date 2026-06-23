@@ -9,6 +9,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QSyntaxHighlighter, QTextCharFormat
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QTextEdit, QVBoxLayout, QWidget
 from modules.date_time.formatters import format_date, format_report_timestamp
+from modules.ui_utils.money_format import format_currency, format_number, money_value
 import config
 
 # Viewer size policy REPORT_VIEWER_RATIOS is in `config.py`.
@@ -57,10 +58,7 @@ def _format_qty_unit(qty, unit) -> tuple[str, str]:
 
 def _to_float(value) -> float:
     """Coerce a value to float with a 0.0 fallback."""
-    try:
-        return float(value or 0.0)
-    except Exception:
-        return 0.0
+    return money_value(value)
 
 
 def _to_ampm_hour_label(hour_slot: Any) -> str:
@@ -194,11 +192,7 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
             return 0
 
     def _fmt_money(value) -> str:
-        try:
-            amount = float(value or 0.0)
-        except Exception:
-            amount = 0.0
-        return f"$ {amount:,.2f}"
+        return format_currency(value)
 
     def _truncate(text: str, width: int) -> str:
         s = str(text or '')
@@ -560,10 +554,10 @@ def _format_summary_report_text(report: dict) -> tuple[str, set[str], set[str], 
             return 0
 
     def _fmt_money(value) -> str:
-        return f"$ {_to_float(value):,.2f}"
+        return format_currency(value)
 
     def _fmt_number(value) -> str:
-        return f"{_to_float(value):,.2f}"
+        return format_number(value)
 
     def _truncate(text: str, width: int) -> str:
         s = str(text or '')

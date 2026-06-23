@@ -17,6 +17,7 @@ from modules.table_ui.table_widget_helpers import (
     configure_readonly_row_selection_table,
 )
 from modules.ui_utils.error_logger import log_error_message
+from modules.ui_utils.money_format import format_currency, money_value
 
 
 SORT_ROLE = Qt.UserRole + 10
@@ -37,17 +38,11 @@ class ReceiptTableItem(QTableWidgetItem):
 
 
 def _format_amount(value: Any) -> str:
-    try:
-        return f"$ {float(value or 0.0):.2f}"
-    except Exception:
-        return "$0.00"
+    return format_currency(value)
 
 
 def _sort_amount(value: Any) -> float:
-    try:
-        return float(value or 0.0)
-    except Exception:
-        return 0.0
+    return money_value(value)
 
 
 def _sort_text(value: Any) -> str:
