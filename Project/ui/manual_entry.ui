@@ -159,7 +159,7 @@
       </spacer>
      </item>
      <item row="7" column="1">
-      <widget class="QLineEdit" name="manualUnitLineEdit">
+      <widget class="QComboBox" name="manualUnitComboBox">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -168,12 +168,6 @@
        </property>
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="readOnly">
-        <bool>true</bool>
        </property>
       </widget>
      </item>

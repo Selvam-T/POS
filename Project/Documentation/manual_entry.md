@@ -7,10 +7,10 @@ The manual entry dialog controller has been fully refactored to use a declarativ
 ## Key Design Features
 
 - **Declarative UI Construction:** Uses `build_dialog_from_ui` for dialog creation and `require_widgets` for all widget resolution. If a widget is missing, the app fails fast and clearly during development.
-- **Gating (FocusGate):** The Quantity and OK button are locked by default and only enabled after a valid product lookup. The gate manages both functional and visual state (readOnly, gray background via QSS).
+- **Gating (FocusGate):** The Quantity and OK button are locked by default. For EACH products they unlock after a valid product lookup; for KG products they unlock only after the cashier selects KG or GRAM in the unit combo.
 - **Exclusive Inputs:** `enforce_exclusive_lineedits` ensures that typing in Product Code clears and locks Name Search, and vice versa, preventing ambiguous input.
 - **Coordinator-Driven Logic:** All field relationships, validation, and focus jumps are handled by the FieldCoordinator. Casing (UPPER for code, Title for name) is enforced in the coordinator links.
-- **Focus & Placeholder Management:** Focus starts on Product Code and moves to Quantity after a valid lookup. The Quantity placeholder is reactive (e.g., "Enter weight" for KG, "Enter Quantity" for EACH).
+- **Focus & Placeholder Management:** Focus starts on Product Code. EACH products move to Quantity after lookup; KG products move to the unit combo first. The Quantity placeholder is reactive (e.g., "Enter weight" for KG, "Enter grams" for GRAM, "Enter Quantity" for EACH).
 - **Data Persistence:** The price is cached in the Quantity widget at lookup time, so the OK click is fast and safe.
 - **Fallback UI:** If the .ui file is missing, a programmatic fallback dialog is shown, styled for visual consistency and with clear error messaging.
 - **Status Messaging:** Uses `set_dialog_info` and `set_dialog_error` to provide post-close feedback to the main window, both for success and fallback/error cases.
@@ -37,7 +37,7 @@ The Manual Entry dialog allows users to manually input product information when 
 - **Immediate Validation:** Pressing Enter in any field triggers immediate validation. If the input is valid, focus advances to the next logical field or submits the form (when in Quantity).
 - **POS-Optimized Flow:** This workflow matches standard POS behavior: type/select product, type quantity, press Enter, done.
 
-**Note:** All manual entries are treated as EACH (count-based) items with editable quantities (integer only, range 1-9999). They display with unit "ea" in the sales table.
+**Note:** Manual entry supports both EACH and KG products. KG products can be entered as KG or GRAM, but the result is always stored with unit `Kg` and quantity in kilograms.
 
 ## Files Involved
 
@@ -142,7 +142,7 @@ The Manual Entry dialog allows users to manually input product information when 
   ```
 - **Cancelled/Error**: `None`
 
-**Note:** Manual entry items are always treated as count-based (like EACH units) with editable quantity cells. KG items requiring weighing must use the Vegetable Entry dialog instead.
+**Note:** Manual entry items preserve the product unit. EACH items use integer quantity input; KG items can be entered as KG or GRAM and are stored internally as kilograms.
 
 ### Process Flow
 
@@ -193,10 +193,12 @@ Widget behavior summary:
     - Accepts normal keyboard typing for name search and QCompleter selection.
     - Scanner bursts are not permitted here, so burst characters are swallowed; a rare first-character leak may briefly trigger the dropdown before cleanup removes it.
 
-3. **manualUnitLineEdit** (read-only)
-    - Does not accept keyboard edits.
-    - Scanner input is not permitted; any leakage is best-effort cleaned.
-    - Value is filled programmatically via coordinator mapping.
+3. **manualUnitComboBox**
+    - Starts empty and disabled before product lookup.
+    - For EACH products, shows `EACH`, remains disabled, and acts as display-only.
+    - For KG products, shows `-- Select Unit --`, `KG`, and `GRAM`.
+    - Quantity and OK remain disabled until `KG` or `GRAM` is selected.
+    - When `KG` or `GRAM` is selected, `manualStatusLabel` displays the selection, e.g. `KG unit selected` or `GRAM unit selected`.
 
 4. **manualQuantityLineEdit**
     - Accepts keyboard typing.
@@ -227,7 +229,7 @@ On dialog close, the wrapper restores focus to the main window (sales table) in 
     ```
 - **Cancelled/Error**: `None`
 
-**Note:** Manual entry items are always treated as count-based (like EACH units) with editable quantity cells. KG items requiring weighing must use the Vegetable Entry dialog instead.
+**Note:** Manual entry items preserve the product unit. EACH items use integer quantity input; KG items can be entered as KG or GRAM and are stored internally as kilograms.
 
 **Focus State**:
 - Background: #FFF9C4 (lighter yellow)
@@ -253,12 +255,15 @@ On dialog close, the wrapper restores focus to the main window (sales table) in 
 - **Size**: MinimumExpanding, height 50px
 - **Font**: 12pt, bold, Verdana
 
-## Read-Only Unit Field & Label Styling
+## Unit Selector Behavior
 
-- The unit field (`manualUnitLineEdit`) is read-only and filled programmatically based on product selection.
-- The corresponding label (`manualUnitFieldLbl`) uses a custom QSS property (e.g., `readonly-label`) for distinct styling (gray color, italic, etc.).
-- The property is set in the controller, and QSS rules ensure consistent appearance for read-only fields and labels.
-- This improves clarity for users, indicating which fields are not editable.
+- The unit selector (`manualUnitComboBox`) represents the cashier's input unit, not a new receipt/storage unit.
+- Before product selection, the combo is empty and disabled.
+- For EACH products, it shows `EACH`, remains disabled, and quantity is validated as an integer.
+- For KG products, it requires an explicit `KG` or `GRAM` selection before quantity can be entered.
+- Selecting `KG` or `GRAM` updates `manualStatusLabel` with the selected unit.
+- If `GRAM` is selected, the entered quantity is divided by 1000 before being stored in `manual_entry_result['quantity']`.
+- `manual_entry_result['unit']` remains only `Kg` or `Each`; receipt and sales table calculations stay based on canonical product units.
 
 ## Usage Example (Refactored Dec 2025)
 
@@ -272,8 +277,8 @@ The manual entry dialog now follows the same declarative, robust pipeline as the
     - All widgets are resolved in a single `require_widgets` call. If a widget is missing from the .ui, the app fails loudly during development.
 
 2. **Gating (The "Shield")**
-    - A FocusGate is defined for `manualQuantityLineEdit`, `manualUnitLineEdit`, and `btnManualOk`.
-    - The gate is locked by default. The on_sync callback in the FieldCoordinator unlocks the gate only when a valid product lookup occurs.
+    - A FocusGate is defined for `manualQuantityLineEdit` and `btnManualOk`.
+    - The gate is locked by default. The on_sync callback unlocks the gate for EACH products after lookup, and for KG products only after the cashier selects `KG` or `GRAM`.
     - The gate manages the readOnly state of the Quantity field, ensuring it turns gray when locked (via QSS).
 
 3. **Exclusive Inputs (Dual Search)**
@@ -281,7 +286,7 @@ The manual entry dialog now follows the same declarative, robust pipeline as the
 
 4. **Standardized Interaction**
     - Casing is enforced: Product Code is UPPERCASE, Name Search is Title Case, handled in the coordinator links.
-    - Focus is managed with `QTimer.singleShot` to start on Product Code and move to Quantity after a valid lookup.
+    - Focus starts on Product Code. After lookup, EACH products move to Quantity and KG products move to the unit combo.
 
 5. **Redundancy Cleanup**
     - Manual `setProperty("readOnly", "true")` calls on labels are removed; these are now handled via the .ui file or QSS.
@@ -291,7 +296,7 @@ The manual entry dialog now follows the same declarative, robust pipeline as the
     - The price is cached in the Quantity widget at lookup time, so the final OK click is fast and safe.
 
 7. **Placeholder Policy**
-    - The Quantity placeholder is reactive: e.g., "Enter Weight" for KG items, "Enter Quantity" for EACH.
+    - The Quantity placeholder is reactive: e.g., "Enter weight" for KG input, "Enter grams" for GRAM input, and "Enter Quantity" for EACH.
 
 8. **Standardized Cleanup**
     - All manual findChild and layout code is gone, replaced by the pipeline's `build_dialog_from_ui` and `require_widgets`.
@@ -325,7 +330,7 @@ The dialog is now shorter, easier to read, and matches the Product Menu Update t
 
 ## Future Enhancements
 
-- [ ] Add unit selection (KG, EACH, etc.)
+- [x] Add KG/GRAM input-unit selection for KG products
 - [ ] Add product category selection
 - [ ] Add barcode/SKU field
 - [ ] Add tax rate configuration
@@ -353,7 +358,7 @@ The dialog is now shorter, easier to read, and matches the Product Menu Update t
 
 ---
 
-**Last Updated**: December 12, 2025  
+**Last Updated**: June 25, 2026  
 **Status**: In Development
 
 ---
