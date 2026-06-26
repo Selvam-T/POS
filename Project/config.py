@@ -233,7 +233,7 @@ NAME_REGEX = re.compile(r"^[A-Za-z0-9\s.,'&()\-/]+$")
 
 # Field-specific rules retained for consumers that use STRING_CONFIG directly.
 STRING_CONFIG = {
-    'product_code': {'min_len': 4, 'max_len': 14, 'required': True},
+    'product_code': {'min_len': 2, 'max_len': 14, 'required': True},
     'product_name': {'min_len': 4, 'max_len': 40, 'required': True},
     'supplier': {'min_len': 3, 'max_len': 15, 'required': False},
     'customer': {'min_len': 3, 'max_len': 25, 'required': True},
@@ -297,11 +297,11 @@ ADS_SIZE_TOLERANCE_PCT = 2.5
 CUSTOMER_DISPLAY_ENABLED = True
 
 # Test mode opens a normal window on the primary display.
-CUSTOMER_DISPLAY_TEST_MODE = True
+CUSTOMER_DISPLAY_TEST_MODE = False
 CUSTOMER_SCREEN_INDEX = 1
 CUSTOMER_SCREEN_WIDTH = 1536
 CUSTOMER_SCREEN_HEIGHT = 900
-CUSTOMER_DISPLAY_FULLSCREEN = False
+CUSTOMER_DISPLAY_FULLSCREEN = True
 
 # Monitor auto-detection is ignored while test mode is enabled.
 CUSTOMER_DISPLAY_AUTO_DETECT = True

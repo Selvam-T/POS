@@ -29,7 +29,7 @@ from modules.ui_utils import input_validation
   - Fields that are defaulted/auto-filled should not be included.
 
 ### Product code
-- `validate_product_code_format(code, digits_only=False, min_len=4, max_len=30)`
+- `validate_product_code_format(code)`
   - Format-only validation (required/non-empty + length, optional digits-only).
   - Use anywhere the user can type/scan a product code (ADD/REMOVE/UPDATE/manual entry).
 

@@ -406,7 +406,7 @@
        <item>
         <layout class="QHBoxLayout" name="add_actionBtns">
          <property name="spacing">
-          <number>40</number>
+          <number>20</number>
          </property>
          <property name="leftMargin">
           <number>30</number>
@@ -418,6 +418,13 @@
           <widget class="QPushButton" name="btnAddOk">
            <property name="text">
             <string>ADD</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnAddClear">
+           <property name="text">
+            <string>CLEAR</string>
            </property>
           </widget>
          </item>
@@ -741,7 +748,7 @@
        <item>
         <layout class="QHBoxLayout" name="remove_actionBtns">
          <property name="spacing">
-          <number>40</number>
+          <number>20</number>
          </property>
          <property name="leftMargin">
           <number>30</number>
@@ -753,6 +760,13 @@
           <widget class="QPushButton" name="btnRemoveOk">
            <property name="text">
             <string>DELETE</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnRemoveClear">
+           <property name="text">
+            <string>CLEAR</string>
            </property>
           </widget>
          </item>
@@ -1183,7 +1197,7 @@
        <item>
         <layout class="QHBoxLayout" name="update_actionBtns">
          <property name="spacing">
-          <number>40</number>
+          <number>20</number>
          </property>
          <property name="leftMargin">
           <number>30</number>
@@ -1195,6 +1209,13 @@
           <widget class="QPushButton" name="btnUpdateOk">
            <property name="text">
             <string>UPDATE</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnUpdateClear">
+           <property name="text">
+            <string>CLEAR</string>
            </property>
           </widget>
          </item>
@@ -1487,7 +1508,7 @@
        <item>
         <layout class="QHBoxLayout" name="category_actionBtns">
          <property name="spacing">
-          <number>40</number>
+          <number>20</number>
          </property>
          <property name="leftMargin">
           <number>30</number>
@@ -1499,6 +1520,13 @@
           <widget class="QPushButton" name="btnCategoryOk">
            <property name="text">
             <string>OK</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnCategoryClear">
+           <property name="text">
+            <string>CLEAR</string>
            </property>
           </widget>
          </item>
@@ -1540,6 +1568,7 @@
   <tabstop>addUnitLineEdit</tabstop>
   <tabstop>addSupplierLineEdit</tabstop>
   <tabstop>btnAddOk</tabstop>
+  <tabstop>btnAddClear</tabstop>
   <tabstop>btnAddCancel</tabstop>
   <tabstop>removeProductCodeLineEdit</tabstop>
   <tabstop>removeNameSearchLineEdit</tabstop>
@@ -1550,6 +1579,7 @@
   <tabstop>removeSupplierLineEdit</tabstop>
   <tabstop>removeLastUpdatedLineEdit</tabstop>
   <tabstop>btnRemoveOk</tabstop>
+  <tabstop>btnRemoveClear</tabstop>
   <tabstop>btnRemoveCancel</tabstop>
   <tabstop>updateProductCodeLineEdit</tabstop>
   <tabstop>updateNameSearchLineEdit</tabstop>
@@ -1562,6 +1592,7 @@
   <tabstop>updateSupplierLineEdit</tabstop>
   <tabstop>updateLastUpdatedLineEdit</tabstop>
   <tabstop>btnUpdateOk</tabstop>
+  <tabstop>btnUpdateClear</tabstop>
   <tabstop>btnUpdateCancel</tabstop>
   <tabstop>categoryAddRadioBtn</tabstop>
   <tabstop>categoryRemoveRadioBtn</tabstop>
@@ -1570,6 +1601,7 @@
   <tabstop>categorySelectComboBox</tabstop>
   <tabstop>categoryUpdateLineEdit</tabstop>
   <tabstop>btnCategoryOk</tabstop>
+  <tabstop>btnCategoryClear</tabstop>
   <tabstop>btnCategoryCancel</tabstop>
   <tabstop>customCloseBtn</tabstop>
   <tabstop>tabWidget</tabstop>

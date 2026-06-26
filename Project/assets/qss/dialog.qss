@@ -92,6 +92,23 @@ QPushButton[objectName$="Cancel"]:pressed {
     padding-top: 2px;
 }
 
+/* Clear Button */
+QPushButton[objectName$="Clear"] {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #f59e0b, stop:1 #d97706);
+    border: 1px solid #92400e;
+}
+
+QPushButton[objectName$="Clear"]:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+                                      stop:0 #fbbf24, stop:1 #f59e0b);
+}
+
+QPushButton[objectName$="Clear"]:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+                                      stop:0 #b45309, stop:1 #d97706);
+    padding-top: 2px;
+}
+
 /* Delete Button */
 QPushButton[objectName$="Del"] {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #ff5f6d, stop:1 #d90429);

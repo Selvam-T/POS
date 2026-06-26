@@ -517,8 +517,7 @@ class CustomerDisplayWindow(QDialog):
             scaled = pix.scaled(size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         else:
             scaled = pix
-        # Clear any fallback styling when an image is rendered so text remains readable
-        label.setStyleSheet("")
+        label.setStyleSheet("background-color: black;")
         label.setPixmap(scaled)
         label.setText("")
 

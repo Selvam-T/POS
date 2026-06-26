@@ -62,6 +62,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         'add_unit': (QLineEdit, 'addUnitLineEdit'),
         'add_supp': (QLineEdit, 'addSupplierLineEdit'),
         'add_ok': (QPushButton, 'btnAddOk'),
+        'add_clear': (QPushButton, 'btnAddClear'),
         'add_cancel': (QPushButton, 'btnAddCancel'),
         'add_status': (QLabel, 'addStatusLabel'),
 
@@ -75,6 +76,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         'rem_supplier': (QLineEdit, 'removeSupplierLineEdit'),
         'rem_last_updated': (QLineEdit, 'removeLastUpdatedLineEdit'),
         'rem_ok': (QPushButton, 'btnRemoveOk'),
+        'rem_clear': (QPushButton, 'btnRemoveClear'),
         'rem_cancel': (QPushButton, 'btnRemoveCancel'),
         'rem_status': (QLabel, 'removeStatusLabel'),
 
@@ -90,6 +92,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         'upd_supplier': (QLineEdit, 'updateSupplierLineEdit'),
         'upd_last_updated': (QLineEdit, 'updateLastUpdatedLineEdit'),
         'upd_ok': (QPushButton, 'btnUpdateOk'),
+        'upd_clear': (QPushButton, 'btnUpdateClear'),
         'upd_cancel': (QPushButton, 'btnUpdateCancel'),
         'upd_status': (QLabel, 'updateStatusLabel'),
 
@@ -101,6 +104,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         'cat_select_combo': (QComboBox, 'categorySelectComboBox'),
         'cat_update_le': (QLineEdit, 'categoryUpdateLineEdit'),
         'cat_ok': (QPushButton, 'btnCategoryOk'),
+        'cat_clear': (QPushButton, 'btnCategoryClear'),
         'cat_cancel': (QPushButton, 'btnCategoryCancel'),
         'cat_status': (QLabel, 'categoryStatusLabel'),
     })
@@ -555,6 +559,38 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     def _set_category_replace_mode():
         _set_category_mode('replace')
 
+    def clear_category_tab() -> None:
+        try:
+            widgets['cat_add_radio'].setChecked(True)
+        except Exception:
+            pass
+        try:
+            _set_category_add_mode()
+        except Exception:
+            pass
+        for k in ['cat_add_le', 'cat_update_le']:
+            try:
+                widgets[k].clear()
+            except Exception:
+                pass
+        try:
+            _cat_replace_selection_valid['val'] = False
+        except Exception:
+            pass
+        try:
+            cat_ok_gate.set_locked(True)
+        except Exception:
+            pass
+        try:
+            ui_feedback.clear_status_label(widgets['cat_status'])
+        except Exception:
+            pass
+        try:
+            widgets['cat_add_le'].setFocus()
+            widgets['cat_add_le'].selectAll()
+        except Exception:
+            pass
+
     def _set_category_prompt(message: str) -> None:
         ui_feedback.set_status_label(widgets['cat_status'], message, ok=True)
 
@@ -985,6 +1021,26 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         except Exception:
             pass
 
+    def clear_remove_tab() -> None:
+        for k in ['rem_code', 'rem_name_srch']:
+            try:
+                widgets[k].clear()
+            except Exception:
+                pass
+        try:
+            _clear_remove_display()
+        except Exception:
+            pass
+        try:
+            ui_feedback.clear_status_label(widgets['rem_status'])
+        except Exception:
+            pass
+        try:
+            widgets['rem_code'].setFocus()
+            widgets['rem_code'].selectAll()
+        except Exception:
+            pass
+
     def _clear_update_display() -> None:
         def _upd_extra():
             try:
@@ -997,6 +1053,26 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 pass
         try:
             clear_display(upd_lineedit_targets, widgets['upd_status'], extra_post_clear=_upd_extra)
+        except Exception:
+            pass
+
+    def clear_update_tab() -> None:
+        for k in ['upd_code', 'upd_name_srch']:
+            try:
+                widgets[k].clear()
+            except Exception:
+                pass
+        try:
+            _clear_update_display()
+        except Exception:
+            pass
+        try:
+            ui_feedback.clear_status_label(widgets['upd_status'])
+        except Exception:
+            pass
+        try:
+            widgets['upd_code'].setFocus()
+            widgets['upd_code'].selectAll()
         except Exception:
             pass
 
@@ -1212,6 +1288,34 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             ui_feedback.clear_status_label(widgets['add_status'])
 
     widgets['add_code'].textChanged.connect(_update_add_gate)
+
+    def clear_add_tab() -> None:
+        try:
+            widgets['add_code'].clear()
+        except Exception:
+            pass
+        for k in ['add_name', 'add_sell', 'add_cost', 'add_markup', 'add_supp', 'add_unit']:
+            try:
+                widgets[k].clear()
+            except Exception:
+                pass
+        try:
+            widgets['add_cat'].setCurrentIndex(-1)
+        except Exception:
+            pass
+        try:
+            ui_feedback.clear_status_label(widgets['add_status'])
+        except Exception:
+            pass
+        try:
+            _update_add_gate()
+        except Exception:
+            pass
+        try:
+            widgets['add_code'].setFocus()
+            widgets['add_code'].selectAll()
+        except Exception:
+            pass
 
     # --- ADD Enter navigation (prevents dialog from accepting on Enter) ---
     # Mandatory fields swallow Enter when empty; optional fields allow advancing.
@@ -1708,6 +1812,10 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
 
     # Connections
     widgets['add_ok'].clicked.connect(do_add); widgets['rem_ok'].clicked.connect(do_rem); widgets['upd_ok'].clicked.connect(do_upd)
+    widgets['add_clear'].clicked.connect(clear_add_tab)
+    widgets['rem_clear'].clicked.connect(clear_remove_tab)
+    widgets['upd_clear'].clicked.connect(clear_update_tab)
+    widgets['cat_clear'].clicked.connect(clear_category_tab)
 
     def do_category_ok() -> None:
         def _finalize_category(message: str, *, show_label: bool = True) -> None:

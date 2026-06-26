@@ -1,6 +1,6 @@
 # Product Menu (Product Management Dialog)
 
-Updated: January 2026
+Updated: June 2026
 
 This document describes the current Product Menu controller behavior after the refactor to the standardized dialog pipeline.
 
@@ -30,7 +30,7 @@ Product Menu follows the dialog pipeline used across the app:
 3. Configure read-only/display-only fields (`setReadOnly(True)` + `Qt.NoFocus`).
 4. Wire relationships + Enter navigation using `FieldCoordinator`.
 5. Apply gating using `FocusGate(lock_enabled=True)`.
-6. OK/Cancel handlers validate + write using DB operation functions.
+6. OK/CLEAR/Cancel handlers validate, reset, or close using tab-specific controller functions.
 
 ---
 
@@ -49,6 +49,20 @@ Landing rules:
 
 - Default landing tab is **ADD**.
 - Landing focus goes to the active tab’s Product Code field.
+
+---
+
+## CLEAR Buttons
+
+Each tab has a tab-local `CLEAR` button between the action button and `CANCEL`.
+CLEAR resets only the active tab's form state; it does not close the dialog and does not write to the database.
+
+- ADD: clears Product Code and all ADD fields, blanks the category combo, clears status, reruns the ADD gate, and returns focus to Product Code.
+- REMOVE: clears Product Code, Name Search, mapped display fields, and status, then returns focus to Product Code.
+- UPDATE: clears Product Code, Name Search, mapped edit/display fields, clears the loaded-value snapshot, re-locks editable fields, clears status, and returns focus to Product Code.
+- CATEGORY: resets the tab to its default Add mode, clears category inputs/status, clears the selection combo through the Add-mode path, locks OK, and focuses New Category.
+
+The implementation is intentionally tab-specific instead of a generic widget wipe so `FocusGate`, placeholders, combo state, lookup snapshots, and mode-specific locks remain consistent.
 
 ---
 
@@ -143,7 +157,7 @@ All product codes are normalized to UPPER CASE, and product names/other strings 
 Code must be:
 
 - non-empty
-- length $\ge 4$
+- length $\ge 2$
 - not a reserved veg code (`veg01`–`veg16`)
 - not already present in `PRODUCT_CACHE`
 
