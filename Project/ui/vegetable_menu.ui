@@ -769,18 +769,18 @@
  </widget>
  <tabstops>
   <tabstop>vegMChooseComboBox</tabstop>
+  <tabstop>vegMProductCodeLineEdit</tabstop>
+  <tabstop>vegMCategoryLineEdit</tabstop>
   <tabstop>vegMProductNameLineEdit</tabstop>
   <tabstop>vegMUnitComboBox</tabstop>
   <tabstop>vegMSellingPriceLineEdit</tabstop>
   <tabstop>vegMCostPriceLineEdit</tabstop>
+  <tabstop>vegMMarkupLineEdit</tabstop>
   <tabstop>vegMSupplierLineEdit</tabstop>
   <tabstop>btnVegMOk</tabstop>
   <tabstop>btnVegMDel</tabstop>
   <tabstop>btnVegMCancel</tabstop>
   <tabstop>customCloseBtn</tabstop>
-  <tabstop>vegMProductCodeLineEdit</tabstop>
-  <tabstop>vegMCategoryLineEdit</tabstop>
-  <tabstop>vegMMarkupLineEdit</tabstop>
  </tabstops>
  <resources/>
  <connections/>

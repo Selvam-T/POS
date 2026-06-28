@@ -87,25 +87,25 @@ def launch_hold_sales_dialog(parent=None):
             customer_name = input_handler.handle_customer_input(name_in)
             name_in.setText(customer_name)
         except ValueError as exc:
-            ui_feedback.set_status_label(status_lbl, str(exc), ok=False)
             name_in.setFocus(Qt.OtherFocusReason)
             name_in.selectAll()
+            ui_feedback.set_status_label(status_lbl, str(exc), ok=False)
             return
 
         sales_items = _build_sales_snapshot(parent)
         if not sales_items:
-            ui_feedback.set_status_label(status_lbl, "No active sale to hold", ok=False)
             name_in.setFocus(Qt.OtherFocusReason)
             name_in.selectAll()
+            ui_feedback.set_status_label(status_lbl, "No active sale to hold", ok=False)
             return
         try:
             # uncomment to test db operation failure handling:
             #raise RuntimeError("TEST: hold sale failure")
             cid = getattr(parent, 'current_user_id', None)
             if cid is None:
-                ui_feedback.set_status_label(status_lbl, "No logged-in user. Please login.", ok=False)
                 name_in.setFocus(Qt.OtherFocusReason)
                 name_in.selectAll()
+                ui_feedback.set_status_label(status_lbl, "No logged-in user. Please login.", ok=False)
                 return
             # Commit held receipt to DB (insert receipts header + receipt_items)
             receipt_no = hold_committer.commit_hold_sale(

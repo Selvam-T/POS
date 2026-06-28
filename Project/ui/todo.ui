@@ -288,6 +288,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>todoInputLineEdit</tabstop>
+  <tabstop>todoAddBtn</tabstop>
+  <tabstop>todoTableWidget</tabstop>
+  <tabstop>customCloseBtn</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
