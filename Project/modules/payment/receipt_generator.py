@@ -181,10 +181,8 @@ def _append_items_table(
     subtotal = round_money(total_amount)
     payable = round_money(payable_total if payable_total is not None else subtotal)
     rounding_adjustment = round_money(payable - subtotal)
-    if abs(rounding_adjustment) >= 0.01:
-        lines.append(_line_with_amount("Subtotal:", _format_receipt_amount(subtotal), width))
-        lines.append(_line_with_amount("Rounding:", _format_receipt_amount(rounding_adjustment), width))
-    lines.append(_line_with_amount("Grand Total:", _format_receipt_amount(payable), width))
+    total_label = "Total (round):" if abs(rounding_adjustment) >= 0.01 else "Total:"
+    lines.append(_line_with_amount(total_label, _format_receipt_amount(payable), width))
     lines.append("")
     return payable
 
@@ -277,7 +275,7 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
         created_text=created_at,
         width=width,
     )
-    # 3. tabled items with Grand Total
+    # 3. tabled items with receipt total
     payable_total = _append_items_table(
         lines,
         items=items,
@@ -326,7 +324,7 @@ def generate_receipt_text_from_snapshot(
         created_text=created_text,
         width=width,
     )
-    # 3. tabled items with Grand Total
+    # 3. tabled items with receipt total
     total_amount = _append_items_table(
         lines,
         items=items,

@@ -211,7 +211,7 @@ Print behavior:
 
 - Uses the same generated receipt text as preview.
 - Keeps receipt-specific amount formatting from `receipt_generator.py` so printed columns stay aligned within the configured receipt width.
-- Shows true item subtotal plus a computed rounding adjustment when the stored payable `grand_total` differs from the sum of item line totals.
+- Shows a single receipt `Total` line. The label changes to `Total (round)` when the stored payable `grand_total` differs from the sum of item line totals.
 - Sends text through `modules.devices.print_helper.print_receipt_with_fallback(...)`.
 - Honors `config.ENABLE_PRINTER_PRINT`: network printer when enabled, console fallback when disabled.
 - Success or failure appears in `receiptStatusLabel`.
