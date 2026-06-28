@@ -63,7 +63,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         'add_supp': (QLineEdit, 'addSupplierLineEdit'),
         'add_ok': (QPushButton, 'btnAddOk'),
         'add_clear': (QPushButton, 'btnAddClear'),
-        'add_cancel': (QPushButton, 'btnAddCancel'),
+        'add_close': (QPushButton, 'btnAddClose'),
         'add_status': (QLabel, 'addStatusLabel'),
 
         # REMOVE
@@ -77,7 +77,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         'rem_last_updated': (QLineEdit, 'removeLastUpdatedLineEdit'),
         'rem_ok': (QPushButton, 'btnRemoveOk'),
         'rem_clear': (QPushButton, 'btnRemoveClear'),
-        'rem_cancel': (QPushButton, 'btnRemoveCancel'),
+        'rem_close': (QPushButton, 'btnRemoveClose'),
         'rem_status': (QLabel, 'removeStatusLabel'),
 
         # UPDATE
@@ -93,7 +93,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         'upd_last_updated': (QLineEdit, 'updateLastUpdatedLineEdit'),
         'upd_ok': (QPushButton, 'btnUpdateOk'),
         'upd_clear': (QPushButton, 'btnUpdateClear'),
-        'upd_cancel': (QPushButton, 'btnUpdateCancel'),
+        'upd_close': (QPushButton, 'btnUpdateClose'),
         'upd_status': (QLabel, 'updateStatusLabel'),
 
         # CATEGORY
@@ -105,7 +105,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         'cat_update_le': (QLineEdit, 'categoryUpdateLineEdit'),
         'cat_ok': (QPushButton, 'btnCategoryOk'),
         'cat_clear': (QPushButton, 'btnCategoryClear'),
-        'cat_cancel': (QPushButton, 'btnCategoryCancel'),
+        'cat_close': (QPushButton, 'btnCategoryClose'),
         'cat_status': (QLabel, 'categoryStatusLabel'),
     })
 
@@ -777,7 +777,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             def _upd_selected(_text=None, _le=None):
                 _sync_source(widgets['upd_name_srch'])
                 try:
-                    widgets['upd_cancel'].setFocus()
+                    widgets['upd_close'].setFocus()
                 except Exception:
                     pass
 
@@ -994,7 +994,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         source=widgets['upd_code'],
         target_map=upd_targets_from_code,
         lookup_fn=_lookup_product,
-        next_focus=widgets['upd_cancel'],
+        next_focus=widgets['upd_close'],
         status_label=widgets['upd_status'],
         on_sync=_on_upd_sync,
         auto_jump=False,
@@ -1003,7 +1003,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         source=widgets['upd_name_srch'],
         target_map=upd_targets_from_name,
         lookup_fn=_lookup_product_by_name,
-        next_focus=widgets['upd_cancel'],
+        next_focus=widgets['upd_close'],
         status_label=widgets['upd_status'],
         on_sync=_on_upd_sync,
         auto_jump=False,
@@ -1106,7 +1106,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         pass
     try:
         widgets['upd_name_srch'].returnPressed.connect(
-            partial(_commit_name_srch, widgets['upd_name_srch'], widgets['upd_cancel'])
+            partial(_commit_name_srch, widgets['upd_name_srch'], widgets['upd_close'])
         )
     except Exception:
         pass
@@ -1465,7 +1465,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
 
     widgets['tabs'].currentChanged.connect(_on_tab_changed)
 
-    # --- OK/Cancel Handlers ---
+    # --- OK/Close Handlers ---
     def _focus_widget(w, select_all: bool = False) -> None:
         if w is None:
             return
@@ -1507,17 +1507,32 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         # Natural phrasing: "Product [Name] Deleted"
         display_msg = f"Product '{name}' {verb}"
         
-        # Use the coordinator for consistency (it clears error states automatically)
-        ui_feedback.set_status_label(widgets[f'{mode}_status'], display_msg, ok=True)
-        
-        # Set the main window status (post-close message)
-        set_dialog_main_status_max(dlg, display_msg, level='info', duration=4000)
-        
         if mode == 'add' and initial_code:
             # If we added a product via a "Not Found" scan, add it to sales table immediately
             QTimer.singleShot(10, lambda: handle_barcode_scanned(main_window.sales_table, code, main_window.statusBar()))
-        
-        QTimer.singleShot(500, dlg.accept)
+
+        cancel_map = {
+            'add': widgets['add_close'],
+            'rem': widgets['rem_close'],
+            'upd': widgets['upd_close'],
+        }
+        clear_map = {
+            'add': clear_add_tab,
+            'rem': clear_remove_tab,
+            'upd': clear_update_tab,
+        }
+        cancel_btn = cancel_map.get(mode)
+        if cancel_btn is not None:
+            def _finish_success() -> None:
+                clear_fn = clear_map.get(mode)
+                if callable(clear_fn):
+                    clear_fn()
+                cancel_btn.setFocus()
+                QTimer.singleShot(
+                    0,
+                    lambda: ui_feedback.set_status_label(widgets[f'{mode}_status'], display_msg, ok=True),
+                )
+            QTimer.singleShot(0, _finish_success)
 
     # --- SECTION 6: EXECUTION HANDLERS ---
 
@@ -1635,7 +1650,14 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             _upd_loaded.get('category') == cat,
             _upd_loaded.get('supplier') == supp,
         ]):
-            dlg.accept()
+            def _finish_noop() -> None:
+                clear_update_tab()
+                widgets['upd_close'].setFocus()
+                QTimer.singleShot(
+                    0,
+                    lambda: ui_feedback.set_status_label(widgets['upd_status'], "No changes to update.", ok=True),
+                )
+            QTimer.singleShot(0, _finish_noop)
             return
 
         # 4. Save
@@ -1819,14 +1841,15 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
 
     def do_category_ok() -> None:
         def _finalize_category(message: str, *, show_label: bool = True) -> None:
-            if show_label:
-                ui_feedback.set_status_label(widgets['cat_status'], message, ok=True, duration=3000)
-            set_dialog_main_status_max(dlg, message, level='info', duration=4000)
-            try:
-                dlg._skip_close_status = True
-            except Exception:
-                pass
-            QTimer.singleShot(500, dlg.accept)
+            def _finish_success() -> None:
+                clear_category_tab()
+                widgets['cat_close'].setFocus()
+                if show_label:
+                    QTimer.singleShot(
+                        0,
+                        lambda: ui_feedback.set_status_label(widgets['cat_status'], message, ok=True, duration=3000),
+                    )
+            QTimer.singleShot(0, _finish_success)
 
         def _selected_category() -> str | None:
             combo = widgets['cat_select_combo']
@@ -1929,7 +1952,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     except Exception:
         pass
 
-    def _cancel_close() -> None:
+    def _close_dialog() -> None:
         # Info-level so it won't override any warning/error queued earlier.
         try:
             if getattr(dlg, '_skip_close_status', False):
@@ -1946,11 +1969,11 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         set_dialog_main_status_max(dlg, 'Product menu closed.', level='info', duration=3000)
         dlg.reject()
 
-    widgets['add_cancel'].clicked.connect(_cancel_close)
-    widgets['rem_cancel'].clicked.connect(_cancel_close)
-    widgets['upd_cancel'].clicked.connect(_cancel_close)
-    widgets['cat_cancel'].clicked.connect(_cancel_close)
-    widgets['close_btn'].clicked.connect(_cancel_close)
+    widgets['add_close'].clicked.connect(_close_dialog)
+    widgets['rem_close'].clicked.connect(_close_dialog)
+    widgets['upd_close'].clicked.connect(_close_dialog)
+    widgets['cat_close'].clicked.connect(_close_dialog)
+    widgets['close_btn'].clicked.connect(_close_dialog)
 
     # Barcode Override
     def barcode_override(barcode):

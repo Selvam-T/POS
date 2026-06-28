@@ -32,7 +32,7 @@ Important object names:
 - `receiptVoidRadioBtn`
 - `receiptNoteLineEdit`
 - `btnReceiptOk`
-- `btnReceiptCancel`
+- `btnReceiptClose`
 - `receiptStatusLabel`
 
 ## Receipt Table

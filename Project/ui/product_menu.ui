@@ -429,9 +429,9 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="btnAddCancel">
+          <widget class="QPushButton" name="btnAddClose">
            <property name="text">
-            <string>CANCEL</string>
+            <string>CLOSE</string>
            </property>
           </widget>
          </item>
@@ -771,9 +771,9 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="btnRemoveCancel">
+          <widget class="QPushButton" name="btnRemoveClose">
            <property name="text">
-            <string>CANCEL</string>
+            <string>CLOSE</string>
            </property>
           </widget>
          </item>
@@ -1220,9 +1220,9 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="btnUpdateCancel">
+          <widget class="QPushButton" name="btnUpdateClose">
            <property name="text">
-            <string>CANCEL</string>
+            <string>CLOSE</string>
            </property>
           </widget>
          </item>
@@ -1531,9 +1531,9 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="btnCategoryCancel">
+          <widget class="QPushButton" name="btnCategoryClose">
            <property name="text">
-            <string>CANCEL</string>
+            <string>CLOSE</string>
            </property>
           </widget>
          </item>
@@ -1569,7 +1569,7 @@
   <tabstop>addSupplierLineEdit</tabstop>
   <tabstop>btnAddOk</tabstop>
   <tabstop>btnAddClear</tabstop>
-  <tabstop>btnAddCancel</tabstop>
+  <tabstop>btnAddClose</tabstop>
   <tabstop>removeProductCodeLineEdit</tabstop>
   <tabstop>removeNameSearchLineEdit</tabstop>
   <tabstop>removeCategoryLineEdit</tabstop>
@@ -1580,7 +1580,7 @@
   <tabstop>removeLastUpdatedLineEdit</tabstop>
   <tabstop>btnRemoveOk</tabstop>
   <tabstop>btnRemoveClear</tabstop>
-  <tabstop>btnRemoveCancel</tabstop>
+  <tabstop>btnRemoveClose</tabstop>
   <tabstop>updateProductCodeLineEdit</tabstop>
   <tabstop>updateNameSearchLineEdit</tabstop>
   <tabstop>updateProductNameLineEdit</tabstop>
@@ -1593,7 +1593,7 @@
   <tabstop>updateLastUpdatedLineEdit</tabstop>
   <tabstop>btnUpdateOk</tabstop>
   <tabstop>btnUpdateClear</tabstop>
-  <tabstop>btnUpdateCancel</tabstop>
+  <tabstop>btnUpdateClose</tabstop>
   <tabstop>categoryAddRadioBtn</tabstop>
   <tabstop>categoryRemoveRadioBtn</tabstop>
   <tabstop>categoryReplaceRadioBtn</tabstop>
@@ -1602,7 +1602,7 @@
   <tabstop>categoryUpdateLineEdit</tabstop>
   <tabstop>btnCategoryOk</tabstop>
   <tabstop>btnCategoryClear</tabstop>
-  <tabstop>btnCategoryCancel</tabstop>
+  <tabstop>btnCategoryClose</tabstop>
   <tabstop>customCloseBtn</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>

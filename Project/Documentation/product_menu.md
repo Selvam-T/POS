@@ -30,7 +30,7 @@ Product Menu follows the dialog pipeline used across the app:
 3. Configure read-only/display-only fields (`setReadOnly(True)` + `Qt.NoFocus`).
 4. Wire relationships + Enter navigation using `FieldCoordinator`.
 5. Apply gating using `FocusGate(lock_enabled=True)`.
-6. OK/CLEAR/Cancel handlers validate, reset, or close using tab-specific controller functions.
+6. OK/CLEAR/Close handlers validate, reset, or close using tab-specific controller functions.
 
 ---
 
@@ -54,7 +54,7 @@ Landing rules:
 
 ## CLEAR Buttons
 
-Each tab has a tab-local `CLEAR` button between the action button and `CANCEL`.
+Each tab has a tab-local `CLEAR` button between the action button and `CLOSE`.
 CLEAR resets only the active tab's form state; it does not close the dialog and does not write to the database.
 
 - ADD: clears Product Code and all ADD fields, blanks the category combo, clears status, reruns the ADD gate, and returns focus to Product Code.
@@ -106,7 +106,7 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 	- Widgets (combo, update line edit) are explicitly enabled/disabled per mode instead of relying on implicit UI defaults.
 	- Enter key behavior is intercepted in the Category tab: Enter does not auto-close the dialog. `Enter` is routed to an explicit handler which validates the current field and advances focus or requires an explicit press of the `OK` button to commit. The `OK` button is not an auto-default so focus changes won't accidentally trigger a commit.
 	- The `Other` category is preserved and is now shown as its real value when present in the DB (the dialog no longer maps `Other` to a placeholder string in the UPDATE flow).
-	- Successful category operations set a post-close StatusBar message on the host window. The dialog sets a skip flag so the generic "dialog closed" message does not overwrite the action-specific message.
+	- Successful category operations keep the dialog open, show success in the tab status label, and move focus to Close.
 
 
 ### Corrupt JSON recovery
@@ -221,7 +221,7 @@ The editable UPDATE widgets (name/sell/cost/category/supplier/OK) start locked v
 After a successful lookup, the loaded values are snapshotted.
 When OK is clicked:
 
-- If no editable fields changed, the dialog closes without writing.
+- If no editable fields changed, no DB write occurs; the dialog remains open, shows "No changes to update.", and moves focus to Close.
 - If fields changed, `update_product(...)` is called.
 
 ---
@@ -256,6 +256,7 @@ Product Menu follows the shared policy in `Documentation/error_logging_and_fallb
 After a successful DB write (ADD/REMOVE/UPDATE), Product Menu refreshes cache/completers best-effort.
 
 - Dialog-local status label shows **success**.
+- The dialog applies that tab's CLEAR/reset behavior, then remains open, restores the success message, and moves focus to that tab's Close button.
 - If refresh fails: a **warning** is queued for the StatusBar and displayed **after the dialog closes**.
 - StatusBar precedence rule: warning/error overrides success info.
 

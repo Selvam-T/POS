@@ -139,7 +139,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
                 "note_lbl": (QLabel, "receiptNoteFieldLbl"),
                 "note": (QLineEdit, "receiptNoteLineEdit"),
                 "ok_btn": (QPushButton, "btnReceiptOk"),
-                "cancel_btn": (QPushButton, "btnReceiptCancel"),
+                "close_action_btn": (QPushButton, "btnReceiptClose"),
                 "status_lbl": (QLabel, "receiptStatusLabel"),
             },
             hard_fail=True,
@@ -606,9 +606,9 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
             else:
                 _print_selected()
         finally:
-            QTimer.singleShot(0, lambda: widgets["cancel_btn"].setFocus(Qt.OtherFocusReason))
+            QTimer.singleShot(0, lambda: widgets["close_action_btn"].setFocus(Qt.OtherFocusReason))
 
-    def _cancel_close() -> None:
+    def _close_dialog() -> None:
         try:
             if not getattr(dlg, "main_status_msg", None):
                 set_dialog_info(dlg, "Receipt dialog closed.", duration=3000)
@@ -701,8 +701,8 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
         widgets["search_btn"].clicked.connect(_run_search)
         widgets["reset_btn"].clicked.connect(_reset_filters)
         widgets["ok_btn"].clicked.connect(_on_ok)
-        widgets["cancel_btn"].clicked.connect(_cancel_close)
-        widgets["close_btn"].clicked.connect(_cancel_close)
+        widgets["close_action_btn"].clicked.connect(_close_dialog)
+        widgets["close_btn"].clicked.connect(_close_dialog)
         print_radio.toggled.connect(lambda _checked: _sync_action_state())
         void_radio.toggled.connect(lambda checked: (_sync_action_state(), checked and note.setFocus(Qt.OtherFocusReason)))
         widgets["product_code"].textEdited.connect(_clear_product_name_when_code_edited)

@@ -74,18 +74,21 @@ QPushButton[objectName$="Ok"]:pressed {
     padding-top: 10px;
 }
 
-/* Cancel Button */
-QPushButton[objectName$="Cancel"] {
+/* Cancel / Close Button */
+QPushButton[objectName$="Cancel"],
+QPushButton[objectName$="Close"] {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #bdc3c7, stop:1 #6c757d);
     border: 1px solid #495057;
 }
 
-QPushButton[objectName$="Cancel"]:hover {
+QPushButton[objectName$="Cancel"]:hover,
+QPushButton[objectName$="Close"]:hover {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
                                       stop:0 #d1d9e2, stop:1 #9ea8b7);
 }
 
-QPushButton[objectName$="Cancel"]:pressed {
+QPushButton[objectName$="Cancel"]:pressed,
+QPushButton[objectName$="Close"]:pressed {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
                                       stop:0 #7a828f, stop:1 #9ea8b7); /* Softer gray */
     /*padding-top: 10px;*/

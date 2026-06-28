@@ -729,11 +729,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="btnReceiptCancel">
-              <property name="text">
-               <string>CANCEL</string>
-              </property>
-             </widget>
+             <widget class="QPushButton" name="btnReceiptClose">
+             <property name="text">
+               <string>CLOSE</string>
+             </property>
+            </widget>
             </item>
            </layout>
           </item>
