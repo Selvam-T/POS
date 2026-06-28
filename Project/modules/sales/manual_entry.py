@@ -1,6 +1,6 @@
 import os
 from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel, QComboBox
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui, 
@@ -122,6 +122,26 @@ def launch_manual_entry_dialog(parent):
         finally:
             combo.blockSignals(False)
 
+    def _unlock_qty_controls(*, focus_qty: bool = False) -> None:
+        gate.set_locked(False)
+        try:
+            widgets['qty'].setEnabled(True)
+            widgets['qty'].setReadOnly(False)
+            widgets['qty'].setFocusPolicy(Qt.StrongFocus)
+        except Exception:
+            pass
+        try:
+            widgets['ok_btn'].setEnabled(True)
+            widgets['ok_btn'].setFocusPolicy(Qt.StrongFocus)
+        except Exception:
+            pass
+        if focus_qty:
+            try:
+                widgets['qty'].setFocus()
+                QTimer.singleShot(0, widgets['qty'].setFocus)
+            except Exception:
+                pass
+
     def _set_gate_state(enabled: bool, result: dict = None):
         gate.set_locked(True)
         if enabled and result:
@@ -142,7 +162,7 @@ def launch_manual_entry_dialog(parent):
             else:
                 _set_combo_items(['EACH'], enabled=False, focus_policy=Qt.NoFocus)
                 _set_qty_placeholder()
-                gate.set_locked(False)
+                _unlock_qty_controls()
         else:
             widgets['unit'].setProperty('product_unit', '')
             widgets['qty'].setProperty('unit_price', 0)
@@ -167,8 +187,9 @@ def launch_manual_entry_dialog(parent):
     def _focus_after_product_sync():
         if _is_product_kg():
             widgets['unit'].setFocus()
+            QTimer.singleShot(0, widgets['unit'].setFocus)
         else:
-            widgets['qty'].setFocus()
+            _unlock_qty_controls(focus_qty=True)
 
     def _on_unit_changed(_index=None):
         if not _is_product_kg():
@@ -176,15 +197,12 @@ def launch_manual_entry_dialog(parent):
 
         if _selected_kg_input_unit():
             _set_qty_placeholder()
-            gate.set_locked(False)
+            _unlock_qty_controls()
             try:
                 widgets['qty'].clear()
             except Exception:
                 pass
-            try:
-                widgets['qty'].setFocus()
-            except Exception:
-                pass
+            _unlock_qty_controls(focus_qty=True)
             ui_feedback.set_status_label(widgets['status'], f"{_combo_text()} unit selected", ok=True)
         else:
             gate.set_locked(True)
