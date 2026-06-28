@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QLabel, QLineEdit, QTableWidget
 
 from modules.table_ui.table_operations import (
+    add_total_listener,
     bind_total_label,
     get_sales_data,
     get_subtotal,
@@ -115,3 +116,31 @@ def test_sales_table_total_label_uses_rounded_payable_total_only():
     assert total_label.text() == "$ 1.00"
     assert total_label.property("numeric_value") == 1.0
     assert total_label.property("subtotal_value") == 1.04
+
+
+def test_qty_enter_updates_total_listener_through_shared_total_path():
+    table = make_table()
+    totals = []
+    add_total_listener(table, totals.append)
+
+    set_table_rows(
+        table,
+        [
+            {
+                "product_name": "Enter Item",
+                "quantity": 1,
+                "unit_price": 1.04,
+                "unit": "Each",
+                "editable": True,
+            }
+        ],
+    )
+    totals.clear()
+
+    editor = table.cellWidget(0, 2).findChild(QLineEdit, "qtyInput")
+    editor.setText("2")
+    totals.clear()
+    editor.returnPressed.emit()
+
+    assert table.item(0, 5).text() == "$ 2.08"
+    assert totals == [2.1]

@@ -15,7 +15,6 @@ from .table_operations import (
     increment_row_quantity,
     set_table_rows,
     add_total_listener,
-    bind_qty_commit_listener,
 )
 __all__ = [
     'setup_sales_table',
@@ -26,7 +25,6 @@ __all__ = [
     'get_total',
     'get_subtotal',
     'add_total_listener',
-    'bind_qty_commit_listener',
     'handle_barcode_scanned',
     'find_product_in_table',
     'increment_row_quantity',

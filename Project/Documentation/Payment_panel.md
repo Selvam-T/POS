@@ -23,7 +23,7 @@
 - Display-only money labels use shared currency formatting (`$ 1,234.50`) while keeping the raw numeric value on the widget as `numeric_value`.
 - Editable payment fields (`*PayLineEdit`, `*ValLineEdit`) remain plain numeric text so user input and validation are not affected by currency symbols.
 - The incoming sale total is already the rounded payable total from the Sales frame, rounded to the nearest `$0.10`.
-- When the active focus is a sales-table `qtyInput`, `MainLoader` refreshes the payment defaults with `focus=False` so Cash/default totals update without stealing Qty focus.
+- Payment defaults refresh only from `saleTotalChanged`. When the active focus is a sales-table `qtyInput`, `MainLoader` uses `focus=False` so Cash/default totals update without stealing Qty focus.
 
 **Allocation formula:**
 ```

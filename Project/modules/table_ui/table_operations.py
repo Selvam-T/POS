@@ -298,7 +298,7 @@ def _update_total_value(table: QTableWidget) -> None:
 # SECTION 4: INTERACTION & EVENT FILTERS
 # =========================================================
 
-def _on_qty_commit(editor: QLineEdit, table: QTableWidget, *, from_enter: bool = False) -> None:
+def _on_qty_commit(editor: QLineEdit, table: QTableWidget) -> None:
     """Clears errors and updates math on commit. Focus handled by Coordinator."""
     from modules.ui_utils import input_handler, ui_feedback
     _recalc_from_editor(editor, table)
@@ -307,10 +307,6 @@ def _on_qty_commit(editor: QLineEdit, table: QTableWidget, *, from_enter: bool =
         input_handler.handle_quantity_input(editor, unit_type='unit')
         if status_lbl:
             ui_feedback.clear_status_label(status_lbl)
-        if from_enter:
-            listener = getattr(table, '_qty_commit_listener', None)
-            if callable(listener):
-                listener(get_total(table))
     except Exception:
         pass
 
@@ -319,8 +315,8 @@ def _install_row_focus_behavior(editor: QLineEdit, table: QTableWidget, row: int
     filt = _RowSelectFilter(table, row)
     editor.installEventFilter(filt)
     editor._rowSelectFilter = filt
-    editor.editingFinished.connect(lambda e=editor, t=table: _on_qty_commit(e, t, from_enter=False))
-    editor.returnPressed.connect(lambda e=editor, t=table: _on_qty_commit(e, t, from_enter=True))
+    editor.editingFinished.connect(lambda e=editor, t=table: _on_qty_commit(e, t))
+    editor.returnPressed.connect(lambda e=editor, t=table: _on_qty_commit(e, t))
 
 class _RowSelectFilter(QObject):
     def __init__(self, table: QTableWidget, row: int):
@@ -343,9 +339,6 @@ def bind_status_label(table: QTableWidget, label: QLabel) -> None:
 
 def bind_next_focus_widget(table: QTableWidget, widget: QWidget) -> None:
     table._next_focus_widget = widget
-
-def bind_qty_commit_listener(table: QTableWidget, listener: Callable[[float], None]) -> None:
-    table._qty_commit_listener = listener
 
 def bind_total_label(table: QTableWidget, label: QLabel) -> None:
     table._total_label = label
