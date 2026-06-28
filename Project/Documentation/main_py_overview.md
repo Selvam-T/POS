@@ -90,7 +90,7 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
 - **Sales Table Management:**
   - Loads and configures the sales table, binds the total label, and manages row operations.
   - **Unit-aware editable states:** KG items have read-only quantity cells, EACH items have editable quantity cells.
-  - **Currency display:** Unit Price, row Total, and the bound total label use shared currency formatting while preserving numeric values for recalculation and payment updates.
+  - **Currency display:** Unit Price and row Total use true two-decimal currency values; the bound total label displays the payable total rounded to the nearest `$0.10` and forwards that payable total to payment updates.
   - **Mixed table rebuilding:** Uses `set_table_rows()` when combining KG and EACH items from dialogs.
   - **Barcode blocking:** KG items cannot be added via barcode scan (shows message to use Vegetable Entry).
   - **PRODUCT_CACHE integration:** Fetches product info as 4-tuple `(found, name, price, unit)` for unit-based behavior.

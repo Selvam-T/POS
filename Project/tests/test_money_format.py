@@ -1,10 +1,9 @@
 from modules.ui_utils.money_format import (
-    format_cash_currency,
     format_currency,
     format_number,
     money_value,
-    round_cash_005,
     round_money,
+    round_payable_total,
 )
 
 
@@ -33,25 +32,8 @@ def test_round_money_uses_display_precision():
     assert round_money("not money") == 0.0
 
 
-def test_round_cash_005_rounds_to_nearest_five_cents():
-    expected = {
-        1.00: 1.00,
-        1.01: 1.00,
-        1.02: 1.00,
-        1.03: 1.05,
-        1.04: 1.05,
-        1.05: 1.05,
-        1.06: 1.05,
-        1.07: 1.05,
-        1.08: 1.10,
-        1.09: 1.10,
-        1.10: 1.10,
-    }
+def test_round_payable_total_rounds_to_nearest_ten_cents():
+    assert round_payable_total(1.04) == 1.00
+    assert round_payable_total(1.05) == 1.10
+    assert round_payable_total(1.09) == 1.10
 
-    for value, rounded in expected.items():
-        assert round_cash_005(value) == rounded
-
-
-def test_format_cash_currency_uses_nearest_five_cent_rounding():
-    assert format_cash_currency(1.01) == "$ 1.00"
-    assert format_cash_currency(1.09) == "$ 1.10"

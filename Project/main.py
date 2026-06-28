@@ -32,6 +32,7 @@ from modules.customer_display import CustomerDisplayWindow
 from modules.wrappers.dialog_wrapper import DialogWrapper
 from modules.db_operation import PRODUCT_CACHE, ensure_cash_outflows_table
 from modules.ui_utils.dialog_utils import report_exception, report_to_statusbar
+from modules.ui_utils.money_format import round_money
 from modules.runtime.paths import load_stylesheet, stylesheet_path
 # --- Menu frame dialog controllers ---
 from modules.menu.logout_menu import launch_logout_dialog
@@ -819,17 +820,18 @@ class MainLoader(QMainWindow):
     # ========== Signal Handlers ==========
     # Update payment defaults when sale total updates.
     def _on_sale_total_changed(self, total: float) -> None:
+        focus_payment = True
         try:
             from PyQt5.QtWidgets import QApplication
             app = QApplication.instance()
             fw = app.focusWidget() if app is not None else None
             if fw is not None and getattr(fw, 'objectName', lambda: '')() == 'qtyInput':
-                return
+                focus_payment = False
         except Exception:
             pass
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:
-            panel.set_payment_default(total, focus=True)
+            panel.set_payment_default(total, focus=focus_payment)
         self._update_customer_display_from_sales()
 
     def _on_qty_commit_total_changed(self, total: float) -> None:
@@ -992,7 +994,7 @@ class MainLoader(QMainWindow):
                 'unit': str(row.get('unit') or ''),
                 'unit_price': unit_price,
                 'price': unit_price,
-                'line_total': round(qty * unit_price, 2),
+                'line_total': round_money(qty * unit_price),
             })
         return out
 
@@ -1215,7 +1217,6 @@ class MainLoader(QMainWindow):
             return
 
         try:
-            from PyQt5.QtWidgets import QLineEdit
             from modules.table_ui.table_operations import set_table_rows
             from modules.domain.unit_helpers import canonicalize_unit
 
@@ -1247,49 +1248,11 @@ class MainLoader(QMainWindow):
             else:
                 return
 
-            # Get existing rows from sales table
             existing_rows = []
-            for r in range(self.sales_table.rowCount()):
-                product_item = self.sales_table.item(r, 1)
-                if product_item is None:
-                    continue
-
-                qty_container = self.sales_table.cellWidget(r, 2)
-                qty = 1.0
-                row_editable = True
-                if qty_container is not None:
-                    editor = qty_container.findChild(QLineEdit, 'qtyInput')
-                    if editor is not None:
-                        row_editable = not editor.isReadOnly()
-                        numeric_val = editor.property('numeric_value')
-                        if numeric_val is not None:
-                            try:
-                                qty = float(numeric_val)
-                            except (ValueError, TypeError):
-                                qty = 1.0
-                        else:
-                            try:
-                                qty = float(editor.text()) if editor.text() else 1.0
-                            except ValueError:
-                                qty = 1.0
-
-                price_item = self.sales_table.item(r, 4)
-                price = 0.0
-                if price_item is not None:
-                    try:
-                        price = float(price_item.text())
-                    except ValueError:
-                        price = 0.0
-
-                unit_item = self.sales_table.item(r, 3)
-                unit_val = canonicalize_unit(unit_item.text() if unit_item is not None else '')
-                row_data = {
-                    'product': product_item.text(),
-                    'quantity': qty,
-                    'unit_price': price,
-                    'editable': row_editable,
-                    'unit': unit_val
-                }
+            for row in get_sales_data(self.sales_table):
+                row_data = dict(row)
+                row_data['product'] = row_data.get('product_name', row_data.get('product', ''))
+                row_data['unit'] = canonicalize_unit(row_data.get('unit', ''))
                 existing_rows.append(row_data)
 
             # Merge new rows into existing rows (handle duplicates for all sources)

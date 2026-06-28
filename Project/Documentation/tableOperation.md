@@ -19,9 +19,10 @@ This module provides generic table operations for product tables in the POS syst
 - `set_table_rows(table, rows, status_bar=None)`: Rebuilds table with per-row editable states. Used when mixing KG (read-only) and EACH (editable) items. **Display logic uses the `numeric_value` property to preserve high-precision weights (KG) while showing user-friendly units (g/kg/ea).**
 - `remove_table_row(table, row)`: Removes a row and updates numbering and colors.
 - `recalc_row_total(table, row)`: Recomputes the total for a row when quantity or price changes. **Handles ValueError from input_handler if invalid characters are typed.**
-- `bind_total_label(table, label)`: Binds a QLabel (usually `totalValue` in the UI) to the table. The label will automatically update whenever the table's contents change.
-- `recompute_total(table)`: Recomputes and returns the grand total from all rows, updating the bound label if present.
-- `get_total(table)`: Returns the last computed grand total.
+- `bind_total_label(table, label)`: Binds a QLabel (usually `totalValue` in the UI) to the table. The label will automatically update with the rounded payable total whenever the table's contents change.
+- `recompute_total(table)`: Recomputes the true row subtotal, rounds the payable total to the nearest `$0.10`, updates the bound label, and returns the payable total.
+- `get_total(table)`: Returns the last computed rounded payable total.
+- `get_subtotal(table)`: Returns the last computed true row subtotal before payable-total rounding.
 - `handle_barcode_scanned(table, barcode, status_bar=None)`: Processes barcode scans. **BLOCKS KG items** (shows message to use Vegetable Entry), adds EACH items normally.
 
 ### Centralized Quantity Validation (2026 Update)

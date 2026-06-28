@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication, QLabel, QLineEdit, QTableWidget
 from modules.table_ui.table_operations import (
     bind_total_label,
     get_sales_data,
+    get_subtotal,
     get_total,
     recalc_row_total,
     set_table_rows,
@@ -86,3 +87,31 @@ def test_sales_table_recalc_keeps_currency_display_and_numeric_total():
     assert total_item.data(Qt.UserRole) == 6.0
     assert total_label.text() == "$ 6.00"
     assert total_label.property("numeric_value") == 6.0
+
+
+def test_sales_table_total_label_uses_rounded_payable_total_only():
+    table = make_table()
+    total_label = QLabel()
+    bind_total_label(table, total_label)
+
+    set_table_rows(
+        table,
+        [
+            {
+                "product_name": "Rounding Item",
+                "quantity": 1,
+                "unit_price": 1.04,
+                "unit": "Each",
+                "editable": True,
+            }
+        ],
+    )
+
+    total_item = table.item(0, 5)
+    assert total_item.text() == "$ 1.04"
+    assert total_item.data(Qt.UserRole) == 1.04
+    assert get_subtotal(table) == 1.04
+    assert get_total(table) == 1.0
+    assert total_label.text() == "$ 1.00"
+    assert total_label.property("numeric_value") == 1.0
+    assert total_label.property("subtotal_value") == 1.04

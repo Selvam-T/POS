@@ -216,6 +216,7 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
     
     gross_line = f"{'Gross Sales':<24} : {_fmt_money(sales.get('gross_sales')):>12}"
     net_line = f"{'Net After Outflow':<24} : {_fmt_money(sales.get('net_after_outflows')):>12}"
+    rounding_adjustment = _to_float(sales.get('rounding_adjustment'))
 
     lines = [
         'Sales Record & Totals',
@@ -239,6 +240,12 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
         '2. Earnings Received (By Payment Type)',
         '-' * 72,
     ]
+    if abs(rounding_adjustment) >= 0.01:
+        insert_at = lines.index(gross_line) + 1
+        lines[insert_at:insert_at] = [
+            f"{'Item Subtotal':<24} : {_fmt_money(sales.get('item_subtotal')):>12}",
+            f"{'Rounding Adjustment':<24} : {_fmt_money(rounding_adjustment):>12}",
+        ]
 
     blue_lines.add(gross_line)
     blue_lines.add(net_line)
@@ -585,6 +592,7 @@ def _format_summary_report_text(report: dict) -> tuple[str, set[str], set[str], 
     refund_line = f"{'Avg Refund Outflow':<24} : {_fmt_money(sales.get('less_refund_outflow')):>12}"
     vendor_line = f"{'Avg Vendor Outflow':<24} : {_fmt_money(sales.get('less_vendor_outflow')):>12}"
     net_line = f"{'Avg Net After Outflows':<24} : {_fmt_money(sales.get('net_after_outflows')):>12}"
+    rounding_adjustment = _to_float(sales.get('rounding_adjustment'))
 
     lines = [
         'Sales Insight',
@@ -605,6 +613,12 @@ def _format_summary_report_text(report: dict) -> tuple[str, set[str], set[str], 
         '',
         net_line,
     ]
+    if abs(rounding_adjustment) >= 0.01:
+        insert_at = lines.index(gross_line) + 1
+        lines[insert_at:insert_at] = [
+            f"{'Avg Item Subtotal':<24} : {_fmt_money(sales.get('item_subtotal')):>12}",
+            f"{'Avg Rounding Adj':<24} : {_fmt_money(rounding_adjustment):>12}",
+        ]
     blue_lines.update({gross_line, net_line})
 
     lines.extend(['', '2. Average Hourly Earnings', '-' * 70])

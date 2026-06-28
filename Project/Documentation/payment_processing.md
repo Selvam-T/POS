@@ -48,7 +48,11 @@ High-level commit flow
        counter and obtain a receipt number.
      - Insert the receipt header row (status='PAID', `created_at` = `paid_at`).
      - Insert one `receipt_items` row per cart line (snapshot product name,
-       unit, price, quantity, line_total).
+      unit, price, quantity, line_total). Item line totals remain true
+      two-decimal values.
+     - Store `receipts.grand_total` as the rounded payable total shown in the
+       Sales frame and Payment panel. Rounding adjustment is computed when
+       needed as `grand_total - SUM(receipt_items.line_total)`.
    - If this is a held receipt (`active_receipt_id` points to an UNPAID
      receipt):
      - Update the existing receipt's status to 'PAID' and set `paid_at`.
@@ -121,7 +125,7 @@ Testing recommendations
   - `receipt_counters` counter incremented for today's date
   - One row in `receipts` with status='PAID'
   - Two rows in `receipt_items` linked to that receipt
-  - One or more rows in `receipt_payments` covering the grand total
+  - One or more rows in `receipt_payments` covering the rounded grand total
   - CASH rows include `tendered` and `amount` (change due = `tendered - amount`)
 - Held receipt path: create a hold (UNPAID), load it, then pay. Verify the
   existing `receipts` row shows `status='PAID'` and `paid_at` set; `receipt_items`

@@ -12,6 +12,7 @@ from modules.db_operation.receipt_write_helpers import (
     insert_row,
     insert_receipt_items,
 )
+from modules.ui_utils.money_format import round_payable_total
 
 
 class HeldSaleCommitter:
@@ -41,7 +42,8 @@ class HeldSaleCommitter:
         if key_col is not None:
             values[key_col] = receipt_no
 
-        total_val = float(sum(self._line_total(i) for i in (sales_items or [])))
+        subtotal_val = float(sum(self._line_total(i) for i in (sales_items or [])))
+        total_val = round_payable_total(subtotal_val)
         created_at = now_iso()
 
         for candidate, value in (

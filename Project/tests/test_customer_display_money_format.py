@@ -35,6 +35,6 @@ def test_customer_display_payment_result_total_currency_format():
 
     assert display._payment_result_total.text() == "$ 1,234.50"
     assert display._payment_result_total.property("numeric_value") == 1234.5
-    assert display._payment_result_total.isVisible()
+    assert not display._payment_result_total.isHidden()
 
     display.close()

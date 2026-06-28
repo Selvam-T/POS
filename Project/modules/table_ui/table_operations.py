@@ -15,7 +15,12 @@ from config import (
 )
 from modules.db_operation import get_product_info
 from modules.ui_utils.ui_feedback import show_temp_status
-from modules.ui_utils.money_format import format_currency, money_value, round_money
+from modules.ui_utils.money_format import (
+    format_currency,
+    money_value,
+    round_money,
+    round_payable_total,
+)
 
 # =========================================================
 # SECTION 1: UI INITIALIZATION & THEME
@@ -93,10 +98,6 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         return
 
     table.setRowCount(0)
-
-    #raise RuntimeError("Testing sales table population failure")     # debug 1
-    #if table.objectName() == "salesTable" and rows:                  # debug 2
-    #    raise RuntimeError("Testing sales table population failure")
 
     for r, data in enumerate(rows):
         table.insertRow(r)
@@ -264,28 +265,31 @@ def _recalc_from_editor(editor: QLineEdit, table: QTableWidget) -> None:
 
 def recompute_total(table: QTableWidget) -> float:
     """Calculates sum of all rows and updates the bound label."""
-    total = 0.0
+    subtotal = 0.0
     for r in range(table.rowCount()):
         item = table.item(r, 5)
         if item:
             try:
-                total += _money_item_value(item)
+                subtotal += _money_item_value(item)
             except Exception:
                 pass
-    total = round_money(total)
-    table._current_total = total
+    subtotal = round_money(subtotal)
+    payable_total = round_payable_total(subtotal)
+    table._current_subtotal = subtotal
+    table._current_total = payable_total
     label = getattr(table, '_total_label', None)
     if isinstance(label, QLabel):
-        label.setText(format_currency(total))
-        label.setProperty('numeric_value', total)
+        label.setText(format_currency(payable_total))
+        label.setProperty('numeric_value', payable_total)
+        label.setProperty('subtotal_value', subtotal)
     listeners = getattr(table, '_total_listeners', None)
     if listeners:
         for callback in listeners:
             try:
-                callback(total)
+                callback(payable_total)
             except Exception:
                 pass
-    return total
+    return payable_total
 
 def _update_total_value(table: QTableWidget) -> None:
     recompute_total(table)
@@ -357,6 +361,9 @@ def add_total_listener(table: QTableWidget, listener: Callable[[float], None]) -
 
 def get_total(table: QTableWidget) -> float:
     return float(getattr(table, '_current_total', 0.0))
+
+def get_subtotal(table: QTableWidget) -> float:
+    return float(getattr(table, '_current_subtotal', 0.0))
 
 # =========================================================
 # SECTION 6: ROW DELETION & HIGHLIGHTS

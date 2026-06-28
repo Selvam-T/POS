@@ -55,16 +55,12 @@ def round_money(value: Any, *, decimals: int = 2, default: float = 0.0) -> float
         return float(default)
 
 
-def round_cash_005(value: Any) -> float:
-    """Round a cash-settlement amount to the nearest 5 cents."""
+def round_payable_total(value: Any) -> float:
+    """Round a payable transaction total to the nearest 10 cents."""
     amount = Decimal(str(money_value(value)))
-    rounded = (amount / Decimal('0.05')).quantize(
+    rounded = (amount / Decimal('0.10')).quantize(
         Decimal('1'),
         rounding=ROUND_HALF_UP,
-    ) * Decimal('0.05')
+    ) * Decimal('0.10')
     return float(rounded.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP))
 
-
-def format_cash_currency(value: Any) -> str:
-    """Format a cash-settlement amount after nearest-5-cent rounding."""
-    return format_currency(round_cash_005(value))

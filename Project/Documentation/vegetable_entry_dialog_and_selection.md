@@ -56,7 +56,7 @@ lookups use the same runtime snapshot.
   - KG items ≥ 1000g: Shows kg with 2 decimals (e.g., "1.20")
   - EACH items: Shows integer count
 - **Unit Display:** Separate column shows 'g', 'kg', or 'ea'
-- **Money Display:** Unit Price and Total use shared currency formatting (for example, `$ 1,234.50`) while the numeric values remain stored on the table items for recalculation and transfer.
+- **Money Display:** Unit Price and row Total use shared currency formatting (for example, `$ 1,234.50`) while the numeric values remain stored on the table items for recalculation and transfer. Payable-total rounding happens only at the bound Sales frame total, not inside individual row totals.
 - **Editable behavior:** Per-row based on unit type (see below)
 
 ### Control Buttons

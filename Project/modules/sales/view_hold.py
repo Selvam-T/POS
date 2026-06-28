@@ -737,7 +737,7 @@ def launch_viewhold_dialog(parent=None):
             return
 
         try:
-            from modules.table_ui.table_operations import set_table_rows
+            from modules.table_ui.table_operations import get_total, set_table_rows
             from modules.domain.unit_helpers import canonicalize_unit
 
             rows = []
@@ -796,10 +796,12 @@ def launch_viewhold_dialog(parent=None):
                 )
                 return
 
+            payable_total = get_total(sales_table)
+
             panel = getattr(parent, 'payment_panel_controller', None) if parent is not None else None
             if panel is not None:
                 try:
-                    panel.set_payment_default(float(total))
+                    panel.set_payment_default(float(payable_total))
                 except Exception:
                     pass
 
@@ -817,7 +819,7 @@ def launch_viewhold_dialog(parent=None):
             else:
                 if frame is not None and receipt_id is not None:
                     try:
-                        frame.notify_hold_loaded(int(receipt_id), float(total))
+                        frame.notify_hold_loaded(int(receipt_id), float(payable_total))
                     except Exception:
                         pass
 

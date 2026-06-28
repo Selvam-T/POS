@@ -20,7 +20,7 @@ This document describes the purpose and structure of each database table used in
 The **receipts** table serves as the primary header for every transaction, whether it is paid immediately, placed on hold, or subsequently cancelled.
 - **Identification:** Each entry uses a unique receipt number formatted as YYYYMMDD-####, with the counter capped at 9999.
 - **Customer & Staff Info:** A customer name is mandatory only for "Hold Sales" (status: UNPAID) and remains empty for standard paid transactions. The `cashier_id` (INTEGER) captures the logged-in user's `user_id` at the time of the transaction (FK -> `users(user_id)`).
-- **Financials & Status:** Stores the grand_total (sum of all item totals) and a status field, which can be 'PAID', 'UNPAID', or 'CANCELLED'.
+- **Financials & Status:** Stores `grand_total` as the rounded payable receipt total and a status field, which can be 'PAID', 'UNPAID', or 'CANCELLED'. The true item subtotal is available by summing `receipt_items.line_total`; any rounding adjustment is computed as `grand_total - SUM(receipt_items.line_total)`.
 - **Temporal Tracking:** Includes timestamps for created_at, paid_at, and cancelled_at. A note field is utilised specifically for UNPAID or CANCELLED records.
 
 ### 2. Receipt_items Table
@@ -30,7 +30,7 @@ This table stores the specific products associated with a receipt, functioning a
 Note on category edits and snapshot model:
 - Category edits performed in the `Product_list` (including bulk replace operations from the Product Menu) do NOT retroactively modify rows in `receipt_items`. The `receipt_items` table is intentionally a snapshot: it preserves the product/category values as they were at sale time so historical reports remain stable.
 - After any Product_list change (single-item CRUD or bulk replace), the in-memory `PRODUCT_CACHE` should be refreshed once so runtime lookups reflect the current master data; this does not change existing receipt rows.
-- **Detail-Oriented:** Each row includes a line_no to maintain the order of items, the product_code, quantity (integer or float), unit (e.g., Kg or Each), and the line_total.
+- **Detail-Oriented:** Each row includes a line_no to maintain the order of items, the product_code, quantity (integer or float), unit (e.g., Kg or Each), and the true two-decimal line_total before payable-total rounding.
 - **Linking:** Links to the parent receipt via a receipt_id. Notably, this table does not require its own created_at field, as it relies on the parent receipt's timestamp.
 
 ### 3. Receipt_payments Table

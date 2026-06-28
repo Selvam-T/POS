@@ -58,6 +58,7 @@ def get_receipt_header_by_no(receipt_no: str, *, conn: Optional[sqlite3.Connecti
         created_col = _first_existing(cols, "created_at", "paid_at")
         status_col = _first_existing(cols, "status")
         cashier_id_col = _first_existing(cols, "cashier_id")
+        total_col = _first_existing(cols, "grand_total", "total")
 
         select_parts = [
             _select_alias(id_col, "receipt_id", "NULL"),
@@ -65,6 +66,7 @@ def get_receipt_header_by_no(receipt_no: str, *, conn: Optional[sqlite3.Connecti
             _select_alias(created_col, "created_at", "''"),
             _select_alias(status_col, "status", "''"),
             _select_alias(cashier_id_col, "cashier_id", "NULL"),
+            _select_alias(total_col, "grand_total", "0"),
         ]
         sql = f"SELECT {', '.join(select_parts)} FROM receipts WHERE {key_col} = ? COLLATE NOCASE LIMIT 1"
         row = c.execute(sql, (receipt_no,)).fetchone()
@@ -232,6 +234,7 @@ def search_receipts(
         paid_col = rcols.get("paid_col")
         cancelled_col = rcols.get("cancelled_col")
         note_col = rcols.get("note_col")
+        total_col = _first_existing(_table_columns(c, "receipts"), "grand_total", "total")
 
         select_parts = [
             _select_alias(id_col, "receipt_id", "NULL"),
@@ -267,6 +270,8 @@ def search_receipts(
                     f"(SELECT COALESCE(SUM({line_expr}), 0) FROM receipt_items ri "
                     f"WHERE ri.{item_link_col} = receipts.{no_col})"
                 )
+        if total_col is not None:
+            amount_expr = f"COALESCE({total_col}, {amount_expr})"
         select_parts.append(f"{amount_expr} AS amount")
 
         where_parts: List[str] = []

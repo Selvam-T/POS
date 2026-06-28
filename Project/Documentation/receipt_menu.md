@@ -211,6 +211,7 @@ Print behavior:
 
 - Uses the same generated receipt text as preview.
 - Keeps receipt-specific amount formatting from `receipt_generator.py` so printed columns stay aligned within the configured receipt width.
+- Shows true item subtotal plus a computed rounding adjustment when the stored payable `grand_total` differs from the sum of item line totals.
 - Sends text through `modules.devices.print_helper.print_receipt_with_fallback(...)`.
 - Honors `config.ENABLE_PRINTER_PRINT`: network printer when enabled, console fallback when disabled.
 - Success or failure appears in `receiptStatusLabel`.
@@ -248,7 +249,7 @@ Implementation lives in `modules/db_operation/receipt_repo.py`.
 `search_receipts(...)`:
 
 - Reads from `receipts`.
-- Aggregates receipt amount from `receipt_items.line_total` where available.
+- Uses the stored payable `receipts.grand_total` where available and falls back to summing `receipt_items.line_total` for compatible schemas.
 - Falls back to quantity times price when needed.
 - Supports schema variants such as `receipt_no` / `receipt_number` and `id` / `receipt_id`.
 - Supports status, date, receipt number, product code, and product name filters.

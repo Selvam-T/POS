@@ -720,6 +720,8 @@ def detailed_report(
 
         payment_breakdown = _fetch_payment_breakdown(c, receipt_ids=paid_ids, receipt_nos=paid_nos)
         product_rows = _fetch_product_aggregates(c, receipt_ids=paid_ids, receipt_nos=paid_nos)
+        item_subtotal = sum(_to_float(row.get('line_sales')) for row in product_rows)
+        rounding_adjustment = gross_sales - item_subtotal
         categories = _build_category_breakdown(product_rows)
         top_products = _rank_products(product_rows, limit=10, sort_key='line_sales')
 
@@ -740,6 +742,8 @@ def detailed_report(
             "sales_summary": {
                 "paid_receipt_count": len(paid_rows),
                 "gross_sales": _to_float(gross_sales),
+                "item_subtotal": _to_float(item_subtotal),
+                "rounding_adjustment": _to_float(rounding_adjustment),
                 "less_refund_outflow": refund_total,
                 "less_vendor_outflow": vendor_total,
                 "net_after_outflows": _to_float(net_after_outflows),
@@ -780,6 +784,8 @@ def summary_report(
         excluded = _fetch_excluded_receipts(c, period_from=period_from, period_to=period_to)
 
         paid_item_rows = _fetch_paid_item_rows(c, paid_rows)
+        item_subtotal = sum(_to_float(row.get('line_sales')) for row in paid_item_rows)
+        rounding_adjustment = gross_sales - item_subtotal
 
         hour_sales: Dict[int, Dict[str, Any]] = {}
         hour_rows: Dict[int, List[Dict[str, Any]]] = defaultdict(list)
@@ -828,6 +834,8 @@ def summary_report(
             'sales_summary': {
                 'paid_receipt_count': _to_float(len(paid_rows)) / range_days,
                 'gross_sales': _to_float(gross_sales) / range_days,
+                'item_subtotal': _to_float(item_subtotal) / range_days,
+                'rounding_adjustment': _to_float(rounding_adjustment) / range_days,
                 'less_refund_outflow': refund_total / range_days,
                 'less_vendor_outflow': vendor_total / range_days,
                 'net_after_outflows': _to_float(net_after_outflows) / range_days,
@@ -870,6 +878,8 @@ def chart_report(
         net_after_outflows = gross_sales - refund_total - vendor_total
 
         paid_item_rows = _fetch_paid_item_rows(c, paid_rows)
+        item_subtotal = sum(_to_float(row.get('line_sales')) for row in paid_item_rows)
+        rounding_adjustment = gross_sales - item_subtotal
         range_days = _period_day_count(period_from, period_to, paid_rows)
         if range_days <= 0:
             range_days = 1
@@ -913,6 +923,8 @@ def chart_report(
             'sales_summary': {
                 'paid_receipt_count': _to_float(len(paid_rows)) / range_days,
                 'gross_sales': _to_float(gross_sales) / range_days,
+                'item_subtotal': _to_float(item_subtotal) / range_days,
+                'rounding_adjustment': _to_float(rounding_adjustment) / range_days,
                 'less_refund_outflow': refund_total / range_days,
                 'less_vendor_outflow': vendor_total / range_days,
                 'net_after_outflows': _to_float(net_after_outflows) / range_days,

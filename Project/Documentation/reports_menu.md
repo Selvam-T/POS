@@ -96,6 +96,9 @@ This document summarizes the current functional design for report-menu wiring, f
     - Improves readability and alignment of currency values.
   - Currency values are formatted through `modules/ui_utils/money_format.format_currency(...)`
     as `$ 1,234.56`.
+  - Gross/payment totals use rounded payable receipt totals. Product/category
+    earnings use true item line totals; when they differ, the report payload
+    includes a computed rounding adjustment.
 
 - Summary report integration
   - For `summary` selection, `viewReportBtn` calls

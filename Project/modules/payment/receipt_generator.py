@@ -9,6 +9,7 @@ import config
 from modules.db_operation import receipt_repo
 from modules.db_operation.users_repo import get_username_by_id
 from modules.ui_utils.greeting_state import current_greeting
+from modules.ui_utils.money_format import round_money
 
 
 def _format_datetime(raw: str) -> str:
@@ -62,6 +63,13 @@ def _line_with_amount(left_text: str, amount_text: str, width: int) -> str:
     left = (left_text or "")[:left_width].ljust(left_width)
     amount = (amount_text or "").rjust(config.RECEIPT_AMOUNT_WIDTH)
     return f"{left}{' ' * config.RECEIPT_GAP}{amount}"
+
+
+def _format_receipt_amount(amount: float) -> str:
+    rounded = round_money(amount)
+    if rounded < 0:
+        return f"-$ {abs(rounded):.2f}"
+    return f"$ {rounded:.2f}"
 
 
 def _resolve_cashier_name(cashier_id: object) -> str:
@@ -155,6 +163,7 @@ def _append_items_table(
     unit_key: str,
     unit_price_key: str,
     line_total_key: str,
+    payable_total: float | None = None,
 ) -> float:
     lines.append(_item_header(width))
     lines.append("-" * width)
@@ -169,9 +178,15 @@ def _append_items_table(
         total_amount += line_total
         lines.append(_item_line(qty, unit, unit_price, name, line_total, width))
     lines.append("-" * width)
-    lines.append(_line_with_amount("Grand Total:", f"$ {total_amount:.2f}", width))
+    subtotal = round_money(total_amount)
+    payable = round_money(payable_total if payable_total is not None else subtotal)
+    rounding_adjustment = round_money(payable - subtotal)
+    if abs(rounding_adjustment) >= 0.01:
+        lines.append(_line_with_amount("Subtotal:", _format_receipt_amount(subtotal), width))
+        lines.append(_line_with_amount("Rounding:", _format_receipt_amount(rounding_adjustment), width))
+    lines.append(_line_with_amount("Grand Total:", _format_receipt_amount(payable), width))
     lines.append("")
-    return total_amount
+    return payable
 
 
 def _append_payment_breakdown(
@@ -242,6 +257,7 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
         created_at = _format_datetime(created_at_raw)
         status = str(header.get("status") or "")
         cashier_name = _resolve_cashier_name(header.get("cashier_id"))
+        header_total = float(header.get("grand_total") or 0.0)
 
         items = receipt_repo.list_receipt_items_by_no(receipt_no, receipt_id=receipt_id)
         payments = receipt_repo.list_receipt_payments_by_no(receipt_no, receipt_id=receipt_id)
@@ -271,6 +287,7 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
         unit_key="unit",
         unit_price_key="unit_price",
         line_total_key="line_total",
+        payable_total=header_total if header_total > 0 else None,
     )
     lines.append("")
     # 4. Payment breakdown depending on receipt status
@@ -294,6 +311,7 @@ def generate_receipt_text_from_snapshot(
     status: str = "UNPAID",
     created_at: str | None = None,
     cashier_name: str = "",
+    payable_total: float | None = None,
     width: int = config.RECEIPT_DEFAULT_WIDTH,
 ) -> str:
     created_text = _format_datetime(created_at) if created_at else _format_datetime(datetime.now().isoformat())
@@ -318,6 +336,7 @@ def generate_receipt_text_from_snapshot(
         unit_key="unit",
         unit_price_key="unit_price",
         line_total_key="line_total",
+        payable_total=payable_total,
     )
     # 4. Payment breakdown depending on receipt status
     _append_payment_breakdown(

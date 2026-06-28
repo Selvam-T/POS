@@ -8,6 +8,7 @@ from modules.table_ui import (
     bind_total_label,
     recompute_total,
     get_total,
+    get_subtotal,
 )
 
 __all__ = [
@@ -17,4 +18,5 @@ __all__ = [
     'bind_total_label',
     'recompute_total',
     'get_total',
+    'get_subtotal',
 ]
