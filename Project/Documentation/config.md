@@ -7,6 +7,11 @@
 
 Import from config.py wherever dialog sizing is needed.
 
+- `PRODUCT_MENU_TAB_RATIOS`: Product Management tab-specific
+  `(width_ratio, height_ratio)` tuples. Product Menu uses
+  `DIALOG_RATIOS['product_menu']` for initial wrapper sizing, then applies the
+  active tab ratio after the dialog is visible.
+
 ## Shared Report Viewer Size Ratio
 - `REPORT_VIEWER_RATIOS`: Shared `(width_ratio, height_ratio)` tuple used by
 	the report viewer shell for `detail`, `summary`, `chart`, and `inactivity`

@@ -1381,13 +1381,6 @@ def main():
 
             # Qt message types: Debug=0, Warning=1, Critical=2, Fatal=3, Info=4
             if mt in (1, 2, 3):
-                # Suppress known ProductMenu resize noise on Windows.
-                if (
-                    "QWindowsWindow::setGeometry" in message
-                    and "ProductMenuDialogWindow" in message
-                    and "Unable to set geometry" in message
-                ):
-                    return
                 # Suppress non-focusable fullscreen window activation warnings.
                 if "requestActivate()" in message and "WindowDoesNotAcceptFocus" in message:
                     return

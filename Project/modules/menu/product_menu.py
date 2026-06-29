@@ -30,7 +30,7 @@ from modules.ui_utils.input_validation import (
 from modules.table_ui import handle_barcode_scanned
 from modules.domain.unit_helpers import canonicalize_unit
 from modules.date_time import format_datetime
-from config import QSS_DIR, UI_DIR
+from config import PRODUCT_MENU_TAB_RATIOS, QSS_DIR, UI_DIR
 
 # Constants
 UI_PATH = os.path.join(UI_DIR, 'product_menu.ui')
@@ -178,6 +178,26 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         except Exception:
             pass
 
+    _tab_ratio_keys = {
+        0: 'add',
+        1: 'remove',
+        2: 'update',
+        3: 'category',
+    }
+
+    def _product_menu_ratio_for_tab(index: int):
+        ratio_key = _tab_ratio_keys.get(int(index), 'add')
+        ratio = PRODUCT_MENU_TAB_RATIOS.get(ratio_key)
+        if ratio is not None:
+            return ratio
+        ratio = PRODUCT_MENU_TAB_RATIOS.get('add')
+        if ratio is not None:
+            return ratio
+        try:
+            return next(iter(PRODUCT_MENU_TAB_RATIOS.values()))
+        except Exception:
+            return None
+
     def _resize_dialog_to_tab(index: int | None = None) -> None:
         tabs = widgets.get('tabs')
         if tabs is None:
@@ -189,39 +209,30 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 index = None
         if index is None or index < 0:
             return
-        try:
-            tab = tabs.widget(index)
-        except Exception:
-            tab = None
-        if tab is None:
-            return
 
         if _dialog_anchor['pos'] is None:
             _capture_dialog_anchor()
 
         try:
-            if tab.layout() is not None:
-                tab.layout().activate()
+            active_tab = tabs.widget(index)
+            if active_tab is not None and active_tab.layout() is not None:
+                active_tab.layout().activate()
+            tabs.updateGeometry()
             if dlg.layout() is not None:
                 dlg.layout().activate()
         except Exception:
             pass
 
         try:
-            base_extra = dlg.layout().sizeHint().height() - tabs.sizeHint().height()
-        except Exception:
-            base_extra = 0
-
-        try:
-            if tab.layout() is not None:
-                tab_height = tab.layout().sizeHint().height()
+            host_geom = main_window.frameGeometry()
+            ratio = _product_menu_ratio_for_tab(index)
+            if ratio is None:
+                desired_w = dlg.width()
+                desired_h = dlg.height()
             else:
-                tab_height = tab.sizeHint().height()
-        except Exception:
-            tab_height = 0
-
-        try:
-            desired = max(int(tab_height + base_extra), 300)
+                width_ratio, height_ratio = ratio
+                desired_w = max(int(host_geom.width() * float(width_ratio)), dlg.minimumWidth())
+                desired_h = max(int(host_geom.height() * float(height_ratio)), 300)
             max_h = None
             try:
                 screen = None
@@ -236,17 +247,24 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 max_h = None
 
             if max_h is not None:
-                desired = min(desired, max_h)
+                desired_h = min(desired_h, max_h)
 
-            dlg.setMinimumHeight(desired)
-            dlg.setMaximumHeight(desired)
+            # Clear the old fixed-height constraint before resizing. This
+            # avoids asking Qt/Windows to shrink below the previous minimum.
+            dlg.setMinimumHeight(0)
+            dlg.setMaximumHeight(16777215)
+            dlg.resize(desired_w, desired_h)
+            dlg.setMinimumHeight(desired_h)
+            dlg.setMaximumHeight(desired_h)
             try:
+                actual_w = int(dlg.width())
                 actual_h = int(dlg.height())
-                if abs(actual_h - int(desired)) > 2:
+                if abs(actual_h - int(desired_h)) > 2 or abs(actual_w - int(desired_w)) > 2:
                     from modules.ui_utils.error_logger import log_error_message
                     log_error_message(
                         "WARNING: ProductMenu resize mismatch: "
-                        f"desired_h={int(desired)} actual_h={actual_h}"
+                        f"desired={int(desired_w)}x{int(desired_h)} "
+                        f"actual={actual_w}x{actual_h}"
                     )
             except Exception:
                 pass
@@ -258,6 +276,19 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 dlg.move(_dialog_anchor['pos'])
         except Exception:
             pass
+        try:
+            dlg.updateGeometry()
+            dlg.update()
+            QTimer.singleShot(0, dlg.repaint)
+        except Exception:
+            pass
+
+    def _schedule_resize_dialog_to_tab(index: int | None = None) -> None:
+        try:
+            idx = widgets['tabs'].currentIndex() if index is None else int(index)
+        except Exception:
+            idx = None
+        QTimer.singleShot(0, lambda idx=idx: _resize_dialog_to_tab(idx))
 
     # Category OK should not auto-trigger on Enter when focus changes.
     try:
@@ -269,10 +300,10 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     # Resize dialog height based on the active tab, keep a fixed anchor position.
     def _post_show_resize() -> None:
         _capture_dialog_anchor()
-        _resize_dialog_to_tab()
+        _schedule_resize_dialog_to_tab()
 
     try:
-        widgets['tabs'].currentChanged.connect(_resize_dialog_to_tab)
+        widgets['tabs'].currentChanged.connect(_schedule_resize_dialog_to_tab)
         QTimer.singleShot(0, _post_show_resize)
     except Exception:
         pass

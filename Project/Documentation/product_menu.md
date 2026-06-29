@@ -52,6 +52,19 @@ Landing rules:
 
 ---
 
+## Dialog Sizing
+
+Product Menu uses `config.PRODUCT_MENU_TAB_RATIOS` after the shared wrapper has positioned the dialog.
+
+- Width stays controlled by the configured tab ratio.
+- Height varies by active tab: ADD, REMOVE, UPDATE, and CATEGORY can each use a different main-window height ratio.
+- The tab resize is deferred with `QTimer.singleShot(0, ...)` after `currentChanged` so the tab switch settles before the frameless dialog changes size.
+- Product Menu resize mismatch warnings are logged when the requested size differs from the actual Qt window size.
+
+`DIALOG_RATIOS['product_menu']` remains the initial/fallback wrapper size; the active tab ratio is the Product Menu sizing source of truth after the dialog is visible.
+
+---
+
 ## CLEAR Buttons
 
 Each tab has a tab-local `CLEAR` button between the action button and `CLOSE`.
