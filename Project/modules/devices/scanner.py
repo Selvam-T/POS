@@ -13,6 +13,8 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from pynput import keyboard
 import time
 
+from config import SCANNER_KEY_INTERVAL_SECONDS
+
 
 class BarcodeScanner(QObject):
     """
@@ -24,10 +26,10 @@ class BarcodeScanner(QObject):
     
     # Qt Signal: emitted when barcode is scanned
     barcode_scanned = pyqtSignal(str)
-    # Activity signal: emitted on every key press with event timestamp
-    scanner_activity = pyqtSignal(float)
+    # Activity signal: emitted on every key press with timestamp and fast-key flag.
+    scanner_activity = pyqtSignal(float, bool)
     
-    def __init__(self, timeout=0.05):
+    def __init__(self, timeout=None):
         """
         Initialize barcode scanner.
         
@@ -39,7 +41,7 @@ class BarcodeScanner(QObject):
         super().__init__()
         self._buffer = ''
         self._last_time = 0
-        self._timeout = timeout
+        self._timeout = SCANNER_KEY_INTERVAL_SECONDS if timeout is None else timeout
         self._listener = None
         self._listener_thread = None
         self._enabled = True
@@ -85,12 +87,12 @@ class BarcodeScanner(QObject):
             return
 
         now = time.time()
+        time_diff = now - self._last_time
+        is_fast = self._last_time > 0 and time_diff <= self._timeout
         try:
-            # Emit activity first so UI can prepare to swallow Enter if needed
-            self.scanner_activity.emit(now)
+            self.scanner_activity.emit(now, is_fast)
         except Exception:
             pass
-        time_diff = now - self._last_time
         
         try:
             # Get character from key

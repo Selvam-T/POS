@@ -156,11 +156,8 @@ Barcode behavior:
 
 - The dialog exposes `dlg.barcode_override_handler`.
 - Scans are accepted only when focus is in `receiptProductCodeLineEdit`.
-- Scans in other widgets are rejected by `BarcodeManager` with the existing “Scan only in Product Code field” behavior.
-
-Known caveat:
-
-- The current scanner timing heuristic can treat very fast manual typing as scanner input in non-product-code fields. This is documented in `Documentation/scanner_input_infocus.md` and should be fixed separately with deliberate scanner-focused testing.
+- Scans in other widgets are rejected by `BarcodeManager` with the existing "Scan only in Product Code field" behavior.
+- Fast manual typing in fields such as `receiptNoteLineEdit` should remain usable; scanner cleanup now runs after a confirmed rejected scan.
 
 ## Preview
 

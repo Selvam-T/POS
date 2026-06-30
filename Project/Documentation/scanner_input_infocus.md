@@ -1,106 +1,87 @@
-# Scanner input: focus-first routing and protection
+# Scanner Input: Focus-First Routing And Protection
 
-This document explains how barcode scanner input is handled across the POS UI to ensure scans are accepted only where intended and ignored everywhere else without side effects.
+This document explains how HID barcode scanner input is routed while keeping normal keyboard typing usable.
 
 ## Goals
 
-- Accept scans in the right place without user clicks.
-- Prevent stray characters or unintended button activation during scans.
-- Keep normal keyboard typing usable in forms.
-- Provide useful diagnostics (focus path and cache lookup) to debug routing.
+- Accept scans only in intended destinations.
+- Prevent scanner Enter from submitting forms or clicking default buttons.
+- Restore/clean leaked scanner text when scans are rejected.
+- Keep fast manual typing usable in ordinary fields.
 
-## Key ideas (current design)
+## Current Design
 
-- App-wide event filtering
-  - Detects scan “bursts” using inter-key timing (very fast consecutive keys).
-  - Swallows Enter briefly and blocks printable keys to non-allowed widgets during the burst.
-- Modal scanner block
-  - When a modal dialog (Manual, Vegetable, etc.) opens, a flag is set to swallow printable keys and Enter globally until the dialog closes.
-  - A dim overlay sits on the main window to block mouse/touch clicks and we restore focus to the sales table on close.
-- Focus-based routing with override
-  - Default: scans go to the sales table handler.
-  - Payment: when `refundInput` is focused, scan fills that field.
-  - Product dialog: installs a temporary barcode override that accepts scans when `*ProductCodeLineEdit` is focused.
-    - If focus shifts mid-scan (e.g., auto-lookup moves focus), the override still accepts the scan if the scan burst started in a `*ProductCodeLineEdit`.
-    - Otherwise it ignores and cleans leaks.
-- Leak cleanup fallback
-  - If a first character leaks into a disallowed field (HID wedge limitation), we remove it best-effort from QLineEdit/QTextEdit family widgets.
-  - Current rule: if the focused widget’s text ends with the first character of the scanned barcode, that trailing character is removed (no length threshold, no timing dependency).
-- Enter/Return control
-  - During scan bursts, Enter is briefly suppressed to avoid clicking default buttons.
-  - In Product dialog, Enter on line edits behaves like Tab to advance focus instead of clicking a button; action buttons are non-default unless focused.
-- Always-on cache diagnostics
-  - Every scan logs an in-memory cache lookup result (found/key/name/price/cache size) for quick diagnosis.
-  - Optional focus-path logging prints active window, focus chain, and whether a barcode override is active.
+### Scanner Timing
 
-## Allowed vs blocked targets
+`modules/devices/scanner.py` owns scanner/manual timing.
 
-- Allowed
-  - Sales table (default destination when no special context applies).
-  - `productCodeLineEdit` in Product Management (when focused).
-  - `refundInput` in Payment frame (when focused).
-- Blocked and cleaned
-  - `qtyInput` (sales table quantity editor).
-  - All fields in Manual Entry and Vegetable dialogs (via modal block + read-only text for Manual).
-  - Any non-focused fields in Product dialog; leaks are cleaned.
+- `SCANNER_KEY_INTERVAL_SECONDS` identifies scanner-fast consecutive keys.
+- `scanner_activity(timestamp, is_fast)` is emitted for each key press.
+- A barcode is confirmed only when the scanner buffer has at least 3 characters and Enter completes the scan.
 
-## Challenges and limitations
+`BarcodeManager` consumes `is_fast`; it does not run a second, different timing threshold.
 
-- HID “keyboard wedge” scanners type like a user:
-  - The very first key can arrive before detection logic kicks in, leading to a rare single-character leak.
-  - Default-button behavior in GUIs can cause Enter to activate buttons if not suppressed.
-- Timing-based burst detection is heuristic:
-  - Extremely fast typists or atypical scanners could mimic similar timings.
-  - Current side effect: very fast manual typing in non-product-code fields can be interpreted as scanner input. During that active scan window, `BarcodeManager` restores the pre-scan text for forbidden fields, so characters may appear to be swallowed unless the user types more slowly. This has been observed in Receipt History fields such as `receiptNoteLineEdit`.
+### Enter Suppression
 
-## Mitigations in this build
+`BarcodeManager` suppresses Enter/Return for `SCANNER_UI_SUPPRESS_SECONDS` after scanner-fast activity.
 
-- Modal scanner block for dialogs prevents both printable keys and Enter everywhere while the dialog is open.
-- Global suppression windows for Enter and printable keys during active scan bursts.
-- Local Enter-as-Tab wiring and non-default buttons in Product dialog.
-- Centralized best-effort leak cleanup for QLineEdit/QTextEdit widgets.
+This protects forms and default buttons from a scanner's trailing Enter. Printable letters and numbers are not blocked solely because they arrived quickly, which avoids the old fast-manual-typing pause in fields such as receipt notes.
 
-## Options to eliminate first-char leaks (not required now)
+### Dialog Overrides
 
-- Scanner prefix/suffix
-  - Configure a distinct prefix (e.g., F9 or control code STX) and suffix (Enter or ETX) so the app detects scans from the very first character and swallows every scan keystroke.
-  - Requires scanning vendor programming barcodes; no PC driver typically needed. If unknown model, defer.
-- COM/serial integration
-  - Read the scan as a single message from a serial port rather than as keystrokes; perfect focus control with zero visual leaks.
-  - Not chosen for this project to keep plug-and-play behavior.
+Scanner-aware dialogs expose `dlg.barcode_override_handler`.
 
-## Rationale for current design
+- Scans are accepted when focus is in a field whose `objectName` ends with `ProductCodeLineEdit`.
+- If focus moves during a scan, the override can still accept it when the scan started in a `*ProductCodeLineEdit`.
+- Scans in other fields are rejected and restored/cleaned.
 
-- Works with any HID scanner without hardware changes.
-- Keeps normal typing usable while making scans safe.
-- Centralizes complexity (event filter, modal block, override) and uses small helpers for maintainability.
-- Provides robust UX: overlay blocks clicks, focus is restored to the sales table, and status bar feedback remains consistent.
+### Modal Block
 
-## Edge cases considered
+Dialogs opened through `DialogWrapper.open_dialog_scanner_blocked(...)` enable modal scanner block.
 
-- Scans during modal dialogs: fully swallowed; no sales increments or field edits.
-- Focus on `qtyInput`: scan ignored and leak cleaned.
-- Focus on `refundInput`: scan is accepted and applied to the field.
-- Product not found: Product dialog opens in ADD mode with code prefilled; override active only on `productCodeLineEdit`.
+- Confirmed scans do not route to the main sales table while a modal is open.
+- Normal typing inside the active modal remains usable.
+- Input outside the active modal is blocked as a fail-safe.
 
-### Effect on totals (salesFrame totalValue)
+## Allowed vs Blocked Targets
 
-- Row totals and the grand total are updated together. If a scan leak briefly alters a quantity and is then cleaned, the two quick recalculations cancel out and the grand total returns to the correct value.
-- The aggregate total is derived from the visible row totals (column 4) to avoid rounding drift and ensure UI consistency.
+Allowed:
 
-## Developer notes
+- Sales table, when no modal/special context blocks scanner routing.
+- Focused dialog fields ending in `ProductCodeLineEdit`, when the dialog has an override.
 
-- Key helpers in `main.py`:
-  - Event filter with `_on_scanner_activity` timing window.
-  - `_start_scanner_modal_block()` / `_end_scanner_modal_block()` and dim overlay helpers.
-  - `_barcodeOverride` for Product dialog; `_ignore_scan()` for leak cleanup and logging.
-- Debug toggles (in `config.py`): `DEBUG_SCANNER_FOCUS`, `DEBUG_FOCUS_CHANGES`, `DEBUG_CACHE_LOOKUP`.
-- When adding new modal dialogs, always:
-  - Show the overlay, start the scanner modal block, and restore focus to the sales table on close.
-  - Avoid default buttons unless explicitly focused; consider Enter-as-Tab on multi-field forms.
+Blocked and cleaned:
 
-## Future improvements (optional)
+- `qtyInput` in the sales table.
+- Non-product-code fields in scanner-aware dialogs.
+- Main-window scan routing while `receipt_context.source == 'HOLD_LOADED'`.
+- Main-window scan routing while a scanner-blocked modal is open.
 
-- Add a per-dialog child event filter to swallow printable keys for all unintended fields, even without modal block.
-- If scanner model becomes known, enable a prefix/suffix for zero-leak capture.
-- Tune timing thresholds if you observe false positives/negatives.
+## Leak Cleanup
+
+HID scanners type like keyboards, so scanner characters can briefly appear in the focused widget.
+
+When a scan is confirmed and then rejected/ignored, `BarcodeManager`:
+
+1. Restores the editable widget text captured at scan-burst start.
+2. Falls back to single-character cleanup if no snapshot is available.
+
+If a scanner does not send Enter, no confirmed scan is emitted, so rejected-scan cleanup does not run.
+
+## Edge Cases
+
+- Fast manual typing may still briefly suppress Enter if it looks scanner-fast, but printable characters should continue flowing into the widget.
+- A scan into a forbidden editable field may briefly show characters until Enter confirms the scan; then the field should restore to its pre-scan text.
+- A scanner configured with a prefix/suffix or serial/COM mode would allow cleaner zero-leak capture, but the current design keeps HID plug-and-play behavior.
+
+## Developer Notes
+
+- Timing constants live in `config.py`:
+  - `SCANNER_KEY_INTERVAL_SECONDS`
+  - `SCANNER_UI_SUPPRESS_SECONDS`
+- Main event filtering and routing live in `modules/devices/barcode_manager.py`.
+- Raw HID key buffering lives in `modules/devices/scanner.py`.
+- Debug toggles:
+  - `DEBUG_SCANNER_FOCUS`
+  - `DEBUG_FOCUS_CHANGES`
+  - `DEBUG_CACHE_LOOKUP`

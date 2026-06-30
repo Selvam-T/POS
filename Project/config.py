@@ -116,6 +116,11 @@ DEBUG_SCANNER_FOCUS = False
 DEBUG_FOCUS_CHANGES = False
 DEBUG_CACHE_LOOKUP = False
 
+# Scanner timing. The key interval identifies scanner-like bursts; the UI
+# suppression window only protects Enter/Return from triggering default actions.
+SCANNER_KEY_INTERVAL_SECONDS = 0.05
+SCANNER_UI_SUPPRESS_SECONDS = 0.90
+
 
 # -----------------------------------------------------------------------------
 # Main UI and dialog presentation

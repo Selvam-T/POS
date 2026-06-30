@@ -180,7 +180,7 @@ The Manual Entry dialog allows users to manually input product information when 
 Manual Entry is launched via `DialogWrapper.open_dialog_scanner_blocked()`, which enables a modal scanner block and overlay so the main window cannot accidentally receive scan input while the dialog is open. Within the dialog, behavior is produced by the combination of:
 
 - `DialogWrapper` (overlay + modal block + cleanup/focus restore)
-- `BarcodeManager` (scan-burst key swallowing + leak cleanup; leak cleanup is length-independent)
+- `BarcodeManager` (Enter suppression during scanner-fast activity + rejected-scan restore/cleanup)
 
 Widget behavior summary:
 
@@ -191,7 +191,7 @@ Widget behavior summary:
 
 2. **manualNameSearchLineEdit**
     - Accepts normal keyboard typing for name search and QCompleter selection.
-    - Scanner bursts are not permitted here, so burst characters are swallowed; a rare first-character leak may briefly trigger the dropdown before cleanup removes it.
+    - Scanner bursts are not permitted here. A rejected confirmed scan restores/cleans leaked scanner text.
 
 3. **manualUnitComboBox**
     - Starts empty and disabled before product lookup.
@@ -202,7 +202,7 @@ Widget behavior summary:
 
 4. **manualQuantityLineEdit**
     - Accepts keyboard typing.
-    - Scanner bursts are swallowed here (not a permitted scan target); if any first character leaks, it is cleaned up best-effort.
+    - Scanner bursts are not a permitted scan target; rejected confirmed scans restore/clean leaked scanner text.
 
 5. **OK / Cancel / X Close buttons**
     - Scanner input does not leak to the main window while the dialog is open.

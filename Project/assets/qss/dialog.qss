@@ -97,18 +97,18 @@ QPushButton[objectName$="Close"]:pressed {
 
 /* Clear Button */
 QPushButton[objectName$="Clear"] {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #f59e0b, stop:1 #d97706);
-    border: 1px solid #92400e;
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #e2a03f, stop:1 #c67a13);
+    border: 1px solid #8c5200;
 }
 
 QPushButton[objectName$="Clear"]:hover {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-                                      stop:0 #fbbf24, stop:1 #f59e0b);
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #f0b863, stop:1 #e2a03f);
 }
 
 QPushButton[objectName$="Clear"]:pressed {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-                                      stop:0 #b45309, stop:1 #d97706);
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                      stop:0 #9a5f06, stop:1 #c67a13);
     padding-top: 2px;
 }
 

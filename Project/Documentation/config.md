@@ -62,6 +62,10 @@ This file centralizes key configuration values for the POS application. It is im
 - `DEBUG_FOCUS_CHANGES`: Log every Qt focus change (very verbose).
 - `DEBUG_CACHE_LOOKUP`: Log cache lookup result for every scanned code.
 
+## Scanner Timing
+- `SCANNER_KEY_INTERVAL_SECONDS`: Shared scanner/manual inter-key threshold used by `scanner.py`.
+- `SCANNER_UI_SUPPRESS_SECONDS`: Enter/Return suppression window used by `BarcodeManager` after scanner-fast activity.
+
 ## Trial Build Flags
 - `TRIAL_BUILD_ENABLED`: Enables trial expiry enforcement.
 - `TRIAL_EXPIRY_DATE`: Last UTC date on which login is allowed.
