@@ -21,7 +21,7 @@ from modules.table_ui.table_operations import (
     setup_sales_table, get_sales_data, set_table_rows, 
     bind_status_label, bind_next_focus_widget
 )
-from config import QSS_DIR, UI_DIR
+from config import MAIN_STATUS_LONG_DURATION_MS, QSS_DIR, UI_DIR
 
 
 UI_PATH = os.path.join(UI_DIR, 'vegetable_entry.ui')
@@ -212,7 +212,7 @@ def _report_vegetable_runtime_failure(
         exc,
         user_message=user_message,
         level="error",
-        duration=6000,
+        duration=MAIN_STATUS_LONG_DURATION_MS,
     )
 
 

@@ -16,7 +16,7 @@ from modules.db_operation.products_repo import get_product_list_schema_and_rows
 from modules.db_operation.users_repo import verify_password, update_password, clear_must_change_password
 from modules.ui_utils import ui_feedback
 from modules.menu.screen2_ads_helper import Screen2AdsController
-from config import ASSETS_DIR, QSS_DIR, UI_DIR
+from config import ASSETS_DIR, MAIN_STATUS_DURATION_MS, PERSISTENT_DURATION_MS, QSS_DIR, STATUS_LABEL_DURATION_MS, UI_DIR
 
 QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 EYE_OPEN_ICON_PATH = os.path.join(ASSETS_DIR, 'icons', 'eye_open.svg')
@@ -370,7 +370,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
 
     def _set_export_status(msg: str, ok: bool) -> None:
         try:
-            ui_feedback.set_status_label(exportStatusLabel, msg, ok=ok, duration=3500 if ok else 0)
+            ui_feedback.set_status_label(exportStatusLabel, msg, ok=ok, duration=STATUS_LABEL_DURATION_MS if ok else PERSISTENT_DURATION_MS)
         except Exception:
             pass
 
@@ -606,7 +606,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             def _reject_with_default_msg():
                 try:
                     if not getattr(dlg, 'main_status_msg', None):
-                        set_dialog_info(dlg, 'Admin dialog closed.', duration=3000)
+                        set_dialog_info(dlg, 'Admin dialog closed.', duration=MAIN_STATUS_DURATION_MS)
                 except Exception:
                     pass
                 try:
@@ -620,7 +620,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     try:
         def _on_admin_cancel():
             try:
-                set_dialog_info(dlg, 'Admin password change cancelled.', duration=3000)
+                set_dialog_info(dlg, 'Admin password change cancelled.', duration=MAIN_STATUS_DURATION_MS)
             except Exception:
                 pass
             try:
@@ -633,7 +633,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
 
         def _on_staff_cancel():
             try:
-                set_dialog_info(dlg, 'Staff password change cancelled.', duration=3000)
+                set_dialog_info(dlg, 'Staff password change cancelled.', duration=MAIN_STATUS_DURATION_MS)
             except Exception:
                 pass
             try:

@@ -1,6 +1,7 @@
 """Unified dialog wrapper for all modal dialogs."""
 from PyQt5.QtWidgets import QDialog
 from modules.ui_utils.dialog_utils import report_to_statusbar
+from config import MAIN_STATUS_DURATION_MS, MAIN_STATUS_LONG_DURATION_MS
 
 
 class DialogWrapper:
@@ -174,12 +175,12 @@ class DialogWrapper:
                     msg = getattr(self.main, '_pending_main_status_msg', None)
                     if msg:
                         is_error = bool(getattr(self.main, '_pending_main_status_is_error', True))
-                        duration = getattr(self.main, '_pending_main_status_duration', 6000)
+                        duration = getattr(self.main, '_pending_main_status_duration', MAIN_STATUS_LONG_DURATION_MS)
                         report_to_statusbar(
                             self.main,
                             msg,
                             is_error=is_error,
-                            duration=int(duration) if duration is not None else 6000,
+                            duration=int(duration) if duration is not None else MAIN_STATUS_LONG_DURATION_MS,
                         )
                 except Exception:
                     pass
@@ -232,10 +233,10 @@ class DialogWrapper:
                         self.main,
                         msg,
                         is_error=bool(is_error),
-                        duration=int(duration) if duration is not None else 4000,
+                        duration=int(duration) if duration is not None else MAIN_STATUS_DURATION_MS,
                     )
                 except Exception:
-                    report_to_statusbar(self.main, msg, is_error=bool(is_error), duration=4000)
+                    report_to_statusbar(self.main, msg, is_error=bool(is_error), duration=MAIN_STATUS_DURATION_MS)
 
         except Exception as e:
             self._hide_overlay()
@@ -254,7 +255,7 @@ class DialogWrapper:
                     self.main,
                     'Error: Dialog failed (see error.log)',
                     is_error=True,
-                    duration=6000,
+                    duration=MAIN_STATUS_LONG_DURATION_MS,
                 )
             except Exception:
                 pass

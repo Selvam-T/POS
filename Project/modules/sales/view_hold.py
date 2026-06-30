@@ -28,6 +28,13 @@ from modules.ui_utils import ui_feedback, input_handler
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate
 from modules.ui_utils.error_logger import log_error_message
 from modules.date_time import format_date, format_time
+from config import (
+    MAIN_STATUS_DURATION_MS,
+    MAIN_STATUS_ERROR_DURATION_MS,
+    MAIN_STATUS_LONG_DURATION_MS,
+    MAIN_STATUS_SHORT_DURATION_MS,
+    STATUS_LABEL_DURATION_MS,
+)
 from modules.table_ui.table_widget_helpers import (
     apply_table_columns,
     configure_readonly_row_selection_table,
@@ -364,7 +371,7 @@ def launch_viewhold_dialog(parent=None):
             status_lbl,
             f"{customer_name} receipt is selected.",
             ok=True,
-            duration=2000,
+            duration=STATUS_LABEL_DURATION_MS,
         )
 
     # Update status label to reflect the currently selected action
@@ -379,7 +386,7 @@ def launch_viewhold_dialog(parent=None):
             msg = "Void selected."
         else:
             return
-        ui_feedback.set_status_label(status_lbl, msg, ok=True, duration=2000)
+        ui_feedback.set_status_label(status_lbl, msg, ok=True, duration=STATUS_LABEL_DURATION_MS)
 
     # Enable/disable and populate the note input depending on VOID mode
     def _refresh_note_state(*_a) -> None:
@@ -498,7 +505,7 @@ def launch_viewhold_dialog(parent=None):
             if empty_message is not None:
                 msg = empty_message or "No matching receipts."
                 ui_feedback.set_status_label(status_lbl, msg, ok=False)
-                set_dialog_main_status_max(dlg, msg, level='info', duration=2000)
+                set_dialog_main_status_max(dlg, msg, level='info', duration=MAIN_STATUS_SHORT_DURATION_MS)
             _update_action_gate()
             _refresh_note_state()
             return
@@ -561,7 +568,7 @@ def launch_viewhold_dialog(parent=None):
         if not rows:
             _set_widgets_enabled(False)
             ui_feedback.set_status_label(status_lbl, "No UNPAID receipts found.", ok=False)
-            set_dialog_main_status_max(dlg, "No UNPAID receipts found.", level='info', duration=2000)
+            set_dialog_main_status_max(dlg, "No UNPAID receipts found.", level='info', duration=MAIN_STATUS_SHORT_DURATION_MS)
             try:
                 # When no receipts are available, ensure the Cancel button receives focus
                 _focus_cancel()
@@ -727,7 +734,7 @@ def launch_viewhold_dialog(parent=None):
                 exc,
                 user_message="Error: Unable to load receipt",
                 level="error",
-                duration=6000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
             ui_feedback.set_status_label(status_lbl, "Unable to load receipt items.", ok=False)
             return
@@ -787,7 +794,7 @@ def launch_viewhold_dialog(parent=None):
                     dlg,
                     "Error: Sales table unavailable. Transaction was not loaded.",
                     level="error",
-                    duration=6000,
+                    duration=MAIN_STATUS_LONG_DURATION_MS,
                 )
                 ui_feedback.set_status_label(
                     status_lbl,
@@ -844,7 +851,7 @@ def launch_viewhold_dialog(parent=None):
                             "transaction continued."
                         ),
                         level="error",
-                        duration=6000,
+                        duration=MAIN_STATUS_ERROR_DURATION_MS,
                     )
                     ui_feedback.set_status_label(
                         status_lbl,
@@ -862,7 +869,7 @@ def launch_viewhold_dialog(parent=None):
                                 "transaction continued."
                             ),
                             level="error",
-                            duration=6000,
+                            duration=MAIN_STATUS_ERROR_DURATION_MS,
                         )
                         ui_feedback.set_status_label(
                             status_lbl,
@@ -870,9 +877,9 @@ def launch_viewhold_dialog(parent=None):
                             ok=False,
                         )
 
-                set_dialog_main_status_max(dlg, f"On Hold transaction loaded to continue shopping.", level='info', duration=4000)
+                set_dialog_main_status_max(dlg, f"On Hold transaction loaded to continue shopping.", level='info', duration=MAIN_STATUS_DURATION_MS)
             else:
-                set_dialog_main_status_max(dlg, f"Loaded receipt {receipt_no} to make Payment.", level='info', duration=4000)
+                set_dialog_main_status_max(dlg, f"Loaded receipt {receipt_no} to make Payment.", level='info', duration=MAIN_STATUS_DURATION_MS)
             dlg.accept()
         except Exception as exc:
             log_exception_traceback_and_postclose_statusBar(
@@ -881,7 +888,7 @@ def launch_viewhold_dialog(parent=None):
                 exc,
                 user_message="Error: Unable to load receipt",
                 level="error",
-                duration=6000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
             ui_feedback.set_status_label(status_lbl, "Error loading receipt.", ok=False)
 
@@ -903,7 +910,7 @@ def launch_viewhold_dialog(parent=None):
             )
             
             if print_result.get("ok"):
-                report_to_statusbar(parent, f"Printed receipt {receipt_no}", is_error=False, duration=4000)
+                report_to_statusbar(parent, f"Printed receipt {receipt_no}", is_error=False, duration=MAIN_STATUS_DURATION_MS)
                 try:
                     dlg.accept()
                 except Exception:
@@ -916,7 +923,7 @@ def launch_viewhold_dialog(parent=None):
                     f"{print_result.get('error') or 'unknown'}",
                     user_message=f"Print failed for {receipt_no}",
                     level="error",
-                    duration=6000,
+                    duration=MAIN_STATUS_ERROR_DURATION_MS,
                 )
                 ui_feedback.set_status_label(status_lbl, f"Print failed for {receipt_no}", ok=False)
         except Exception as exc:
@@ -926,7 +933,7 @@ def launch_viewhold_dialog(parent=None):
                 exc,
                 user_message="Error: Unable to print receipt",
                 level="error",
-                duration=6000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
             ui_feedback.set_status_label(status_lbl, "Print error.", ok=False)
 
@@ -963,14 +970,14 @@ def launch_viewhold_dialog(parent=None):
                 exc,
                 user_message="Error: Unable to void receipt",
                 level="error",
-                duration=6000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
             ui_feedback.set_status_label(status_lbl, "Void failed.", ok=False)
             return
 
         if not ok:
             ui_feedback.set_status_label(status_lbl, "Void failed.", ok=False)
-            report_to_statusbar(parent, "Void failed.", is_error=True, duration=6000)
+            report_to_statusbar(parent, "Void failed.", is_error=True, duration=MAIN_STATUS_ERROR_DURATION_MS)
             return
 
         note_in.clear()
@@ -990,10 +997,10 @@ def launch_viewhold_dialog(parent=None):
                 status_lbl,
                 f"Receipt {receipt_no} voided. No receipts remaining; cancel to close.",
                 ok=True,
-                duration=4000,
+                duration=STATUS_LABEL_DURATION_MS,
             )
         else:
-            ui_feedback.set_status_label(status_lbl, f"Receipt {receipt_no} voided.", ok=True, duration=2000)
+            ui_feedback.set_status_label(status_lbl, f"Receipt {receipt_no} voided.", ok=True, duration=STATUS_LABEL_DURATION_MS)
 
     def _handle_ok() -> None:
         ui_feedback.clear_status_label(status_lbl)
@@ -1014,7 +1021,7 @@ def launch_viewhold_dialog(parent=None):
         ui_feedback.set_status_label(status_lbl, "Select an action.", ok=False)
 
     def _handle_cancel() -> None:
-        set_dialog_main_status_max(dlg, "View Hold cancelled.", level='info', duration=2500)
+        set_dialog_main_status_max(dlg, "View Hold cancelled.", level='info', duration=MAIN_STATUS_DURATION_MS)
         dlg.reject()
 
     cancel_btn.clicked.connect(_handle_cancel)
@@ -1060,5 +1067,5 @@ def launch_viewhold_dialog(parent=None):
     except Exception:
         pass
 
-    #set_dialog_main_status_max(dlg, "View Hold opened.", level='info', duration=2000)
+    #set_dialog_main_status_max(dlg, "View Hold opened.", level='info', duration=MAIN_STATUS_SHORT_DURATION_MS)
     return dlg

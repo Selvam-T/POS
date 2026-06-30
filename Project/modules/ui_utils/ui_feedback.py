@@ -1,10 +1,11 @@
 from PyQt5.QtWidgets import QLabel, QStatusBar
 from PyQt5.QtCore import QTimer
 import weakref
+from config import MAIN_STATUS_DURATION_MS, STATUS_LABEL_DURATION_MS
 
 BARCODE_WARNING_TEXT = "Scan only in Product Code field"
 
-def _set_status_label_state(label: QLabel, message: str, state: str, duration: int = 3000) -> bool:
+def _set_status_label_state(label: QLabel, message: str, state: str, duration: int = STATUS_LABEL_DURATION_MS) -> bool:
     if label is None:
         return False
 
@@ -37,19 +38,19 @@ def _set_status_label_state(label: QLabel, message: str, state: str, duration: i
 
     return state == "success"
 
-def set_status_label(label: QLabel, message: str, ok: bool, duration: int = 3000) -> bool:
+def set_status_label(label: QLabel, message: str, ok: bool, duration: int = STATUS_LABEL_DURATION_MS) -> bool:
     """Sets status message and triggers QSS property change."""
     status_val = "success" if ok else "error"
     return _set_status_label_state(label, message, status_val, duration)
 
 
-def set_warning_status_label(label: QLabel, message: str, duration: int = 3000) -> bool:
+def set_warning_status_label(label: QLabel, message: str, duration: int = STATUS_LABEL_DURATION_MS) -> bool:
     """Sets a warning message with warning styling."""
     return _set_status_label_state(label, message, "warning", duration)
 
 
 class AutoClearingWarningLabel:
-    def __init__(self, label: QLabel, message: str, duration: int = 3000, poll_interval: int = 150):
+    def __init__(self, label: QLabel, message: str, duration: int = STATUS_LABEL_DURATION_MS, poll_interval: int = 150):
         self._label_ref = weakref.ref(label) if label is not None else lambda: None
         self._message = str(message or "")
         self._duration = max(0, int(duration))
@@ -123,7 +124,7 @@ class AutoClearingWarningLabel:
         self._active = False
 
 
-def create_auto_clearing_warning_label(label: QLabel, message: str, duration: int = 3000, poll_interval: int = 150) -> AutoClearingWarningLabel:
+def create_auto_clearing_warning_label(label: QLabel, message: str, duration: int = STATUS_LABEL_DURATION_MS, poll_interval: int = 150) -> AutoClearingWarningLabel:
     return AutoClearingWarningLabel(label, message, duration=duration, poll_interval=poll_interval)
 
 def clear_status_label(label: QLabel) -> bool:
@@ -142,7 +143,7 @@ def clear_status_label(label: QLabel) -> bool:
 
 # helper function to target the Main Window’s status bar
 
-def show_main_status(parent, message: str, is_error: bool = False, duration: int = 3000):
+def show_main_status(parent, message: str, is_error: bool = False, duration: int = MAIN_STATUS_DURATION_MS):
     """Finds the Main Window status bar and shows a message."""
     from PyQt5.QtWidgets import QMainWindow
     
@@ -157,7 +158,7 @@ def show_main_status(parent, message: str, is_error: bool = False, duration: int
         win.statusBar().showMessage(message, duration)
 
 
-def show_temp_status(status_bar: QStatusBar, message: str, duration_ms: int = 3000) -> None:
+def show_temp_status(status_bar: QStatusBar, message: str, duration_ms: int = MAIN_STATUS_DURATION_MS) -> None:
     """Small helper for transient messages on a QStatusBar."""
     if status_bar is None:
         return

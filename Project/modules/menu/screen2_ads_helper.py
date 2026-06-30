@@ -8,7 +8,7 @@ from PyQt5.QtGui import QImage, QPixmap, QIcon
 from PyQt5.QtWidgets import QFileDialog, QListWidget, QListWidgetItem, QLabel, QPushButton
 
 from modules.ui_utils import ui_feedback
-from config import ADS_DIR, MAX_ADS, ALLOWED_EXTS, REQ_WIDTH, REQ_HEIGHT, ADS_SIZE_TOLERANCE_PCT
+from config import ADS_DIR, MAX_ADS, ALLOWED_EXTS, REQ_WIDTH, REQ_HEIGHT, ADS_SIZE_TOLERANCE_PCT, STATUS_LABEL_DURATION_MS
 from modules.runtime.data import ensure_ads_dir
 
 
@@ -74,7 +74,7 @@ class Screen2AdsController:
             pass
 
     # Show an error/success message in screen2StatusLabel.
-    def _set_status(self, message: str, *, ok: bool | None = None, duration: int = 2000) -> None:
+    def _set_status(self, message: str, *, ok: bool | None = None, duration: int = STATUS_LABEL_DURATION_MS) -> None:
         if not message:
             ui_feedback.clear_status_label(self._status)
             return

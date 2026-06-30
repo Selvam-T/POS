@@ -43,7 +43,7 @@ from modules.table_ui.receipt_table_helpers import (
     selected_receipt,
     sort_receipts_by_column,
 )
-from config import QSS_DIR, UI_DIR
+from config import MAIN_STATUS_DURATION_MS, MAIN_STATUS_ERROR_DURATION_MS, QSS_DIR, STATUS_LABEL_DURATION_MS, UI_DIR
 
 QSS_PATH = os.path.join(QSS_DIR, "dialog.qss")
 UI_PATH = os.path.join(UI_DIR, "receipt_menu.ui")
@@ -90,7 +90,7 @@ def _date_text(widget: QDateEdit) -> str:
     except Exception:
         return QDate.currentDate().toString("yyyy-MM-dd")
 
-def _set_status(label: QLabel, message: str, *, ok: bool = True, duration: int = 3500) -> None:
+def _set_status(label: QLabel, message: str, *, ok: bool = True, duration: int = STATUS_LABEL_DURATION_MS) -> None:
     try:
         ui_feedback.set_status_label(label, message, ok=ok, duration=duration)
     except Exception:
@@ -100,7 +100,7 @@ def _set_status(label: QLabel, message: str, *, ok: bool = True, duration: int =
             pass
 
 
-def _set_warning(label: QLabel, message: str, *, duration: int = 3500) -> None:
+def _set_warning(label: QLabel, message: str, *, duration: int = STATUS_LABEL_DURATION_MS) -> None:
     try:
         ui_feedback.set_warning_status_label(label, message, duration=duration)
     except Exception:
@@ -249,7 +249,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
     barcode_warning = ui_feedback.create_auto_clearing_warning_label(
         status_lbl,
         ui_feedback.BARCODE_WARNING_TEXT,
-        duration=4500,
+        duration=STATUS_LABEL_DURATION_MS,
     )
 
     def _mark_product_error(widget, message: str) -> None:
@@ -477,7 +477,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
                 exc,
                 user_message=f"Error: Receipt search failed: {exc}",
                 level="error",
-                duration=5000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
 
     def _run_search() -> None:
@@ -528,7 +528,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
                 mode = str(print_result.get("mode") or "printer")
                 target = "console" if mode == "console" else "printer"
                 _set_status(status_lbl, f"Receipt {receipt_no} sent to {target}.", ok=True)
-                set_dialog_info(dlg, f"Receipt {receipt_no} printed.", duration=3500)
+                set_dialog_info(dlg, f"Receipt {receipt_no} printed.", duration=MAIN_STATUS_DURATION_MS)
             else:
                 _set_status(status_lbl, "Printer unavailable or receipt not sent.", ok=False)
                 log_error_message_and_postclose_statusBar(
@@ -537,7 +537,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
                     f"Printer send failed for receipt {receipt_no}: {print_result.get('error') or 'unknown'}",
                     user_message=f"Error: Receipt print failed for {receipt_no}",
                     level="error",
-                    duration=5000,
+                    duration=MAIN_STATUS_ERROR_DURATION_MS,
                 )
         except Exception as exc:
             _set_status(status_lbl, f"Print failed: {exc}", ok=False)
@@ -547,7 +547,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
                 exc,
                 user_message=f"Error: Receipt print failed: {exc}",
                 level="error",
-                duration=5000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
 
     def _void_selected() -> None:
@@ -575,7 +575,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
                     f"void_unpaid_receipt returned false for receipt {receipt_no}",
                     user_message=f"Error: Receipt {receipt_no} was not voided.",
                     level="error",
-                    duration=5000,
+                    duration=MAIN_STATUS_ERROR_DURATION_MS,
                 )
                 return
             _set_status(status_lbl, f"Receipt {receipt_no} voided.", ok=True)
@@ -583,7 +583,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
                 dlg,
                 f"Receipt {receipt_no} voided.",
                 level="info",
-                duration=3500,
+                duration=MAIN_STATUS_DURATION_MS,
             )
             print_radio.setChecked(True)
             note.clear()
@@ -596,7 +596,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
                 exc,
                 user_message=f"Error: Receipt void failed: {exc}",
                 level="error",
-                duration=5000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
 
     def _on_ok() -> None:
@@ -611,7 +611,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
     def _close_dialog() -> None:
         try:
             if not getattr(dlg, "main_status_msg", None):
-                set_dialog_info(dlg, "Receipt dialog closed.", duration=3000)
+                set_dialog_info(dlg, "Receipt dialog closed.", duration=MAIN_STATUS_DURATION_MS)
         except Exception:
             pass
         try:

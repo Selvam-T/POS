@@ -9,6 +9,7 @@ from modules.ui_utils.error_logger import (
     ensure_error_log_file,
     truncate_error_log,
 )
+from config import MAIN_STATUS_DURATION_MS, MAIN_STATUS_ERROR_DURATION_MS
 
 
 class MainStatusFooterController(QObject):
@@ -233,7 +234,7 @@ class MainStatusFooterController(QObject):
             text = self._error_log_text()
             if not text.strip():
                 self.refresh_error_log_state()
-                self._show_status("No error log entries to export.", 3000)
+                self._show_status("No error log entries to export.", MAIN_STATUS_DURATION_MS)
                 return
 
             export_dir = Path(
@@ -251,14 +252,14 @@ class MainStatusFooterController(QObject):
             )
 
             self.refresh_error_log_state()
-            self._show_status(f"Error log saved to {export_dir}", 4000)
+            self._show_status(f"Error log saved to {export_dir}", MAIN_STATUS_DURATION_MS)
         except Exception as exc:
             try:
                 from modules.ui_utils.error_logger import log_error_message
                 log_error_message(f"Error log export failed: {exc}")
             except Exception:
                 pass
-            self._show_status("Error: Unable to export error log.", 5000)
+            self._show_status("Error: Unable to export error log.", MAIN_STATUS_ERROR_DURATION_MS)
         finally:
             self._watch_error_log_path()
             self._schedule_error_log_refresh()
@@ -267,7 +268,7 @@ class MainStatusFooterController(QObject):
         try:
             truncate_error_log(LOG_PATH)
             self.refresh_error_log_state()
-            self._show_status("Error log cleared.", 4000)
+            self._show_status("Error log cleared.", MAIN_STATUS_DURATION_MS)
             self._watch_error_log_path()
             self._schedule_error_log_refresh()
         except Exception as exc:
@@ -278,7 +279,7 @@ class MainStatusFooterController(QObject):
                 pass
             self._watch_error_log_path()
             self._schedule_error_log_refresh()
-            self._show_status("Error: Unable to clear error log.", 5000)
+            self._show_status("Error: Unable to clear error log.", MAIN_STATUS_ERROR_DURATION_MS)
 
     def _show_status(self, message: str, timeout: int) -> None:
         try:

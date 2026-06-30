@@ -10,7 +10,7 @@ from modules.ui_utils.dialog_utils import (
 )
 from modules.table_ui.table_operations import is_transaction_active
 from modules.ui_utils.ui_feedback import set_status_label, show_temp_status
-from config import QSS_DIR, UI_DIR
+from config import MAIN_STATUS_DURATION_MS, QSS_DIR, UI_DIR
 
 # Paths
 UI_PATH = os.path.join(UI_DIR, 'logout_menu.ui')
@@ -47,7 +47,7 @@ def launch_logout_dialog(host_window):
                         else:
                             sb = getattr(host_window, 'statusbar', None)
                             if sb:
-                                show_temp_status(sb, "Clear sales cart before logging out.", 3000)
+                                show_temp_status(sb, "Clear sales cart before logging out.", MAIN_STATUS_DURATION_MS)
                         widgets['cancel_btn'].setFocus()
                         return
                 except Exception:

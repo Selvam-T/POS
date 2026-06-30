@@ -149,7 +149,7 @@ class CustomerDisplayWindow(QDialog):
                 log_error_message(f"CustomerDisplay: screen2.ui load failed: {exc}\n{tb}")
             except Exception:
                 pass
-            report_to_statusbar(self._host, "Customer display UI missing - using fallback.", is_error=True, duration=6000)
+            report_to_statusbar(self._host, "Customer display UI missing - using fallback.", is_error=True, duration=config.MAIN_STATUS_ERROR_DURATION_MS)
             try:
                 from modules.customer_display.fallback_screen2 import create_fallback_ui
 
@@ -368,7 +368,7 @@ class CustomerDisplayWindow(QDialog):
             self._connected = True
             self._show_display()
             if not initial:
-                report_to_statusbar(self._host, "Customer display connected", is_error=False, duration=1500)
+                report_to_statusbar(self._host, "Customer display connected", is_error=False, duration=config.MAIN_STATUS_SHORT_DURATION_MS)
             return
 
         screens = QApplication.screens()
@@ -379,10 +379,10 @@ class CustomerDisplayWindow(QDialog):
             self._connected = True
             self._show_display()
             if not initial:
-                report_to_statusbar(self._host, "Customer display connected", is_error=False, duration=1500)
+                report_to_statusbar(self._host, "Customer display connected", is_error=False, duration=config.MAIN_STATUS_SHORT_DURATION_MS)
         else:
             if self._connected or initial:
-                report_to_statusbar(self._host, "Customer display disconnected", is_error=False, duration=1500)
+                report_to_statusbar(self._host, "Customer display disconnected", is_error=False, duration=config.MAIN_STATUS_SHORT_DURATION_MS)
             self._connected = False
             self.hide()
 

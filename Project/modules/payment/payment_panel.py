@@ -17,6 +17,11 @@ from modules.ui_utils.money_format import format_currency, format_number, money_
 from modules.payment import receipt_generator
 from modules.payment.keypad_controller import KeypadController
 from modules.devices import print_helper
+from config import (
+    MAIN_STATUS_DURATION_MS,
+    MAIN_STATUS_ERROR_DURATION_MS,
+    MAIN_STATUS_SHORT_DURATION_MS,
+)
 from PyQt5.QtWidgets import QApplication
 
 class PaymentPanel(QObject):
@@ -213,7 +218,7 @@ class PaymentPanel(QObject):
                 return
             except Exception as exc:
                 log_error_message(f"Refund dialog launch failed: {exc}")
-        report_to_statusbar(host, "Error: Refund dialog unavailable.", is_error=True, duration=4000)
+        report_to_statusbar(host, "Error: Refund dialog unavailable.", is_error=True, duration=MAIN_STATUS_ERROR_DURATION_MS)
 
     def _open_vendor_dialog(self) -> None:
         host = self._main_window
@@ -223,7 +228,7 @@ class PaymentPanel(QObject):
                 return
             except Exception as exc:
                 log_error_message(f"Vendor dialog launch failed: {exc}")
-        report_to_statusbar(host, "Error: Vendor dialog unavailable.", is_error=True, duration=4000)
+        report_to_statusbar(host, "Error: Vendor dialog unavailable.", is_error=True, duration=MAIN_STATUS_ERROR_DURATION_MS)
 
     def _open_todo_dialog(self) -> None:
         """Open the TODO dialog using the app dialog wrapper (scanner-blocked)."""
@@ -251,14 +256,14 @@ class PaymentPanel(QObject):
                     os.path.join(os.path.dirname(__file__), '..', '..', 'ui', 'todo.ui')
                 )
                 try:
-                    report_to_statusbar(host, "Opening TODO dialog...", is_error=False, duration=1500)
+                    report_to_statusbar(host, "Opening TODO dialog...", is_error=False, duration=MAIN_STATUS_SHORT_DURATION_MS)
                 except Exception:
                     pass
 
                 if not os.path.exists(ui_path):
                     log_error_message(f"todo.ui not found at {ui_path}")
                     try:
-                        report_to_statusbar(host, "Error: todo.ui missing.", is_error=True, duration=4000)
+                        report_to_statusbar(host, "Error: todo.ui missing.", is_error=True, duration=MAIN_STATUS_ERROR_DURATION_MS)
                     except Exception:
                         pass
                     return
@@ -296,7 +301,7 @@ class PaymentPanel(QObject):
             except Exception as exc:
                 log_error_message(f"TODO dialog launch failed: {exc}")
                 try:
-                    report_to_statusbar(host, "Error: TODO dialog unavailable.", is_error=True, duration=4000)
+                    report_to_statusbar(host, "Error: TODO dialog unavailable.", is_error=True, duration=MAIN_STATUS_ERROR_DURATION_MS)
                 except Exception:
                     pass
         except Exception:
@@ -978,14 +983,14 @@ class PaymentPanel(QObject):
                     self._main_window,
                     "Receipt print failed.",
                     is_error=True,
-                    duration=3000,
+                    duration=MAIN_STATUS_ERROR_DURATION_MS,
                 )
                 return
 
         ctx = getattr(self._main_window, 'receipt_context', {}) or {}
         receipt_no = ctx.get('last_receipt_no')
         if not receipt_no:
-            report_to_statusbar(self._main_window, "No Receipt to be printed.", is_error=True, duration=3000)
+            report_to_statusbar(self._main_window, "No Receipt to be printed.", is_error=True, duration=MAIN_STATUS_ERROR_DURATION_MS)
             return
 
         try:
@@ -1001,28 +1006,28 @@ class PaymentPanel(QObject):
                     self._main_window,
                     f"Receipt {receipt_no} printed.",
                     is_error=False,
-                    duration=3000,
+                    duration=MAIN_STATUS_DURATION_MS,
                 )
             else:
                 report_to_statusbar(
                     self._main_window,
                     f"Receipt {receipt_no} print failed.",
                     is_error=True,
-                    duration=3000,
+                    duration=MAIN_STATUS_ERROR_DURATION_MS,
                 )
             if "Receipt Status is UNKNOWN" in receipt_text:
                 log_error_message(f"Receipt status is UNKNOWN for receipt {receipt_no}.")
                 
         except ValueError:
             log_error_message(f"Receipt not found for receipt {receipt_no}.")
-            report_to_statusbar(self._main_window, "Receipt not found.", is_error=True, duration=3000)
+            report_to_statusbar(self._main_window, "Receipt not found.", is_error=True, duration=MAIN_STATUS_ERROR_DURATION_MS)
         except RuntimeError:
             log_error_message(f"Receipt data not found for receipt {receipt_no}.")
             report_to_statusbar(
                 self._main_window,
                 "Receipt data not found.",
                 is_error=True,
-                duration=3000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
         except Exception as exc:
             log_error_message(f"Receipt print failed: {exc}")
@@ -1030,7 +1035,7 @@ class PaymentPanel(QObject):
                 self._main_window,
                 "Receipt print failed.",
                 is_error=True,
-                duration=3000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
 
     def _collect_payment_split(self) -> dict:

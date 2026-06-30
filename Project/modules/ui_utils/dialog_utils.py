@@ -20,9 +20,14 @@ from PyQt5.QtGui import QFont
 from modules.ui_utils.error_logger import log_error_message
 from modules.ui_utils import ui_feedback
 from modules.runtime.paths import load_stylesheet
+from config import (
+    MAIN_STATUS_DURATION_MS,
+    MAIN_STATUS_ERROR_DURATION_MS,
+    MAIN_STATUS_LONG_DURATION_MS,
+)
 
 
-def set_dialog_main_status(dlg, message: str, *, is_error: bool = False, duration: int = 4000) -> None:
+def set_dialog_main_status(dlg, message: str, *, is_error: bool = False, duration: int = MAIN_STATUS_DURATION_MS) -> None:
     """Standard way for dialogs to request a post-close StatusBar message.
 
     DialogWrapper will read these attributes after exec_() and display them.
@@ -36,11 +41,11 @@ def set_dialog_main_status(dlg, message: str, *, is_error: bool = False, duratio
         pass
 
 
-def set_dialog_info(dlg, message: str, *, duration: int = 4000) -> None:
+def set_dialog_info(dlg, message: str, *, duration: int = MAIN_STATUS_DURATION_MS) -> None:
     set_dialog_main_status(dlg, message, is_error=False, duration=duration)
 
 
-def set_dialog_error(dlg, message: str, *, duration: int = 5000) -> None:
+def set_dialog_error(dlg, message: str, *, duration: int = MAIN_STATUS_ERROR_DURATION_MS) -> None:
     set_dialog_main_status(dlg, message, is_error=True, duration=duration)
 
 
@@ -64,7 +69,7 @@ def report_to_statusbar(
     *,
     is_error: bool = True,
     ok: Optional[bool] = None,
-    duration: int = 4000,
+    duration: int = MAIN_STATUS_DURATION_MS,
 ) -> None:
     """Best-effort: show a transient message on the MainWindow status bar.
 
@@ -99,7 +104,7 @@ def load_ui_strict(ui_path: str, *, host_window=None, dialog_name: str = "Dialog
             try:
                 host_window._pending_main_status_msg = f"Error: {msg}"
                 host_window._pending_main_status_is_error = True
-                host_window._pending_main_status_duration = 6000
+                host_window._pending_main_status_duration = MAIN_STATUS_LONG_DURATION_MS
             except Exception:
                 pass
         return None
@@ -116,13 +121,13 @@ def load_ui_strict(ui_path: str, *, host_window=None, dialog_name: str = "Dialog
             try:
                 host_window._pending_main_status_msg = f"Error: {dialog_name} UI load failed"
                 host_window._pending_main_status_is_error = True
-                host_window._pending_main_status_duration = 6000
+                host_window._pending_main_status_duration = MAIN_STATUS_LONG_DURATION_MS
             except Exception:
                 pass
         return None
 
 
-def report_exception(host_window, where: str, exc: Exception, *, user_message: Optional[str] = None, duration: int = 5000) -> None:
+def report_exception(host_window, where: str, exc: Exception, *, user_message: Optional[str] = None, duration: int = MAIN_STATUS_ERROR_DURATION_MS) -> None:
     """Standardized exception routing.
 
     - Writes details to error.log (including traceback when available)
@@ -170,7 +175,7 @@ def set_dialog_main_status_max(
     *,
     level: str = 'info',
     is_error: Optional[bool] = None,
-    duration: int = 4000,
+    duration: int = MAIN_STATUS_DURATION_MS,
 ) -> None:
     """Set dialog's post-close StatusBar message only if it is >= current severity.
 
@@ -238,7 +243,7 @@ def log_exception_traceback_and_postclose_statusBar(
     *,
     user_message: str,
     level: str = 'error',
-    duration: int = 5000,
+    duration: int = MAIN_STATUS_ERROR_DURATION_MS,
 ) -> None:
     """Log exception details and set a post-close StatusBar message intent on dlg.
 
@@ -259,7 +264,7 @@ def log_error_message_and_postclose_statusBar(
     *,
     user_message: str,
     level: str = 'error',
-    duration: int = 5000,
+    duration: int = MAIN_STATUS_ERROR_DURATION_MS,
 ) -> None:
     """Log a handled (non-exception) failure and set post-close StatusBar intent."""
     try:

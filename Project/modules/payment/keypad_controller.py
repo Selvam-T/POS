@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QObject, QEvent
 from PyQt5.QtGui import QValidator
 from PyQt5.QtWidgets import QApplication, QLineEdit, QPushButton
+from config import MAIN_STATUS_SHORT_DURATION_MS
 
 
 class KeypadController(QObject):
@@ -172,7 +173,7 @@ class KeypadController(QObject):
                         mainw = None
                 if mainw is not None:
                     try:
-                        report_to_statusbar(mainw, "Keypad input error", is_error=True, duration=2000)
+                        report_to_statusbar(mainw, "Keypad input error", is_error=True, duration=MAIN_STATUS_SHORT_DURATION_MS)
                     except Exception:
                         pass
             except Exception:
@@ -197,7 +198,7 @@ class KeypadController(QObject):
                 log_error_message(f"Keypad error (_on_dot): {exc}")
                 try:
                     mw = self.parent.window()
-                    report_to_statusbar(mw, "Keypad input error", is_error=True, duration=2000)
+                    report_to_statusbar(mw, "Keypad input error", is_error=True, duration=MAIN_STATUS_SHORT_DURATION_MS)
                 except Exception:
                     pass
             except Exception:
@@ -219,7 +220,7 @@ class KeypadController(QObject):
                 log_error_message(f"Keypad error (_on_fast_set): {exc}")
                 try:
                     mw = self.parent.window()
-                    report_to_statusbar(mw, "Keypad input error", is_error=True, duration=2000)
+                    report_to_statusbar(mw, "Keypad input error", is_error=True, duration=MAIN_STATUS_SHORT_DURATION_MS)
                 except Exception:
                     pass
             except Exception:
@@ -240,7 +241,7 @@ class KeypadController(QObject):
                 log_error_message(f"Keypad error (_on_backspace): {exc}")
                 try:
                     mw = self.parent.window()
-                    report_to_statusbar(mw, "Keypad input error", is_error=True, duration=2000)
+                    report_to_statusbar(mw, "Keypad input error", is_error=True, duration=MAIN_STATUS_SHORT_DURATION_MS)
                 except Exception:
                     pass
             except Exception:
@@ -259,7 +260,7 @@ class KeypadController(QObject):
                 log_error_message(f"Keypad error (_on_clear): {exc}")
                 try:
                     mw = self.parent.window()
-                    report_to_statusbar(mw, "Keypad input error", is_error=True, duration=2000)
+                    report_to_statusbar(mw, "Keypad input error", is_error=True, duration=MAIN_STATUS_SHORT_DURATION_MS)
                 except Exception:
                     pass
             except Exception:
@@ -287,7 +288,7 @@ class KeypadController(QObject):
                 log_error_message(f"Keypad error (_on_tab): {exc}")
                 try:
                     mw = self.parent.window()
-                    report_to_statusbar(mw, "Keypad navigation error", is_error=True, duration=2000)
+                    report_to_statusbar(mw, "Keypad navigation error", is_error=True, duration=MAIN_STATUS_SHORT_DURATION_MS)
                 except Exception:
                     pass
             except Exception:
@@ -341,7 +342,7 @@ class KeypadController(QObject):
                 log_error_message(f"Keypad error (_on_enter): {exc}")
                 try:
                     mw = self.parent.window()
-                    report_to_statusbar(mw, "Keypad action error", is_error=True, duration=2000)
+                    report_to_statusbar(mw, "Keypad action error", is_error=True, duration=MAIN_STATUS_SHORT_DURATION_MS)
                 except Exception:
                     pass
             except Exception:

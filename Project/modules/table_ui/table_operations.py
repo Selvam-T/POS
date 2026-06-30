@@ -11,7 +11,7 @@ from PyQt5.QtGui import QColor, QBrush, QRegularExpressionValidator
 # Configuration and Database constants
 from config import (
     ROW_COLOR_EVEN, ROW_COLOR_ODD, ROW_COLOR_DELETE_HIGHLIGHT, 
-    MAX_TABLE_ROWS
+    MAX_TABLE_ROWS, MAIN_STATUS_DURATION_MS
 )
 from modules.db_operation import get_product_info
 from modules.ui_utils.ui_feedback import show_temp_status
@@ -403,13 +403,13 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
     from modules.domain.unit_helpers import canonicalize_unit
 
     if not barcode: return
-    if status_bar: show_temp_status(status_bar, f"Scanned: {barcode}", 3000)
+    if status_bar: show_temp_status(status_bar, f"Scanned: {barcode}", MAIN_STATUS_DURATION_MS)
     
     found, product_name, unit_price, unit = get_product_info(barcode)
     unit_canon = canonicalize_unit(unit)
 
     if not found:
-        if status_bar: show_temp_status(status_bar, f"Product '{barcode}' not found", 3000)
+        if status_bar: show_temp_status(status_bar, f"Product '{barcode}' not found", MAIN_STATUS_DURATION_MS)
         return
 
     existing_row = find_product_in_table(table, barcode, unit_canon)
@@ -427,10 +427,10 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
             if editor and not editor.isReadOnly():
                 increment_row_quantity(table, existing_row)
             elif status_bar:
-                show_temp_status(status_bar, "KG item - use Vegetable Entry to weigh", 3000)
+                show_temp_status(status_bar, "KG item - use Vegetable Entry to weigh", MAIN_STATUS_DURATION_MS)
     else:
         if unit_canon == 'Kg':
-            if status_bar: show_temp_status(status_bar, "KG item - use Vegetable Entry to weigh", 3000)
+            if status_bar: show_temp_status(status_bar, "KG item - use Vegetable Entry to weigh", MAIN_STATUS_DURATION_MS)
         else:
             _add_product_row(table, barcode, product_name, unit_price, unit_canon)
 

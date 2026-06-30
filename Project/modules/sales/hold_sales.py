@@ -16,7 +16,7 @@ from modules.ui_utils.dialog_utils import (
     log_exception_traceback_and_postclose_statusBar,
 )
 from modules.ui_utils.focus_utils import FieldCoordinator
-from config import QSS_DIR, UI_DIR
+from config import MAIN_STATUS_DURATION_MS, MAIN_STATUS_ERROR_DURATION_MS, MAIN_STATUS_LONG_DURATION_MS, QSS_DIR, UI_DIR
 
 HOLD_SALES_UI = os.path.join(UI_DIR, 'hold_sales.ui')
 
@@ -122,7 +122,7 @@ def launch_hold_sales_dialog(parent=None):
             if panel is not None:
                 panel.clear_payment_frame()
 
-            set_dialog_main_status_max(dlg, "Sale held successfully.", level='info', duration=4000)
+            set_dialog_main_status_max(dlg, "Sale held successfully.", level='info', duration=MAIN_STATUS_DURATION_MS)
             dlg.accept()
         except Exception as exc:
             # Commit failed: prepare snapshot receipt for fallback printing
@@ -142,7 +142,7 @@ def launch_hold_sales_dialog(parent=None):
                     dlg,
                     "Hold failed. Receipt print error.",
                     level='error',
-                    duration=6000,
+                    duration=MAIN_STATUS_ERROR_DURATION_MS,
                 )
             else:
                 cleared = False
@@ -157,14 +157,14 @@ def launch_hold_sales_dialog(parent=None):
                             dlg,
                             "Hold failed. Receipt printed to console.",
                             level='error',
-                            duration=6000,
+                            duration=MAIN_STATUS_ERROR_DURATION_MS,
                         )
                     else:
                         set_dialog_main_status_max(
                             dlg,
                             "Hold failed. Receipt printed.",
                             level='error',
-                            duration=6000,
+                            duration=MAIN_STATUS_ERROR_DURATION_MS,
                         )
                     cleared = True
                 else:
@@ -172,7 +172,7 @@ def launch_hold_sales_dialog(parent=None):
                         dlg,
                         "Hold failed. Receipt print failed.",
                         level='error',
-                        duration=6000,
+                        duration=MAIN_STATUS_ERROR_DURATION_MS,
                     )
 
                 # After successful snapshot print/console fallback, clear UI to avoid duplicate state
@@ -189,12 +189,12 @@ def launch_hold_sales_dialog(parent=None):
                 exc,
                 user_message="Error: Unable to hold sale (see error.log)",
                 level='error',
-                duration=6000,
+                duration=MAIN_STATUS_LONG_DURATION_MS,
             )
             dlg.reject()
 
     def _handle_close() -> None:
-        set_dialog_main_status_max(dlg, "Hold Sales cancelled.", level='info', duration=4000)
+        set_dialog_main_status_max(dlg, "Hold Sales cancelled.", level='info', duration=MAIN_STATUS_DURATION_MS)
         dlg.reject()
 
     ok_btn.clicked.connect(_handle_ok)

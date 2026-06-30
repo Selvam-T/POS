@@ -12,7 +12,7 @@ from modules.ui_utils.dialog_utils import (
     log_exception_traceback_and_postclose_statusBar,
 )
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
-from config import QSS_DIR, UI_DIR
+from config import MAIN_STATUS_DURATION_MS, MAIN_STATUS_LONG_DURATION_MS, QSS_DIR, STATUS_LABEL_DURATION_MS, UI_DIR
 
 UI_PATH = os.path.join(UI_DIR, 'refund.ui')
 QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
@@ -73,7 +73,7 @@ def launch_refund_dialog(parent=None):
     barcode_warning = ui_feedback.create_auto_clearing_warning_label(
         status,
         ui_feedback.BARCODE_WARNING_TEXT,
-        duration=4500,
+        duration=STATUS_LABEL_DURATION_MS,
     )
 
     # Remember and hide note placeholder while inputs are locked (opt-in)
@@ -270,7 +270,7 @@ def launch_refund_dialog(parent=None):
                 note=note_text,
             )
 
-            set_dialog_info(dlg, f'Refund recorded: ${amount_val:.2f}', duration=4000)
+            set_dialog_info(dlg, f'Refund recorded: ${amount_val:.2f}', duration=MAIN_STATUS_DURATION_MS)
             dlg.accept()
         except ValueError as exc:
             ui_feedback.set_status_label(status, str(exc), ok=False)
@@ -281,12 +281,12 @@ def launch_refund_dialog(parent=None):
                 exc,
                 user_message='Error: Unable to save refund (see error.log)',
                 level='error',
-                duration=6000,
+                duration=MAIN_STATUS_LONG_DURATION_MS,
             )
             dlg.reject()
 
     def _handle_cancel() -> None:
-        set_dialog_info(dlg, 'Refund cancelled.', duration=3000)
+        set_dialog_info(dlg, 'Refund cancelled.', duration=MAIN_STATUS_DURATION_MS)
         dlg.reject()
 
     ok_btn.clicked.connect(_handle_ok)

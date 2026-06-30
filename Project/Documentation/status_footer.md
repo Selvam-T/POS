@@ -119,7 +119,7 @@ The exported file includes:
 - original log contents
 
 After successful export, the centered StatusBar shows the export folder for
-4000 ms, without the filename:
+`config.MAIN_STATUS_DURATION_MS`, without the filename:
 
 ```text
 Error log saved to C:\Users\SELVAM\POS_Exports\Error_Log
@@ -138,7 +138,7 @@ After successful clear, the centered StatusBar shows:
 Error log cleared.
 ```
 
-for 4000 ms. `errorLogStatusLabel` is refreshed back to `No Error`.
+for `config.MAIN_STATUS_DURATION_MS`. `errorLogStatusLabel` is refreshed back to `No Error`.
 
 ## Watcher Notes
 

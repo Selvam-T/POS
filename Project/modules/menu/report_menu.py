@@ -19,7 +19,7 @@ from modules.date_time import (
     set_locked_property,
 )
 from modules.menu import report_generator, report_viewers, report_exports
-from config import QSS_DIR, UI_DIR
+from config import MAIN_STATUS_DURATION_MS, QSS_DIR, STATUS_LABEL_DURATION_MS, UI_DIR
 
 QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 
@@ -206,7 +206,7 @@ def launch_reports_dialog(host_window):
             def _reject_with_default_msg():
                 try:
                     if not getattr(dlg, 'main_status_msg', None):
-                        set_dialog_info(dlg, 'Report dialog closed.', duration=3000)
+                        set_dialog_info(dlg, 'Report dialog closed.', duration=MAIN_STATUS_DURATION_MS)
                 except Exception:
                     pass
                 try:
@@ -254,13 +254,13 @@ def launch_reports_dialog(host_window):
 
     def _set_report_status(message: str, *, ok: bool) -> None:
         try:
-            ui_feedback.set_status_label(report_status_lbl, message, ok=ok, duration=3500)
+            ui_feedback.set_status_label(report_status_lbl, message, ok=ok, duration=STATUS_LABEL_DURATION_MS)
         except Exception:
             pass
 
     def _set_report_warning(message: str) -> None:
         try:
-            ui_feedback.set_warning_status_label(report_status_lbl, message, duration=3500)
+            ui_feedback.set_warning_status_label(report_status_lbl, message, duration=STATUS_LABEL_DURATION_MS)
         except Exception:
             pass
 
@@ -280,7 +280,7 @@ def launch_reports_dialog(host_window):
         if report_cancel_btn is not None:
             def _on_report_cancel():
                 try:
-                    set_dialog_info(dlg, 'Report selection cancelled.', duration=3000)
+                    set_dialog_info(dlg, 'Report selection cancelled.', duration=MAIN_STATUS_DURATION_MS)
                 except Exception:
                     pass
                 try:
@@ -429,7 +429,7 @@ def launch_reports_dialog(host_window):
             def _apply_success() -> None:
                 try:
                     _set_report_status(message, ok=True)
-                    set_dialog_info(dlg, message, duration=3500)
+                    set_dialog_info(dlg, message, duration=MAIN_STATUS_DURATION_MS)
                 except Exception:
                     pass
 

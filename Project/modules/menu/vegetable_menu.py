@@ -12,7 +12,7 @@ from modules.db_operation import (
     get_product_full, add_product, delete_product, 
     refresh_product_cache, PRODUCT_CACHE
 )
-from config import QSS_DIR, UI_DIR
+from config import MAIN_STATUS_DURATION_MS, QSS_DIR, UI_DIR
 
 # Constants
 UI_PATH = os.path.join(UI_DIR, 'vegetable_menu.ui')
@@ -215,7 +215,7 @@ def launch_vegetable_menu_dialog(host_window):
 
     def do_close() -> None:
         # Info-level so it won't override any warning/error queued earlier.
-        set_dialog_main_status_max(dlg, 'Vegetable menu closed.', level='info', duration=3000)
+        set_dialog_main_status_max(dlg, 'Vegetable menu closed.', level='info', duration=MAIN_STATUS_DURATION_MS)
         dlg.reject()
         
     widgets['ok_btn'].clicked.connect(do_save)

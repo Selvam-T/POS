@@ -11,6 +11,7 @@ from PyQt5.QtCore import QObject, Qt, QEvent, QTimer
 from PyQt5.QtWidgets import QLineEdit, QComboBox, QPushButton
 from modules.ui_utils import ui_feedback
 from modules.ui_utils.canonicalization import canonicalize_product_code, canonicalize_title_text
+from config import STATUS_LABEL_DURATION_MS
 
 class FieldCoordinator(QObject):
     def __init__(self, parent):
@@ -33,7 +34,7 @@ class FieldCoordinator(QObject):
             pass
         return ui_feedback.set_status_label(status_label, message or "", ok=False)
 
-    def set_ok(self, message: str, status_label=None, duration: int = 3000) -> bool:
+    def set_ok(self, message: str, status_label=None, duration: int = STATUS_LABEL_DURATION_MS) -> bool:
         """Show success and clear remembered error state."""
         if status_label is None:
             return False

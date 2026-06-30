@@ -190,7 +190,7 @@ def launch_todo_dialog(parent=None):
         try:
             todo_state.save_todos(getattr(dlg, '_todo_items', []) or [])
         except Exception as exc:
-            ui_feedback.set_status_label(status_lbl, str(exc), ok=False, duration=4000)
+            ui_feedback.set_status_label(status_lbl, str(exc), ok=False, duration=config.STATUS_LABEL_DURATION_MS)
 
     def _delete_row(index: int) -> None:
         items = list(getattr(dlg, '_todo_items', []) or [])
@@ -208,7 +208,7 @@ def launch_todo_dialog(parent=None):
             text = _validate_todo_input()
             warning = todo_input.property('input_warning') or ''
         except Exception as exc:
-            ui_feedback.set_status_label(status_lbl, str(exc), ok=False, duration=4000)
+            ui_feedback.set_status_label(status_lbl, str(exc), ok=False, duration=config.STATUS_LABEL_DURATION_MS)
             return
 
         items = list(getattr(dlg, '_todo_items', []) or [])
@@ -217,7 +217,7 @@ def launch_todo_dialog(parent=None):
                 status_lbl,
                 "List is full. Delete items to free up rows",
                 ok=False,
-                duration=4000,
+                duration=config.STATUS_LABEL_DURATION_MS,
             )
             return
 
@@ -233,7 +233,7 @@ def launch_todo_dialog(parent=None):
             pass
         _update_add_state()
         if warning:
-            ui_feedback.set_warning_status_label(status_lbl, warning, duration=4000)
+            ui_feedback.set_warning_status_label(status_lbl, warning, duration=config.STATUS_LABEL_DURATION_MS)
         try:
             todo_input.setFocus(Qt.OtherFocusReason)
         except Exception:
@@ -247,7 +247,7 @@ def launch_todo_dialog(parent=None):
                 return
             _validate_todo_input()
         except Exception as exc:
-            ui_feedback.set_status_label(status_lbl, str(exc), ok=False, duration=4000)
+            ui_feedback.set_status_label(status_lbl, str(exc), ok=False, duration=config.STATUS_LABEL_DURATION_MS)
             try:
                 todo_input.setFocus(Qt.OtherFocusReason)
                 todo_input.selectAll()
@@ -291,7 +291,7 @@ def launch_todo_dialog(parent=None):
                 try:
                     if not getattr(dlg, 'main_status_msg', None):
                         msg = 'todo item added' if getattr(dlg, '_todo_added', False) else 'todo dialog closed'
-                        set_dialog_info(dlg, msg, duration=3000)
+                        set_dialog_info(dlg, msg, duration=config.MAIN_STATUS_DURATION_MS)
                 except Exception:
                     pass
                 try:
@@ -306,8 +306,8 @@ def launch_todo_dialog(parent=None):
     try:
         load_error = todo_state.get_last_load_error()
         if load_error:
-            set_dialog_error(dlg, load_error, duration=6000)
-            ui_feedback.set_status_label(status_lbl, load_error, ok=False, duration=6000)
+            set_dialog_error(dlg, load_error, duration=config.MAIN_STATUS_ERROR_DURATION_MS)
+            ui_feedback.set_status_label(status_lbl, load_error, ok=False, duration=config.STATUS_LABEL_DURATION_MS)
     except Exception:
         pass
     dlg._todo_added = False

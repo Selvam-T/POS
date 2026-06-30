@@ -1,8 +1,9 @@
 """High-level barcode scanner routing and UI leak cleanup."""
 
 from PyQt5.QtCore import QObject
-from config import SCANNER_KEY_INTERVAL_SECONDS, SCANNER_UI_SUPPRESS_SECONDS
+from config import MAIN_STATUS_DURATION_MS, SCANNER_KEY_INTERVAL_SECONDS, SCANNER_UI_SUPPRESS_SECONDS
 from modules.devices.scanner import BarcodeScanner
+from modules.ui_utils import ui_feedback
 
 class BarcodeManager(QObject):
     """Manage scanner events, dialog overrides, modal blocking, and scan leaks."""
@@ -64,7 +65,7 @@ class BarcodeManager(QObject):
                             if status_lbl is not None:
                                 break
                         if status_lbl is not None:
-                            status_lbl.setText('Scan only in Product Code field')
+                            ui_feedback.set_warning_status_label(status_lbl, ui_feedback.BARCODE_WARNING_TEXT)
                     return
         except Exception:
             pass
@@ -114,7 +115,7 @@ class BarcodeManager(QObject):
                 found = True
             if not found:
                 if status_bar and hasattr(status_bar, 'showMessage'):
-                    status_bar.showMessage(f"Product '{barcode}' not found - Opening Product Management (ADD)", 3000)
+                    status_bar.showMessage(f"Product '{barcode}' not found - Opening Product Management (ADD)", MAIN_STATUS_DURATION_MS)
                 if hasattr(parent, 'open_product_menu_dialog'):
                     parent.open_product_menu_dialog(initial_mode='add', initial_code=barcode)
                 return
@@ -131,7 +132,7 @@ class BarcodeManager(QObject):
                 if callable(readiness_gate):
                     readiness_gate()
                 else:
-                    status_bar.showMessage(f"Scanned: {barcode}", 3000)
+                    status_bar.showMessage(f"Scanned: {barcode}", MAIN_STATUS_DURATION_MS)
         except Exception:
             pass
 

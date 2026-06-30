@@ -30,7 +30,14 @@ from modules.ui_utils.input_validation import (
 from modules.table_ui import handle_barcode_scanned
 from modules.domain.unit_helpers import canonicalize_unit
 from modules.date_time import format_datetime
-from config import PRODUCT_MENU_TAB_RATIOS, QSS_DIR, UI_DIR
+from config import (
+    MAIN_STATUS_DURATION_MS,
+    MAIN_STATUS_ERROR_DURATION_MS,
+    PRODUCT_MENU_TAB_RATIOS,
+    QSS_DIR,
+    STATUS_LABEL_DURATION_MS,
+    UI_DIR,
+)
 
 # Constants
 UI_PATH = os.path.join(UI_DIR, 'product_menu.ui')
@@ -112,17 +119,17 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     add_barcode_warning = ui_feedback.create_auto_clearing_warning_label(
         widgets['add_status'],
         ui_feedback.BARCODE_WARNING_TEXT,
-        duration=4500,
+        duration=STATUS_LABEL_DURATION_MS,
     )
     rem_barcode_warning = ui_feedback.create_auto_clearing_warning_label(
         widgets['rem_status'],
         ui_feedback.BARCODE_WARNING_TEXT,
-        duration=4500,
+        duration=STATUS_LABEL_DURATION_MS,
     )
     upd_barcode_warning = ui_feedback.create_auto_clearing_warning_label(
         widgets['upd_status'],
         ui_feedback.BARCODE_WARNING_TEXT,
-        duration=4500,
+        duration=STATUS_LABEL_DURATION_MS,
     )
 
     def _wire_barcode_warning_clear(code_widget, warning_helper) -> None:
@@ -737,7 +744,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             e,
             user_message='Warning: Failed to load product list (suggestions may be limited)',
             level='warning',
-            duration=5000,
+            duration=MAIN_STATUS_ERROR_DURATION_MS,
         )
 
     def _post_db_success_refresh(where: str) -> None:
@@ -756,7 +763,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 e,
                 user_message='Warning: Product list may be outdated (restart if needed)',
                 level='warning',
-                duration=5000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
         try:
             _refresh_name_completers()
@@ -767,7 +774,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 e,
                 user_message='Warning: Search suggestions not updated',
                 level='warning',
-                duration=4000,
+                duration=MAIN_STATUS_DURATION_MS,
             )
 
     def _names_from_cache() -> list:
@@ -832,7 +839,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 e,
                 user_message='Warning: Search suggestions not updated',
                 level='warning',
-                duration=4000,
+                duration=MAIN_STATUS_DURATION_MS,
             )
 
     # --- Lookup engine (single normalized shape) ---
@@ -1615,7 +1622,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 str(db_msg),
                 user_message=f"Error: {db_msg}",
                 level='error',
-                duration=5000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
             # IMMEDIATE feedback in dialog
             ui_feedback.set_status_label(widgets['add_status'], db_msg, ok=False)
@@ -1635,7 +1642,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 str(msg),
                 user_message=f"Error: {msg}",
                 level='error',
-                duration=5000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
             # IMMEDIATE feedback in dialog
             ui_feedback.set_status_label(widgets['rem_status'], msg, ok=False)
@@ -1704,7 +1711,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 str(db_msg),
                 user_message=f"Error: {db_msg}",
                 level='error',
-                duration=5000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
             # IMMEDIATE feedback in dialog
             ui_feedback.set_status_label(widgets['upd_status'], db_msg, ok=False)
@@ -1878,7 +1885,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 if show_label:
                     QTimer.singleShot(
                         0,
-                        lambda: ui_feedback.set_status_label(widgets['cat_status'], message, ok=True, duration=3000),
+                        lambda: ui_feedback.set_status_label(widgets['cat_status'], message, ok=True, duration=STATUS_LABEL_DURATION_MS),
                     )
             QTimer.singleShot(0, _finish_success)
 
@@ -1898,10 +1905,10 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 op_fn()
                 _finalize_category(success_msg)
             except ValueError as e:
-                ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False, duration=3000)
+                ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False, duration=STATUS_LABEL_DURATION_MS)
             except Exception as e:
                 try:
-                    ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False, duration=3000)
+                    ui_feedback.set_status_label(widgets['cat_status'], str(e), ok=False, duration=STATUS_LABEL_DURATION_MS)
                 except Exception:
                     pass
                 try:
@@ -1912,7 +1919,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                         str(e),
                         user_message=f"Error: {e}",
                         level='error',
-                        duration=5000,
+                        duration=MAIN_STATUS_ERROR_DURATION_MS,
                     )
                 except Exception:
                     pass
@@ -1997,7 +2004,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 return
         except Exception:
             pass
-        set_dialog_main_status_max(dlg, 'Product menu closed.', level='info', duration=3000)
+        set_dialog_main_status_max(dlg, 'Product menu closed.', level='info', duration=MAIN_STATUS_DURATION_MS)
         dlg.reject()
 
     widgets['add_close'].clicked.connect(_close_dialog)

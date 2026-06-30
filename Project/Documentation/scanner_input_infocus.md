@@ -13,6 +13,8 @@ This document explains how HID barcode scanner input is routed while keeping nor
 
 ### Scanner Timing
 
+Workflow diagram: [Barcode_Manager_High-Speed_Manual_Input.png](Barcode_Manager_High-Speed_Manual_Input.png)
+
 `modules/devices/scanner.py` owns scanner/manual timing.
 
 - `SCANNER_KEY_INTERVAL_SECONDS` identifies scanner-fast consecutive keys.

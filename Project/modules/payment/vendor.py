@@ -12,7 +12,7 @@ from modules.ui_utils.dialog_utils import (
     log_exception_traceback_and_postclose_statusBar,
 )
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate
-from config import QSS_DIR, UI_DIR
+from config import MAIN_STATUS_DURATION_MS, MAIN_STATUS_ERROR_DURATION_MS, QSS_DIR, UI_DIR
 
 UI_PATH = os.path.join(UI_DIR, 'vendor.ui')
 QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
@@ -173,7 +173,7 @@ def launch_vendor_dialog(parent=None):
                 note=note_val,
             )
 
-            set_dialog_info(dlg, f"Vendor payment recorded: ${amount_val:.2f}", duration=4000)
+            set_dialog_info(dlg, f"Vendor payment recorded: ${amount_val:.2f}", duration=MAIN_STATUS_DURATION_MS)
             dlg.accept()
         except ValueError as exc:
             ui_feedback.set_status_label(status, str(exc), ok=False)
@@ -184,12 +184,12 @@ def launch_vendor_dialog(parent=None):
                 exc,
                 user_message='Error: Unable to save vendor payment (see error.log)',
                 level='error',
-                duration=6000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
             dlg.reject()
 
     def _handle_cancel() -> None:
-        set_dialog_info(dlg, 'Vendor payment cancelled.', duration=3000)
+        set_dialog_info(dlg, 'Vendor payment cancelled.', duration=MAIN_STATUS_DURATION_MS)
         dlg.reject()
 
     ok_btn.clicked.connect(_handle_ok)

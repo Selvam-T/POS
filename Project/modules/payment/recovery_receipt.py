@@ -4,6 +4,7 @@ from modules.devices import print_helper
 from modules.payment import receipt_generator
 from modules.ui_utils.dialog_utils import report_to_statusbar
 from modules.ui_utils.error_logger import log_error_message
+from config import MAIN_STATUS_DURATION_MS, MAIN_STATUS_ERROR_DURATION_MS
 
 
 def print_payment_failure_receipt(main_window, payment_split: dict) -> None:
@@ -16,7 +17,7 @@ def print_payment_failure_receipt(main_window, payment_split: dict) -> None:
     try:
         sales_items = main_window._build_sale_items_snapshot()
         if not sales_items:
-            report_to_statusbar(main_window, "No Receipt to be printed.", is_error=True, duration=3000)
+            report_to_statusbar(main_window, "No Receipt to be printed.", is_error=True, duration=MAIN_STATUS_ERROR_DURATION_MS)
             return
 
         payments = []
@@ -45,14 +46,14 @@ def print_payment_failure_receipt(main_window, payment_split: dict) -> None:
                 main_window,
                 "Temporary receipt printed.",
                 is_error=False,
-                duration=3000,
+                duration=MAIN_STATUS_DURATION_MS,
             )
         else:
             report_to_statusbar(
                 main_window,
                 "Temporary receipt print failed.",
                 is_error=True,
-                duration=3000,
+                duration=MAIN_STATUS_ERROR_DURATION_MS,
             )
     except Exception as exc:
         log_error_message(f"Payment failure receipt print failed: {exc}")
@@ -60,5 +61,5 @@ def print_payment_failure_receipt(main_window, payment_split: dict) -> None:
             main_window,
             "Receipt print failed.",
             is_error=True,
-            duration=3000,
+            duration=MAIN_STATUS_ERROR_DURATION_MS,
         )

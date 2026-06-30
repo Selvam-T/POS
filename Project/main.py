@@ -132,7 +132,7 @@ class MainLoader(QMainWindow):
         self._payment_db_failure_count = 0
         self._payment_db_failure_limit = 3
         self._payment_failure_lock_active = False
-        self._payment_failure_status_message = "Print receipt (Optional) and clear salesTable to proceed"
+        self._payment_failure_status_message = "Payment recovery required: print receipt if needed, then clear sales table."
         self._payment_failure_status_reapply_pending = False
         self.status_footer = MainStatusFooterController().bind(self)
         try:
@@ -334,7 +334,7 @@ class MainLoader(QMainWindow):
                 try:
                     sb = getattr(self, 'statusbar', None)
                     if sb is not None:
-                        sb.showMessage('Use the Logout button in the menu to exit.', 3000)
+                        sb.showMessage('Use the Logout button in the menu to exit.', config.MAIN_STATUS_DURATION_MS)
                 except Exception:
                     pass
                 event.ignore()
@@ -390,7 +390,7 @@ class MainLoader(QMainWindow):
                 self,
                 "Admin access denied.",
                 is_error=True,
-                duration=4000,
+                duration=config.MAIN_STATUS_ERROR_DURATION_MS,
             )
             return
 
@@ -441,7 +441,7 @@ class MainLoader(QMainWindow):
             from modules.ui_utils.ui_feedback import show_temp_status
             sb = getattr(self, 'statusbar', None)
             if sb:
-                show_temp_status(sb, "Vegetable menu disabled for held receipts.", 3000)
+                show_temp_status(sb, "Vegetable menu disabled for held receipts.", config.MAIN_STATUS_DURATION_MS)
             return
 
         self.dialog_wrapper.open_dialog_scanner_blocked(
@@ -456,7 +456,7 @@ class MainLoader(QMainWindow):
             self,
             self._sales_table_unavailable_message,
             is_error=True,
-            duration=6000,
+            duration=config.MAIN_STATUS_LONG_DURATION_MS,
         )
 
     def _mark_sales_table_unavailable(self, exc: Exception, *, where: str) -> None:
@@ -509,7 +509,7 @@ class MainLoader(QMainWindow):
             from modules.ui_utils.ui_feedback import show_temp_status
             sb = getattr(self, 'statusbar', None)
             if sb:
-                show_temp_status(sb, "On Hold Receipt loaded. Vegetable entry not allowed.", 3000)
+                show_temp_status(sb, "On Hold Receipt loaded. Vegetable entry not allowed.", config.MAIN_STATUS_DURATION_MS)
             return
 
         self.dialog_wrapper.open_dialog_scanner_blocked(
@@ -531,7 +531,7 @@ class MainLoader(QMainWindow):
             from modules.ui_utils.ui_feedback import show_temp_status
             sb = getattr(self, 'statusbar', None)
             if sb:
-                show_temp_status(sb, "On Hold Receipt loaded. Manual entry not allowed.", 3000)
+                show_temp_status(sb, "On Hold Receipt loaded. Manual entry not allowed.", config.MAIN_STATUS_DURATION_MS)
             return
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_manual_entry_dialog, 
@@ -564,13 +564,13 @@ class MainLoader(QMainWindow):
         if self._is_hold_loaded_in_cart():
             sb = getattr(self, 'statusbar', None)
             if sb:
-                show_temp_status(sb, "On Hold Receipt loaded. Hold Sales disabled.", 3000)
+                show_temp_status(sb, "On Hold Receipt loaded. Hold Sales disabled.", config.MAIN_STATUS_DURATION_MS)
             return
 
         if not self._can_launch_hold_sales_dialog():
             sb = getattr(self, 'statusbar', None)
             if sb:
-                show_temp_status(sb, "No active sale to place on hold.", 3000)
+                show_temp_status(sb, "No active sale to place on hold.", config.MAIN_STATUS_DURATION_MS)
             return
 
         self.dialog_wrapper.open_dialog_scanner_blocked(
@@ -605,7 +605,7 @@ class MainLoader(QMainWindow):
         if self._is_hold_loaded_in_cart():
             sb = getattr(self, 'statusbar', None)
             if sb:
-                show_temp_status(sb, "On Hold Receipt loaded. View Holds disabled.", 3000)
+                show_temp_status(sb, "On Hold Receipt loaded. View Holds disabled.", config.MAIN_STATUS_DURATION_MS)
             return
 
         sales_table = getattr(self, 'sales_table', None)
@@ -615,7 +615,7 @@ class MainLoader(QMainWindow):
         if sales_table is None or sales_table.rowCount() > 0 or ctx.get('active_receipt_id') is not None:
             sb = getattr(self, 'statusbar', None)
             if sb:
-                show_temp_status(sb, "Sales in progress. View Holds disabled.", 3000)
+                show_temp_status(sb, "Sales in progress. View Holds disabled.", config.MAIN_STATUS_DURATION_MS)
             return
 
         # Optional extra guard: ensure payment frame is effectively empty (total 0)
@@ -629,7 +629,7 @@ class MainLoader(QMainWindow):
             if pay_total != 0.0:
                 sb = getattr(self, 'statusbar', None)
                 if sb:
-                    show_temp_status(sb, "Clear payment before viewing holds.", 3000)
+                    show_temp_status(sb, "Clear payment before viewing holds.", config.MAIN_STATUS_DURATION_MS)
                 return
 
         self.dialog_wrapper.open_dialog_scanner_blocked(launch_viewhold_dialog, dialog_key='view_hold')
@@ -652,7 +652,7 @@ class MainLoader(QMainWindow):
         if not is_transaction_active(sales_table):
             sb = getattr(self, 'statusbar', None)
             if sb:
-                show_temp_status(sb, "Cart is empty.", 3000)
+                show_temp_status(sb, "Cart is empty.", config.MAIN_STATUS_DURATION_MS)
             return
         self.dialog_wrapper.open_dialog_scanner_blocked(
             launch_clearcart_dialog,
@@ -1018,7 +1018,7 @@ class MainLoader(QMainWindow):
                     self,
                     "Cash drawer failed to open.",
                     is_error=True,
-                    duration=4000,
+                    duration=config.MAIN_STATUS_ERROR_DURATION_MS,
                 )
                 try:
                     from modules.ui_utils.error_logger import log_error_message
@@ -1030,7 +1030,7 @@ class MainLoader(QMainWindow):
                 self,
                 "Cash drawer error.",
                 is_error=True,
-                duration=4000,
+                duration=config.MAIN_STATUS_ERROR_DURATION_MS,
             )
             try:
                 from modules.ui_utils.error_logger import log_error_message
@@ -1061,7 +1061,7 @@ class MainLoader(QMainWindow):
             return
         try:
             sb.setStyleSheet("color: red;")
-            sb.showMessage(self._payment_failure_status_message, 0)
+            sb.showMessage(self._payment_failure_status_message, config.PERSISTENT_DURATION_MS)
         except Exception:
             pass
 
@@ -1103,7 +1103,7 @@ class MainLoader(QMainWindow):
                 f"({self._payment_db_failure_count}/{self._payment_db_failure_limit})"
             ),
             is_error=True,
-            duration=6000,
+            duration=config.MAIN_STATUS_LONG_DURATION_MS,
         )
 
     def print_payment_failure_receipt(self, payment_split: dict) -> None:
@@ -1130,7 +1130,7 @@ class MainLoader(QMainWindow):
         # Ensure payment panel's validation agrees with processing rules.
         try:
             if panel is not None and not panel._is_payment_valid():
-                report_to_statusbar(self, "Payment invalid: please correct allocation/tender.", is_error=True, duration=4000)
+                report_to_statusbar(self, "Payment invalid: please correct allocation/tender.", is_error=True, duration=config.MAIN_STATUS_ERROR_DURATION_MS)
                 return False
         except Exception:
             # If validation routine is unavailable, continue and let commit handle failures.
@@ -1153,7 +1153,7 @@ class MainLoader(QMainWindow):
             committer = PaidSaleCommitter()
             cid = getattr(self, 'current_user_id', None)
             if cid is None:
-                report_to_statusbar(self, "No logged-in user. Please login.", is_error=True, duration=4000)
+                report_to_statusbar(self, "No logged-in user. Please login.", is_error=True, duration=config.MAIN_STATUS_ERROR_DURATION_MS)
                 return False
             committer = PaidSaleCommitter()
             receipt_no = committer.commit_paid_sale(
@@ -1173,7 +1173,7 @@ class MainLoader(QMainWindow):
                 self,
                 f"Payment completed: {receipt_no}",
                 is_error=False,
-                duration=5000,
+                duration=config.MAIN_STATUS_EXTENDED_DURATION_MS,
             )
             return True
 
@@ -1183,7 +1183,7 @@ class MainLoader(QMainWindow):
                 "Payment processing",
                 e,
                 user_message="Payment failed to update DB. Please retry.",
-                duration=6000,
+                duration=config.MAIN_STATUS_LONG_DURATION_MS,
             )
             self._record_payment_db_failure()
             return False
@@ -1516,7 +1516,7 @@ def main():
                 window,
                 'Error: Failed to load product list (search may be limited)',
                 is_error=True,
-                duration=6000,
+                duration=config.MAIN_STATUS_LONG_DURATION_MS,
             )
         sys.exit(app.exec_())
     else:

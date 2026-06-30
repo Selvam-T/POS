@@ -41,6 +41,16 @@ Dialogs can request a StatusBar message after they close using:
 
 The execution wrapper (`DialogWrapper`) reads these attributes after `exec_()` and displays them.
 
+### Message duration constants
+
+User-facing message durations are centralized in `config.py`:
+
+- Dialog-local `*StatusLabel` messages use `STATUS_LABEL_DURATION_MS`.
+- Main-window StatusBar and post-close dialog messages use the `MAIN_STATUS_*_DURATION_MS` constants.
+- Messages that must remain visible until explicitly cleared use `PERSISTENT_DURATION_MS`.
+
+Avoid hardcoding numeric message durations at call sites unless a new named constant is added first.
+
 ### Modal-safe StatusBar policy
 
 When a modal dialog is open, the overlay is active and the StatusBar is visually “behind” the modal.
@@ -63,21 +73,21 @@ For handled (non-exception) failures (e.g., DB CRUD returning `(ok=False, msg)`)
 
 ## API Reference
 
-### `set_dialog_main_status(dlg, message, *, is_error=False, duration=4000)`
+### `set_dialog_main_status(dlg, message, *, is_error=False, duration=MAIN_STATUS_DURATION_MS)`
 
 Stores a “post-close message request” on the dialog instance.
 
 Used by wrappers that want consistent messaging even when the dialog rejects/cancels.
 
-### `set_dialog_info(dlg, message, *, duration=4000)`
+### `set_dialog_info(dlg, message, *, duration=MAIN_STATUS_DURATION_MS)`
 
 Convenience wrapper around `set_dialog_main_status(..., is_error=False)`.
 
-### `set_dialog_error(dlg, message, *, duration=5000)`
+### `set_dialog_error(dlg, message, *, duration=MAIN_STATUS_ERROR_DURATION_MS)`
 
 Convenience wrapper around `set_dialog_main_status(..., is_error=True)`.
 
-### `set_dialog_main_status_max(dlg, message, *, level='info', is_error=None, duration=4000)`
+### `set_dialog_main_status_max(dlg, message, *, level='info', is_error=None, duration=MAIN_STATUS_DURATION_MS)`
 
 Sets the dialog’s post-close StatusBar intent only if the new message is **at least as severe** as the existing one.
 
@@ -86,7 +96,7 @@ Severity precedence:
 
 This supports the rule: “failure/warning takes precedence over success in the StatusBar”.
 
-### `report_to_statusbar(host_window, message, *, is_error=True, duration=4000)`
+### `report_to_statusbar(host_window, message, *, is_error=True, duration=MAIN_STATUS_DURATION_MS)`
 
 Best-effort StatusBar helper (delegates to `ui_feedback.show_main_status`).
 
@@ -105,7 +115,7 @@ Strict `.ui` loader:
 
 If `host_window` is provided, UI-load failures will queue a pending StatusBar message for the wrapper to display after overlay cleanup.
 
-### `report_exception(host_window, where, exc, *, user_message=None, duration=5000)`
+### `report_exception(host_window, where, exc, *, user_message=None, duration=MAIN_STATUS_ERROR_DURATION_MS)`
 
 Standardized exception routing:
 
@@ -114,7 +124,7 @@ Standardized exception routing:
 
 This is intended for unexpected DB/UI failures where users need a quick hint but developers need full traceback.
 
-### `log_exception_traceback_and_postclose_statusBar(dlg, where, exc, *, user_message, level='error', duration=5000)`
+### `log_exception_traceback_and_postclose_statusBar(dlg, where, exc, *, user_message, level='error', duration=MAIN_STATUS_ERROR_DURATION_MS)`
 
 Modal-safe exception routing:
 

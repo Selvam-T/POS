@@ -52,6 +52,10 @@ If no override consumes the scan:
 
 ## Scan-Burst Timing
 
+![Barcode scanner high-speed input workflow](Barcode_Manager_High-Speed_Manual_Input.png)
+
+The diagram's `confirmation.py` box is conceptual; the confirmed `barcode_scanned` signal is emitted by `modules/devices/scanner.py`.
+
 `scanner.py` owns scanner/manual timing. It uses `SCANNER_KEY_INTERVAL_SECONDS` and emits:
 
 ```python
