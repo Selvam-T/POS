@@ -12,7 +12,7 @@ from modules.ui_utils.dialog_utils import (
     log_exception_traceback_and_postclose_statusBar,
 )
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
-from config import MAIN_STATUS_DURATION_MS, MAIN_STATUS_LONG_DURATION_MS, QSS_DIR, STATUS_LABEL_DURATION_MS, UI_DIR
+from config import MAIN_STATUS_DURATION_MS, MAIN_STATUS_LONG_DURATION_MS, QSS_DIR, STATUS_LABEL_SHORT_DURATION_MS, UI_DIR
 
 UI_PATH = os.path.join(UI_DIR, 'refund.ui')
 QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
@@ -73,7 +73,7 @@ def launch_refund_dialog(parent=None):
     barcode_warning = ui_feedback.create_auto_clearing_warning_label(
         status,
         ui_feedback.BARCODE_WARNING_TEXT,
-        duration=STATUS_LABEL_DURATION_MS,
+        duration=STATUS_LABEL_SHORT_DURATION_MS,
     )
 
     # Remember and hide note placeholder while inputs are locked (opt-in)

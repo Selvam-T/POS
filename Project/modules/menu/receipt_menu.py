@@ -43,7 +43,7 @@ from modules.table_ui.receipt_table_helpers import (
     selected_receipt,
     sort_receipts_by_column,
 )
-from config import MAIN_STATUS_DURATION_MS, MAIN_STATUS_ERROR_DURATION_MS, QSS_DIR, STATUS_LABEL_DURATION_MS, UI_DIR
+from config import MAIN_STATUS_DURATION_MS, MAIN_STATUS_ERROR_DURATION_MS, STATUS_LABEL_DURATION_MS, STATUS_LABEL_SHORT_DURATION_MS, QSS_DIR, UI_DIR
 
 QSS_PATH = os.path.join(QSS_DIR, "dialog.qss")
 UI_PATH = os.path.join(UI_DIR, "receipt_menu.ui")
@@ -249,7 +249,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
     barcode_warning = ui_feedback.create_auto_clearing_warning_label(
         status_lbl,
         ui_feedback.BARCODE_WARNING_TEXT,
-        duration=STATUS_LABEL_DURATION_MS,
+        duration=STATUS_LABEL_SHORT_DURATION_MS,
     )
 
     def _mark_product_error(widget, message: str) -> None:

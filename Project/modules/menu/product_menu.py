@@ -33,9 +33,10 @@ from modules.date_time import format_datetime
 from config import (
     MAIN_STATUS_DURATION_MS,
     MAIN_STATUS_ERROR_DURATION_MS,
+    STATUS_LABEL_DURATION_MS,
+    STATUS_LABEL_SHORT_DURATION_MS,
     PRODUCT_MENU_TAB_RATIOS,
     QSS_DIR,
-    STATUS_LABEL_DURATION_MS,
     UI_DIR,
 )
 
@@ -119,17 +120,17 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     add_barcode_warning = ui_feedback.create_auto_clearing_warning_label(
         widgets['add_status'],
         ui_feedback.BARCODE_WARNING_TEXT,
-        duration=STATUS_LABEL_DURATION_MS,
+        duration=STATUS_LABEL_SHORT_DURATION_MS,
     )
     rem_barcode_warning = ui_feedback.create_auto_clearing_warning_label(
         widgets['rem_status'],
         ui_feedback.BARCODE_WARNING_TEXT,
-        duration=STATUS_LABEL_DURATION_MS,
+        duration=STATUS_LABEL_SHORT_DURATION_MS,
     )
     upd_barcode_warning = ui_feedback.create_auto_clearing_warning_label(
         widgets['upd_status'],
         ui_feedback.BARCODE_WARNING_TEXT,
-        duration=STATUS_LABEL_DURATION_MS,
+        duration=STATUS_LABEL_SHORT_DURATION_MS,
     )
 
     def _wire_barcode_warning_clear(code_widget, warning_helper) -> None:

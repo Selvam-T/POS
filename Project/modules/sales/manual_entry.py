@@ -11,7 +11,7 @@ from modules.ui_utils.dialog_utils import (
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 from modules.ui_utils import input_handler, input_validation, ui_feedback
 import modules.db_operation as dbop
-from config import QSS_DIR, STATUS_LABEL_DURATION_MS, UI_DIR
+from config import QSS_DIR, STATUS_LABEL_SHORT_DURATION_MS, UI_DIR
 
 UI_PATH = os.path.join(UI_DIR, 'manual_entry.ui')
 QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
@@ -59,7 +59,7 @@ def launch_manual_entry_dialog(parent):
     barcode_warning = ui_feedback.create_auto_clearing_warning_label(
         widgets['status'],
         ui_feedback.BARCODE_WARNING_TEXT,
-        duration=STATUS_LABEL_DURATION_MS,
+        duration=STATUS_LABEL_SHORT_DURATION_MS,
     )
 
     def _clear_barcode_warning_when_code_cleared(_text=None) -> None:

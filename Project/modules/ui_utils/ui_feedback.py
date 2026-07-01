@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QLabel, QStatusBar
 from PyQt5.QtCore import QTimer
 import weakref
-from config import MAIN_STATUS_DURATION_MS, STATUS_LABEL_DURATION_MS
+from config import MAIN_STATUS_DURATION_MS, STATUS_LABEL_DURATION_MS, STATUS_LABEL_SHORT_DURATION_MS
 
 BARCODE_WARNING_TEXT = "Scan only in Product Code field"
 
@@ -44,13 +44,13 @@ def set_status_label(label: QLabel, message: str, ok: bool, duration: int = STAT
     return _set_status_label_state(label, message, status_val, duration)
 
 
-def set_warning_status_label(label: QLabel, message: str, duration: int = STATUS_LABEL_DURATION_MS) -> bool:
+def set_warning_status_label(label: QLabel, message: str, duration: int = STATUS_LABEL_SHORT_DURATION_MS) -> bool:
     """Sets a warning message with warning styling."""
     return _set_status_label_state(label, message, "warning", duration)
 
 
 class AutoClearingWarningLabel:
-    def __init__(self, label: QLabel, message: str, duration: int = STATUS_LABEL_DURATION_MS, poll_interval: int = 150):
+    def __init__(self, label: QLabel, message: str, duration: int = STATUS_LABEL_SHORT_DURATION_MS, poll_interval: int = 150):
         self._label_ref = weakref.ref(label) if label is not None else lambda: None
         self._message = str(message or "")
         self._duration = max(0, int(duration))
