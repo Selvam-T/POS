@@ -58,6 +58,7 @@ Scanner-aware dialogs expose `dlg.barcode_override_handler`.
 - Scans are accepted when focus is in a field whose `objectName` ends with `ProductCodeLineEdit`.
 - If focus moves during a scan, the override can still accept it when the scan started in a `*ProductCodeLineEdit`.
 - Scans in other fields are rejected and restored/cleaned.
+- Known limitation: dialog name-search fields may still retain one leaked scanner character after rejection. They remain manual fields and do not own scanner input.
 
 ### Modal Block
 
@@ -94,6 +95,8 @@ When a scan is confirmed and then rejected/ignored, `BarcodeManager`:
 3. Falls back to single-character cleanup if no snapshot is available.
 
 Date fields are covered by the same path: `QDateEdit` restores/cleans through its internal `lineEdit()`.
+
+Name-search fields in scanner-aware dialogs can still retain a single leaked character after rejection. The scan is still blocked from barcode routing; this is a limitation of HID keyboard-style scanner cleanup in those manual fields.
 
 If a scanner does not send Enter, no confirmed scan is emitted, so rejected-scan cleanup does not run.
 

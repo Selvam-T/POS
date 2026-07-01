@@ -197,12 +197,6 @@ def launch_vendor_dialog(parent=None):
     if close_btn is not None:
         close_btn.clicked.connect(_handle_cancel)
 
-    def barcode_override(barcode: str) -> bool:
-        # Swallow barcode input while modal vendor dialog is open.
-        return True
-
-    dlg.barcode_override_handler = barcode_override
-
     name.setFocus(Qt.OtherFocusReason)
     try:
         name.selectAll()

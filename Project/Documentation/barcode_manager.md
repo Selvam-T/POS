@@ -59,6 +59,8 @@ Current rule:
 
 Dialogs without a barcode override behave like scanner-blocked modals: scanner input is rejected instead of being routed to the sales table.
 
+Known limitation: rejected scans in dialog name-search fields can still leave a single leaked character. The scan is not accepted and does not route as barcode input, but HID keyboard timing can allow one character to land before the rejected-scan cleanup runs.
+
 ### 4) HOLD_LOADED Cart Protection
 
 When `receipt_context.source == 'HOLD_LOADED'`, scanner-driven sales-table routing is blocked.
@@ -106,6 +108,8 @@ When a confirmed scan is rejected or ignored, `BarcodeManager` restores text in 
 3. If no snapshot is available, `_cleanup_scanner_leak(...)` removes the trailing first character of the scanned barcode when present.
 
 `QDateEdit` widgets are handled through their internal `lineEdit()`, so report/receipt date fields can restore pre-scan text and clean leaked scanner characters through the same shared path.
+
+Dialog name-search fields may still show a single leaked character after a rejected scan. This is treated as a limitation of the current HID scanner cleanup approach; name-search fields remain manual fields and are not barcode-owned.
 
 The stable protected-field memory is needed because the first scanner character can land before a burst is confirmed. It preserves values such as a sales-table quantity or payment amount and removes the first-character leak reliably.
 

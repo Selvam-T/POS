@@ -151,38 +151,12 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     _wire_barcode_warning_clear(widgets['rem_code'], rem_barcode_warning)
     _wire_barcode_warning_clear(widgets['upd_code'], upd_barcode_warning)
 
-
-    _dialog_anchor = {'pos': None}
-
-    def _capture_dialog_anchor() -> None:
-        if _dialog_anchor['pos'] is not None:
-            return
+    def _center_dialog_on_main() -> None:
         try:
-            if not dlg.isVisible():
-                QTimer.singleShot(0, _capture_dialog_anchor)
-                return
-        except Exception:
-            pass
-        try:
-            p = dlg.pos()
-            if p.x() == 0 and p.y() == 0:
-                QTimer.singleShot(0, _capture_dialog_anchor)
-                return
-            try:
-                host_y = main_window.frameGeometry().y()
-            except Exception:
-                host_y = 0
-            try:
-                offset = -80
-                new_y = max(host_y, p.y() + offset)
-                p.setY(new_y)
-            except Exception:
-                pass
-            _dialog_anchor['pos'] = p
-            try:
-                dlg.move(_dialog_anchor['pos'])
-            except Exception:
-                pass
+            host_geom = main_window.frameGeometry()
+            x = host_geom.x() + (host_geom.width() - dlg.width()) // 2
+            y = host_geom.y() + (host_geom.height() - dlg.height()) // 2
+            dlg.move(x, y)
         except Exception:
             pass
 
@@ -217,9 +191,6 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
                 index = None
         if index is None or index < 0:
             return
-
-        if _dialog_anchor['pos'] is None:
-            _capture_dialog_anchor()
 
         try:
             active_tab = tabs.widget(index)
@@ -279,11 +250,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         except Exception:
             pass
 
-        try:
-            if _dialog_anchor['pos'] is not None:
-                dlg.move(_dialog_anchor['pos'])
-        except Exception:
-            pass
+        _center_dialog_on_main()
         try:
             dlg.updateGeometry()
             dlg.update()
@@ -305,9 +272,8 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
     except Exception:
         pass
 
-    # Resize dialog height based on the active tab, keep a fixed anchor position.
+    # Resize dialog height based on the active tab and keep it centered.
     def _post_show_resize() -> None:
-        _capture_dialog_anchor()
         _schedule_resize_dialog_to_tab()
 
     try:
