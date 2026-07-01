@@ -1,6 +1,6 @@
 # Product Menu (Product Management Dialog)
 
-Updated: June 2026
+Updated: July 2026
 
 This document describes the current Product Menu controller behavior after the refactor to the standardized dialog pipeline.
 
@@ -16,8 +16,15 @@ It integrates with:
 
 Primary implementation:
 
-- Controller: `modules/menu/product_menu.py` (`open_dialog_scanner_enabled`)
+- Launcher / ADD-REMOVE-UPDATE controller: `modules/menu/product_menu.py`
+- Category tab controller: `modules/menu/product_category_tab.py`
+- Tab sizing controller: `modules/menu/product_menu_sizing.py`
 - UI: `ui/product_menu.ui`
+
+The Product Menu was refactored in narrow, behavior-preserving steps so the
+public launcher remains `launch_product_dialog(...)` in `product_menu.py`.
+The extracted controllers are attached to the dialog instance to preserve their
+Qt signal/event-filter lifetime for as long as the dialog is open.
 
 ---
 
@@ -55,6 +62,8 @@ Landing rules:
 ## Dialog Sizing
 
 Product Menu uses `config.PRODUCT_MENU_TAB_RATIOS` after the shared wrapper has positioned the dialog.
+The sizing behavior is implemented by `ProductMenuSizingController` in
+`modules/menu/product_menu_sizing.py`.
 
 - Width stays controlled by the configured tab ratio.
 - Height varies by active tab: ADD, REMOVE, UPDATE, and CATEGORY can each use a different main-window height ratio.
@@ -135,6 +144,8 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 
 ## Category tab — quick summary
 
+- The Category tab UI behavior is implemented by `ProductCategoryTabController`
+  in `modules/menu/product_category_tab.py`.
 - The Category tab delegates to `modules/ui_utils/category_service.py`.
 - `add` updates only the JSON store; `remove`/`replace` run a DB replace (via `products_repo.replace_category`) then call `refresh_product_cache()` and update JSON.
 - Product Menu triggers cache refresh / completer refresh after DB category changes so UI lookups stay current.
