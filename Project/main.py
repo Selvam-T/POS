@@ -834,6 +834,12 @@ class MainLoader(QMainWindow):
             panel.set_payment_default(total, focus=focus_payment)
         self._update_customer_display_from_sales()
 
+    def _on_qty_commit_total_changed(self, total: float) -> None:
+        panel = getattr(self, 'payment_panel_controller', None)
+        if panel is not None:
+            panel.set_payment_default(total, focus=True)
+        self._update_customer_display_from_sales()
+
     # Update receipt context when a held sale is loaded.
     def _on_view_hold_loaded(self, receipt_id: int, total: float) -> None:
         ctx = self.receipt_context

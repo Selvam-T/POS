@@ -1,9 +1,21 @@
 """High-level barcode scanner routing and UI leak cleanup."""
 
+import weakref
+
 from PyQt5.QtCore import QObject
 from config import MAIN_STATUS_DURATION_MS, SCANNER_KEY_INTERVAL_SECONDS, SCANNER_UI_SUPPRESS_SECONDS
 from modules.devices.scanner import BarcodeScanner
 from modules.ui_utils import ui_feedback
+
+PROTECTED_MANUAL_FIELD_NAMES = {
+    'qtyInput',
+    'tenderValLineEdit',
+    'cashPayLineEdit',
+    'netsPayLineEdit',
+    'paynowPayLineEdit',
+    'voucherPayLineEdit',
+}
+
 
 class BarcodeManager(QObject):
     """Manage scanner events, dialog overrides, modal blocking, and scan leaks."""
@@ -13,6 +25,8 @@ class BarcodeManager(QObject):
         self._modalBlockScanner = False
         self._barcodeOverride = None
         self._scannerCandidateUntil = 0.0
+        self._scannerBurstUntil = 0.0
+        self._protectedManualText = weakref.WeakKeyDictionary()
         self.scanner.barcode_scanned.connect(self.on_barcode_scanned)
         self.scanner.scanner_activity.connect(self._on_scanner_activity)
         self.scanner.start()
@@ -30,8 +44,8 @@ class BarcodeManager(QObject):
             fw = QApplication.instance().focusWidget() if QApplication.instance() else None
             obj_name = fw.objectName() if fw and hasattr(fw, 'objectName') else ''
             scan_start_name = getattr(self, '_scanStartObjName', '') or ''
-            scan_started_in_code = bool(scan_start_name.endswith('ProductCodeLineEdit'))
-            focus_in_code = bool(obj_name.endswith('ProductCodeLineEdit'))
+            scan_started_in_code = self._is_barcode_allowed_name(scan_start_name)
+            focus_in_code = self._is_barcode_allowed_name(obj_name)
             if callable(override):
                 if focus_in_code or scan_started_in_code:
                     handled = False
@@ -91,12 +105,13 @@ class BarcodeManager(QObject):
         except Exception:
             pass
 
-        # Quantity editor input must stay manual.
+        # Manual-entry fields in the main window must not own or route scans.
         try:
             from PyQt5.QtWidgets import QApplication
             fw = QApplication.instance().focusWidget() if QApplication.instance() else None
-            if fw is not None and getattr(fw, 'objectName', lambda: '')() == 'qtyInput':
-                self._ignore_scan(barcode, reason='qtyInput-focused')
+            start_w = getattr(self, '_scanStartWidget', None)
+            if self._is_protected_manual_field(fw) or self._is_protected_manual_field(start_w):
+                self._ignore_scan(barcode, reason='protected-manual-field')
                 return
         except Exception:
             pass
@@ -165,6 +180,10 @@ class BarcodeManager(QObject):
                 getattr(self, '_scannerCandidateUntil', 0.0),
                 now + SCANNER_UI_SUPPRESS_SECONDS,
             )
+            self._scannerBurstUntil = max(
+                getattr(self, '_scannerBurstUntil', 0.0),
+                now + SCANNER_UI_SUPPRESS_SECONDS,
+            )
             self._suppressEnterUntil = max(
                 getattr(self, '_suppressEnterUntil', 0.0),
                 now + SCANNER_UI_SUPPRESS_SECONDS,
@@ -192,13 +211,74 @@ class BarcodeManager(QObject):
             pass
         return False
 
+    @staticmethod
+    def _object_name(widget) -> str:
+        try:
+            if widget is None or not hasattr(widget, 'objectName'):
+                return ''
+            return str(widget.objectName() or '')
+        except Exception:
+            return ''
+
+    @staticmethod
+    def _is_barcode_allowed_name(name: str) -> bool:
+        name = str(name or '')
+        return name == 'productCodeLineEdit' or name.endswith('ProductCodeLineEdit')
+
+    def _is_barcode_allowed_field(self, widget) -> bool:
+        return self._is_barcode_allowed_name(self._object_name(widget))
+
+    def _is_protected_manual_field(self, widget) -> bool:
+        return self._object_name(widget) in PROTECTED_MANUAL_FIELD_NAMES
+
+    def _remember_protected_manual_text(self, widget) -> None:
+        if not self._is_protected_manual_field(widget):
+            return
+        try:
+            from PyQt5.QtWidgets import QLineEdit
+            if isinstance(widget, QLineEdit):
+                self._protectedManualText[widget] = widget.text()
+        except Exception:
+            pass
+
+    def _restore_protected_manual_text(self, widget) -> bool:
+        if not self._is_protected_manual_field(widget):
+            return False
+        try:
+            from PyQt5.QtWidgets import QLineEdit
+            if isinstance(widget, QLineEdit) and widget in self._protectedManualText:
+                widget.setText(self._protectedManualText[widget])
+                return True
+        except Exception:
+            pass
+        return False
+
+    def _restore_scan_start_text(self) -> bool:
+        start_w = getattr(self, '_scanStartWidget', None)
+        return self._restore_protected_manual_text(start_w) or self._restore_pre_scan_text(start_w)
+
     def eventFilter(self, obj, event):
         import time
         from PyQt5.QtCore import QEvent, Qt
         from PyQt5.QtWidgets import QApplication
+        if event.type() == QEvent.FocusIn:
+            self._remember_protected_manual_text(obj)
+        elif event.type() == QEvent.KeyRelease:
+            now = time.time()
+            if (
+                now > getattr(self, '_scannerCandidateUntil', 0.0)
+                and now > getattr(self, '_scannerBurstUntil', 0.0)
+            ):
+                self._remember_protected_manual_text(obj)
+
         if event.type() == QEvent.KeyPress:
             k = event.key()
             now = time.time()
+            text = event.text() or ''
+            is_printable = len(text) == 1 and (31 < ord(text) < 127)
+            if is_printable and now > getattr(self, '_scannerBurstUntil', 0.0):
+                self._remember_protected_manual_text(obj)
+
             try:
                 if getattr(self, '_modalBlockScanner', False):
                     app = QApplication.instance()
@@ -209,14 +289,10 @@ class BarcodeManager(QObject):
                         if modal is not None and fw is not None and fw.window() is modal:
                             pass
                         else:
-                            text = event.text() or ''
-                            is_printable = len(text) == 1 and (31 < ord(text) < 127)
                             if is_printable or k in (Qt.Key_Return, Qt.Key_Enter):
                                 self._restore_pre_scan_text(fw)
                                 return True
                     except Exception:
-                        text = event.text() or ''
-                        is_printable = len(text) == 1 and (31 < ord(text) < 127)
                         if is_printable or k in (Qt.Key_Return, Qt.Key_Enter):
                             self._restore_pre_scan_text(fw)
                             return True
@@ -225,6 +301,20 @@ class BarcodeManager(QObject):
 
             if k in (Qt.Key_Return, Qt.Key_Enter) and now <= getattr(self, '_suppressEnterUntil', 0.0):
                 return True
+
+            if now <= getattr(self, '_scannerBurstUntil', 0.0):
+                app = QApplication.instance()
+                fw = app.focusWidget() if app else None
+                if is_printable and not self._is_barcode_allowed_field(fw):
+                    try:
+                        start_w = getattr(self, '_scanStartWidget', None)
+                        if fw is start_w:
+                            self._restore_protected_manual_text(fw) or self._restore_pre_scan_text(fw)
+                        elif self._is_protected_manual_field(start_w):
+                            self._restore_scan_start_text()
+                    except Exception:
+                        pass
+                    return True
 
         return super().eventFilter(obj, event)
     
@@ -263,8 +353,19 @@ class BarcodeManager(QObject):
         try:
             from PyQt5.QtWidgets import QApplication
             fw = QApplication.instance().focusWidget() if QApplication.instance() else None
-            if not self._restore_pre_scan_text(fw):
+            start_w = getattr(self, '_scanStartWidget', None)
+
+            restored = False
+            if start_w is not None and (start_w is fw or self._is_protected_manual_field(start_w)):
+                restored = self._restore_protected_manual_text(start_w) or self._restore_pre_scan_text(start_w)
+            elif fw is not None:
+                restored = self._restore_protected_manual_text(fw) or self._restore_pre_scan_text(fw)
+
+            if not restored:
                 self._cleanup_scanner_leak(fw, barcode)
+            if start_w is not None and start_w is not fw:
+                if not (self._restore_protected_manual_text(start_w) or self._restore_pre_scan_text(start_w)):
+                    self._cleanup_scanner_leak(start_w, barcode)
         except Exception:
             pass
 

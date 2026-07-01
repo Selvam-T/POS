@@ -27,7 +27,29 @@ Workflow diagram: [Barcode_Manager_High-Speed_Manual_Input.png](Barcode_Manager_
 
 `BarcodeManager` suppresses Enter/Return for `SCANNER_UI_SUPPRESS_SECONDS` after scanner-fast activity.
 
-This protects forms and default buttons from a scanner's trailing Enter. Printable letters and numbers are not blocked solely because they arrived quickly, which avoids the old fast-manual-typing pause in fields such as receipt notes.
+This protects forms and default buttons from a scanner's trailing Enter.
+
+Printable letters and numbers are blocked only during the confirmed scanner-burst window and only when the focused widget is not barcode-allowed. This keeps normal fast manual typing usable while preventing scanner text from leaking into protected fields.
+
+### Main Window Protection
+
+The main window is the normal scan-to-cart surface, so it is not globally scanner-blocked.
+
+Instead, `BarcodeManager` rejects scans selectively for protected manual fields:
+
+- `qtyInput`
+- `tenderValLineEdit`
+- `cashPayLineEdit`
+- `netsPayLineEdit`
+- `paynowPayLineEdit`
+- `voucherPayLineEdit`
+
+If a scanner burst targets one of these fields:
+
+- Printable scanner characters are swallowed.
+- The widget restores to its last stable manual value.
+- The completed scan is ignored so it does not add to the cart or open Product Menu.
+- Manual typing and manual Enter remain unaffected outside scanner-burst timing.
 
 ### Dialog Overrides
 
@@ -44,17 +66,19 @@ Dialogs opened through `DialogWrapper.open_dialog_scanner_blocked(...)` enable m
 - Confirmed scans do not route to the main sales table while a modal is open.
 - Normal typing inside the active modal remains usable.
 - Input outside the active modal is blocked as a fail-safe.
+- Dialogs that need scanner input opt in with `dlg.barcode_override_handler`, and only `*ProductCodeLineEdit` fields may consume scans.
 
 ## Allowed vs Blocked Targets
 
 Allowed:
 
 - Sales table, when no modal/special context blocks scanner routing.
-- Focused dialog fields ending in `ProductCodeLineEdit`, when the dialog has an override.
+- Focused or scan-start dialog fields ending in `ProductCodeLineEdit`, when the dialog has an override.
 
 Blocked and cleaned:
 
 - `qtyInput` in the sales table.
+- Main-window payment entry fields: `tenderValLineEdit`, `cashPayLineEdit`, `netsPayLineEdit`, `paynowPayLineEdit`, `voucherPayLineEdit`.
 - Non-product-code fields in scanner-aware dialogs.
 - Main-window scan routing while `receipt_context.source == 'HOLD_LOADED'`.
 - Main-window scan routing while a scanner-blocked modal is open.
@@ -65,15 +89,17 @@ HID scanners type like keyboards, so scanner characters can briefly appear in th
 
 When a scan is confirmed and then rejected/ignored, `BarcodeManager`:
 
-1. Restores the editable widget text captured at scan-burst start.
-2. Falls back to single-character cleanup if no snapshot is available.
+1. Restores protected main-window manual fields from stable text memory.
+2. Restores other editable widgets from text captured at scan-burst start.
+3. Falls back to single-character cleanup if no snapshot is available.
 
 If a scanner does not send Enter, no confirmed scan is emitted, so rejected-scan cleanup does not run.
 
 ## Edge Cases
 
 - Fast manual typing may still briefly suppress Enter if it looks scanner-fast, but printable characters should continue flowing into the widget.
-- A scan into a forbidden editable field may briefly show characters until Enter confirms the scan; then the field should restore to its pre-scan text.
+- A scan into a protected main-window field should swallow scanner characters during the confirmed burst and ignore the completed scan.
+- A scan into other forbidden editable fields may briefly show characters until Enter confirms the scan; then the field should restore to its pre-scan text.
 - A scanner configured with a prefix/suffix or serial/COM mode would allow cleaner zero-leak capture, but the current design keeps HID plug-and-play behavior.
 
 ## Developer Notes
