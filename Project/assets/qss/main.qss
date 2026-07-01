@@ -1,5 +1,19 @@
 /* =============================================================
-   BASE APPLICATION
+   MAIN APPLICATION STYLESHEET
+   -------------------------------------------------------------
+   Loaded globally by main.py.
+
+   Scope:
+   - Main window shell, status footer, menu sidebar, payment panel,
+     login dialog fallback, and customer-facing display.
+   - Global fallback widget styling that should apply application-wide.
+
+   Keep modal/menu dialog overrides in dialog.qss.
+   Keep embedded sales table/frame styling in sales.qss.
+   ============================================================= */
+
+/* =============================================================
+   1. APPLICATION SHELL AND STATUS FOOTER
    ============================================================= */
 QMainWindow {
   background-color: #F0F0F0;
@@ -92,15 +106,14 @@ QPushButton#clearErrorLogBtn {
 }
 
 /* =============================================================
-   COMMON BUTTON FONT
-   Apply a unified font to all QPushButtons
+   2. GLOBAL BUTTON FONT FALLBACK
    ============================================================= */
 QPushButton {
   font-family: 'Segoe UI', Tahoma, sans-serif;
 }
 
 /* =============================================================
-   HEADER AND ITS CHILDREN
+   3. MAIN HEADER
    ============================================================= */
 
 /* --- Header Labels --- */
@@ -119,30 +132,8 @@ QLabel#labelDayTime {
 QLabel#labelDate { padding-left: 20px; }
 QLabel#labelDayTime { padding-right: 20px; }
 
-/* =========================================================
-   TITLE BAR STYLING
-   ========================================================= */
-QFrame#customTitleBar {
-    background-color: 66bb6a;
-    min-height: 40px;
-}
-
-QLabel#customTitle {
-    color: #222222;
-    font-size: 20px;
-    font-weight: 700;
-}
-
-QPushButton#customCloseBtn {
-    color: #18042f;
-    background: transparent;
-    border: 2px solid transparent; /* Reserve space for the focus border */
-    font-size: 40px;
-    font-weight: bold;
-}
-
 /* =============================================================
-   LOGIN DIALOG
+   4. LOGIN DIALOG
    ============================================================= */
 
 QDialog#loginDialog {
@@ -220,10 +211,9 @@ QLabel#loginStatusLabel[status="error"] {
     color: #991b1b; 
 }
 /* =============================================================
-   PAYMENT FRAME AND ITS CHILDREN
+   5. PAYMENT PANEL
    ============================================================= */
 
-/* --- 1. Payment Frame Container --- */
 QFrame#paymentFrame {
   background-color: #ffe8cc;
   border: 1px solid #333333;
@@ -231,7 +221,6 @@ QFrame#paymentFrame {
   font-family: "Segoe UI", Arial, sans-serif;
 }
 
-/* --- 2. Payment Label --- */
 QLabel#paymentLabel {
   font-size: 14pt;
   qproperty-alignment: 'AlignCenter';
@@ -240,7 +229,7 @@ QLabel#paymentLabel {
   padding: 0px;
 }
 
-/* --- 3. payable Layout --- */ 
+/* Payable amount summary. */ 
 
 *[objectName*="PayFrame"] {
     background-color: #f4f5f4;  
@@ -261,7 +250,7 @@ QLabel#paymentLabel {
     border-radius: 10px;
 }
 
-/* 4. Payment mode select buttons */
+/* Payment mode select buttons. */
 
 *[objectName*="PaySlcBtn"] {
   padding: 8px 10px;
@@ -301,7 +290,7 @@ QPushButton#voucherPaySlcBtn:focus {
   border: 3px solid #4fa1ff;
 }
 
-/* 5. Operation buttons */
+/* Payment operation buttons. */
 
 #payPayOpsBtn, #printPayOpsBtn, #resetPayOpsBtn {
     color: white;
@@ -363,7 +352,7 @@ QPushButton#keyTodoBtn:focus {
     border-radius: 8px;
 }
 
-/* 6. tender */
+/* Tender input fields. */
 
 *[objectName*="TtlLabel"],
 *[objectName*="LineEdit"] {
@@ -400,7 +389,7 @@ QPushButton#keyTodoBtn:focus {
   background-color: #ffffff;
 }
 
-/* 7. Keypad */
+/* Keypad. */
 #keypadFrame QPushButton {
     min-width: 100px;
     max-width: 100px;
@@ -435,7 +424,7 @@ QPushButton#keyTodoBtn:focus {
   color: white;
 }
 
-/* 7. Keypad keyOpsFrame QPushButtons */
+/* Keypad operation buttons. */
 #keyRefundBtn, #keyVendorBtn, #keyTodoBtn {
     color: white;
     font-size: 20px;
@@ -479,7 +468,7 @@ QPushButton#keyTodoBtn:focus {
     background: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #7b6c4d, stop:1 #716347);
 }
 
-/* 8. Status Label */
+/* Payment status label. */
 QLabel#payStatusLabel {
   font-size: 18px;
   font-weight: bold;
@@ -510,7 +499,7 @@ QLabel[status="warning"] {
 }
 
 /* =============================================================
-   MENU FRAME (RIGHT SIDEBAR)
+   6. MENU FRAME (RIGHT SIDEBAR)
    ============================================================= */
 QFrame#menuFrame {
   background-color: #b0c4de;
@@ -559,9 +548,9 @@ QFrame#menuFrame QPushButton[iconFallback="true"]:pressed {
   border-color: #dddddd;
 }
 
-/* ===============================================================
-   COMMON ELEMENTS applied to the entire QApplication as fallback
-   =============================================================== */
+/* =============================================================
+   7. GLOBAL TABLE AND SCROLLBAR FALLBACKS
+   ============================================================= */
 
 QTableWidget { gridline-color: rgba(0, 0, 0, 0.2); }
 QTableWidget::item:selected { background-color: #99ccff; }
@@ -605,14 +594,7 @@ QScrollBar::handle:horizontal:hover { background: #5a9fd4; }
 QScrollBar::handle:horizontal:pressed { background: #3a6a94; }
 
 /* =============================================================
-   MANUAL PRODUCT ENTRY DIALOG
-   ============================================================= */
-QFrame#manualFrame { background: #daf197; }
-QLabel#manualLabel1, QLabel#manualLabel2 { font-size: 18px; font-weight: bold; }
-QTextEdit#manualText { font-size: 18px; font-weight: bold; }
-
-/* =============================================================
-   Customer Facing Screen
+   8. CUSTOMER FACING SCREEN
    ============================================================= */
 QWidget#pageSplit {
     background-color: beige;

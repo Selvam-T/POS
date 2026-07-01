@@ -1,6 +1,22 @@
-/* =============================
-   DIALOG BACKGROUND
-   ============================= */
+/* =============================================================
+   DIALOG / MODAL / MENU STYLESHEET
+   -------------------------------------------------------------
+   Loaded by: modules/ui_utils/dialog_utils.py and dialog launchers
+   in modules/sales, modules/payment, and modules/menu.
+
+   Scope:
+   - Modal dialogs opened from SalesFrame, Payment panel, and Menu.
+   - Dialog title bars, shared form controls, dialog tables, and
+     menu-dialog feature sections.
+
+   Keep embedded SalesFrame table styling in sales.qss.
+   Keep main window, payment panel, sidebar, login, and customer
+   display shell styling in main.qss.
+   ============================================================= */
+
+/* =============================================================
+   1. DIALOG SHELL
+   ============================================================= */
 QDialog {
     background-color: #ffffff;
     border-top: 1px solid #eeeeee;
@@ -12,9 +28,9 @@ QDialog {
 
 
 
-/* =========================================================
-   TITLE BAR STYLING
-   ========================================================= */
+/* =============================================================
+   2. SHARED CUSTOM TITLE BAR
+   ============================================================= */
 QFrame#customTitleBar {
     background-color: #ffffff;
     min-height: 64px;
@@ -39,16 +55,15 @@ QPushButton#customCloseBtn {
     padding: 0px;
 }
 
-/* Focus Style */
 QPushButton#customCloseBtn:focus {
     border: 2px solid #d0741e;
     border-radius: 10px; 
     outline: none;
 }
 
-/* =============================
-   BUTTON ACTION STYLES
-   ============================= */
+/* =============================================================
+   3. SHARED DIALOG ACTION BUTTONS
+   ============================================================= */
 QPushButton {
     color: white;
     font-size: 12pt;
@@ -135,11 +150,10 @@ QPushButton:focus {
     border: 2px solid orange;
 }
 
-/* =========================================================
-   VEGETABLE SLOT BUTTONS (special)
-   ========================================================= */
+/* =============================================================
+   4. VEGETABLE ENTRY DIALOG
+   ============================================================= */
 
-/* Use *= (contains) and remove the comma between attributes */
 QPushButton[objectName*="vegEButton"][state="active"] {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #096926, stop:1 #3d994a);
     border: 1px solid #015c0a;
@@ -163,9 +177,9 @@ QPushButton[objectName*="vegEButton"][state="active"]:focus {
     outline: none;
 }
 
-/* =========================================================
-    screen2BtnLayout
-   ========================================================= */
+/* =============================================================
+   5. ADMIN MENU - SCREEN 2 ADS TAB
+   ============================================================= */
 
 QPushButton[objectName*="Screen2Btn"] {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #4facfe, stop:1 #0062ff);
@@ -175,9 +189,9 @@ QPushButton[objectName*="Screen2Btn"] {
     font-weight: 600;
 }
 
-/* =========================================================
-   STATUS LABELS (DYNAMIC PROPERTIES)
-   ========================================================= */
+/* =============================================================
+   6. SHARED STATUS LABELS
+   ============================================================= */
 
 /* Default look for all status labels */
 QLabel[objectName$="StatusLabel"] {
@@ -218,9 +232,7 @@ QLabel[objectName$="SubLbl"] {
     color: #710b0b !important; 
 }*/
 
-/* =========================================================
-   Admin_menu Screen 2 Ads Tab Special Labels
-   ========================================================= */
+/* Admin menu Screen 2 Ads tab labels. */
 QLabel#screen2RulesLabel,
 QLabel#screen2CountLabel,
 QLabel#screen2PreviewLabel{
@@ -239,9 +251,9 @@ QLabel#screen2PreviewLabel{
     border-radius: 4px;
 }
 
-/* =========================================================
-   COMMON INPUT WIDGETS
-   ========================================================= */
+/* =============================================================
+   7. SHARED FORM CONTROLS AND LOCKED STATES
+   ============================================================= */
 
 QLineEdit, QComboBox, QDateEdit {
     background-color: #ffffff;
@@ -278,9 +290,9 @@ QLineEdit[validation="error"] {
     background-color: #fff1f0;
 }
 
-/* =========================================================
-   TODO DIALOG ROW STYLES
-   ========================================================= */
+/* =============================================================
+   8. TODO DIALOG
+   ============================================================= */
 
 QTableWidget#todoTableWidget {
     border: 1px solid #c7cdd6;
@@ -320,19 +332,19 @@ QPushButton[todoRowCell="delete"] {
     min-height: 44px;
 }
 
-/* View Hold: */
+/* =============================================================
+   9. VIEW HOLD DIALOG
+   ============================================================= */
 
 QLineEdit#viewHoldSearchLineEdit:focus,
 QLineEdit#viewHoldNoteLineEdit:focus {
     border: 1px solid #2196f3;
 }
 
-QWidget#ViewHoldDialog QLineEdit:disabled,
 QWidget#ViewHoldDialog QLineEdit:disabled {
     background-color: #f3f1f1 !important;
 }
 
-QWidget#ViewHoldDialog QLineEdit:read-only,
 QWidget#ViewHoldDialog QLineEdit:read-only {
     background-color: #f5f5f5;
 }
@@ -406,7 +418,9 @@ QComboBox[locked="true"]::down-arrow {
     opacity: 0.5;
 }
 
-/* ToolButton SVG Icon */
+/* =============================================================
+   10. ADMIN / STAFF TOOL BUTTONS
+   ============================================================= */
 
 QToolButton#adminToolBtn,
 QToolButton#adminToolBtn2,
@@ -426,6 +440,10 @@ QPushButton[objectName*="ReceiptBtn"]:focus {
     outline: none;
     border: 2px solid orange;
 } 
+
+/* =============================================================
+   11. SHARED LABELS, TABS, AND GROUP BOXES
+   ============================================================= */
 
 /* Field labels */
 QLabel[objectName$="FieldLbl"] {
@@ -502,8 +520,11 @@ QGroupBox {
 }
 
 /* =============================================================
-     vegEntryTable + All tables
-    ============================================================= */
+   12. DIALOG TABLES
+   -------------------------------------------------------------
+   Covers Vegetable Entry, View Hold, and Receipt menu tables.
+
+   ============================================================= */
 
 /* 1. Table Header Styling */
 QWidget#vegEntryDialog QHeaderView::section,
@@ -522,7 +543,6 @@ QTableWidget#receiptTable QHeaderView::section  {
 
 /* 2. Table Styling */
 QWidget#vegEntryDialog QTableWidget#vegEntryTable,
-QWidget#SalesFrame QTableWidget#salesTable,
 QWidget#ViewHoldDialog QTableWidget#viewHoldTable,
 QWidget#receiptTableFrame QTableWidget#receiptTable {
     font-size: 10pt;
@@ -586,9 +606,9 @@ QPushButton#removeBtn:pressed {
     border: 5px solid #990000;
 }
 
-/* -------------------------------------------------------------------
-   QRadioButton: Base Text Style
-------------------------------------------------------------------- */
+/* =============================================================
+   13. SHARED RADIO BUTTONS
+   ============================================================= */
 QRadioButton {
     font-size: 18px;
     font-weight: bold;
@@ -628,7 +648,9 @@ QRadioButton::indicator:pressed {
     background-color: #ecf0f1;
 }
 
-/* --- Admin menu Export --- */ 
+/* =============================================================
+   14. ADMIN MENU - EXPORT TAB
+   ============================================================= */
 
 QFrame[objectName*="ExportFrame"] {
     border: 1px solid #7e7f7e;
@@ -707,8 +729,8 @@ QFrame#exportFrame QPushButton[objectName*="ExportBtn"]:focus {
 }
 
 /* =============================================================
-     receipt menu
-    ============================================================= */
+   15. RECEIPT MENU
+   ============================================================= */
 QFrame#receiptPreviewFrame,
 QFrame#receiptSearchFrame,
 QFrame#receiptFilterFrame,
@@ -787,17 +809,13 @@ QPushButton#resetReceiptBtn:focus {
 }
 
 /* =============================================================
-     report menu
-    ============================================================= */
+   16. REPORT MENU
+   ============================================================= */
 QGroupBox#reportGroupBox{
     border: 1px solid #c2c4c4;
     border-radius: 4px;
     margin-top: 14px;
     padding: 10px 10px 0px 10px;
-}
-
-/* Apply the font size to the widget itself */
-QGroupBox#reportGroupBox {
     font-size: 11pt;
     font-weight: 500;
 }

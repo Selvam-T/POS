@@ -1,6 +1,19 @@
 /* =============================================================
-     SALES FRAME AND ITS CHILDREN
-     ============================================================= */
+   SALES PANEL STYLESHEET
+   -------------------------------------------------------------
+   Loaded by: modules/sales/sales_panel.py
+
+   Scope:
+   - Embedded SalesFrame UI and sales table controls.
+   - Row quantity editor and remove button widgets created by
+     modules/table_ui/table_operations.py.
+
+   Keep dialog/menu/payment styling in dialog.qss or main.qss.
+   ============================================================= */
+
+/* =============================================================
+   1. SALES FRAME SHELL
+   ============================================================= */
 
 /* --- Sales Frame Container --- */
 QFrame#salesFrame {
@@ -19,7 +32,10 @@ QLabel#salesLabel {
     padding: 0px;
 }
 
-/* --- Sales Table --- */
+/* =============================================================
+   2. SALES TABLE
+   ============================================================= */
+
 /* Alternating row colors are set programmatically in Python due to embedded widgets. */
 QTableWidget#salesTable {
     border: 1px solid #4317ab;
@@ -39,7 +55,11 @@ QTableWidget#salesTable QHeaderView::section {
 
 QTableWidget::item:selected { background-color: transparent; }
 
-/* --- Quantity Input Field --- */
+/* =============================================================
+   3. SALES TABLE EMBEDDED ROW WIDGETS
+   ============================================================= */
+
+/* Quantity input fields are inserted into salesTable at runtime. */
 QLineEdit#qtyInput {
     font-size: 11pt;
     font-weight: bold;
@@ -56,7 +76,7 @@ QLineEdit#qtyInput[error="true"] {
     border: 3px solid red;
 }
 
-/* --- Remove Button --- */
+/* Remove buttons are inserted into salesTable at runtime. */
 QPushButton#removeBtn {
     background-color: transparent; /* Transparent to show row color */
     border: 5px solid #d33f12;
@@ -76,7 +96,10 @@ QPushButton#removeBtn:pressed {
     border: 5px solid #990000;
 }
 
-/* --- Total Display Container --- */
+/* =============================================================
+   4. TOTAL DISPLAY
+   ============================================================= */
+
 QFrame#totalContainer {
     min-height: 26px;
     border-radius: 2px;
@@ -96,7 +119,9 @@ QLabel#totalValue {
     border: 1px solid #4317ab;
 }
 
-/* --- Add Buttons (vegEntryBtn, manualEntryBtn) --- */
+/* =============================================================
+   5. SALES ACTION BUTTONS
+   ============================================================= */
 
 QFrame#salesFrame QPushButton {
     border-radius: 18px; 
@@ -126,34 +151,3 @@ QPushButton#holdSalesBtn:pressed { background-color: #7a6f00; }
 QPushButton#viewHoldBtn { background-color: #006699; }
 QPushButton#viewHoldBtn:hover { background-color: #0077b3; }
 QPushButton#viewHoldBtn:pressed { background-color: #004d73; }
-
-/* 4. Table Styling */
-QWidget#vegEntryDialog QTableWidget#vegEntryTable {
-    background-color: #FFFFFF; /* Pure White */
-    alternate-background-color: #F4F6F7; /* Very faint grey-blue for rows */
-    gridline-color: #EAEDED; /* Subtle grid lines */
-    selection-background-color: #D6EAF8; /* When a row is selected */
-    selection-color: #000000;
-    font-size: 10pt;
-    color: #2C3E50;
-    border: 1px solid #BDC3C7; /* Define the outer border of the table */
-}
-
-/* 5. Table Header Styling */
-QWidget#vegEntryDialog QHeaderView::section {
-    background-color: #34495E; /* Dark Slate Blue/Grey */
-    color: white;
-    padding: 4px;
-    border: none; /* Cleaner look without borders between headers */
-    border-right: 1px solid #2C3E50; /* Subtle separator */
-    border-bottom: 2px solid #2C3E50; /* Anchor the header to the table */
-    font-size: 10pt;
-    font-weight: bold;
-    font-family: "Verdana";
-}
-
-/* Optional: Style the top-left corner button of the table */
-QWidget#vegEntryDialog QTableCornerButton::section {
-    background-color: #34495E;
-    border: none;
-}
