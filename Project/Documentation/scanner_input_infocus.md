@@ -93,6 +93,8 @@ When a scan is confirmed and then rejected/ignored, `BarcodeManager`:
 2. Restores other editable widgets from text captured at scan-burst start.
 3. Falls back to single-character cleanup if no snapshot is available.
 
+Date fields are covered by the same path: `QDateEdit` restores/cleans through its internal `lineEdit()`.
+
 If a scanner does not send Enter, no confirmed scan is emitted, so rejected-scan cleanup does not run.
 
 ## Edge Cases

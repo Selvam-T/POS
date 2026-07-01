@@ -158,7 +158,7 @@ class BarcodeManager(QObject):
         
         if now > getattr(self, '_scannerCandidateUntil', 0.0):
             try:
-                from PyQt5.QtWidgets import QApplication, QLineEdit, QTextEdit, QPlainTextEdit
+                from PyQt5.QtWidgets import QApplication, QDateEdit, QLineEdit, QTextEdit, QPlainTextEdit
                 app = QApplication.instance()
                 fw = app.focusWidget() if app else None
                 
@@ -168,7 +168,10 @@ class BarcodeManager(QObject):
                 
                 self._preScanText = None
                 if fw:
-                    if isinstance(fw, QLineEdit):
+                    if isinstance(fw, QDateEdit):
+                        line = fw.lineEdit()
+                        self._preScanText = line.text() if line is not None else fw.text()
+                    elif isinstance(fw, QLineEdit):
                         self._preScanText = fw.text()
                     elif isinstance(fw, (QTextEdit, QPlainTextEdit)):
                         self._preScanText = fw.toPlainText()
@@ -194,11 +197,16 @@ class BarcodeManager(QObject):
     def _restore_pre_scan_text(self, fw):
         """Restore focused editable text captured at scan-burst start."""
         try:
-            from PyQt5.QtWidgets import QLineEdit, QTextEdit, QPlainTextEdit
+            from PyQt5.QtWidgets import QDateEdit, QLineEdit, QTextEdit, QPlainTextEdit
             saved = getattr(self, '_preScanText', None)
             
             if fw is not None and saved is not None:
-                if isinstance(fw, QLineEdit):
+                if isinstance(fw, QDateEdit):
+                    line = fw.lineEdit()
+                    if line is not None:
+                        line.setText(saved)
+                    return True
+                elif isinstance(fw, QLineEdit):
                     fw.setText(saved)
                     return True
                 elif isinstance(fw, (QTextEdit, QPlainTextEdit)):
@@ -325,7 +333,14 @@ class BarcodeManager(QObject):
             
             ch = barcode[0]
             
-            from PyQt5.QtWidgets import QLineEdit, QTextEdit, QPlainTextEdit
+            from PyQt5.QtWidgets import QDateEdit, QLineEdit, QTextEdit, QPlainTextEdit
+
+            if isinstance(fw, QDateEdit):
+                line = fw.lineEdit()
+                txt = line.text() if line is not None else ''
+                if txt.endswith(ch) and line is not None:
+                    line.setText(txt[:-1])
+                    return
 
             if isinstance(fw, QLineEdit):
                 txt = fw.text() or ''

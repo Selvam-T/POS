@@ -105,6 +105,8 @@ When a confirmed scan is rejected or ignored, `BarcodeManager` restores text in 
 2. Other editable widgets restore from `_preScanText`, captured at scan-burst start.
 3. If no snapshot is available, `_cleanup_scanner_leak(...)` removes the trailing first character of the scanned barcode when present.
 
+`QDateEdit` widgets are handled through their internal `lineEdit()`, so report/receipt date fields can restore pre-scan text and clean leaked scanner characters through the same shared path.
+
 The stable protected-field memory is needed because the first scanner character can land before a burst is confirmed. It preserves values such as a sales-table quantity or payment amount and removes the first-character leak reliably.
 
 ## Integration Points
