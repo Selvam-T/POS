@@ -62,9 +62,9 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
   - All scanner logic, event filtering, and modal block/override handling are managed by `BarcodeManager`.
 
 - **Menu and Sales Frame Wiring:**
-  - Wires right-side menu buttons to their respective dialog launcher methods.
+  - Wires right-side menu buttons to their respective dialog launcher methods through `modules/main_window/menu_controller.py`.
   - Wires sales frame buttons (e.g., Vegetable Entry, Manual Entry, On Hold, View Hold, Cancel All) to their dialog launcher methods.
-  - Sets up icons, tooltips, and fallback text for menu buttons.
+  - Sets up icons, tooltips, and fallback text for menu buttons via `MainMenuController`.
   - Cancel All button opens confirmation dialog; on confirm, clears all sales table rows and resets total to $0.00.
 
 - **ReceiptContext Gating (Feb 2026):**
@@ -139,7 +139,8 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
   - Scanner block is automatically released when dialogs close.
 
 - **Menu Button Wiring:**
-  - Menu buttons are mapped to icons and tooltips, and are programmatically wired to their respective dialog launcher methods.
+  - Menu buttons are mapped to icons and tooltips, and are programmatically wired to their respective dialog launcher methods by `MainMenuController`.
+  - `MainLoader` retains `self.menu_controller` after setup; the actual dialog launcher methods remain on `MainLoader`.
 
 - **Focus and Debug Helpers:**
   - Includes helpers for focus path tracing, widget description, and verbose debug output (toggleable via config).
@@ -178,6 +179,18 @@ Additional behavior:
 
 ---
 
+## Main Window Companion Modules
+
+- `modules/main_window/menu_controller.py`: owns right-side menu icon/text setup,
+  tooltips, fallback text, and button signal wiring. `MainLoader` still owns the
+  dialog launcher methods and retains the controller as `self.menu_controller`.
+- `modules/main_window/customer_display_controller.py`: owns customer display
+  initialization and sales-table-to-display payload sync. `MainLoader` keeps
+  compatibility wrappers and retains the controller as
+  `self.customer_display_controller`.
+
+---
+
 ## File Structure Reference
 
 - `main.py` — Main application loader and orchestrator
@@ -211,4 +224,4 @@ Additional behavior:
 - This section will be updated as the login controller implementation advances.
 
 ---
-_Last updated: January 22, 2026_
+_Last updated: July 2, 2026_

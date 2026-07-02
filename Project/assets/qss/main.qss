@@ -143,6 +143,38 @@ QDialog#loginDialog {
     font-family: "Segoe UI", Arial, sans-serif;
 }
 
+QDialog#loginDialog QFrame#customTitleBar {
+    background-color: transparent;
+    min-height: 64px;
+}
+
+QDialog#loginDialog QLabel#customTitle {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+QDialog#loginDialog QPushButton#customCloseBtn {
+    color: #ffffff;
+    background: transparent;
+    border: 2px solid transparent;
+    font-size: 40px;
+    font-weight: bold;
+    min-height: 48px;
+    max-height: 48px;
+    min-width: 48px;
+    max-width: 48px;
+    padding: 0px;
+}
+
+QDialog#loginDialog QPushButton#customCloseBtn:hover,
+QDialog#loginDialog QPushButton#customCloseBtn:focus {
+    color: #18042f;
+    background-color: rgba(255, 255, 255, 0.72);
+    border: 2px solid #d0741e;
+    border-radius: 10px;
+}
+
 QLabel#loginHeaderLabel {
     font-size: 24px;
     font-weight: bold;
@@ -496,6 +528,18 @@ QLabel[status="warning"] {
   background-color: #fffbeb;
   border: 1px solid #fcd34d;
   border-radius: 4px;
+}
+
+/* =============================================================
+   5A. GLOBAL TOOLTIP POPUPS
+   ============================================================= */
+QToolTip {
+  font-family: 'Dubai', Helvetica, sans-serif;
+  font-size: 12pt;
+  color: #252525;
+  background-color: #8ff3ab;
+  border: 1px solid #236925;
+  padding: 2px 4px;
 }
 
 /* =============================================================

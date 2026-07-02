@@ -101,9 +101,9 @@ GREETING_SELECTED = 'Thanks for shopping with us!'
 # -----------------------------------------------------------------------------
 
 # Set False during development to bypass the login dialog.
-LOGIN_ON = False
+LOGIN_ON = True
 AUTO_LOGIN_UID = 1
-AUTO_LOGIN_USERNAME = 'dev'
+AUTO_LOGIN_USERNAME = 'developer'
 AUTO_LOGIN_IS_ADMIN = True
 
 # Trial builds are blocked after TRIAL_EXPIRY_DATE or if the system clock is
@@ -326,11 +326,11 @@ ADS_SIZE_TOLERANCE_PCT = 2.5
 CUSTOMER_DISPLAY_ENABLED = True
 
 # Test mode opens a normal window on the primary display.
-CUSTOMER_DISPLAY_TEST_MODE = False
+CUSTOMER_DISPLAY_TEST_MODE = True
 CUSTOMER_SCREEN_INDEX = 1
-CUSTOMER_SCREEN_WIDTH = 1536
-CUSTOMER_SCREEN_HEIGHT = 900
-CUSTOMER_DISPLAY_FULLSCREEN = True
+CUSTOMER_SCREEN_WIDTH = 1280 #1536
+CUSTOMER_SCREEN_HEIGHT = 800 #900
+CUSTOMER_DISPLAY_FULLSCREEN = False
 
 # Monitor auto-detection is ignored while test mode is enabled.
 CUSTOMER_DISPLAY_AUTO_DETECT = True

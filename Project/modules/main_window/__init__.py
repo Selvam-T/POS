@@ -1,0 +1,1 @@
+"""Main window companion controllers."""

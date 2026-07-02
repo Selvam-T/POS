@@ -199,6 +199,12 @@ All customization occurs in `customer_display.py` -> `show_payment_result()` met
 when `CUSTOMER_DISPLAY_ENABLED` is True. It updates the customer display
 from sales and payment events.
 
+As of July 2026, the MainWindow-facing customer display wiring lives in
+`modules/main_window/customer_display_controller.py`
+(`MainCustomerDisplayController`). `MainLoader` keeps compatibility wrapper
+methods (`_init_customer_display` and `_update_customer_display_from_sales`) and
+delegates their implementation to this controller.
+
 Update hooks:
 - Sales total updates -> Payment state (updated items/total).
 - Hold receipt loaded -> Payment state (updated items/total).

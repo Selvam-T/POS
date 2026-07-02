@@ -18,8 +18,7 @@ from PyQt5.QtWidgets import (
     QDialog,
     QMessageBox,
 )
-from PyQt5.QtCore import Qt, QSize, QTimer, qInstallMessageHandler
-from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt, QTimer, qInstallMessageHandler
 
 from modules.table_ui.table_operations import get_sales_data
 from modules.sales.sales_panel import setup_sales_frame
@@ -28,12 +27,13 @@ from modules.payment.refund import launch_refund_dialog
 from modules.payment.vendor import launch_vendor_dialog
 from modules.db_operation.paid_sale_committer import PaidSaleCommitter
 from modules.devices.barcode_manager import BarcodeManager
-from modules.customer_display import CustomerDisplayWindow
 from modules.wrappers.dialog_wrapper import DialogWrapper
 from modules.db_operation import PRODUCT_CACHE, ensure_cash_outflows_table
 from modules.ui_utils.dialog_utils import report_exception, report_to_statusbar
 from modules.ui_utils.money_format import round_money
 from modules.runtime.paths import load_stylesheet, stylesheet_path
+from modules.main_window.menu_controller import MainMenuController
+from modules.main_window.customer_display_controller import MainCustomerDisplayController
 # --- Menu frame dialog controllers ---
 from modules.menu.logout_menu import launch_logout_dialog
 from modules.menu.admin_menu import launch_admin_dialog
@@ -49,15 +49,6 @@ from modules.sales.hold_sales import launch_hold_sales_dialog
 from modules.sales.view_hold import launch_viewhold_dialog
 from modules.sales.clear_cart import launch_clearcart_dialog
 
-from config import (
-    ICON_ADMIN,
-    ICON_REPORTS,
-    ICON_VEGETABLE,
-    ICON_PRODUCT,
-    ICON_GREETING,
-    ICON_RECEIPT,
-    ICON_LOGOUT,
-)
 from modules.info_section.info_section import InfoSectionController
 from modules.status_footer import MainStatusFooterController
 
@@ -198,6 +189,7 @@ class MainLoader(QMainWindow):
         if self.payment_panel_controller is not None:
             self._wire_payment_panel_signals()
 
+        self.customer_display_controller = MainCustomerDisplayController(self)
         self._init_customer_display()
 
         # Insert menu_frame.ui into placeholder named 'menuFrame'
@@ -215,93 +207,8 @@ class MainLoader(QMainWindow):
                 pass
             menu_layout.addWidget(menu_widget)
 
-        # ----------------- Menu buttons wiring and icons -----------------
-        # Map buttons to config-defined icons (must be in outer scope for try block)
-        button_icons = {
-            'adminBtn': ICON_ADMIN,
-            'reportsBtn': ICON_REPORTS,
-            'vegetableBtn': ICON_VEGETABLE,
-            'productBtn': ICON_PRODUCT,
-            'greetingBtn': ICON_GREETING,
-            'receiptBtn': ICON_RECEIPT,
-            'logoutBtn': ICON_LOGOUT,
-        }
-        try:
-            def set_btn_icon_path(btn: QPushButton, icon_path: str, size: int = 60) -> bool:
-                """Set a button icon from a config-defined runtime path.
-                Returns True on success, False if file missing or error.
-                """
-                try:
-                    if os.path.exists(icon_path):
-                        btn.setIcon(QIcon(icon_path))
-                        btn.setIconSize(QSize(size, size))
-                        return True
-                    # Icon file missing; fall back to text label
-                    return False
-                except Exception as _e:
-                    # Ignore icon errors and fall back to text label.
-                    return False
-
-            menu_buttons = {
-                'adminBtn': 'Admin',
-                'reportsBtn': 'Reports',
-                'vegetableBtn': 'Vegetable',
-                'productBtn': 'Product',
-                'greetingBtn': 'Greeting',
-                'receiptBtn': 'Receipt',
-                'logoutBtn': 'Logout',
-            }
-
-            for obj_name, title in menu_buttons.items():
-                btn = self.findChild(QPushButton, obj_name)
-                if btn is None:
-                    continue
-                # Set icon if available
-                icon_rel = button_icons.get(obj_name)
-                success = False
-                if icon_rel:
-                    success = set_btn_icon_path(btn, icon_rel)
-                # If icon loaded, keep icon-only; else show text fallback
-                try:
-                    if success:
-                        btn.setProperty('iconFallback', False)
-                        btn.setText('')
-                    else:
-                        btn.setProperty('iconFallback', True)
-                        btn.setText(title)
-                    # Refresh QSS to apply property changes
-                    btn.style().unpolish(btn)
-                    btn.style().polish(btn)
-                    btn.setToolTip(title)
-                except Exception:
-                    pass
-                # Wire click handlers per button
-                if obj_name == 'productBtn':
-                    btn.clicked.connect(self.open_product_menu_dialog)
-                elif obj_name == 'logoutBtn':
-                    btn.clicked.connect(self.open_logout_menu_dialog)
-                elif obj_name == 'vegetableBtn':
-                    btn.clicked.connect(self.launch_vegetable_menu_dialog)
-                elif obj_name == 'greetingBtn':
-                    btn.clicked.connect(self.open_greeting_menu_dialog)
-                elif obj_name == 'adminBtn':
-                    btn.clicked.connect(self.open_admin_menu_dialog)
-                elif obj_name == 'reportsBtn':
-                    btn.clicked.connect(self.open_report_menu_dialog)
-                elif obj_name == 'receiptBtn':
-                    btn.clicked.connect(self.open_receipt_menu_dialog)
-                else:
-                    try:
-                        btn.setEnabled(False)
-                        btn.setToolTip(title)
-                    except Exception:
-                        pass
-        except Exception as e:
-            try:
-                from modules.ui_utils.error_logger import log_error_message
-                log_error_message(f"Failed to wire menu buttons: {e}")
-            except Exception:
-                pass
+        self.menu_controller = MainMenuController(self)
+        self.menu_controller.setup()
 
     # Stop devices and close the app when logging out.
     def _perform_logout(self):
@@ -678,65 +585,18 @@ class MainLoader(QMainWindow):
         panel.paymentSuccess.connect(self._on_payment_success)
 
     def _init_customer_display(self) -> None:
-        self.customer_display = None
-        if not bool(getattr(config, 'CUSTOMER_DISPLAY_ENABLED', True)):
-            return
-        try:
-            self.customer_display = CustomerDisplayWindow(self)
-        except Exception as exc:
-            try:
-                from modules.ui_utils.error_logger import log_error_message
-                log_error_message(f"Customer display init failed: {exc}")
-            except Exception:
-                pass
+        controller = getattr(self, 'customer_display_controller', None)
+        if controller is None:
+            self.customer_display_controller = MainCustomerDisplayController(self)
+            controller = self.customer_display_controller
+        controller.init_display()
 
     def _update_customer_display_from_sales(self, state: str | None = None) -> None:
-        display = getattr(self, 'customer_display', None)
-        if display is None:
-            return
-        sales_table = getattr(self, 'sales_table', None)
-        if sales_table is None:
-            display.set_mode_full_idle()
-            display.show_idle()
-            return
-
-        try:
-            rows = get_sales_data(sales_table)
-        except Exception:
-            rows = []
-
-        if rows:
-            display.set_mode_split()
-        else:
-            display.set_mode_full_idle()
-
-        items = []
-        total = 0.0
-        for row in rows:
-            qty = float(row.get('quantity') or 0.0)
-            name = str(row.get('product_name') or row.get('product') or '')
-            price = float(row.get('unit_price') or 0.0)
-            line_total = qty * price
-            total += line_total
-            items.append({
-                'quantity': qty,
-                'description': name,
-                'amount': line_total,
-                'unit': row.get('unit') if isinstance(row, dict) else None,
-            })
-
-        # Display returns to idle if no rows and state is not payment
-        if not rows and state not in (display.STATE_PAYMENT,):
-            display.show_idle()
-            return
-
-        payload = {
-            # Active sales default to the payment QR page in the right frame.
-            'state': state or (display.STATE_PAYMENT if rows else display.STATE_IDLE),
-            'items': items,
-            'total': total,
-        }
-        display.update_transaction(payload)
+        controller = getattr(self, 'customer_display_controller', None)
+        if controller is None:
+            self.customer_display_controller = MainCustomerDisplayController(self)
+            controller = self.customer_display_controller
+        controller.update_from_sales(state=state)
 
     def _reset_receipt_context(self) -> None:
         # Safety invariant: context reset should only happen after clearing the cart.
