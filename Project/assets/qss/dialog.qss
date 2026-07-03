@@ -1,4 +1,4 @@
-/* =============================================================
+﻿/* =============================================================
    DIALOG / MODAL / MENU STYLESHEET
    -------------------------------------------------------------
    Loaded by: modules/ui_utils/dialog_utils.py and dialog launchers
@@ -154,14 +154,24 @@ QPushButton:focus {
    4. VEGETABLE ENTRY DIALOG
    ============================================================= */
 
-QPushButton[objectName*="vegEButton"][state="active"] {
+QPushButton[objectName*="vegEButton"][state="activeKg"] {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #096926, stop:1 #3d994a);
     border: 1px solid #015c0a;
     color: white;
 }
 
-QPushButton[objectName*="vegEButton"][state="active"]:hover {
+QPushButton[objectName*="vegEButton"][state="activeKg"]:hover {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #76ae3b, stop:1 #2d783c);
+}
+
+QPushButton[objectName*="vegEButton"][state="activeEach"] {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #6f2dbd, stop:1 #9d4edd);
+    border: 1px solid #4b1685;
+    color: white;
+}
+
+QPushButton[objectName*="vegEButton"][state="activeEach"]:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #8750cc, stop:1 #7b2cbf);
 }
 
 QPushButton[objectName*="vegEButton"][state="empty"] {
@@ -172,7 +182,12 @@ QPushButton[objectName*="vegEButton"][state="empty"] {
 }
 
 /* Specifically target active vegetable buttons when they have focus */
-QPushButton[objectName*="vegEButton"][state="active"]:focus {
+QPushButton[objectName*="vegEButton"][state="activeKg"]:focus {
+    border: 2px solid #d0741e;
+    outline: none;
+}
+
+QPushButton[objectName*="vegEButton"][state="activeEach"]:focus {
     border: 2px solid #d0741e;
     outline: none;
 }
@@ -998,3 +1013,4 @@ QPlainTextEdit#reportViewerTextEdit {
     font-family: "Consolas", "Courier New", monospace;
     font-size: 10.5pt;
 }
+

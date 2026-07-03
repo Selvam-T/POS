@@ -189,7 +189,7 @@ self.dialog_wrapper.open_dialog_scanner_blocked(
 
 **dialog.qss:**
 - **Selector Precision:** Uses *= (contains) for vegEButton selectors, ensuring all 16 buttons are styled.
-- **State-Based Styling:** [state="active"] and [state="empty"] properties allow dynamic visual feedback for vegetable slots.
+- **State-Based Styling:** `vegetable_entry.py` sets unit-aware button states for all populated vegetable slots: `[state="activeKg"]` keeps the existing green style for weighed KG items, `[state="activeEach"]` applies a complementary purple style for EACH items, and `[state="empty"]` keeps unused slots grayscale.
 
 ---
 

@@ -1,4 +1,4 @@
-import os
+﻿import os
 from functools import partial
 
 from PyQt5.QtWidgets import QTableWidget, QPushButton, QLabel, QLineEdit
@@ -110,7 +110,9 @@ def launch_vegetable_entry_dialog(parent, main_sales_table):
         
         if found:
             btn.setText(product_name); btn.setEnabled(True)
-            btn.setFocusPolicy(Qt.StrongFocus); btn.setProperty('state', 'active')
+            unit_canon = canonicalize_unit(unit)
+            btn.setFocusPolicy(Qt.StrongFocus)
+            btn.setProperty('state', 'activeKg' if unit_canon == 'Kg' else 'activeEach')
             btn.clicked.connect(partial(_handle_vegetable_button_click, dlg, status_lbl, vtable, veg_code, product_name, unit_price, unit))
         else:
             btn.setText('empty'); btn.setEnabled(False)
@@ -306,3 +308,4 @@ def _handle_ok_all(dlg, vtable, status_lbl):
             local_message="Unable to prepare vegetable items.",
             user_message="Error: Unable to prepare vegetable items",
         )
+
