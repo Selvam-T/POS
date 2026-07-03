@@ -1,14 +1,23 @@
-# Database Administration Requirements
-# No external dependencies - uses Python standard library only
-
-# Python standard library modules used:
-# - sqlite3 (built-in)
-# - csv (built-in)
-# - pathlib (built-in)
-# - datetime (built-in)
-# - os (built-in)
-# - sys (built-in)
-
-# Optional (for Excel import if needed in future):
+# Database_admin requirements
+#
+# Runtime dependency policy:
+# - No third-party packages are required.
+# - Scripts use Python standard library modules only.
+#
+# Recommended Python:
+# - Python 3.10+
+#
+# Built-in modules used include:
+# - argparse
+# - collections
+# - csv
+# - datetime
+# - hashlib
+# - os
+# - pathlib
+# - sqlite3
+# - sys
+#
+# Optional future Excel support, not currently required:
 # pandas>=2.0.0
 # openpyxl>=3.0.0
