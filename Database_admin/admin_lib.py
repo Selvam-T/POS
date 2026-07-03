@@ -61,6 +61,13 @@ def clean_text(value: object) -> str:
     return " ".join(str(value).strip().split())
 
 
+def title_words(value: object) -> str:
+    text = clean_text(value)
+    if not text:
+        return ""
+    return " ".join(part[:1].upper() + part[1:].lower() for part in text.split(" "))
+
+
 def normalize_unit(value: object) -> str:
     text = clean_text(value)
     if not text:
@@ -70,7 +77,7 @@ def normalize_unit(value: object) -> str:
         return "Kg"
     if key in {"each", "ea", "unit", "piece", "pieces", "count", "item", "items"}:
         return "Each"
-    return text[:1].upper() + text[1:]
+    return title_words(text)
 
 
 def read_csv_rows(path: Path) -> List[Dict[str, str]]:

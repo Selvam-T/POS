@@ -198,22 +198,33 @@ TODO_ITEM_MAX_LEN = 40
 # Product category labels should not exceed 25 characters.
 PRODUCT_CATEGORIES = [
     '--Select Category--',
-    'Alcohol',
+    'Bakery Goods',
+    'Beer',
     'Beverages',
-    'Bread & Bakery',
-    'Canned & Packaged Foods',
+    'Breakfast Items',
+    'Canned Food',
+    'Condiments & Sauce',
+    'Cooking Oil',
     'Dairy Products',
-    'Frozen Foods',
-    'Household Supplies',
-    'Ice cream',
-    'Magnolia',
+    'Egg',
+    'F&n',
+    'Frozen Food',
+    'General Merchandise',
+    'Household Products',
+    'Ice Cream',
+    'Indian Provision',
+    'Indian Snacks',
+    'Kitchen Essentials',
+    'Liquor',
     'Marigold',
+    'Noodles',
     'Personal Care',
-    'Snacks & Confectionery',
+    'Pet Products',
+    'Poojai Items',
+    'Rice',
+    'Snacks',
     'Telecom',
     'Tobacco',
-    'Stationary',
-    'Vegetables',
     'Other',
 ]
 PROTECTED_CATEGORIES = ['Other', '--Select Category--']
@@ -238,7 +249,7 @@ CATEGORIES_JSON_SCHEMA = {
 # Validation and input limits
 # -----------------------------------------------------------------------------
 
-PRODUCT_CODE_MIN_LEN = 4
+PRODUCT_CODE_MIN_LEN = 1
 PRODUCT_CODE_MAX_LEN = 15
 
 QUANTITY_MIN_KG = 0.005
@@ -262,7 +273,7 @@ NAME_REGEX = re.compile(r"^[A-Za-z0-9\s.,'&()\-/]+$")
 
 # Field-specific rules retained for consumers that use STRING_CONFIG directly.
 STRING_CONFIG = {
-    'product_code': {'min_len': 2, 'max_len': 14, 'required': True},
+    'product_code': {'min_len': 1, 'max_len': 15, 'required': True},
     'product_name': {'min_len': 4, 'max_len': 40, 'required': True},
     'supplier': {'min_len': 3, 'max_len': 15, 'required': False},
     'customer': {'min_len': 3, 'max_len': 25, 'required': True},

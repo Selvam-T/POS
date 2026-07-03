@@ -11,16 +11,15 @@ ADMIN_ROOT = Path(__file__).resolve().parents[1]
 if str(ADMIN_ROOT) not in sys.path:
     sys.path.insert(0, str(ADMIN_ROOT))
 
-from admin_lib import DATA_DIR, clean_text, normalize_unit, now_stamp, read_csv_rows, write_csv_rows, print_header
-from migration.stage_legacy_products import PRODUCT_HEADERS, STAGED_PATH
+from admin_lib import DATA_DIR, clean_text, normalize_unit, now_stamp, title_words, write_csv_rows, print_header
+from migration.stage_legacy_products import PRODUCT_HEADERS, stage_legacy_products
 
 
-CLEANED_PATH = DATA_DIR / "cleaned_products.csv"
 REJECTED_PATH = DATA_DIR / "rejected_products.csv"
 VALIDATION_SUMMARY_PATH = DATA_DIR / "product_validation_summary.txt"
 
 APP_LIMITS = {
-    "product_code": (2, 14),
+    "product_code": (1, 15),
     "name": (4, 40),
     "supplier": (0, 15),
     "category": (0, 25),
@@ -37,12 +36,11 @@ def _to_float(value: str) -> Tuple[bool, float | None]:
         return False, None
 
 
-def validate_legacy_products(staged_path: Path = STAGED_PATH) -> tuple[Path, Path]:
+def validate_legacy_products(rows: List[Dict[str, object]] | None = None) -> tuple[List[Dict[str, object]], Path]:
     print_header("Validate Legacy Products")
-    if not staged_path.exists():
-        raise FileNotFoundError(f"Staged file not found: {staged_path}")
+    if rows is None:
+        rows = stage_legacy_products()
 
-    rows = read_csv_rows(staged_path)
     seen_codes: set[str] = set()
     cleaned: List[Dict[str, object]] = []
     rejected: List[Dict[str, object]] = []
@@ -56,7 +54,7 @@ def validate_legacy_products(staged_path: Path = STAGED_PATH) -> tuple[Path, Pat
         source_row = clean_text(row.get("source_row"))
         product_code = clean_text(row.get("product_code"))
         name = clean_text(row.get("name"))
-        category = clean_text(row.get("category")) or "Other"
+        category = title_words(row.get("category")) or "Other"
         supplier = clean_text(row.get("supplier"))
         unit = normalize_unit(row.get("unit"))
         last_updated = clean_text(row.get("last_updated")) or now_stamp()
@@ -64,9 +62,9 @@ def validate_legacy_products(staged_path: Path = STAGED_PATH) -> tuple[Path, Pat
         if not product_code:
             reasons.append("blank product_code")
         elif len(product_code) < APP_LIMITS["product_code"][0]:
-            reasons.append("product_code shorter than 2")
+            reasons.append("product_code shorter than 1")
         elif len(product_code) > APP_LIMITS["product_code"][1]:
-            reasons.append("product_code longer than 14")
+            reasons.append("product_code longer than 15")
 
         code_key = product_code.upper()
         if product_code and code_key in seen_codes:
@@ -129,9 +127,7 @@ def validate_legacy_products(staged_path: Path = STAGED_PATH) -> tuple[Path, Pat
             }
         )
 
-    cleaned_fields = ["source_row", *PRODUCT_HEADERS, "warnings"]
     rejected_fields = ["source_row", *PRODUCT_HEADERS, "reasons"]
-    write_csv_rows(CLEANED_PATH, cleaned_fields, cleaned)
     write_csv_rows(REJECTED_PATH, rejected_fields, rejected)
 
     summary_lines = [
@@ -154,7 +150,7 @@ def validate_legacy_products(staged_path: Path = STAGED_PATH) -> tuple[Path, Pat
         print(f"Rejected rows: {REJECTED_PATH}")
         raise ValueError("Product validation failed. Fix data/products.csv and rerun setup.")
 
-    return CLEANED_PATH, REJECTED_PATH
+    return cleaned, REJECTED_PATH
 
 
 if __name__ == "__main__":

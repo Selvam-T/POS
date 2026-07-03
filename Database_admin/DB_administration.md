@@ -112,21 +112,42 @@ The setup script runs these steps in order:
 4. Create `Product_list`.
 5. Create `receipts`, `receipt_items`, and `receipt_payments`.
 6. Create `cash_outflows`.
-7. Stage `data/products.csv`.
-8. Validate and clean staged products.
+7. Stage `data/products.csv` in memory.
+8. Validate and clean staged products in memory.
 9. Migrate valid products into `Product_list`.
 10. Run database audit.
 
-If validation fails, the process stops and writes reports under `data/`.
+If validation fails, the process stops and writes inspection files under `data/`.
 
 ```text
-data/staged_products.csv
-data/cleaned_products.csv
 data/rejected_products.csv
 data/product_validation_summary.txt
 ```
 
 Fix `data/products.csv`, then rerun `setup_fresh_database.py`.
+
+## Rebuilding With A New Product CSV
+
+For development or a full customer database rebuild, replace:
+
+```text
+Database_admin/data/products.csv
+```
+
+Then run:
+
+```bash
+python setup_fresh_database.py --reset
+```
+
+This creates a fresh database from the new CSV. Existing transaction data is not preserved:
+
+- receipt tables become empty.
+- cash outflows become empty.
+- users are reinitialized.
+- products are loaded from the new CSV.
+
+Do not use `--reset` casually on a production database. Production product updates should use a safer update/import process that preserves receipts and operational history.
 
 ## Product Rules
 
@@ -136,6 +157,7 @@ Database rules:
 - `product_code` is the primary key.
 - blank `product_code` is rejected.
 - duplicate `product_code` is rejected.
+- one-character product codes are allowed because some customer products have no barcode and are retrieved by short shortcut codes.
 - duplicate product names are allowed in the database.
 - `Product_list.name` must not have a unique index.
 
@@ -172,6 +194,23 @@ legacy/
 ```
 
 Fresh database setup should use corrected create scripts and `setup_fresh_database.py`, not legacy migration scripts.
+
+For development only, to clear receipt test transactions and reset receipt numbering:
+
+```bash
+python tables/reset_receipt_history.py
+```
+
+This clears:
+
+```text
+receipts
+receipt_items
+receipt_payments
+receipt_counters
+```
+
+It does not clear `Product_list`, `users`, or `cash_outflows`.
 
 ## Post-Setup POS Checks
 

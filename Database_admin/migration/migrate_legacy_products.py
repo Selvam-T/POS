@@ -4,21 +4,23 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+from typing import Dict, List
 
 ADMIN_ROOT = Path(__file__).resolve().parents[1]
 if str(ADMIN_ROOT) not in sys.path:
     sys.path.insert(0, str(ADMIN_ROOT))
 
-from admin_lib import connect, read_csv_rows, print_header
-from migration.validate_legacy_products import CLEANED_PATH
+from admin_lib import connect, print_header
+from migration.stage_legacy_products import stage_legacy_products
+from migration.validate_legacy_products import validate_legacy_products
 
 
-def migrate_legacy_products(cleaned_path: Path = CLEANED_PATH) -> int:
+def migrate_legacy_products(rows: List[Dict[str, object]] | None = None) -> int:
     print_header("Migrate Legacy Products")
-    if not cleaned_path.exists():
-        raise FileNotFoundError(f"Cleaned product file not found: {cleaned_path}")
+    if rows is None:
+        staged = stage_legacy_products()
+        rows, _ = validate_legacy_products(staged)
 
-    rows = read_csv_rows(cleaned_path)
     inserted = 0
     with connect() as conn:
         for row in rows:

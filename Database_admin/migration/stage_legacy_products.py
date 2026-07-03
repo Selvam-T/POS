@@ -10,7 +10,7 @@ ADMIN_ROOT = Path(__file__).resolve().parents[1]
 if str(ADMIN_ROOT) not in sys.path:
     sys.path.insert(0, str(ADMIN_ROOT))
 
-from admin_lib import DATA_DIR, products_csv_path, read_csv_rows, write_csv_rows, print_header
+from admin_lib import products_csv_path, read_csv_rows, print_header
 
 
 PRODUCT_HEADERS = [
@@ -24,10 +24,7 @@ PRODUCT_HEADERS = [
     "last_updated",
 ]
 
-STAGED_PATH = DATA_DIR / "staged_products.csv"
-
-
-def stage_legacy_products(csv_path: Path | None = None) -> Path:
+def stage_legacy_products(csv_path: Path | None = None) -> List[Dict[str, object]]:
     print_header("Stage Legacy Products")
     source = csv_path or products_csv_path()
     if not source.exists():
@@ -48,10 +45,8 @@ def stage_legacy_products(csv_path: Path | None = None) -> Path:
             staged_row[header] = row.get(header, "")
         staged.append(staged_row)
 
-    write_csv_rows(STAGED_PATH, ["source_row", *PRODUCT_HEADERS], staged)
     print(f"Rows staged: {len(staged)}")
-    print(f"Staged file: {STAGED_PATH}")
-    return STAGED_PATH
+    return staged
 
 
 if __name__ == "__main__":
