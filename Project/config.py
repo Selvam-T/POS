@@ -336,7 +336,7 @@ REQ_RATIO = REQ_WIDTH / REQ_HEIGHT
 ADS_SIZE_TOLERANCE_PCT = 2.5
 
 # Disable to skip creating the customer-facing display window.
-CUSTOMER_DISPLAY_ENABLED = False
+CUSTOMER_DISPLAY_ENABLED = True
 
 # Test mode opens a normal window on the primary display.
 CUSTOMER_DISPLAY_TEST_MODE = True
