@@ -65,6 +65,10 @@ JSON_DATA_DIR = os.path.join(DATA_DIR, 'json')
 APPDATA_DIR = JSON_DATA_DIR
 ADS_DIR = os.path.join(DATA_DIR, 'ads')
 
+# Single source for the application release version.
+# Use semantic versioning: major.minor.patch.
+# Examples: 1.0.0 first release, 1.1.0 feature release, 1.1.1 bug fix.
+APP_VERSION = '1.0.0'
 
 # -----------------------------------------------------------------------------
 # Business identity and localization
@@ -73,6 +77,7 @@ ADS_DIR = os.path.join(DATA_DIR, 'ads')
 COMPANY_NAME = 'Anumani Trading Pte Ltd'
 ADDRESS_LINE_1 = 'BLK 77 INDUS RD, #01-501'
 ADDRESS_LINE_2 = 'INDUS GARDEN SINGAPORE'
+
 
 DATE_FMT = 'd MMM yyyy'
 DAY_FMT = 'ddd'
@@ -101,7 +106,7 @@ GREETING_SELECTED = 'Thanks for shopping with us!'
 # -----------------------------------------------------------------------------
 
 # Set False during development to bypass the login dialog.
-LOGIN_ON = False
+LOGIN_ON = True
 AUTO_LOGIN_UID = 1
 AUTO_LOGIN_USERNAME = 'developer'
 AUTO_LOGIN_IS_ADMIN = True
@@ -343,7 +348,7 @@ CUSTOMER_DISPLAY_TEST_MODE = True
 CUSTOMER_SCREEN_INDEX = 1
 CUSTOMER_SCREEN_WIDTH = 1280 #1536
 CUSTOMER_SCREEN_HEIGHT = 800 #900
-CUSTOMER_DISPLAY_FULLSCREEN = False
+CUSTOMER_DISPLAY_FULLSCREEN = True
 
 # Monitor auto-detection is ignored while test mode is enabled.
 CUSTOMER_DISPLAY_AUTO_DETECT = True
