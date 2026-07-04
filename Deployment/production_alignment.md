@@ -47,6 +47,74 @@ C:\SelvamPOS\
 - Database, logs, backups, and writable data stay outside the packaged app.
 - `POS_DB_PATH` remains an optional database override for tests and support.
 
+## Version Mechanism
+
+- `Project/config.py` owns the application release version in `APP_VERSION`.
+- The first production release should use `APP_VERSION = '1.0.0'`.
+- Use semantic versioning:
+  - `1.0.0`: first stable release.
+  - `1.1.0`: feature release with backward-compatible changes.
+  - `1.1.1`: bug-fix release.
+  - `2.0.0`: major release with breaking behavior, data, or deployment changes.
+- `Deployment/version_info.txt` owns the Windows executable metadata consumed
+  by PyInstaller.
+- Keep `Deployment/version_info.txt` aligned with `APP_VERSION`. Windows file
+  versions use four numeric parts, so app version `1.0.0` is written as
+  `1,0,0,0` in `filevers` and `prodvers`.
+- Trial-build settings such as `TRIAL_BUILD_ENABLED`, `TRIAL_EXPIRY_DATE`, and
+  `modules/runtime/trial_build.py` are not the release version. They only
+  control trial expiry and clock-rollback protection.
+
+Build from the `Project` directory and pass the Windows version metadata file
+to PyInstaller:
+
+```powershell
+pyinstaller --name SelvamPOS --version-file ..\Deployment\version_info.txt main.py
+```
+
+## Release Installer and Manual Deployment
+
+PyInstaller builds the application executable and bundled runtime files. A
+Windows installer is responsible for creating the client-machine folder layout,
+copying documentation and starter data, and adding shortcuts.
+
+The intended installer output is:
+
+```text
+C:\SelvamPOS\
+|-- app\
+|   |-- SelvamPOS.exe
+|   `-- _internal\
+|-- db\
+|   `-- Anumani.db
+|-- logs\
+|   `-- error.log
+|-- backups\
+|-- data\
+|   |-- json\
+|   `-- ads\
+`-- USERGUIDE.md
+```
+
+For the first release, it is acceptable to skip the installer package and
+manually create the client folder structure if each file is placed exactly as
+shown above. In that manual deployment:
+
+- Copy the PyInstaller output into `C:\SelvamPOS\app`.
+- Copy `USERGUIDE.md` to `C:\SelvamPOS\USERGUIDE.md`.
+- Copy the starting database to `C:\SelvamPOS\db\Anumani.db`.
+- Create `logs`, `backups`, `data\json`, and `data\ads` if they do not exist.
+- Keep writable client data outside `C:\SelvamPOS\app` so future app upgrades
+  can replace the executable without touching live business data.
+
+For a later release, add an installer script, such as Inno Setup, and have it
+apply only the application changes by default. Upgrade installers must not
+overwrite the client's live `db\Anumani.db`, `data`, `logs`, or `backups`
+content unless the release explicitly includes a reviewed migration or support
+procedure. This allows a future version, for example `1.1.0`, to replace
+`C:\SelvamPOS\app` while preserving the client's sales, products, ads, logs,
+and backups.
+
 ## Phase Record
 
 ### Phase 0 - Dependency Baseline
