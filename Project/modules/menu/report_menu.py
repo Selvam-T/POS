@@ -182,7 +182,7 @@ def launch_reports_dialog(host_window):
             'save_pdf_btn': (QPushButton, 'savePdfReportBtn'),
             'save_excel_btn': (QPushButton, 'saveExcelReportBtn'),
             'reset_btn': (QPushButton, 'resetReportBtn'),
-            'cancel_btn': (QPushButton, 'btnReportCancel'),
+            'close_btn': (QPushButton, 'btnReportClose'),
             'status_lbl': (QLabel, 'reportStatusLabel'),
         }, hard_fail=True)
     except Exception as e:
@@ -246,7 +246,7 @@ def launch_reports_dialog(host_window):
     save_pdf_btn = dlg.findChild(QPushButton, 'savePdfReportBtn')
     save_excel_btn = dlg.findChild(QPushButton, 'saveExcelReportBtn')
     reset_btn = dlg.findChild(QPushButton, 'resetReportBtn')
-    report_cancel_btn = dlg.findChild(QPushButton, 'btnReportCancel')
+    report_close_btn = dlg.findChild(QPushButton, 'btnReportClose')
     report_status_lbl = dlg.findChild(QLabel, 'reportStatusLabel')
     action_buttons = [view_btn, save_pdf_btn, save_excel_btn]
     date_field_labels = [from_label, to_label]
@@ -272,15 +272,15 @@ def launch_reports_dialog(host_window):
         except Exception:
             pass
 
-    for _widget in (from_date, to_date, today, date_range, view_btn, save_pdf_btn, save_excel_btn, reset_btn, report_cancel_btn):
+    for _widget in (from_date, to_date, today, date_range, view_btn, save_pdf_btn, save_excel_btn, reset_btn, report_close_btn):
         _link_report_status(_widget)
 
-    # report cancel button.
+    # report close button.
     try:
-        if report_cancel_btn is not None:
-            def _on_report_cancel():
+        if report_close_btn is not None:
+            def _on_report_close():
                 try:
-                    set_dialog_info(dlg, 'Report selection cancelled.', duration=MAIN_STATUS_DURATION_MS)
+                    set_dialog_info(dlg, 'Report dialog closed.', duration=MAIN_STATUS_DURATION_MS)
                 except Exception:
                     pass
                 try:
@@ -291,7 +291,7 @@ def launch_reports_dialog(host_window):
                 except Exception:
                     pass
 
-            report_cancel_btn.clicked.connect(_on_report_cancel)
+            report_close_btn.clicked.connect(_on_report_close)
     except Exception:
         pass
 

@@ -226,6 +226,7 @@ PRODUCT_CATEGORIES = [
     'Snacks',
     'Telecom',
     'Tobacco',
+    'Vegetable',
     'Other',
 ]
 PROTECTED_CATEGORIES = ['Other', '--Select Category--']

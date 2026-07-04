@@ -546,9 +546,9 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="btnReportCancel">
+           <widget class="QPushButton" name="btnReportClose">
             <property name="text">
-             <string>CANCEL</string>
+             <string>CLOSE</string>
             </property>
            </widget>
           </item>
@@ -574,7 +574,7 @@
   <tabstop>savePdfReportBtn</tabstop>
   <tabstop>saveExcelReportBtn</tabstop>
   <tabstop>resetReportBtn</tabstop>
-  <tabstop>btnReportCancel</tabstop>
+  <tabstop>btnReportClose</tabstop>
   <tabstop>customCloseBtn</tabstop>
  </tabstops>
  <resources/>

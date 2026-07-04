@@ -8,9 +8,9 @@ This document summarizes the current functional design for report-menu wiring, f
 - `launch_reports_dialog(host_window)`
   - Loads and returns the report dialog (`ui/report_menu.ui`) as modal + frameless.
   - Applies shared dialog stylesheet (`assets/qss/dialog.qss`).
-  - Wires `customCloseBtn` and `btnReportCancel` using admin-style reject flow:
+  - Wires `customCloseBtn` and `btnReportClose` using admin-style reject flow:
     - `customCloseBtn`: closes dialog and posts default non-error status (`Report dialog closed.`) to main status bar.
-    - `btnReportCancel`: closes dialog and posts cancel non-error status (`Report selection cancelled.`) to main status bar.
+    - `btnReportClose`: closes dialog and posts close non-error status (`Report dialog closed.`) to main status bar.
   - Applies role defaults/permissions via `_apply_role_default_state(...)`.
   - Wires shared date gating via `DateRangeGateController`.
   - Wires `resetReportBtn` to restore defaults for report type and date frame.
