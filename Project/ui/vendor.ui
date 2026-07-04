@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>470</height>
+    <height>450</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>400</width>
-    <height>470</height>
+    <height>450</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -130,7 +130,7 @@
       <number>0</number>
      </property>
      <property name="bottomMargin">
-      <number>10</number>
+      <number>0</number>
      </property>
      <property name="horizontalSpacing">
       <number>15</number>

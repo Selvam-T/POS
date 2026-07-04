@@ -101,7 +101,7 @@ GREETING_SELECTED = 'Thanks for shopping with us!'
 # -----------------------------------------------------------------------------
 
 # Set False during development to bypass the login dialog.
-LOGIN_ON = True
+LOGIN_ON = False
 AUTO_LOGIN_UID = 1
 AUTO_LOGIN_USERNAME = 'developer'
 AUTO_LOGIN_IS_ADMIN = True
@@ -143,15 +143,16 @@ DIALOG_RATIOS = {
     'view_hold': (0.5, 0.7),
     'clear_cart': (0.25, 0.25),
     'refund': (0.35, 0.5),
+    'vendor': (0.30, 0.5),
     'MaxRowsDialog': (0.25, 0.25),
 }
 
 # Product Management tab-specific (width_ratio, height_ratio).
 PRODUCT_MENU_TAB_RATIOS = {
-    'add': (0.5, 0.73),
-    'remove': (0.5, 0.78),
-    'update': (0.5, 0.87),
-    'category': (0.5, 0.57),
+    'add': (0.5, 0.75),
+    'remove': (0.5, 0.80),
+    'update': (0.5, 0.90),
+    'category': (0.5, 0.60),
 }
 
 REPORT_VIEWER_RATIOS = (0.6, 0.85)
@@ -334,7 +335,7 @@ REQ_RATIO = REQ_WIDTH / REQ_HEIGHT
 ADS_SIZE_TOLERANCE_PCT = 2.5
 
 # Disable to skip creating the customer-facing display window.
-CUSTOMER_DISPLAY_ENABLED = True
+CUSTOMER_DISPLAY_ENABLED = False
 
 # Test mode opens a normal window on the primary display.
 CUSTOMER_DISPLAY_TEST_MODE = True

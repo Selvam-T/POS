@@ -7,11 +7,11 @@ The manual entry dialog controller has been fully refactored to use a declarativ
 ## Key Design Features
 
 - **Declarative UI Construction:** Uses `build_dialog_from_ui` for dialog creation and `require_widgets` for all widget resolution. If a widget is missing, the app fails fast and clearly during development.
-- **Gating (FocusGate):** The Quantity and OK button are locked by default. For EACH products they unlock after a valid product lookup; for KG products they unlock only after the cashier selects KG or GRAM in the unit combo.
+- **Gating (FocusGate):** Unit Price, Quantity/Weight, and OK are locked by default. For EACH products they unlock after a valid product lookup; for KG products they unlock only after the cashier selects KG or GRAM in the unit combo.
 - **Exclusive Inputs:** `enforce_exclusive_lineedits` ensures that typing in Product Code clears and locks Name Search, and vice versa, preventing ambiguous input.
 - **Coordinator-Driven Logic:** All field relationships, validation, and focus jumps are handled by the FieldCoordinator. Casing (UPPER for code, Title for name) is enforced in the coordinator links.
-- **Focus & Placeholder Management:** Focus starts on Product Code. EACH products move to Quantity after lookup; KG products move to the unit combo first. The Quantity placeholder is reactive (e.g., "Enter weight" for KG, "Enter grams" for GRAM, "Enter Quantity" for EACH).
-- **Data Persistence:** The price is cached in the Quantity widget at lookup time, so the OK click is fast and safe.
+- **Focus & Placeholder Management:** Focus starts on Product Code. Dummy-price products move to Unit Price before Quantity/Weight; normal products keep the standard Quantity/Weight flow. KG products still move to the unit combo first. Quantity placeholder text remains reactive.
+- **Data Persistence:** Normal prices display read-only in `manualPriceLineEdit`; dummy-price products require cashier-entered runtime price before Quantity/Weight.
 - **Fallback UI:** If the .ui file is missing, a programmatic fallback dialog is shown, styled for visual consistency and with clear error messaging.
 - **Status Messaging:** Uses `set_dialog_info` and `set_dialog_error` to provide post-close feedback to the main window, both for success and fallback/error cases.
 - **No Local Product Cache:** The controller trusts that the product cache is loaded at app startup; no local checks or reloads are performed.
@@ -33,11 +33,11 @@ All intelligence is now declarative and pipeline-driven, ensuring a predictable,
 The Manual Entry dialog allows users to manually input product information when items cannot be processed through the standard vegetable entry or barcode scanning methods. This is useful for miscellaneous items, special products, or when the barcode scanner is unavailable.
 
 ### January 2026 Workflow Enhancements
-- **Focus Jump:** After selecting a product name from the dropdown or entering a valid product code, focus automatically moves to the Quantity field for faster entry.
-- **Immediate Validation:** Pressing Enter in any field triggers immediate validation. If the input is valid, focus advances to the next logical field or submits the form (when in Quantity).
-- **POS-Optimized Flow:** This workflow matches standard POS behavior: type/select product, type quantity, press Enter, done.
+- **Focus Jump:** After selecting a product name from the dropdown or entering a valid product code, normal products move to Quantity/Weight; dummy-price products move to Unit Price first.
+- **Immediate Validation:** Pressing Enter in any field triggers immediate validation. Dummy-price flow is Unit Price -> Quantity/Weight -> OK.
+- **POS-Optimized Flow:** This workflow matches standard POS behavior while supporting products that require cashier-entered runtime price.
 
-**Note:** Manual entry supports both EACH and KG products. KG products can be entered as KG or GRAM, but the result is always stored with unit `Kg` and quantity in kilograms.
+**Note:** Manual entry supports both EACH and KG products. KG products can be entered as KG or GRAM, but the result is always stored with unit `Kg` and quantity in kilograms. Products with the dummy selling price `0.10` require the cashier to enter the actual runtime unit price.
 
 ## Files Involved
 
@@ -203,8 +203,18 @@ Widget behavior summary:
 4. **manualQuantityLineEdit**
     - Accepts keyboard typing.
     - Scanner bursts are not a permitted scan target; rejected confirmed scans restore/clean leaked scanner text.
+    - Its label is dynamic: `Quantity :` for EACH products and `Weight :` for KG products.
 
-5. **OK / Cancel / X Close buttons**
+5. **manualPriceLineEdit**
+    - Displays the product selling price for normal products and remains read-only.
+    - For products whose selling price is the dummy value `0.10`, becomes required and editable.
+    - Uses programmatic placeholder text:
+        - EACH products: `-- Enter price per unit --`
+        - KG products: `-- Enter price per Kg --`
+    - KG runtime price is always entered as price per Kg, even when the cashier selects `GRAM` as the quantity input unit.
+    - For dummy-price products, pressing Enter validates the price and moves focus to `manualQuantityLineEdit`; quantity then moves focus to `btnManualOk`.
+
+6. **OK / Cancel / X Close buttons**
     - Scanner input does not leak to the main window while the dialog is open.
     - Enter/Return is briefly suppressed during scan activity to avoid accidental button activation.
 
@@ -230,6 +240,7 @@ On dialog close, the wrapper restores focus to the main window (sales table) in 
 - **Cancelled/Error**: `None`
 
 **Note:** Manual entry items preserve the product unit. EACH items use integer quantity input; KG items can be entered as KG or GRAM and are stored internally as kilograms.
+For dummy-price KG products, the runtime price entered in `manualPriceLineEdit` is still price per Kg; gram input only changes the quantity conversion.
 
 **Focus State**:
 - Background: #FFF9C4 (lighter yellow)
@@ -264,6 +275,9 @@ On dialog close, the wrapper restores focus to the main window (sales table) in 
 - Selecting `KG` or `GRAM` updates `manualStatusLabel` with the selected unit.
 - If `GRAM` is selected, the entered quantity is divided by 1000 before being stored in `manual_entry_result['quantity']`.
 - `manual_entry_result['unit']` remains only `Kg` or `Each`; receipt and sales table calculations stay based on canonical product units.
+- For dummy-price products (`selling_price == 0.10`), `manualPriceLineEdit` supplies the runtime unit price used in `manual_entry_result['unit_price']`.
+- For KG products, the runtime price is always per Kg, even if `GRAM` is selected for quantity entry.
+- Dummy-price manual entries are always added to the sales table as new rows, rather than merged with an existing row for the same product. This preserves different runtime prices for miscellaneous products that share one dummy product code.
 
 ## Usage Example (Refactored Dec 2025)
 
@@ -277,9 +291,9 @@ The manual entry dialog now follows the same declarative, robust pipeline as the
     - All widgets are resolved in a single `require_widgets` call. If a widget is missing from the .ui, the app fails loudly during development.
 
 2. **Gating (The "Shield")**
-    - A FocusGate is defined for `manualQuantityLineEdit` and `btnManualOk`.
+    - A FocusGate is defined for `manualPriceLineEdit`, `manualQuantityLineEdit`, and `btnManualOk`.
     - The gate is locked by default. The on_sync callback unlocks the gate for EACH products after lookup, and for KG products only after the cashier selects `KG` or `GRAM`.
-    - The gate manages the readOnly state of the Quantity field, ensuring it turns gray when locked (via QSS).
+    - The gate manages the readOnly state of the Price and Quantity fields, ensuring locked fields turn gray via QSS.
 
 3. **Exclusive Inputs (Dual Search)**
     - `enforce_exclusive_lineedits` is applied to the Product Code and Name Search fields. Typing in one clears and locks the other, preventing ambiguous input.
@@ -287,16 +301,20 @@ The manual entry dialog now follows the same declarative, robust pipeline as the
 4. **Standardized Interaction**
     - Casing is enforced: Product Code is UPPERCASE, Name Search is Title Case, handled in the coordinator links.
     - Focus starts on Product Code. After lookup, EACH products move to Quantity and KG products move to the unit combo.
+    - For dummy-price products, focus moves to Unit Price before Quantity.
 
 5. **Redundancy Cleanup**
     - Manual `setProperty("readOnly", "true")` calls on labels are removed; these are now handled via the .ui file or QSS.
     - The local PRODUCT_CACHE load check is removed; the app startup ensures cache is ready.
 
 6. **Data Persistence**
-    - The price is cached in the Quantity widget at lookup time, so the final OK click is fast and safe.
+    - Normal product prices are displayed read-only in `manualPriceLineEdit`.
+    - Dummy-price products (`0.10`) require cashier price entry, and OK-time validation rechecks that price before accepting the dialog.
+    - Dummy-price manual entries set a `force_new_row` result flag so the main sales-table merge step appends them as separate transaction lines.
 
 7. **Placeholder Policy**
     - The Quantity placeholder is reactive: e.g., "Enter weight" for KG input, "Enter grams" for GRAM input, and "Enter Quantity" for EACH.
+    - The runtime Price placeholder is programmatic: "per unit" for EACH and "per Kg" for KG.
 
 8. **Standardized Cleanup**
     - All manual findChild and layout code is gone, replaced by the pipeline's `build_dialog_from_ui` and `require_widgets`.

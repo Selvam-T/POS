@@ -28,9 +28,9 @@ def validate_quantity(value, unit_type='unit'):
         val = float(value)
         if unit_type.lower() == 'kg':
             if val < QUANTITY_MIN_KG:
-                return False, f"Min weight is {int(QUANTITY_MIN_KG*1000)}g"
+                return False, f"Min weight is {int(QUANTITY_MIN_KG*1000)} grams"
             if val > QUANTITY_MAX_KG:
-                return False, f"Max weight is {QUANTITY_MAX_KG}kg"
+                return False, f"Max weight is {QUANTITY_MAX_KG} kg"
             return True, ""
         else:
             if not val.is_integer():

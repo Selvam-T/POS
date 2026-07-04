@@ -35,6 +35,8 @@ def launch_manual_entry_dialog(parent):
             'code': (QLineEdit, 'manualProductCodeLineEdit'),
             'name_srch': (QLineEdit, 'manualNameSearchLineEdit'),
             'qty': (QLineEdit, 'manualQuantityLineEdit'),
+            'price': (QLineEdit, 'manualPriceLineEdit'),
+            'qty_label': (QLabel, 'manualQuantityFieldLbl'),
             'unit': (QComboBox, 'manualUnitComboBox'),
             'status': (QLabel, 'manualStatusLabel'),
             'ok_btn': (QPushButton, 'btnManualOk'),
@@ -49,6 +51,7 @@ def launch_manual_entry_dialog(parent):
 
     # 3. Gating and UI state
     UNIT_PROMPT = '-- Select Unit --'
+    DUMMY_UNIT_PRICE = 0.10
 
     # For Kg products, this combo selects input units; persisted sale units stay Kg.
     widgets['unit'].clear()
@@ -70,10 +73,10 @@ def launch_manual_entry_dialog(parent):
             return
         barcode_warning.clear()
 
-    gate = FocusGate([widgets['qty'], widgets['ok_btn']], lock_enabled=True)
+    gate = FocusGate([widgets['qty'], widgets['price'], widgets['ok_btn']], lock_enabled=True)
     try:
-        gate.remember_placeholders([widgets['qty']])
-        gate.hide_placeholders([widgets['qty']])
+        gate.remember_placeholders([widgets['qty'], widgets['price']])
+        gate.hide_placeholders([widgets['qty'], widgets['price']])
     except Exception:
         pass
     
@@ -98,6 +101,18 @@ def launch_manual_entry_dialog(parent):
     def _selected_kg_input_unit() -> bool:
         return _combo_text().lower() in ('kg', 'gram')
 
+    def _is_dummy_price(value) -> bool:
+        try:
+            return abs(float(value) - DUMMY_UNIT_PRICE) < 0.000001
+        except (TypeError, ValueError):
+            return False
+
+    def _is_runtime_price_required() -> bool:
+        try:
+            return bool(widgets['price'].property('runtime_price_required'))
+        except Exception:
+            return False
+
     def _set_qty_placeholder() -> None:
         try:
             if _is_product_kg():
@@ -105,10 +120,73 @@ def launch_manual_entry_dialog(parent):
                     widgets['qty'].setPlaceholderText('Enter grams (e.g. 600)')
                 else:
                     widgets['qty'].setPlaceholderText('Enter weight (e.g. 1.5)')
+                widgets['qty_label'].setText('Weight :')
             else:
                 widgets['qty'].setPlaceholderText('Enter Quantity')
+                widgets['qty_label'].setText('Quantity :')
         except Exception:
             pass
+
+    def _set_price_placeholder() -> None:
+        try:
+            if _is_product_kg():
+                widgets['price'].setPlaceholderText('-- Enter price per Kg --')
+            else:
+                widgets['price'].setPlaceholderText('-- Enter price per unit --')
+        except Exception:
+            pass
+
+    def _set_price_state(unit_price, *, runtime_required: bool) -> None:
+        price = widgets['price']
+        price.setProperty('runtime_price_required', bool(runtime_required))
+        price.setProperty('product_unit_price', float(unit_price or 0))
+        if runtime_required:
+            try:
+                price.clear()
+                _set_price_placeholder()
+                price.setEnabled(True)
+                price.setReadOnly(False)
+                price.setFocusPolicy(Qt.StrongFocus)
+            except Exception:
+                pass
+            return
+
+        try:
+            price.setText(f"{float(unit_price or 0):.2f}")
+            price.setPlaceholderText('')
+            price.setEnabled(True)
+            price.setReadOnly(True)
+            price.setFocusPolicy(Qt.NoFocus)
+        except Exception:
+            pass
+
+    def _enforce_price_lock_state() -> None:
+        if _is_runtime_price_required():
+            _unlock_price_control()
+            return
+        try:
+            widgets['price'].setReadOnly(True)
+            widgets['price'].setFocusPolicy(Qt.NoFocus)
+        except Exception:
+            pass
+
+    def _unlock_price_control(*, focus_price: bool = False) -> None:
+        if not _is_runtime_price_required():
+            return
+        try:
+            widgets['price'].setEnabled(True)
+            widgets['price'].setReadOnly(False)
+            widgets['price'].setFocusPolicy(Qt.StrongFocus)
+            _set_price_placeholder()
+        except Exception:
+            pass
+        if focus_price:
+            try:
+                widgets['price'].setFocus()
+                widgets['price'].selectAll()
+                QTimer.singleShot(0, widgets['price'].setFocus)
+            except Exception:
+                pass
 
     def _set_combo_items(items, *, enabled: bool, focus_policy=Qt.NoFocus) -> None:
         combo = widgets['unit']
@@ -130,6 +208,8 @@ def launch_manual_entry_dialog(parent):
             widgets['qty'].setFocusPolicy(Qt.StrongFocus)
         except Exception:
             pass
+        _unlock_price_control()
+        _enforce_price_lock_state()
         try:
             widgets['ok_btn'].setEnabled(True)
             widgets['ok_btn'].setFocusPolicy(Qt.StrongFocus)
@@ -146,8 +226,15 @@ def launch_manual_entry_dialog(parent):
         gate.set_locked(True)
         if enabled and result:
             unit = 'Kg' if (result.get('unit', '').lower() == 'kg') else 'Each'
+            unit_price = float(result.get('price', 0) or 0)
+            runtime_price_required = _is_dummy_price(unit_price)
             widgets['unit'].setProperty('product_unit', unit)
-            widgets['qty'].setProperty('unit_price', result.get('price', 0))
+            widgets['qty'].setProperty('unit_price', unit_price)
+            try:
+                widgets['qty_label'].setText('Weight :' if unit == 'Kg' else 'Quantity :')
+            except Exception:
+                pass
+            _set_price_state(unit_price, runtime_required=runtime_price_required)
             try:
                 widgets['qty'].clear()
             except Exception:
@@ -156,7 +243,11 @@ def launch_manual_entry_dialog(parent):
             if unit == 'Kg':
                 _set_combo_items([UNIT_PROMPT, 'KG', 'GRAM'], enabled=True, focus_policy=Qt.StrongFocus)
                 try:
-                    gate.hide_placeholders([widgets['qty']])
+                    gate.hide_placeholders([widgets['qty'], widgets['price']])
+                    if runtime_price_required:
+                        widgets['price'].setEnabled(False)
+                        widgets['price'].setReadOnly(True)
+                        widgets['price'].setFocusPolicy(Qt.NoFocus)
                 except Exception:
                     pass
             else:
@@ -166,13 +257,25 @@ def launch_manual_entry_dialog(parent):
         else:
             widgets['unit'].setProperty('product_unit', '')
             widgets['qty'].setProperty('unit_price', 0)
+            try:
+                widgets['qty_label'].setText('Quantity :')
+            except Exception:
+                pass
+            _set_price_state(0, runtime_required=False)
+            try:
+                widgets['price'].clear()
+                widgets['price'].setEnabled(False)
+                widgets['price'].setReadOnly(True)
+                widgets['price'].setFocusPolicy(Qt.NoFocus)
+            except Exception:
+                pass
             _set_combo_items([], enabled=False, focus_policy=Qt.NoFocus)
             try:
                 widgets['qty'].clear()
             except Exception:
                 pass
             try:
-                gate.hide_placeholders([widgets['qty']])
+                gate.hide_placeholders([widgets['qty'], widgets['price']])
             except Exception:
                 pass
 
@@ -188,6 +291,9 @@ def launch_manual_entry_dialog(parent):
         if _is_product_kg():
             widgets['unit'].setFocus()
             QTimer.singleShot(0, widgets['unit'].setFocus)
+        elif _is_runtime_price_required():
+            _unlock_qty_controls()
+            _unlock_price_control(focus_price=True)
         else:
             _unlock_qty_controls(focus_qty=True)
 
@@ -198,17 +304,23 @@ def launch_manual_entry_dialog(parent):
         if _selected_kg_input_unit():
             _set_qty_placeholder()
             _unlock_qty_controls()
+            _unlock_price_control()
             try:
                 widgets['qty'].clear()
             except Exception:
                 pass
-            _unlock_qty_controls(focus_qty=True)
+            if _is_runtime_price_required():
+                _unlock_price_control(focus_price=True)
+            else:
+                _unlock_qty_controls(focus_qty=True)
             ui_feedback.set_status_label(widgets['status'], f"{_combo_text()} unit selected", ok=True)
         else:
             gate.set_locked(True)
             try:
                 widgets['qty'].clear()
-                gate.hide_placeholders([widgets['qty']])
+                if _is_runtime_price_required():
+                    widgets['price'].clear()
+                gate.hide_placeholders([widgets['qty'], widgets['price']])
             except Exception:
                 pass
 
@@ -238,6 +350,24 @@ def launch_manual_entry_dialog(parent):
 
         return input_handler.handle_quantity_input(widgets['qty'], unit_type='unit')
 
+    def _focus_after_quantity():
+        widgets['ok_btn'].setFocus()
+
+    def _focus_after_price():
+        if _is_runtime_price_required():
+            widgets['qty'].setFocus()
+            widgets['qty'].selectAll()
+            return
+        widgets['ok_btn'].setFocus()
+
+    def _unit_price_for_current_product() -> float:
+        if _is_runtime_price_required():
+            return input_handler.handle_selling_price(widgets['price'], price_type='Unit price')
+        try:
+            return float(widgets['price'].property('product_unit_price') or widgets['price'].text() or 0)
+        except (TypeError, ValueError):
+            raise ValueError("Unit price is invalid")
+
     # Code -> name
     coord.add_link(
         source=widgets['code'],
@@ -262,17 +392,25 @@ def launch_manual_entry_dialog(parent):
 
     coord.add_link(
         source=widgets['qty'],
-        next_focus=widgets['ok_btn'],
+        next_focus=_focus_after_quantity,
         status_label=widgets['status'],
         swallow_empty=True,
         validate_fn=_quantity_for_current_unit
     )
 
+    coord.add_link(
+        source=widgets['price'],
+        next_focus=_focus_after_price,
+        status_label=widgets['status'],
+        swallow_empty=True,
+        validate_fn=_unit_price_for_current_product
+    )
+
     # Exclusive product search fields
     enforce_exclusive_lineedits(
         widgets['code'], widgets['name_srch'],
-        on_switch_to_a=lambda: clear_display([widgets['qty'], widgets['unit']], widgets['status'], extra_post_clear=lambda: _set_gate_state(False)),
-        on_switch_to_b=lambda: clear_display([widgets['qty'], widgets['unit']], widgets['status'], extra_post_clear=lambda: _set_gate_state(False))
+        on_switch_to_a=lambda: clear_display([widgets['qty'], widgets['unit'], widgets['price']], widgets['status'], extra_post_clear=lambda: _set_gate_state(False)),
+        on_switch_to_b=lambda: clear_display([widgets['qty'], widgets['unit'], widgets['price']], widgets['status'], extra_post_clear=lambda: _set_gate_state(False))
     )
 
     # Name search suggestions
@@ -329,6 +467,11 @@ def launch_manual_entry_dialog(parent):
         _quantity_for_current_unit,
         status_label=widgets['status']
     )
+    coord.register_validator(
+        widgets['price'],
+        _unit_price_for_current_product,
+        status_label=widgets['status']
+    )
 
     # 5. Execution
     def do_ok():
@@ -337,9 +480,14 @@ def launch_manual_entry_dialog(parent):
             if not widgets['code'].text() or not widgets['name_srch'].text():
                 raise ValueError("Select a product first")
 
-            # Validate quantity
             product_unit = _product_unit() or 'Each'
+            if _is_runtime_price_required():
+                unit_price = _unit_price_for_current_product()
+            else:
+                unit_price = None
             qty = _quantity_for_current_unit()
+            if unit_price is None:
+                unit_price = _unit_price_for_current_product()
 
             # Prepare result
             dlg.manual_entry_result = {
@@ -347,7 +495,8 @@ def launch_manual_entry_dialog(parent):
                 'product_name': widgets['name_srch'].text(),
                 'quantity': qty,
                 'unit': product_unit,
-                'unit_price': float(widgets['qty'].property('unit_price') or 0),
+                'unit_price': unit_price,
+                'force_new_row': _is_runtime_price_required(),
                 'editable': True
             }
             set_dialog_info(dlg, f"{widgets['name_srch'].text()} of {qty} {product_unit} added. ")
@@ -409,7 +558,8 @@ def _create_manual_entry_fallback_ui(parent):
     grid = QGridLayout()
     widgets = {
         'code': QLineEdit(), 'name_srch': QLineEdit(), 
-        'unit': QComboBox(), 'qty': QLineEdit(),
+        'unit': QComboBox(), 'qty': QLineEdit(), 'price': QLineEdit(),
+        'qty_label': QLabel("Qty:"),
         'status': QLabel(""), 'ok_btn': QPushButton("ADD"), 
         'cancel_btn': QPushButton("CANCEL"), 'close_btn': None 
     }
@@ -431,11 +581,17 @@ def _create_manual_entry_fallback_ui(parent):
     widgets['unit'].setStyleSheet("font-size: 12pt; color: #4b5563;")
     grid.addWidget(widgets['unit'], 2, 1)
 
-    qtylbl = QLabel("Qty:")
+    qtylbl = widgets['qty_label']
     qtylbl.setStyleSheet("font-size: 12pt; color: #4b5563;")
     grid.addWidget(qtylbl, 3, 0)  
     widgets['qty'].setStyleSheet("font-size: 12pt; color: #4b5563;")
     grid.addWidget(widgets['qty'], 3, 1)
+
+    pricelbl = QLabel("Unit Price:")
+    pricelbl.setStyleSheet("font-size: 12pt; color: #4b5563;")
+    grid.addWidget(pricelbl, 4, 0)
+    widgets['price'].setStyleSheet("font-size: 12pt; color: #4b5563;")
+    grid.addWidget(widgets['price'], 4, 1)
     layout.addLayout(grid)
 
     widgets['status'].setStyleSheet("color: red; font-size: 10pt;")

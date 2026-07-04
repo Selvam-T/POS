@@ -1104,6 +1104,7 @@ class MainLoader(QMainWindow):
                     'quantity': manual_result['quantity'],
                     'unit_price': manual_result['unit_price'],
                     'unit': unit_val,
+                    'force_new_row': bool(manual_result.get('force_new_row', False)),
                     'editable': unit_val != 'Kg'
                 }]
             else:
@@ -1122,6 +1123,10 @@ class MainLoader(QMainWindow):
                 new_unit = new_row.get('unit', '')
                 new_editable = new_row.get('editable', True)
                 new_qty = new_row.get('quantity', 0.0)
+
+                if new_row.get('force_new_row', False):
+                    existing_rows.append(new_row)
+                    continue
 
                 found_match = False
                 for existing_row in existing_rows:
