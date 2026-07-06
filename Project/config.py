@@ -106,7 +106,7 @@ GREETING_SELECTED = 'Thanks for shopping with us!'
 # -----------------------------------------------------------------------------
 
 # Set False during development to bypass the login dialog.
-LOGIN_ON = True
+LOGIN_ON = False
 AUTO_LOGIN_UID = 1
 AUTO_LOGIN_USERNAME = 'developer'
 AUTO_LOGIN_IS_ADMIN = True
@@ -341,7 +341,7 @@ REQ_RATIO = REQ_WIDTH / REQ_HEIGHT
 ADS_SIZE_TOLERANCE_PCT = 2.5
 
 # Disable to skip creating the customer-facing display window.
-CUSTOMER_DISPLAY_ENABLED = True
+CUSTOMER_DISPLAY_ENABLED = False
 
 # Test mode opens a normal window on the primary display.
 CUSTOMER_DISPLAY_TEST_MODE = True

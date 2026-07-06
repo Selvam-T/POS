@@ -101,6 +101,9 @@ def launch_manual_entry_dialog(parent):
     def _selected_kg_input_unit() -> bool:
         return _combo_text().lower() in ('kg', 'gram')
 
+    def _is_product_each() -> bool:
+        return _product_unit().lower() == 'each'
+
     def _is_dummy_price(value) -> bool:
         try:
             return abs(float(value) - DUMMY_UNIT_PRICE) < 0.000001
@@ -133,6 +136,23 @@ def launch_manual_entry_dialog(parent):
                 widgets['price'].setPlaceholderText('-- Enter price per Kg --')
             else:
                 widgets['price'].setPlaceholderText('-- Enter price per unit --')
+        except Exception:
+            pass
+
+    def _set_each_default_quantity() -> None:
+        try:
+            widgets['qty'].setText('1')
+        except Exception:
+            pass
+
+    def _apply_tab_order_for_current_unit() -> None:
+        try:
+            if _is_product_each():
+                dlg.setTabOrder(widgets['price'], widgets['ok_btn'])
+            else:
+                dlg.setTabOrder(widgets['price'], widgets['qty'])
+            dlg.setTabOrder(widgets['qty'], widgets['ok_btn'])
+            dlg.setTabOrder(widgets['ok_btn'], widgets['cancel_btn'])
         except Exception:
             pass
 
@@ -239,6 +259,7 @@ def launch_manual_entry_dialog(parent):
                 widgets['qty'].clear()
             except Exception:
                 pass
+            _apply_tab_order_for_current_unit()
 
             if unit == 'Kg':
                 _set_combo_items([UNIT_PROMPT, 'KG', 'GRAM'], enabled=True, focus_policy=Qt.StrongFocus)
@@ -253,6 +274,7 @@ def launch_manual_entry_dialog(parent):
             else:
                 _set_combo_items(['EACH'], enabled=False, focus_policy=Qt.NoFocus)
                 _set_qty_placeholder()
+                _set_each_default_quantity()
                 _unlock_qty_controls()
         else:
             widgets['unit'].setProperty('product_unit', '')
@@ -274,6 +296,7 @@ def launch_manual_entry_dialog(parent):
                 widgets['qty'].clear()
             except Exception:
                 pass
+            _apply_tab_order_for_current_unit()
             try:
                 gate.hide_placeholders([widgets['qty'], widgets['price']])
             except Exception:
@@ -295,7 +318,9 @@ def launch_manual_entry_dialog(parent):
             _unlock_qty_controls()
             _unlock_price_control(focus_price=True)
         else:
-            _unlock_qty_controls(focus_qty=True)
+            _unlock_qty_controls()
+            widgets['ok_btn'].setFocus()
+            QTimer.singleShot(0, widgets['ok_btn'].setFocus)
 
     def _on_unit_changed(_index=None):
         if not _is_product_kg():
@@ -355,6 +380,9 @@ def launch_manual_entry_dialog(parent):
 
     def _focus_after_price():
         if _is_runtime_price_required():
+            if _is_product_each():
+                widgets['ok_btn'].setFocus()
+                return
             widgets['qty'].setFocus()
             widgets['qty'].selectAll()
             return

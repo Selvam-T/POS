@@ -65,6 +65,49 @@ C:\SelvamPOS\
   `modules/runtime/trial_build.py` are not the release version. They only
   control trial expiry and clock-rollback protection.
 
+For version `1.0.0`, `Deployment/version_info.txt` should contain:
+
+```python
+# UTF-8
+#
+# Windows executable version metadata for PyInstaller.
+# Keep FileVersion/ProductVersion aligned with Project/config.py APP_VERSION.
+# Windows requires four numeric parts, so APP_VERSION 1.0.0 becomes 1,0,0,0.
+
+VSVersionInfo(
+  ffi=FixedFileInfo(
+    filevers=(1, 0, 0, 0),
+    prodvers=(1, 0, 0, 0),
+    mask=0x3f,
+    flags=0x0,
+    OS=0x40004,
+    fileType=0x1,
+    subtype=0x0,
+    date=(0, 0)
+  ),
+  kids=[
+    StringFileInfo([
+      StringTable(
+        '040904B0',
+        [
+          StringStruct('CompanyName', 'Anumani Trading Pte Ltd'),
+          StringStruct('FileDescription', 'SelvamPOS point of sale application'),
+          StringStruct('FileVersion', '1.0.0'),
+          StringStruct('InternalName', 'SelvamPOS'),
+          StringStruct('OriginalFilename', 'SelvamPOS.exe'),
+          StringStruct('ProductName', 'SelvamPOS'),
+          StringStruct('ProductVersion', '1.0.0')
+        ]
+      )
+    ]),
+    VarFileInfo([VarStruct('Translation', [1033, 1200])])
+  ]
+)
+```
+
+For a future version, update `APP_VERSION`, `filevers`, `prodvers`,
+`FileVersion`, and `ProductVersion` together.
+
 Build from the `Project` directory and pass the Windows version metadata file
 to PyInstaller:
 
