@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt
 from modules.ui_utils.focus_utils import FieldCoordinator
 from modules.db_operation import get_product_info
 from modules.db_operation import PRODUCT_CACHE
-from modules.ui_utils import ui_feedback
+from modules.ui_utils import input_validation, ui_feedback
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui,
     build_error_fallback_dialog,
@@ -19,9 +19,9 @@ from modules.ui_utils.dialog_utils import (
 from modules.domain.unit_helpers import canonicalize_unit
 from modules.table_ui.table_operations import (
     setup_sales_table, get_sales_data, set_table_rows, 
-    bind_status_label, bind_next_focus_widget
+    bind_status_label, bind_next_focus_widget, bind_rows_changed_listener
 )
-from config import MAIN_STATUS_LONG_DURATION_MS, QSS_DIR, UI_DIR
+from config import MAIN_STATUS_LONG_DURATION_MS, QSS_DIR, UI_DIR, VEG_KG_MANUAL_GRAMS_FALLBACK
 
 
 UI_PATH = os.path.join(UI_DIR, 'vegetable_entry.ui')
@@ -94,6 +94,7 @@ def launch_vegetable_entry_dialog(parent, main_sales_table):
     setup_sales_table(vtable)
     bind_status_label(vtable, status_lbl)
     bind_next_focus_widget(vtable, ok_btn)
+    bind_rows_changed_listener(vtable, lambda _table: _refresh_vegetable_table_state(dlg, vtable))
 
     # Link OK button to coordinator so Enter clicks it when focused
     coord.add_link(ok_btn, next_focus=None)
@@ -112,11 +113,16 @@ def launch_vegetable_entry_dialog(parent, main_sales_table):
             btn.setText(product_name); btn.setEnabled(True)
             unit_canon = canonicalize_unit(unit)
             btn.setFocusPolicy(Qt.StrongFocus)
+            btn.setProperty('base_enabled', True)
+            btn.setProperty('base_focus_policy', int(Qt.StrongFocus))
             btn.setProperty('state', 'activeKg' if unit_canon == 'Kg' else 'activeEach')
             btn.clicked.connect(partial(_handle_vegetable_button_click, dlg, status_lbl, vtable, veg_code, product_name, unit_price, unit))
         else:
             btn.setText('empty'); btn.setEnabled(False)
-            btn.setFocusPolicy(Qt.NoFocus); btn.setProperty('state', 'empty')
+            btn.setFocusPolicy(Qt.NoFocus)
+            btn.setProperty('base_enabled', False)
+            btn.setProperty('base_focus_policy', int(Qt.NoFocus))
+            btn.setProperty('state', 'empty')
         
         btn.style().unpolish(btn); btn.style().polish(btn)
 
@@ -139,6 +145,36 @@ def _handle_vegetable_button_click(dlg, msg_label, vtable, code, name, price, un
     unit_canon = canonicalize_unit(unit)
 
     if unit_canon == 'Kg':
+        # Temporary fallback path: manual whole-gram input while scale hardware is unavailable.
+        if VEG_KG_MANUAL_GRAMS_FALLBACK:
+            try:
+                added = _add_vegetable_row(
+                    dlg,
+                    vtable,
+                    name,
+                    0.0,
+                    price,
+                    editable=True,
+                    unit='Kg',
+                    manual_kg_grams=True,
+                )
+            except Exception as exc:
+                _report_vegetable_runtime_failure(
+                    dlg,
+                    msg_label,
+                    f"Vegetable Entry staging table ({code}, {name})",
+                    exc,
+                    local_message=f"Unable to add {name} to the vegetable table.",
+                    user_message="Error: Vegetable table update failed",
+                )
+                return
+            if not added:
+                return
+            ui_feedback.set_status_label(msg_label, f"Enter {name} weight in grams", ok=True)
+            _focus_manual_kg_editor(vtable, name)
+            _sync_pending_qty_state(dlg, vtable)
+            return
+
         ui_feedback.set_status_label(msg_label, f"Place {name} on scale...", ok=True)
         try:
             w_grams = weight_simulation()
@@ -160,7 +196,14 @@ def _handle_vegetable_button_click(dlg, msg_label, vtable, code, name, price, un
         w_kg = w_grams / 1000.0
         try:
             added = _add_vegetable_row(
-                dlg, vtable, name, w_kg, price, editable=False
+                dlg,
+                vtable,
+                name,
+                w_kg,
+                price,
+                editable=False,
+                unit='Kg',
+                manual_kg_grams=False,
             )
         except Exception as exc:
             _report_vegetable_runtime_failure(
@@ -176,9 +219,10 @@ def _handle_vegetable_button_click(dlg, msg_label, vtable, code, name, price, un
             return
         ui_feedback.set_status_label(msg_label, f"Added {name}: {w_grams}g", ok=True)
     else:
+        # EACH rows remain editable; pending-state protection handles empty/invalid qty.
         try:
             added = _add_vegetable_row(
-                dlg, vtable, name, 1.0, price, editable=True
+                dlg, vtable, name, 1.0, price, editable=True, unit='Each'
             )
         except Exception as exc:
             _report_vegetable_runtime_failure(
@@ -196,6 +240,109 @@ def _handle_vegetable_button_click(dlg, msg_label, vtable, code, name, price, un
 
     # Shift focus to OK
     dlg._veg_widgets['ok_btn'].setFocus()
+    _sync_pending_qty_state(dlg, vtable)
+
+
+# ---------------------------------------------------------------------------
+# Temporary KG manual-grams fallback helpers
+# ---------------------------------------------------------------------------
+
+def _focus_manual_kg_editor(vtable, name) -> None:
+    for row in range(vtable.rowCount()):
+        item = vtable.item(row, 1)
+        qty_container = vtable.cellWidget(row, 2)
+        if not (item and qty_container):
+            continue
+        if item.text().strip().lower() != name.strip().lower():
+            continue
+        editor = qty_container.findChild(QLineEdit, 'qtyInput')
+        if editor and bool(editor.property('manual_kg_grams')):
+            editor.setFocus()
+            editor.selectAll()
+            return
+
+
+def _validate_vegetable_qty_editor(editor: QLineEdit) -> float:
+    if bool(editor.property('manual_kg_grams')):
+        text = (editor.text() or '').strip()
+        if not text:
+            raise ValueError("Enter weight in grams")
+        if not text.isdigit():
+            raise ValueError("Weight must be entered as whole grams")
+        qty_kg = int(text) / 1000.0
+        ok, err = input_validation.validate_quantity(str(qty_kg), unit_type='kg')
+        if not ok:
+            raise ValueError(err or "Invalid weight")
+        return qty_kg
+    from modules.ui_utils import input_handler
+    return input_handler.handle_quantity_input(editor, unit_type='unit')
+
+
+# ---------------------------------------------------------------------------
+# Vegetable quantity pending-state protection
+# ---------------------------------------------------------------------------
+
+def _vegetable_qty_editor_is_valid(editor: QLineEdit) -> bool:
+    try:
+        _validate_vegetable_qty_editor(editor)
+        return True
+    except Exception:
+        return False
+
+
+def _pending_qty_editor(vtable):
+    for row in range(vtable.rowCount()):
+        qty_container = vtable.cellWidget(row, 2)
+        if not qty_container:
+            continue
+        editor = qty_container.findChild(QLineEdit, 'qtyInput')
+        if editor and not editor.isReadOnly() and not _vegetable_qty_editor_is_valid(editor):
+            return editor
+    return None
+
+
+def _sync_pending_qty_state(dlg, vtable) -> None:
+    pending_editor = _pending_qty_editor(vtable)
+    pending = pending_editor is not None
+    try:
+        dlg._veg_widgets['ok_btn'].setEnabled(not pending)
+        dlg._veg_widgets['ok_btn'].setFocusPolicy(Qt.NoFocus if pending else Qt.StrongFocus)
+    except Exception:
+        pass
+
+    for i in range(1, 17):
+        btn = dlg._veg_widgets.get(f'veg_btn_{i}')
+        if btn is None:
+            continue
+        base_enabled = bool(btn.property('base_enabled'))
+        try:
+            base_focus = Qt.FocusPolicy(int(btn.property('base_focus_policy') or int(Qt.NoFocus)))
+        except Exception:
+            base_focus = Qt.StrongFocus if base_enabled else Qt.NoFocus
+        btn.setEnabled(False if pending else base_enabled)
+        btn.setFocusPolicy(Qt.NoFocus if pending else base_focus)
+
+
+def _refresh_vegetable_table_state(dlg, vtable) -> None:
+    ok_btn = dlg._veg_widgets['ok_btn']
+    for r in range(vtable.rowCount()):
+        qty_container = vtable.cellWidget(r, 2)
+        if not qty_container:
+            continue
+        editor = qty_container.findChild(QLineEdit, 'qtyInput')
+        if not editor:
+            continue
+        if editor not in dlg._coord.links:
+            dlg._coord.add_link(
+                editor,
+                next_focus=ok_btn,
+                validate_fn=lambda e=editor: _validate_vegetable_qty_editor(e),
+                status_label=dlg._veg_widgets['status'],
+            )
+        if not bool(editor.property('pending_hook_connected')):
+            editor.textChanged.connect(lambda _text=None, d=dlg, t=vtable: _sync_pending_qty_state(d, t))
+            editor.setProperty('pending_hook_connected', True)
+    _sync_pending_qty_state(dlg, vtable)
 
 
 def _report_vegetable_runtime_failure(
@@ -218,7 +365,17 @@ def _report_vegetable_runtime_failure(
     )
 
 
-def _add_vegetable_row(dlg, vtable, name, quantity, price, editable) -> bool:
+def _add_vegetable_row(
+    dlg,
+    vtable,
+    name,
+    quantity,
+    price,
+    editable,
+    *,
+    unit=None,
+    manual_kg_grams=False,
+) -> bool:
     """
     Adds/Updates a row in the vegetable entry table.
     Ensures combined (Main Table + Veg Table) row count <= MAX_TABLE_ROWS.
@@ -227,13 +384,15 @@ def _add_vegetable_row(dlg, vtable, name, quantity, price, editable) -> bool:
     from modules.ui_utils.max_rows_dialog import open_max_rows_dialog
 
     current_data = get_sales_data(vtable)
-    target_unit = canonicalize_unit("Kg" if not editable else "Each")
+    target_unit = canonicalize_unit(unit or ("Kg" if not editable else "Each"))
     
     found_in_veg_dialog = False
     for row in current_data:
         # Check if product already exists in the dialog's table to update quantity
         if (row['product_name'].strip().lower() == name.strip().lower() and row['unit'] == target_unit):
-            row['quantity'] += (1.0 if editable else quantity)
+            row['quantity'] += (1.0 if target_unit == 'Each' else quantity)
+            if manual_kg_grams:
+                row['manual_kg_grams'] = True
             found_in_veg_dialog = True
             break
             
@@ -254,7 +413,9 @@ def _add_vegetable_row(dlg, vtable, name, quantity, price, editable) -> bool:
             'quantity': quantity, 
             'unit_price': price, 
             'unit': target_unit, 
-            'editable': editable
+            'editable': editable,
+            # Fallback metadata: editable KG rows accept whole grams but store kg.
+            'manual_kg_grams': bool(manual_kg_grams),
         })
     
     # Refresh the vegetable dialog table
@@ -287,7 +448,17 @@ def _handle_ok_all(dlg, vtable, status_lbl):
         for row in scraped_rows:
             if row['quantity'] <= 0: raise ValueError(f"Quantity for '{row['product_name']}' must be > 0")
             code = next((k for k, v in PRODUCT_CACHE.items() if v[0] == row['product_name']), row['product_name'])
-            rows_to_transfer.append({'product_code': code, 'product_name': row['product_name'], 'quantity': row['quantity'], 'unit_price': row['unit_price'], 'unit': row['unit'], 'editable': row['editable']})
+            transfer_row = {
+                'product_code': code,
+                'product_name': row['product_name'],
+                'quantity': row['quantity'],
+                'unit_price': row['unit_price'],
+                'unit': row['unit'],
+                'editable': row['editable'],
+            }
+            if row.get('manual_kg_grams'):
+                transfer_row['manual_kg_grams'] = True
+            rows_to_transfer.append(transfer_row)
 
         dlg.vegetable_rows = rows_to_transfer
         count = len(rows_to_transfer)
@@ -308,4 +479,3 @@ def _handle_ok_all(dlg, vtable, status_lbl):
             local_message="Unable to prepare vegetable items.",
             user_message="Error: Unable to prepare vegetable items",
         )
-

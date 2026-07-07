@@ -171,7 +171,7 @@ QPushButton[objectName*="vegEButton"][state="activeEach"] {
 }
 
 QPushButton[objectName*="vegEButton"][state="activeEach"]:hover {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #8750cc, stop:1 #7b2cbf);
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #9567be, stop:1 #7b2cbf);
 }
 
 QPushButton[objectName*="vegEButton"][state="empty"] {

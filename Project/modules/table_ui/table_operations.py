@@ -11,7 +11,7 @@ from PyQt5.QtGui import QColor, QBrush, QRegularExpressionValidator
 # Configuration and Database constants
 from config import (
     ROW_COLOR_EVEN, ROW_COLOR_ODD, ROW_COLOR_DELETE_HIGHLIGHT, 
-    MAX_TABLE_ROWS, MAIN_STATUS_DURATION_MS
+    MAX_TABLE_ROWS, MAIN_STATUS_DURATION_MS, QUANTITY_MAX_KG
 )
 from modules.db_operation import get_product_info
 from modules.ui_utils.ui_feedback import show_temp_status
@@ -45,6 +45,19 @@ def _money_item_value(item: Optional[QTableWidgetItem]) -> float:
     if numeric is not None:
         return money_value(numeric)
     return money_value(item.text())
+
+def _manual_kg_grams_to_kg(editor: QLineEdit) -> float:
+    from modules.ui_utils import input_validation
+
+    text = (editor.text() or '').strip()
+    if not text.isdigit():
+        raise ValueError("Weight must be entered as whole grams")
+    grams = int(text)
+    qty_kg = grams / 1000.0
+    ok, err = input_validation.validate_quantity(str(qty_kg), unit_type='kg')
+    if not ok:
+        raise ValueError(err or "Invalid weight")
+    return qty_kg
 
 def setup_sales_table(table: QTableWidget) -> None:
     """Configures table headers, column widths, and basic interaction policies."""
@@ -107,6 +120,7 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         u_price = data.get('unit_price', 0.0)
         editable = data.get('editable', True)
         unit_canon = data.get('unit', '')
+        manual_kg_grams = bool(data.get('manual_kg_grams')) and unit_canon == 'Kg'
 
         # Basic Cell Items (Col 0, 1)
         items = {
@@ -127,7 +141,9 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         table.setItem(r, 4, item_price)
 
         # Col 2: Quantity Editor (Regex-locked for EACH, Read-only for KG)
-        if not editable:
+        if manual_kg_grams:
+            qty_display = "" if float(qty_val) <= 0 else str(int(round(float(qty_val) * 1000)))
+        elif not editable:
             qty_display = str(int(float(qty_val) * 1000)) if qty_val < 1.0 else f"{float(qty_val):.2f}"
         else:
             qty_display = str(int(float(qty_val))) if float(qty_val) == int(float(qty_val)) else f"{float(qty_val):.2f}"
@@ -135,11 +151,14 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
         qty_edit = QLineEdit(qty_display)
         qty_edit.setObjectName('qtyInput')
         qty_edit.setProperty('numeric_value', float(qty_val))
+        qty_edit.setProperty('manual_kg_grams', manual_kg_grams)
         qty_edit.setReadOnly(not editable)
         qty_edit.setAlignment(Qt.AlignCenter)
 
         if editable:
-            regex = QRegularExpression(r"^[1-9][0-9]{0,3}$")
+            max_grams_digits = max(1, len(str(int(QUANTITY_MAX_KG * 1000))))
+            regex_pattern = rf"^[1-9][0-9]{{0,{max_grams_digits - 1}}}$" if manual_kg_grams else r"^[1-9][0-9]{0,3}$"
+            regex = QRegularExpression(regex_pattern)
             qty_edit.setValidator(QRegularExpressionValidator(regex, qty_edit))
             qty_edit.textChanged.connect(lambda _t, e=qty_edit, t=table: _recalc_from_editor(e, t))
         
@@ -182,6 +201,9 @@ def set_table_rows(table: QTableWidget, rows: List[Dict[str, Any]], status_bar: 
     _update_total_value(table)
     if table.rowCount() > 0:
         table.scrollToBottom()
+    listener = getattr(table, '_rows_changed_listener', None)
+    if callable(listener):
+        listener(table)
 
 def get_sales_data(table: QTableWidget) -> List[Dict[str, Any]]:
     """Extracts data from the QTableWidget back into a dictionary list."""
@@ -203,18 +225,23 @@ def get_sales_data(table: QTableWidget) -> List[Dict[str, Any]]:
         try:
             if editor.isReadOnly():
                 qty = float(editor.property('numeric_value') or 0.0)
+            elif bool(editor.property('manual_kg_grams')):
+                qty = _manual_kg_grams_to_kg(editor)
             else:
                 qty = input_handler.handle_quantity_input(editor, unit_type='unit')
         except Exception:
             qty = 0.0
 
-        rows.append({
+        row_data = {
             'product_name': name_item.text(),
             'quantity': qty,
             'unit_price': _money_item_value(price_item),
             'unit': unit_canon,
-            'editable': not editor.isReadOnly()
-        })
+            'editable': not editor.isReadOnly(),
+        }
+        if bool(editor.property('manual_kg_grams')):
+            row_data['manual_kg_grams'] = True
+        rows.append(row_data)
     return rows
 
 def is_transaction_active(table_widget) -> bool:
@@ -241,6 +268,9 @@ def recalc_row_total(table: QTableWidget, row: int) -> None:
     try:
         if editor.isReadOnly():
             qty = float(editor.property('numeric_value') or 0.0)
+        elif bool(editor.property('manual_kg_grams')):
+            qty = _manual_kg_grams_to_kg(editor)
+            editor.setProperty('numeric_value', qty)
         else:
             qty = input_handler.handle_quantity_input(editor, unit_type='unit')
             editor.setProperty('numeric_value', qty)
@@ -304,7 +334,10 @@ def _on_qty_commit(editor: QLineEdit, table: QTableWidget, *, notify_listener: b
     _recalc_from_editor(editor, table)
     status_lbl = getattr(table, '_status_label', None)
     try:
-        input_handler.handle_quantity_input(editor, unit_type='unit')
+        if bool(editor.property('manual_kg_grams')):
+            _manual_kg_grams_to_kg(editor)
+        else:
+            input_handler.handle_quantity_input(editor, unit_type='unit')
         if status_lbl:
             ui_feedback.clear_status_label(status_lbl)
         if notify_listener:
@@ -346,6 +379,9 @@ def bind_next_focus_widget(table: QTableWidget, widget: QWidget) -> None:
 
 def bind_qty_commit_listener(table: QTableWidget, listener: Callable[[float], None]) -> None:
     table._qty_commit_listener = listener
+
+def bind_rows_changed_listener(table: QTableWidget, listener: Callable[[QTableWidget], None]) -> None:
+    table._rows_changed_listener = listener
 
 def bind_total_label(table: QTableWidget, label: QLabel) -> None:
     table._total_label = label

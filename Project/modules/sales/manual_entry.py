@@ -139,12 +139,6 @@ def launch_manual_entry_dialog(parent):
         except Exception:
             pass
 
-    def _set_each_default_quantity() -> None:
-        try:
-            widgets['qty'].setText('1')
-        except Exception:
-            pass
-
     def _apply_tab_order_for_current_unit() -> None:
         try:
             if _is_product_each():
@@ -274,7 +268,10 @@ def launch_manual_entry_dialog(parent):
             else:
                 _set_combo_items(['EACH'], enabled=False, focus_policy=Qt.NoFocus)
                 _set_qty_placeholder()
-                _set_each_default_quantity()
+                try:
+                    widgets['qty'].setText('1')
+                except Exception:
+                    pass
                 _unlock_qty_controls()
         else:
             widgets['unit'].setProperty('product_unit', '')

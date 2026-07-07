@@ -27,6 +27,7 @@ This document describes the workflow for the Vegetable Entry dialog, where users
      - `quantity`: Numeric weight in kg (e.g., `0.6`, stored for calculations)
      - **Display**: "600" in Quantity column, "g" in Unit column
      - `editable`: `False` (quantity cell is READ-ONLY)
+     - If `VEG_KG_MANUAL_GRAMS_FALLBACK=True`, the quantity cell starts empty, receives focus, and is temporarily editable as whole grams only. Example: enter `1500` for 1.5 kg. Decimal input such as `1.5` is rejected, and the stored value remains canonical kg (`1.5`).
  3. **Duplicate handling:** If same KG item clicked again, ADDS weights (e.g., 600g + 600g = 1200g)
      - Updates to display "1.20" in Quantity, "kg" in Unit
  
@@ -54,6 +55,7 @@ lookups use the same runtime snapshot.
 - **Quantity Display:**
   - KG items < 1000g: Shows grams (e.g., "600")
   - KG items ≥ 1000g: Shows kg with 2 decimals (e.g., "1.20")
+  - KG manual fallback rows: Quantity cell starts empty, accepts whole grams only (e.g., "1500"), and converts to kg for totals and transfer
   - EACH items: Shows integer count
 - **Unit Display:** Separate column shows 'g', 'kg', or 'ea'
 - **Money Display:** Unit Price and row Total use shared currency formatting (for example, `$ 1,234.50`) while the numeric values remain stored on the table items for recalculation and transfer. Payable-total rounding happens only at the bound Sales frame total, not inside individual row totals.
@@ -72,6 +74,7 @@ When user clicks a KG vegetable button:
     - `quantity`: Numeric weight in kg (e.g., `0.6`, stored for calculations)
     - **Display**: "600" in Quantity column, "g" in Unit column
     - `editable`: `False` (quantity cell is READ-ONLY)
+    - With `VEG_KG_MANUAL_GRAMS_FALLBACK=True`, KG rows start with an empty quantity cell focused for cashier input. They are editable as integer grams only while still storing/transferring canonical kg. Use `1500` for 1.5 kg; do not enter decimals.
 3. **Duplicate handling:** If same KG item clicked again, ADDS weights (e.g., 600g + 600g = 1200g)
     - Updates to display "1.20" in Quantity, "kg" in Unit
     - All merging is handled via a canonical data list and table rebuild, ensuring no duplicate rows.
@@ -85,6 +88,26 @@ When user clicks an EACH vegetable button:
 2. **Duplicate handling:** If same EACH item clicked again, INCREMENTS quantity by 1
     - All merging is handled via a canonical data list and table rebuild, ensuring no duplicate rows.
 
+### Temporary KG Manual-Grams Fallback
+- Controlled by `config.VEG_KG_MANUAL_GRAMS_FALLBACK`.
+- Keep the flag `False` when weighing scale hardware is installed and production-ready.
+  - KG vegetable rows use the scale path (`weight_simulation()` until hardware integration is replaced).
+  - The quantity cell displays the measured weight and remains read-only.
+  - Cashiers cannot manually alter KG weight in the vegetable table.
+- Set the flag `True` only as a temporary operating mode when scale hardware is unavailable or not production-ready.
+  - KG vegetable rows bypass the scale value and start with an empty focused quantity cell.
+  - Cashiers enter whole grams only. `1500` means 1500 g / 1.5 kg.
+  - Float input such as `1.5` is not accepted.
+  - The visible gram input is converted back to canonical kilograms before totals, merge, receipts, and reports.
+- EACH vegetable rows are unaffected by this flag; they remain editable integer quantities.
+- `modules.table_ui.table_operations` keeps `manual_kg_grams=True` row metadata so `get_sales_data()` converts the visible grams back to canonical kg before totals, merge, receipts, and reports.
+
+### Editable Quantity Pending State
+- Applies to every editable quantity cell, including EACH rows and manual KG grams fallback rows.
+- While any editable quantity is empty or invalid, vegetable buttons and `OK ALL` are disabled.
+- Row delete, `CANCEL ALL`, and the custom titlebar close button remain available.
+- Entering a valid quantity or deleting the pending row clears the block.
+
 ### Unit Detection Logic
 ```python
 # From _handle_vegetable_button_click()
@@ -92,9 +115,16 @@ _, name, price, unit = get_product_info(product_code)
 unit_upper = unit.upper() if unit else 'EACH'
 
 if unit_upper == 'KG':
-    editable = False
-    weight = 0.6  # Simulated weighing scale
-    display_text = format_weight(weight)  # "600 g"
+    if VEG_KG_MANUAL_GRAMS_FALLBACK:
+        editable = True
+        weight = 0.0
+        display_text = ""  # cashier enters whole grams
+        manual_kg_grams = True
+    else:
+        editable = False
+        weight = 0.6  # Simulated weighing scale
+        display_text = format_weight(weight)  # "600 g"
+        manual_kg_grams = False
 else:
     editable = True
     weight = 1

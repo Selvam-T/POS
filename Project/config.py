@@ -197,7 +197,12 @@ ICON_LOGOUT = os.path.join(ASSETS_DIR, 'icons', 'logout.svg')
 # -----------------------------------------------------------------------------
 
 MAX_TABLE_ROWS = 50
+
+# vegetable-entry
 VEG_SLOTS = 16
+VEG_KG_MANUAL_GRAMS_FALLBACK = False # Turn on if weigh scale not installed
+
+# todo list: 12 rows, 40 characters max per item.
 TODO_ROWS = 12
 TODO_ITEM_MAX_LEN = 40
 
@@ -305,6 +310,8 @@ country_code = 'SG'
 currency = 'SGD'
 paynow_proxy_type = 'UEN'
 paynow_proxy_value = '201940352W'
+paynow_proxy_suffix = '888' # The 3-digit voice box bank intermediary code
+#bill_reference = 'EPOSSPSW74Y0GVMXU2RYWM33'
 mcc = 0
 
 error_correction = 'H'
@@ -341,14 +348,14 @@ REQ_RATIO = REQ_WIDTH / REQ_HEIGHT
 ADS_SIZE_TOLERANCE_PCT = 2.5
 
 # Disable to skip creating the customer-facing display window.
-CUSTOMER_DISPLAY_ENABLED = False
+CUSTOMER_DISPLAY_ENABLED = True
 
 # Test mode opens a normal window on the primary display.
 CUSTOMER_DISPLAY_TEST_MODE = True
 CUSTOMER_SCREEN_INDEX = 1
 CUSTOMER_SCREEN_WIDTH = 1280 #1536
 CUSTOMER_SCREEN_HEIGHT = 800 #900
-CUSTOMER_DISPLAY_FULLSCREEN = True
+CUSTOMER_DISPLAY_FULLSCREEN = False
 
 # Monitor auto-detection is ignored while test mode is enabled.
 CUSTOMER_DISPLAY_AUTO_DETECT = True

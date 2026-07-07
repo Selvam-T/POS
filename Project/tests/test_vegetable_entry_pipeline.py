@@ -3,12 +3,16 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QApplication,
     QDialog,
+    QLineEdit,
     QMainWindow,
     QPushButton,
     QTableWidget,
 )
+from PyQt5.QtGui import QValidator
+from PyQt5.QtTest import QTest
 
 from modules.sales import vegetable_entry
+from modules.table_ui.table_operations import get_sales_data
 from modules.ui_utils import dialog_utils
 
 
@@ -209,6 +213,7 @@ def test_vegetable_entry_invalid_weight_is_local_only(app, monkeypatch):
     sales_table = QTableWidget()
     dlg = vegetable_entry.launch_vegetable_entry_dialog(parent, sales_table)
     logged = []
+    monkeypatch.setattr(vegetable_entry, "VEG_KG_MANUAL_GRAMS_FALLBACK", False)
     monkeypatch.setattr(vegetable_entry, "weight_simulation", lambda: 0)
     monkeypatch.setattr(dialog_utils, "log_error_message", logged.append)
 
@@ -230,6 +235,192 @@ def test_vegetable_entry_invalid_weight_is_local_only(app, monkeypatch):
     parent.close()
 
 
+def test_vegetable_entry_kg_row_remains_readonly_when_manual_fallback_disabled(
+    app, monkeypatch
+):
+    parent = QMainWindow()
+    sales_table = QTableWidget()
+    dlg = vegetable_entry.launch_vegetable_entry_dialog(parent, sales_table)
+    monkeypatch.setattr(vegetable_entry, "VEG_KG_MANUAL_GRAMS_FALLBACK", False)
+    monkeypatch.setattr(vegetable_entry, "weight_simulation", lambda: 600)
+
+    vegetable_entry._handle_vegetable_button_click(
+        dlg,
+        dlg._veg_widgets["status"],
+        dlg._veg_widgets["table"],
+        "VEG01",
+        "Carrot",
+        2.0,
+        "Kg",
+    )
+
+    editor = dlg._veg_widgets["table"].cellWidget(0, 2).findChild(QLineEdit, "qtyInput")
+    rows = get_sales_data(dlg._veg_widgets["table"])
+
+    assert editor.isReadOnly()
+    assert editor.text() == "600"
+    assert rows[0]["quantity"] == 0.6
+    assert rows[0]["unit"] == "Kg"
+    assert rows[0]["editable"] is False
+    assert "manual_kg_grams" not in rows[0]
+
+    dlg.close()
+    parent.close()
+
+
+def test_vegetable_entry_kg_manual_fallback_edits_integer_grams_and_transfers_kg(
+    app, monkeypatch
+):
+    parent = QMainWindow()
+    sales_table = QTableWidget()
+    dlg = vegetable_entry.launch_vegetable_entry_dialog(parent, sales_table)
+    dlg.show()
+    app.processEvents()
+    monkeypatch.setattr(vegetable_entry, "VEG_KG_MANUAL_GRAMS_FALLBACK", True)
+
+    vegetable_entry._handle_vegetable_button_click(
+        dlg,
+        dlg._veg_widgets["status"],
+        dlg._veg_widgets["table"],
+        "VEG01",
+        "Carrot",
+        2.0,
+        "Kg",
+    )
+
+    editor = dlg._veg_widgets["table"].cellWidget(0, 2).findChild(QLineEdit, "qtyInput")
+    validator = editor.validator()
+    app.processEvents()
+
+    assert editor.text() == ""
+    assert editor.hasFocus()
+    assert not dlg._veg_widgets["ok_btn"].isEnabled()
+    assert not dlg._veg_widgets["veg_btn_1"].isEnabled()
+    assert dlg._veg_widgets["cancel_btn"].isEnabled()
+    assert dlg._veg_widgets["close_btn"].isEnabled()
+    assert get_sales_data(dlg._veg_widgets["table"])[0]["quantity"] == 0.0
+
+    editor.setText("1500")
+    app.processEvents()
+
+    assert dlg._veg_widgets["ok_btn"].isEnabled()
+    assert dlg._veg_widgets["veg_btn_1"].isEnabled()
+
+    QTest.keyClick(editor, Qt.Key_Return)
+    app.processEvents()
+    rows = get_sales_data(dlg._veg_widgets["table"])
+
+    assert not editor.isReadOnly()
+    assert editor.property("manual_kg_grams") is True
+    assert validator.validate("1500", 0)[0] == QValidator.Acceptable
+    assert validator.validate("1.5", 0)[0] != QValidator.Acceptable
+    assert dlg._veg_widgets["ok_btn"].hasFocus()
+    assert rows[0]["quantity"] == 1.5
+    assert rows[0]["unit"] == "Kg"
+    assert rows[0]["editable"] is True
+    assert rows[0]["manual_kg_grams"] is True
+
+    dlg._veg_widgets["ok_btn"].click()
+
+    assert dlg.result() == QDialog.Accepted
+    assert dlg.vegetable_rows == [
+        {
+            "product_code": "Carrot",
+            "product_name": "Carrot",
+            "quantity": 1.5,
+            "unit_price": 2.0,
+            "unit": "Kg",
+            "editable": True,
+            "manual_kg_grams": True,
+        }
+    ]
+
+    parent.close()
+
+
+def test_vegetable_entry_kg_manual_fallback_delete_clears_pending_button_block(
+    app, monkeypatch
+):
+    parent = QMainWindow()
+    sales_table = QTableWidget()
+    dlg = vegetable_entry.launch_vegetable_entry_dialog(parent, sales_table)
+    dlg.show()
+    app.processEvents()
+    monkeypatch.setattr(vegetable_entry, "VEG_KG_MANUAL_GRAMS_FALLBACK", True)
+
+    vegetable_entry._handle_vegetable_button_click(
+        dlg,
+        dlg._veg_widgets["status"],
+        dlg._veg_widgets["table"],
+        "VEG01",
+        "Carrot",
+        2.0,
+        "Kg",
+    )
+
+    delete_btn = dlg._veg_widgets["table"].cellWidget(0, 6).findChild(QPushButton, "removeBtn")
+
+    assert delete_btn.isEnabled()
+    assert not dlg._veg_widgets["ok_btn"].isEnabled()
+    assert not dlg._veg_widgets["veg_btn_1"].isEnabled()
+
+    delete_btn.click()
+    app.processEvents()
+
+    assert dlg._veg_widgets["table"].rowCount() == 0
+    assert dlg._veg_widgets["ok_btn"].isEnabled()
+    assert dlg._veg_widgets["veg_btn_1"].isEnabled()
+
+    dlg.close()
+    parent.close()
+
+
+def test_vegetable_entry_each_empty_qty_blocks_ok_and_veg_buttons(
+    app, monkeypatch
+):
+    parent = QMainWindow()
+    sales_table = QTableWidget()
+    dlg = vegetable_entry.launch_vegetable_entry_dialog(parent, sales_table)
+    dlg.show()
+    app.processEvents()
+    monkeypatch.setattr(vegetable_entry, "VEG_KG_MANUAL_GRAMS_FALLBACK", False)
+
+    vegetable_entry._handle_vegetable_button_click(
+        dlg,
+        dlg._veg_widgets["status"],
+        dlg._veg_widgets["table"],
+        "VEG02",
+        "Onion",
+        1.5,
+        "Each",
+    )
+
+    editor = dlg._veg_widgets["table"].cellWidget(0, 2).findChild(QLineEdit, "qtyInput")
+    delete_btn = dlg._veg_widgets["table"].cellWidget(0, 6).findChild(QPushButton, "removeBtn")
+
+    assert editor.text() == "1"
+    assert dlg._veg_widgets["ok_btn"].isEnabled()
+    assert dlg._veg_widgets["veg_btn_1"].isEnabled()
+
+    editor.clear()
+    app.processEvents()
+
+    assert not dlg._veg_widgets["ok_btn"].isEnabled()
+    assert not dlg._veg_widgets["veg_btn_1"].isEnabled()
+    assert delete_btn.isEnabled()
+    assert dlg._veg_widgets["cancel_btn"].isEnabled()
+    assert dlg._veg_widgets["close_btn"].isEnabled()
+
+    editor.setText("3")
+    app.processEvents()
+
+    assert dlg._veg_widgets["ok_btn"].isEnabled()
+    assert dlg._veg_widgets["veg_btn_1"].isEnabled()
+
+    dlg.close()
+    parent.close()
+
+
 def test_vegetable_entry_scale_exception_logs_and_sets_postclose_error(
     app, monkeypatch
 ):
@@ -237,6 +428,7 @@ def test_vegetable_entry_scale_exception_logs_and_sets_postclose_error(
     sales_table = QTableWidget()
     dlg = vegetable_entry.launch_vegetable_entry_dialog(parent, sales_table)
     logged = []
+    monkeypatch.setattr(vegetable_entry, "VEG_KG_MANUAL_GRAMS_FALLBACK", False)
 
     def fail_scale():
         raise RuntimeError("scale offline")
@@ -260,7 +452,7 @@ def test_vegetable_entry_scale_exception_logs_and_sets_postclose_error(
     assert "scale offline" in logged[0]
     assert dlg.main_status_msg == "Error: Unable to weigh Carrot"
     assert dlg.main_status_is_error is True
-    assert dlg.main_status_duration == 6000
+    assert dlg.main_status_duration == vegetable_entry.MAIN_STATUS_LONG_DURATION_MS
 
     dlg._veg_widgets["cancel_btn"].click()
     assert dlg.main_status_msg == "Error: Unable to weigh Carrot"

@@ -94,6 +94,10 @@ See `Documentation/product_menu.md` for UI behavior, admin-only rules, and resto
 
 ## Feature Constants
 - `VEG_SLOTS`: Number of vegetable buttons/slots in the vegetable entry UI (default: 16).
+- `VEG_KG_MANUAL_GRAMS_FALLBACK`: Temporary vegetable-entry fallback for sites without production-ready weighing scale hardware.
+  - Set to `False` when the weighing scale path is available. KG vegetable rows use the scale value, show a read-only quantity, and cannot be manually edited.
+  - Set to `True` only when operating without a ready scale. KG vegetable rows start with an empty focused quantity cell, accept whole grams only (for example `1500` for 1.5 kg), and are converted back to kilograms internally for totals, merge, receipts, and reports.
+  - EACH vegetable rows are not changed by this flag; they remain editable integer quantities.
 
 ---
 
