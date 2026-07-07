@@ -24,7 +24,7 @@ The sales frame setup moved out of `main.py` and is now embodied by the `SalesFr
 
 `MainLoader` listens to these signals and updates the shared `ReceiptContext` accordingly; logging is currently used to surface the updates before the database layer is wired in.
 
-The total listener mentioned above keeps `saleTotalChanged` in sync with `bind_total_label` so the controller doesn't need to duplicate total math. Payment Panel defaults refresh from this signal only. When a Qty editor is being typed in, `MainLoader` uses `focus=False` so the defaults update without stealing Qty focus.
+The total listener mentioned above keeps `saleTotalChanged` in sync with `bind_total_label` so the controller doesn't need to duplicate total math. Payment Panel defaults refresh from this signal without moving focus into the payment fields. Barcode scans, Manual Entry, Vegetable Entry, and Qty edits can therefore keep the cashier in the sales workflow while the payment panel stays live. When Qty is accepted with Enter, focus leaves the row editor and returns to the Sales table rather than jumping to payment. Moving into payment is treated as an explicit user action, such as clicking a `*PayLineEdit` or payment control.
 
 ## Sales Table Readiness Gate
 

@@ -680,24 +680,22 @@ class MainLoader(QMainWindow):
     # ========== Signal Handlers ==========
     # Update payment defaults when sale total updates.
     def _on_sale_total_changed(self, total: float) -> None:
-        focus_payment = True
-        try:
-            from PyQt5.QtWidgets import QApplication
-            app = QApplication.instance()
-            fw = app.focusWidget() if app is not None else None
-            if fw is not None and getattr(fw, 'objectName', lambda: '')() == 'qtyInput':
-                focus_payment = False
-        except Exception:
-            pass
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:
-            panel.set_payment_default(total, focus=focus_payment)
+            panel.set_payment_default(total, focus=False)
         self._update_customer_display_from_sales()
 
     def _on_qty_commit_total_changed(self, total: float) -> None:
         panel = getattr(self, 'payment_panel_controller', None)
         if panel is not None:
-            panel.set_payment_default(total, focus=True)
+            panel.set_payment_default(total, focus=False)
+        table = getattr(self, 'sales_table', None)
+        if table is not None:
+            try:
+                from PyQt5.QtCore import Qt
+                table.setFocus(Qt.OtherFocusReason)
+            except Exception:
+                pass
         self._update_customer_display_from_sales()
 
     # Update receipt context when a held sale is loaded.

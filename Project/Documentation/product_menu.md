@@ -50,7 +50,8 @@ The constructor supports two optional knobs:
 
 If there is an active sale transaction (`sale_lock=True`):
 
-- REMOVE and UPDATE tabs are disabled.
+- REMOVE, UPDATE, and CATEGORY tabs are disabled. ADD remains accessible so staff
+  can continue adding products during the active transaction.
 
 Landing rules:
 

@@ -200,7 +200,7 @@ MAX_TABLE_ROWS = 50
 
 # vegetable-entry
 VEG_SLOTS = 16
-VEG_KG_MANUAL_GRAMS_FALLBACK = False # Turn on if weigh scale not installed
+VEG_KG_MANUAL_GRAMS_FALLBACK = True # Turn on if weigh scale not installed
 
 # todo list: 12 rows, 40 characters max per item.
 TODO_ROWS = 12
@@ -311,8 +311,10 @@ currency = 'SGD'
 paynow_proxy_type = 'UEN'
 paynow_proxy_value = '201940352W'
 paynow_proxy_suffix = '888' # The 3-digit voice box bank intermediary code
-#bill_reference = 'EPOSSPSW74Y0GVMXU2RYWM33'
-mcc = 0
+paynow_editable_amount_indicator = '1'  # Tag 26, Sub-tag 03 = '1'
+transaction_id = '20270707103059'        # Tag 04 payload
+bill_reference = 'EPOSSPSW74Y0GVMXU2RYWM33'
+mcc = '0000'
 
 error_correction = 'H'
 box_size = 10
