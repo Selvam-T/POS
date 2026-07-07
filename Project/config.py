@@ -102,24 +102,34 @@ GREETING_SELECTED = 'Thanks for shopping with us!'
 
 
 # -----------------------------------------------------------------------------
-# Runtime controls and diagnostics
+# Development / production switchboard
 # -----------------------------------------------------------------------------
+# Review these flags when switching between development, testing, and production.
+# Keep all environment-dependent toggles here so release readiness is easy to audit.
 
-# Set False during development to bypass the login dialog.
-LOGIN_ON = False
-AUTO_LOGIN_UID = 1
-AUTO_LOGIN_USERNAME = 'developer'
-AUTO_LOGIN_IS_ADMIN = True
+# Login and access: development can bypass login; production should require login.
+LOGIN_ON = False  # False bypasses login and uses AUTO_LOGIN_* below.
+AUTO_LOGIN_UID = 1  # User id injected when LOGIN_ON is False.
+AUTO_LOGIN_USERNAME = 'developer'  # Username injected when LOGIN_ON is False.
+AUTO_LOGIN_IS_ADMIN = True  # Grants admin role to the auto-login user.
 
-# Trial builds are blocked after TRIAL_EXPIRY_DATE or if the system clock is
-# earlier than the embedded UTC build timestamp.
-TRIAL_BUILD_ENABLED = False
+# Trial build gate: enable only for time-limited trial executables.
+TRIAL_BUILD_ENABLED = False  # True blocks launch after TRIAL_EXPIRY_DATE/build-clock checks.
 TRIAL_EXPIRY_DATE = date(2026, 6, 30)
 TRIAL_EXPIRED_MESSAGE = 'Testing period expired. Please contact SelvamPOS support.'
 
-DEBUG_SCANNER_FOCUS = False
-DEBUG_FOCUS_CHANGES = False
-DEBUG_CACHE_LOOKUP = False
+# Vegetable scale fallback: use only when weighing scale hardware is not installed/ready.
+VEG_KG_MANUAL_GRAMS_FALLBACK = True  # True lets cashier enter KG vegetables as whole grams.
+
+# Printer and cash drawer: enable only when production hardware is configured and tested.
+ENABLE_PRINTER_PRINT = False  # True sends receipt text to the network printer.
+ENABLE_CASH_DRAWER = False  # True pulses the cash drawer after successful cash payment.
+
+# Customer display launch mode: test mode uses a normal window; production uses target screen.
+CUSTOMER_DISPLAY_ENABLED = True  # False skips creating the customer-facing display.
+CUSTOMER_DISPLAY_TEST_MODE = True  # True opens customer display as a normal test window.
+CUSTOMER_DISPLAY_FULLSCREEN = False  # True makes the customer display fullscreen.
+CUSTOMER_DISPLAY_AUTO_DETECT = True  # Ignored while CUSTOMER_DISPLAY_TEST_MODE is True.
 
 # Scanner timing. The key interval identifies scanner-like bursts; the UI
 # suppression window only protects Enter/Return from triggering default actions.
@@ -200,7 +210,6 @@ MAX_TABLE_ROWS = 50
 
 # vegetable-entry
 VEG_SLOTS = 16
-VEG_KG_MANUAL_GRAMS_FALLBACK = True # Turn on if weigh scale not installed
 
 # todo list: 12 rows, 40 characters max per item.
 TODO_ROWS = 12
@@ -331,9 +340,7 @@ PRINTER_IP = '192.168.0.10'
 PC_IP = '192.168.0.5'
 SUBNET_MASK = '255.255.255.0'
 PRINTER_PORT = 9100
-ENABLE_PRINTER_PRINT = False
 
-ENABLE_CASH_DRAWER = False
 CASH_DRAWER_PIN = 2
 CASH_DRAWER_TIMEOUT = 2.0
 
@@ -349,18 +356,10 @@ REQ_HEIGHT = 800
 REQ_RATIO = REQ_WIDTH / REQ_HEIGHT
 ADS_SIZE_TOLERANCE_PCT = 2.5
 
-# Disable to skip creating the customer-facing display window.
-CUSTOMER_DISPLAY_ENABLED = True
-
-# Test mode opens a normal window on the primary display.
-CUSTOMER_DISPLAY_TEST_MODE = True
 CUSTOMER_SCREEN_INDEX = 1
 CUSTOMER_SCREEN_WIDTH = 1280 #1536
 CUSTOMER_SCREEN_HEIGHT = 800 #900
-CUSTOMER_DISPLAY_FULLSCREEN = False
 
-# Monitor auto-detection is ignored while test mode is enabled.
-CUSTOMER_DISPLAY_AUTO_DETECT = True
 CUSTOMER_DISPLAY_IDLE_TIMEOUT = 5
 CUSTOMER_DISPLAY_IDLE_AD_INTERVAL = 6
 

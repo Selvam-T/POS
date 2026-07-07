@@ -114,7 +114,3 @@ If a scanner does not send Enter, no confirmed scan is emitted, so rejected-scan
   - `SCANNER_UI_SUPPRESS_SECONDS`
 - Main event filtering and routing live in `modules/devices/barcode_manager.py`.
 - Raw HID key buffering lives in `modules/devices/scanner.py`.
-- Debug toggles:
-  - `DEBUG_SCANNER_FOCUS`
-  - `DEBUG_FOCUS_CHANGES`
-  - `DEBUG_CACHE_LOOKUP`

@@ -92,7 +92,7 @@ Scanner input in-focus routing, protection, and diagnostics:
 - Centralized helpers: `_ignore_scan`, `_cleanup_scanner_leak`, `_show_dim_overlay`/`_hide_dim_overlay`, `_start_scanner_modal_block`/`_end_scanner_modal_block`, `_refocus_sales_table`, `_clear_barcode_override`.
 - Diagnostics:
     - Always-on cache lookup logging per scan (found/missed, name, price, cache size).
-    - Optional toggles: `DEBUG_SCANNER_FOCUS`, `DEBUG_FOCUS_CHANGES`, `DEBUG_CACHE_LOOKUP`.
+    - Legacy `DEBUG_*` scanner/focus toggles were removed after debug logging was retired.
 - Known limitation (HID wedge): rare first-character leak into disallowed fields; mitigated via cleanup and global suppression windows. Hardware-level fixes (prefix/suffix or serial mode) are documented but deferred.
 
 Docs: Added `Documentation/scanner_input_infocus.md` detailing routing rules, protections, known limitations, and developer guidance. Updated `README.md` to summarize behavior and link to the doc.

@@ -57,10 +57,24 @@ This file centralizes key configuration values for the POS application. It is im
 ## Database Path
 - `DB_PATH`: Absolute path to the SQLite database. Computed relative to the project root so it works on any machine.
 
-## Debug Flags
-- `DEBUG_SCANNER_FOCUS`: Print scanner focus widget for debugging.
-- `DEBUG_FOCUS_CHANGES`: Log every Qt focus change (very verbose).
-- `DEBUG_CACHE_LOOKUP`: Log cache lookup result for every scanned code.
+## Development / Production Switchboard
+These flags are grouped together in `config.py` so development and production behavior can be reviewed from one place.
+
+- Login and access:
+  - `LOGIN_ON`: `False` bypasses login for development; production should normally require login.
+  - `AUTO_LOGIN_UID`, `AUTO_LOGIN_USERNAME`, `AUTO_LOGIN_IS_ADMIN`: User identity injected only when `LOGIN_ON` is `False`.
+- Trial build gate:
+  - `TRIAL_BUILD_ENABLED`: Enables trial expiry enforcement for trial executables.
+- Vegetable scale fallback:
+  - `VEG_KG_MANUAL_GRAMS_FALLBACK`: Enables manual whole-gram entry for KG vegetables when scale hardware is unavailable.
+- Printer and cash drawer:
+  - `ENABLE_PRINTER_PRINT`: Enables network printer output.
+  - `ENABLE_CASH_DRAWER`: Enables cash drawer pulse after successful cash payment.
+- Customer display launch mode:
+  - `CUSTOMER_DISPLAY_ENABLED`: Creates or skips the customer-facing display.
+  - `CUSTOMER_DISPLAY_TEST_MODE`: Opens the customer display as a normal test window.
+  - `CUSTOMER_DISPLAY_FULLSCREEN`: Uses fullscreen customer display.
+  - `CUSTOMER_DISPLAY_AUTO_DETECT`: Enables target-screen auto-detection when test mode is off.
 
 ## Scanner Timing
 - `SCANNER_KEY_INTERVAL_SECONDS`: Shared scanner/manual inter-key threshold used by `scanner.py`.
