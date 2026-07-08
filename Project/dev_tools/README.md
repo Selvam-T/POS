@@ -25,6 +25,7 @@ The three `clear_*.py` scripts permanently remove data from the active database.
 ## Manual Tests
 
 - `manual_tests/scanner_check.py`: Opens a small Qt application that verifies barcode scanner signal handling.
+- `manual_tests/preview_paynow_qr.py`: Generates and displays a PayNow QR preview image for visual/manual checking.
 
 These are interactive checks, not automated pytest tests. Automated tests remain in `tests/`.
 
@@ -39,6 +40,7 @@ Examples:
 ```cmd
 python dev_tools\database\query_all_tables_in_db.py
 python dev_tools\manual_tests\scanner_check.py
+python dev_tools\manual_tests\preview_paynow_qr.py
 python dev_tools\maintenance\format_assets.py
 python dev_tools\maintenance\normalize_products.py
 python dev_tools\maintenance\write_trial_build_timestamp.py

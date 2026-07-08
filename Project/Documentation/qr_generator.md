@@ -9,7 +9,7 @@ Key points
 - The generator no longer embeds an amount in the QR payload so customers' banking apps will not pre-fill payment amounts.
 - This is intentional because POS payment confirmation is not integrated with the banking app; the cashier verifies and records the final payment manually.
 - A generic QR avoids stale or incorrect amount QR codes when the cart or payment allocation changes.
-- The default reference used in the QR is `merchant_name` from `config.py`, matching the standalone `test_qr.py` reference rendering path.
+- The default reference used in the QR is `merchant_name` from `config.py`, matching the manual preview script's reference rendering path.
 - The public API for Screen 2 is `generate_qr_pixmap(ref_value: str | None = None, target_size: int = 250)` which returns a `QPixmap` ready to set on a `QLabel`.
 - The QR image includes an overlaid logo and a rounded white card background to match the app styling.
 
@@ -27,4 +27,3 @@ Security and privacy
 --------------------
 - Because the QR does not include an amount, customers enter the cashier-confirmed payment value manually in their banking apps.
 - Reference strings are trimmed to 25 characters to avoid oversized TLV entries.
-

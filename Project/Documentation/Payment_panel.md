@@ -23,7 +23,7 @@
 - Display-only money labels use shared currency formatting (`$ 1,234.50`) while keeping the raw numeric value on the widget as `numeric_value`.
 - Editable payment fields (`*PayLineEdit`, `*ValLineEdit`) remain plain numeric text so user input and validation are not affected by currency symbols.
 - The incoming sale total is already the rounded payable total from the Sales frame, rounded to the nearest `$0.10`.
-- Payment defaults refresh only from `saleTotalChanged`. When the active focus is a sales-table `qtyInput`, `MainLoader` uses `focus=False` so Cash/default totals update without stealing Qty focus.
+- Payment totals refresh from `saleTotalChanged`, but payment allocations stay empty until the cashier explicitly clicks a `*PaySlcBtn` or manually enters a split amount. When the active focus is a sales-table `qtyInput`, `MainLoader` uses `focus=False` so the total updates without stealing Qty focus.
 
 **Allocation formula:**
 ```
@@ -38,22 +38,23 @@ change = tender - cash
 - **Validation**: All payment fields (cash, nets, paynow, tender, voucher) are validated via `modules/ui_utils.input_handler` when the user presses Enter (handled by `PaymentPanel._handle_enter_key()`) or leaves the field. Validation failures hold focus on the offending widget, surface an error through `payStatusLabel`, and block navigation/Pay until corrected. Editing or re-focusing the field clears the error via `ui_feedback` so the message goes away as soon as the value changes.
 - **Unallocated tracking**: Recomputed on any payment change. Highlights the unalloc frame when `unalloc > 0`; clears highlight when `unalloc <= 0`. When `unalloc < 0`, the frame stays neutral but the status label shows `Warning: Payment Over-allocation.` so the user knows a warning state exists even though Pay remains reachable.
 - **Status priority**: validation error > (cash>0 and tender<cash) > (unalloc>0) > (unalloc<0) > clear.
-- **Tender/Balance**: Tender UI is shown/enabled only when `cash > 0`. `balance = tender - cash` (may go negative while typing); tender placeholder shows only when `cash > 0` and tender is empty.
+- **Tender/Balance**: Tender UI is shown/enabled only when `cash > 0`. `balance = tender - cash` (may go negative while typing); tender placeholder shows only when `cash > 0` and tender is empty. Tender is a one-way dependent default from CASH: cash selector/manual cash edits seed tender when tender is empty or still matches the previous cash amount, but manual tender edits never update cash. Clearing cash clears tender.
 - **Placeholders**: Pay-method placeholders show only when `unalloc > 0` and the field is empty. Tender placeholder is conditional on cash being present.
 - **Read-only / focus gating**: When `unalloc == 0`, zero-valued pay fields become read-only and lose focusability; fields with values stay editable. Tender is locked/no-focus when `cash <= 0`.
-- **Pay-select buttons**: Choosing a method fills that method with the full total (voucher uses int), clears the other methods, recalculates, and moves focus (cash→tender, others→Pay). A second click just focuses/selects.
+- **Live sale refresh**: Sales-table total changes update `totalValPayLabel` and clear existing payment allocations. This keeps the payment fields empty while the transaction is still being built and requires the cashier to choose payment again after Reset or after adding/editing sale items.
+- **Pay-select buttons**: Choosing a method fills that method with the full total (voucher uses int), clears the other methods, recalculates, and moves focus to Pay. CASH also copies the same full total into tender so exact cash is immediately payable; the cashier can still edit tender for larger or corrected cash received.
 - **Enter navigation**: Context-aware routing—cash with `unalloc <= 0` jumps to tender; pay fields with `unalloc <= 0` jump to Pay; tender enforces `tender >= cash` before advancing and will jump back/select-all if short; if tender>cash while `unalloc > 0`, focus jumps to the next pay field.
 - **Pay button gating**: Requires `total > 0`, `unalloc <= 0`, no validation errors, receipt status in (`NONE`, `UNPAID`), and when `cash > 0`, `tender >= cash`. Reset is enabled only when total>0; Print normally only when total is zero/empty.
 - **Payment DB failure lock**: After three failed DB commit attempts, `main.py` locks `payPayOpsBtn`, changes its text to `PAY err`, applies the red locked style, and keeps the recovery StatusBar message visible until the sales table is cleared. The lock is reversible and is cleared when the sales table is cleared through the recovery flow.
 - **Print during failure lock**: While the DB failure lock is active, `printPayOpsBtn` is enabled even though the cart total is still present. It routes to `modules/payment/recovery_receipt.py` to print a `TEMP-DB-FAIL` snapshot receipt from the current sales table and payment split. This printout is not a DB receipt and does not write any rows.
 
 ## Pay-Select Behavior
-- Sets the chosen method to total (voucher rounded to int), clears others to zero/blank, recomputes unalloc, then focuses tender (if cash) or Pay (otherwise).
+- Sets the chosen method to total (voucher rounded to int), clears others to zero/blank, recomputes unalloc, then focuses Pay. For CASH, tender is set to the same value as the cash allocation. Re-clicking a selector reapplies the same rule instead of using a special focus/select path.
 
 ## Controller API
-- `set_payment_default(total)` — prime fields for a new sale total and focus tender if visible.
+- `set_payment_default(total)` — refresh the live payable total, clear payment allocations, and wait for explicit payment selection/manual entry.
 - `clear_payment_frame()` — zero all fields, hide tender, clear status/highlights.
-- `reset_payment_grid_to_default()` — reapply defaults using the current total.
+- `reset_payment_grid_to_default()` — clear payment allocations while keeping the current payable total live.
 - `recalc_unalloc_and_ui()` — recompute unalloc, update placeholders, status, and enablement.
 - `recalc_cash_balance_and_ui()` — manage tender visibility, balance, placeholders, and status for cash flows.
 - `update_readonly_policy()` — lock/unlock pay/tender focus based on unalloc and cash presence.

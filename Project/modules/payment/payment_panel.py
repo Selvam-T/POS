@@ -38,8 +38,8 @@ class PaymentPanel(QObject):
         self._widgets = {}
         self._placeholders = {}
         self._unalloc_title_default = "Balance to Allocate"
-        self._last_pay_select_method = None
         self._last_unalloc = 0.0
+        self._last_cash_amount = 0.0
         self._has_validation_error = False
         self._validation_message = ""
         self._pay_select_buttons = {}
@@ -314,7 +314,10 @@ class PaymentPanel(QObject):
         for field in pay_fields:
             if field is None:
                     continue
-            field.textChanged.connect(self.recalc_unalloc_and_ui)
+            if field == self._widgets.get('cash'):
+                field.textChanged.connect(self._handle_cash_text_changed)
+            else:
+                field.textChanged.connect(self.recalc_unalloc_and_ui)
             field.textChanged.connect(lambda _=None, f=field: self._clear_validation_error(f))
             field.editingFinished.connect(self._validate_currency_field)
 
@@ -448,6 +451,30 @@ class PaymentPanel(QObject):
         widget.setText(text)
         widget.blockSignals(False)
 
+    def _sync_tender_from_cash_if_default(self) -> None:
+        # Cash owns the tender default. Manual tender overrides are preserved.
+        cash_field = self._widgets.get('cash')
+        tender_field = self._widgets.get('tender')
+        if cash_field is None or tender_field is None:
+            return
+
+        cash = self._get_validated_amount(cash_field)
+        tender_text = (tender_field.text() or '').strip()
+        tender = self._get_validated_amount(tender_field)
+        previous_cash = self._last_cash_amount
+
+        if cash <= 0:
+            self._set_line_text(tender_field, "")
+        elif not tender_text or self._round_currency(tender - previous_cash) == 0:
+            self._set_line_text(tender_field, self._format_number(cash))
+
+        self._last_cash_amount = cash
+
+    def _handle_cash_text_changed(self) -> None:
+        # Keep tender in one-way sync with cash unless tender was manually edited.
+        self._sync_tender_from_cash_if_default()
+        self.recalc_unalloc_and_ui()
+
     def _set_label_text(self, widget: QLabel, text: str) -> None:
         # Set label text safely when widget exists.
         if widget is None:
@@ -509,25 +536,21 @@ class PaymentPanel(QObject):
 
     # Public API
     def set_payment_default(self, total: float, *, focus: bool = True) -> None:
-        # Reset payment split to default values for the provided total.
+        # Refresh the payable total without preselecting a payment method.
         if total <= 0:
             self.clear_payment_frame()
             return
         self._reset_validation_feedback()
         self._set_money_label_value(self._widgets.get('total_label'), total)
-        self._set_line_text(self._widgets.get('cash'), self._format_number(total))
+        self._set_line_text(self._widgets.get('cash'), "")
         self._set_line_text(self._widgets.get('nets'), "")
         self._set_line_text(self._widgets.get('paynow'), "")
         self._set_line_text(self._widgets.get('voucher'), "")
         self._set_line_text(self._widgets.get('tender'), "")
-        self._last_pay_select_method = None
+        self._set_line_text(self._widgets.get('balance'), "")
+        self._last_cash_amount = 0.0
         self.recalc_unalloc_and_ui()
         self.update_pay_button_state()
-        if focus:
-            tender = self._widgets.get('tender')
-            if tender is not None and tender.isVisible():
-                tender.setFocus()
-                tender.selectAll()
 
     def clear_payment_frame(self) -> None:
         # Clear all payment fields/state and return the panel to idle defaults.
@@ -540,6 +563,7 @@ class PaymentPanel(QObject):
         self._set_line_text(self._widgets.get('voucher'), "")
         self._set_line_text(self._widgets.get('tender'), "")
         self._set_line_text(self._widgets.get('balance'), "")
+        self._last_cash_amount = 0.0
         self._last_unalloc = 0.0
         self._clear_unalloc_highlight()
         self._set_tender_visibility(False)
@@ -556,7 +580,7 @@ class PaymentPanel(QObject):
         self.update_pay_button_state()
 
     def reset_payment_grid_to_default(self) -> None:
-        # Reapply default split behavior using the current total amount.
+        # Clear allocations while keeping the current payable total live.
         self._reset_validation_feedback()
         total = self._get_total_amount()
         self.set_payment_default(total)
@@ -916,12 +940,6 @@ class PaymentPanel(QObject):
         if field is None:
             return
 
-        if self._last_pay_select_method == method:
-            field.setFocus()
-            field.selectAll()
-            return
-
-        self._last_pay_select_method = method
         total = self._get_total_amount()
         for key, le in field_map.items():
             if le is None:
@@ -936,21 +954,18 @@ class PaymentPanel(QObject):
                 le.clear()
             le.blockSignals(False)
 
+        tender = self._widgets.get('tender')
+        if method == 'cash' and tender is not None:
+            self._set_line_text(tender, self._format_number(total))
+        elif method != 'cash' and tender is not None:
+            self._set_line_text(tender, "")
+
+        self._last_cash_amount = self._get_validated_amount(self._widgets.get('cash'))
         self.recalc_unalloc_and_ui()
 
-        if method == 'cash':
-            tender = self._widgets.get('tender')
-            if tender is not None:
-                tender.setFocus()
-                tender.selectAll()
-            else:
-                pay_btn = self._widgets.get('pay_button')
-                if pay_btn is not None:
-                    pay_btn.setFocus()
-        else:
-            pay_btn = self._widgets.get('pay_button')
-            if pay_btn is not None:
-                pay_btn.setFocus()
+        pay_btn = self._widgets.get('pay_button')
+        if pay_btn is not None:
+            pay_btn.setFocus()
 
     def handle_pay_clicked(self) -> None:
         # Validate payment state and emit finalized payment payload when valid.

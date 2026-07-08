@@ -229,9 +229,6 @@ class CustomerDisplayWindow(QDialog):
         table.setFrameShape(QFrame.Box)
         table.setLineWidth(1)
 
-        # Apply a readable default font for rows in case stylesheet cascade misses it
-        table.setFont(QFont("Segoe UI", 16))
-
         header = table.horizontalHeader()
         if header is not None:
             # Ensure header is visible and has a reasonable minimum height so

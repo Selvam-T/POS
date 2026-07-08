@@ -1,5 +1,5 @@
-# show_qr.py
-# not ideal long-term but just a quick test to confirm QR generation + display works in our environment.
+# preview_paynow_qr.py
+# Manual PayNow QR preview. This is not an automated pytest test.
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2]))
 

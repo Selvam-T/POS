@@ -120,7 +120,8 @@ Why this is required:
 
 Testing recommendations
 -----------------------
-- Happy path: scan two items, open payment panel, allocate full cash, click
+- Happy path: scan two items, open payment panel, click CASH to allocate the
+  full total, confirm tender defaults to the same exact-cash value, then click
   PAY. Verify the following in the DB:
   - `receipt_counters` counter incremented for today's date
   - One row in `receipts` with status='PAID'

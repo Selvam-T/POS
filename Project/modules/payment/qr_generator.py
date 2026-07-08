@@ -58,7 +58,7 @@ def make_expiry_yyyymmdd():
 def build_paynow_payload(ref_value: str | None = None):
     """Build a generic PayNow dynamic QR payload without embedding an amount.
 
-    The visual output intentionally mirrors `test_qr.py`; only tag 54
+    The visual output intentionally mirrors `dev_tools/manual_tests/preview_paynow_qr.py`; only tag 54
     (transaction amount) is omitted so customers enter the amount manually.
     """
     editable = "0"
@@ -201,7 +201,7 @@ def overlay_logo(qr_img):
 def generate_qr_pixmap(ref_value: str | None = None, target_size: int = 250):
     """Return a PyQt5 QPixmap containing the generated QR code card.
 
-    - Mirrors the card rendered by `test_qr.py`.
+    - Mirrors the card rendered by `dev_tools/manual_tests/preview_paynow_qr.py`.
     - Fits the card within `target_size` while preserving aspect and alpha.
     """
     try:

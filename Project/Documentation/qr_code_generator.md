@@ -412,7 +412,7 @@ Key functions in that file:
 - `add_qr_card(qr_img)`
 
 Note:
-- `modules/payment/test_qr.py` remains a standalone experiment/reference script.
+- `dev_tools/manual_tests/preview_paynow_qr.py` remains a standalone manual preview/reference script.
 - Application code should use `modules/payment/qr_generator.py`.
 
 ---

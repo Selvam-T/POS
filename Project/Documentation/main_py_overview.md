@@ -92,7 +92,7 @@ There are no other direct calls to `_perform_logout` in the codebase, ensuring t
   - **Unit-aware editable states:** KG items have read-only quantity cells, EACH items have editable quantity cells.
   - **Currency display:** Unit Price and row Total use true two-decimal currency values; the bound total label displays the payable total rounded to the nearest `$0.10` and forwards that payable total to payment updates.
   - **Mixed table rebuilding:** Uses `set_table_rows()` when combining KG and EACH items from dialogs.
-  - **Payment refresh focus rule:** Barcode scans, Manual Entry, Vegetable Entry, and Qty edits update the payment panel live without moving focus out of the sales workflow. Cashiers enter payment explicitly by clicking/focusing payment controls.
+  - **Payment refresh focus rule:** Barcode scans, Manual Entry, Vegetable Entry, and Qty edits update the payment total live without pre-filling payment allocations or moving focus out of the sales workflow. Cashiers enter payment explicitly by clicking/focusing payment controls.
   - **Barcode blocking:** KG items cannot be added via barcode scan (shows message to use Vegetable Entry).
   - **PRODUCT_CACHE integration:** Fetches product info as 4-tuple `(found, name, price, unit)` for unit-based behavior.
 

@@ -319,7 +319,7 @@ country_code = 'SG'
 currency = 'SGD'
 paynow_proxy_type = 'UEN'
 paynow_proxy_value = '201940352W'
-paynow_proxy_suffix = '888' # The 3-digit voice box bank intermediary code
+paynow_proxy_suffix = '888' # The 3-digit voice box bank intermediary (EPOS) code
 paynow_editable_amount_indicator = '1'  # Tag 26, Sub-tag 03 = '1'
 transaction_id = '20270707103059'        # Tag 04 payload
 bill_reference = 'EPOSSPSW74Y0GVMXU2RYWM33'
@@ -363,5 +363,5 @@ CUSTOMER_SCREEN_HEIGHT = 800 #900
 CUSTOMER_DISPLAY_IDLE_TIMEOUT = 5
 CUSTOMER_DISPLAY_IDLE_AD_INTERVAL = 6
 
-CUSTOMER_DISPLAY_DATE_FMT = DATE_FMT
+CUSTOMER_DISPLAY_DATE_FMT = '%#d %b %Y'
 CUSTOMER_DISPLAY_TIME_FMT = TIME_FMT
