@@ -12,7 +12,7 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - Cash drawer implementation: `Documentation/cash_drawer.md`
 - View Hold (load/print/void held receipts): `Documentation/view_hold.md`
 - Product menu + category management: `Documentation/product_menu.md`
-- Printer helper: `Documentation/printer.md`
+- Printer helper: `Documentation/printer_drawer.md`
 - Error handling pipeline: `Documentation/error_logging_and_fallback.md`
 - Main status footer and error-log controls: `Documentation/status_footer.md`
 - Dialog utilities/pipeline: `Documentation/dialog_utils.md`, `Documentation/dialog_pipeline.md`

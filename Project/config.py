@@ -308,8 +308,9 @@ STRING_CONFIG = {
 # -----------------------------------------------------------------------------
 
 RECEIPT_DEFAULT_WIDTH = 48
-RECEIPT_QTY_WIDTH = 10  # Quantity plus unit.
-RECEIPT_AMOUNT_WIDTH = 8  # Up to $9999.99.
+RECEIPT_QTY_WIDTH = 9  # Quantity plus unit.
+RECEIPT_AMOUNT_WIDTH = 8  # Summary/payment amounts include "$ ".
+RECEIPT_ITEM_AMOUNT_WIDTH = 7  # Item price/total columns omit "$ ".
 RECEIPT_GAP = 1
 
 # Lowercase names are retained because qr_generator imports this public API.

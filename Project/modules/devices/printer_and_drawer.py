@@ -9,7 +9,28 @@ from config import PRINTER_IP, PRINTER_PORT
 from modules.ui_utils.error_logger import log_error_message
 
 
-def _send_with_escpos(receipt_text: str, ip: str, port: int, timeout: float) -> bool:
+def _set_receipt_style(printer, style: str) -> None:
+    if style == "company":
+        printer.set(align="left", font="a", width=1, height=2)
+    elif style in ("table", "greeting"):
+        printer.set(align="left", font="b", width=1, height=1)
+    else:
+        printer.set(align="left", font="a", width=1, height=1)
+
+
+def _send_text(printer, text: str) -> None:
+    printer.text(text or "")
+    if text and not text.endswith("\n"):
+        printer.text("\n")
+
+
+def _send_with_escpos(
+    receipt_text: str,
+    ip: str,
+    port: int,
+    timeout: float,
+    receipt_sections: list[dict[str, str]] | None = None,
+) -> bool:
     try:
         from escpos.printer import Network
     except Exception as exc:
@@ -22,9 +43,13 @@ def _send_with_escpos(receipt_text: str, ip: str, port: int, timeout: float) -> 
     p = None
     try:
         p = Network(host=ip, port=port, timeout=timeout)
-        p.text(receipt_text or "")
-        if receipt_text and not receipt_text.endswith("\n"):
-            p.text("\n")
+        if receipt_sections:
+            for section in receipt_sections:
+                _set_receipt_style(p, str(section.get("style") or "normal"))
+                _send_text(p, str(section.get("text") or ""))
+            _set_receipt_style(p, "normal")
+        else:
+            _send_text(p, receipt_text)
         p.cut()
         return True
     except Exception as exc:
@@ -41,18 +66,24 @@ def _send_with_escpos(receipt_text: str, ip: str, port: int, timeout: float) -> 
                 pass
 
 
-def print_receipt(receipt_text: str, blocking: bool = True, timeout: float = 5.0) -> bool:
+def print_receipt(
+    receipt_text: str,
+    *,
+    receipt_sections: list[dict[str, str]] | None = None,
+    blocking: bool = True,
+    timeout: float = 5.0,
+) -> bool:
     """Send `receipt_text` to the configured network printer."""
     if not receipt_text:
         return False
 
     if blocking:
-        return _send_with_escpos(receipt_text, PRINTER_IP, PRINTER_PORT, timeout)
+        return _send_with_escpos(receipt_text, PRINTER_IP, PRINTER_PORT, timeout, receipt_sections)
 
     try:
         thread = threading.Thread(
             target=_send_with_escpos,
-            args=(receipt_text, PRINTER_IP, PRINTER_PORT, timeout),
+            args=(receipt_text, PRINTER_IP, PRINTER_PORT, timeout, receipt_sections),
             daemon=True,
         )
         thread.start()
