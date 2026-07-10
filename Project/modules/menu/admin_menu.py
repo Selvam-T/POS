@@ -1,6 +1,7 @@
 import os
 import csv
 import json
+import sqlite3
 from datetime import datetime
 from pathlib import Path
 from PyQt5 import uic
@@ -16,7 +17,7 @@ from modules.db_operation.products_repo import get_product_list_schema_and_rows
 from modules.db_operation.users_repo import verify_password, update_password, clear_must_change_password
 from modules.ui_utils import ui_feedback
 from modules.menu.screen2_ads_helper import Screen2AdsController
-from config import ASSETS_DIR, MAIN_STATUS_DURATION_MS, PERSISTENT_DURATION_MS, QSS_DIR, STATUS_LABEL_DURATION_MS, UI_DIR
+from config import ASSETS_DIR, DATABASE_FILENAME, DB_PATH, MAIN_STATUS_DURATION_MS, PERSISTENT_DURATION_MS, QSS_DIR, STATUS_LABEL_DURATION_MS, UI_DIR
 
 QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 EYE_OPEN_ICON_PATH = os.path.join(ASSETS_DIR, 'icons', 'eye_open.svg')
@@ -74,6 +75,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             'xlsxExportBtn': (QPushButton, 'xlsxExportBtn'),
             'sqlExportBtn': (QPushButton, 'sqlExportBtn'),
             'csv2ExportBtn': (QPushButton, 'csv2ExportBtn'),
+            'dbExportBtn': (QPushButton, 'dbExportBtn'),
             'exportStatusLabel': (QLabel, 'exportStatusLabel'),
             'exportHeaderLabel2': (QLabel, 'exportHeaderLabel2'),
 
@@ -114,6 +116,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     xlsxExportBtn = widgets['xlsxExportBtn']
     sqlExportBtn = widgets['sqlExportBtn']
     csv2ExportBtn = widgets.get('csv2ExportBtn')
+    dbExportBtn = widgets.get('dbExportBtn')
     exportStatusLabel = widgets['exportStatusLabel']
     exportHeaderLabel2 = widgets.get('exportHeaderLabel2')
     customClose = widgets.get('customClose')
@@ -348,6 +351,9 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     # EXPORT tab wiring (product_list exports only).
     def _exports_dir() -> Path:
         return Path.home() / 'POS_Exports'/ 'Inventory'
+
+    def _db_copy_exports_dir() -> Path:
+        return Path.home() / 'POS_Exports' / 'DB_copy'
         
     def _timestamp_for_filename() -> str:
         # Windows-safe replacement for requested hh:mm format.
@@ -358,6 +364,11 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
 
     def _ensure_exports_folder() -> Path:
         out_dir = _exports_dir()
+        out_dir.mkdir(parents=True, exist_ok=True)
+        return out_dir
+
+    def _ensure_db_copy_exports_folder() -> Path:
+        out_dir = _db_copy_exports_dir()
         out_dir.mkdir(parents=True, exist_ok=True)
         return out_dir
 
@@ -441,6 +452,50 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
         except Exception as e:
             log_error_message(f'admin_menu export Product List CSV failed: {e}')
             _set_export_status('Product List CSV export failed.', ok=False)
+
+    def _export_db_copy() -> None:
+        source_path = Path(DB_PATH)
+        try:
+            # debug
+            #raise RuntimeError('TEST: DB export failure before folder creation')
+            if not source_path.exists():
+                raise FileNotFoundError(f'Database not found: {source_path}')
+            
+            out_dir = _ensure_db_copy_exports_folder()
+            db_name = Path(DATABASE_FILENAME)
+            db_suffix = db_name.suffix or '.db'
+            file_stem = f"{db_name.stem}_{_timestamp_for_filename()}"
+            out_path = out_dir / f"{file_stem}{db_suffix}"
+            duplicate_index = 2
+            while out_path.exists():
+                out_path = out_dir / f"{file_stem}_{duplicate_index}{db_suffix}"
+                duplicate_index += 1
+            tmp_path = out_path.with_suffix(out_path.suffix + '.tmp')
+
+            if tmp_path.exists():
+                tmp_path.unlink()
+
+            source_uri = source_path.resolve().as_uri()
+            source_conn = sqlite3.connect(f'{source_uri}?mode=ro', uri=True)
+            try:
+                dest_conn = sqlite3.connect(str(tmp_path))
+                try:
+                    source_conn.backup(dest_conn)
+                finally:
+                    dest_conn.close()
+            finally:
+                source_conn.close()
+
+            tmp_path.replace(out_path)
+            _set_export_status(f'Database copy exported to {out_dir}', ok=True)
+        except Exception as e:
+            try:
+                if 'tmp_path' in locals() and tmp_path.exists():
+                    tmp_path.unlink()
+            except Exception:
+                pass
+            log_error_message(f'admin_menu export database copy failed: {e}')
+            _set_export_status('Database copy export failed.', ok=False)
 
     def _export_xls() -> None:
         try:
@@ -564,6 +619,8 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
         xlsExportBtn.clicked.connect(_export_xls)
         xlsxExportBtn.clicked.connect(_export_xlsx)
         sqlExportBtn.clicked.connect(_export_sql)
+        if dbExportBtn is not None:
+            dbExportBtn.clicked.connect(_export_db_copy)
         # Wire categories CSV export button if present
         try:
             if csv2ExportBtn is not None:
