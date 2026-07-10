@@ -40,9 +40,9 @@ class KeypadController(QObject):
         if btn_tab is not None:
             btn_tab.clicked.connect(self._on_tab)
 
-        btn_shtab = parent.findChild(QPushButton, "keyFastBtnshftab")
-        if btn_shtab is not None:
-            btn_shtab.clicked.connect(lambda: self._on_tab(reverse=True))
+        btn_rstpay = parent.findChild(QPushButton, "keyFastBtnrstpay")
+        if btn_rstpay is not None:
+            btn_rstpay.clicked.connect(self._on_reset_pay)
 
         btn_clear = parent.findChild(QPushButton, "keyFastBtnclr")
         if btn_clear is not None:
@@ -79,7 +79,7 @@ class KeypadController(QObject):
                     if not name.startswith("keyNumBtn") and not name.startswith("keyDolBtn"):
                         if name not in {
                             "keyFastBtntab",
-                            "keyFastBtnshftab",
+                            "keyFastBtnrstpay",
                             "keyFastBtnclr",
                             "keyFastBtnenter",
                             "keyFastBtnbksp",
@@ -97,7 +97,7 @@ class KeypadController(QObject):
             if not name.startswith("keyNumBtn") and not name.startswith("keyDolBtn"):
                 if name not in {
                     "keyFastBtntab",
-                    "keyFastBtnshftab",
+                    "keyFastBtnrstpay",
                     "keyFastBtnclr",
                     "keyFastBtnenter",
                     "keyFastBtnbksp",
@@ -266,19 +266,40 @@ class KeypadController(QObject):
             except Exception:
                 pass
 
-    def _on_tab(self, reverse: bool = False):
+    def _on_reset_pay(self):
+        try:
+            tender = self.parent.findChild(QLineEdit, "tenderValLineEdit")
+            if tender is None or not tender.isEnabled() or tender.isReadOnly():
+                return
+            tender.clear()
+            tender.setFocus()
+            self._last_target = tender
+        except Exception as exc:
+            try:
+                from modules.ui_utils.error_logger import log_error_message
+                from modules.ui_utils.dialog_utils import report_to_statusbar
+                log_error_message(f"Keypad error (_on_reset_pay): {exc}")
+                try:
+                    mw = self.parent.window()
+                    report_to_statusbar(mw, "Keypad input error", is_error=True, duration=MAIN_STATUS_SHORT_DURATION_MS)
+                except Exception:
+                    pass
+            except Exception:
+                pass
+
+    def _on_tab(self):
         try:
             fw = QApplication.focusWidget()
             if isinstance(fw, QLineEdit) and fw.objectName() == "qtyInput":
                 return
             target = self._get_tab_target()
-            if self._tab_handler is not None and self._tab_handler(target, reverse):
+            if self._tab_handler is not None and self._tab_handler(target):
                 return
             if target is not None:
-                target.focusNextPrevChild(not reverse)
+                target.focusNextPrevChild(True)
             else:
                 try:
-                    self.parent.focusNextPrevChild(not reverse)
+                    self.parent.focusNextPrevChild(True)
                 except Exception:
                     pass
         except Exception as exc:

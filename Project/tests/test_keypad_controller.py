@@ -133,9 +133,6 @@ def test_tab_calls_parent(app):
     controller._on_tab()
     assert panel.last_tab_next is True
 
-    controller._on_tab(reverse=True)
-    assert panel.last_tab_next is False
-
 
 def test_enter_next_focus_callable(app):
     panel, le = _make_panel(app)

@@ -194,7 +194,7 @@ Files and examples:
   - Receipt print `ValueError`, `RuntimeError`, or generic exception logs and
     reports immediate `StatusBar`; `MAIN_STATUS_ERROR_DURATION_MS`.
 - `modules/payment/keypad_controller.py`
-  - Keypad digit/dot/fast-set/backspace/clear/tab/enter exceptions log and
+  - Keypad digit/dot/fast-set/backspace/clear/reset-pay/tab/enter exceptions log and
     report immediate `StatusBar`; `MAIN_STATUS_SHORT_DURATION_MS`.
 - `modules/payment/recovery_receipt.py`
   - Payment-failure receipt print failure logs and reports immediate
@@ -403,4 +403,3 @@ usable.
 - `error_logging_and_fallback.md` mentions ISO-style timestamps in its example,
   but `error_logger.py` currently writes timestamps like
   `01 JUL 2026, 3:04:05 pm`.
-
