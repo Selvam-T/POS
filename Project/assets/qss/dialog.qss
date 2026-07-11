@@ -523,6 +523,12 @@ QTabBar::tab:hover:!selected {
     color: #0062ff; /* Text color change on hover */
 }
 
+QTabBar::tab:disabled {
+    background: #ffffff; /* #d1d5db;*/
+    color: #ffffff; /* #c1c4ca; */
+    border-color: #ffffff; /* #b8bec8; */
+}
+
 QTabBar::tab:focus {
     outline: none;
     border: 2px solid orange;

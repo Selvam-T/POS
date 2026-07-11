@@ -108,7 +108,7 @@ GREETING_SELECTED = 'Thanks for shopping with us!'
 # Keep all environment-dependent toggles here so release readiness is easy to audit.
 
 # Login and access: development can bypass login; production should require login.
-LOGIN_ON = False  # False bypasses login and uses AUTO_LOGIN_* below.
+LOGIN_ON = True  # False bypasses login and uses AUTO_LOGIN_* below.
 AUTO_LOGIN_UID = 1  # User id injected when LOGIN_ON is False.
 AUTO_LOGIN_USERNAME = 'developer'  # Username injected when LOGIN_ON is False.
 AUTO_LOGIN_IS_ADMIN = True  # Grants admin role to the auto-login user.
@@ -126,7 +126,7 @@ ENABLE_PRINTER_PRINT = False  # True sends receipt text to the network printer.
 ENABLE_CASH_DRAWER = False  # True pulses the cash drawer after successful cash payment.
 
 # Customer display launch mode: test mode uses a normal window; production uses target screen.
-CUSTOMER_DISPLAY_ENABLED = True  # False skips creating the customer-facing display.
+CUSTOMER_DISPLAY_ENABLED = False  # False skips creating the customer-facing display.
 CUSTOMER_DISPLAY_TEST_MODE = True  # True opens customer display as a normal test window.
 CUSTOMER_DISPLAY_FULLSCREEN = False  # True makes the customer display fullscreen.
 CUSTOMER_DISPLAY_AUTO_DETECT = True  # Ignored while CUSTOMER_DISPLAY_TEST_MODE is True.
