@@ -93,8 +93,8 @@ def _resolve_cashier_name(cashier_id: object) -> str:
 def _item_line(qty: float, unit: str, unit_price: float, name: str, line_total: float, width: int) -> str:
     left_width = _item_left_width(width)
     item_amount_width = _item_amount_width()
-    # Reserve space for: qty, one space, product name, one space, and unit price column
-    product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 2 + item_amount_width))
+    # Reserve space for: product name, qty, and unit price columns.
+    product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 3 + item_amount_width))
 
     original_unit = unit
 
@@ -117,8 +117,7 @@ def _item_line(qty: float, unit: str, unit_price: float, name: str, line_total: 
     else:
         name_text = raw_name.ljust(product_width)
     price_text = f"{unit_price:.2f}".rjust(item_amount_width)
-    # Single space between qty and name, and between name and unit price
-    left_text = f"{qty_text} {name_text} {price_text}"
+    left_text = f"{name_text}  {qty_text} {price_text}"
     amount_text = f"{line_total:.2f}"
     main_line = f"{left_text}{' ' * config.RECEIPT_GAP}{amount_text.rjust(item_amount_width)}"
 
@@ -127,8 +126,8 @@ def _item_line(qty: float, unit: str, unit_price: float, name: str, line_total: 
 def _item_header(width: int) -> str:
     left_width = _item_left_width(width)
     item_amount_width = _item_amount_width()
-    # Reserve space for unit price column inside the left area so columns fit the receipt width
-    product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 2 + item_amount_width))
+    # Reserve space for qty and unit price columns inside the left area.
+    product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 3 + item_amount_width))
     qty_text = "Qty".ljust(config.RECEIPT_QTY_WIDTH)
     hdr_name = "Product"
     if len(hdr_name) > product_width:
@@ -136,7 +135,7 @@ def _item_header(width: int) -> str:
     else:
         name_text = hdr_name.ljust(product_width)
     price_text = "Price".rjust(item_amount_width)
-    left_text = f"{qty_text} {name_text} {price_text}"
+    left_text = f"{name_text}  {qty_text} {price_text}"
     return f"{left_text}{' ' * config.RECEIPT_GAP}{'Total'.rjust(item_amount_width)}"
 
 
@@ -381,4 +380,3 @@ def generate_receipt_text_from_snapshot(
     )
 
     return "\n".join(lines)
-
