@@ -1010,10 +1010,8 @@ class PaymentPanel(QObject):
 
         try:
             receipt_text = receipt_generator.generate_receipt_text(str(receipt_no))
-            receipt_sections = receipt_generator.generate_receipt_sections(str(receipt_no))
             print_result = print_helper.print_receipt_with_fallback(
                 receipt_text,
-                receipt_sections=receipt_sections,
                 blocking=True,
                 context="Payment",
             )

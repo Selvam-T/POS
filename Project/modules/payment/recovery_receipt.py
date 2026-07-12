@@ -36,17 +36,8 @@ def print_payment_failure_receipt(main_window, payment_split: dict) -> None:
             cashier_name=str(getattr(main_window, 'current_username', '') or ''),
             payable_total=float(payment_split.get('total', 0.0) or 0.0),
         )
-        receipt_sections = receipt_generator.generate_receipt_sections_from_snapshot(
-            items=sales_items,
-            payments=payments,
-            receipt_no="TEMP-DB-FAIL",
-            status="PAID",
-            cashier_name=str(getattr(main_window, 'current_username', '') or ''),
-            payable_total=float(payment_split.get('total', 0.0) or 0.0),
-        )
         print_result = print_helper.print_receipt_with_fallback(
             receipt_text,
-            receipt_sections=receipt_sections,
             blocking=True,
             context="Payment failure recovery",
         )

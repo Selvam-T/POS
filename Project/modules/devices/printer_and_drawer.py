@@ -6,16 +6,21 @@ operations. It replaces the older `printer.py` module name for clarity.
 import threading
 
 from config import PRINTER_IP, PRINTER_PORT
+import config
 from modules.ui_utils.error_logger import log_error_message
 
 
-def _set_receipt_style(printer, style: str) -> None:
-    if style == "company":
-        printer.set(align="left", font="a", width=1, height=2)
-    elif style in ("table", "greeting"):
-        printer.set(align="left", font="b", width=1, height=1)
-    else:
-        printer.set(align="left", font="a", width=1, height=1)
+def _receipt_font() -> str:
+    font = str(getattr(config, "RECEIPT_PRINTER_FONT", "a") or "a").strip().lower()
+    return "b" if font == "b" else "a"
+
+
+def _receipt_scale(name: str, default: int = 1) -> int:
+    try:
+        value = int(getattr(config, name, default))
+    except Exception:
+        value = default
+    return min(8, max(1, value))
 
 
 def _send_text(printer, text: str) -> None:
@@ -24,12 +29,31 @@ def _send_text(printer, text: str) -> None:
         printer.text("\n")
 
 
+def _send_receipt_text(printer, receipt_text: str) -> None:
+    font = _receipt_font()
+    lines = str(receipt_text or "").splitlines()
+    if not lines:
+        return
+
+    printer.set(
+        align="left",
+        font=font,
+        width=_receipt_scale("RECEIPT_COMPANY_NAME_WIDTH", 1),
+        height=_receipt_scale("RECEIPT_COMPANY_NAME_HEIGHT", 2),
+    )
+    _send_text(printer, lines[0])
+
+    remaining = "\n".join(lines[1:])
+    if remaining:
+        printer.set(align="left", font=font, width=1, height=1)
+        _send_text(printer, remaining)
+
+
 def _send_with_escpos(
     receipt_text: str,
     ip: str,
     port: int,
     timeout: float,
-    receipt_sections: list[dict[str, str]] | None = None,
 ) -> bool:
     try:
         from escpos.printer import Network
@@ -43,13 +67,8 @@ def _send_with_escpos(
     p = None
     try:
         p = Network(host=ip, port=port, timeout=timeout)
-        if receipt_sections:
-            for section in receipt_sections:
-                _set_receipt_style(p, str(section.get("style") or "normal"))
-                _send_text(p, str(section.get("text") or ""))
-            _set_receipt_style(p, "normal")
-        else:
-            _send_text(p, receipt_text)
+        _send_receipt_text(p, receipt_text)
+        p.set(align="left", font=_receipt_font(), width=1, height=1)
         p.cut()
         return True
     except Exception as exc:
@@ -69,7 +88,6 @@ def _send_with_escpos(
 def print_receipt(
     receipt_text: str,
     *,
-    receipt_sections: list[dict[str, str]] | None = None,
     blocking: bool = True,
     timeout: float = 5.0,
 ) -> bool:
@@ -78,12 +96,12 @@ def print_receipt(
         return False
 
     if blocking:
-        return _send_with_escpos(receipt_text, PRINTER_IP, PRINTER_PORT, timeout, receipt_sections)
+        return _send_with_escpos(receipt_text, PRINTER_IP, PRINTER_PORT, timeout)
 
     try:
         thread = threading.Thread(
             target=_send_with_escpos,
-            args=(receipt_text, PRINTER_IP, PRINTER_PORT, timeout, receipt_sections),
+            args=(receipt_text, PRINTER_IP, PRINTER_PORT, timeout),
             daemon=True,
         )
         thread.start()

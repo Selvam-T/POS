@@ -312,6 +312,9 @@ RECEIPT_QTY_WIDTH = 9  # Quantity plus unit.
 RECEIPT_AMOUNT_WIDTH = 8  # Summary/payment amounts include "$ ".
 RECEIPT_ITEM_AMOUNT_WIDTH = 7  # Item price/total columns omit "$ ".
 RECEIPT_GAP = 1
+RECEIPT_PRINTER_FONT = 'b'  # ESC/POS receipt font: 'a' or 'b'.
+RECEIPT_COMPANY_NAME_WIDTH = 1  # ESC/POS width scale for the first receipt line.
+RECEIPT_COMPANY_NAME_HEIGHT = 2  # ESC/POS height scale for the first receipt line.
 
 # Lowercase names are retained because qr_generator imports this public API.
 merchant_name = 'Anumani Trading Pte Ltd'

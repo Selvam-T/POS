@@ -10,7 +10,6 @@ from modules.ui_utils.error_logger import log_error_message
 def print_receipt_with_fallback(
     receipt_text: str,
     *,
-    receipt_sections: list[dict[str, str]] | None = None,
     enable_printer: bool = ENABLE_PRINTER_PRINT,
     blocking: bool = True,
     context: str = "Receipt",
@@ -40,7 +39,6 @@ def print_receipt_with_fallback(
 
         printed_ok = device_printer.print_receipt(
             receipt_text,
-            receipt_sections=receipt_sections,
             blocking=blocking,
         )
         if printed_ok:

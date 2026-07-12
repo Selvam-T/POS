@@ -278,73 +278,6 @@ def _append_greeting(lines: List[str], *, status: str, width: int) -> None:
         lines.append(_center_line(current_greeting(), width))
 
 
-def _receipt_sections_from_data(
-    *,
-    receipt_no: str,
-    cashier_name: str,
-    created_text: str,
-    status: str,
-    items: list[dict],
-    payments: list[dict] | None,
-    payable_total: float | None,
-    width: int,
-    qty_key: str,
-    name_key: str,
-    unit_key: str,
-    unit_price_key: str,
-    line_total_key: str,
-    include_greeting: bool = True,
-    extra_blank_before_payment: bool = True,
-) -> list[dict[str, str]]:
-    company_lines = [_center_line(str(getattr(config, "COMPANY_NAME", "")), width)]
-    normal_lines = [
-        _center_line(str(getattr(config, "ADDRESS_LINE_1", "")), width),
-        _center_line(str(getattr(config, "ADDRESS_LINE_2", "")), width),
-        "",
-    ]
-    _append_receipt_info(
-        normal_lines,
-        receipt_no=receipt_no,
-        cashier_name=cashier_name,
-        created_text=created_text,
-        width=width,
-    )
-
-    table_lines, summary_lines, calculated_total = _items_table_sections(
-        items=items,
-        width=width,
-        qty_key=qty_key,
-        name_key=name_key,
-        unit_key=unit_key,
-        unit_price_key=unit_price_key,
-        line_total_key=line_total_key,
-        payable_total=payable_total,
-    )
-
-    payment_lines: list[str] = [""] if extra_blank_before_payment else []
-    _append_payment_breakdown(
-        payment_lines,
-        status=status,
-        payments=payments,
-        payable_total=calculated_total,
-        width=width,
-    )
-
-    sections = [
-        {"style": "company", "text": "\n".join(company_lines)},
-        {"style": "normal", "text": "\n".join(normal_lines)},
-        {"style": "table", "text": "\n".join(table_lines)},
-        {"style": "summary", "text": "\n".join(summary_lines + payment_lines)},
-    ]
-
-    if include_greeting:
-        greeting_lines: list[str] = []
-        _append_greeting(greeting_lines, status=status, width=width)
-        if greeting_lines:
-            sections.append({"style": "greeting", "text": "\n".join(greeting_lines)})
-    return sections
-
-
 def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_WIDTH) -> str:
     try:
         header = receipt_repo.get_receipt_header_by_no(receipt_no)
@@ -403,43 +336,6 @@ def generate_receipt_text(receipt_no: str, width: int = config.RECEIPT_DEFAULT_W
     return "\n".join(lines)
 
 
-def generate_receipt_sections(receipt_no: str, width: int = config.RECEIPT_DEFAULT_WIDTH) -> list[dict[str, str]]:
-    try:
-        header = receipt_repo.get_receipt_header_by_no(receipt_no)
-        if not header:
-            raise ValueError(f"Receipt not found: {receipt_no}")
-
-        receipt_id = header.get("receipt_id")
-        created_at_raw = str(header.get("created_at") or "")
-        created_at = _format_datetime(created_at_raw)
-        status = str(header.get("status") or "")
-        cashier_name = _resolve_cashier_name(header.get("cashier_id"))
-        header_total = float(header.get("grand_total") or 0.0)
-
-        items = receipt_repo.list_receipt_items_by_no(receipt_no, receipt_id=receipt_id)
-        payments = receipt_repo.list_receipt_payments_by_no(receipt_no, receipt_id=receipt_id)
-    except ValueError:
-        raise
-    except Exception as exc:
-        raise RuntimeError("Receipt data unavailable.") from exc
-
-    return _receipt_sections_from_data(
-        receipt_no=receipt_no,
-        cashier_name=cashier_name,
-        created_text=created_at,
-        status=status,
-        items=items,
-        payments=payments,
-        payable_total=header_total if header_total > 0 else None,
-        width=width,
-        qty_key="qty",
-        name_key="product_name",
-        unit_key="unit",
-        unit_price_key="unit_price",
-        line_total_key="line_total",
-    )
-
-
 def generate_receipt_text_from_snapshot(
     *,
     items: list[dict],
@@ -486,33 +382,3 @@ def generate_receipt_text_from_snapshot(
 
     return "\n".join(lines)
 
-
-def generate_receipt_sections_from_snapshot(
-    *,
-    items: list[dict],
-    payments: list[dict] | None = None,
-    receipt_no: str = "TEMP",
-    status: str = "UNPAID",
-    created_at: str | None = None,
-    cashier_name: str = "",
-    payable_total: float | None = None,
-    width: int = config.RECEIPT_DEFAULT_WIDTH,
-) -> list[dict[str, str]]:
-    created_text = _format_datetime(created_at) if created_at else _format_datetime(datetime.now().isoformat())
-    return _receipt_sections_from_data(
-        receipt_no=receipt_no,
-        cashier_name=cashier_name,
-        created_text=created_text,
-        status=status,
-        items=items,
-        payments=payments,
-        payable_total=payable_total,
-        width=width,
-        qty_key="quantity",
-        name_key="name",
-        unit_key="unit",
-        unit_price_key="unit_price",
-        line_total_key="line_total",
-        include_greeting=False,
-        extra_blank_before_payment=False,
-    )
