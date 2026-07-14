@@ -126,7 +126,7 @@ ENABLE_PRINTER_PRINT = False  # True sends receipt text to the network printer.
 ENABLE_CASH_DRAWER = False  # True pulses the cash drawer after successful cash payment.
 
 # Customer display launch mode: test mode uses a normal window; production uses target screen.
-CUSTOMER_DISPLAY_ENABLED = False  # False skips creating the customer-facing display.
+CUSTOMER_DISPLAY_ENABLED = True  # False skips creating the customer-facing display.
 CUSTOMER_DISPLAY_TEST_MODE = True  # True opens customer display as a normal test window.
 CUSTOMER_DISPLAY_FULLSCREEN = False  # True makes the customer display fullscreen.
 CUSTOMER_DISPLAY_AUTO_DETECT = True  # Ignored while CUSTOMER_DISPLAY_TEST_MODE is True.
@@ -366,3 +366,7 @@ CUSTOMER_DISPLAY_IDLE_AD_INTERVAL = 6
 
 CUSTOMER_DISPLAY_DATE_FMT = '%#d %b %Y'
 CUSTOMER_DISPLAY_TIME_FMT = TIME_FMT
+
+# Static QR image option for Screen 2; False keeps generated PayNow QR rendering.
+CUSTOMER_DISPLAY_USE_STATIC_QR_IMAGE = True
+CUSTOMER_DISPLAY_QR_IMAGE_FILENAME = 'eposQR.png'

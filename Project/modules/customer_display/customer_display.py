@@ -30,12 +30,15 @@ from modules.date_time.formatters import format_date, format_time
 from modules.ui_utils.greeting_state import current_greeting
 from modules.ui_utils.money_format import format_currency, money_value
 from config import (
+    ASSETS_DIR,
     COMPANY_NAME,
     CUSTOMER_DISPLAY_AUTO_DETECT,
     CUSTOMER_DISPLAY_ENABLED,
     CUSTOMER_DISPLAY_FULLSCREEN,
     CUSTOMER_DISPLAY_IDLE_TIMEOUT,
     CUSTOMER_DISPLAY_IDLE_AD_INTERVAL,
+    CUSTOMER_DISPLAY_QR_IMAGE_FILENAME,
+    CUSTOMER_DISPLAY_USE_STATIC_QR_IMAGE,
     CUSTOMER_DISPLAY_TEST_MODE,
     CUSTOMER_DISPLAY_DATE_FMT,
     CUSTOMER_DISPLAY_TIME_FMT,
@@ -670,11 +673,34 @@ class CustomerDisplayWindow(QDialog):
         self._qr_label.setPixmap(scaled)
         self._qr_label.setText("")
 
+    def _load_static_qr_pixmap(self) -> QPixmap | None:
+        image_path = os.path.join(ASSETS_DIR, 'images', CUSTOMER_DISPLAY_QR_IMAGE_FILENAME)
+        if not os.path.exists(image_path):
+            self._safe_log(f"CustomerDisplay: static QR image missing: {image_path}")
+            return None
+
+        pixmap = QPixmap(image_path)
+        if pixmap.isNull():
+            self._safe_log(f"CustomerDisplay: static QR image could not be loaded: {image_path}")
+            return None
+
+        return pixmap
+
     def generate_and_set_qr(self, ref: str | None = None, size: int | None = None) -> None:
         """Generate a QR pixmap via `modules.payment.qr_generator` and set it.
 
         If the generator is unavailable, falls back to clearing the label.
         """
+        if CUSTOMER_DISPLAY_USE_STATIC_QR_IMAGE:
+            pix = self._load_static_qr_pixmap()
+            if pix is not None:
+                target_size = size or self._apply_qr_label_size()
+                self._qr_pixmap = pix
+                self._qr_ref = ref
+                self._qr_target_size = target_size
+                self.set_qr_image(pix)
+                return
+
         if qr_generator is None:
             try:
                 self._qr_label.setText("QR CODE")

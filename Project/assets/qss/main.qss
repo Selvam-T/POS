@@ -450,16 +450,16 @@ QPushButton#keyTodoBtn:focus {
   color: white;
 }
 
-/* Reset Pay */
+/* Cash paid clear */
 *[objectName*="keyFastBtnrstpay"] {
-    background-color: #66BB6A;
-    color: yellow;
+    background-color: #78d165;
+    color: navy;
 }
 
 /* $10 $50 $100 */
 *[objectName*="keyDolBtn"] {
     background-color: #7e4f79;
-  color: white;
+    color: white;
 }
 
 /* Keypad operation buttons. */

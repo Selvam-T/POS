@@ -3,6 +3,7 @@ import csv
 import json
 import sqlite3
 from datetime import datetime
+from math import gcd
 from pathlib import Path
 from PyQt5 import uic
 from PyQt5.QtCore import Qt, QObject, QEvent
@@ -17,7 +18,20 @@ from modules.db_operation.products_repo import get_product_list_schema_and_rows
 from modules.db_operation.users_repo import verify_password, update_password, clear_must_change_password
 from modules.ui_utils import ui_feedback
 from modules.menu.screen2_ads_helper import Screen2AdsController
-from config import ASSETS_DIR, DATABASE_FILENAME, DB_PATH, MAIN_STATUS_DURATION_MS, PERSISTENT_DURATION_MS, QSS_DIR, STATUS_LABEL_DURATION_MS, UI_DIR
+from config import (
+    ALLOWED_EXTS,
+    ASSETS_DIR,
+    DATABASE_FILENAME,
+    DB_PATH,
+    MAIN_STATUS_DURATION_MS,
+    MAX_ADS,
+    PERSISTENT_DURATION_MS,
+    QSS_DIR,
+    REQ_HEIGHT,
+    REQ_WIDTH,
+    STATUS_LABEL_DURATION_MS,
+    UI_DIR,
+)
 
 QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 EYE_OPEN_ICON_PATH = os.path.join(ASSETS_DIR, 'icons', 'eye_open.svg')
@@ -62,6 +76,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             'btnStaffCancel': (QPushButton, 'btnStaffCancel'),
             'screen2List': (QListWidget, 'screen2ListWidget'),
             'screen2Preview': (QLabel, 'screen2PreviewLabel'),
+            'screen2Rules': (QLabel, 'screen2RulesLabel'),
             'screen2Count': (QLabel, 'screen2CountLabel'),
             'screen2Status': (QLabel, 'screen2StatusLabel'),
             'screen2Add': (QPushButton, 'addScreen2Btn'),
@@ -105,6 +120,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     btnStaffCancel = widgets['btnStaffCancel']
     screen2List = widgets['screen2List']
     screen2Preview = widgets['screen2Preview']
+    screen2Rules = widgets['screen2Rules']
     screen2Count = widgets['screen2Count']
     screen2Status = widgets['screen2Status']
     screen2Add = widgets['screen2Add']
@@ -120,6 +136,17 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     exportStatusLabel = widgets['exportStatusLabel']
     exportHeaderLabel2 = widgets.get('exportHeaderLabel2')
     customClose = widgets.get('customClose')
+
+    preferred_exts = ['.jpg', '.jpeg', '.png']
+    normalized_exts = {ext.lower() for ext in ALLOWED_EXTS}
+    ordered_exts = [ext for ext in preferred_exts if ext in normalized_exts]
+    ordered_exts.extend(sorted(ext for ext in normalized_exts if ext not in ordered_exts))
+    allowed_exts = ', '.join(ext.lstrip('.').upper() for ext in ordered_exts)
+    ratio_divisor = gcd(REQ_WIDTH, REQ_HEIGHT)
+    ratio_text = f"{REQ_WIDTH // ratio_divisor} : {REQ_HEIGHT // ratio_divisor}"
+    screen2Rules.setText(
+        f"Allowed:  {allowed_exts}  |  Max: {MAX_ADS} images  |  Standard size: {REQ_WIDTH} x {REQ_HEIGHT} ({ratio_text})"
+    )
 
     # Titlebar close
     if customClose is not None:
