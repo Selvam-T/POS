@@ -523,6 +523,12 @@ QTabBar::tab:hover:!selected {
     color: #0062ff; /* Text color change on hover */
 }
 
+QTabBar::tab:disabled {
+    background: #ffffff; /* #d1d5db;*/
+    color: #ffffff; /* #c1c4ca; */
+    border-color: #ffffff; /* #b8bec8; */
+}
+
 QTabBar::tab:focus {
     outline: none;
     border: 2px solid orange;
@@ -674,7 +680,7 @@ QFrame[objectName*="ExportFrame"] {
 
 QFrame#csvExportFrame,
 QFrame#csv2ExportFrame {
-    background-color: #eb81d9;  
+    background-color: #9fd6bb;  
 }
 
 QFrame#xlsExportFrame,
@@ -690,6 +696,10 @@ QFrame#xlsx2ExportFrame {
 QFrame#sqlExportFrame,
 QFrame#sql2ExportFrame {
     background-color: #818deb;  
+}
+
+QFrame#dbExportFrame {
+    background-color: #ed94de;
 }
 
 QLabel[objectName*="ExportLabel"] {
@@ -735,6 +745,21 @@ QPushButton[objectName*="2ExportBtn"]:hover {
 QPushButton[objectName*="2ExportBtn"]:pressed {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
                                         stop:0 #1eedbd, stop:1 #56edbd);
+}
+
+QPushButton#dbExportBtn {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+                                        stop:0 #ccefe0, stop:1 #8ed8ba);
+}
+
+QPushButton#dbExportBtn:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+                                        stop:0 #b6ead5, stop:1 #70cfa8);
+}
+
+QPushButton#dbExportBtn:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+                                        stop:0 #79d9b2, stop:1 #45bd8d);
 }
 
 /* Tab navigation focus */

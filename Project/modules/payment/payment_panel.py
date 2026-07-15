@@ -334,7 +334,7 @@ class PaymentPanel(QObject):
             except Exception:
                 pass
 
-    def _handle_keypad_tab(self, target, reverse: bool = False) -> bool:
+    def _handle_keypad_tab(self, target) -> bool:
         ordered = self._keypad_tab_order()
         if not ordered:
             return False
@@ -345,8 +345,7 @@ class PaymentPanel(QObject):
             return True
 
         idx = ordered.index(cur)
-        step = -1 if reverse else 1
-        next_idx = (idx + step) % len(ordered)
+        next_idx = (idx + 1) % len(ordered)
         ordered[next_idx].setFocus()
         return True
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>650</height>
+    <height>730</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>650</height>
+    <height>730</height>
    </size>
   </property>
   <layout class="QVBoxLayout" name="mainVerticalLayout">
@@ -1039,6 +1039,84 @@
            <number>20</number>
           </property>
           <item>
+           <widget class="QFrame" name="csv2ExportFrame">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>42</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::NoFrame</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Plain</enum>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_exportCsv2Frame" stretch="1,3">
+             <property name="spacing">
+              <number>10</number>
+             </property>
+             <property name="leftMargin">
+              <number>0</number>
+             </property>
+             <property name="topMargin">
+              <number>0</number>
+             </property>
+             <property name="rightMargin">
+              <number>0</number>
+             </property>
+             <property name="bottomMargin">
+              <number>0</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="csv2ExportLabel">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>CSV</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="csv2ExportBtn">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>Category List</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer_18">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
            <widget class="QFrame" name="csvExportFrame">
             <property name="minimumSize">
              <size>
@@ -1287,7 +1365,7 @@
            </widget>
           </item>
           <item>
-           <spacer name="verticalSpacer_18">
+           <spacer name="verticalSpacer_dbExport">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
             </property>
@@ -1303,7 +1381,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QFrame" name="csv2ExportFrame">
+           <widget class="QFrame" name="dbExportFrame">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -1316,7 +1394,7 @@
             <property name="frameShadow">
              <enum>QFrame::Plain</enum>
             </property>
-            <layout class="QHBoxLayout" name="horizontalLayout_exportCsv2Frame" stretch="1,3">
+            <layout class="QHBoxLayout" name="horizontalLayout_exportDbFrame" stretch="1,3">
              <property name="spacing">
               <number>10</number>
              </property>
@@ -1333,7 +1411,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QLabel" name="csv2ExportLabel">
+              <widget class="QLabel" name="dbExportLabel">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -1341,7 +1419,7 @@
                 </size>
                </property>
                <property name="text">
-                <string>CSV</string>
+                <string>DB</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -1349,7 +1427,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="csv2ExportBtn">
+              <widget class="QPushButton" name="dbExportBtn">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -1357,7 +1435,7 @@
                 </size>
                </property>
                <property name="text">
-                <string>Category List</string>
+                <string>Database Copy</string>
                </property>
               </widget>
              </item>
@@ -1430,11 +1508,12 @@
   <tabstop>upScreen2Btn</tabstop>
   <tabstop>downScreen2Btn</tabstop>
   <tabstop>screen2ListWidget</tabstop>
+  <tabstop>csv2ExportBtn</tabstop>
   <tabstop>csvExportBtn</tabstop>
   <tabstop>xlsExportBtn</tabstop>
   <tabstop>xlsxExportBtn</tabstop>
   <tabstop>sqlExportBtn</tabstop>
-  <tabstop>csv2ExportBtn</tabstop>
+  <tabstop>dbExportBtn</tabstop>
   <tabstop>customCloseBtn</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>

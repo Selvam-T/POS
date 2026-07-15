@@ -124,23 +124,27 @@ Implementation note: validators live in `modules/menu/screen2_ads_helper.py` and
 
 ## EXPORT Tab
 
-The EXPORT tab allows exporting the application's `Product_list` table in four formats:
+The EXPORT tab allows exporting the application's `Product_list` table in four formats, plus a timestamped SQLite database copy:
 
 - CSV (`.csv`) - simple comma-separated values file.
 - XLS (`.xls`) - legacy Excel workbook (requires the `xlwt` package).
 - XLSX (`.xlsx`) - modern Excel workbook (requires the `openpyxl` package).
 - SQL (`.sql`) - SQL file containing the `CREATE TABLE` statement and `INSERT` statements for every row.
+- DB copy (`.db`) - SQLite backup copy of the configured application database.
 
 Behaviour and wiring:
-- Buttons wired in controller: `csvExportBtn`, `xlsExportBtn`, `xlsxExportBtn`, `sqlExportBtn` (see `modules/menu/admin_menu.py`).
-- Exports are written under the user's home folder at `POS_Exports/Inventory`.
+- Buttons wired in controller: `csvExportBtn`, `xlsExportBtn`, `xlsxExportBtn`, `sqlExportBtn`, `csv2ExportBtn`, `dbExportBtn` (see `modules/menu/admin_menu.py`).
+- Product/category exports are written under the user's home folder at `POS_Exports/Inventory`.
+- Database copies are written under the user's home folder at `POS_Exports/DB_copy`.
 - Filenames follow the pattern: `Product_List_{kind}_ddmmmyyyy_hh-mm.ext` (the timestamp is Windows-safe).
+- Database copy filenames follow the pattern: `{database_stem}_ddmmmyyyy_hh-mm.db`, for example `Anumani_10jul2026_14-05.db`. If the same timestamp already exists, a numeric suffix is added.
 - After a successful export the UI shows a concise status message in `exportStatusLabel` naming the file type and export directory.
 
 Notes:
 - The XLS export uses `xlwt`. The project `requirements.txt` lists `xlwt>=1.3.0`. Legacy XLS worksheets are limited to 65,536 rows (including the header) and 256 columns; the controller checks both limits before saving.
 - The XLSX export uses `openpyxl`. If `openpyxl` is not installed the controller will report an error and the XLSX export will fail; install via `pip install openpyxl` or include it in your environment requirements. The project `requirements.txt` already lists `openpyxl>=3.1`.
 - Exports are generated from a `SELECT * FROM Product_list ORDER BY name COLLATE NOCASE` query; ensure the `Product_list` table exists and the DB path is correct.
+- Database copies are created through SQLite's backup API, so the exported `.db` is a consistent standalone database snapshot that can be restored manually when the POS application is closed.
 
 ## Known Limits / Assumptions
 

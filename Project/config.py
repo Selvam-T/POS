@@ -108,7 +108,7 @@ GREETING_SELECTED = 'Thanks for shopping with us!'
 # Keep all environment-dependent toggles here so release readiness is easy to audit.
 
 # Login and access: development can bypass login; production should require login.
-LOGIN_ON = False  # False bypasses login and uses AUTO_LOGIN_* below.
+LOGIN_ON = True  # False bypasses login and uses AUTO_LOGIN_* below.
 AUTO_LOGIN_UID = 1  # User id injected when LOGIN_ON is False.
 AUTO_LOGIN_USERNAME = 'developer'  # Username injected when LOGIN_ON is False.
 AUTO_LOGIN_IS_ADMIN = True  # Grants admin role to the auto-login user.
@@ -147,7 +147,7 @@ DIALOG_RATIOS = {
     'vegetable_entry': (0.5, 0.9),
     'manual_entry': (0.4, 0.3),
     'logout_menu': (0.25, 0.25),
-    'admin_menu': (0.45, 0.4),
+    'admin_menu': (0.45, 0.5),
     'receipt_menu': (0.75, 0.9),
     'report_menu': (0.45, 0.6),
     'greeting_menu': (0.3, 0.3),
@@ -369,3 +369,7 @@ CUSTOMER_DISPLAY_IDLE_AD_INTERVAL = 6
 
 CUSTOMER_DISPLAY_DATE_FMT = '%#d %b %Y'
 CUSTOMER_DISPLAY_TIME_FMT = TIME_FMT
+
+# Static QR image option for Screen 2; False keeps generated PayNow QR rendering.
+CUSTOMER_DISPLAY_USE_STATIC_QR_IMAGE = True
+CUSTOMER_DISPLAY_QR_IMAGE_FILENAME = 'eposQR.png'

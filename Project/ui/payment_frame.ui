@@ -567,13 +567,12 @@ RECEIPT</string>
          </widget>
         </item>
         <item row="1" column="4">
-         <widget class="QPushButton" name="keyFastBtnshftab">
+         <widget class="QPushButton" name="keyFastBtntab">
           <property name="focusPolicy">
            <enum>Qt::NoFocus</enum>
           </property>
           <property name="text">
-           <string>SHIFT
-TAB</string>
+           <string>TAB</string>
           </property>
          </widget>
         </item>
@@ -718,12 +717,13 @@ TAB</string>
          </widget>
         </item>
         <item row="0" column="4">
-         <widget class="QPushButton" name="keyFastBtntab">
+         <widget class="QPushButton" name="keyFastBtnrstpay">
           <property name="focusPolicy">
            <enum>Qt::NoFocus</enum>
           </property>
           <property name="text">
-           <string>TAB</string>
+           <string>TENDER
+CLEAR</string>
           </property>
          </widget>
         </item>
