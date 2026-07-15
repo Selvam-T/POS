@@ -722,8 +722,8 @@ RECEIPT</string>
            <enum>Qt::NoFocus</enum>
           </property>
           <property name="text">
-           <string>PAID
-ZERO</string>
+           <string>TENDER
+CLEAR</string>
           </property>
          </widget>
         </item>

@@ -75,6 +75,9 @@ These flags are grouped together in `config.py` so development and production be
   - `CUSTOMER_DISPLAY_TEST_MODE`: Opens the customer display as a normal test window.
   - `CUSTOMER_DISPLAY_FULLSCREEN`: Uses fullscreen customer display.
   - `CUSTOMER_DISPLAY_AUTO_DETECT`: Enables target-screen auto-detection when test mode is off.
+- Customer display QR rendering:
+  - `CUSTOMER_DISPLAY_USE_STATIC_QR_IMAGE`: Uses a QR image from `assets/images` when enabled; otherwise uses generated PayNow QR rendering.
+  - `CUSTOMER_DISPLAY_QR_IMAGE_FILENAME`: Static QR image file name, for example `eposQR.png`. If the file is missing or invalid, the app logs the issue and falls back to generated QR rendering.
 
 ## Scanner Timing
 - `SCANNER_KEY_INTERVAL_SECONDS`: Shared scanner/manual inter-key threshold used by `scanner.py`.

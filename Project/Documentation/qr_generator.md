@@ -15,7 +15,15 @@ Key points
 
 Usage in `customer_display`
 ---------------------------
-Call `generate_and_set_qr(ref=None, size=250)` on the `CustomerDisplayWindow` instance to generate and place the QR into `screen2QrLabel`.
+Call `generate_and_set_qr(ref=None, size=250)` on the `CustomerDisplayWindow` instance to place the QR into `screen2QrLabel`.
+
+By default, Screen 2 uses generated QR rendering. If
+`CUSTOMER_DISPLAY_USE_STATIC_QR_IMAGE` is enabled in `config.py`,
+`CustomerDisplayWindow` first tries to load
+`assets/images/<CUSTOMER_DISPLAY_QR_IMAGE_FILENAME>` and display that image
+instead. If the configured static image is missing or cannot be loaded, the
+missing/invalid file is logged and the existing generated QR path is used as
+the fallback.
 
 Implementation notes
 --------------------

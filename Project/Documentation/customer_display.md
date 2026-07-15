@@ -23,11 +23,16 @@ Configured in `config.py`:
 - `CUSTOMER_DISPLAY_FULLSCREEN`
 - `CUSTOMER_DISPLAY_AUTO_DETECT`
 - `CUSTOMER_DISPLAY_IDLE_TIMEOUT`
+- `CUSTOMER_DISPLAY_USE_STATIC_QR_IMAGE`
+- `CUSTOMER_DISPLAY_QR_IMAGE_FILENAME`
 
 Notes:
 - Test mode shows the display on the main monitor as a normal window.
 - Physical mode places the display on the configured screen index only
   when it exists.
+- Static QR mode loads the configured image from `assets/images`; if the file
+  is missing or invalid, the display logs the issue and falls back to generated
+  QR rendering.
 
 ## Module
 
@@ -40,7 +45,8 @@ Responsibilities:
 - Render the sales table and total.
 - Format displayed currency through `modules/ui_utils/money_format.format_currency(...)`
   as `$ 1,234.56`.
-- Render the generic PayNow QR label at fixed 250 x 250 during active sales.
+- Render either a configured static QR image or the generated generic PayNow QR
+  during active sales.
 - Handle screen placement and connect/disconnect events.
 - Avoid stealing focus from the cashier screen.
 - Keep the sales table auto-scrolled with scrollbar hidden.
@@ -50,18 +56,20 @@ Responsibilities:
 The screen uses `ui/screen2.ui` with two main regions:
 - Left panel: `screen2LeftFrame` and `screen2SalesTable`.
 - Right panel: `screen2RightFrame` and `screen2AdDisplayStack`.
-  - `screen2QrLabel`: a `QLabel` (250x250) placed on the `pagePayment` view. The generated generic PayNow QR `QPixmap` is set here by `CustomerDisplayWindow.generate_and_set_qr()`.
+  - `screen2QrLabel`: a `QLabel` placed on the `pagePayment` view. The QR
+    pixmap is set here by `CustomerDisplayWindow.generate_and_set_qr()`.
 ### Right Panel State Page
 
 The right panel `screen2AdDisplayStack` contains one active-sale page:
-- index 0: `pagePayment` - displays payment information and the generic PayNow QR code
+- index 0: `pagePayment` - displays payment information and the configured QR
+  code
 
 Note: `pageCompleted` has been removed. Payment results now display via
 `paymentResultOverlay` (full-screen overlay with semi-transparent background).
 
 Current behavior: when the sales table has rows, `pageSplit` is active and the
-right panel defaults to `pagePayment` so the customer can scan the generic
-PayNow QR early.
+right panel defaults to `pagePayment` so the customer can scan the configured
+QR early.
 
 The UI `screen2AdDisplayStack` defaults to index `0` (`pagePayment`) in
 `ui/screen2.ui`. `CustomerDisplayWindow` also defensively initializes both
@@ -130,6 +138,14 @@ Fallback intentionally omits:
 - New config key: `CUSTOMER_DISPLAY_IDLE_AD_INTERVAL` (seconds) controls the
   rotation interval for fullscreen idle ads. See `config.py` under the
   Customer Display settings section.
+- `CUSTOMER_DISPLAY_USE_STATIC_QR_IMAGE`: when `False`, Screen 2 uses the
+  generated generic PayNow QR. When `True`, Screen 2 first tries to load the
+  static image configured by `CUSTOMER_DISPLAY_QR_IMAGE_FILENAME`.
+- `CUSTOMER_DISPLAY_QR_IMAGE_FILENAME`: file name under `assets/images` for
+  static QR mode, for example `eposQR.png` or `eposQR.jpeg`.
+- Static QR fallback: if the configured image is missing or cannot be loaded,
+  `CustomerDisplayWindow` logs the file problem and displays the generated QR
+  instead.
 
 ## Data Flow
 
