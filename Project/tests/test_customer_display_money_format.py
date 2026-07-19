@@ -23,6 +23,10 @@ def test_customer_display_item_and_total_currency_format():
     assert amount_item.data(Qt.UserRole) == 1234.5
     assert display._total_label.text() == "$ 1,234.50"
     assert display._total_label.property("numeric_value") == 1234.5
+    assert display._total_title_label.text() == "Total Payable :"
+
+    display.set_total(1234.5, rounding_applied=True)
+    assert display._total_title_label.text() == "Total Payable (round) :"
 
     display.close()
 

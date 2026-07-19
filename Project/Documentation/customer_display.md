@@ -157,7 +157,20 @@ It accepts clean transaction data from the main window via:
 Payload shape:
 - `state`: `idle | payment` (active sale defaults to `payment`)
 - `items`: list of {quantity, description, amount, unit}
-- `total`: float or numeric string
+- `total`: the rounded payable total from the sales table
+
+`MainCustomerDisplayController` builds item rows from `get_sales_data()` so
+quantities and individual line amounts remain available to Screen 2. It does
+not independently sum those rows for the payable total. Instead, it reads the
+sales table's authoritative `_current_total` through the existing
+`get_total(sales_table)` helper. This is the same nearest-$0.10 rounded value
+emitted through `saleTotalChanged` and consumed by the payment panel. For
+example, item rows may total `$ 1.58`, while `screen2ValueLabel`, sales-frame
+`totalValue`, and payment-frame `totalValPayLabel` all show `$ 1.60`.
+The accompanying `screen2TotalLabel` reads `Total Payable (round) :` only when
+the payable total differs from the subtotal. When no rounding adjustment is
+applied, it reads `Total Payable :`. This mirrors the conditional wording used
+on receipts.
 
 Currency display is output-only: item amounts, sale total, and payment-result
 total are formatted for customers while retaining numeric metadata on the
@@ -222,8 +235,8 @@ methods (`_init_customer_display` and `_update_customer_display_from_sales`) and
 delegates their implementation to this controller.
 
 Update hooks:
-- Sales total updates -> Payment state (updated items/total).
-- Hold receipt loaded -> Payment state (updated items/total).
+- Sales total updates -> Payment state (updated items and authoritative rounded payable total).
+- Hold receipt loaded -> Payment state (updated items and authoritative rounded payable total).
 - Payment requested -> `show_payment_result(total=...)` + overlay display (triggered immediately on PAY click).
 - Item entry (vegetable/manual) -> `hide_payment_result_overlay()`.
 - Cart cleared -> Idle state.

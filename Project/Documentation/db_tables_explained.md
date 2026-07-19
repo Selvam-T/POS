@@ -36,6 +36,7 @@ Note on category edits and snapshot model:
 ### 3. Receipt_payments Table
 The **receipt_payments** table is designed to handle the complexities of payment processing, particularly when multiple methods are used.
 - **Multi-Type Support:** Allows a single receipt to be paid using various types, including CASH, NETS, PAYNOW, or OTHER.
+- **Internal vs Display Name:** `OTHER` is intentionally stored for the payment option currently shown to cashiers as `VOUCHER`. The database value remains generic so the visible option can be renamed later without changing historical payment rows or migrating the table. Receipts and reports translate `OTHER` to `VOUCHER` only when presenting the method to users. A blank or missing method is presented as `UNKNOWN`; it must not be interpreted as a voucher.
 - **Structure:** Each entry records the receipt_id, the specific payment_type, the tendered amount, and the amount allocated to that type.
 - **Tendered vs Amount:** For CASH, `tendered` is the amount handed over by the customer and `amount` is the portion applied to the receipt total. Change due is `tendered - amount`. For non-cash types (NETS, PAYNOW, OTHER), `tendered` equals `amount`.
 - **Logic:** This table is only populated when a payment is actually processed; for "Hold Sales" (UNPAID status), no entries are made in this table until the customer returns to pay.

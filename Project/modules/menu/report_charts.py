@@ -10,7 +10,7 @@ from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtWidgets import QApplication, QDialog, QFrame, QGridLayout, QLabel, QScrollArea, QSizePolicy, QVBoxLayout, QWidget
 
 from modules.date_time.formatters import format_report_timestamp
-from modules.menu.report_viewers import _to_ampm_hour_label
+from modules.menu.report_viewers import _display_payment_method, _to_ampm_hour_label
 from modules.ui_utils.money_format import format_currency, money_value
 
 
@@ -238,9 +238,7 @@ class _PaymentHistogramChart(_BaseChartWidget):
         # normalize labels and amounts and sort by descending amount for histogram
         normalized: List[Dict[str, Any]] = []
         for row in rows:
-            label = str(row.get('method') or 'VOUCHER').upper()
-            if label in {'OTHER', ''}:
-                label = 'VOUCHER'
+            label = _display_payment_method(row.get('method'))
             normalized.append({'method': label, 'amount': _to_float(row.get('amount'))})
         self._rows = sorted(normalized, key=lambda r: r['amount'], reverse=True)
 

@@ -304,7 +304,10 @@ def _detail_workbook_data(report_data: dict) -> dict[str, list[list[Any]] | list
         ('Net After Outflows', sales.get('net_after_outflows') or 0),
     ]
 
-    payment_rows = [[row.get('method') or '', row.get('amount') or 0] for row in payments]
+    payment_rows = [
+        [report_viewers._display_payment_method(row.get('method')), row.get('amount') or 0]
+        for row in payments
+    ]
 
     category_rows: list[list[Any]] = []
     if include_breakdowns:

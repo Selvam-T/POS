@@ -61,6 +61,14 @@ def _to_float(value) -> float:
     return money_value(value)
 
 
+def _display_payment_method(value: Any) -> str:
+    """Return the user-facing label for a stored payment method."""
+    method = str(value or '').strip().upper()
+    if method == 'OTHER':
+        return 'VOUCHER'
+    return method or 'UNKNOWN'
+
+
 def _to_ampm_hour_label(hour_slot: Any) -> str:
     """Convert an hour range like '09:00 - 10:00' to AM/PM format."""
     text = str(hour_slot or '').strip()
@@ -258,7 +266,8 @@ def _format_detailed_report_text(report: dict) -> tuple[str, set[str], set[str],
         table_header_lines.add(pay_header)
 
         for row in payments:
-            lines.append(f"{str(row.get('method') or '').upper():<24} : {_fmt_money(row.get('amount')):>12}")
+            method = _display_payment_method(row.get('method'))
+            lines.append(f"{method:<24} : {_fmt_money(row.get('amount')):>12}")
         payment_total = sum(_to_float(row.get('amount')) for row in payments)
     else:
         lines.append('No payment rows.')

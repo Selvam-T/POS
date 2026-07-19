@@ -74,7 +74,7 @@ APP_VERSION = '1.0.0'
 # Business identity and localization
 # -----------------------------------------------------------------------------
 
-COMPANY_NAME = 'Anumani Trading Pte Ltd'
+COMPANY_NAME = 'ANUMANI TRADING PTE LTD'
 ADDRESS_LINE_1 = 'BLK 77 INDUS RD, #01-501'
 ADDRESS_LINE_2 = 'INDUS GARDEN SINGAPORE'
 
@@ -108,9 +108,9 @@ GREETING_SELECTED = 'Thanks for shopping with us!'
 # Keep all environment-dependent toggles here so release readiness is easy to audit.
 
 # Login and access: development can bypass login; production should require login.
-LOGIN_ON = True  # False bypasses login and uses AUTO_LOGIN_* below.
+LOGIN_ON = False  # False bypasses login and uses AUTO_LOGIN_* below.
 AUTO_LOGIN_UID = 1  # User id injected when LOGIN_ON is False.
-AUTO_LOGIN_USERNAME = 'developer'  # Username injected when LOGIN_ON is False.
+AUTO_LOGIN_USERNAME = 'Developer'  # Username injected when LOGIN_ON is False.
 AUTO_LOGIN_IS_ADMIN = True  # Grants admin role to the auto-login user.
 
 # Trial build gate: enable only for time-limited trial executables.
@@ -307,13 +307,13 @@ STRING_CONFIG = {
 # Receipts and PayNow
 # -----------------------------------------------------------------------------
 
-RECEIPT_DEFAULT_WIDTH = 48
+RECEIPT_DEFAULT_WIDTH = 56
 RECEIPT_QTY_WIDTH = 9  # Quantity plus unit.
-RECEIPT_AMOUNT_WIDTH = 8  # Summary/payment amounts include "$ ".
-RECEIPT_ITEM_AMOUNT_WIDTH = 7  # Item price/total columns omit "$ ".
+RECEIPT_AMOUNT_WIDTH = 9  # Summary/payment amounts include "$ ".
+RECEIPT_ITEM_AMOUNT_WIDTH = 8  # Item price/total columns omit "$ ".
 RECEIPT_GAP = 1
 RECEIPT_PRINTER_FONT = 'b'  # ESC/POS receipt font: 'a' or 'b'.
-RECEIPT_COMPANY_NAME_WIDTH = 1  # ESC/POS width scale for the first receipt line.
+RECEIPT_COMPANY_NAME_WIDTH = 2  # ESC/POS width scale for the first receipt line.
 RECEIPT_COMPANY_NAME_HEIGHT = 2  # ESC/POS height scale for the first receipt line.
 
 # Lowercase names are retained because qr_generator imports this public API.

@@ -19,6 +19,11 @@
 
 ## Data Rules
 - Voucher is integer-only.
+- The cashier-facing `VOUCHER` allocation is persisted to
+  `receipt_payments.payment_type` as `OTHER`. This intentional internal name
+  permits the visible payment option to change later without a database
+  migration. User-facing receipts and reports translate `OTHER` back to
+  `VOUCHER`.
 - NETS / PayNow / Cash accept 2-decimal floats.
 - Display-only money labels use shared currency formatting (`$ 1,234.50`) while keeping the raw numeric value on the widget as `numeric_value`.
 - Editable payment fields (`*PayLineEdit`, `*ValLineEdit`) remain plain numeric text so user input and validation are not affected by currency symbols.

@@ -152,6 +152,11 @@ This document summarizes the current functional design for report-menu wiring, f
     for complex HTML/CSS layouts; PDF export would require additional
     dependencies and is unnecessary for this simple, fixed-width design.
   - other types (`chart` and unknown values): placeholder content renderer
+- Payment method labels use presentation-only normalization shared with report
+  charts and exports: stored `OTHER` displays as `VOUCHER`, while a blank or
+  missing method displays as `UNKNOWN`. Other nonblank methods are uppercased
+  and otherwise unchanged. The report layer does not update
+  `receipt_payments` or rewrite repository data.
 - Uses the shared `REPORT_VIEWER_RATIOS` tuple from `config.py` for viewer
   sizing, with a pixel fallback when the tuple is unavailable.
 - Viewer closes via native window titlebar `X` button (no in-dialog Close push button).
@@ -179,6 +184,9 @@ This document summarizes the current functional design for report-menu wiring, f
 - Owns shared export helpers for report PDF and XLSX generation.
 - Reuses the report text formatters from `report_viewers.py` for PDF output.
 - Builds XLSX files from structured report data with one sheet per report section.
+- Detailed-report PDF output and the XLSX `Payments` sheet follow the same
+  payment-method display rule as the on-screen viewer (`OTHER` -> `VOUCHER`,
+  blank/missing -> `UNKNOWN`).
 - Uses the shared export folder `Path.home() / 'POS_Exports' / 'Reports'`.
 
 ### Export fail-safe behavior

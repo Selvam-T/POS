@@ -1,7 +1,7 @@
 import config
 
 from modules.customer_display import CustomerDisplayWindow
-from modules.table_ui.table_operations import get_sales_data
+from modules.table_ui.table_operations import get_sales_data, get_subtotal, get_total
 
 
 class MainCustomerDisplayController:
@@ -42,19 +42,22 @@ class MainCustomerDisplayController:
             display.set_mode_full_idle()
 
         items = []
-        total = 0.0
         for row in rows:
             qty = float(row.get('quantity') or 0.0)
             name = str(row.get('product_name') or row.get('product') or '')
             price = float(row.get('unit_price') or 0.0)
             line_total = qty * price
-            total += line_total
             items.append({
                 'quantity': qty,
                 'description': name,
                 'amount': line_total,
                 'unit': row.get('unit') if isinstance(row, dict) else None,
             })
+
+        # Use the payable total already calculated by the sales table. This is
+        # the same rounded value emitted to the payment panel.
+        total = get_total(sales_table)
+        subtotal = get_subtotal(sales_table)
 
         # Display returns to idle if no rows and state is not payment.
         if not rows and state not in (display.STATE_PAYMENT,):
@@ -66,5 +69,6 @@ class MainCustomerDisplayController:
             'state': state or (display.STATE_PAYMENT if rows else display.STATE_IDLE),
             'items': items,
             'total': total,
+            'rounding_applied': abs(total - subtotal) >= 0.01,
         }
         display.update_transaction(payload)

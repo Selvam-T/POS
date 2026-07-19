@@ -241,7 +241,7 @@
                 <font/>
                </property>
                <property name="text">
-                <string>Total Payable:</string>
+                <string>Total Payable :</string>
                </property>
               </widget>
              </item>

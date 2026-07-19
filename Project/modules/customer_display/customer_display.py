@@ -188,6 +188,7 @@ class CustomerDisplayWindow(QDialog):
         self._stack = self.findChild(QStackedWidget, "screen2AdDisplayStack")
         self._mode_stack = self.findChild(QStackedWidget, "screen2ModeStack")
         self._table = self.findChild(QTableWidget, "screen2SalesTable")
+        self._total_title_label = self.findChild(QLabel, "screen2TotalLabel")
         self._total_label = self.findChild(QLabel, "screen2ValueLabel")
         self._count_label = self.findChild(QLabel, "screen2NumLabel")
         self._date_label = self.findChild(QLabel, "screen2DateLabel")
@@ -639,7 +640,10 @@ class CustomerDisplayWindow(QDialog):
             self._table.scrollToBottom()
         self.set_item_count(item_count)
 
-    def set_total(self, total: float) -> None:
+    def set_total(self, total: float, *, rounding_applied: bool = False) -> None:
+        if self._total_title_label is not None:
+            title = 'Total Payable (round) :' if rounding_applied else 'Total Payable :'
+            self._total_title_label.setText(title)
         if self._total_label is None:
             return
         self._total_label.setText(format_currency(total))
@@ -732,6 +736,7 @@ class CustomerDisplayWindow(QDialog):
         state = payload.get("state", self.STATE_IDLE)
         items = payload.get("items", [])
         total = payload.get("total", 0.0)
+        rounding_applied = bool(payload.get("rounding_applied", False))
 
         if state == self.STATE_IDLE:
             # Keep the current mode decision (full-idle vs split) from caller;
@@ -748,7 +753,7 @@ class CustomerDisplayWindow(QDialog):
             self._set_state(self.STATE_IDLE)
 
         self.set_items(items)
-        self.set_total(total)
+        self.set_total(total, rounding_applied=rounding_applied)
 
     def show_payment_result(self, total: float | None = None, greeting: str | None = None) -> None:
         """Display the success payment overlay with optional total and greeting.

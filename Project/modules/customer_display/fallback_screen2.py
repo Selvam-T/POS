@@ -121,7 +121,7 @@ def _make_main_page(parent: QWidget) -> QWidget:
 	total_frame.setObjectName('screen2TotalFrame')
 	total_layout = QHBoxLayout(total_frame)
 	total_layout.setContentsMargins(0, 0, 0, 0)
-	total_label = QLabel('Total Payable:', total_frame)
+	total_label = QLabel('Total Payable :', total_frame)
 	total_label.setObjectName('screen2TotalLabel')
 	total_label.setStyleSheet('font-size: 25px; font-weight: 500;')
 	total_layout.addWidget(total_label)

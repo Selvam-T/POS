@@ -8,9 +8,18 @@ from pathlib import Path
 sys.path.insert(0, r'c:\Users\SELVAM\OneDrive\Desktop\POS\Project')
 
 from modules.menu import report_exports
+from modules.menu import report_viewers
 
 
 OPENPYXL_AVAILABLE = importlib.util.find_spec('openpyxl') is not None
+
+
+class TestPaymentMethodDisplay(unittest.TestCase):
+    def test_normalizes_internal_and_blank_payment_methods(self):
+        self.assertEqual(report_viewers._display_payment_method('OTHER'), 'VOUCHER')
+        self.assertEqual(report_viewers._display_payment_method(''), 'UNKNOWN')
+        self.assertEqual(report_viewers._display_payment_method(None), 'UNKNOWN')
+        self.assertEqual(report_viewers._display_payment_method('cash'), 'CASH')
 
 
 DETAIL_SAMPLE = {

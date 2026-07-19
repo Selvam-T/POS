@@ -59,7 +59,10 @@ High-level commit flow
      - Do not re-insert items (they were inserted when the sale was placed on
        hold).
    - Insert one or more `receipt_payments` rows representing each payment
-     method used (CASH, NETS, PAYNOW, VOUCHER, ...). CASH rows store both
+     method used. The stored values are `CASH`, `NETS`, `PAYNOW`, and `OTHER`;
+     `OTHER` is the stable internal value for the cashier-facing VOUCHER method
+     so the visible method can be renamed in the future without a database
+     migration. CASH rows store both
      `amount` (applied to the receipt total) and `tendered` (cash received);
      non-cash rows set `tendered = amount`.
 8. Commit: if all statements succeed the transaction commits; otherwise
@@ -69,6 +72,10 @@ High-level commit flow
 
 Important implementation details
 --------------------------------
+- Payment-method naming is normalized only at the presentation boundary. The
+  database and report repository retain `OTHER`; receipts and reports display
+  it as `VOUCHER`. A missing or blank method is displayed as `UNKNOWN` rather
+  than being classified as a voucher.
 - `next_receipt_no` must be called with the same `conn` used by the
   transaction so the counter update participates in the same atomic boundary.
   The code checks `conn.in_transaction` and avoids nested `BEGIN` errors.
