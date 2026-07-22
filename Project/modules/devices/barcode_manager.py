@@ -4,7 +4,6 @@ import weakref
 
 from PyQt5.QtCore import QObject
 from config import MAIN_STATUS_DURATION_MS, SCANNER_KEY_INTERVAL_SECONDS, SCANNER_UI_SUPPRESS_SECONDS
-from modules.devices.barcode_routing_logger import log_barcode_routing
 from modules.devices.scanner import BarcodeScanner
 from modules.ui_utils import ui_feedback
 
@@ -69,11 +68,6 @@ class BarcodeManager(QObject):
                     dlg = QApplication.activeModalWidget() or QApplication.activeWindow()
                     try:
                         if dlg is not None and bool(dlg.property('suppressBarcodeWarning')):
-                            self._log_scan_issue(
-                                barcode,
-                                outcome='ignored',
-                                reason='dialog-override-focus-rejected',
-                            )
                             return
                     except Exception:
                         pass
@@ -86,11 +80,6 @@ class BarcodeManager(QObject):
                                 break
                         if status_lbl is not None:
                             ui_feedback.set_warning_status_label(status_lbl, ui_feedback.BARCODE_WARNING_TEXT)
-                    self._log_scan_issue(
-                        barcode,
-                        outcome='ignored',
-                        reason='dialog-override-focus-rejected',
-                    )
                     return
         except Exception:
             pass
@@ -140,7 +129,6 @@ class BarcodeManager(QObject):
             except Exception:
                 found = True
             if not found:
-                self._log_scan_issue(barcode, outcome='failed', reason='product-not-found')
                 if status_bar and hasattr(status_bar, 'showMessage'):
                     status_bar.showMessage(f"Product '{barcode}' not found - Opening Product Management (ADD)", MAIN_STATUS_DURATION_MS)
                 if hasattr(parent, 'open_product_menu_dialog'):
@@ -151,37 +139,19 @@ class BarcodeManager(QObject):
                     outcome = handle_barcode_scanned(parent.sales_table, barcode, status_bar)
                     if outcome in {'added', 'incremented'}:
                         self._focus_sales_table()
-                    else:
-                        self._log_scan_issue(
-                            barcode,
-                            outcome='ignored',
-                            reason=outcome or 'unhandled',
-                        )
                 except Exception as exc:
-                    self._log_scan_issue(
-                        barcode,
-                        outcome='failed',
-                        reason='barcode-handler-exception',
-                        exception=repr(exc),
-                    )
                     marker = getattr(parent, '_mark_sales_table_unavailable', None)
                     if callable(marker):
                         marker(exc, where="Populate sales table from barcode scan")
                     return
             else:
-                self._log_scan_issue(barcode, outcome='failed', reason='no-sales-table')
                 readiness_gate = getattr(parent, '_require_sales_table_ready', None)
                 if callable(readiness_gate):
                     readiness_gate()
                 elif status_bar and hasattr(status_bar, 'showMessage'):
                     status_bar.showMessage(f"Scanned: {barcode}", MAIN_STATUS_DURATION_MS)
-        except Exception as exc:
-            self._log_scan_issue(
-                barcode,
-                outcome='failed',
-                reason='barcode-routing-exception',
-                exception=repr(exc),
-            )
+        except Exception:
+            pass
 
     def _on_scanner_activity(self, _when_ts: float, is_fast: bool = False):
         """Track burst timing and snapshot focused text before scanner characters land."""
@@ -397,7 +367,6 @@ class BarcodeManager(QObject):
             pass
 
     def _ignore_scan(self, barcode: str, reason: str = ''):
-        self._log_scan_issue(barcode, outcome='ignored', reason=reason or 'unspecified')
         try:
             from PyQt5.QtWidgets import QApplication
             fw = QApplication.instance().focusWidget() if QApplication.instance() else None
@@ -426,43 +395,6 @@ class BarcodeManager(QObject):
             if table is not None:
                 table.setFocusPolicy(Qt.StrongFocus)
                 table.setFocus(Qt.OtherFocusReason)
-        except Exception:
-            pass
-
-    def _log_scan_issue(
-        self,
-        barcode: str,
-        *,
-        outcome: str,
-        reason: str,
-        **extra,
-    ) -> None:
-        """Record state only for completed scans that were ignored or failed."""
-        try:
-            from PyQt5.QtWidgets import QApplication
-
-            parent = self.parent()
-            app = QApplication.instance()
-            focus_widget = app.focusWidget() if app is not None else None
-            start_widget = getattr(self, '_scanStartWidget', None)
-            ctx = getattr(parent, 'receipt_context', {}) or {}
-            table = getattr(parent, 'sales_table', None)
-            log_barcode_routing(
-                outcome=outcome,
-                reason=reason,
-                barcode=barcode,
-                scan_start_widget=self._object_name(start_widget),
-                current_focus_widget=self._object_name(focus_widget),
-                receipt_source=str(ctx.get('source') or ''),
-                active_receipt_id=ctx.get('active_receipt_id'),
-                receipt_status=str(ctx.get('status') or ''),
-                modal_block=bool(getattr(self, '_modalBlockScanner', False)),
-                barcode_override=callable(getattr(self, '_barcodeOverride', None)),
-                sales_table_ready=bool(getattr(parent, '_sales_table_ready', False)),
-                sales_table_present=table is not None,
-                sales_table_rows=(int(table.rowCount()) if table is not None else None),
-                **extra,
-            )
         except Exception:
             pass
 

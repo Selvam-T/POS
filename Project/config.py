@@ -51,13 +51,11 @@ DATA_DIR = _PATHS['data_dir']
 DATABASE_FILENAME = 'Anumani.db'
 LOGIN_LOGO_FILENAME = 'anumani_logo.png'
 ERROR_LOG_FILENAME = 'error.log'
-BARCODE_ROUTING_LOG_FILENAME = 'barcode_routing.log'
 
 # Existing modules still use this alias for runtime resource paths.
 _BASE_DIR = RUNTIME_DIR
 DB_PATH = os.path.join(DB_DIR, DATABASE_FILENAME)
 LOG_PATH = os.path.join(LOGS_DIR, ERROR_LOG_FILENAME)
-BARCODE_ROUTING_LOG_PATH = os.path.join(LOGS_DIR, BARCODE_ROUTING_LOG_FILENAME)
 LOGIN_BACKGROUND = os.path.join(
     ASSETS_DIR, 'images', LOGIN_LOGO_FILENAME
 )

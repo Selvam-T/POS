@@ -45,6 +45,11 @@ QTableWidget#salesTable {
     gridline-color: rgba(0, 0, 0, 0.2);
 }
 
+/* Visible safe-focus indicator for barcode scanning. */
+QTableWidget#salesTable:focus {
+    border: 2px solid #f59e0b;
+}
+
 QTableWidget#salesTable QHeaderView::section {
     background-color: #0961a8;
     color: white;

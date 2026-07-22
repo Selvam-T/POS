@@ -51,9 +51,8 @@ If a scanner burst targets one of these fields:
 - The completed scan is ignored so it does not add to the cart or open Product Menu.
 - Manual typing and manual Enter remain unaffected outside scanner-burst timing.
 
-Ignored protected-field scans are recorded in `logs/barcode_routing.log` with
-both scan-start and completion-time focus. Successful main-window product scans
-return focus to `salesTable` after the add/increment completes.
+Successful main-window product scans return focus to `salesTable` after the
+add/increment completes.
 
 ### Dialog Overrides
 
@@ -118,6 +117,3 @@ If a scanner does not send Enter, no confirmed scan is emitted, so rejected-scan
   - `SCANNER_UI_SUPPRESS_SECONDS`
 - Main event filtering and routing live in `modules/devices/barcode_manager.py`.
 - Raw HID key buffering lives in `modules/devices/scanner.py`.
-- Ignored/failed completed-scan diagnostics live in
-  `modules/devices/barcode_routing_logger.py` and use
-  `config.BARCODE_ROUTING_LOG_PATH`.

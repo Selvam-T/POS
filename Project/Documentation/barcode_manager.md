@@ -11,8 +11,6 @@ This document describes the current behavior of `BarcodeManager` in `modules/dev
 - Protects main-window manual fields while still allowing normal main-window scan-to-cart behavior.
 - Blocks scanner-driven main-window actions while modal dialogs are open.
 - Suppresses Enter/Return during scanner bursts to avoid unintended button clicks.
-- Writes ignored/failed completed-scan diagnostics to the dedicated external
-  `logs/barcode_routing.log` file; successful scans are not logged.
 
 ## Core Concepts
 
@@ -81,25 +79,6 @@ This check happens after dialog override routing, so product-code dialogs can st
 3. `_modalBlockScanner`: ignore scan + restore/cleanup leak.
 4. Main-window protected manual field: ignore scan + restore/cleanup leak.
 5. Sales-table barcode routing.
-
-## Diagnostic Log
-
-`modules/devices/barcode_routing_logger.py` appends one JSON object per line to
-`config.BARCODE_ROUTING_LOG_PATH` (`logs/barcode_routing.log`). It records only
-completed scans that are ignored or fail, including:
-
-- Local timestamp with UTC offset
-- Outcome and routing reason
-- Barcode
-- Scan-start widget and completion-time focused widget
-- Receipt source, status, and active receipt ID
-- Modal-block and barcode-override state
-- Sales-table readiness, presence, and row count
-- Exception representation when routing raises
-
-The logger is best-effort and must never interrupt scanning or transaction
-processing. `error.log` remains reserved for application errors and status-footer
-reporting.
 
 ## Scan-Burst Timing
 

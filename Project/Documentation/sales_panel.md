@@ -26,6 +26,15 @@ The sales frame setup moved out of `main.py` and is now embodied by the `SalesFr
 
 The total listener mentioned above keeps `saleTotalChanged` in sync with `bind_total_label` so the controller doesn't need to duplicate total math. Payment Panel totals refresh from this signal without pre-filling payment allocations or moving focus into the payment fields. Barcode scans, Manual Entry, Vegetable Entry, and Qty edits can therefore keep the cashier in the sales workflow while the payment total stays live. When Qty is accepted with Enter, focus leaves the row editor and returns to the Sales table rather than jumping to payment. Moving into payment is treated as an explicit user action, such as clicking a `*PayLineEdit` or payment control.
 
+## Sales Table Focus Indicator
+
+`assets/qss/sales.qss` applies a 4 px orange border to `salesTable` while the
+table itself has focus. The normal border returns when focus moves elsewhere.
+This gives the cashier an immediate visual indication that barcode scans have
+the safe sales-table focus target. It does not change scanner routing, and it
+does not highlight a row `qtyInput`; quantity editors retain their own focus
+style.
+
 ## Sales Table Readiness Gate
 
 The Sales table is considered ready only after `setup_sales_frame(...)`

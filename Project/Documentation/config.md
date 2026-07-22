@@ -82,9 +82,6 @@ These flags are grouped together in `config.py` so development and production be
 ## Scanner Timing
 - `SCANNER_KEY_INTERVAL_SECONDS`: Shared scanner/manual inter-key threshold used by `scanner.py`.
 - `SCANNER_UI_SUPPRESS_SECONDS`: Enter/Return suppression window used by `BarcodeManager` after scanner-fast activity.
-- `BARCODE_ROUTING_LOG_PATH`: External `logs/barcode_routing.log` diagnostic
-  file for ignored or failed completed barcode scans. It is separate from
-  `LOG_PATH`/`error.log` and does not drive the status-footer error indicator.
 
 ## Trial Build Flags
 - `TRIAL_BUILD_ENABLED`: Enables trial expiry enforcement.

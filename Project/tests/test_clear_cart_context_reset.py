@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from PyQt5.QtWidgets import QDialog
 
@@ -26,8 +27,12 @@ def test_clear_cart_resets_context_when_payment_panel_cleanup_fails():
     window._refresh_sales_label_from_context = lambda: None
     window._update_customer_display_from_sales = lambda: None
 
-    MainLoader._clear_sales_table(window)
+    # Keep the deliberately simulated cleanup failure out of the shared
+    # production error.log used by the installed application.
+    with patch('modules.ui_utils.error_logger.log_error_message') as log_error:
+        MainLoader._clear_sales_table(window)
 
     assert window.receipt_context['active_receipt_id'] is None
     assert window.receipt_context['source'] == 'ACTIVE_SALE'
     assert window.receipt_context['status'] == 'NONE'
+    log_error.assert_called_once()
