@@ -11,6 +11,8 @@ This document describes the current behavior of `BarcodeManager` in `modules/dev
 - Protects main-window manual fields while still allowing normal main-window scan-to-cart behavior.
 - Blocks scanner-driven main-window actions while modal dialogs are open.
 - Suppresses Enter/Return during scanner bursts to avoid unintended button clicks.
+- Writes ignored/failed completed-scan diagnostics to the dedicated external
+  `logs/barcode_routing.log` file; successful scans are not logged.
 
 ## Core Concepts
 
@@ -20,6 +22,9 @@ The main window is the default scanner surface. When no modal/special context bl
 
 - Product found: `handle_barcode_scanned(...)` adds/increments the item.
 - Product not found: Product Menu opens in ADD mode with the scanned code.
+- After a successful add/increment, focus is explicitly returned to the
+  `salesTable` widget (not a row `qtyInput`) so the next scan has a stable,
+  non-protected focus target.
 
 Because the main window must allow scan-to-cart, it is **not** globally scanner-blocked. Instead, `BarcodeManager` selectively protects manual-entry widgets that must never receive or route scans:
 
@@ -76,6 +81,25 @@ This check happens after dialog override routing, so product-code dialogs can st
 3. `_modalBlockScanner`: ignore scan + restore/cleanup leak.
 4. Main-window protected manual field: ignore scan + restore/cleanup leak.
 5. Sales-table barcode routing.
+
+## Diagnostic Log
+
+`modules/devices/barcode_routing_logger.py` appends one JSON object per line to
+`config.BARCODE_ROUTING_LOG_PATH` (`logs/barcode_routing.log`). It records only
+completed scans that are ignored or fail, including:
+
+- Local timestamp with UTC offset
+- Outcome and routing reason
+- Barcode
+- Scan-start widget and completion-time focused widget
+- Receipt source, status, and active receipt ID
+- Modal-block and barcode-override state
+- Sales-table readiness, presence, and row count
+- Exception representation when routing raises
+
+The logger is best-effort and must never interrupt scanning or transaction
+processing. `error.log` remains reserved for application errors and status-footer
+reporting.
 
 ## Scan-Burst Timing
 

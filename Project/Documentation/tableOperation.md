@@ -23,7 +23,7 @@ This module provides generic table operations for product tables in the POS syst
 - `recompute_total(table)`: Recomputes the true row subtotal, rounds the payable total to the nearest `$0.10`, updates the bound label, and returns the payable total.
 - `get_total(table)`: Returns the last computed rounded payable total.
 - `get_subtotal(table)`: Returns the last computed true row subtotal before payable-total rounding.
-- `handle_barcode_scanned(table, barcode, status_bar=None)`: Processes barcode scans. **BLOCKS KG items** (shows message to use Vegetable Entry), adds EACH items normally.
+- `handle_barcode_scanned(table, barcode, status_bar=None)`: Processes barcode scans and returns a routing outcome such as `added`, `incremented`, `product-not-found`, `kg-item`, or `max-rows` for the barcode manager's diagnostics. **BLOCKS KG items** (shows message to use Vegetable Entry), adds EACH items normally.
 
 ### Centralized Quantity Validation (2026 Update)
 - `get_sales_data(table)`: Now uses `input_handler.handle_quantity_input` for extracting and validating quantity from each row. This ensures all numeric checks, limits (e.g., 9999), and error handling are consistent and centralized. Manual `float()` conversion is no longer used for editable rows.

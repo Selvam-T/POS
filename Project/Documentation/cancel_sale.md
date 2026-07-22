@@ -127,6 +127,11 @@ def _perform_logout(self): ...
 ```
 
 **Why `_clear_sales_table()` is in main.py:**
+
+After an accepted Clear Cart, `receipt_context` is reset to `ACTIVE_SALE`
+immediately after cart clearing and before payment-panel or customer-display
+cleanup. Those later cleanup operations are isolated and logged independently,
+so a UI cleanup failure cannot leave an empty cart in `HOLD_LOADED` state.
 - Needs access to `self.sales_table` (main window instance attribute)
 - Needs access to `self.dialog_wrapper._last_dialog` (to check result)
 - Operates on main window context (table, labels, future payment frame)

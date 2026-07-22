@@ -1147,6 +1147,11 @@ class MainLoader(QMainWindow):
                     where="Populate sales table from entry dialog",
                 )
                 return
+            try:
+                self.sales_table.setFocusPolicy(Qt.StrongFocus)
+                self.sales_table.setFocus(Qt.OtherFocusReason)
+            except Exception:
+                pass
             self._update_customer_display_from_sales()
         except Exception:
             try:
@@ -1206,11 +1211,33 @@ class MainLoader(QMainWindow):
                 self._open_cash_drawer_if_needed({'cash': cash_allocated})
 
             self._clear_sales_table_core(update_display=False)
-            if panel is not None:
-                panel.clear_payment_frame()
 
+            # Once the cart is empty, restoring ACTIVE_SALE is mandatory and
+            # must not depend on later payment/display cleanup succeeding.
             self._reset_receipt_context()
-            self._update_customer_display_from_sales()
+
+            if panel is not None:
+                try:
+                    panel.clear_payment_frame()
+                except Exception as panel_exc:
+                    try:
+                        from modules.ui_utils.error_logger import log_error_message
+                        log_error_message(
+                            f"Clear Cart payment-panel cleanup failed: {panel_exc!r}"
+                        )
+                    except Exception:
+                        pass
+
+            try:
+                self._update_customer_display_from_sales()
+            except Exception as display_exc:
+                try:
+                    from modules.ui_utils.error_logger import log_error_message
+                    log_error_message(
+                        f"Clear Cart customer-display cleanup failed: {display_exc!r}"
+                    )
+                except Exception:
+                    pass
         except Exception as e:
             try:
                 import traceback

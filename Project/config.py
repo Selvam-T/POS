@@ -51,11 +51,13 @@ DATA_DIR = _PATHS['data_dir']
 DATABASE_FILENAME = 'Anumani.db'
 LOGIN_LOGO_FILENAME = 'anumani_logo.png'
 ERROR_LOG_FILENAME = 'error.log'
+BARCODE_ROUTING_LOG_FILENAME = 'barcode_routing.log'
 
 # Existing modules still use this alias for runtime resource paths.
 _BASE_DIR = RUNTIME_DIR
 DB_PATH = os.path.join(DB_DIR, DATABASE_FILENAME)
 LOG_PATH = os.path.join(LOGS_DIR, ERROR_LOG_FILENAME)
+BARCODE_ROUTING_LOG_PATH = os.path.join(LOGS_DIR, BARCODE_ROUTING_LOG_FILENAME)
 LOGIN_BACKGROUND = os.path.join(
     ASSETS_DIR, 'images', LOGIN_LOGO_FILENAME
 )
@@ -307,12 +309,12 @@ STRING_CONFIG = {
 # Receipts and PayNow
 # -----------------------------------------------------------------------------
 
-RECEIPT_DEFAULT_WIDTH = 56
+RECEIPT_DEFAULT_WIDTH = 56 # 56 for font a, 60 for font b
 RECEIPT_QTY_WIDTH = 9  # Quantity plus unit.
 RECEIPT_AMOUNT_WIDTH = 9  # Summary/payment amounts include "$ ".
-RECEIPT_ITEM_AMOUNT_WIDTH = 8  # Item price/total columns omit "$ ".
+RECEIPT_ITEM_AMOUNT_WIDTH = 9  # Item price/total columns omit "$ ".
 RECEIPT_GAP = 1
-RECEIPT_PRINTER_FONT = 'b'  # ESC/POS receipt font: 'a' or 'b'.
+RECEIPT_PRINTER_FONT = 'a'  # ESC/POS receipt font: 'a' or 'b'.
 RECEIPT_COMPANY_NAME_WIDTH = 2  # ESC/POS width scale for the first receipt line.
 RECEIPT_COMPANY_NAME_HEIGHT = 2  # ESC/POS height scale for the first receipt line.
 
@@ -346,7 +348,7 @@ SUBNET_MASK = '255.255.255.0'
 PRINTER_PORT = 9100
 
 CASH_DRAWER_PIN = 2
-CASH_DRAWER_TIMEOUT = 2.0
+CASH_DRAWER_TIMEOUT = 5.0
 
 
 # -----------------------------------------------------------------------------

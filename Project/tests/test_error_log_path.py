@@ -13,6 +13,13 @@ def test_log_path_is_external_and_shared():
     assert status_footer.LOG_PATH == expected
 
 
+def test_barcode_routing_log_path_is_external_and_separate():
+    expected = str(Path(config.LOGS_DIR) / config.BARCODE_ROUTING_LOG_FILENAME)
+
+    assert config.BARCODE_ROUTING_LOG_PATH == expected
+    assert config.BARCODE_ROUTING_LOG_PATH != config.LOG_PATH
+
+
 def test_ensure_error_log_creates_directory_and_file(tmp_path):
     log_path = tmp_path / 'logs' / 'error.log'
 

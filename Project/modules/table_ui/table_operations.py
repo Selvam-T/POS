@@ -440,12 +440,13 @@ def _highlight_row_by_button(table: QTableWidget, btn: QPushButton) -> None:
 # SECTION 7: BARCODE SCANNER LOGIC
 # =========================================================
 
-def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Optional[QStatusBar] = None) -> None:
-    """Processes scan. Enforces MAX_TABLE_ROWS for new items, but allows existing qty updates."""
+def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Optional[QStatusBar] = None) -> str:
+    """Process a scan and return its routing outcome for diagnostics."""
     from modules.ui_utils.max_rows_dialog import open_max_rows_dialog
     from modules.domain.unit_helpers import canonicalize_unit
 
-    if not barcode: return
+    if not barcode:
+        return 'empty-barcode'
     if status_bar: show_temp_status(status_bar, f"Scanned: {barcode}", MAIN_STATUS_DURATION_MS)
     
     found, product_name, unit_price, unit = get_product_info(barcode)
@@ -453,7 +454,7 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
 
     if not found:
         if status_bar: show_temp_status(status_bar, f"Product '{barcode}' not found", MAIN_STATUS_DURATION_MS)
-        return
+        return 'product-not-found'
 
     existing_row = find_product_in_table(table, barcode, unit_canon)
 
@@ -461,7 +462,7 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
     if existing_row is None and table.rowCount() >= MAX_TABLE_ROWS:
         dlg = open_max_rows_dialog(table.window(), f"Maximum of {MAX_TABLE_ROWS} items reached.")
         dlg.exec_()
-        return
+        return 'max-rows'
 
     if existing_row is not None:
         qty_container = table.cellWidget(existing_row, 2)
@@ -469,13 +470,19 @@ def handle_barcode_scanned(table: QTableWidget, barcode: str, status_bar: Option
             editor = qty_container.findChild(QLineEdit, 'qtyInput')
             if editor and not editor.isReadOnly():
                 increment_row_quantity(table, existing_row)
+                return 'incremented'
             elif status_bar:
                 show_temp_status(status_bar, "KG item - use Vegetable Entry to weigh", MAIN_STATUS_DURATION_MS)
+            return 'kg-existing'
     else:
         if unit_canon == 'Kg':
             if status_bar: show_temp_status(status_bar, "KG item - use Vegetable Entry to weigh", MAIN_STATUS_DURATION_MS)
+            return 'kg-item'
         else:
             _add_product_row(table, barcode, product_name, unit_price, unit_canon)
+            return 'added'
+
+    return 'unhandled'
 
 def find_product_in_table(table: QTableWidget, product_code: str, unit_canon: str = None) -> Optional[int]:
     """Helper for duplicate detection in barcode scanning."""
