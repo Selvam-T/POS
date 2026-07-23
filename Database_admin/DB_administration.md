@@ -9,7 +9,15 @@ Database_admin/
   config/
     .env
   data/
-    products.csv
+    imports/
+      products.csv
+    reports/
+      rejected_products.csv
+      product_validation_summary.txt
+    reference/
+      category_target_list.csv
+      product_list_clean.xlsx
+      product_list_MASTER.xls
   database/
     create_database.py
     reset_database.py
@@ -23,6 +31,7 @@ Database_admin/
   products/
     import_products.py
     export_products.py
+    replace_products.py
   migration/
     stage_legacy_products.py
     validate_legacy_products.py
@@ -36,6 +45,12 @@ Database_admin/
 ```
 
 `admin_lib.py` is the shared helper module used by the admin scripts. It centralizes config loading, database path resolution, CSV reading/writing, SQLite connection setup, and common product-cleaning helpers.
+
+The `data` subfolders have distinct purposes:
+
+- `imports` contains operational CSV input and the default product export used to prepare a later import.
+- `reports` contains generated validation summaries and rejected-row reports.
+- `reference` contains human-maintained spreadsheets and reference lists; administration scripts do not import these files automatically.
 
 ## Configuration
 
@@ -63,7 +78,7 @@ DB_PATH=../db/CustomerName.db
 Place the import file here:
 
 ```text
-Database_admin/data/products.csv
+Database_admin/data/imports/products.csv
 ```
 
 Required headers:
@@ -112,26 +127,26 @@ The setup script runs these steps in order:
 4. Create `Product_list`.
 5. Create `receipts`, `receipt_items`, and `receipt_payments`.
 6. Create `cash_outflows`.
-7. Stage `data/products.csv` in memory.
+7. Stage `data/imports/products.csv` in memory.
 8. Validate and clean staged products in memory.
 9. Migrate valid products into `Product_list`.
 10. Run database audit.
 
-If validation fails, the process stops and writes inspection files under `data/`.
+If validation fails, the process stops and writes inspection files under `data/reports/`.
 
 ```text
-data/rejected_products.csv
-data/product_validation_summary.txt
+data/reports/rejected_products.csv
+data/reports/product_validation_summary.txt
 ```
 
-Fix `data/products.csv`, then rerun `setup_fresh_database.py`.
+Fix `data/imports/products.csv`, then rerun `setup_fresh_database.py`.
 
 ## Rebuilding With A New Product CSV
 
 For development or a full customer database rebuild, replace:
 
 ```text
-Database_admin/data/products.csv
+Database_admin/data/imports/products.csv
 ```
 
 Then run:
@@ -149,20 +164,85 @@ This creates a fresh database from the new CSV. Existing transaction data is not
 
 Do not use `--reset` casually on a production database. Production product updates should use a safer update/import process that preserves receipts and operational history.
 
+## Replacing Only Product_list
+
+`products/replace_products.py` is the guarded production-catalog workflow. It requires explicit database and CSV paths and does not use the configured default database implicitly.
+
+Always work on a complete copy of the closed production database. Validate first:
+
+```powershell
+python products/replace_products.py `
+  --db "C:\path\to\Anumani_working_YYYYMMDD.db" `
+  --csv "C:\path\to\products_cleaned.csv" `
+  --report-dir "C:\path\to\validation_reports" `
+  --check-only
+```
+
+Review `rejected_products.csv` and `product_validation_summary.txt`. Replacement is blocked if validation rejects any row.
+
+After validation and independent backup confirmation, run the replacement with the exact confirmation phrase:
+
+```powershell
+python products/replace_products.py `
+  --db "C:\path\to\Anumani_working_YYYYMMDD.db" `
+  --csv "C:\path\to\products_cleaned.csv" `
+  --report-dir "C:\path\to\validation_reports" `
+  --confirm REPLACE-PRODUCT-LIST
+```
+
+The command:
+
+1. validates the complete CSV before opening a write transaction.
+2. opens the explicitly named existing database.
+3. records all non-`Product_list` table row counts.
+4. begins one immediate transaction.
+5. deletes only `Product_list` rows.
+6. inserts the complete validated catalog.
+7. recreates `uq_product_name_nocase` as a unique `NOCASE` index.
+8. verifies required fields, row count, and duplicate groups.
+9. verifies that unrelated table row counts did not change.
+10. commits only after every check succeeds; otherwise it rolls back.
+
+This command does not create a missing database and does not reset users, receipts, payments, receipt counters, or cash outflows. Row-count preservation is an additional guard; the pre-migration backup remains the authoritative rollback.
+
+After replacement, run the full audit against the same explicit working-copy path:
+
+```powershell
+python audit/verify_db_and_product_list.py `
+  --db "C:\path\to\Anumani_working_YYYYMMDD.db"
+```
+
 ## Product Rules
 
-Database rules:
+### Approved Product Identity Policy
 
+The approved target policy is:
+
+- `product_code` is the permanent product identity and the key used for database updates.
 - `product_code` is `TEXT`, not integer.
 - `product_code` is the primary key.
-- blank `product_code` is rejected.
-- duplicate `product_code` is rejected.
+- blank or duplicate product codes are rejected.
 - one-character product codes are allowed because some customer products have no barcode and are retrieved by short shortcut codes.
-- duplicate product names are allowed in the database.
-- `Product_list.name` must not have a unique index.
+- `Product_list.name` is required and must not be `NULL`, empty, or whitespace-only.
+- product names must be unique using a trimmed, case-insensitive comparison.
+- the database, CSV migration validator, and POS application must enforce the same product-name policy.
 
-Migration cleaning:
+The database target combines separate constraints:
 
+- `NOT NULL` prevents a null product name.
+- `CHECK(trim(name) <> '')` prevents an empty or whitespace-only product name.
+- the unique `uq_product_name_nocase` index prevents case-insensitive duplicate product names.
+- CSV and application inputs must be trimmed before storage so leading or trailing whitespace cannot bypass the intended policy.
+
+`product_code`, not `name`, remains the row identity. Product-name uniqueness is required because the current name-search interfaces use a displayed name to resolve a product.
+
+### Migration Policy
+
+Before changing `Product_list`, migration must validate the complete CSV:
+
+- duplicate product codes are rejected case-insensitively.
+- duplicate product names are rejected after trimming and case-insensitive normalization.
+- blank product codes and blank product names are rejected.
 - blank category becomes `Other`.
 - blank unit becomes `Each`.
 - blank supplier stays blank.
@@ -170,10 +250,21 @@ Migration cleaning:
 - blank last updated gets a migration timestamp.
 - invalid or blank selling price rejects the row.
 
-Application rule:
+Migration is all-or-nothing. If any row is rejected, the validator must produce the rejection report and abort before deleting or inserting product rows. It must not silently retain the first duplicate and discard later occurrences.
 
-- the POS application may still block users from creating new duplicate product names.
-- existing migrated duplicate names are not removed by the database.
+Production catalog replacement must operate on a complete backup copy of the production database, replace only `Product_list` inside one transaction, preserve all other tables, and roll back on failure. A full fresh-database reset is not part of the product-only production workflow.
+
+### Application Policy
+
+- Product Add rejects a name already assigned to another product.
+- Product Update permits the current product to retain its own name.
+- Product Update rejects changing a name to one assigned to another product.
+- `PRODUCT_CACHE` remains keyed by normalized `product_code`.
+- name completers continue to display a stable unique list.
+
+### Phase 2 Implementation Status
+
+The schema creator, CSV migration validator, database audit, product-only replacement command, automated tests, and this administration guide implement the approved policy. The active production database is not changed by the repository update; it must still go through the separately controlled catalog-cleaning, working-copy replacement, audit, application test, deployment, and rollback phases.
 
 ## Receipt Counters
 
@@ -219,8 +310,10 @@ After setup, run the POS application and check:
 - POS starts without database errors.
 - `PRODUCT_CACHE` loads.
 - product code/barcode lookup works.
-- duplicate product names do not break cache loading.
-- Product Menu still blocks new duplicate names through application validation.
+- the product audit reports no duplicate product names.
+- the database rejects a case-insensitive duplicate product name.
+- Product Menu blocks adding or renaming a product to a duplicate name.
+- Product Menu allows a product to retain its own unique name while other fields are updated.
 - paid receipts save.
 - `receipt_items` save.
 - receipt history retrieves.

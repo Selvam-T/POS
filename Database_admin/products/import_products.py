@@ -1,4 +1,4 @@
-"""Import products from data/products.csv using the staged legacy migration flow."""
+"""Import products from data/imports/products.csv using the staged migration flow."""
 
 from __future__ import annotations
 

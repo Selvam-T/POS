@@ -12,9 +12,9 @@ if str(ADMIN_ROOT) not in sys.path:
 from admin_lib import connect, print_header
 
 
-def create_product_list_table(*, drop_existing: bool = False) -> None:
+def create_product_list_table(*, drop_existing: bool = False, db_file: Path | str | None = None) -> None:
     print_header("Create Product_list Table")
-    with connect() as conn:
+    with connect(db_file) as conn:
         if drop_existing:
             conn.execute("DROP TABLE IF EXISTS Product_list;")
 
@@ -36,10 +36,13 @@ def create_product_list_table(*, drop_existing: bool = False) -> None:
             "CREATE INDEX IF NOT EXISTS idx_product_code_nocase "
             "ON Product_list(product_code COLLATE NOCASE);"
         )
-        conn.execute("DROP INDEX IF EXISTS uq_product_name_nocase;")
+        conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS uq_product_name_nocase "
+            "ON Product_list(name COLLATE NOCASE);"
+        )
         conn.commit()
 
-    print("Product_list ensured. Product names are not unique at DB level.")
+    print("Product_list ensured. Product names are unique case-insensitively.")
 
 
 if __name__ == "__main__":

@@ -11,12 +11,12 @@ ADMIN_ROOT = Path(__file__).resolve().parents[1]
 if str(ADMIN_ROOT) not in sys.path:
     sys.path.insert(0, str(ADMIN_ROOT))
 
-from admin_lib import DATA_DIR, clean_text, normalize_unit, now_stamp, title_words, write_csv_rows, print_header
+from admin_lib import REPORT_DIR, clean_text, normalize_unit, now_stamp, title_words, write_csv_rows, print_header
 from migration.stage_legacy_products import PRODUCT_HEADERS, stage_legacy_products
 
 
-REJECTED_PATH = DATA_DIR / "rejected_products.csv"
-VALIDATION_SUMMARY_PATH = DATA_DIR / "product_validation_summary.txt"
+REJECTED_PATH = REPORT_DIR / "rejected_products.csv"
+VALIDATION_SUMMARY_PATH = REPORT_DIR / "product_validation_summary.txt"
 
 APP_LIMITS = {
     "product_code": (1, 15),
@@ -36,12 +36,17 @@ def _to_float(value: str) -> Tuple[bool, float | None]:
         return False, None
 
 
-def validate_legacy_products(rows: List[Dict[str, object]] | None = None) -> tuple[List[Dict[str, object]], Path]:
+def validate_legacy_products(
+    rows: List[Dict[str, object]] | None = None,
+    *,
+    report_dir: Path | None = None,
+) -> tuple[List[Dict[str, object]], Path]:
     print_header("Validate Legacy Products")
     if rows is None:
         rows = stage_legacy_products()
 
     seen_codes: set[str] = set()
+    seen_names: set[str] = set()
     cleaned: List[Dict[str, object]] = []
     rejected: List[Dict[str, object]] = []
     warnings: Counter[str] = Counter()
@@ -76,6 +81,12 @@ def validate_legacy_products(rows: List[Dict[str, object]] | None = None) -> tup
             reasons.append("blank name")
         elif len(name) > APP_LIMITS["name"][1]:
             row_warnings.append("name longer than POS input max 40")
+
+        name_key = name.casefold()
+        if name and name_key in seen_names:
+            reasons.append("duplicate product name")
+        elif name:
+            seen_names.add(name_key)
 
         ok_price, selling_price = _to_float(str(row.get("selling_price", "")))
         if not ok_price or selling_price is None:
@@ -127,8 +138,11 @@ def validate_legacy_products(rows: List[Dict[str, object]] | None = None) -> tup
             }
         )
 
+    output_dir = report_dir or REPORT_DIR
+    rejected_path = output_dir / REJECTED_PATH.name
+    summary_path = output_dir / VALIDATION_SUMMARY_PATH.name
     rejected_fields = ["source_row", *PRODUCT_HEADERS, "reasons"]
-    write_csv_rows(REJECTED_PATH, rejected_fields, rejected)
+    write_csv_rows(rejected_path, rejected_fields, rejected)
 
     summary_lines = [
         "Product validation summary",
@@ -141,16 +155,17 @@ def validate_legacy_products(rows: List[Dict[str, object]] | None = None) -> tup
     summary_lines.extend(f"- {reason}: {count}" for reason, count in sorted(reject_reasons.items()))
     summary_lines.extend(["", "Warnings:"])
     summary_lines.extend(f"- {warning}: {count}" for warning, count in sorted(warnings.items()))
-    VALIDATION_SUMMARY_PATH.write_text("\n".join(summary_lines) + "\n", encoding="utf-8")
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+    summary_path.write_text("\n".join(summary_lines) + "\n", encoding="utf-8")
 
     print(f"Rows valid: {len(cleaned)}")
     print(f"Rows rejected: {len(rejected)}")
-    print(f"Validation summary: {VALIDATION_SUMMARY_PATH}")
+    print(f"Validation summary: {summary_path}")
     if rejected:
-        print(f"Rejected rows: {REJECTED_PATH}")
-        raise ValueError("Product validation failed. Fix data/products.csv and rerun setup.")
+        print(f"Rejected rows: {rejected_path}")
+        raise ValueError("Product validation failed. Fix the source product CSV and rerun.")
 
-    return cleaned, REJECTED_PATH
+    return cleaned, rejected_path
 
 
 if __name__ == "__main__":
