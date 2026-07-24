@@ -47,11 +47,22 @@ The constructor supports two optional knobs:
 
 - `initial_mode`: may choose the initial tab (`add`/`remove`/`update`) when allowed.
 - `initial_code`: when provided, the dialog always lands on **ADD** and prefills the ADD code.
+- `opened_from_missing_scan`: explicitly identifies the barcode-not-found sales
+  workflow. It is separate from the sales-table row-count check so an empty sale
+  still receives the same restricted ADD workflow.
 
-If there is an active sale transaction (`sale_lock=True`):
+REMOVE, UPDATE, and CATEGORY are disabled when either:
 
-- REMOVE, UPDATE, and CATEGORY tabs are disabled. ADD remains accessible so staff
-  can continue adding products during the active transaction.
+- the sales table contains one or more rows; or
+- Product Menu was opened automatically for a scanned product that was not found.
+
+ADD remains accessible in both cases. Keeping these conditions separate preserves
+the active-transaction guard for Product-button launches while making the
+barcode-not-found behavior independent of the current sales-table row count.
+
+After a successful ADD in the barcode-not-found workflow, the new product is
+inserted into the sales table, Product Menu closes automatically, and the shared
+dialog wrapper restores focus to the sales table.
 
 Landing rules:
 

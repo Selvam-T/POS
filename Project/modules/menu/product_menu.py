@@ -42,9 +42,16 @@ from config import (
 UI_PATH = os.path.join(UI_DIR, 'product_menu.ui')
 QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 
-def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
+def launch_product_dialog(
+    main_window,
+    initial_mode=None,
+    initial_code=None,
+    opened_from_missing_scan=False,
+):
     from modules.table_ui.table_operations import is_transaction_active
-    sale_lock = is_transaction_active(getattr(main_window, 'sales_table', None))
+    sale_active = is_transaction_active(getattr(main_window, 'sales_table', None))
+    missing_scan_flow = bool(opened_from_missing_scan)
+    tabs_locked = sale_active or missing_scan_flow
 
     # 1. Attempt to load the real UI
     dlg = build_dialog_from_ui(UI_PATH, host_window=main_window, dialog_name='Product menu', qss_path=QSS_PATH)
@@ -1035,9 +1042,16 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         # Natural phrasing: "Product [Name] Deleted"
         display_msg = f"Product '{name}' {verb}"
         
-        if mode == 'add' and initial_code:
-            # If we added a product via a "Not Found" scan, add it to sales table immediately
-            QTimer.singleShot(10, lambda: handle_barcode_scanned(main_window.sales_table, code, main_window.statusBar()))
+        if mode == 'add' and missing_scan_flow:
+            # Complete the missing-scan workflow as one operation: insert the
+            # newly created product, close the dialog, then let DialogWrapper
+            # restore focus to the sales table.
+            def _finish_missing_scan_add() -> None:
+                handle_barcode_scanned(main_window.sales_table, code, main_window.statusBar())
+                dlg.accept()
+
+            QTimer.singleShot(10, _finish_missing_scan_add)
+            return
 
         cancel_map = {
             'add': widgets['add_close'],
@@ -1273,7 +1287,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
         pass
 
     # Initialization
-    if sale_lock:
+    if tabs_locked:
         widgets['tabs'].setTabEnabled(1, False)
         widgets['tabs'].setTabEnabled(2, False)
         widgets['tabs'].setTabEnabled(3, False)
@@ -1294,7 +1308,7 @@ def launch_product_dialog(main_window, initial_mode=None, initial_code=None):
             idx = tab_index_for_mode.get(initial_mode.strip().lower())
             if idx is not None:
                 target_idx = idx
-        if sale_lock and target_idx != 0:
+        if tabs_locked and target_idx != 0:
             target_idx = 0
         widgets['tabs'].setCurrentIndex(target_idx)
     except Exception:

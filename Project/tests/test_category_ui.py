@@ -3,7 +3,18 @@ import os
 import sys
 
 import pytest
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QComboBox, QLabel, QLineEdit, QPushButton
+from PyQt5.QtTest import QTest
+from PyQt5.QtWidgets import (
+    QApplication,
+    QComboBox,
+    QDialog,
+    QLabel,
+    QLineEdit,
+    QMainWindow,
+    QPushButton,
+    QTableWidget,
+    QTabWidget,
+)
 
 # Ensure project package is on path when running directly.
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -78,6 +89,72 @@ def test_category_combo_excludes_other_for_admin(app, temp_category_json):
     assert items[0] == "--Select Category--"
     assert "Other" not in items
     dlg.close()
+
+
+def test_active_sale_locks_product_tabs_for_button_launch(app, temp_category_json):
+    mw = _make_main(is_admin=True)
+    mw.sales_table = QTableWidget(1, 1)
+
+    dlg = launch_product_dialog(mw)
+    tabs = dlg.findChild(QTabWidget, "tabWidget")
+
+    assert tabs.currentIndex() == 0
+    assert [tabs.isTabEnabled(i) for i in range(4)] == [True, False, False, False]
+    dlg.close()
+
+
+def test_missing_scan_locks_product_tabs_when_sale_is_empty(app, temp_category_json):
+    mw = _make_main(is_admin=True)
+    mw.sales_table = QTableWidget(0, 1)
+
+    dlg = launch_product_dialog(
+        mw,
+        initial_mode="add",
+        initial_code="TESTSCAN",
+        opened_from_missing_scan=True,
+    )
+    tabs = dlg.findChild(QTabWidget, "tabWidget")
+
+    assert tabs.currentIndex() == 0
+    assert [tabs.isTabEnabled(i) for i in range(4)] == [True, False, False, False]
+    assert dlg.findChild(QLineEdit, "addProductCodeLineEdit").text() == "TESTSCAN"
+    dlg.close()
+
+
+def test_missing_scan_add_closes_dialog_and_inserts_product(
+    app,
+    temp_category_json,
+    monkeypatch,
+):
+    mw = _make_main(is_admin=True)
+    mw.sales_table = QTableWidget(0, 1)
+    inserted = []
+    monkeypatch.setattr(product_menu, "add_product", lambda *args, **kwargs: (True, "OK"))
+    monkeypatch.setattr(product_menu.dbop, "refresh_product_cache", lambda: None)
+    monkeypatch.setattr(
+        product_menu,
+        "handle_barcode_scanned",
+        lambda table, code, status_bar: inserted.append((table, code)),
+    )
+
+    dlg = launch_product_dialog(
+        mw,
+        initial_code="TESTSCAN",
+        opened_from_missing_scan=True,
+    )
+    dlg.show()
+    app.processEvents()
+    dlg.findChild(QLineEdit, "addProductNameLineEdit").setText("Test Scan")
+    dlg.findChild(QLineEdit, "addSellingPriceLineEdit").setText("1.25")
+    dlg.findChild(QLineEdit, "addCostPriceLineEdit").setText("0.50")
+    dlg.findChild(QLineEdit, "addSupplierLineEdit").setText("Supplier")
+
+    dlg.findChild(QPushButton, "btnAddOk").click()
+    QTest.qWait(20)
+
+    assert inserted == [(mw.sales_table, "TESTSCAN")]
+    assert dlg.result() == QDialog.Accepted
+    assert not dlg.isVisible()
 
 
 def test_product_add_success_stays_open_and_focuses_close(app, temp_category_json, monkeypatch):

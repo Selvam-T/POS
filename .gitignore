@@ -8,3 +8,9 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+
+# Local experiments and credentials
+/Exploration/QR_announce_test/
+**/token.json
+**/credentials.json
+*.log

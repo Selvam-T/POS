@@ -132,7 +132,11 @@ class BarcodeManager(QObject):
                 if status_bar and hasattr(status_bar, 'showMessage'):
                     status_bar.showMessage(f"Product '{barcode}' not found - Opening Product Management (ADD)", MAIN_STATUS_DURATION_MS)
                 if hasattr(parent, 'open_product_menu_dialog'):
-                    parent.open_product_menu_dialog(initial_mode='add', initial_code=barcode)
+                    parent.open_product_menu_dialog(
+                        initial_mode='add',
+                        initial_code=barcode,
+                        opened_from_missing_scan=True,
+                    )
                 return
             if hasattr(parent, 'sales_table') and parent.sales_table is not None:
                 try:
