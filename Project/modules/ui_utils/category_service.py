@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from modules.db_operation import categories_repo, products_repo, refresh_product_cache
 from modules.db_operation.sqlite_runtime import get_conn, transaction
+from modules.ui_utils.canonicalization import canonicalize_title_text
 from modules.ui_utils.input_validation import validate_category
 
 
 def _validated_name(value: str) -> str:
-    name = str(value or "").strip()
+    name = canonicalize_title_text(value)
     if not name:
         raise ValueError("Category is required")
     ok, error = validate_category(name)
@@ -66,28 +67,21 @@ def update_category(old_name: str, new_name: str) -> int:
             _ensure_mutable(source, "replaced")
             target = categories_repo.get_by_name(clean_new, conn=conn)
 
-            if target and int(target["category_id"]) != int(source["category_id"]):
-                products_updated = products_repo.reassign_category(
-                    int(source["category_id"]),
-                    int(target["category_id"]),
-                    conn=conn,
+            if target:
+                raise ValueError(
+                    f"Category '{clean_new}' already exists. "
+                    "Merging is not available."
                 )
-                categories_repo.delete_category(
-                    int(source["category_id"]),
-                    conn=conn,
-                )
-            else:
-                categories_repo.rename_category(
-                    int(source["category_id"]),
-                    clean_new,
-                    conn=conn,
-                )
-                products_updated = 0
+            categories_repo.rename_category(
+                int(source["category_id"]),
+                clean_new,
+                conn=conn,
+            )
     finally:
         conn.close()
 
     refresh_product_cache()
-    return products_updated
+    return 0
 
 
 def delete_category(name: str, *, replacement: str | None = None) -> int:

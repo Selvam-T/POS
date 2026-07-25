@@ -468,7 +468,23 @@ class ProductCategoryTabController:
                 return None
             return name
 
-        def _run_category_op(op_fn, success_msg: str, error_tag: str) -> None:
+        def _focus_invalid_input(widget) -> None:
+            if widget is None:
+                return
+            try:
+                widget.setFocus()
+                if hasattr(widget, 'selectAll'):
+                    widget.selectAll()
+            except Exception:
+                pass
+
+        def _run_category_op(
+            op_fn,
+            success_msg: str,
+            error_tag: str,
+            *,
+            error_widget=None,
+        ) -> None:
             try:
                 op_fn()
                 self.refresh_combo()
@@ -482,6 +498,7 @@ class ProductCategoryTabController:
                     ok=False,
                     duration=STATUS_LABEL_DURATION_MS,
                 )
+                QTimer.singleShot(0, lambda: _focus_invalid_input(error_widget))
             except Exception as e:
                 try:
                     ui_feedback.set_status_label(
@@ -513,6 +530,7 @@ class ProductCategoryTabController:
                 lambda: category_service.add_category(name),
                 f"Category '{name.strip()}' added",
                 "Category ADD failed",
+                error_widget=self.widgets['cat_add_le'],
             )
             return
 
@@ -531,13 +549,14 @@ class ProductCategoryTabController:
             target = _selected_category()
             if not target:
                 return
-            replacement = self.widgets['cat_update_le'].text() or ''
+            replacement = self._normalize_line_edit(self.widgets['cat_update_le'])
             if not self._validate_text(replacement, focus_widget=self.widgets['cat_update_le']):
                 return
             _run_category_op(
                 lambda: category_service.update_category(target, replacement),
                 f"Category '{target}' replaced with '{replacement}'",
                 "Category REPLACE failed",
+                error_widget=self.widgets['cat_update_le'],
             )
             return
 

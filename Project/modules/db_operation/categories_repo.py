@@ -34,6 +34,31 @@ def list_categories(
             c.close()
 
 
+def get_category_schema_and_rows(
+    *,
+    conn: Optional[sqlite3.Connection] = None,
+) -> tuple[Optional[str], list, list]:
+    """Return the exact Category CREATE statement, headers, and rows."""
+    own = conn is None
+    c = conn or get_conn()
+    try:
+        schema_row = c.execute(
+            "SELECT sql FROM sqlite_master "
+            "WHERE type='table' AND lower(name)=lower(?)",
+            (TABLE,),
+        ).fetchone()
+        create_sql = schema_row[0] if schema_row and schema_row[0] else None
+        cur = c.execute(
+            f"SELECT * FROM {TABLE} ORDER BY category_id"
+        )
+        rows = cur.fetchall()
+        headers = [description[0] for description in (cur.description or [])]
+        return create_sql, headers, rows
+    finally:
+        if own:
+            c.close()
+
+
 def get_by_name(
     name: str,
     *,

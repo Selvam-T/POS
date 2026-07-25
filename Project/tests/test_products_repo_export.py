@@ -3,7 +3,7 @@ import sqlite3
 import tempfile
 import unittest
 from modules.db_operation.sqlite_runtime import get_conn
-from modules.db_operation import products_repo
+from modules.db_operation import categories_repo, products_repo
 
 
 class TestProductsRepoExport(unittest.TestCase):
@@ -58,6 +58,24 @@ class TestProductsRepoExport(unittest.TestCase):
                 self.assertIsInstance(headers, list)
                 self.assertTrue(len(headers) >= 1)
                 self.assertEqual(len(rows), 2)
+
+                readable_headers, readable_rows = (
+                    products_repo.get_product_list_readable_rows(conn=conn)
+                )
+                self.assertIn("category", readable_headers)
+                self.assertNotIn("category_id", readable_headers)
+                category_index = readable_headers.index("category")
+                self.assertEqual(
+                    [row[category_index] for row in readable_rows],
+                    ["Fruit", "Fruit"],
+                )
+
+                category_sql, category_headers, category_rows = (
+                    categories_repo.get_category_schema_and_rows(conn=conn)
+                )
+                self.assertIn("CREATE TABLE", category_sql.upper())
+                self.assertEqual(category_headers, ["category_id", "name"])
+                self.assertEqual([tuple(row) for row in category_rows], [(1, "Fruit")])
             finally:
                 conn.close()
         finally:

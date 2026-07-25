@@ -111,7 +111,7 @@ def test_protected_categories_warn_and_remain(category_db, name):
     assert name in category_service.list_categories()
 
 
-def test_replace_with_existing_category_merges(category_db):
+def test_replace_with_existing_category_is_rejected(category_db):
     category_service.add_category("Treats")
     conn = sqlite3.connect(category_db)
     snack_id = conn.execute(
@@ -128,5 +128,16 @@ def test_replace_with_existing_category_merges(category_db):
     conn.commit()
     conn.close()
 
-    assert category_service.update_category("Snacks", "Treats") == 1
-    assert "Snacks" not in category_service.list_categories()
+    with pytest.raises(ValueError, match="Merging is not available"):
+        category_service.update_category("Snacks", "Treats")
+
+    assert "Snacks" in category_service.list_categories()
+    conn = sqlite3.connect(category_db)
+    assert conn.execute(
+        """
+        SELECT c.name FROM Product_list p
+        JOIN Category c ON c.category_id=p.category_id
+        WHERE p.product_code='P003'
+        """
+    ).fetchone()[0] == "Snacks"
+    conn.close()

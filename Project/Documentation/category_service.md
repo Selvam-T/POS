@@ -8,15 +8,14 @@ longer exists.
 - `get_category_id(name)` resolves required system categories such as
   `Vegetable`.
 - `add_category(name)` validates and inserts one Category row.
-- `update_category(old, new)` renames in place when `new` is unused. If `new`
-  already exists, products are reassigned and the old row is deleted as a
-  merge.
+- `update_category(old, new)` renames in place only when `new` is unused.
+  Existing category names are rejected; category merging is not available.
 - `delete_category(name)` transactionally reassigns products to `Other`, then
   deletes the selected Category row.
 
 `Other` and `Vegetable` have `is_protected = 1`. Attempts to remove or replace
-them raise an informative validation message. Successful rename, merge, and
-delete operations refresh `PRODUCT_CACHE` after commit.
+them raise an informative validation message. Successful rename and delete
+operations refresh `PRODUCT_CACHE` after commit.
 
 `receipt_items.category` remains historical snapshot text and is never changed.
 

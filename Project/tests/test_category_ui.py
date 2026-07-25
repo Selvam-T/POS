@@ -24,6 +24,7 @@ if PROJECT_ROOT not in sys.path:
 
 from modules.menu import product_menu
 from modules.menu.product_menu import launch_product_dialog
+from modules.ui_utils import category_service
 
 
 @pytest.fixture(scope="module")
@@ -176,6 +177,58 @@ def test_remove_protected_category_shows_warning(app, temp_category_json):
     dlg.close()
 
 
+def test_duplicate_category_add_returns_focus_and_selects_input(
+    app,
+    temp_category_json,
+):
+    mw = _make_main(is_admin=True)
+    dlg = launch_product_dialog(mw)
+    dlg.show()
+    app.processEvents()
+    dlg.findChild(QTabWidget, "tabWidget").setCurrentIndex(3)
+
+    category_input = dlg.findChild(QLineEdit, "categoryAddLineEdit")
+    category_input.setText("aLPHA")
+    dlg.findChild(QPushButton, "btnCategoryOk").click()
+    _flush_success_events(app)
+
+    assert "already exists" in dlg.findChild(
+        QLabel, "categoryStatusLabel"
+    ).text()
+    assert category_input.hasFocus()
+    assert category_input.selectedText() == "Alpha"
+    dlg.close()
+
+
+def test_existing_category_replace_is_rejected_and_returns_focus(
+    app,
+    temp_category_json,
+):
+    mw = _make_main(is_admin=True)
+    dlg = launch_product_dialog(mw)
+    dlg.show()
+    app.processEvents()
+    dlg.findChild(QTabWidget, "tabWidget").setCurrentIndex(3)
+    dlg.findChild(QRadioButton, "categoryReplaceRadioBtn").setChecked(True)
+    app.processEvents()
+
+    combo = dlg.findChild(QComboBox, "categorySelectComboBox")
+    combo.setCurrentIndex(combo.findText("Alpha"))
+    dlg.product_category_tab_controller._on_combo_activated(combo.currentIndex())
+    replacement_input = dlg.findChild(QLineEdit, "categoryUpdateLineEdit")
+    replacement_input.setText("bETA")
+    dlg.findChild(QPushButton, "btnCategoryOk").click()
+    _flush_success_events(app)
+
+    status = dlg.findChild(QLabel, "categoryStatusLabel").text()
+    assert "already exists" in status
+    assert "merging is not available" in status.casefold()
+    assert replacement_input.hasFocus()
+    assert replacement_input.selectedText() == "Beta"
+    assert "Alpha" in category_service.list_categories()
+    dlg.close()
+
+
 def test_active_sale_locks_product_tabs_for_button_launch(app, temp_category_json):
     mw = _make_main(is_admin=True)
     mw.sales_table = QTableWidget(1, 1)
@@ -270,6 +323,39 @@ def test_product_add_success_stays_open_and_focuses_close(app, temp_category_jso
     dlg.close()
 
 
+def test_product_add_requires_category_selection(
+    app,
+    temp_category_json,
+    monkeypatch,
+):
+    mw = _make_main(is_admin=True)
+    saved = []
+    monkeypatch.setattr(
+        product_menu,
+        "add_product",
+        lambda *args, **kwargs: saved.append(args) or (True, "OK"),
+    )
+
+    dlg = launch_product_dialog(mw)
+    dlg.show()
+    app.processEvents()
+    dlg.findChild(QLineEdit, "addProductCodeLineEdit").setText("NOCAT")
+    dlg.findChild(QLineEdit, "addProductNameLineEdit").setText("No Category")
+    dlg.findChild(QLineEdit, "addSellingPriceLineEdit").setText("1.25")
+    dlg.findChild(QLineEdit, "addCostPriceLineEdit").setText("0.50")
+    dlg.findChild(QLineEdit, "addSupplierLineEdit").setText("Supplier")
+
+    category_combo = dlg.findChild(QComboBox, "addCategoryComboBox")
+    assert category_combo.currentIndex() == 0
+    dlg.findChild(QPushButton, "btnAddOk").click()
+    app.processEvents()
+
+    assert saved == []
+    assert dlg.findChild(QLabel, "addStatusLabel").text() == "Select a category"
+    assert category_combo.hasFocus()
+    dlg.close()
+
+
 def test_product_remove_success_stays_open_and_focuses_close(app, temp_category_json, monkeypatch):
     mw = _make_main(is_admin=True)
     monkeypatch.setattr(
@@ -358,6 +444,54 @@ def test_product_update_noop_stays_open_and_focuses_close(app, temp_category_jso
         dlg.close()
 
 
+def test_product_update_requires_category_selection(
+    app,
+    temp_category_json,
+    monkeypatch,
+):
+    mw = _make_main(is_admin=True)
+    product = {
+        "product_code": "TESTUPD",
+        "name": "Test Update",
+        "category": "Alpha",
+        "category_id": 1,
+        "cost": 0.50,
+        "price": 1.25,
+        "unit": "Each",
+        "supplier": "Supplier",
+        "last_updated": "",
+    }
+    saved = []
+    monkeypatch.setattr(
+        product_menu,
+        "get_product_full",
+        lambda code: (True, dict(product)),
+    )
+    monkeypatch.setattr(
+        product_menu,
+        "update_product",
+        lambda *args, **kwargs: saved.append(args) or (True, "OK"),
+    )
+
+    dlg = launch_product_dialog(mw)
+    dlg.show()
+    app.processEvents()
+    dlg.findChild(QTabWidget, "tabWidget").setCurrentIndex(2)
+    code = dlg.findChild(QLineEdit, "updateProductCodeLineEdit")
+    code.setText("TESTUPD")
+    code.editingFinished.emit()
+    app.processEvents()
+
+    category_combo = dlg.findChild(QComboBox, "updateCategoryComboBox")
+    category_combo.setCurrentIndex(0)
+    dlg.findChild(QPushButton, "btnUpdateOk").setEnabled(True)
+    dlg.findChild(QPushButton, "btnUpdateOk").click()
+    app.processEvents()
+
+    assert saved == []
+    assert dlg.findChild(QLabel, "updateStatusLabel").text() == "Select a category"
+    assert category_combo.hasFocus()
+    dlg.close()
 def test_category_add_success_stays_open_and_focuses_close(app, temp_category_json):
     mw = _make_main(is_admin=True)
     dlg = launch_product_dialog(mw)
@@ -365,14 +499,51 @@ def test_category_add_success_stays_open_and_focuses_close(app, temp_category_js
     app.processEvents()
     tabs = dlg.findChild(QTabWidget, "tabWidget")
     tabs.setCurrentIndex(3)
-    dlg.findChild(QLineEdit, "categoryAddLineEdit").setText("Gamma")
+    dlg.findChild(QLineEdit, "categoryAddLineEdit").setText("gAMMA_category")
 
     dlg.findChild(QPushButton, "btnCategoryOk").click()
     _flush_success_events(app)
 
     assert dlg.isVisible()
     assert dlg.result() == 0
-    assert "Category 'Gamma' added" in dlg.findChild(QLabel, "categoryStatusLabel").text()
+    assert "Category 'Gamma Category' added" in dlg.findChild(
+        QLabel, "categoryStatusLabel"
+    ).text()
+    conn = sqlite3.connect(temp_category_json)
+    try:
+        assert conn.execute(
+            "SELECT name FROM Category WHERE name = ? COLLATE NOCASE",
+            ("Gamma Category",),
+        ).fetchone() == ("Gamma Category",)
+    finally:
+        conn.close()
     assert dlg.findChild(QLineEdit, "categoryAddLineEdit").text() == ""
     assert dlg.findChild(QPushButton, "btnCategoryClose").hasFocus()
+    dlg.close()
+
+
+def test_category_replace_normalizes_name(app, temp_category_json):
+    mw = _make_main(is_admin=True)
+    dlg = launch_product_dialog(mw)
+    dlg.show()
+    app.processEvents()
+    dlg.findChild(QTabWidget, "tabWidget").setCurrentIndex(3)
+    dlg.findChild(QRadioButton, "categoryReplaceRadioBtn").setChecked(True)
+    app.processEvents()
+
+    combo = dlg.findChild(QComboBox, "categorySelectComboBox")
+    combo.setCurrentIndex(combo.findText("Alpha"))
+    dlg.product_category_tab_controller._on_combo_activated(combo.currentIndex())
+    dlg.findChild(QLineEdit, "categoryUpdateLineEdit").setText("fRESH_food")
+    dlg.findChild(QPushButton, "btnCategoryOk").click()
+    _flush_success_events(app)
+
+    conn = sqlite3.connect(temp_category_json)
+    try:
+        assert conn.execute(
+            "SELECT name FROM Category WHERE name = ? COLLATE NOCASE",
+            ("Fresh Food",),
+        ).fetchone() == ("Fresh Food",)
+    finally:
+        conn.close()
     dlg.close()

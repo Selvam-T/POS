@@ -258,3 +258,30 @@ def get_product_list_schema_and_rows(*, conn: Optional[sqlite3.Connection] = Non
     finally:
         if own:
             c.close()
+
+
+def get_product_list_readable_rows(
+    *,
+    conn: Optional[sqlite3.Connection] = None,
+) -> Tuple[list, list]:
+    """Return headers and rows for human-readable product exports.
+
+    The persisted ``category_id`` is replaced by its Category display name.
+    """
+    sql = f"""
+    SELECT p.product_code, p.name, c.name AS category, p.supplier,
+           p.selling_price, p.cost_price, p.unit, p.last_updated
+      FROM {TABLE} AS p
+      JOIN Category AS c ON c.category_id = p.category_id
+     ORDER BY p.name COLLATE NOCASE
+    """
+    own = conn is None
+    c = conn or get_conn()
+    try:
+        cur = c.execute(sql)
+        rows = cur.fetchall()
+        headers = [description[0] for description in (cur.description or [])]
+        return headers, rows
+    finally:
+        if own:
+            c.close()

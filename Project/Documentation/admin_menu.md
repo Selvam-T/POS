@@ -124,26 +124,40 @@ Implementation note: validators live in `modules/menu/screen2_ads_helper.py` and
 
 ## EXPORT Tab
 
-The EXPORT tab allows exporting the application's `Product_list` table in four formats, plus a timestamped SQLite database copy:
+The EXPORT tab separates human-readable inventory exports from exact Product
+Data exports:
 
-- CSV (`.csv`) - simple comma-separated values file.
-- XLS (`.xls`) - legacy Excel workbook (requires the `xlwt` package).
-- XLSX (`.xlsx`) - modern Excel workbook (requires the `openpyxl` package).
-- SQL (`.sql`) - SQL file containing the `CREATE TABLE` statement and `INSERT` statements for every row.
-- DB copy (`.db`) - SQLite backup copy of the configured application database.
+- Category List CSV contains `category_id` and `category_name`.
+- Product List CSV, XLS, and XLSX replace `Product_list.category_id` with the
+  joined Category name in a column named `category`.
+- Product Data CSV writes two timestamp-matched files: an exact `Category`
+  table CSV and an exact `Product_list` table CSV. These retain `category_id`
+  for import and migration.
+- Product Data SQL writes both exact table schemas and their rows into one SQL
+  file. `Category` is created and populated before `Product_list` so its
+  foreign-key dependency can be satisfied.
+- DB copy (`.db`) is a timestamped SQLite backup of the configured database.
 
 Behaviour and wiring:
-- Buttons wired in controller: `csvExportBtn`, `xlsExportBtn`, `xlsxExportBtn`, `sqlExportBtn`, `csv2ExportBtn`, `dbExportBtn` (see `modules/menu/admin_menu.py`).
+- Buttons wired in the controller: `csv2ExportBtn`, `csvExportBtn`,
+  `xlsExportBtn`, `xlsxExportBtn`, `productDataCsvExportBtn`,
+  `productDataSqlExportBtn`, and `dbExportBtn`.
 - Product/category exports are written under the user's home folder at `POS_Exports/Inventory`.
+- The category CSV contains `category_id` and `category_name` columns sourced
+  from the Category table.
 - Database copies are written under the user's home folder at `POS_Exports/DB_copy`.
-- Filenames follow the pattern: `Product_List_{kind}_ddmmmyyyy_hh-mm.ext` (the timestamp is Windows-safe).
+- Human-readable filenames follow
+  `Product_List_{kind}_ddmmmyyyy_hh-mm.ext`.
+- Product Data filenames start with `Product_Data_` and identify the exported
+  table or table pair.
 - Database copy filenames follow the pattern: `{database_stem}_ddmmmyyyy_hh-mm.db`, for example `Anumani_10jul2026_14-05.db`. If the same timestamp already exists, a numeric suffix is added.
 - After a successful export the UI shows a concise status message in `exportStatusLabel` naming the file type and export directory.
 
 Notes:
 - The XLS export uses `xlwt`. The project `requirements.txt` lists `xlwt>=1.3.0`. Legacy XLS worksheets are limited to 65,536 rows (including the header) and 256 columns; the controller checks both limits before saving.
 - The XLSX export uses `openpyxl`. If `openpyxl` is not installed the controller will report an error and the XLSX export will fail; install via `pip install openpyxl` or include it in your environment requirements. The project `requirements.txt` already lists `openpyxl>=3.1`.
-- Exports are generated from a `SELECT * FROM Product_list ORDER BY name COLLATE NOCASE` query; ensure the `Product_list` table exists and the DB path is correct.
+- Human-readable product exports join `Product_list` to `Category`. Product
+  Data exports use exact table columns and exact `CREATE TABLE` statements.
 - Database copies are created through SQLite's backup API, so the exported `.db` is a consistent standalone database snapshot that can be restored manually when the POS application is closed.
 
 ## Known Limits / Assumptions

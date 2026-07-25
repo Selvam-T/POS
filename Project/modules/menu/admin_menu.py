@@ -13,8 +13,14 @@ from modules.ui_utils.dialog_utils import build_dialog_from_ui, require_widgets,
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, set_initial_focus
 from modules.ui_utils import input_handler
 from modules.db_operation.sqlite_runtime import get_conn
-from modules.db_operation.products_repo import get_product_list_schema_and_rows
-from modules.db_operation.categories_repo import list_categories
+from modules.db_operation.products_repo import (
+    get_product_list_readable_rows,
+    get_product_list_schema_and_rows,
+)
+from modules.db_operation.categories_repo import (
+    get_category_schema_and_rows,
+    list_categories,
+)
 from modules.db_operation.users_repo import verify_password, update_password, clear_must_change_password
 from modules.ui_utils import ui_feedback
 from modules.menu.screen2_ads_helper import Screen2AdsController
@@ -36,6 +42,64 @@ from config import (
 QSS_PATH = os.path.join(QSS_DIR, 'dialog.qss')
 EYE_OPEN_ICON_PATH = os.path.join(ASSETS_DIR, 'icons', 'eye_open.svg')
 EYE_CLOSE_ICON_PATH = os.path.join(ASSETS_DIR, 'icons', 'eye_close.svg')
+
+
+def _category_export_data(categories):
+    """Return the stable, human-readable Category CSV shape."""
+    return (
+        ['category_id', 'category_name'],
+        [
+            [category['category_id'], category['name']]
+            for category in categories
+        ],
+    )
+
+
+def _sql_literal(value):
+    if value is None:
+        return 'NULL'
+    if isinstance(value, bool):
+        return '1' if value else '0'
+    if isinstance(value, (int, float)):
+        return str(value)
+    escaped = str(value).replace("'", "''")
+    return f"'{escaped}'"
+
+
+def _build_product_data_sql(
+    category_data,
+    product_data,
+    *,
+    generated_at: str,
+) -> str:
+    """Build a dependency-ordered Category + Product_list SQL export."""
+    sections = [
+        ("Category", category_data),
+        ("Product_list", product_data),
+    ]
+    lines = [
+        "-- Product Data export: Category and Product_list",
+        f"-- Generated: {generated_at}",
+        "",
+        "PRAGMA foreign_keys = ON;",
+        "BEGIN TRANSACTION;",
+    ]
+    for table_name, (create_sql, headers, rows) in sections:
+        if not create_sql:
+            raise RuntimeError(f"{table_name} schema not found")
+        lines.append(f"{str(create_sql).strip().rstrip(';')};")
+        if headers:
+            columns_sql = ", ".join(f'"{header}"' for header in headers)
+            for row in rows:
+                values_sql = ", ".join(
+                    _sql_literal(value) for value in list(row)
+                )
+                lines.append(
+                    f'INSERT INTO "{table_name}" ({columns_sql}) '
+                    f"VALUES ({values_sql});"
+                )
+    lines.extend(["COMMIT;", ""])
+    return "\n".join(lines)
 
 
 # Build and return the admin settings dialog.
@@ -88,7 +152,8 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             'csvExportBtn': (QPushButton, 'csvExportBtn'),
             'xlsExportBtn': (QPushButton, 'xlsExportBtn'),
             'xlsxExportBtn': (QPushButton, 'xlsxExportBtn'),
-            'sqlExportBtn': (QPushButton, 'sqlExportBtn'),
+            'productDataCsvExportBtn': (QPushButton, 'productDataCsvExportBtn'),
+            'productDataSqlExportBtn': (QPushButton, 'productDataSqlExportBtn'),
             'csv2ExportBtn': (QPushButton, 'csv2ExportBtn'),
             'dbExportBtn': (QPushButton, 'dbExportBtn'),
             'exportStatusLabel': (QLabel, 'exportStatusLabel'),
@@ -130,7 +195,8 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     csvExportBtn = widgets['csvExportBtn']
     xlsExportBtn = widgets['xlsExportBtn']
     xlsxExportBtn = widgets['xlsxExportBtn']
-    sqlExportBtn = widgets['sqlExportBtn']
+    productDataCsvExportBtn = widgets['productDataCsvExportBtn']
+    productDataSqlExportBtn = widgets['productDataSqlExportBtn']
     csv2ExportBtn = widgets.get('csv2ExportBtn')
     dbExportBtn = widgets.get('dbExportBtn')
     exportStatusLabel = widgets['exportStatusLabel']
@@ -375,7 +441,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
         except Exception:
             pass
 
-    # EXPORT tab wiring (product_list exports only).
+    # EXPORT tab wiring.
     def _exports_dir() -> Path:
         return Path.home() / 'POS_Exports'/ 'Inventory'
 
@@ -388,6 +454,9 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
 
     def _base_export_file_stem() -> str:
         return f"Product_List_{{kind}}_{_timestamp_for_filename()}"
+
+    def _product_data_file_stem(table_name: str, kind: str, timestamp: str) -> str:
+        return f"Product_Data_{table_name}_{kind}_{timestamp}"
 
     def _ensure_exports_folder() -> Path:
         out_dir = _exports_dir()
@@ -420,12 +489,12 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             out_path = out_dir / file_name
 
             categories = list_categories()
+            headers, rows = _category_export_data(categories)
 
             with out_path.open('w', encoding='utf-8', newline='') as f:
                 writer = csv.writer(f)
-                writer.writerow(['category'])
-                for category in categories:
-                    writer.writerow([category['name']])
+                writer.writerow(headers)
+                writer.writerows(rows)
 
             _set_export_status(f'Product Categories CSV exported to {out_dir}', ok=True)
         except Exception as e:
@@ -433,12 +502,18 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             _set_export_status('Product Categories CSV export failed.', ok=False)
 
     def _fetch_product_rows_and_headers():
-        # Use repo helper to fetch headers and rows so SQL lives in `products_repo`.
+        # Human-readable product exports resolve category_id to Category.name.
         try:
-            _, headers, rows = get_product_list_schema_and_rows()
-            return headers, rows
+            return get_product_list_readable_rows()
         except Exception:
             return [], []
+
+    def _write_csv_file(out_path: Path, headers, rows) -> None:
+        with out_path.open('w', encoding='utf-8', newline='') as f:
+            writer = csv.writer(f)
+            if headers:
+                writer.writerow(headers)
+            writer.writerows([list(row) for row in rows])
 
     def _export_csv() -> None:
         try:
@@ -447,17 +522,39 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             out_path = out_dir / file_name
 
             headers, rows = _fetch_product_rows_and_headers()
-            with out_path.open('w', encoding='utf-8', newline='') as f:
-                writer = csv.writer(f)
-                if headers:
-                    writer.writerow(headers)
-                for r in rows:
-                    writer.writerow(list(r))
+            _write_csv_file(out_path, headers, rows)
 
             _set_export_status(f'Product List CSV file exported to {out_dir}', ok=True)
         except Exception as e:
             log_error_message(f'admin_menu export Product List CSV failed: {e}')
             _set_export_status('Product List CSV export failed.', ok=False)
+
+    def _export_product_data_csv() -> None:
+        """Export exact Category and Product_list tables as a paired CSV set."""
+        try:
+            out_dir = _ensure_exports_folder()
+            timestamp = _timestamp_for_filename()
+            _, category_headers, category_rows = get_category_schema_and_rows()
+            _, product_headers, product_rows = get_product_list_schema_and_rows()
+            if not category_headers or not product_headers:
+                raise RuntimeError("Category or Product_list data is unavailable")
+
+            category_path = out_dir / (
+                _product_data_file_stem("Category", "csv", timestamp) + ".csv"
+            )
+            product_path = out_dir / (
+                _product_data_file_stem("Product_List", "csv", timestamp) + ".csv"
+            )
+            _write_csv_file(category_path, category_headers, category_rows)
+            _write_csv_file(product_path, product_headers, product_rows)
+
+            _set_export_status(
+                f'Product Data CSV files exported to {out_dir}',
+                ok=True,
+            )
+        except Exception as e:
+            log_error_message(f'admin_menu export Product Data CSV failed: {e}')
+            _set_export_status('Product Data CSV export failed.', ok=False)
 
     def _export_db_copy() -> None:
         source_path = Path(DB_PATH)
@@ -583,48 +680,34 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
                 log_error_message(f'admin_menu export Product List XLSX failed: {e}')
                 _set_export_status('Product List XLSX export failed.', ok=False)
 
-    def _sql_literal(v):
-        if v is None:
-            return 'NULL'
-        if isinstance(v, bool):
-            return '1' if v else '0'
-        if isinstance(v, (int, float)):
-            return str(v)
-        s = str(v).replace("'", "''")
-        return f"'{s}'"
-
     def _export_sql() -> None:
         try:
             out_dir = _ensure_exports_folder()
-            file_name = _base_export_file_stem().format(kind='sql') + '.sql'
+            timestamp = _timestamp_for_filename()
+            file_name = (
+                _product_data_file_stem("Category_Product_List", "sql", timestamp)
+                + ".sql"
+            )
             out_path = out_dir / file_name
 
-            create_sql, headers, rows = get_product_list_schema_and_rows()
-            if not create_sql:
-                raise RuntimeError('Product_list schema not found')
+            sql_text = _build_product_data_sql(
+                get_category_schema_and_rows(),
+                get_product_list_schema_and_rows(),
+                generated_at=datetime.now().isoformat(timespec="seconds"),
+            )
+            out_path.write_text(sql_text, encoding='utf-8', newline='\n')
 
-            with out_path.open('w', encoding='utf-8', newline='\n') as f:
-                f.write('-- Product_list export\n')
-                f.write(f'-- Generated: {datetime.now().isoformat(timespec="seconds")}\n\n')
-                f.write('BEGIN TRANSACTION;\n')
-                f.write(f'{create_sql};\n')
-                if headers:
-                    cols_sql = ', '.join([f'"{h}"' for h in headers])
-                    for r in rows:
-                        vals_sql = ', '.join([_sql_literal(v) for v in list(r)])
-                        f.write(f'INSERT INTO "Product_list" ({cols_sql}) VALUES ({vals_sql});\n')
-                f.write('COMMIT;\n')
-
-            _set_export_status(f'Product List SQL file exported to {out_dir}', ok=True)
+            _set_export_status(f'Product Data SQL file exported to {out_dir}', ok=True)
         except Exception as e:
-            log_error_message(f'admin_menu export Product List SQL failed: {e}')
-            _set_export_status('Product List SQL export failed.', ok=False)
+            log_error_message(f'admin_menu export Product Data SQL failed: {e}')
+            _set_export_status('Product Data SQL export failed.', ok=False)
 
     try:
         csvExportBtn.clicked.connect(_export_csv)
         xlsExportBtn.clicked.connect(_export_xls)
         xlsxExportBtn.clicked.connect(_export_xlsx)
-        sqlExportBtn.clicked.connect(_export_sql)
+        productDataCsvExportBtn.clicked.connect(_export_product_data_csv)
+        productDataSqlExportBtn.clicked.connect(_export_sql)
         if dbExportBtn is not None:
             dbExportBtn.clicked.connect(_export_db_copy)
         # Wire categories CSV export button if present

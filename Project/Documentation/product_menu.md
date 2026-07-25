@@ -123,7 +123,8 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 
 - Add validates and inserts a Category row.
 - Remove transactionally reassigns products to `Other`, then deletes the row.
-- Replace renames in place, or merges into an existing category.
+- Replace renames in place only when the new label does not already exist.
+  Category merging is not available.
 - `Other` and `Vegetable` are protected; attempted remove/replace operations
   show an informative warning.
 - Category changes refresh `PRODUCT_CACHE` after commit. Receipt snapshots are
@@ -133,6 +134,7 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 	- Radio buttons that switch Add/Remove/Replace are wired to only trigger their handlers when becoming `checked` (prevents unintended repopulation during programmatic state changes).
 	- Widgets (combo, update line edit) are explicitly enabled/disabled per mode instead of relying on implicit UI defaults.
 	- Enter key behavior is intercepted in the Category tab: Enter does not auto-close the dialog. `Enter` is routed to an explicit handler which validates the current field and advances focus or requires an explicit press of the `OK` button to commit. The `OK` button is not an auto-default so focus changes won't accidentally trigger a commit.
+	- Duplicate Add or Replace labels show an error, return focus to the invalid text field, and select its contents for correction.
 	- The `Other` category is preserved and is now shown as its real value when present in the DB (the dialog no longer maps `Other` to a placeholder string in the UPDATE flow).
 	- Successful category operations keep the dialog open, show success in the tab status label, and move focus to Close.
 
@@ -148,7 +150,7 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 
 ### Tests (category features)
 
-- `tests/test_category_db_replace.py`: add, rename, merge, delete, protected
+- `tests/test_category_db_replace.py`: add, rename, merge rejection, delete, protected
   categories, cache refresh, and receipt snapshots.
 - `tests/test_category_ui.py`: admin gating and database-backed category combos.
 

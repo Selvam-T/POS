@@ -79,12 +79,12 @@ QPushButton[objectName$="Ok"] {
 }
 
 QPushButton[objectName$="Ok"]:hover {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
                                       stop:0 #90caf9, stop:1 #2196f3);
 }
 
 QPushButton[objectName$="Ok"]:pressed {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
                                       stop:0 #1565c0, stop:1 #2196f3);
     padding-top: 10px;
 }
@@ -98,7 +98,7 @@ QPushButton[objectName$="Close"] {
 
 QPushButton[objectName$="Cancel"]:hover,
 QPushButton[objectName$="Close"]:hover {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
                                       stop:0 #d1d9e2, stop:1 #9ea8b7);
 }
 
@@ -679,7 +679,8 @@ QFrame[objectName*="ExportFrame"] {
 }
 
 QFrame#csvExportFrame,
-QFrame#csv2ExportFrame {
+QFrame#csv2ExportFrame,
+QFrame#productDataCsvExportFrame {
     background-color: #9fd6bb;  
 }
 
@@ -693,7 +694,7 @@ QFrame#xlsx2ExportFrame {
     background-color: #21a366;
 }
 
-QFrame#sqlExportFrame,
+QFrame#productDataSqlExportFrame,
 QFrame#sql2ExportFrame {
     background-color: #818deb;  
 }
@@ -747,19 +748,37 @@ QPushButton[objectName*="2ExportBtn"]:pressed {
                                         stop:0 #1eedbd, stop:1 #56edbd);
 }
 
-QPushButton#dbExportBtn {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-                                        stop:0 #ccefe0, stop:1 #8ed8ba);
+QPushButton[objectName*="dbExportBtn"] {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                        stop:0 #bc71f5, stop:1 #cf7ceb);
 }
 
-QPushButton#dbExportBtn:hover {
-    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-                                        stop:0 #b6ead5, stop:1 #70cfa8);
+QPushButton[objectName*="dbExportBtn"]:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                        stop:0 #ab35c5, stop:1 #cb56f6);
 }
 
-QPushButton#dbExportBtn:pressed {
+QPushButton[objectName*="dbExportBtn"]:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1, 
+                                        stop:0 #7f34d5, stop:1 #9e18f2);
+}
+
+QPushButton#productDataSqlExportBtn,
+QPushButton#productDataCsvExportBtn {
     background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
-                                        stop:0 #79d9b2, stop:1 #45bd8d);
+                                        stop:0 #d1d9f5, stop:1 #b6c1ea);
+}
+
+QPushButton#productDataSqlExportBtn:hover,
+QPushButton#productDataCsvExportBtn:hover {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+                                        stop:0 #b6c1ea, stop:1 #8798d4);
+}
+
+QPushButton#productDataSqlExportBtn:pressed,
+QPushButton#productDataCsvExportBtn:pressed {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0, y2:1,
+                                        stop:0 #8798d4, stop:1 #6e7798);
 }
 
 /* Tab navigation focus */

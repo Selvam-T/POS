@@ -154,7 +154,7 @@ DIALOG_RATIOS = {
     'todo': (0.45, 0.6),
     'product_menu': (0.5, 0.73),
     'vegetable_menu': (0.32, 0.7),
-    'hold_sales': (0.4, 0.3),
+    'hold_sales': (0.3, 0.3),
     'view_hold': (0.5, 0.7),
     'clear_cart': (0.25, 0.25),
     'refund': (0.35, 0.5),

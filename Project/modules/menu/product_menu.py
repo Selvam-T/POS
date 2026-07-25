@@ -1010,14 +1010,14 @@ def launch_product_dialog(
     def _resolve_category_for_save(combo: QComboBox, *, status_label: QLabel) -> int | None:
         category_id = combo.currentData()
         if combo.currentIndex() <= 0 or category_id is None:
-            ui_feedback.set_status_label(status_label, "Category must be selected", ok=False)
             _focus_widget(combo)
+            ui_feedback.set_status_label(status_label, "Select a category", ok=False)
             return None
         try:
             return int(category_id)
         except (TypeError, ValueError):
-            ui_feedback.set_status_label(status_label, "Invalid category selection", ok=False)
             _focus_widget(combo)
+            ui_feedback.set_status_label(status_label, "Invalid category selection", ok=False)
             return None
 
     def _finalize(mode: str, code: str, name: str) -> None:
