@@ -10,10 +10,11 @@ from config import MAIN_STATUS_ERROR_DURATION_MS, STATUS_LABEL_DURATION_MS
 
 
 class ProductCategoryTabController:
-    def __init__(self, dlg, widgets: dict, coord):
+    def __init__(self, dlg, widgets: dict, coord, on_categories_changed=None):
         self.dlg = dlg
         self.widgets = widgets
         self.coord = coord
+        self.on_categories_changed = on_categories_changed
         self._replace_selection_valid = {'val': False}
 
         self.add_gate = FocusGate([widgets['cat_add_le']], lock_enabled=True)
@@ -470,6 +471,9 @@ class ProductCategoryTabController:
         def _run_category_op(op_fn, success_msg: str, error_tag: str) -> None:
             try:
                 op_fn()
+                self.refresh_combo()
+                if callable(self.on_categories_changed):
+                    self.on_categories_changed()
                 _finalize_category(success_msg)
             except ValueError as e:
                 ui_feedback.set_status_label(

@@ -59,10 +59,11 @@ def temp_category_json(tmp_path, monkeypatch):
         );
         INSERT INTO Category(name, is_protected, sort_order)
         VALUES
-          ('Alpha', 0, 1),
+          ('Zulu', 0, 1),
           ('Beta', 0, 2),
           ('Vegetable', 1, 3),
-          ('Other', 1, 4);
+          ('Other', 1, 4),
+          ('Alpha', 0, 5);
         """
     )
     conn.commit()
@@ -97,9 +98,59 @@ def test_category_combo_includes_protected_categories_for_warning(app, temp_cate
     assert combo is not None
 
     items = [combo.itemText(i) for i in range(combo.count())]
-    assert items[0] == "--Select Category--"
-    assert "Other" in items
-    assert "Vegetable" in items
+    assert items == [
+        "--Select Category--",
+        "Alpha",
+        "Beta",
+        "Vegetable",
+        "Zulu",
+        "Other",
+    ]
+    dlg.close()
+
+
+def test_category_add_refreshes_all_product_category_combos(
+    app,
+    temp_category_json,
+):
+    mw = _make_main(is_admin=True)
+    dlg = launch_product_dialog(mw)
+    dlg.show()
+    app.processEvents()
+
+    add_combo = dlg.findChild(QComboBox, "addCategoryComboBox")
+    update_combo = dlg.findChild(QComboBox, "updateCategoryComboBox")
+    category_combo = dlg.findChild(QComboBox, "categorySelectComboBox")
+    assert all(combo.findText("Test") == -1 for combo in (
+        add_combo,
+        update_combo,
+        category_combo,
+    ))
+
+    dlg.findChild(QTabWidget, "tabWidget").setCurrentIndex(3)
+    dlg.findChild(QRadioButton, "categoryAddRadioBtn").setChecked(True)
+    dlg.findChild(QLineEdit, "categoryAddLineEdit").setText("test")
+    app.processEvents()
+    dlg.findChild(QPushButton, "btnCategoryOk").click()
+    _flush_success_events(app)
+
+    expected = [
+        "--Select Category--",
+        "Alpha",
+        "Beta",
+        "Test",
+        "Vegetable",
+        "Zulu",
+        "Other",
+    ]
+    for combo in (add_combo, update_combo):
+        assert [combo.itemText(i) for i in range(combo.count())] == expected
+
+    dlg.findChild(QRadioButton, "categoryRemoveRadioBtn").setChecked(True)
+    app.processEvents()
+    assert [
+        category_combo.itemText(i) for i in range(category_combo.count())
+    ] == expected
     dlg.close()
 
 

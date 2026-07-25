@@ -375,7 +375,18 @@ def launch_product_dialog(
 
     # --- Coordinator Wiring ---
     coord = FieldCoordinator(dlg)
-    category_tab = ProductCategoryTabController(dlg, widgets, coord)
+
+    def _refresh_product_category_combos() -> None:
+        """Keep ADD and UPDATE category choices current while the dialog stays open."""
+        _init_category_combo(widgets['add_cat'])
+        _init_category_combo(widgets['upd_cat'])
+
+    category_tab = ProductCategoryTabController(
+        dlg,
+        widgets,
+        coord,
+        on_categories_changed=_refresh_product_category_combos,
+    )
     dlg.product_category_tab_controller = category_tab
     _set_category_add_mode = category_tab.set_add_mode
     _set_category_remove_mode = category_tab.set_remove_mode

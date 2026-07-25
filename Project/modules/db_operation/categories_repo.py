@@ -23,7 +23,6 @@ def list_categories(
       {where}
      ORDER BY
        CASE WHEN name = 'Other' COLLATE NOCASE THEN 1 ELSE 0 END,
-       sort_order,
        name COLLATE NOCASE
     """
     own = conn is None
