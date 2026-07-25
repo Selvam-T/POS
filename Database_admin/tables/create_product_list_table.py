@@ -12,9 +12,13 @@ if str(ADMIN_ROOT) not in sys.path:
 from admin_lib import connect, print_header
 
 
-def create_product_list_table(*, drop_existing: bool = False) -> None:
+def create_product_list_table(
+    *,
+    drop_existing: bool = False,
+    db_file: Path | str | None = None,
+) -> None:
     print_header("Create Product_list Table")
-    with connect() as conn:
+    with connect(db_file) as conn:
         if drop_existing:
             conn.execute("DROP TABLE IF EXISTS Product_list;")
 
@@ -23,12 +27,16 @@ def create_product_list_table(*, drop_existing: bool = False) -> None:
             CREATE TABLE IF NOT EXISTS Product_list (
                 product_code  TEXT PRIMARY KEY NOT NULL CHECK(trim(product_code) <> ''),
                 name          TEXT NOT NULL CHECK(trim(name) <> ''),
-                category      TEXT,
+                category_id   INTEGER NOT NULL,
                 supplier      TEXT,
                 selling_price REAL NOT NULL,
                 cost_price    REAL,
                 unit          TEXT,
-                last_updated  TEXT
+                last_updated  TEXT,
+                FOREIGN KEY (category_id)
+                    REFERENCES Category(category_id)
+                    ON UPDATE RESTRICT
+                    ON DELETE RESTRICT
             );
             """
         )

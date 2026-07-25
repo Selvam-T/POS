@@ -52,6 +52,7 @@ def get_product_full(product_code: str) -> Tuple[bool, Dict[str, Any]]:
     return True, {
         'product_code': row.get('product_code', ''),
         'name': row.get('name', ''),
+        'category_id': row.get('category_id'),
         'category': row.get('category', ''),
         'supplier': row.get('supplier', ''),
         'price': float(row.get('selling_price') or 0.0),
@@ -65,7 +66,7 @@ def add_product(
     product_code: str,
     name: str,
     selling_price: float = 0.0,
-    category: str = '',
+    category_id: int = 0,
     supplier: str = '',
     cost_price: float = 0.0,
     unit: str = 'EACH',
@@ -76,14 +77,15 @@ def add_product(
         products_repo.add_product(
             product_code=product_code,
             name=name,
-            category=category,
+            category_id=category_id,
             supplier=supplier,
             selling_price=float(selling_price or 0.0),
             cost_price=float(cost_price or 0.0),
             unit=unit,
         )
         try:
-            upsert_cache_item(product_code, name, float(selling_price or 0.0), unit, category)
+            category_name = products_repo.get_product_full(product_code).get('category', '')
+            upsert_cache_item(product_code, name, float(selling_price or 0.0), unit, category_name)
         except Exception as e:
             try:
                 from modules.ui_utils.error_logger import log_error_message
@@ -104,7 +106,7 @@ def update_product(
     product_code: str,
     name: str = '',
     selling_price: float = 0.0,
-    category: str = '',
+    category_id: int = 0,
     supplier: str = '',
     cost_price: float = 0.0,
     unit: str = 'EACH',
@@ -114,7 +116,7 @@ def update_product(
         updated = products_repo.update_product(
             product_code,
             name=name,
-            category=category,
+            category_id=category_id,
             supplier=supplier,
             selling_price=float(selling_price or 0.0),
             cost_price=float(cost_price or 0.0),
@@ -123,7 +125,8 @@ def update_product(
         if not updated:
             return False, 'Product not found'
         try:
-            upsert_cache_item(product_code, name, float(selling_price or 0.0), unit, category)
+            category_name = products_repo.get_product_full(product_code).get('category', '')
+            upsert_cache_item(product_code, name, float(selling_price or 0.0), unit, category_name)
         except Exception as e:
             try:
                 from modules.ui_utils.error_logger import log_error_message

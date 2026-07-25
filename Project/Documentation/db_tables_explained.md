@@ -57,7 +57,8 @@ The **Product_list** table is the master catalog for all products available in t
 - **Structure:**
 	- `product_code` (TEXT, PRIMARY KEY): Unique identifier for each product (e.g., barcode or custom code).
 	- `name` (TEXT, NOT NULL): Product name, displayed in menus and receipts.
-	- `category` (TEXT): Product category (e.g., Beverages, Vegetables).
+	- `category_id` (INTEGER, NOT NULL): Foreign key to
+	  `Category.category_id`; readable names are obtained with a join.
 	- `supplier` (TEXT): Supplier or vendor name.
 	- `selling_price` (REAL, NOT NULL): Current selling price.
 	- `cost_price` (REAL): Purchase cost for accounting.
@@ -70,6 +71,13 @@ The **Product_list** table is the master catalog for all products available in t
 	- CRUD operations (add, update, delete) are managed via the Product Management dialog and backend modules.
 	- Historical product details are snapshotted in `receipt_items` at sale time to preserve accuracy.
 	- Normalization scripts ensure consistent casing and formatting for product fields.
+
+### Category Table
+
+The `Category` master table contains `category_id`, case-insensitive unique
+`name`, `is_protected`, and `sort_order`. `Other` and `Vegetable` are protected
+from remove/replace operations. Product deletion or reassignment rules are
+coordinated transactionally by `category_service`.
 	- Barcode scanning and menu dialogs reference this table for product validation and display.
 
 ---

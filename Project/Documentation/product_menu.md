@@ -113,29 +113,23 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 
 ## Category Source of Truth
 
-- Categories are stored in `<CLIENT ROOT>/data/json/categories.json` (seeded once from `config.PRODUCT_CATEGORIES`).
-- The first item in the JSON list is treated as the placeholder (e.g. `--Select Category--`).
-- JSON order is canonical: placeholder first, sorted middle, `Other` last.
+- Categories are stored in SQLite `Category`.
+- `Product_list.category_id` is required and references `Category.category_id`.
+- `--Select Category--` is UI-only with `userData=None`; real combo items
+  carry their integer `category_id`.
 - The Category tab is **admin-only**.
-
-### Storage and seeding
-
-- The JSON file is created only if missing; after that, the config list is no longer used at runtime.
-- Reads validate a minimal schema and normalize ordering each load.
-
-### category_state.py responsibilities
-
-- Loads and validates JSON, seeds on first run, and reorders lists into canonical order.
-- Enforces uniqueness (case-insensitive) and protects `Other` and `--Select Category--` from rename/delete.
-- Performs atomic writes (temp file + replace) with timestamped backups.
 
 ### Category tab behavior
 
-- Add: validates and inserts into JSON only. In **ADD** mode the category combo is intentionally cleared (no placeholder or existing items are injected) so the user must explicitly type or press Enter to confirm a new category.
-- Remove: executes a DB replace + JSON delete. The operation runs inside a single transaction that updates `Product_list` where the category matches the deleted value (case-insensitive), then removes the category from the JSON store. `PRODUCT_CACHE` is refreshed after a successful bulk replace so in-memory lookups match the current Product_list.
-- Replace: executes a DB replace in `Product_list`, then updates the JSON store to swap the old value for the new value. `PRODUCT_CACHE` is refreshed after a successful bulk replace. Receipt snapshots are not updated; the category stored in `receipt_items` remains the value at time of sale (snapshot model).
+- Add validates and inserts a Category row.
+- Remove transactionally reassigns products to `Other`, then deletes the row.
+- Replace renames in place, or merges into an existing category.
+- `Other` and `Vegetable` are protected; attempted remove/replace operations
+  show an informative warning.
+- Category changes refresh `PRODUCT_CACHE` after commit. Receipt snapshots are
+  never changed.
 - UI behaviour and safeguards:
-	- The combo handling was split into two explicit flows: `refresh` (populate from JSON) and `clear` (empty + no selection). `ADD` uses `clear`; `REMOVE`/`REPLACE` use `refresh`.
+	- `refresh` populates from SQLite and `clear` removes selection items.
 	- Radio buttons that switch Add/Remove/Replace are wired to only trigger their handlers when becoming `checked` (prevents unintended repopulation during programmatic state changes).
 	- Widgets (combo, update line edit) are explicitly enabled/disabled per mode instead of relying on implicit UI defaults.
 	- Enter key behavior is intercepted in the Category tab: Enter does not auto-close the dialog. `Enter` is routed to an explicit handler which validates the current field and advances focus or requires an explicit press of the `OK` button to commit. The `OK` button is not an auto-default so focus changes won't accidentally trigger a commit.
@@ -143,30 +137,20 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 	- Successful category operations keep the dialog open, show success in the tab status label, and move focus to Close.
 
 
-### Corrupt JSON recovery
-
-- If the JSON is invalid, the file is renamed to `categories.json.corrupt.YYYYMMDDThhmmss` and the store is reseeded.
-- To restore a known-good backup, rename the desired backup to `categories.json` (overwrite), then restart the app.
-
-### Manual backup / restore (no UI)
-
-- Backups are created in `data/json/` as `categories.json.bak.YYYYMMDDThhmmss`.
-- Export: copy `data/json/categories.json` to a safe filename.
-- Restore: rename a backup to `categories.json` (overwrite), then restart the app.
-
 ## Category tab — quick summary
 
 - The Category tab UI behavior is implemented by `ProductCategoryTabController`
   in `modules/menu/product_category_tab.py`.
 - The Category tab delegates to `modules/ui_utils/category_service.py`.
-- `add` updates only the JSON store; `remove`/`replace` run a DB replace (via `products_repo.replace_category`) then call `refresh_product_cache()` and update JSON.
+- Persistence uses `categories_repo` and `products_repo` in SQLite
+  transactions.
 - Product Menu triggers cache refresh / completer refresh after DB category changes so UI lookups stay current.
 
 ### Tests (category features)
 
-- `tests/test_category_state.py`: JSON storage, ordering, and validation behavior.
-- `tests/test_category_db_replace.py`: DB replacement when deleting categories.
-- `tests/test_category_ui.py`: Admin-only tab gating and category combo filtering.
+- `tests/test_category_db_replace.py`: add, rename, merge, delete, protected
+  categories, cache refresh, and receipt snapshots.
+- `tests/test_category_ui.py`: admin gating and database-backed category combos.
 
 ---
 

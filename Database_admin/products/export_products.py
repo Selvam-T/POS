@@ -20,9 +20,11 @@ def export_products(out_path: Path | None = None) -> Path:
     with connect() as conn:
         rows = conn.execute(
             """
-            SELECT product_code, name, category, supplier, selling_price, cost_price, unit, last_updated
-            FROM Product_list
-            ORDER BY name COLLATE NOCASE, product_code COLLATE NOCASE
+            SELECT p.product_code, p.name, c.name AS category, p.supplier,
+                   p.selling_price, p.cost_price, p.unit, p.last_updated
+              FROM Product_list AS p
+              JOIN Category AS c ON c.category_id = p.category_id
+             ORDER BY p.name COLLATE NOCASE, p.product_code COLLATE NOCASE
             """
         ).fetchall()
 

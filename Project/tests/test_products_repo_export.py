@@ -22,7 +22,7 @@ class TestProductsRepoExport(unittest.TestCase):
                         product_code TEXT PRIMARY KEY,
                         name TEXT NOT NULL,
                         selling_price REAL NOT NULL,
-                        category TEXT,
+                        category_id INTEGER NOT NULL,
                         supplier TEXT,
                         cost_price REAL,
                         unit TEXT,
@@ -30,14 +30,23 @@ class TestProductsRepoExport(unittest.TestCase):
                     );
                     """
                 )
+                cur.execute(
+                    """
+                    CREATE TABLE Category (
+                        category_id INTEGER PRIMARY KEY,
+                        name TEXT NOT NULL UNIQUE
+                    )
+                    """
+                )
+                cur.execute("INSERT INTO Category(category_id, name) VALUES (1, 'Fruit')")
                 # Insert two rows
                 cur.execute(
-                    "INSERT INTO Product_list (product_code, name, selling_price, category, supplier, cost_price, unit, last_updated) VALUES (?,?,?,?,?,?,?,datetime('now'))",
-                    ("P1", "Apple", 1.5, "Fruit", "Farm", 0.5, "EACH"),
+                    "INSERT INTO Product_list (product_code, name, selling_price, category_id, supplier, cost_price, unit, last_updated) VALUES (?,?,?,?,?,?,?,datetime('now'))",
+                    ("P1", "Apple", 1.5, 1, "Farm", 0.5, "EACH"),
                 )
                 cur.execute(
-                    "INSERT INTO Product_list (product_code, name, selling_price, category, supplier, cost_price, unit, last_updated) VALUES (?,?,?,?,?,?,?,datetime('now'))",
-                    ("P2", "Banana", 0.8, "Fruit", "Farm", 0.3, "EACH"),
+                    "INSERT INTO Product_list (product_code, name, selling_price, category_id, supplier, cost_price, unit, last_updated) VALUES (?,?,?,?,?,?,?,datetime('now'))",
+                    ("P2", "Banana", 0.8, 1, "Farm", 0.3, "EACH"),
                 )
                 conn.commit()
 

@@ -62,8 +62,6 @@ class Change:
     product_code: str
     name_old: str
     name_new: str
-    category_old: str
-    category_new: str
     supplier_old: str
     supplier_new: str
 
@@ -100,16 +98,13 @@ def compute_changes(
             continue
 
         name_old = _norm_text(r["name"])
-        category_old = _norm_text(r["category"])
         supplier_old = _norm_text(r["supplier"])
 
         name_new = _to_camel_case(name_old)
-        category_new = _to_camel_case(category_old)
         supplier_new = _to_camel_case(supplier_old)
 
         if (
             name_new != name_old
-            or category_new != category_old
             or supplier_new != supplier_old
         ):
             changes.append(
@@ -117,8 +112,6 @@ def compute_changes(
                     product_code=code,
                     name_old=name_old,
                     name_new=name_new,
-                    category_old=category_old,
-                    category_new=category_new,
                     supplier_old=supplier_old,
                     supplier_new=supplier_new,
                 )
@@ -131,8 +124,6 @@ def _format_change(c: Change) -> str:
     parts: List[str] = []
     if c.name_old != c.name_new:
         parts.append(f"name: '{c.name_old}' -> '{c.name_new}'")
-    if c.category_old != c.category_new:
-        parts.append(f"category: '{c.category_old}' -> '{c.category_new}'")
     if c.supplier_old != c.supplier_new:
         parts.append(f"supplier: '{c.supplier_old}' -> '{c.supplier_new}'")
     return f"{c.product_code}: " + ", ".join(parts)
@@ -155,7 +146,6 @@ def apply_changes(
     base_sql = """
     UPDATE Product_list
        SET name = ?,
-           category = ?,
            supplier = ?
     """.strip()
 
@@ -168,7 +158,7 @@ def apply_changes(
         for ch in changes:
             conn.execute("SAVEPOINT sp_norm;")
             try:
-                params: List[object] = [ch.name_new, ch.category_new, ch.supplier_new]
+                params: List[object] = [ch.name_new, ch.supplier_new]
                 if touch_last_updated:
                     params.append(now_iso())
                 params.append(ch.product_code)
@@ -246,7 +236,7 @@ def main() -> int:
     conn = get_conn(db_path)
     try:
         rows = conn.execute(
-            "SELECT product_code, name, category, supplier FROM Product_list ORDER BY product_code COLLATE NOCASE"
+            "SELECT product_code, name, supplier FROM Product_list ORDER BY product_code COLLATE NOCASE"
         ).fetchall()
 
         changes = compute_changes(rows, include_veg=bool(args.include_veg))

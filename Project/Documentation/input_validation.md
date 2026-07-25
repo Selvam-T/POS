@@ -72,7 +72,9 @@ Even though category is usually selected from a non-editable dropdown (QComboBox
    - The validator acts as a contract between UI and DB, ensuring the string length is always safe, regardless of UI source.
 
 **When could you remove it?**
-If you are 100% certain the ComboBox will never be editable and your PRODUCT_CATEGORIES list is pre-validated, you could skip validation. However, keeping it is considered defensive programming: it costs almost nothing and prevents future UI changes from breaking your database.
+Category names are validated before Category-table writes. Product category
+selection requires non-NULL combo item data containing an existing
+`category_id`; the UI-only placeholder carries `None`.
 
 ### Email / Password
 - “New” format validators:

@@ -23,10 +23,25 @@ class ReportsRepoTest(unittest.TestCase):
         )
         cur.execute(
             """
+            CREATE TABLE Category (
+                category_id INTEGER PRIMARY KEY,
+                name TEXT UNIQUE
+            )
+            """
+        )
+        cur.executemany(
+            "INSERT INTO Category(name) VALUES (?)",
+            [(name,) for name in (
+                "Drinks", "Snacks", "Household", "Toiletries", "Pantry",
+                "Canned Food", "Groceries", "Dairy",
+            )],
+        )
+        cur.execute(
+            """
             CREATE TABLE Product_list (
                 product_code TEXT PRIMARY KEY,
                 name TEXT,
-                category TEXT,
+                category_id INTEGER NOT NULL REFERENCES Category(category_id),
                 supplier TEXT,
                 selling_price REAL,
                 cost_price REAL,
@@ -90,8 +105,8 @@ class ReportsRepoTest(unittest.TestCase):
 
         cur.execute("INSERT INTO users(user_id, username) VALUES (1, 'admin')")
         cur.executemany(
-            "INSERT INTO Product_list(product_code, name, category, supplier, selling_price, cost_price, unit, last_updated) "
-            "VALUES (?, ?, ?, '', 0, 0, 'Each', '2026-04-20T00:00:00')",
+            "INSERT INTO Product_list(product_code, name, category_id, supplier, selling_price, cost_price, unit, last_updated) "
+            "VALUES (?, ?, (SELECT category_id FROM Category WHERE name=?), '', 0, 0, 'Each', '2026-04-20T00:00:00')",
             [
                 ('P014', 'Green Tea 500ml', 'Drinks'),
                 ('P022', 'Butter Cookies', 'Snacks'),
@@ -164,10 +179,25 @@ class ReportsRepoTest(unittest.TestCase):
         )
         cur.execute(
             """
+            CREATE TABLE Category (
+                category_id INTEGER PRIMARY KEY,
+                name TEXT UNIQUE
+            )
+            """
+        )
+        cur.executemany(
+            "INSERT INTO Category(name) VALUES (?)",
+            [(name,) for name in (
+                "Drinks", "Snacks", "Household", "Toiletries", "Pantry",
+                "Canned Food", "Groceries", "Dairy",
+            )],
+        )
+        cur.execute(
+            """
             CREATE TABLE Product_list (
                 product_code TEXT PRIMARY KEY,
                 name TEXT,
-                category TEXT,
+                category_id INTEGER NOT NULL REFERENCES Category(category_id),
                 supplier TEXT,
                 selling_price REAL,
                 cost_price REAL,
@@ -208,8 +238,8 @@ class ReportsRepoTest(unittest.TestCase):
 
         cur.execute("INSERT INTO users(user_id, username) VALUES (1, 'admin')")
         cur.executemany(
-            "INSERT INTO Product_list(product_code, name, category, supplier, selling_price, cost_price, unit, last_updated) "
-            "VALUES (?, ?, ?, '', 0, 0, 'Each', '2026-04-20T00:00:00')",
+            "INSERT INTO Product_list(product_code, name, category_id, supplier, selling_price, cost_price, unit, last_updated) "
+            "VALUES (?, ?, (SELECT category_id FROM Category WHERE name=?), '', 0, 0, 'Each', '2026-04-20T00:00:00')",
             [
                 ('P014', 'Green Tea 500ml', 'Drinks'),
                 ('P022', 'Butter Cookies', 'Snacks'),

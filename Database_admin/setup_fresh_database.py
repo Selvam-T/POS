@@ -11,6 +11,7 @@ from migration.migrate_legacy_products import migrate_legacy_products
 from migration.stage_legacy_products import stage_legacy_products
 from migration.validate_legacy_products import validate_legacy_products
 from tables.create_cash_outflows_table import create_cash_outflows_table
+from tables.create_category_table import create_category_table
 from tables.create_product_list_table import create_product_list_table
 from tables.create_receipt_tables import create_receipt_tables
 from tables.create_user_table import create_users_table
@@ -25,6 +26,7 @@ def setup_fresh_database(*, reset: bool = False) -> None:
 
     create_users_table()
     initialize_default_users()
+    create_category_table()
     create_product_list_table()
     create_receipt_tables()
     create_cash_outflows_table()

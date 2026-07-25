@@ -14,6 +14,7 @@ Database_admin/
     create_database.py
     reset_database.py
   tables/
+    create_category_table.py
     create_product_list_table.py
     create_user_table.py
     create_receipt_tables.py
@@ -24,6 +25,7 @@ Database_admin/
     import_products.py
     export_products.py
   migration/
+    migrate_categories_to_table.py
     stage_legacy_products.py
     validate_legacy_products.py
     migrate_legacy_products.py
@@ -109,13 +111,14 @@ The setup script runs these steps in order:
 1. Create the configured SQLite database file.
 2. Create `users`.
 3. Initialize default `admin` and `staff` users.
-4. Create `Product_list`.
-5. Create `receipts`, `receipt_items`, and `receipt_payments`.
-6. Create `cash_outflows`.
-7. Stage `data/products.csv` in memory.
-8. Validate and clean staged products in memory.
-9. Migrate valid products into `Product_list`.
-10. Run database audit.
+4. Validate the category master CSV and create `Category`.
+5. Create `Product_list` with its required Category foreign key.
+6. Create `receipts`, `receipt_items`, and `receipt_payments`.
+7. Create `cash_outflows`.
+8. Stage `data/products.csv` in memory.
+9. Validate and clean staged products in memory.
+10. Resolve category names to IDs and migrate products.
+11. Run database audit.
 
 If validation fails, the process stops and writes inspection files under `data/`.
 
@@ -125,6 +128,81 @@ data/product_validation_summary.txt
 ```
 
 Fix `data/products.csv`, then rerun `setup_fresh_database.py`.
+
+## Category Table Migration
+
+The controlled migration from the legacy category JSON/text model uses:
+
+```text
+Database_admin/Master_data/category_target_list.csv
+```
+
+The CSV must have exactly one header:
+
+```csv
+category
+```
+
+Every data cell must be nonblank and pass the application's category-name
+validation. Names must be unique case-insensitively. `Other` and `Vegetable`
+are required protected categories. The UI-only `--Select Category--`
+placeholder must not appear in the CSV.
+
+Run the read-only preflight first:
+
+```bash
+python migration/migrate_categories_to_table.py --preflight
+```
+
+Preflight validates the complete CSV and audits every legacy
+`Product_list.category`. Blank or NULL product categories are permitted at
+this stage because the write phase maps them to `Other`. Any other product
+category absent from the validated CSV stops the migration without writes.
+
+After a verified database and JSON backup, run:
+
+```bash
+python migration/migrate_categories_to_table.py
+```
+
+The write phase uses one transaction to:
+
+1. map blank or NULL `Product_list.category` values to `Other`;
+2. create `Category`; and
+3. populate it from the validated CSV.
+
+`Category.name` is unique case-insensitively. `Other` and `Vegetable` receive
+`is_protected = 1`; all other imported categories receive `0`.
+
+This first migration stage prepares Category and legacy product text for the
+foreign-key conversion. It does not change `receipt_items.category`.
+
+After Steps 2–7 have been verified, run the Product_list foreign-key
+migration:
+
+```bash
+python migration/migrate_product_category_fk.py
+```
+
+This migration performs Steps 8–10 in one transaction:
+
+1. adds a temporary `Product_list.category_id`;
+2. maps every legacy category name to `Category.category_id`;
+3. stops and rolls back if any product is unresolved;
+4. rebuilds `Product_list` without the legacy category text column;
+5. requires `category_id`; and
+6. enforces `ON UPDATE RESTRICT` and `ON DELETE RESTRICT`.
+
+Before dropping the legacy table, the migration compares all retained product
+values between the old and rebuilt tables. It also restores the
+`idx_product_code_nocase` index and runs SQLite foreign-key verification.
+
+The POS repositories, cache, menus, exports, administration tools, and tests
+now use `category_id` plus Category joins. Product CSV exports intentionally
+emit readable category names, and imports resolve those names back to IDs.
+
+`receipt_items.category` remains unchanged historical text and never receives
+a Category foreign key.
 
 ## Rebuilding With A New Product CSV
 

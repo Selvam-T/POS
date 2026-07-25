@@ -14,6 +14,7 @@ from admin_lib import connect, db_path, print_header, table_exists
 
 EXPECTED_BASE_TABLES = {
     "Product_list",
+    "Category",
     "users",
     "cash_outflows",
     "receipts",
@@ -36,6 +37,28 @@ def verify_database() -> None:
 
         product_count = conn.execute("SELECT COUNT(*) AS c FROM Product_list").fetchone()["c"]
         print(f"Product_list rows: {product_count}")
+
+        category_count = conn.execute("SELECT COUNT(*) AS c FROM Category").fetchone()["c"]
+        unresolved = conn.execute(
+            """
+            SELECT COUNT(*) AS c
+              FROM Product_list AS p
+              LEFT JOIN Category AS c ON c.category_id = p.category_id
+             WHERE c.category_id IS NULL
+            """
+        ).fetchone()["c"]
+        protected = {
+            row["name"].casefold()
+            for row in conn.execute(
+                "SELECT name FROM Category WHERE is_protected = 1"
+            )
+        }
+        if unresolved:
+            raise RuntimeError(f"Unresolved product category IDs: {unresolved}")
+        if protected != {"other", "vegetable"}:
+            raise RuntimeError("Protected categories must be Other and Vegetable")
+        print(f"Category rows: {category_count}")
+        print("Product category foreign keys: resolved")
 
         indexes = conn.execute("PRAGMA index_list('Product_list')").fetchall()
         index_names = {row["name"] for row in indexes}

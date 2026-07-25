@@ -26,17 +26,26 @@ def migrate_legacy_products(rows: List[Dict[str, object]] | None = None) -> int:
         for row in rows:
             cost_text = str(row.get("cost_price") or "").strip()
             cost_price = float(cost_text) if cost_text else None
+            category_name = str(row.get("category") or "Other").strip()
+            category_row = conn.execute(
+                "SELECT category_id FROM Category WHERE name = ? COLLATE NOCASE",
+                (category_name,),
+            ).fetchone()
+            if not category_row:
+                raise ValueError(
+                    f"Product category is absent from Category: {category_name}"
+                )
             conn.execute(
                 """
                 INSERT INTO Product_list
-                  (product_code, name, category, supplier, selling_price, cost_price, unit, last_updated)
+                  (product_code, name, category_id, supplier, selling_price, cost_price, unit, last_updated)
                 VALUES
                   (?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     row["product_code"],
                     row["name"],
-                    row.get("category") or "Other",
+                    int(category_row["category_id"]),
                     row.get("supplier") or "",
                     float(row["selling_price"]),
                     cost_price,

@@ -2,6 +2,7 @@
 /data/
 /db/
 /logs/
+/backups/
 
 # Python-generated files
 __pycache__/

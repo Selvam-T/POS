@@ -51,24 +51,22 @@ class ProductCategoryTabController:
         if combo is None:
             return
         try:
-            categories = category_service.list_categories() or []
+            categories = category_service.list_category_records() or []
             combo.blockSignals(True)
             combo.clear()
             placeholder = self.category_placeholder(categories)
-            combo.addItem(placeholder)
+            combo.addItem(placeholder, None)
 
-            items = []
-            for c in categories:
-                s = (c or '').strip()
+            items = set()
+            for category in categories:
+                s = str(category.get("name") or "").strip()
                 if not s:
                     continue
-                if s.strip().lower() == 'other':
+                key = s.casefold()
+                if key in items:
                     continue
-                if s.strip().lower() == placeholder.strip().lower():
-                    continue
-                if s not in items:
-                    items.append(s)
-            combo.addItems(items)
+                items.add(key)
+                combo.addItem(s, int(category["category_id"]))
             combo.setCurrentIndex(0)
         except Exception:
             pass

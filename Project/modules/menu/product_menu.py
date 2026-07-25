@@ -190,49 +190,23 @@ def launch_product_dialog(
     _configure_readonly_lineedit(widgets['upd_unit'])
     _configure_readonly_lineedit(widgets['add_unit'])
 
-    # Category combos: JSON categories, with a first-item placeholder.
+    # Category combos: database categories, with a UI-only placeholder.
     def _init_category_combo(combo: QComboBox) -> None:
         if combo is None:
             return
         try:
-            placeholder = ""
-            categories = []
-
-            try:
-                categories = category_service.list_categories() or []
-            except Exception:
-                categories = []
-
-            # Prefer first item from JSON list as placeholder when available.
-            if categories:
-                placeholder = (categories[0] or '').strip()
-                if placeholder.strip().lower() == 'other':
-                    placeholder = ''
-
-            # Fallback to whatever the .ui provided.
-            if not placeholder:
-                try:
-                    if combo.count() > 0:
-                        placeholder = (combo.itemText(0) or '').strip()
-                except Exception:
-                    placeholder = ""
+            placeholder = "--Select Category--"
+            categories = category_service.list_category_records() or []
 
             combo.blockSignals(True)
             combo.clear()
-            if placeholder:
-                combo.addItem(placeholder)
-            # Avoid duplicating the placeholder if the list already includes it.
-            items = []
-            for c in list(categories or []):
-                s = (c or '').strip()
-                if not s:
-                    continue
-                if placeholder and s.strip().lower() == placeholder.strip().lower():
-                    continue
-                if s not in items:
-                    items.append(s)
-            combo.addItems(items)
-            combo.setCurrentIndex(0 if placeholder else -1)
+            combo.addItem(placeholder, None)
+            for category in categories:
+                combo.addItem(
+                    str(category.get("name") or ""),
+                    int(category["category_id"]),
+                )
+            combo.setCurrentIndex(0)
         except Exception:
             pass
         finally:
@@ -390,6 +364,7 @@ def launch_product_dialog(
             'code': code_disp,
             'name_search': pdata.get('name') or '',
             'name': pdata.get('name') or '',
+            'category_id': pdata.get('category_id'),
             'category': pdata.get('category') or '',
             'cost': str(pdata.get('cost') or ''),
             'sell': str(pdata.get('price') or ''),
@@ -452,18 +427,17 @@ def launch_product_dialog(
         **upd_lineedit_targets,
     }
 
-    def _apply_category_to_combo(combo: QComboBox, value: str) -> None:
+    def _apply_category_to_combo(combo: QComboBox, category_id) -> None:
         if combo is None:
             return
-        s = (value or '').strip()
-        if not s:
+        if category_id is None:
             try:
                 combo.setCurrentIndex(0)
             except Exception:
                 pass
             return
         try:
-            i = combo.findText(s)
+            i = combo.findData(int(category_id))
             combo.setCurrentIndex(i if i >= 0 else 0)
         except Exception:
             pass
@@ -491,7 +465,7 @@ def launch_product_dialog(
                 pass
             return
 
-        _apply_category_to_combo(widgets['upd_cat'], result.get('category'))
+        _apply_category_to_combo(widgets['upd_cat'], result.get('category_id'))
         try:
             _set_upd_inputs_enabled(True)
         except Exception:
@@ -502,7 +476,7 @@ def launch_product_dialog(
             _upd_loaded['name'] = (result.get('name') or '').strip()
             _upd_loaded['sell'] = float((result.get('sell') or 0) or 0)
             _upd_loaded['cost'] = float((result.get('cost') or 0) or 0)
-            _upd_loaded['category'] = (result.get('category') or '').strip()
+            _upd_loaded['category_id'] = result.get('category_id')
             _upd_loaded['supplier'] = (result.get('supplier') or '').strip()
         except Exception:
             pass
@@ -1022,17 +996,18 @@ def launch_product_dialog(
             ui_feedback.set_status_label(status_label, str(e), ok=False)
             return False, None
   
-    def _resolve_category_for_save(combo: QComboBox, *, status_label: QLabel) -> str | None:
-        # 1. If placeholder is selected, return empty string (No validation needed)
-        if combo.currentIndex() <= 0:
-            return ""
-        # 2. If an actual item is selected (like '1'), run validation via _try_value
-        ok, cat = _try_value(
-            lambda: input_handler.handle_category_input_combo(combo),
-            status_label=status_label,
-            focus_widget=combo,
-        )
-        return cat if ok else None
+    def _resolve_category_for_save(combo: QComboBox, *, status_label: QLabel) -> int | None:
+        category_id = combo.currentData()
+        if combo.currentIndex() <= 0 or category_id is None:
+            ui_feedback.set_status_label(status_label, "Category must be selected", ok=False)
+            _focus_widget(combo)
+            return None
+        try:
+            return int(category_id)
+        except (TypeError, ValueError):
+            ui_feedback.set_status_label(status_label, "Invalid category selection", ok=False)
+            _focus_widget(combo)
+            return None
 
     def _finalize(mode: str, code: str, name: str) -> None:
         # Update verbs to be more professional
@@ -1189,7 +1164,7 @@ def launch_product_dialog(
             _upd_loaded.get('name') == name,
             _upd_loaded.get('sell') == sell,
             _upd_loaded.get('cost') == cost,
-            _upd_loaded.get('category') == cat,
+            _upd_loaded.get('category_id') == cat,
             _upd_loaded.get('supplier') == supp,
         ]):
             def _finish_noop() -> None:

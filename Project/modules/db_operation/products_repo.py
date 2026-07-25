@@ -12,7 +12,7 @@ TABLE = "Product_list"
 def add_product(
     product_code: str,
     name: str,
-    category: str = "",
+    category_id: int,
     supplier: str = "",
     selling_price: float = 0.0,
     cost_price: float = 0.0,
@@ -22,7 +22,7 @@ def add_product(
 ) -> None:
     sql = f"""
     INSERT INTO {TABLE}
-      (product_code, name, category, supplier, selling_price, cost_price, unit, last_updated)
+      (product_code, name, category_id, supplier, selling_price, cost_price, unit, last_updated)
     VALUES
       (?, ?, ?, ?, ?, ?, ?, ?)
     """
@@ -35,7 +35,7 @@ def add_product(
                 (
                     product_code,
                     name,
-                    category,
+                    int(category_id),
                     supplier,
                     float(selling_price),
                     float(cost_price),
@@ -52,7 +52,7 @@ def update_product(
     product_code: str,
     *,
     name: Optional[str] = None,
-    category: Optional[str] = None,
+    category_id: Optional[int] = None,
     supplier: Optional[str] = None,
     selling_price: Optional[float] = None,
     cost_price: Optional[float] = None,
@@ -66,9 +66,9 @@ def update_product(
     if name is not None:
         fields.append("name = ?")
         params.append(name)
-    if category is not None:
-        fields.append("category = ?")
-        params.append(category)
+    if category_id is not None:
+        fields.append("category_id = ?")
+        params.append(int(category_id))
     if supplier is not None:
         fields.append("supplier = ?")
         params.append(supplier)
@@ -120,18 +120,18 @@ def delete_product(product_code: str, *, conn: Optional[sqlite3.Connection] = No
             c.close()
 
 
-def replace_category(
-    old_category: str,
-    new_category: str,
+def reassign_category(
+    old_category_id: int,
+    new_category_id: int,
     *,
     conn: Optional[sqlite3.Connection] = None,
 ) -> int:
-    """Replace category for all products; returns affected row count."""
+    """Reassign products between category IDs; returns affected row count."""
     sql = f"""
     UPDATE {TABLE}
-       SET category = ?,
+       SET category_id = ?,
            last_updated = ?
-     WHERE category = ? COLLATE NOCASE
+     WHERE category_id = ?
     """
     own = conn is None
     c = conn or get_conn()
@@ -140,9 +140,9 @@ def replace_category(
         #raise RuntimeError("Simulated replace_category failure")
         if own:
             with transaction(c):
-                cur = c.execute(sql, (new_category, now_iso(), old_category))
+                cur = c.execute(sql, (int(new_category_id), now_iso(), int(old_category_id)))
                 return int(cur.rowcount or 0)
-        cur = c.execute(sql, (new_category, now_iso(), old_category))
+        cur = c.execute(sql, (int(new_category_id), now_iso(), int(old_category_id)))
         return int(cur.rowcount or 0)
     finally:
         if own:
@@ -152,9 +152,11 @@ def replace_category(
 def get_product_full(product_code: str, *, conn: Optional[sqlite3.Connection] = None) -> Optional[Dict[str, Any]]:
     """Return full product row as dict, or None."""
     sql = f"""
-    SELECT product_code, name, category, supplier, selling_price, cost_price, unit, last_updated
-      FROM {TABLE}
-     WHERE product_code = ? COLLATE NOCASE
+    SELECT p.product_code, p.name, p.category_id, c.name AS category,
+           p.supplier, p.selling_price, p.cost_price, p.unit, p.last_updated
+      FROM {TABLE} AS p
+      JOIN Category AS c ON c.category_id = p.category_id
+     WHERE p.product_code = ? COLLATE NOCASE
     """
     own = conn is None
     c = conn or get_conn()
@@ -188,9 +190,11 @@ def get_product_slim(product_code: str, *, conn: Optional[sqlite3.Connection] = 
 def list_products(*, conn: Optional[sqlite3.Connection] = None) -> List[Dict[str, Any]]:
     """Return full product rows."""
     sql = f"""
-    SELECT product_code, name, category, supplier, selling_price, cost_price, unit, last_updated
-      FROM {TABLE}
-     ORDER BY name COLLATE NOCASE
+    SELECT p.product_code, p.name, p.category_id, c.name AS category,
+           p.supplier, p.selling_price, p.cost_price, p.unit, p.last_updated
+      FROM {TABLE} AS p
+      JOIN Category AS c ON c.category_id = p.category_id
+     ORDER BY p.name COLLATE NOCASE
     """
     own = conn is None
     c = conn or get_conn()

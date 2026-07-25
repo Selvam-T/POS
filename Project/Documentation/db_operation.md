@@ -38,15 +38,21 @@ Use this for DB path resolution, connections, and transactions.
 
 SQL-only repository for the `Product_list` table.
 
-- `add_product(...)` → inserts a row (raises on errors)
+- `add_product(...)` → inserts a row with required `category_id` (raises on errors)
 - `update_product(product_code, **fields)` → returns `True` if updated
 - `delete_product(product_code)` → returns `True` if deleted
-- `get_product_full(product_code)` → returns a dict row or `None`
+- `get_product_full(product_code)` → joins Category and returns both
+  `category_id` and display `category`, or `None`
   - `list_products()` → list rows (used by cache)
 
 Important:
 - Keep schema changes localized here.
 - This module should not import PyQt.
+
+### `modules/db_operation/categories_repo.py` (SQL only)
+
+Category master-data reads and writes: list, resolve, add, rename, and delete.
+Multi-table business transactions remain in `category_service.py`.
 
 ### `modules/db_operation/product_cache.py` (app-wide cache)
 

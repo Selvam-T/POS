@@ -41,8 +41,8 @@ def products_csv_path() -> Path:
     return (ADMIN_ROOT / raw).resolve()
 
 
-def connect() -> sqlite3.Connection:
-    path = db_path()
+def connect(path: Path | str | None = None) -> sqlite3.Connection:
+    path = Path(path).resolve() if path is not None else db_path()
     if not path.exists():
         raise FileNotFoundError(f"Database not found: {path}")
     conn = sqlite3.connect(str(path))

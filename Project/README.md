@@ -171,13 +171,16 @@ CREATE TABLE Product_list (
     product_code TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     selling_price REAL NOT NULL,
-    category TEXT,
+    category_id INTEGER NOT NULL REFERENCES Category(category_id),
     supplier TEXT,
     cost_price REAL,
     unit TEXT,
     last_updated TEXT
 );
 ```
+
+`Category` stores the readable name, protected status, and display order.
+`receipt_items.category` remains independent historical snapshot text.
 
 **Product Cache:**
 - Loads all products into memory on startup

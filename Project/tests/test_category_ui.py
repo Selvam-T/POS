@@ -1,5 +1,5 @@
-import json
 import os
+import sqlite3
 import sys
 
 import pytest
@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QMainWindow,
     QPushButton,
+    QRadioButton,
     QTableWidget,
     QTabWidget,
 )
@@ -23,7 +24,6 @@ if PROJECT_ROOT not in sys.path:
 
 from modules.menu import product_menu
 from modules.menu.product_menu import launch_product_dialog
-from modules.ui_utils import category_state
 
 
 @pytest.fixture(scope="module")
@@ -36,26 +36,37 @@ def app():
 
 @pytest.fixture()
 def temp_category_json(tmp_path, monkeypatch):
-    path = tmp_path / "categories.json"
-    monkeypatch.setattr(category_state, "CATEGORIES_JSON_PATH", str(path))
-    monkeypatch.setattr(category_state, "CATEGORIES_JSON_BACKUP_PREFIX", "categories.json.bak.")
-    monkeypatch.setattr(category_state, "PROTECTED_CATEGORIES", ["Other", "--Select Category--"])
-    monkeypatch.setattr(
-        category_state,
-        "PRODUCT_CATEGORIES",
-        ["--Select Category--", "Alpha", "Other"],
+    path = tmp_path / "categories.db"
+    monkeypatch.setenv("POS_DB_PATH", str(path))
+    conn = sqlite3.connect(path)
+    conn.executescript(
+        """
+        CREATE TABLE Category (
+            category_id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL COLLATE NOCASE UNIQUE,
+            is_protected INTEGER NOT NULL,
+            sort_order INTEGER NOT NULL
+        );
+        CREATE TABLE Product_list (
+            product_code TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            category_id INTEGER NOT NULL REFERENCES Category(category_id),
+            supplier TEXT,
+            selling_price REAL NOT NULL,
+            cost_price REAL,
+            unit TEXT,
+            last_updated TEXT
+        );
+        INSERT INTO Category(name, is_protected, sort_order)
+        VALUES
+          ('Alpha', 0, 1),
+          ('Beta', 0, 2),
+          ('Vegetable', 1, 3),
+          ('Other', 1, 4);
+        """
     )
-
-    data = {
-        "categories": [
-            "--Select Category--",
-            "Beta",
-            "Other",
-            "Alpha",
-        ]
-    }
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data), encoding="utf-8")
+    conn.commit()
+    conn.close()
     return path
 
 
@@ -79,7 +90,7 @@ def test_category_tab_disabled_for_non_admin(app, temp_category_json):
     dlg.close()
 
 
-def test_category_combo_excludes_other_for_admin(app, temp_category_json):
+def test_category_combo_includes_protected_categories_for_warning(app, temp_category_json):
     mw = _make_main(is_admin=True)
     dlg = launch_product_dialog(mw)
     combo = dlg.findChild(QComboBox, 'categorySelectComboBox')
@@ -87,7 +98,30 @@ def test_category_combo_excludes_other_for_admin(app, temp_category_json):
 
     items = [combo.itemText(i) for i in range(combo.count())]
     assert items[0] == "--Select Category--"
-    assert "Other" not in items
+    assert "Other" in items
+    assert "Vegetable" in items
+    dlg.close()
+
+
+def test_remove_protected_category_shows_warning(app, temp_category_json):
+    mw = _make_main(is_admin=True)
+    dlg = launch_product_dialog(mw)
+    dlg.show()
+    app.processEvents()
+    dlg.findChild(QTabWidget, "tabWidget").setCurrentIndex(3)
+    dlg.findChild(QRadioButton, "categoryRemoveRadioBtn").setChecked(True)
+    app.processEvents()
+
+    combo = dlg.findChild(QComboBox, "categorySelectComboBox")
+    combo.setCurrentIndex(combo.findText("Other"))
+    dlg.product_category_tab_controller._on_combo_activated(combo.currentIndex())
+    app.processEvents()
+    dlg.findChild(QPushButton, "btnCategoryOk").click()
+    app.processEvents()
+
+    assert "protected" in dlg.findChild(
+        QLabel, "categoryStatusLabel"
+    ).text().lower()
     dlg.close()
 
 
@@ -148,6 +182,7 @@ def test_missing_scan_add_closes_dialog_and_inserts_product(
     dlg.findChild(QLineEdit, "addSellingPriceLineEdit").setText("1.25")
     dlg.findChild(QLineEdit, "addCostPriceLineEdit").setText("0.50")
     dlg.findChild(QLineEdit, "addSupplierLineEdit").setText("Supplier")
+    dlg.findChild(QComboBox, "addCategoryComboBox").setCurrentIndex(1)
 
     dlg.findChild(QPushButton, "btnAddOk").click()
     QTest.qWait(20)
@@ -170,6 +205,7 @@ def test_product_add_success_stays_open_and_focuses_close(app, temp_category_jso
     dlg.findChild(QLineEdit, "addSellingPriceLineEdit").setText("1.25")
     dlg.findChild(QLineEdit, "addCostPriceLineEdit").setText("0.50")
     dlg.findChild(QLineEdit, "addSupplierLineEdit").setText("Supplier")
+    dlg.findChild(QComboBox, "addCategoryComboBox").setCurrentIndex(1)
 
     dlg.findChild(QPushButton, "btnAddOk").click()
     _flush_success_events(app)
@@ -234,6 +270,7 @@ def test_product_update_noop_stays_open_and_focuses_close(app, temp_category_jso
         "product_code": "TESTUPD",
         "name": "Test Update",
         "category": "",
+        "category_id": 1,
         "cost": 0.50,
         "price": 1.25,
         "unit": "Each",

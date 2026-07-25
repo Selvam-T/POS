@@ -215,57 +215,6 @@ VEG_SLOTS = 16
 TODO_ROWS = 12
 TODO_ITEM_MAX_LEN = 40
 
-# Product category labels should not exceed 25 characters.
-PRODUCT_CATEGORIES = [
-    '--Select Category--',
-    'Bakery Goods',
-    'Beer',
-    'Beverages',
-    'Breakfast Items',
-    'Canned Food',
-    'Condiments & Sauce',
-    'Cooking Oil',
-    'Dairy Products',
-    'Egg',
-    'F&n',
-    'Frozen Food',
-    'General Merchandise',
-    'Household Products',
-    'Ice Cream',
-    'Indian Provision',
-    'Indian Snacks',
-    'Kitchen Essentials',
-    'Liquor',
-    'Marigold',
-    'Noodles',
-    'Personal Care',
-    'Pet Products',
-    'Poojai Items',
-    'Rice',
-    'Snacks',
-    'Telecom',
-    'Tobacco',
-    'Vegetable',
-    'Other',
-]
-PROTECTED_CATEGORIES = ['Other', '--Select Category--']
-
-# Seeded from PRODUCT_CATEGORIES only when the JSON store does not yet exist.
-CATEGORIES_JSON_FILENAME = 'categories.json'
-CATEGORIES_JSON_PATH = os.path.join(APPDATA_DIR, CATEGORIES_JSON_FILENAME)
-CATEGORIES_JSON_BACKUP_PREFIX = 'categories.json.bak.'
-CATEGORIES_JSON_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'categories': {
-            'type': 'array',
-            'items': {'type': 'string'},
-        }
-    },
-    'required': ['categories'],
-}
-
-
 # -----------------------------------------------------------------------------
 # Validation and input limits
 # -----------------------------------------------------------------------------

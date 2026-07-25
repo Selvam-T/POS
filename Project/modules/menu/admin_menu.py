@@ -1,6 +1,5 @@
 import os
 import csv
-import json
 import sqlite3
 from datetime import datetime
 from math import gcd
@@ -15,6 +14,7 @@ from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, set_initia
 from modules.ui_utils import input_handler
 from modules.db_operation.sqlite_runtime import get_conn
 from modules.db_operation.products_repo import get_product_list_schema_and_rows
+from modules.db_operation.categories_repo import list_categories
 from modules.db_operation.users_repo import verify_password, update_password, clear_must_change_password
 from modules.ui_utils import ui_feedback
 from modules.menu.screen2_ads_helper import Screen2AdsController
@@ -413,40 +413,19 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             pass
 
     def _export_csv2() -> None:
-        """Export categories to CSV from external data or the in-memory fallback."""
+        """Export category master rows from the database."""
         try:
             out_dir = _ensure_exports_folder()
             file_name = f"Categories_csv_{_timestamp_for_filename()}.csv"
             out_path = out_dir / file_name
 
-            # Prefer on-disk categories JSON when available
-            cats = []
-            try:
-                import config
-                path = getattr(config, 'CATEGORIES_JSON_PATH', None)
-                if path and os.path.exists(path):
-                    with open(path, 'r', encoding='utf-8') as f:
-                        data = json.load(f)
-                        if isinstance(data, dict):
-                            cats = data.get('categories') or []
-                        elif isinstance(data, list):
-                            cats = data
-            except Exception:
-                cats = []
-
-            # Fallback to in-memory categories from config
-            if not cats:
-                try:
-                    import config
-                    cats = getattr(config, 'PRODUCT_CATEGORIES', []) or []
-                except Exception:
-                    cats = []
+            categories = list_categories()
 
             with out_path.open('w', encoding='utf-8', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(['category'])
-                for c in (cats or []):
-                    writer.writerow([c])
+                for category in categories:
+                    writer.writerow([category['name']])
 
             _set_export_status(f'Product Categories CSV exported to {out_dir}', ok=True)
         except Exception as e:

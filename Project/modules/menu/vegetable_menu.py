@@ -7,7 +7,7 @@ from modules.ui_utils.dialog_utils import (
     set_dialog_error, build_error_fallback_dialog
 )
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate
-from modules.ui_utils import input_handler, ui_feedback
+from modules.ui_utils import input_handler, ui_feedback, category_service
 from modules.db_operation import (
     get_product_full, add_product, delete_product, 
     refresh_product_cache, PRODUCT_CACHE
@@ -154,6 +154,10 @@ def launch_vegetable_menu_dialog(host_window):
     # --- SECTION 3: REWRITE ENGINE ---
 
     def _execute_rewrite(candidate_veg=None, remove_code=None):
+        try:
+            vegetable_category_id = category_service.get_category_id(DEFAULT_VEG_CATEGORY)
+        except ValueError as exc:
+            return False, str(exc)
         vegs = []
         for i in range(1, 17):
             code = f"VEG{i:02d}"
@@ -171,7 +175,7 @@ def launch_vegetable_menu_dialog(host_window):
             for i in range(1, 17): delete_product(f"VEG{i:02d}")
             now = QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss')
             for i, v in enumerate(sorted_vegs, 1):
-                add_product(f"VEG{i:02d}", v['name'], v['sell'], DEFAULT_VEG_CATEGORY, 
+                add_product(f"VEG{i:02d}", v['name'], v['sell'], vegetable_category_id,
                             v['supp'], v['cost'], v['unit'], now)
             refresh_product_cache()
             return True, "Vegetable list updated."

@@ -304,10 +304,10 @@ Log-only examples:
 - `modules/menu/receipt_menu.py`
   - Product cache load, preview failure, table fill failure, and signal wiring
     failures are logged. Preview failure also shows dialog status label.
-- `modules/ui_utils/category_state.py` and
-  `modules/ui_utils/category_service.py`
-  - Category archive/backup/reorder/replacement support failures log only or
-    return failure to callers that decide display.
+- `modules/ui_utils/category_service.py`
+  - Category validation and protected-category failures return informative
+    messages to the Category tab; unexpected database failures are logged by
+    the dialog boundary.
 - `modules/ui_utils/todo_state.py`
   - Todo JSON load/validation failures log and store last-load error. The todo
     dialog later displays that stored load error in both dialog label and

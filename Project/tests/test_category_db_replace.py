@@ -1,121 +1,132 @@
-import os
 import sqlite3
-import sys
 
 import pytest
 
-# Ensure project package is on path when running directly.
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
-
-from modules.ui_utils import category_service, category_state
+from modules.ui_utils import category_service
 
 
 @pytest.fixture()
-def temp_db_and_json(tmp_path, monkeypatch):
+def category_db(tmp_path, monkeypatch):
     db_path = tmp_path / "test.db"
     monkeypatch.setenv("POS_DB_PATH", str(db_path))
-
-    monkeypatch.setattr(category_state, "CATEGORIES_JSON_PATH", str(tmp_path / "categories.json"))
-    monkeypatch.setattr(category_state, "CATEGORIES_JSON_BACKUP_PREFIX", "categories.json.bak.")
-    monkeypatch.setattr(category_state, "PROTECTED_CATEGORIES", ["Other", "--Select Category--"])
-    monkeypatch.setattr(category_state, "PRODUCT_CATEGORIES", ["--Select Category--", "Other"])
-
-    conn = sqlite3.connect(str(db_path))
-    try:
-        conn.execute(
-            """
-            CREATE TABLE Product_list (
-                product_code TEXT,
-                name TEXT,
-                category TEXT,
-                supplier TEXT,
-                selling_price REAL,
-                cost_price REAL,
-                unit TEXT,
-                last_updated TEXT
-            )
-            """
-        )
-        conn.execute(
-            """
-            CREATE TABLE receipt_items (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                category TEXT
-            )
-            """
-        )
-        conn.commit()
-    finally:
-        conn.close()
-
-    category_state.seed_categories_if_missing()
+    conn = sqlite3.connect(db_path)
+    conn.executescript(
+        """
+        PRAGMA foreign_keys = ON;
+        CREATE TABLE Category (
+            category_id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL COLLATE NOCASE UNIQUE,
+            is_protected INTEGER NOT NULL,
+            sort_order INTEGER NOT NULL
+        );
+        CREATE TABLE Product_list (
+            product_code TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            category_id INTEGER NOT NULL REFERENCES Category(category_id)
+                ON DELETE RESTRICT ON UPDATE RESTRICT,
+            supplier TEXT,
+            selling_price REAL NOT NULL,
+            cost_price REAL,
+            unit TEXT,
+            last_updated TEXT
+        );
+        CREATE TABLE receipt_items (
+            id INTEGER PRIMARY KEY,
+            category TEXT
+        );
+        INSERT INTO Category(name, is_protected, sort_order)
+        VALUES ('Other', 1, 1), ('Vegetable', 1, 2), ('Snacks', 0, 3);
+        """
+    )
+    conn.commit()
+    conn.close()
     return db_path
 
 
-def _count_by_category(conn, table, category):
-    row = conn.execute(
-        f"SELECT COUNT(*) AS cnt FROM {table} WHERE category = ? COLLATE NOCASE",
-        (category,),
-    ).fetchone()
-    return int(row[0] or 0)
+def test_delete_reassigns_products_but_preserves_receipt_snapshot(category_db):
+    conn = sqlite3.connect(category_db)
+    snack_id = conn.execute(
+        "SELECT category_id FROM Category WHERE name='Snacks'"
+    ).fetchone()[0]
+    conn.execute(
+        """
+        INSERT INTO Product_list
+          (product_code, name, category_id, selling_price, unit)
+        VALUES ('P001', 'Test', ?, 1.0, 'Each')
+        """,
+        (snack_id,),
+    )
+    conn.execute("INSERT INTO receipt_items(category) VALUES ('Snacks')")
+    conn.commit()
+    conn.close()
+
+    assert category_service.delete_category("Snacks") == 1
+
+    conn = sqlite3.connect(category_db)
+    assert conn.execute(
+        """
+        SELECT c.name FROM Product_list p
+        JOIN Category c ON c.category_id=p.category_id
+        WHERE p.product_code='P001'
+        """
+    ).fetchone()[0] == "Other"
+    assert conn.execute(
+        "SELECT category FROM receipt_items"
+    ).fetchone()[0] == "Snacks"
+    assert conn.execute(
+        "SELECT COUNT(*) FROM Category WHERE name='Snacks'"
+    ).fetchone()[0] == 0
+    conn.close()
 
 
-def test_delete_category_replaces_in_db(temp_db_and_json):
-    category_state.add_category("Snacks")
+def test_rename_keeps_product_id_and_refreshes_cache(category_db):
+    conn = sqlite3.connect(category_db)
+    snack_id = conn.execute(
+        "SELECT category_id FROM Category WHERE name='Snacks'"
+    ).fetchone()[0]
+    conn.execute(
+        """
+        INSERT INTO Product_list
+          (product_code, name, category_id, selling_price, unit)
+        VALUES ('P002', 'CacheTest', ?, 2.0, 'Each')
+        """,
+        (snack_id,),
+    )
+    conn.commit()
+    conn.close()
 
-    conn = sqlite3.connect(str(temp_db_and_json))
-    try:
-        conn.execute(
-            "INSERT INTO Product_list (product_code, name, category, supplier, selling_price, cost_price, unit, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            ("P001", "Test", "Snacks", "", 1.0, 0.0, "EACH", "2026-01-01"),
-        )
-        conn.execute(
-            "INSERT INTO receipt_items (category) VALUES (?)",
-            ("Snacks",),
-        )
-        conn.commit()
-    finally:
-        conn.close()
+    assert category_service.update_category("Snacks", "Treats") == 0
 
-    products_updated = category_service.delete_category("Snacks")
-    assert products_updated == 1
-
-    conn = sqlite3.connect(str(temp_db_and_json))
-    try:
-        assert _count_by_category(conn, "Product_list", "Snacks") == 0
-        assert _count_by_category(conn, "receipt_items", "Snacks") == 1
-        assert _count_by_category(conn, "Product_list", "Other") == 1
-        assert _count_by_category(conn, "receipt_items", "Other") == 0
-    finally:
-        conn.close()
-
-    cats = category_state.list_categories()
-    assert "Snacks" not in cats
-    assert "Other" in cats
-
-
-def test_product_cache_refreshed_after_category_replace(temp_db_and_json):
-    # Ensure product and category exist
-    category_state.add_category("Snacks")
-    conn = sqlite3.connect(str(temp_db_and_json))
-    try:
-        conn.execute(
-            "INSERT INTO Product_list (product_code, name, category, supplier, selling_price, cost_price, unit, last_updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            ("P002", "CacheTest", "Snacks", "", 2.0, 0.0, "EACH", "2026-01-01"),
-        )
-        conn.commit()
-    finally:
-        conn.close()
-
-    # Clear in-memory cache and run the delete_category which should refresh it
     from modules.db_operation import PRODUCT_CACHE
-    PRODUCT_CACHE.clear()
+    assert PRODUCT_CACHE["P002"][3] == "Treats"
 
-    products_updated = category_service.delete_category("Snacks")
-    assert products_updated >= 1
 
-    # PRODUCT_CACHE should have been refreshed and contain P002
-    from modules.db_operation import PRODUCT_CACHE as PC
-    assert any(k == 'P002' for k in (PC or {}).keys())
+@pytest.mark.parametrize("name", ["Other", "Vegetable"])
+def test_protected_categories_warn_and_remain(category_db, name):
+    with pytest.raises(ValueError, match="protected"):
+        category_service.delete_category(name)
+    with pytest.raises(ValueError, match="protected"):
+        category_service.update_category(name, "Replacement")
+
+    assert name in category_service.list_categories()
+
+
+def test_replace_with_existing_category_merges(category_db):
+    category_service.add_category("Treats")
+    conn = sqlite3.connect(category_db)
+    snack_id = conn.execute(
+        "SELECT category_id FROM Category WHERE name='Snacks'"
+    ).fetchone()[0]
+    conn.execute(
+        """
+        INSERT INTO Product_list
+          (product_code, name, category_id, selling_price)
+        VALUES ('P003', 'MergeTest', ?, 1.0)
+        """,
+        (snack_id,),
+    )
+    conn.commit()
+    conn.close()
+
+    assert category_service.update_category("Snacks", "Treats") == 1
+    assert "Snacks" not in category_service.list_categories()

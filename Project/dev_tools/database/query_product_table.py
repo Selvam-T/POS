@@ -22,7 +22,15 @@ db_path = get_db_path()
 conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 for code in codes:
-    cursor.execute("SELECT name, unit, category FROM Product_list WHERE product_code = ? COLLATE NOCASE", (code,))
+    cursor.execute(
+        """
+        SELECT p.name, p.unit, c.name
+          FROM Product_list AS p
+          JOIN Category AS c ON c.category_id = p.category_id
+         WHERE p.product_code = ? COLLATE NOCASE
+        """,
+        (code,),
+    )
     row = cursor.fetchone()
     print(f"{code}: {row[0] if row else 'NOT FOUND'}: {row[1] if row else 'N/A'}: {row[2] if row else 'N/A'}")
 conn.close()

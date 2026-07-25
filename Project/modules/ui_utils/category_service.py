@@ -1,81 +1,116 @@
-from config import PROTECTED_CATEGORIES
-from modules.db_operation import products_repo, refresh_product_cache
+"""Category business operations backed exclusively by SQLite."""
+
+from __future__ import annotations
+
+from modules.db_operation import categories_repo, products_repo, refresh_product_cache
 from modules.db_operation.sqlite_runtime import get_conn, transaction
-from modules.ui_utils import category_state
-from modules.ui_utils.error_logger import log_error_message
+from modules.ui_utils.input_validation import validate_category
 
 
-def _other_category_name() -> str:
-    for item in PROTECTED_CATEGORIES or []:
-        if str(item).strip().lower() == 'other':
-            return str(item).strip()
-    return 'Other'
+def _validated_name(value: str) -> str:
+    name = str(value or "").strip()
+    if not name:
+        raise ValueError("Category is required")
+    ok, error = validate_category(name)
+    if not ok:
+        raise ValueError(error)
+    return name
 
 
-def _ensure_category_present(name: str) -> None:
-    categories = category_state.list_categories() or []
-    if any((c or '').strip().lower() == str(name).strip().lower() for c in categories):
-        return
-    categories.append(str(name).strip())
+def _required_category(name: str, *, conn):
+    category = categories_repo.get_by_name(name, conn=conn)
+    if not category:
+        raise ValueError(f"Required category '{name}' is missing")
+    return category
+
+
+def _ensure_mutable(category: dict, operation: str) -> None:
+    if bool(category.get("is_protected")):
+        name = category.get("name") or "This category"
+        raise ValueError(
+            f"Category '{name}' is protected and cannot be {operation}."
+        )
+
+
+def list_category_records() -> list[dict]:
+    return categories_repo.list_categories()
+
+
+def list_categories() -> list[str]:
+    return [str(row["name"]) for row in list_category_records()]
+
+
+def get_category_id(name: str) -> int:
+    category = categories_repo.get_by_name(str(name or "").strip())
+    if not category:
+        raise ValueError(f"Category '{name}' does not exist")
+    return int(category["category_id"])
+
+
+def add_category(name: str) -> int:
+    clean_name = _validated_name(name)
     try:
-        category_state.save_categories(categories)
-    except Exception as e:
-        log_error_message(f"category_service: ensure replacement category failed: {e}")
+        return categories_repo.add_category(clean_name)
+    except Exception as exc:
+        if "UNIQUE constraint failed" in str(exc):
+            raise ValueError(f"Category '{clean_name}' already exists") from exc
         raise
-
-
-def replace_category_in_db(old_name: str, new_name: str) -> int:
-    """Replace category in Product_list only (snapshot model preserves receipts)."""
-    conn = get_conn()
-    try:
-        with transaction(conn):
-            products_updated = products_repo.replace_category(old_name, new_name, conn=conn)
-            return products_updated
-    except Exception as e:
-        log_error_message(f"category_service: DB replace failed ({old_name} -> {new_name}): {e}")
-        raise
-    finally:
-        conn.close()
-
-
-def add_category(name: str) -> None:
-    """Add category to JSON store only."""
-    category_state.add_category(name)
 
 
 def update_category(old_name: str, new_name: str) -> int:
-    """Rename category in DB tables, then JSON store."""
-    old_cat = category_state.Category.from_raw(old_name)
-    new_cat = category_state.Category.from_raw(new_name)
+    clean_new = _validated_name(new_name)
+    conn = get_conn()
+    try:
+        with transaction(conn):
+            source = _required_category(old_name, conn=conn)
+            _ensure_mutable(source, "replaced")
+            target = categories_repo.get_by_name(clean_new, conn=conn)
 
-    if old_cat.is_protected():
-        raise ValueError("Protected category cannot be renamed")
-    ok, err = new_cat.validate()
-    if not ok:
-        raise ValueError(err)
-    if new_cat.is_protected():
-        raise ValueError("Protected category cannot be used")
+            if target and int(target["category_id"]) != int(source["category_id"]):
+                products_updated = products_repo.reassign_category(
+                    int(source["category_id"]),
+                    int(target["category_id"]),
+                    conn=conn,
+                )
+                categories_repo.delete_category(
+                    int(source["category_id"]),
+                    conn=conn,
+                )
+            else:
+                categories_repo.rename_category(
+                    int(source["category_id"]),
+                    clean_new,
+                    conn=conn,
+                )
+                products_updated = 0
+    finally:
+        conn.close()
 
-    products_updated = replace_category_in_db(old_cat.normalized(), new_cat.normalized())
     refresh_product_cache()
-    category_state.update_category(old_cat.normalized(), new_cat.normalized())
     return products_updated
 
 
 def delete_category(name: str, *, replacement: str | None = None) -> int:
-    """Replace category with 'Other' in DB tables, then remove from JSON store."""
-    target = category_state.Category.from_raw(name)
-    if target.is_protected():
-        raise ValueError("Protected category cannot be deleted")
+    conn = get_conn()
+    try:
+        with transaction(conn):
+            source = _required_category(name, conn=conn)
+            _ensure_mutable(source, "removed")
+            replacement_name = replacement or "Other"
+            target = _required_category(replacement_name, conn=conn)
+            if int(source["category_id"]) == int(target["category_id"]):
+                raise ValueError("Replacement category must be different")
+            products_updated = products_repo.reassign_category(
+                int(source["category_id"]),
+                int(target["category_id"]),
+                conn=conn,
+            )
+            categories_repo.delete_category(
+                int(source["category_id"]),
+                conn=conn,
+            )
+    finally:
+        conn.close()
 
-    repl = replacement or _other_category_name()
-    _ensure_category_present(repl)
-    products_updated = replace_category_in_db(target.normalized(), repl)
     refresh_product_cache()
-    category_state.delete_category(target.normalized())
     return products_updated
-
-
-def list_categories():
-    """Return categories from the JSON store."""
-    return category_state.list_categories()
