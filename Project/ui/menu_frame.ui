@@ -108,6 +108,19 @@
     </widget>
    </item>
    <item alignment="Qt::AlignHCenter">
+    <widget class="QPushButton" name="diagnosticsBtn">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>Diagnostics</string>
+     </property>
+    </widget>
+   </item>
+   <item alignment="Qt::AlignHCenter">
     <widget class="QPushButton" name="logoutBtn">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">

@@ -762,11 +762,6 @@ class PaymentPanel(QObject):
         if cash > 0 and tender < cash:
             self._set_status("Cash tender < CASH payable.", is_error=True)
             return
-        # Under-allocation
-        if unalloc > 0:
-            self._set_status("Payable not fully allocated.", is_error=True)
-            return
-
         # Over-allocation messages (when unalloc < 0)
         if unalloc < 0:
             if self._is_voucher_only_overpay_allowed(unalloc):

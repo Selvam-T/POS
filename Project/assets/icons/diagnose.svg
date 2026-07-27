@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="147" height="140" viewBox="0 0 147 140">
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- monitor -->
+    <path d="M17 7 H126 Q139 7 140 21 V87 Q140 101 126 102 H82 V122 L106 126 Q115 127 115 136 Q115 140 107 140 H39 Q31 140 31 136 Q31 127 40 126 L64 122 V102 H17 Q4 102 4 87 V21 Q4 8 17 7 Z"
+          fill="#61B4E8" stroke="#102E3F" stroke-width="6"/>
+
+    <!-- stand -->
+    <path d="M64 102 H82 V122 Q82 127 89 128 L106 131 Q112 132 112 136 H34 Q35 132 40 131 L57 128 Q64 127 64 122 Z"
+          fill="#C9D9F2" stroke="#102E3F" stroke-width="6"/>
+
+    <!-- magnifier lens -->
+    <circle cx="73" cy="53" r="31" fill="#FFF6DE" stroke="#102E3F" stroke-width="7"/>
+
+    <!-- heartbeat waveform -->
+    <path d="M52 54 L60 54 L64 49 L69 64 L74 41 L80 57 L92 54"
+          stroke="#102E3F" stroke-width="6"/>
+
+    <!-- magnifier neck -->
+    <path d="M91 76 L101 86" stroke="#102E3F" stroke-width="11"/>
+    <path d="M92 75 L99 82" stroke="#C9D9F2" stroke-width="5"/>
+
+    <!-- handle -->
+    <path d="M104 82 Q110 76 116 84 L134 109 Q139 116 132 123 L116 135 Q109 141 103 132 L88 106 Q83 99 90 93 Z"
+          fill="#D6A25B" stroke="#102E3F" stroke-width="7"/>
+
+    <!-- small dash on screen -->
+    <line x1="55" y1="88" x2="61" y2="88" stroke="#102E3F" stroke-width="2"/>
+  </g>
+</svg>

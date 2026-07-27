@@ -17,6 +17,7 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - Main status footer and error-log controls: `Documentation/status_footer.md`
 - Dialog utilities/pipeline: `Documentation/dialog_utils.md`, `Documentation/dialog_pipeline.md`
 - Scanner routing: `Documentation/scanner_input_infocus.md`
+- Diagnostics menu and report export: `Documentation/diagnostics_menu.md`
 
 ## Features
 

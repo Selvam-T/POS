@@ -151,6 +151,7 @@ DIALOG_RATIOS = {
     'receipt_menu': (0.75, 0.9),
     'report_menu': (0.45, 0.6),
     'greeting_menu': (0.3, 0.3),
+    'diagnostics_menu': (0.35, 0.6),
     'todo': (0.45, 0.6),
     'product_menu': (0.45, 0.90),
     'vegetable_menu': (0.32, 0.7),
@@ -191,6 +192,7 @@ ICON_VEGETABLE = os.path.join(ASSETS_DIR, 'icons', 'vegetable.svg')
 ICON_PRODUCT = os.path.join(ASSETS_DIR, 'icons', 'product.svg')
 ICON_GREETING = os.path.join(ASSETS_DIR, 'icons', 'greeting.svg')
 ICON_RECEIPT = os.path.join(ASSETS_DIR, 'icons', 'receipt.svg')
+ICON_DIAGNOSTICS = os.path.join(ASSETS_DIR, 'icons', 'diagnose.svg')
 ICON_LOGOUT = os.path.join(ASSETS_DIR, 'icons', 'logout.svg')
 
 

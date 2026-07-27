@@ -19,7 +19,6 @@ import argparse
 import os
 import sys
 from pathlib import Path
-from typing import Mapping, Sequence
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -28,56 +27,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from modules.db_operation import products_repo
 from modules.db_operation.product_cache import PRODUCT_CACHE, load_product_cache
-from modules.ui_utils.canonicalization import (
-    canonicalize_product_code,
-    canonicalize_title_text,
-)
-
-
-def _expected_cache_item(row: Mapping) -> tuple[str, float, str, str]:
-    return (
-        canonicalize_title_text(row.get("name")),
-        float(row.get("selling_price") or 0.0),
-        canonicalize_title_text(row.get("unit")) or "Each",
-        str(row.get("category") or "").strip(),
-    )
-
-
-def compare_product_cache(
-    database_rows: Sequence[Mapping],
-    cache: Mapping[str, tuple],
-) -> dict:
-    expected = {
-        canonicalize_product_code(row.get("product_code")): _expected_cache_item(row)
-        for row in database_rows
-        if canonicalize_product_code(row.get("product_code"))
-    }
-    actual = dict(cache)
-    expected_codes = set(expected)
-    actual_codes = set(actual)
-    missing = sorted(expected_codes - actual_codes)
-    extra = sorted(actual_codes - expected_codes)
-    mismatched = sorted(
-        code
-        for code in expected_codes & actual_codes
-        if tuple(actual[code]) != expected[code]
-    )
-    consistent = sorted(
-        code
-        for code in expected_codes & actual_codes
-        if tuple(actual[code]) == expected[code]
-    )
-    return {
-        "database_total": len(expected),
-        "cache_total": len(actual),
-        "consistent_total": len(consistent),
-        "inconsistent_total": len(missing) + len(extra) + len(mismatched),
-        "missing_from_cache": missing,
-        "extra_in_cache": extra,
-        "value_mismatches": mismatched,
-        "expected": expected,
-        "actual": actual,
-    }
+from modules.menu.diagnostics.product_cache_check import compare_product_cache
 
 
 def run_check(db_path: str | None = None) -> dict:

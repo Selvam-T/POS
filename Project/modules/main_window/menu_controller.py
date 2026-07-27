@@ -11,6 +11,7 @@ from config import (
     ICON_PRODUCT,
     ICON_GREETING,
     ICON_RECEIPT,
+    ICON_DIAGNOSTICS,
     ICON_LOGOUT,
 )
 
@@ -23,6 +24,7 @@ class MainMenuController:
         'productBtn': 'Product',
         'greetingBtn': 'Greeting',
         'receiptBtn': 'Receipt',
+        'diagnosticsBtn': 'Diagnostics',
         'logoutBtn': 'Logout',
     }
 
@@ -33,6 +35,7 @@ class MainMenuController:
         'productBtn': ICON_PRODUCT,
         'greetingBtn': ICON_GREETING,
         'receiptBtn': ICON_RECEIPT,
+        'diagnosticsBtn': ICON_DIAGNOSTICS,
         'logoutBtn': ICON_LOGOUT,
     }
 
@@ -93,6 +96,7 @@ class MainMenuController:
             'adminBtn': self.main_window.open_admin_menu_dialog,
             'reportsBtn': self.main_window.open_report_menu_dialog,
             'receiptBtn': self.main_window.open_receipt_menu_dialog,
+            'diagnosticsBtn': self.main_window.open_diagnostics_menu_dialog,
         }
         handler = handler_map.get(obj_name)
         if handler is not None:

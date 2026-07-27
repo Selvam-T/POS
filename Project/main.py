@@ -40,6 +40,7 @@ from modules.menu.admin_menu import launch_admin_dialog
 from modules.menu.receipt_menu import launch_receipt_dialog
 from modules.menu.report_menu import launch_reports_dialog
 from modules.menu.greeting_menu import launch_greeting_dialog
+from modules.menu.diagnostics_menu import launch_diagnostics_dialog
 from modules.menu.product_menu import launch_product_dialog
 from modules.menu.vegetable_menu import launch_vegetable_menu_dialog
 # --- Sales frame dialog controllers ---
@@ -259,6 +260,13 @@ class MainLoader(QMainWindow):
         super().resizeEvent(event)
 
     # ========== Menu Frame Dialog Handlers ==========
+    def open_diagnostics_menu_dialog(self):
+        """Open the scanner-blocked Diagnostics dialog."""
+        self.dialog_wrapper.open_dialog_scanner_blocked(
+            launch_diagnostics_dialog,
+            dialog_key='diagnostics_menu',
+        )
+
     # Trigger logout dialog via the dialog wrapper.
     def open_logout_menu_dialog(self):
         """Open Logout dialog."""

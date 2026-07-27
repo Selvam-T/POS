@@ -119,11 +119,12 @@ Files and examples:
   - Amount/note/no-user validation failures go to the dialog status label only;
     default `STATUS_LABEL_DURATION_MS`.
 - `modules/payment/payment_panel.py`
-  - Allocation/tender validation messages go to payment-panel status label via
+  - Tender, invalid-input, and over-allocation messages go to the payment-panel status label via
     `_set_status(...)`; default `STATUS_LABEL_DURATION_MS`.
   - Examples: `Invalid amount.`, `Cash tender < CASH payable.`,
-    `Payable not fully allocated.`, `overpayment detected, rectify payment
-    allocation`.
+    `overpayment detected, rectify payment allocation`.
+  - Under-allocation is conveyed by the unallocated-value display, highlight,
+    placeholders, and disabled Pay button rather than the status label.
 - `modules/payment/todo.py`
   - Todo input validation and save failures show the todo dialog status label;
     explicit `STATUS_LABEL_DURATION_MS`.
