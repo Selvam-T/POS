@@ -266,6 +266,7 @@ QLabel#screen2PreviewLabel{
     border-radius: 4px;
 }
 
+
 /* =============================================================
    7. SHARED FORM CONTROLS AND LOCKED STATES
    ============================================================= */
@@ -485,14 +486,14 @@ QLabel[objectName$="HeaderLabel"] {
 }
 
 QLabel[objectName$="HeaderLabel2"] {
-    font-size: 13pt;
-    font-weight: 300;
+    font-size: 12pt;
+    font-weight: 200;
     color: #210707;
 }
 
 /* TabWidget */
 QTabWidget::pane {
-    border: 1px solid #c7cdd6;
+    border: none;
     background: #ffffff;
     border-radius: 4px;
 }
@@ -1056,4 +1057,44 @@ QPlainTextEdit#reportViewerTextEdit {
     padding: 8px;
     font-family: "Consolas", "Courier New", monospace;
     font-size: 10.5pt;
+}
+
+/* =============================================================
+   17. PRODUCT MENU
+   ============================================================= */
+QLabel#categoryFieldLbl {
+    color: #373767;
+    font-size: 11 pt;
+    font-weight: 400;
+}
+
+QGroupBox#categoryGroupBox {
+    background-color: #f6f7f1;
+    border: 1px solid #2ae390;
+    border-radius: 16px;
+}
+
+QLabel#categoriesLabel {
+    color: #222222;
+    font-family: "Verdana";
+    font-size: 10pt;
+    font-weight: 100;
+}
+
+QListWidget#categoriesListWidget {
+    background-color: #ffffff;
+    color: #222222;
+    border: 1px solid #adaddcdd;
+    border-radius: 4px;
+    font-family: "Verdana";
+    font-size: 10pt;
+    font-weight: 100;
+    padding: 2px;
+}
+
+QListWidget#categoriesListWidget::item {
+    padding-left: 6px;
+    padding-right: 2px;
+    padding-top: 1px;
+    padding-bottom: 1px;
 }

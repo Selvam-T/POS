@@ -1,8 +1,11 @@
 import os
 import sqlite3
 import sys
+import xml.etree.ElementTree as ET
+from pathlib import Path
 
 import pytest
+from PyQt5.QtCore import Qt
 from PyQt5.QtTest import QTest
 from PyQt5.QtWidgets import (
     QApplication,
@@ -10,6 +13,7 @@ from PyQt5.QtWidgets import (
     QDialog,
     QLabel,
     QLineEdit,
+    QListWidget,
     QMainWindow,
     QPushButton,
     QRadioButton,
@@ -25,6 +29,7 @@ if PROJECT_ROOT not in sys.path:
 from modules.menu import product_menu
 from modules.menu.product_menu import launch_product_dialog
 from modules.ui_utils import category_service
+from config import DIALOG_RATIOS
 
 
 @pytest.fixture(scope="module")
@@ -547,3 +552,189 @@ def test_category_replace_normalizes_name(app, temp_category_json):
     finally:
         conn.close()
     dlg.close()
+
+
+def test_product_menu_uses_one_fixed_size_across_tabs(app, temp_category_json):
+    mw = _make_main(is_admin=True)
+    dlg = launch_product_dialog(mw)
+    dlg.resize(800, 900)
+    dlg.show()
+    app.processEvents()
+
+    tabs = dlg.findChild(QTabWidget, "tabWidget")
+    initial_size = dlg.size()
+    for index in range(tabs.count()):
+        tabs.setCurrentIndex(index)
+        app.processEvents()
+        assert dlg.size() == initial_size
+
+    assert DIALOG_RATIOS["product_menu"] == (0.45, 0.90)
+    dlg.close()
+
+
+def test_product_menu_has_no_tab_resize_subsystem():
+    project_root = Path(PROJECT_ROOT)
+    source = (project_root / "modules" / "menu" / "product_menu.py").read_text(
+        encoding="utf-8"
+    )
+    main_source = (project_root / "main.py").read_text(encoding="utf-8")
+    wrapper_source = (
+        project_root / "modules" / "wrappers" / "dialog_wrapper.py"
+    ).read_text(encoding="utf-8")
+
+    assert not (project_root / "modules" / "menu" / "product_menu_sizing.py").exists()
+    assert "ProductMenuSizingController" not in source
+    assert "product_menu_sizing" not in source
+    assert "schedule_resize_to_tab" not in source
+    assert "ProductMenuDialogWindow" not in main_source
+    assert "QWindowsWindow::setGeometry" not in main_source
+    assert "if dialog_key == 'product_menu':" in wrapper_source
+    assert "dlg.setFixedSize(dlg.size())" in wrapper_source
+
+
+def test_categories_list_renders_sorted_without_placeholder(
+    app,
+    temp_category_json,
+):
+    dlg = launch_product_dialog(_make_main(is_admin=True))
+    category_list = dlg.findChild(QListWidget, "categoriesListWidget")
+
+    assert [category_list.item(i).text() for i in range(category_list.count())] == [
+        "1. Alpha",
+        "2. Beta",
+        "3. Other",
+        "4. Vegetable",
+        "5. Zulu",
+    ]
+    assert category_list.findItems("--Select Category--", Qt.MatchFixedString) == []
+    dlg.close()
+
+
+def test_categories_list_uses_two_fixed_columns_at_target_width(
+    app,
+    temp_category_json,
+    monkeypatch,
+):
+    records = [
+        {
+            "category_id": index,
+            "name": f"Category {index:02d}",
+            "is_protected": False,
+            "sort_order": index,
+        }
+        for index in range(1, 10)
+    ]
+    monkeypatch.setattr(category_service, "list_category_records", lambda: records)
+
+    dlg = launch_product_dialog(_make_main(is_admin=True))
+    dlg.resize(800, 900)
+    tabs = dlg.findChild(QTabWidget, "tabWidget")
+    tabs.setCurrentIndex(3)
+    dlg.show()
+    QTest.qWait(20)
+
+    category_list = dlg.findChild(QListWidget, "categoriesListWidget")
+    dlg.product_category_tab_controller.recalculate_list_grid()
+    QTest.qWait(20)
+    column_x_positions = {
+        category_list.visualItemRect(category_list.item(i)).x()
+        for i in range(category_list.count())
+    }
+
+    assert len(column_x_positions) == 2
+    assert category_list.gridSize().width() > 300
+    assert category_list.gridSize().height() == max(
+        26,
+        category_list.fontMetrics().height() + 6,
+    )
+    assert all(
+        int(category_list.item(i).textAlignment())
+        == int(Qt.AlignLeft | Qt.AlignVCenter)
+        for i in range(category_list.count())
+    )
+    assert all(
+        category_list.item(i).sizeHint().width() == 300
+        and category_list.item(i).sizeHint().height()
+        == category_list.gridSize().height()
+        for i in range(category_list.count())
+    )
+    assert category_list.horizontalScrollBar().isVisible() is False
+    dlg.close()
+
+
+def test_categories_list_vertical_scrollbar_appears_for_overflow(
+    app,
+    temp_category_json,
+    monkeypatch,
+):
+    records = [
+        {
+            "category_id": index,
+            "name": f"Category {index:02d}",
+            "is_protected": False,
+            "sort_order": index,
+        }
+        for index in range(1, 46)
+    ]
+    monkeypatch.setattr(category_service, "list_category_records", lambda: records)
+
+    dlg = launch_product_dialog(_make_main(is_admin=True))
+    dlg.resize(800, 900)
+    dlg.findChild(QTabWidget, "tabWidget").setCurrentIndex(3)
+    dlg.show()
+    QTest.qWait(20)
+
+    category_list = dlg.findChild(QListWidget, "categoriesListWidget")
+    assert category_list.verticalScrollBar().isVisible() is True
+    assert category_list.horizontalScrollBar().isVisible() is False
+    dlg.close()
+
+
+def test_categories_list_refreshes_after_add_remove_and_replace(
+    app,
+    temp_category_json,
+):
+    dlg = launch_product_dialog(_make_main(is_admin=True))
+    dlg.show()
+    app.processEvents()
+    dlg.findChild(QTabWidget, "tabWidget").setCurrentIndex(3)
+    category_list = dlg.findChild(QListWidget, "categoriesListWidget")
+
+    dlg.findChild(QLineEdit, "categoryAddLineEdit").setText("Gamma")
+    dlg.findChild(QPushButton, "btnCategoryOk").click()
+    _flush_success_events(app)
+    assert "Gamma" in [
+        category_list.item(i).data(Qt.UserRole)
+        for i in range(category_list.count())
+    ]
+
+    dlg.findChild(QRadioButton, "categoryRemoveRadioBtn").setChecked(True)
+    app.processEvents()
+    combo = dlg.findChild(QComboBox, "categorySelectComboBox")
+    combo.setCurrentIndex(combo.findText("Gamma"))
+    dlg.product_category_tab_controller._on_combo_activated(combo.currentIndex())
+    dlg.findChild(QPushButton, "btnCategoryOk").click()
+    _flush_success_events(app)
+    assert "Gamma" not in [
+        category_list.item(i).data(Qt.UserRole)
+        for i in range(category_list.count())
+    ]
+
+    dlg.findChild(QRadioButton, "categoryReplaceRadioBtn").setChecked(True)
+    app.processEvents()
+    combo.setCurrentIndex(combo.findText("Alpha"))
+    dlg.product_category_tab_controller._on_combo_activated(combo.currentIndex())
+    dlg.findChild(QLineEdit, "categoryUpdateLineEdit").setText("Delta")
+    dlg.findChild(QPushButton, "btnCategoryOk").click()
+    _flush_success_events(app)
+    displayed_names = [
+        category_list.item(i).data(Qt.UserRole)
+        for i in range(category_list.count())
+    ]
+    assert "Alpha" not in displayed_names
+    assert "Delta" in displayed_names
+    dlg.close()
+
+
+def test_product_menu_ui_remains_valid_xml():
+    ET.parse(Path(PROJECT_ROOT) / "ui" / "product_menu.ui")

@@ -18,7 +18,6 @@ Primary implementation:
 
 - Launcher / ADD-REMOVE-UPDATE controller: `modules/menu/product_menu.py`
 - Category tab controller: `modules/menu/product_category_tab.py`
-- Tab sizing controller: `modules/menu/product_menu_sizing.py`
 - UI: `ui/product_menu.ui`
 
 The Product Menu was refactored in narrow, behavior-preserving steps so the
@@ -73,16 +72,17 @@ Landing rules:
 
 ## Dialog Sizing
 
-Product Menu uses `config.PRODUCT_MENU_TAB_RATIOS` after the shared wrapper has positioned the dialog.
-The sizing behavior is implemented by `ProductMenuSizingController` in
-`modules/menu/product_menu_sizing.py`.
+Product Menu is one fixed-size frameless dialog. The shared `DialogWrapper`
+calculates its size once from `DIALOG_RATIOS['product_menu']`, currently
+`(0.45, 0.90)`, and centers it on the main window.
 
-- Width stays controlled by the configured tab ratio.
-- Height varies by active tab: ADD, REMOVE, UPDATE, and CATEGORY can each use a different main-window height ratio.
-- The tab resize is deferred with `QTimer.singleShot(0, ...)` after `currentChanged` so the tab switch settles before the frameless dialog changes size.
-- Product Menu resize mismatch warnings are logged when the requested size differs from the actual Qt window size.
-
-`DIALOG_RATIOS['product_menu']` remains the initial/fallback wrapper size; the active tab ratio is the Product Menu sizing source of truth after the dialog is visible.
+- ADD, REMOVE, UPDATE / VIEW, and CATEGORY use the same dialog dimensions.
+- Tab changes perform focus and data-refresh work only; they do not resize or
+  recenter the dialog.
+- There is no Product Menu-specific sizing controller, deferred geometry timer,
+  per-tab ratio, or Product Menu geometry-warning suppression.
+- The CATEGORY list uses an expanding layout policy inside the allocated dialog
+  space. This does not change the top-level dialog size.
 
 ---
 
@@ -138,6 +138,34 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 	- The `Other` category is preserved and is now shown as its real value when present in the DB (the dialog no longer maps `Other` to a placeholder string in the UPDATE flow).
 	- Successful category operations keep the dialog open, show success in the tab status label, and move focus to Close.
 
+### Existing categories list
+
+The CATEGORY tab includes an informational `categoriesListWidget` after the
+category-management form, status, and action buttons.
+
+- Data comes from `category_service.list_category_records()`; the UI does not
+  query SQLite directly.
+- Blank and placeholder values such as `--Select Category--` are excluded.
+- Names are deduplicated and sorted case-insensitively A-Z.
+- The standard `QListWidget` uses IconMode, left-to-right flow, wrapping,
+  static movement, uniform item sizes, and two fixed-width columns.
+- Each item is 300 pixels wide. Remaining viewport width is distributed evenly
+  across the left gutter, center column gap, and right gutter, including when
+  the vertical scrollbar is visible.
+- Items are explicitly left/vertically-centered, use compact single-line row
+  heights, and provide ample width for the 25-character category limit.
+- Item padding is kept narrow and text is not elided.
+- Items are numbered after A-Z sorting (`1.`, `2.`, and so on). Numbering is
+  presentation-only and is recalculated whenever the list refreshes.
+- The vertical scrollbar appears only for overflow; horizontal scrolling is
+  disabled.
+- The list is display-only. It does not alter the existing Remove/Replace combo
+  selection behavior.
+- It refreshes when Product Menu opens, whenever CATEGORY becomes active, and
+  after successful category add, remove, or replace operations.
+- The list expands into the remaining CATEGORY space below the OK, CLEAR, and
+  CLOSE action row.
+
 
 ## Category tab — quick summary
 
@@ -152,7 +180,9 @@ This is enforced via `is_reserved_vegetable_code(...)` and the shared `_lookup_p
 
 - `tests/test_category_db_replace.py`: add, rename, merge rejection, delete, protected
   categories, cache refresh, and receipt snapshots.
-- `tests/test_category_ui.py`: admin gating and database-backed category combos.
+- `tests/test_category_ui.py`: admin gating, database-backed category combos,
+  fixed Product Menu geometry, category-list sorting/grid/scrolling, CRUD
+  refreshes, and UI XML validity.
 
 ---
 

@@ -1286,11 +1286,6 @@ def main():
                     return
                 if "QObject::~QObject: Timers cannot be stopped from another thread" in message:
                     return
-                if (
-                    "QWindowsWindow::setGeometry: Unable to set geometry" in message
-                    and 'QWidgetWindow/"ProductMenuDialogWindow"' in message
-                ):
-                    return
                 try:
                     log_error_message(f"Qt: {message}")
                 except Exception:

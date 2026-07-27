@@ -1,5 +1,11 @@
-from PyQt5.QtCore import QObject, QEvent, Qt, QTimer
-from PyQt5.QtWidgets import QLabel, QLineEdit
+from PyQt5.QtCore import QObject, QEvent, QSize, Qt, QTimer
+from PyQt5.QtWidgets import (
+    QAbstractItemView,
+    QLabel,
+    QLineEdit,
+    QListView,
+    QListWidgetItem,
+)
 
 from modules.ui_utils import category_service, ui_feedback
 from modules.ui_utils.canonicalization import canonicalize_title_text
@@ -32,7 +38,10 @@ class ProductCategoryTabController:
         self.select_lbl = self._find_label('categorySelectFieldLbl')
         self.update_lbl = self._find_label('categoryUpdateFieldLbl')
         self._cat_filter = None
+        self._categories_list_filter = None
 
+        self._configure_categories_list()
+        self.refresh_list()
         self._register_validators()
         self._wire_connections()
         self.set_add_mode()
@@ -46,6 +55,109 @@ class ProductCategoryTabController:
     @staticmethod
     def category_placeholder(_items: list | None = None) -> str:
         return '--Select Category--'
+
+    def _configure_categories_list(self) -> None:
+        category_list = self.widgets['cat_list']
+        category_list.setViewMode(QListView.IconMode)
+        category_list.setFlow(QListView.LeftToRight)
+        category_list.setWrapping(True)
+        category_list.setMovement(QListView.Static)
+        category_list.setResizeMode(QListView.Adjust)
+        category_list.setUniformItemSizes(True)
+        category_list.setSpacing(0)
+        category_list.setWordWrap(False)
+        category_list.setTextElideMode(Qt.ElideNone)
+        category_list.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        category_list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        category_list.setDragEnabled(False)
+        category_list.setAcceptDrops(False)
+        category_list.setDropIndicatorShown(False)
+        category_list.setDragDropMode(QAbstractItemView.NoDragDrop)
+        category_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        category_list.setSelectionMode(QAbstractItemView.NoSelection)
+
+        controller = self
+
+        class _CategoriesListGeometryFilter(QObject):
+            def eventFilter(filter_self, obj, event):
+                if event.type() in (QEvent.Show, QEvent.Resize):
+                    controller.recalculate_list_grid()
+                return False
+
+        self._categories_list_filter = _CategoriesListGeometryFilter(self.dlg)
+        category_list.installEventFilter(self._categories_list_filter)
+        category_list.viewport().installEventFilter(self._categories_list_filter)
+
+    def recalculate_list_grid(self) -> None:
+        category_list = self.widgets['cat_list']
+        cell_width = 300
+        cell_height = max(26, int(category_list.fontMetrics().height()) + 6)
+        scrollbar = category_list.verticalScrollBar()
+        scrollbar_width = (
+            int(scrollbar.sizeHint().width())
+            if scrollbar is not None
+            else 0
+        )
+        viewport_width = (
+            int(category_list.width())
+            - (int(category_list.frameWidth()) * 2)
+            - scrollbar_width
+        )
+
+        layout_reserve = 10
+        column_gap = max(
+            2,
+            (viewport_width - (cell_width * 2) - layout_reserve) // 3,
+        )
+        remainder = max(
+            0,
+            viewport_width
+            - (cell_width * 2)
+            - (column_gap * 3)
+            - layout_reserve,
+        )
+        left_margin = (column_gap // 2) + (remainder // 2)
+        right_margin = (
+            column_gap
+            - (column_gap // 2)
+            + remainder
+            - (remainder // 2)
+        )
+        reserve_shift = layout_reserve // 2
+        left_margin += reserve_shift
+        right_margin = max(0, right_margin - reserve_shift)
+        category_list.setViewportMargins(left_margin, 0, right_margin, 0)
+
+        grid_size = QSize(cell_width + column_gap, cell_height)
+        item_size = QSize(cell_width, cell_height)
+        category_list.setGridSize(grid_size)
+        for index in range(category_list.count()):
+            category_list.item(index).setSizeHint(item_size)
+
+    def refresh_list(self) -> None:
+        category_list = self.widgets['cat_list']
+        records = category_service.list_category_records() or []
+        placeholder_key = self.category_placeholder([]).casefold()
+        categories_by_key = {}
+
+        for record in records:
+            name = str(record.get('name') or '').strip()
+            key = name.casefold()
+            if not name or key == placeholder_key or key in categories_by_key:
+                continue
+            categories_by_key[key] = name
+
+        category_list.clear()
+        for number, key in enumerate(sorted(categories_by_key), start=1):
+            category_name = categories_by_key[key]
+            item = QListWidgetItem(f"{number}. {category_name}")
+            item.setData(Qt.UserRole, category_name)
+            item.setFlags(Qt.ItemIsEnabled)
+            item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            category_list.addItem(item)
+
+        self.recalculate_list_grid()
+        QTimer.singleShot(0, self.recalculate_list_grid)
 
     def refresh_combo(self) -> None:
         combo = self.widgets['cat_select_combo']
@@ -488,6 +600,7 @@ class ProductCategoryTabController:
             try:
                 op_fn()
                 self.refresh_combo()
+                self.refresh_list()
                 if callable(self.on_categories_changed):
                     self.on_categories_changed()
                 _finalize_category(success_msg)

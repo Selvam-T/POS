@@ -3,7 +3,7 @@ import re
 import shutil
 from typing import List, Tuple
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import QEvent, QObject, QSize, Qt, QTimer
 from PyQt5.QtGui import QImage, QPixmap, QIcon
 from PyQt5.QtWidgets import QFileDialog, QListWidget, QListWidgetItem, QLabel, QPushButton
 
@@ -33,8 +33,33 @@ class Screen2AdsController:
         self._remove_btn = remove_btn
         self._up_btn = up_btn
         self._down_btn = down_btn
+        self._list_layout_filter = None
 
+        self._configure_list_layout()
         self._ensure_ads_dir()
+
+    def _configure_list_layout(self) -> None:
+        controller = self
+
+        class _ListViewportFilter(QObject):
+            def eventFilter(filter_self, obj, event):
+                if event.type() in (QEvent.Show, QEvent.Resize):
+                    controller._center_single_column()
+                return False
+
+        self._list_layout_filter = _ListViewportFilter(self._list)
+        self._list.installEventFilter(self._list_layout_filter)
+        self._list.viewport().installEventFilter(self._list_layout_filter)
+        self._list.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self._center_single_column()
+        QTimer.singleShot(0, self._center_single_column)
+
+    def _center_single_column(self) -> None:
+        viewport_width = max(1, int(self._list.viewport().width()))
+        grid_height = int(self._list.gridSize().height())
+        if grid_height <= 0:
+            grid_height = 140
+        self._list.setGridSize(QSize(viewport_width, grid_height))
 
     # Wire widget signals to handlers.
     def wire(self) -> None:
@@ -127,6 +152,7 @@ class Screen2AdsController:
         name = os.path.basename(path)
         item = QListWidgetItem(name)
         item.setData(Qt.UserRole, path)
+        item.setTextAlignment(Qt.AlignHCenter)
 
         pix = QPixmap(path)
         if not pix.isNull():

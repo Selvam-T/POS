@@ -1,6 +1,14 @@
 import os
 from functools import partial
-from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel, QComboBox, QTabWidget, QRadioButton
+from PyQt5.QtWidgets import (
+    QComboBox,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QPushButton,
+    QRadioButton,
+    QTabWidget,
+)
 from PyQt5.QtCore import Qt, QTimer, QDateTime
 
 from modules.ui_utils.dialog_utils import (
@@ -16,7 +24,6 @@ from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_ex
 from modules.ui_utils import input_handler, ui_feedback
 from modules.ui_utils import category_service
 from modules.menu.product_category_tab import ProductCategoryTabController
-from modules.menu.product_menu_sizing import ProductMenuSizingController
 from modules.db_operation import (
     get_product_full, add_product, update_product, delete_product
 )
@@ -120,6 +127,7 @@ def launch_product_dialog(
         'cat_clear': (QPushButton, 'btnCategoryClear'),
         'cat_close': (QPushButton, 'btnCategoryClose'),
         'cat_status': (QLabel, 'categoryStatusLabel'),
+        'cat_list': (QListWidget, 'categoriesListWidget'),
     })
 
     add_barcode_warning = ui_feedback.create_auto_clearing_warning_label(
@@ -155,10 +163,6 @@ def launch_product_dialog(
     _wire_barcode_warning_clear(widgets['add_code'], add_barcode_warning)
     _wire_barcode_warning_clear(widgets['rem_code'], rem_barcode_warning)
     _wire_barcode_warning_clear(widgets['upd_code'], upd_barcode_warning)
-
-    sizing = ProductMenuSizingController(dlg, main_window, widgets)
-    dlg.product_menu_sizing_controller = sizing
-    sizing.wire()
 
     # Category OK should not auto-trigger on Enter when focus changes.
     try:
@@ -971,9 +975,11 @@ def launch_product_dialog(
 
     def _on_tab_changed(idx: int) -> None:
         _focus_code_for_tab(idx)
-        # Refresh Category tab list when opened (only if remove/replace is active).
+        # Refresh the informational list whenever CATEGORY becomes active.
+        # Preserve the existing mode-specific combo and focus setup.
         if idx == 3:
             try:
+                category_tab.refresh_list()
                 if widgets['cat_remove_radio'].isChecked():
                     _set_category_remove_mode()
                 elif widgets['cat_replace_radio'].isChecked():

@@ -152,7 +152,7 @@ DIALOG_RATIOS = {
     'report_menu': (0.45, 0.6),
     'greeting_menu': (0.3, 0.3),
     'todo': (0.45, 0.6),
-    'product_menu': (0.5, 0.73),
+    'product_menu': (0.45, 0.90),
     'vegetable_menu': (0.32, 0.7),
     'hold_sales': (0.3, 0.3),
     'view_hold': (0.5, 0.7),
@@ -160,14 +160,6 @@ DIALOG_RATIOS = {
     'refund': (0.35, 0.5),
     'vendor': (0.30, 0.5),
     'MaxRowsDialog': (0.25, 0.25),
-}
-
-# Product Management tab-specific (width_ratio, height_ratio).
-PRODUCT_MENU_TAB_RATIOS = {
-    'add': (0.5, 0.75),
-    'remove': (0.5, 0.80),
-    'update': (0.5, 0.90),
-    'category': (0.5, 0.60),
 }
 
 REPORT_VIEWER_RATIOS = (0.6, 0.85)

@@ -217,6 +217,8 @@ class DialogWrapper:
                 pass
 
             self._setup_dialog_geometry(dlg, width_ratio, height_ratio)
+            if dialog_key == 'product_menu':
+                dlg.setFixedSize(dlg.size())
             dlg.finished.connect(self._create_cleanup(on_finish))
             self._last_dialog = dlg  # Store reference for callbacks
             result = dlg.exec_()
