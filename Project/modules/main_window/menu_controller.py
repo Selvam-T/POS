@@ -58,7 +58,7 @@ class MainMenuController:
                 pass
 
     @staticmethod
-    def _set_btn_icon_path(btn: QPushButton, icon_path: str, size: int = 60) -> bool:
+    def _set_btn_icon_path(btn: QPushButton, icon_path: str, size: int = 54) -> bool:
         try:
             if os.path.exists(icon_path):
                 btn.setIcon(QIcon(icon_path))

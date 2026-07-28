@@ -50,13 +50,13 @@ def test_product_cache_consistency_counts_all_difference_types():
     assert result["value_mismatches"] == ["B2"]
 
 
-def test_category_export_has_id_and_human_readable_name():
+def test_category_export_has_name_and_product_usage_without_id():
     headers, rows = _category_export_data(
-        [{"category_id": 7, "name": "Beverages"}]
+        [{"category_id": 7, "name": "Beverages", "product_count": 12}]
     )
 
-    assert headers == ["category_id", "category_name"]
-    assert rows == [[7, "Beverages"]]
+    assert headers == ["category_name", "product_count"]
+    assert rows == [["Beverages", 12]]
 
 
 def test_product_data_sql_recreates_category_before_products():

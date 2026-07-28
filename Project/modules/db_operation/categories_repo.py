@@ -34,6 +34,32 @@ def list_categories(
             c.close()
 
 
+def list_categories_with_product_usage(
+    *,
+    conn: Optional[sqlite3.Connection] = None,
+) -> List[Dict[str, Any]]:
+    """Return every category with the number of products assigned to it."""
+    sql = f"""
+    SELECT c.category_id,
+           c.name,
+           COUNT(p.product_code) AS product_count
+      FROM {TABLE} AS c
+      LEFT JOIN Product_list AS p
+        ON p.category_id = c.category_id
+     GROUP BY c.category_id, c.name
+     ORDER BY
+       CASE WHEN c.name = 'Other' COLLATE NOCASE THEN 1 ELSE 0 END,
+       c.name COLLATE NOCASE
+    """
+    own = conn is None
+    c = conn or get_conn()
+    try:
+        return [dict(row) for row in c.execute(sql).fetchall()]
+    finally:
+        if own:
+            c.close()
+
+
 def get_category_schema_and_rows(
     *,
     conn: Optional[sqlite3.Connection] = None,

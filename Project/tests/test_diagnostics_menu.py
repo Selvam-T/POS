@@ -80,6 +80,25 @@ def test_status_label_handles_missing_selection(monkeypatch):
     assert status.property("status") == "error"
 
 
+def test_every_diagnostic_checkbox_has_a_tooltip():
+    _app()
+    dlg = diagnostics_menu.launch_diagnostics_dialog(None)
+
+    for object_name in (
+        "databaseIntegrityCheckBox",
+        "productCacheCheckBox",
+        "productCodeCheckBox",
+        "duplicateNamesCheckBox",
+        "productDerivedUiCheckBox",
+        "categoryIntegrityCheckBox",
+        "runtimeAssetsCheckBox",
+        "deviceReadinessCheckBox",
+    ):
+        checkbox = dlg.findChild(QCheckBox, object_name)
+        assert checkbox is not None
+        assert checkbox.toolTip().strip()
+
+
 def test_cache_only_selection_uses_live_product_cache(monkeypatch, tmp_path):
     _app()
     report_path = tmp_path / "cache_report.txt"

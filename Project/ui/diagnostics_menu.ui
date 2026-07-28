@@ -158,6 +158,9 @@
       </property>
       <item>
        <widget class="QCheckBox" name="databaseIntegrityCheckBox">
+        <property name="toolTip">
+         <string>Counts database records and runs SQLite integrity and foreign-key checks.</string>
+        </property>
         <property name="text">
          <string>Database counts and SQLite integrity</string>
         </property>
@@ -168,6 +171,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="productCacheCheckBox">
+        <property name="toolTip">
+         <string>Compares the live PRODUCT_CACHE with the Product_list database table.</string>
+        </property>
         <property name="text">
          <string>Product cache consistency</string>
         </property>
@@ -175,6 +181,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="productCodeCheckBox">
+        <property name="toolTip">
+         <string>Finds numeric product codes that may be missing one to three ending characters.</string>
+        </property>
         <property name="text">
          <string>Suspicious or incomplete product codes</string>
         </property>
@@ -182,6 +191,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="duplicateNamesCheckBox">
+        <property name="toolTip">
+         <string>Finds product names duplicated after case and repeated-whitespace normalization.</string>
+        </property>
         <property name="text">
          <string>Duplicate product names</string>
         </property>
@@ -192,6 +204,9 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
+        <property name="toolTip">
+         <string>Checks cache-derived product search choices and fixed VEG01-VEG16 slot data.</string>
+        </property>
         <property name="text">
          <string>Product search lists and vegetable slots</string>
         </property>
@@ -199,6 +214,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="categoryIntegrityCheckBox">
+        <property name="toolTip">
+         <string>Checks category names, required categories, and product-category relationships.</string>
+        </property>
         <property name="text">
          <string>Category integrity</string>
         </property>
@@ -206,6 +224,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="runtimeAssetsCheckBox">
+        <property name="toolTip">
+         <string>Checks runtime paths, required UI/QSS/icon files, export readiness, and disk-space information.</string>
+        </property>
         <property name="text">
          <string>Runtime assets and paths</string>
         </property>
@@ -213,6 +234,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="deviceReadinessCheckBox">
+        <property name="toolTip">
+         <string>Checks device software, configuration, controllers, and display detection without physical tests.</string>
+        </property>
         <property name="text">
          <string>Device readiness</string>
         </property>

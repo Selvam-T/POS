@@ -19,7 +19,7 @@ from modules.db_operation.products_repo import (
 )
 from modules.db_operation.categories_repo import (
     get_category_schema_and_rows,
-    list_categories,
+    list_categories_with_product_usage,
 )
 from modules.db_operation.users_repo import verify_password, update_password, clear_must_change_password
 from modules.ui_utils import ui_feedback
@@ -47,9 +47,9 @@ EYE_CLOSE_ICON_PATH = os.path.join(ASSETS_DIR, 'icons', 'eye_close.svg')
 def _category_export_data(categories):
     """Return the stable, human-readable Category CSV shape."""
     return (
-        ['category_id', 'category_name'],
+        ['category_name', 'product_count'],
         [
-            [category['category_id'], category['name']]
+            [category['name'], category['product_count']]
             for category in categories
         ],
     )
@@ -488,7 +488,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             file_name = f"Categories_csv_{_timestamp_for_filename()}.csv"
             out_path = out_dir / file_name
 
-            categories = list_categories()
+            categories = list_categories_with_product_usage()
             headers, rows = _category_export_data(categories)
 
             with out_path.open('w', encoding='utf-8', newline='') as f:
