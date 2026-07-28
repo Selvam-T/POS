@@ -3,7 +3,14 @@ from pathlib import Path
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PyQt5.QtWidgets import QApplication, QCheckBox, QDialog, QLabel, QPushButton
+from PyQt5.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QDialog,
+    QLabel,
+    QPushButton,
+    QWidget,
+)
 
 from modules.menu import diagnostics_menu
 
@@ -218,6 +225,106 @@ def test_product_derived_ui_only_selection_uses_live_cache(
     assert dlg.result() == QDialog.Accepted
     assert observed == [live_cache]
     assert set(dlg.diagnostics_result) == {"product_derived_ui"}
+
+
+def test_category_integrity_only_selection_runs_sixth_check(
+    monkeypatch,
+    tmp_path,
+):
+    _app()
+    report_path = tmp_path / "category_report.txt"
+    observed = []
+    monkeypatch.setattr(
+        diagnostics_menu,
+        "run_category_integrity_diagnostics",
+        lambda: observed.append("categories") or {
+            "status": "PASS",
+            "issues": [],
+        },
+    )
+    monkeypatch.setattr(
+        diagnostics_menu,
+        "export_diagnostic_report",
+        lambda results: report_path,
+    )
+
+    dlg = diagnostics_menu.launch_diagnostics_dialog(None)
+    dlg.findChild(QCheckBox, "databaseIntegrityCheckBox").setChecked(False)
+    category_box = dlg.findChild(QCheckBox, "categoryIntegrityCheckBox")
+    assert category_box.isEnabled()
+    category_box.setChecked(True)
+    dlg.findChild(QPushButton, "btnDiagnosticsOk").click()
+
+    assert dlg.result() == QDialog.Accepted
+    assert observed == ["categories"]
+    assert set(dlg.diagnostics_result) == {"category_integrity"}
+
+
+def test_runtime_assets_only_selection_runs_seventh_check(
+    monkeypatch,
+    tmp_path,
+):
+    _app()
+    report_path = tmp_path / "runtime_report.txt"
+    observed = []
+    monkeypatch.setattr(
+        diagnostics_menu,
+        "run_runtime_assets_diagnostics",
+        lambda: observed.append("runtime") or {
+            "status": "PASS",
+            "issues": [],
+        },
+    )
+    monkeypatch.setattr(
+        diagnostics_menu,
+        "export_diagnostic_report",
+        lambda results: report_path,
+    )
+
+    dlg = diagnostics_menu.launch_diagnostics_dialog(None)
+    dlg.findChild(QCheckBox, "databaseIntegrityCheckBox").setChecked(False)
+    runtime_box = dlg.findChild(QCheckBox, "runtimeAssetsCheckBox")
+    assert runtime_box.isEnabled()
+    runtime_box.setChecked(True)
+    dlg.findChild(QPushButton, "btnDiagnosticsOk").click()
+
+    assert dlg.result() == QDialog.Accepted
+    assert observed == ["runtime"]
+    assert set(dlg.diagnostics_result) == {"runtime_assets"}
+
+
+def test_device_readiness_only_selection_runs_eighth_check(
+    monkeypatch,
+    tmp_path,
+):
+    _app()
+    report_path = tmp_path / "device_report.txt"
+    parent = QWidget()
+    observed = []
+    monkeypatch.setattr(
+        diagnostics_menu,
+        "run_device_readiness_diagnostics",
+        lambda *, host_window=None: observed.append(host_window) or {
+            "status": "PASS",
+            "issues": [],
+        },
+    )
+    monkeypatch.setattr(
+        diagnostics_menu,
+        "export_diagnostic_report",
+        lambda results: report_path,
+    )
+
+    dlg = diagnostics_menu.launch_diagnostics_dialog(parent)
+    dlg.findChild(QCheckBox, "databaseIntegrityCheckBox").setChecked(False)
+    device_box = dlg.findChild(QCheckBox, "deviceReadinessCheckBox")
+    assert device_box.isEnabled()
+    device_box.setChecked(True)
+    dlg.findChild(QPushButton, "btnDiagnosticsOk").click()
+
+    assert dlg.result() == QDialog.Accepted
+    assert observed == [parent]
+    assert set(dlg.diagnostics_result) == {"device_readiness"}
 
 
 def test_export_failure_rejects_dialog_and_reports_error(monkeypatch):

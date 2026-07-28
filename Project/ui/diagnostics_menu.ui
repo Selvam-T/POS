@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>560</width>
-    <height>600</height>
+    <height>650</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>500</width>
-    <height>600</height>
+    <height>650</height>
    </size>
   </property>
   <layout class="QVBoxLayout" name="mainVerticalLayout">
@@ -199,21 +199,22 @@
       </item>
       <item>
        <widget class="QCheckBox" name="categoryIntegrityCheckBox">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="text">
-         <string>Category integrity  (Coming soon)</string>
+         <string>Category integrity</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QCheckBox" name="runtimeAssetsCheckBox">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="text">
-         <string>Runtime assets and paths  (Coming soon)</string>
+         <string>Runtime assets and paths</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="deviceReadinessCheckBox">
+        <property name="text">
+         <string>Device readiness</string>
         </property>
        </widget>
       </item>

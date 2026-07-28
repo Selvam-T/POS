@@ -15,7 +15,7 @@ cleanup.
 
 ## Current Checks
 
-The dialog presents seven selectable checks:
+The dialog presents eight selectable checks:
 
 1. Database counts and SQLite integrity
 2. Product cache consistency
@@ -24,10 +24,12 @@ The dialog presents seven selectable checks:
 5. Product search lists and vegetable slots
 6. Category integrity
 7. Runtime assets and paths
+8. Device readiness
 
 The Database, Product Cache, Suspicious Product Code, Duplicate Product Name,
-and Product Search Lists and Vegetable Slots checks are enabled. The remaining
-two checks are visible, disabled, and marked `Coming soon`.
+Product Search Lists and Vegetable Slots, and Category Integrity checks are
+enabled. Runtime Assets and Paths and Device Readiness are also enabled, so all
+eight checks are available.
 
 ## Database Check
 
@@ -289,6 +291,116 @@ its Remove and Update completers after its successful Add, Remove, and Update
 refresh pipeline. Runtime widget synchronization remains an integration-test
 responsibility rather than a claim made by this read-only operator diagnostic.
 
+## Category Integrity
+
+This diagnostic reads `Category` and product category references through a
+separate read-only connection. It does not report category usage statistics
+and does not inspect or compare category dropdown choices.
+
+Category names are compared after trimming, collapsing repeated whitespace,
+and ignoring case. Punctuation is preserved. Therefore `Soft  Drinks` and
+`soft drinks` form a duplicate group, while `Soft-Drinks` remains distinct.
+
+The check reports:
+
+- Blank category names
+- Duplicate normalized category-name groups, including category IDs
+- Whether required category `Other` exists exactly once
+- Whether required category `Vegetable` exists exactly once
+- Products with no `category_id`
+- Products referencing an ID that does not exist in the Category table
+- Existing `VEG01`–`VEG16` products not assigned to `Vegetable`
+
+Unpopulated vegetable slots are not category issues. Ordinary barcoded
+Vegetable-category products are outside the fixed-code assignment check.
+Category usage and unused-category statistics belong in the Admin export
+rather than this diagnostic.
+
+The result is `PASS` when category names, required categories, product
+relationships, and populated fixed vegetable assignments are valid. Findings
+produce `WARNING`; inability to query or complete produces `FAIL`. The check is
+report-only and does not repair category or product records.
+
+## Runtime Assets and Paths
+
+This diagnostic validates the active source or packaged runtime layout without
+creating, deleting, or modifying runtime files. It checks:
+
+- Resolved application and client-root directories
+- Active database existence and readability
+- Database parent-folder writability
+- Resolved UI, QSS, and icon directories
+- Presence of required `.ui`, `.qss`, and `.svg` files
+- Whether Qt can load each required SVG icon
+- Whether the Diagnostic export folder exists or its nearest existing parent
+  is writable so the folder can be created during report export
+- Whether the runtime is using source or packaged path resolution
+
+Available disk space is reported for the database and Diagnostic export
+locations. It is informational only: there is no low-space threshold and the
+amount never changes `PASS` or `WARNING`.
+
+The runtime diagnostic intentionally omits recent error count and most recent
+error time.
+
+Missing/unreadable required paths or assets, unwritable database/export
+locations, and SVGs that Qt cannot load produce `WARNING`. Failure to execute
+the diagnostic produces `FAIL`.
+
+## Device Readiness
+
+Device Readiness is non-invasive. It inspects software, configuration,
+initialized controller state, and Qt display detection without performing a
+physical device action.
+
+Barcode scanner checks:
+
+- Scanner module and `pynput` dependency availability
+- Scanner timing configuration
+- Whether the running main window has an initialized barcode manager/scanner
+
+Receipt printer checks:
+
+- Whether hardware printing is enabled
+- Printer/cash-drawer module and `python-escpos` availability
+- Configured printer IP address and port validity
+
+Cash drawer checks:
+
+- Whether drawer operation is enabled
+- Drawer pin and timeout validity
+- Shared printer network/dependency readiness when enabled
+
+Second monitor checks:
+
+- Customer-display module and `screen2.ui` availability
+- Enabled and test-window-mode configuration
+- Configured screen index validity
+- Number of displays currently detected by Qt
+
+Disabled printer or drawer operation is reported as `DISABLED`, not a warning.
+Customer-display test-window mode is reported as `TEST MODE`. A physical second
+monitor absent from the development environment is `NOT CONNECTED`, not a
+warning.
+
+The check never:
+
+- Prints a test receipt
+- Opens the cash drawer
+- Waits for physical barcode input
+- Shows a second-monitor test pattern
+
+The report states:
+
+```text
+Physical operation is not tested by this diagnostic.
+Verify devices through normal application workflows.
+```
+
+Invalid enabled configuration, missing required dependencies/modules, or a
+missing running scanner controller produces `WARNING`. The diagnostic does not
+claim physical hardware readiness.
+
 ## Running State
 
 When OK is selected:
@@ -370,6 +482,9 @@ The report includes:
 - Tail-truncated product-code candidates and confidence
 - Duplicate product-name groups with product codes and stored names
 - Shared product-name choice and fixed vegetable-slot findings
+- Category names, required records, and product-category relationship findings
+- Runtime path, required asset, Qt icon-load, and informational disk-space data
+- Non-invasive scanner, printer, drawer, and second-monitor readiness data
 - Issues that caused a failed result
 
 After a successful export, the StatusBar message is intentionally concise:
@@ -397,6 +512,9 @@ a report was saved.
 - `modules/menu/diagnostics/product_code_check.py`: suspicious code matching
 - `modules/menu/diagnostics/product_name_check.py`: duplicate-name grouping
 - `modules/menu/diagnostics/product_derived_ui_check.py`: shared choices and fixed slots
+- `modules/menu/diagnostics/category_integrity_check.py`: category master and relationships
+- `modules/menu/diagnostics/runtime_assets_check.py`: runtime paths and assets
+- `modules/menu/diagnostics/device_readiness_check.py`: device configuration and detection
 - `modules/ui_utils/product_choices.py`: canonical product-name choice builder
 - `modules/menu/diagnostics/report_formatter.py`: selected-check text report
 - `modules/menu/diagnostics/report_exporter.py`: export folder and file writing
@@ -409,6 +527,9 @@ a report was saved.
 - `tests/test_product_code_diagnostics.py`: code matching and reporting tests
 - `tests/test_product_name_diagnostics.py`: name normalization and report tests
 - `tests/test_product_derived_ui_diagnostics.py`: shared choices and slot tests
+- `tests/test_category_integrity_diagnostics.py`: category and relationship tests
+- `tests/test_runtime_assets_diagnostics.py`: paths, assets, and report tests
+- `tests/test_device_readiness_diagnostics.py`: non-invasive device readiness tests
 
 ## Module Organization
 

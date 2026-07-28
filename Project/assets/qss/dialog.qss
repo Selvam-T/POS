@@ -1151,6 +1151,11 @@ QListWidget#categoriesListWidget::item {
    18. DIAGNOSTICS MENU
    ============================================================= */
 
+QDialog#DiagnosticsMenuDialog QFrame#diagnosticsChecksFrame {
+    border: none;
+    background-color: #ffffff;
+}
+
 /* Checkbox Text Styling */
 QFrame#diagnosticsChecksFrame QCheckBox {
     font-size: 12pt; 

@@ -6,11 +6,14 @@ from PyQt5.QtWidgets import QApplication, QCheckBox, QLabel, QPushButton
 import config
 from modules.menu.diagnostics import (
     export_diagnostic_report,
+    run_category_integrity_diagnostics,
+    run_device_readiness_diagnostics,
     run_database_diagnostics,
     run_product_cache_diagnostics,
     run_product_code_diagnostics,
     run_product_derived_ui_diagnostics,
     run_product_name_diagnostics,
+    run_runtime_assets_diagnostics,
 )
 from modules.db_operation import product_cache
 from modules.runtime.paths import stylesheet_path, ui_path
@@ -57,6 +60,7 @@ def launch_diagnostics_dialog(parent=None):
                 "quality": (QCheckBox, "productDerivedUiCheckBox"),
                 "categories": (QCheckBox, "categoryIntegrityCheckBox"),
                 "runtime": (QCheckBox, "runtimeAssetsCheckBox"),
+                "devices": (QCheckBox, "deviceReadinessCheckBox"),
                 "status": (QLabel, "diagnosticStatusLabel"),
                 "ok": (QPushButton, "btnDiagnosticsOk"),
                 "cancel": (QPushButton, "btnDiagnosticsCancel"),
@@ -81,10 +85,15 @@ def launch_diagnostics_dialog(parent=None):
     widgets["quality"].setChecked(False)
     widgets["quality"].setEnabled(True)
     widgets["quality"].setFocusPolicy(Qt.StrongFocus)
-    for key in ("categories", "runtime"):
-        widgets[key].setChecked(False)
-        widgets[key].setEnabled(False)
-        widgets[key].setFocusPolicy(Qt.NoFocus)
+    widgets["categories"].setChecked(False)
+    widgets["categories"].setEnabled(True)
+    widgets["categories"].setFocusPolicy(Qt.StrongFocus)
+    widgets["runtime"].setChecked(False)
+    widgets["runtime"].setEnabled(True)
+    widgets["runtime"].setFocusPolicy(Qt.StrongFocus)
+    widgets["devices"].setChecked(False)
+    widgets["devices"].setEnabled(True)
+    widgets["devices"].setFocusPolicy(Qt.StrongFocus)
     set_initial_focus(
         dlg,
         first_widget=widgets["database"],
@@ -100,6 +109,9 @@ def launch_diagnostics_dialog(parent=None):
             widgets["codes"],
             widgets["names"],
             widgets["quality"],
+            widgets["categories"],
+            widgets["runtime"],
+            widgets["devices"],
             widgets["ok"],
             widgets["cancel"],
             widgets["close"],
@@ -126,6 +138,9 @@ def launch_diagnostics_dialog(parent=None):
                 widgets["codes"],
                 widgets["names"],
                 widgets["quality"],
+                widgets["categories"],
+                widgets["runtime"],
+                widgets["devices"],
             )
         ):
             ui_feedback.set_status_label(
@@ -162,6 +177,16 @@ def launch_diagnostics_dialog(parent=None):
                 run_product_derived_ui_diagnostics(
                     product_cache.PRODUCT_CACHE
                 )
+            )
+        if widgets["categories"].isChecked():
+            results["category_integrity"] = (
+                run_category_integrity_diagnostics()
+            )
+        if widgets["runtime"].isChecked():
+            results["runtime_assets"] = run_runtime_assets_diagnostics()
+        if widgets["devices"].isChecked():
+            results["device_readiness"] = (
+                run_device_readiness_diagnostics(host_window=parent)
             )
         dlg.diagnostics_result = results
 
