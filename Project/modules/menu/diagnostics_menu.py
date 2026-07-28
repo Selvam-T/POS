@@ -8,6 +8,7 @@ from modules.menu.diagnostics import (
     export_diagnostic_report,
     run_database_diagnostics,
     run_product_cache_diagnostics,
+    run_product_code_diagnostics,
 )
 from modules.db_operation import product_cache
 from modules.runtime.paths import stylesheet_path, ui_path
@@ -19,6 +20,7 @@ from modules.ui_utils.dialog_utils import (
     require_widgets,
     set_dialog_error,
     set_dialog_info,
+    set_dialog_main_status_max,
 )
 from modules.ui_utils.error_logger import log_error_message
 from modules.ui_utils.focus_utils import FocusGate, set_initial_focus
@@ -68,7 +70,10 @@ def launch_diagnostics_dialog(parent=None):
     widgets["cache"].setChecked(False)
     widgets["cache"].setEnabled(True)
     widgets["cache"].setFocusPolicy(Qt.StrongFocus)
-    for key in ("codes", "names", "quality", "categories", "runtime"):
+    widgets["codes"].setChecked(False)
+    widgets["codes"].setEnabled(True)
+    widgets["codes"].setFocusPolicy(Qt.StrongFocus)
+    for key in ("names", "quality", "categories", "runtime"):
         widgets[key].setChecked(False)
         widgets[key].setEnabled(False)
         widgets[key].setFocusPolicy(Qt.NoFocus)
@@ -84,6 +89,7 @@ def launch_diagnostics_dialog(parent=None):
         [
             widgets["database"],
             widgets["cache"],
+            widgets["codes"],
             widgets["ok"],
             widgets["cancel"],
             widgets["close"],
@@ -104,7 +110,11 @@ def launch_diagnostics_dialog(parent=None):
             return
         if not any(
             checkbox.isChecked()
-            for checkbox in (widgets["database"], widgets["cache"])
+            for checkbox in (
+                widgets["database"],
+                widgets["cache"],
+                widgets["codes"],
+            )
         ):
             ui_feedback.set_status_label(
                 widgets["status"],
@@ -131,14 +141,18 @@ def launch_diagnostics_dialog(parent=None):
             results["product_cache"] = run_product_cache_diagnostics(
                 product_cache.PRODUCT_CACHE
             )
+        if widgets["codes"].isChecked():
+            results["product_codes"] = run_product_code_diagnostics()
         dlg.diagnostics_result = results
 
-        failed_results = [
-            result
-            for result in results.values()
-            if str(result.get("status") or "FAIL") != "PASS"
-        ]
-        status = "FAIL" if failed_results else "PASS"
+        statuses = {
+            str(result.get("status") or "FAIL") for result in results.values()
+        }
+        status = (
+            "FAIL"
+            if "FAIL" in statuses
+            else ("WARNING" if "WARNING" in statuses else "PASS")
+        )
         try:
             report_path = export_diagnostic_report(dlg.diagnostics_result)
             dlg.diagnostics_report_path = str(report_path)
@@ -155,33 +169,37 @@ def launch_diagnostics_dialog(parent=None):
             dlg.reject()
             return
 
-        if status == "PASS":
-            message = f"Diagnostic report saved to {report_path.parent}"
-            is_error = False
-        else:
-            for key, failed_result in (
+        message = f"Diagnostic report saved to {report_path.parent}"
+        if status == "FAIL":
+            for key, non_pass_result in (
                 (key, value)
                 for key, value in results.items()
-                if str(value.get("status") or "FAIL") != "PASS"
+                if str(value.get("status") or "FAIL") == "FAIL"
             ):
                 try:
                     log_error_message(
-                        f"diagnostics_menu: {key} diagnostic failed: "
+                        f"diagnostics_menu: {key} diagnostic "
+                        f"{str(non_pass_result.get('status') or 'FAIL').lower()}: "
                         + "; ".join(
                             str(issue)
-                            for issue in (failed_result.get("issues") or [])
+                            for issue in (non_pass_result.get("issues") or [])
                         )
                     )
                 except Exception:
                     pass
-            message = f"Diagnostic report saved to {report_path.parent}"
-            is_error = True
 
-        if is_error:
+        if status == "FAIL":
             set_dialog_error(
                 dlg,
                 message,
                 duration=config.MAIN_STATUS_ERROR_DURATION_MS,
+            )
+        elif status == "WARNING":
+            set_dialog_main_status_max(
+                dlg,
+                message,
+                level="warning",
+                duration=config.MAIN_STATUS_LONG_DURATION_MS,
             )
         else:
             set_dialog_info(

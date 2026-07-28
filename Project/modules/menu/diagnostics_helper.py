@@ -11,8 +11,10 @@ from modules.menu.diagnostics import (
     compare_product_cache,
     export_diagnostic_report,
     format_diagnostic_report,
+    find_suspicious_product_codes,
     run_database_diagnostics,
     run_product_cache_diagnostics,
+    run_product_code_diagnostics,
 )
 
 
@@ -22,6 +24,8 @@ __all__ = [
     "compare_product_cache",
     "export_diagnostic_report",
     "format_diagnostic_report",
+    "find_suspicious_product_codes",
     "run_database_diagnostics",
     "run_product_cache_diagnostics",
+    "run_product_code_diagnostics",
 ]

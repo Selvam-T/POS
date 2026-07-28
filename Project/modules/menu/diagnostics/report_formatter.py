@@ -138,6 +138,94 @@ def _append_product_cache_report(lines: list[str], cache: Mapping) -> None:
     lines.append("")
 
 
+def _append_product_code_report(lines: list[str], codes: Mapping) -> None:
+    candidates = list(codes.get("candidates") or [])
+    high_confidence_total = sum(
+        1
+        for candidate in candidates
+        if str(candidate.get("confidence") or "").upper() == "HIGH"
+    )
+    lower_confidence_total = sum(
+        1
+        for candidate in candidates
+        if str(candidate.get("confidence") or "").upper() == "LOWER"
+    )
+    suspicious_codes = {
+        str(code)
+        for candidate in candidates
+        for code in (
+            candidate.get("shorter_code"),
+            candidate.get("longer_code"),
+        )
+        if code
+    }
+    excluded_total = sum(
+        int(codes.get(key) or 0)
+        for key in (
+            "ignored_short_code_total",
+            "ignored_vegetable_code_total",
+            "ignored_other_code_total",
+        )
+    )
+    lines.extend(
+        [
+            "SUSPICIOUS OR INCOMPLETE PRODUCT CODES",
+            "-" * 64,
+            f"Status: {codes.get('status') or 'NOT RUN'}",
+            f"Started: {codes.get('started_at') or 'N/A'}",
+            f"Completed: {codes.get('completed_at') or 'N/A'}",
+            f"Duration: {float(codes.get('duration_seconds') or 0.0):.3f} seconds",
+            f"Database path: {codes.get('database_path') or 'N/A'}",
+            "",
+            "CHECK SETTINGS",
+            f"- Minimum barcode length checked: {codes.get('minimum_barcode_length', 5)} characters",
+            "- Tail truncation range checked: "
+            f"1 to {codes.get('maximum_missing_tail_characters', 3)} missing characters",
+            "- Matching rule: shorter code must exactly match the start of a longer code",
+            "",
+            "SCAN SUMMARY",
+            f"- Product codes read from database: {codes.get('database_total', 0)}",
+            f"- Numeric barcode codes checked: {codes.get('eligible_numeric_total', 0)}",
+            f"- Codes excluded from comparison: {excluded_total}",
+            f"  - Short keyboard shortcut codes: {codes.get('ignored_short_code_total', 0)}",
+            f"  - Automated vegetable codes: {codes.get('ignored_vegetable_code_total', 0)}",
+            f"  - Other nonnumeric/internal codes: {codes.get('ignored_other_code_total', 0)}",
+            "",
+            "FINDINGS",
+            f"- Suspicious product codes: {len(suspicious_codes)}",
+            f"- Suspicious tail-truncation pairs found: {len(candidates)}",
+            f"  - High-confidence pairs: {high_confidence_total}",
+            f"  - Lower-confidence pairs: {lower_confidence_total}",
+            "",
+            "REVIEW CANDIDATES",
+        ]
+    )
+    if candidates:
+        for index, candidate in enumerate(candidates, start=1):
+            lines.extend(
+                [
+                    f"{index}. Missing tail characters: "
+                    f"{candidate.get('missing_tail_characters', 'N/A')}",
+                    f"   Confidence: {candidate.get('confidence', 'N/A')}",
+                    "   Prefix coverage: "
+                    f"{float(candidate.get('prefix_coverage_percent') or 0.0):.2f}%",
+                    f"   a) {candidate.get('shorter_code') or 'N/A'} - "
+                    f"{candidate.get('product_name_1') or 'Unnamed product'}",
+                    f"   b) {candidate.get('longer_code') or 'N/A'} - "
+                    f"{candidate.get('product_name_2') or 'Unnamed product'}",
+                    "",
+                ]
+            )
+    else:
+        lines.append("- None")
+    lines.extend(["", "Issues:"])
+    lines.extend(
+        [f"- {issue}" for issue in (codes.get("issues") or [])]
+        or ["- None"]
+    )
+    lines.append("")
+
+
 def format_diagnostic_report(
     diagnostic_results: Mapping[str, Mapping],
     *,
@@ -147,10 +235,19 @@ def format_diagnostic_report(
     generated = generated_at or datetime.now().astimezone()
     database = dict((diagnostic_results or {}).get("database") or {})
     product_cache = dict((diagnostic_results or {}).get("product_cache") or {})
-    completed = [item for item in (database, product_cache) if item]
+    product_codes = dict((diagnostic_results or {}).get("product_codes") or {})
+    completed = [
+        item for item in (database, product_cache, product_codes) if item
+    ]
     statuses = [str(item.get("status") or "FAIL") for item in completed]
     overall_status = (
-        "FAIL" if "FAIL" in statuses else ("PASS" if statuses else "NOT RUN")
+        "FAIL"
+        if "FAIL" in statuses
+        else (
+            "WARNING"
+            if "WARNING" in statuses
+            else ("PASS" if statuses else "NOT RUN")
+        )
     )
 
     lines = [
@@ -168,11 +265,18 @@ def format_diagnostic_report(
         selected_number += 1
     if product_cache:
         lines.append(f"{selected_number}. Product cache consistency")
+        selected_number += 1
+    if product_codes:
+        lines.append(
+            f"{selected_number}. Suspicious or incomplete product codes"
+        )
     lines.append("")
     if database:
         _append_database_report(lines, database)
     if product_cache:
         _append_product_cache_report(lines, product_cache)
+    if product_codes:
+        _append_product_code_report(lines, product_codes)
 
     lines.extend(["", "=" * 64, "END OF REPORT", ""])
     return "\n".join(lines)

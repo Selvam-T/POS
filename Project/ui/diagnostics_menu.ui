@@ -175,11 +175,8 @@
       </item>
       <item>
        <widget class="QCheckBox" name="productCodeCheckBox">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="text">
-         <string>Suspicious or incomplete product codes  (Coming soon)</string>
+         <string>Suspicious or incomplete product codes</string>
         </property>
        </widget>
       </item>

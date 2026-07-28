@@ -1,6 +1,6 @@
 # Diagnostics Menu
 
-Updated: July 27, 2026
+Updated: July 28, 2026
 
 ## Overview
 
@@ -25,8 +25,8 @@ The dialog presents seven selectable checks:
 6. Category integrity
 7. Runtime assets and paths
 
-The Database and Product Cache checks are enabled. The remaining five checks
-are visible, disabled, and marked `Coming soon`.
+The Database, Product Cache, and Suspicious Product Code checks are enabled.
+The remaining four checks are visible, disabled, and marked `Coming soon`.
 
 ## Database Check
 
@@ -117,6 +117,85 @@ That command loads a cache only inside its own standalone process when needed.
 The in-application Diagnostics menu never reloads the live cache before checking
 it.
 
+## Suspicious or Incomplete Product Codes
+
+This diagnostic reads product codes and names from `Product_list` using the
+same separate read-only connection. It identifies review candidates without
+declaring that either product is automatically wrong.
+
+The check targets numeric barcode-like codes of at least five characters.
+Codes shorter than five characters are treated as intentional keyboard
+shortcuts and ignored. Automated vegetable codes matching `VEG01` or
+`VEG-01` through `VEG99` are also explicitly ignored. Other alphanumeric
+internal codes are ignored because they are not scanner barcodes.
+
+Candidate matching models premature scanner termination only. A candidate
+exists when a shorter database code is an exact prefix of another database
+code:
+
+- One missing tail character is reported as high confidence.
+- Two or three missing tail characters are reported as lower confidence.
+- More than three missing tail characters are not compared.
+
+Middle-character deletion, single-character substitution, and adjacent
+character transposition are intentionally not checked. Those errors are
+plausible during manual typing but do not represent the barcode-scanner failure
+observed in this POS.
+
+Same-length 80 percent similarity is also intentionally excluded. Retail
+barcodes from the same manufacturer or product family commonly share most of
+their digits, while later digits distinguish legitimate variants, package
+sizes, or individual products. For example, two valid products can be more
+than 90 percent similar without either code being incorrect. A generic
+similarity threshold therefore creates many false positives; exact tail-prefix
+matching is materially stronger evidence of an incomplete scan.
+
+The result is `PASS` when no candidates are found, `WARNING` when review
+candidates or normalized duplicate codes are found, and `FAIL` only when the
+check cannot complete. A warning does not modify, merge, or delete products.
+The report lists the number of missing tail characters, confidence, prefix
+coverage, both codes, and both product names for manual review.
+
+Review candidates are written only to the diagnostic report and are not added
+to `error_log`. Actual failures, such as an unreadable database or failed
+report export, continue to use the application error logger.
+
+The product-code section separates configuration from results:
+
+```text
+CHECK SETTINGS
+- Minimum barcode length checked: 5 characters
+- Tail truncation range checked: 1 to 3 missing characters
+- Matching rule: shorter code must exactly match the start of a longer code
+
+SCAN SUMMARY
+- Product codes read from database: <count>
+- Numeric barcode codes checked: <count>
+- Codes excluded from comparison: <count>
+  - Short keyboard shortcut codes: <count>
+  - Automated vegetable codes: <count>
+  - Other nonnumeric/internal codes: <count>
+
+FINDINGS
+- Suspicious product codes: <unique-code count>
+- Suspicious tail-truncation pairs found: <count>
+  - High-confidence pairs: <count>
+  - Lower-confidence pairs: <count>
+
+REVIEW CANDIDATES
+- None
+```
+
+`CHECK SETTINGS` describes what the diagnostic was configured to search for;
+it does not describe a finding. `SCAN SUMMARY` records the examined and
+excluded populations. Only `FINDINGS` counts suspected pairs, and only actual
+findings produce product details under `REVIEW CANDIDATES`.
+
+`Suspicious product codes` counts unique individual product codes involved in
+the findings. `Suspicious tail-truncation pairs found` counts relationships
+between a shorter and longer code. One product code can participate in more
+than one pair, so the two totals do not necessarily match.
+
 ## Running State
 
 When OK is selected:
@@ -195,6 +274,7 @@ The report includes:
 - Live product-cache totals and consistency count
 - Missing, extra, invalid, and duplicate-normalized cache keys
 - Per-field cache value mismatches
+- Tail-truncated product-code candidates and confidence
 - Issues that caused a failed result
 
 After a successful export, the StatusBar message is intentionally concise:
@@ -203,10 +283,11 @@ After a successful export, the StatusBar message is intentionally concise:
 Diagnostic report saved to <folder path>
 ```
 
-When diagnostics find issues, the same concise path message uses error severity;
-the issue details remain in the report. If export itself fails, the dialog is
-rejected and the export error is reported without claiming that a report was
-saved.
+When diagnostics find review candidates, the same concise path message uses
+warning severity. Error severity is reserved for a check or export that fails
+to complete. The issue details remain in the report. If export itself fails,
+the dialog is rejected and the export error is reported without claiming that
+a report was saved.
 
 ## Files
 
@@ -218,6 +299,7 @@ saved.
 - `modules/menu/diagnostics/common.py`: timestamps and read-only SQLite helpers
 - `modules/menu/diagnostics/database_check.py`: database counts and integrity
 - `modules/menu/diagnostics/product_cache_check.py`: live cache comparison
+- `modules/menu/diagnostics/product_code_check.py`: suspicious code matching
 - `modules/menu/diagnostics/report_formatter.py`: selected-check text report
 - `modules/menu/diagnostics/report_exporter.py`: export folder and file writing
 - `modules/menu/diagnostics/__init__.py`: supported package-level imports
@@ -226,6 +308,7 @@ saved.
 - `assets/qss/dialog.qss`: Diagnostics dialog styling
 - `tests/test_diagnostics_helper.py`: database, cache, and report tests
 - `tests/test_diagnostics_menu.py`: selection, controller, and export-path tests
+- `tests/test_product_code_diagnostics.py`: code matching and reporting tests
 
 ## Module Organization
 

@@ -117,6 +117,38 @@ def test_cache_only_selection_uses_live_product_cache(monkeypatch, tmp_path):
     assert set(dlg.diagnostics_result) == {"product_cache"}
 
 
+def test_product_code_only_selection_runs_third_check(monkeypatch, tmp_path):
+    _app()
+    report_path = tmp_path / "code_report.txt"
+    observed = []
+    monkeypatch.setattr(
+        diagnostics_menu,
+        "run_product_code_diagnostics",
+        lambda: observed.append("codes") or {
+            "status": "WARNING",
+            "issues": ["One suspicious pair"],
+        },
+    )
+    monkeypatch.setattr(
+        diagnostics_menu,
+        "export_diagnostic_report",
+        lambda results: report_path,
+    )
+
+    dlg = diagnostics_menu.launch_diagnostics_dialog(None)
+    dlg.findChild(QCheckBox, "databaseIntegrityCheckBox").setChecked(False)
+    codes_box = dlg.findChild(QCheckBox, "productCodeCheckBox")
+    assert codes_box.isEnabled()
+    codes_box.setChecked(True)
+    dlg.findChild(QPushButton, "btnDiagnosticsOk").click()
+
+    assert dlg.result() == QDialog.Accepted
+    assert observed == ["codes"]
+    assert set(dlg.diagnostics_result) == {"product_codes"}
+    assert dlg.main_status_is_error is False
+    assert dlg._main_status_severity == 1
+
+
 def test_export_failure_rejects_dialog_and_reports_error(monkeypatch):
     _app()
     logged = []
