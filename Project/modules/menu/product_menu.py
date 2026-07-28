@@ -23,6 +23,7 @@ from modules.ui_utils.canonicalization import canonicalize_product_code
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 from modules.ui_utils import input_handler, ui_feedback
 from modules.ui_utils import category_service
+from modules.ui_utils.product_choices import build_product_name_choices
 from modules.menu.product_category_tab import ProductCategoryTabController
 from modules.db_operation import (
     get_product_full, add_product, update_product, delete_product
@@ -270,25 +271,6 @@ def launch_product_dialog(
                 duration=MAIN_STATUS_DURATION_MS,
             )
 
-    def _names_from_cache() -> list:
-        out = []
-        try:
-            for rec in (dbop.PRODUCT_CACHE or {}).values():
-                if rec and rec[0]:
-                    out.append(rec[0])
-        except Exception:
-            return []
-        # stable unique list
-        seen = set()
-        uniq = []
-        for n in out:
-            key = (n or '').strip().lower()
-            if not key or key in seen:
-                continue
-            seen.add(key)
-            uniq.append(n)
-        return uniq
-
     def _refresh_name_completers() -> None:
         """Refresh REMOVE/UPDATE name completers from the current PRODUCT_CACHE.
 
@@ -296,7 +278,7 @@ def launch_product_dialog(
         so we reattach using a fresh name list.
         """
         try:
-            new_names = _names_from_cache()
+            new_names = build_product_name_choices(dbop.PRODUCT_CACHE)
 
             def _rem_selected(_text=None, _le=None):
                 _sync_source(widgets['rem_name_srch'])

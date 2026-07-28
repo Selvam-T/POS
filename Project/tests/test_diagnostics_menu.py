@@ -149,6 +149,77 @@ def test_product_code_only_selection_runs_third_check(monkeypatch, tmp_path):
     assert dlg._main_status_severity == 1
 
 
+def test_duplicate_name_only_selection_runs_fourth_check(monkeypatch, tmp_path):
+    _app()
+    report_path = tmp_path / "name_report.txt"
+    observed = []
+    monkeypatch.setattr(
+        diagnostics_menu,
+        "run_product_name_diagnostics",
+        lambda: observed.append("names") or {
+            "status": "WARNING",
+            "issues": ["One duplicate name group"],
+        },
+    )
+    monkeypatch.setattr(
+        diagnostics_menu,
+        "export_diagnostic_report",
+        lambda results: report_path,
+    )
+
+    dlg = diagnostics_menu.launch_diagnostics_dialog(None)
+    dlg.findChild(QCheckBox, "databaseIntegrityCheckBox").setChecked(False)
+    names_box = dlg.findChild(QCheckBox, "duplicateNamesCheckBox")
+    assert names_box.isEnabled()
+    names_box.setChecked(True)
+    dlg.findChild(QPushButton, "btnDiagnosticsOk").click()
+
+    assert dlg.result() == QDialog.Accepted
+    assert observed == ["names"]
+    assert set(dlg.diagnostics_result) == {"product_names"}
+    assert dlg.main_status_is_error is False
+    assert dlg._main_status_severity == 1
+
+
+def test_product_derived_ui_only_selection_uses_live_cache(
+    monkeypatch,
+    tmp_path,
+):
+    _app()
+    report_path = tmp_path / "ui_data_report.txt"
+    live_cache = {"1001": ("Test Product", 1.5, "Each", "Other")}
+    observed = []
+    monkeypatch.setattr(
+        diagnostics_menu.product_cache,
+        "PRODUCT_CACHE",
+        live_cache,
+    )
+    monkeypatch.setattr(
+        diagnostics_menu,
+        "run_product_derived_ui_diagnostics",
+        lambda cache: observed.append(cache) or {
+            "status": "PASS",
+            "issues": [],
+        },
+    )
+    monkeypatch.setattr(
+        diagnostics_menu,
+        "export_diagnostic_report",
+        lambda results: report_path,
+    )
+
+    dlg = diagnostics_menu.launch_diagnostics_dialog(None)
+    dlg.findChild(QCheckBox, "databaseIntegrityCheckBox").setChecked(False)
+    ui_box = dlg.findChild(QCheckBox, "productDerivedUiCheckBox")
+    assert ui_box.isEnabled()
+    ui_box.setChecked(True)
+    dlg.findChild(QPushButton, "btnDiagnosticsOk").click()
+
+    assert dlg.result() == QDialog.Accepted
+    assert observed == [live_cache]
+    assert set(dlg.diagnostics_result) == {"product_derived_ui"}
+
+
 def test_export_failure_rejects_dialog_and_reports_error(monkeypatch):
     _app()
     logged = []

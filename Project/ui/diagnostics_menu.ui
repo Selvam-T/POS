@@ -182,21 +182,18 @@
       </item>
       <item>
        <widget class="QCheckBox" name="duplicateNamesCheckBox">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
         <property name="text">
-         <string>Duplicate product names  (Coming soon)</string>
+         <string>Duplicate product names</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="productQualityCheckBox">
+       <widget class="QCheckBox" name="productDerivedUiCheckBox">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Product data quality  (Coming soon)</string>
+         <string>Product search lists and vegetable slots</string>
         </property>
        </widget>
       </item>

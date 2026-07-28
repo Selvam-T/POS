@@ -21,12 +21,13 @@ The dialog presents seven selectable checks:
 2. Product cache consistency
 3. Suspicious or incomplete product codes
 4. Duplicate product names
-5. Product data quality
+5. Product search lists and vegetable slots
 6. Category integrity
 7. Runtime assets and paths
 
-The Database, Product Cache, and Suspicious Product Code checks are enabled.
-The remaining four checks are visible, disabled, and marked `Coming soon`.
+The Database, Product Cache, Suspicious Product Code, Duplicate Product Name,
+and Product Search Lists and Vegetable Slots checks are enabled. The remaining
+two checks are visible, disabled, and marked `Coming soon`.
 
 ## Database Check
 
@@ -196,6 +197,98 @@ the findings. `Suspicious tail-truncation pairs found` counts relationships
 between a shorter and longer code. One product code can participate in more
 than one pair, so the two totals do not necessarily match.
 
+## Duplicate Product Names
+
+This diagnostic reads product codes and names from `Product_list` using a
+separate read-only connection. It groups names only after limited,
+deterministic normalization:
+
+- Leading and trailing whitespace is removed.
+- Repeated whitespace, including spaces and tabs, is collapsed to one space.
+- Letter case is ignored.
+- Punctuation is preserved.
+
+For example, these names are reported as one duplicate group:
+
+```text
+Fresh  Milk
+fresh milk
+```
+
+These names are not grouped:
+
+```text
+Fresh-Milk
+Fresh Milk
+Fresh Mil
+```
+
+The first two differ by punctuation, and the third is merely similar. The
+diagnostic intentionally performs no punctuation removal, spelling correction,
+edit-distance calculation, or other near-duplicate matching.
+
+The result is `PASS` when no duplicate groups exist, `WARNING` when one or more
+groups require review, and `FAIL` only when the check cannot complete. Empty
+names are counted as skipped rather than treated as duplicates; missing-name
+validation belongs to the separate Product Data Quality check.
+
+The report records the duplicate group count, total products participating in
+duplicate groups, the normalized comparison name, and every product code and
+stored name in each group. Findings are report-only and do not modify products
+or write warning findings to `error_log`.
+
+## Product Search Lists and Vegetable Slots
+
+Manual entry, Refund, Receipt, and Product Menu previously constructed their
+product-name suggestions with separate list-building code. They now call the
+shared:
+
+```text
+modules.ui_utils.product_choices.build_product_name_choices(PRODUCT_CACHE)
+```
+
+The builder returns one choice for every nonempty cache record. It trims only
+surrounding whitespace, preserves internal whitespace, casing, punctuation,
+and duplicate entries, then sorts the complete list case-insensitively by
+product name. It does not rely on cache insertion or product-code order.
+
+The refactor changes only the construction of displayed choices. It does not
+change the existing shared input-handler or Product Menu name-lookup rules.
+When duplicate names exist, the current first matching `PRODUCT_CACHE` record
+is used. This temporary ambiguity remains visible rather than being concealed
+by the builder; the Duplicate Product Names diagnostic and database-level
+duplicate prevention address the underlying condition.
+
+This diagnostic operates on the exact live `PRODUCT_CACHE` object. It does not
+reload the cache or repeat the database-versus-cache comparison performed by
+the Product Cache diagnostic. It verifies:
+
+- The shared choice output contains one entry for every usable cache name,
+  including duplicates.
+- The choice output has no missing or extra entries.
+- The choice output is sorted.
+- Empty product names and malformed cache records are reported.
+- Fixed slot identifiers range from `VEG01` through `VEG16`; unpopulated slots
+  are counted informationally and are not issues.
+- Reserved-looking `VEGxx` or `VEG-xx` codes outside that range are reported.
+- Each populated fixed slot has a usable name, positive selling price, unit,
+  and `Vegetable` category value.
+
+Products in the Vegetable category with ordinary scanned barcodes are
+legitimate and are ignored by the fixed-slot check. The diagnostic examines
+only reserved-looking `VEG` codes.
+
+The report explicitly records this limitation:
+
+> The check validates the shared cache-derived data pipeline. It does not
+> inspect unopened dialog widgets or confirm that an already-open widget model
+> refreshed after a product change.
+
+Dialogs construct their completer/model when opened. Product Menu also rebuilds
+its Remove and Update completers after its successful Add, Remove, and Update
+refresh pipeline. Runtime widget synchronization remains an integration-test
+responsibility rather than a claim made by this read-only operator diagnostic.
+
 ## Running State
 
 When OK is selected:
@@ -275,6 +368,8 @@ The report includes:
 - Missing, extra, invalid, and duplicate-normalized cache keys
 - Per-field cache value mismatches
 - Tail-truncated product-code candidates and confidence
+- Duplicate product-name groups with product codes and stored names
+- Shared product-name choice and fixed vegetable-slot findings
 - Issues that caused a failed result
 
 After a successful export, the StatusBar message is intentionally concise:
@@ -300,6 +395,9 @@ a report was saved.
 - `modules/menu/diagnostics/database_check.py`: database counts and integrity
 - `modules/menu/diagnostics/product_cache_check.py`: live cache comparison
 - `modules/menu/diagnostics/product_code_check.py`: suspicious code matching
+- `modules/menu/diagnostics/product_name_check.py`: duplicate-name grouping
+- `modules/menu/diagnostics/product_derived_ui_check.py`: shared choices and fixed slots
+- `modules/ui_utils/product_choices.py`: canonical product-name choice builder
 - `modules/menu/diagnostics/report_formatter.py`: selected-check text report
 - `modules/menu/diagnostics/report_exporter.py`: export folder and file writing
 - `modules/menu/diagnostics/__init__.py`: supported package-level imports
@@ -309,6 +407,8 @@ a report was saved.
 - `tests/test_diagnostics_helper.py`: database, cache, and report tests
 - `tests/test_diagnostics_menu.py`: selection, controller, and export-path tests
 - `tests/test_product_code_diagnostics.py`: code matching and reporting tests
+- `tests/test_product_name_diagnostics.py`: name normalization and report tests
+- `tests/test_product_derived_ui_diagnostics.py`: shared choices and slot tests
 
 ## Module Organization
 

@@ -22,6 +22,7 @@ import modules.db_operation as dbop
 from modules.devices import print_helper
 from modules.payment.receipt_generator import generate_receipt_text
 from modules.ui_utils import input_handler, ui_feedback
+from modules.ui_utils.product_choices import build_product_name_choices
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui,
     build_error_fallback_dialog,
@@ -211,15 +212,7 @@ def launch_receipt_dialog(host_window, *args, **kwargs):
                 log_error_message(f"receipt_menu: product cache load failed: {exc}")
             except Exception:
                 pass
-        names = []
-        seen = set()
-        for rec in (dbop.PRODUCT_CACHE or {}).values():
-            name_text = str(rec[0] or "").strip() if rec else ""
-            key = name_text.casefold()
-            if name_text and key not in seen:
-                names.append(name_text)
-                seen.add(key)
-        names.sort(key=str.casefold)
+        names = build_product_name_choices(dbop.PRODUCT_CACHE)
 
         try:
             product_name_line.clear()

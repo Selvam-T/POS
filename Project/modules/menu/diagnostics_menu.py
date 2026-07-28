@@ -9,6 +9,8 @@ from modules.menu.diagnostics import (
     run_database_diagnostics,
     run_product_cache_diagnostics,
     run_product_code_diagnostics,
+    run_product_derived_ui_diagnostics,
+    run_product_name_diagnostics,
 )
 from modules.db_operation import product_cache
 from modules.runtime.paths import stylesheet_path, ui_path
@@ -52,7 +54,7 @@ def launch_diagnostics_dialog(parent=None):
                 "cache": (QCheckBox, "productCacheCheckBox"),
                 "codes": (QCheckBox, "productCodeCheckBox"),
                 "names": (QCheckBox, "duplicateNamesCheckBox"),
-                "quality": (QCheckBox, "productQualityCheckBox"),
+                "quality": (QCheckBox, "productDerivedUiCheckBox"),
                 "categories": (QCheckBox, "categoryIntegrityCheckBox"),
                 "runtime": (QCheckBox, "runtimeAssetsCheckBox"),
                 "status": (QLabel, "diagnosticStatusLabel"),
@@ -73,7 +75,13 @@ def launch_diagnostics_dialog(parent=None):
     widgets["codes"].setChecked(False)
     widgets["codes"].setEnabled(True)
     widgets["codes"].setFocusPolicy(Qt.StrongFocus)
-    for key in ("names", "quality", "categories", "runtime"):
+    widgets["names"].setChecked(False)
+    widgets["names"].setEnabled(True)
+    widgets["names"].setFocusPolicy(Qt.StrongFocus)
+    widgets["quality"].setChecked(False)
+    widgets["quality"].setEnabled(True)
+    widgets["quality"].setFocusPolicy(Qt.StrongFocus)
+    for key in ("categories", "runtime"):
         widgets[key].setChecked(False)
         widgets[key].setEnabled(False)
         widgets[key].setFocusPolicy(Qt.NoFocus)
@@ -90,6 +98,8 @@ def launch_diagnostics_dialog(parent=None):
             widgets["database"],
             widgets["cache"],
             widgets["codes"],
+            widgets["names"],
+            widgets["quality"],
             widgets["ok"],
             widgets["cancel"],
             widgets["close"],
@@ -114,6 +124,8 @@ def launch_diagnostics_dialog(parent=None):
                 widgets["database"],
                 widgets["cache"],
                 widgets["codes"],
+                widgets["names"],
+                widgets["quality"],
             )
         ):
             ui_feedback.set_status_label(
@@ -143,6 +155,14 @@ def launch_diagnostics_dialog(parent=None):
             )
         if widgets["codes"].isChecked():
             results["product_codes"] = run_product_code_diagnostics()
+        if widgets["names"].isChecked():
+            results["product_names"] = run_product_name_diagnostics()
+        if widgets["quality"].isChecked():
+            results["product_derived_ui"] = (
+                run_product_derived_ui_diagnostics(
+                    product_cache.PRODUCT_CACHE
+                )
+            )
         dlg.diagnostics_result = results
 
         statuses = {

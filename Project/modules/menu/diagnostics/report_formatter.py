@@ -226,6 +226,143 @@ def _append_product_code_report(lines: list[str], codes: Mapping) -> None:
     lines.append("")
 
 
+def _append_product_name_report(lines: list[str], names: Mapping) -> None:
+    lines.extend(
+        [
+            "DUPLICATE PRODUCT NAMES",
+            "-" * 64,
+            f"Status: {names.get('status') or 'NOT RUN'}",
+            f"Started: {names.get('started_at') or 'N/A'}",
+            f"Completed: {names.get('completed_at') or 'N/A'}",
+            f"Duration: {float(names.get('duration_seconds') or 0.0):.3f} seconds",
+            f"Database path: {names.get('database_path') or 'N/A'}",
+            "",
+            "CHECK SETTINGS",
+            "- Matching is case-insensitive",
+            "- Leading, trailing, and repeated whitespace is normalized",
+            "- Punctuation is preserved",
+            "- Near-duplicate or fuzzy matching is not performed",
+            "",
+            "SCAN SUMMARY",
+            f"- Products read from database: {names.get('database_total', 0)}",
+            f"- Nonempty product names checked: {names.get('names_checked_total', 0)}",
+            f"- Empty product names skipped: {names.get('empty_name_total', 0)}",
+            "",
+            "FINDINGS",
+            f"- Duplicate name groups found: {names.get('duplicate_group_total', 0)}",
+            f"- Products in duplicate groups: {names.get('duplicate_product_total', 0)}",
+            "",
+            "REVIEW CANDIDATES",
+        ]
+    )
+    groups = list(names.get("duplicate_groups") or [])
+    if groups:
+        for group_index, group in enumerate(groups, start=1):
+            lines.append(
+                f"{group_index}. Normalized name: "
+                f"{group.get('normalized_name') or 'N/A'} "
+                f"({group.get('product_count', 0)} products)"
+            )
+            for product_index, product in enumerate(
+                group.get("products") or [],
+                start=1,
+            ):
+                label = chr(ord("a") + product_index - 1)
+                lines.append(
+                    f"   {label}) {product.get('product_code') or 'N/A'} - "
+                    f"{product.get('product_name') or 'Unnamed product'}"
+                )
+            lines.append("")
+    else:
+        lines.append("- None")
+    lines.extend(["", "Issues:"])
+    lines.extend(
+        [f"- {issue}" for issue in (names.get("issues") or [])]
+        or ["- None"]
+    )
+    lines.append("")
+
+
+def _append_product_derived_ui_report(lines: list[str], ui_data: Mapping) -> None:
+    lines.extend(
+        [
+            "PRODUCT SEARCH LISTS AND VEGETABLE SLOTS",
+            "-" * 64,
+            f"Status: {ui_data.get('status') or 'NOT RUN'}",
+            f"Started: {ui_data.get('started_at') or 'N/A'}",
+            f"Completed: {ui_data.get('completed_at') or 'N/A'}",
+            f"Duration: {float(ui_data.get('duration_seconds') or 0.0):.3f} seconds",
+            "",
+            "CHECK SCOPE",
+            "- Source: live PRODUCT_CACHE",
+            "- Product-name consumers: "
+            + ", ".join(ui_data.get("consumer_names") or ["None"]),
+            "- Fixed vegetable slot range: VEG01 to VEG16",
+            "- Ordinary barcoded Vegetable-category products are not checked",
+            "",
+            "PRODUCT SEARCH CHOICES",
+            f"- Cache entries read: {ui_data.get('cache_total', 0)}",
+            f"- Source product names: {ui_data.get('source_name_total', 0)}",
+            f"- Expected choices: {ui_data.get('expected_choice_total', 0)}",
+            f"- Shared choices produced: {ui_data.get('choice_total', 0)}",
+            "- Duplicate source-name entries preserved: "
+            f"{ui_data.get('duplicate_source_name_total', 0)}",
+            f"- Choices sorted: {'PASS' if ui_data.get('choices_sorted') else 'FAIL'}",
+        ]
+    )
+    for heading, key in (
+        ("Missing choices", "missing_choice_names"),
+        ("Extra choices", "extra_choice_names"),
+        ("Products with empty names", "invalid_name_codes"),
+        ("Malformed cache records", "malformed_cache_codes"),
+    ):
+        values = list(ui_data.get(key) or [])
+        lines.append(f"- {heading}: {len(values)}")
+        lines.extend(f"  - {value}" for value in values)
+
+    lines.extend(
+        [
+            "",
+            "FIXED VEGETABLE SLOTS",
+            f"- Expected slots: {ui_data.get('expected_vegetable_total', 16)}",
+            f"- Available slots: {ui_data.get('available_vegetable_total', 0)}",
+        ]
+    )
+    for heading, key in (
+        (
+            "Unpopulated slot codes (informational)",
+            "missing_vegetable_codes",
+        ),
+        (
+            "Reserved codes outside VEG01-VEG16",
+            "unexpected_vegetable_codes",
+        ),
+    ):
+        values = list(ui_data.get(key) or [])
+        lines.append(f"- {heading}: {len(values)}")
+        lines.extend(f"  - {value}" for value in values)
+
+    invalid_records = list(ui_data.get("invalid_vegetable_records") or [])
+    lines.append(f"- Invalid slot records: {len(invalid_records)}")
+    for record in invalid_records:
+        lines.append(
+            f"  - {record.get('product_code') or 'N/A'}: "
+            + ", ".join(record.get("invalid_fields") or ["unknown"])
+        )
+
+    lines.extend(["", "LIMITATIONS"])
+    lines.extend(
+        [f"- {item}" for item in (ui_data.get("limitations") or [])]
+        or ["- None"]
+    )
+    lines.extend(["", "Issues:"])
+    lines.extend(
+        [f"- {issue}" for issue in (ui_data.get("issues") or [])]
+        or ["- None"]
+    )
+    lines.append("")
+
+
 def format_diagnostic_report(
     diagnostic_results: Mapping[str, Mapping],
     *,
@@ -236,8 +373,20 @@ def format_diagnostic_report(
     database = dict((diagnostic_results or {}).get("database") or {})
     product_cache = dict((diagnostic_results or {}).get("product_cache") or {})
     product_codes = dict((diagnostic_results or {}).get("product_codes") or {})
+    product_names = dict((diagnostic_results or {}).get("product_names") or {})
+    product_derived_ui = dict(
+        (diagnostic_results or {}).get("product_derived_ui") or {}
+    )
     completed = [
-        item for item in (database, product_cache, product_codes) if item
+        item
+        for item in (
+            database,
+            product_cache,
+            product_codes,
+            product_names,
+            product_derived_ui,
+        )
+        if item
     ]
     statuses = [str(item.get("status") or "FAIL") for item in completed]
     overall_status = (
@@ -270,6 +419,14 @@ def format_diagnostic_report(
         lines.append(
             f"{selected_number}. Suspicious or incomplete product codes"
         )
+        selected_number += 1
+    if product_names:
+        lines.append(f"{selected_number}. Duplicate product names")
+        selected_number += 1
+    if product_derived_ui:
+        lines.append(
+            f"{selected_number}. Product search lists and vegetable slots"
+        )
     lines.append("")
     if database:
         _append_database_report(lines, database)
@@ -277,6 +434,10 @@ def format_diagnostic_report(
         _append_product_cache_report(lines, product_cache)
     if product_codes:
         _append_product_code_report(lines, product_codes)
+    if product_names:
+        _append_product_name_report(lines, product_names)
+    if product_derived_ui:
+        _append_product_derived_ui_report(lines, product_derived_ui)
 
     lines.extend(["", "=" * 64, "END OF REPORT", ""])
     return "\n".join(lines)

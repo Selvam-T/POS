@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton
 
 import modules.db_operation as dbop
 from modules.ui_utils import input_handler, ui_feedback
+from modules.ui_utils.product_choices import build_product_name_choices
 from modules.ui_utils.dialog_utils import (
     build_dialog_from_ui,
     require_widgets,
@@ -233,7 +234,7 @@ def launch_refund_dialog(parent=None):
     price.textEdited.connect(lambda *_: _set_error_state(price, False))
     code.textEdited.connect(lambda *_: barcode_warning.clear() if not code.text().strip() else None)
 
-    product_names = [rec[0] for rec in (dbop.PRODUCT_CACHE or {}).values() if rec and rec[0]]
+    product_names = build_product_name_choices(dbop.PRODUCT_CACHE)
     input_handler.setup_name_search_lineedit(
         name,
         product_names,

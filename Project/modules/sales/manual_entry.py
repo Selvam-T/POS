@@ -10,6 +10,7 @@ from modules.ui_utils.dialog_utils import (
 )
 from modules.ui_utils.focus_utils import FieldCoordinator, FocusGate, enforce_exclusive_lineedits
 from modules.ui_utils import input_handler, input_validation, ui_feedback
+from modules.ui_utils.product_choices import build_product_name_choices
 import modules.db_operation as dbop
 from config import QSS_DIR, STATUS_LABEL_SHORT_DURATION_MS, UI_DIR
 
@@ -439,7 +440,7 @@ def launch_manual_entry_dialog(parent):
     )
 
     # Name search suggestions
-    product_names = [rec[0] for rec in (dbop.PRODUCT_CACHE or {}).values() if rec[0]]
+    product_names = build_product_name_choices(dbop.PRODUCT_CACHE)
     def _name_selected():
         try:
             coord._sync_fields(widgets['name_srch'])
