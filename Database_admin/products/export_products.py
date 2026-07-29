@@ -11,11 +11,11 @@ ADMIN_ROOT = Path(__file__).resolve().parents[1]
 if str(ADMIN_ROOT) not in sys.path:
     sys.path.insert(0, str(ADMIN_ROOT))
 
-from admin_lib import DATA_DIR, connect, db_path
+from admin_lib import IMPORT_DIR, connect, db_path
 
 
 def export_products(out_path: Path | None = None) -> Path:
-    output = out_path or (DATA_DIR / "product_export.csv")
+    output = out_path or (IMPORT_DIR / "product_export.csv")
     output.parent.mkdir(parents=True, exist_ok=True)
     with connect() as conn:
         rows = conn.execute(

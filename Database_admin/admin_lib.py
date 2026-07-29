@@ -13,6 +13,9 @@ from typing import Dict, Iterable, List
 ADMIN_ROOT = Path(__file__).resolve().parent
 CONFIG_PATH = ADMIN_ROOT / "config" / ".env"
 DATA_DIR = ADMIN_ROOT / "data"
+IMPORT_DIR = DATA_DIR / "imports"
+REPORT_DIR = DATA_DIR / "reports"
+REFERENCE_DIR = DATA_DIR / "reference"
 
 
 def load_config() -> Dict[str, str]:
@@ -37,7 +40,7 @@ def db_path() -> Path:
 
 def products_csv_path() -> Path:
     config = load_config()
-    raw = config.get("CSV_FILE_PATH", "data/products.csv")
+    raw = config.get("CSV_FILE_PATH", "data/imports/products.csv")
     return (ADMIN_ROOT / raw).resolve()
 
 

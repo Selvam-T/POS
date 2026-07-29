@@ -4,6 +4,7 @@ Usage: python dev_tools/database/query_receipt_tables.py
 """
 import sqlite3
 import sys
+from contextlib import redirect_stdout
 from pathlib import Path
 
 # Ensure the project root is on sys.path so sibling package `modules` can be imported
@@ -44,7 +45,7 @@ def print_table(cursor, table_name: str, limit: int = 10) -> None:
     print('\n')
 
 
-def main():
+def run_query():
     db_path = get_db_path()
     try:
         conn = sqlite3.connect(db_path)
@@ -58,6 +59,14 @@ def main():
         print_table(cur, t, limit=LIMIT)
 
     conn.close()
+
+
+def main():
+    output_path = Path(__file__).with_suffix(".txt")
+    with output_path.open("w", encoding="utf-8") as output_file:
+        with redirect_stdout(output_file):
+            run_query()
+    print(f"Query output written to: {output_path}")
 
 
 if __name__ == '__main__':

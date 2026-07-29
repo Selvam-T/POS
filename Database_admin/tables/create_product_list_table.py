@@ -44,10 +44,13 @@ def create_product_list_table(
             "CREATE INDEX IF NOT EXISTS idx_product_code_nocase "
             "ON Product_list(product_code COLLATE NOCASE);"
         )
-        conn.execute("DROP INDEX IF EXISTS uq_product_name_nocase;")
+        conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS uq_product_name_nocase "
+            "ON Product_list(name COLLATE NOCASE);"
+        )
         conn.commit()
 
-    print("Product_list ensured. Product names are not unique at DB level.")
+    print("Product_list ensured. Product names are unique case-insensitively.")
 
 
 if __name__ == "__main__":

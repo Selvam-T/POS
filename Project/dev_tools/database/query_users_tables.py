@@ -1,5 +1,7 @@
 import sys
 import os
+from contextlib import redirect_stdout
+from pathlib import Path
 
 import sqlite3
 # Get the project root from dev_tools/database.
@@ -8,7 +10,7 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__f
 sys.path.append(parent_dir)
 from modules.db_operation.sqlite_runtime import get_db_path
 
-def main():
+def run_query():
     db_path = get_db_path()
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -34,6 +36,15 @@ def main():
     print(f"\nTotal users: {count}")
 
     conn.close()
+
+
+def main():
+    output_path = Path(__file__).with_suffix(".txt")
+    with output_path.open("w", encoding="utf-8") as output_file:
+        with redirect_stdout(output_file):
+            run_query()
+    print(f"Query output written to: {output_path}")
+
 
 if __name__ == "__main__":
     main()

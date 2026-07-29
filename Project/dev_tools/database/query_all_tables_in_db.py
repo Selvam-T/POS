@@ -1,5 +1,7 @@
 import sys
 import os
+from contextlib import redirect_stdout
+from pathlib import Path
 
 import sqlite3
 # Get the project root from dev_tools/database.
@@ -20,7 +22,7 @@ def count_records(cursor, table):
     cursor.execute(f"SELECT COUNT(*) FROM {table}")
     return cursor.fetchone()[0]
 
-def main():
+def run_query():
     db_path = get_db_path()
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
@@ -47,6 +49,15 @@ def main():
         print(f"{table}: {count} rows")
 
     conn.close()
+
+
+def main():
+    output_path = Path(__file__).with_suffix(".txt")
+    with output_path.open("w", encoding="utf-8") as output_file:
+        with redirect_stdout(output_file):
+            run_query()
+    print(f"Query output written to: {output_path}")
+
 
 if __name__ == "__main__":
     main()
