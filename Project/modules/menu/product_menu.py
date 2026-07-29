@@ -1090,7 +1090,7 @@ def launch_product_dialog(
         success, db_msg = add_product(code, name, sell, cat, supp, cost, unit, 
                                       QDateTime.currentDateTime().toString('yyyy-MM-dd HH:mm:ss'))
         if success:
-            dbop.refresh_product_cache()
+            _post_db_success_refresh('ADD')
             _finalize('add', code, name)
         else:
             # STATUSBAR feedback after dialog closes (handled-failure helper logs message details)
@@ -1179,7 +1179,7 @@ def launch_product_dialog(
         # 4. Save
         success, db_msg = update_product(code, name, sell, cat, supp, cost, unit)
         if success:
-            dbop.refresh_product_cache()
+            _post_db_success_refresh('UPDATE')
             _finalize('upd', code, name)
         else:
             # STATUSBAR feedback after dialog closes (handled-failure helper logs message details)

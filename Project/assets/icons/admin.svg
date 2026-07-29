@@ -1,46 +1,124 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="147" height="140" viewBox="0 0 147 140">
   <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M18 139 V124 Q18 112 31 106 L49 98 L61 111 L74 104 L86 111 L98 98 L116 106 Q129 112 129 124 V139"
-          fill="#C9D2E6" stroke="#000000" stroke-width="3.4"/>
-    <path d="M49 98 L40 139 H61 L66 109 Z"
-          fill="#B8C3DB" stroke="#000000" stroke-width="3"/>
-    <path d="M98 98 L107 139 H86 L81 109 Z"
-          fill="#B8C3DB" stroke="#000000" stroke-width="3"/>
-    <path d="M61 104 Q74 114 87 104 L83 139 H65 Z"
-          fill="#FFFFFF" stroke="#000000" stroke-width="2.8"/>
+    <!-- head -->
+    <path d="M42 27
+             Q52 15 73 14
+             Q95 14 106 27
+             Q116 39 116 59
+             Q116 80 104 92
+             Q92 104 73 104
+             Q54 104 42 92
+             Q30 80 30 59
+             Q30 39 42 27 Z"
+          fill="#E8E1AF" stroke="#000000" stroke-width="3.2"/>
 
-    <path d="M68 104 H80 L81 111 L74 118 L67 111 Z"
-          fill="#214C96" stroke="#000000" stroke-width="2.8"/>
-    <path d="M67 111 L74 118 L81 111 L78 139 H70 Z"
-          fill="#214C96" stroke="#000000" stroke-width="2.8"/>
+    <!-- ears -->
+    <path d="M25 51 Q20 51 19 57 Q19 63 25 63" fill="#E8E1AF" stroke="#000000" stroke-width="3.2"/>
+    <path d="M121 51 Q127 51 128 57 Q128 63 121 63" fill="#E8E1AF" stroke="#000000" stroke-width="3.2"/>
 
-    <path d="M60 81 H88 V100 Q74 108 60 100 Z"
-          fill="#E4B597" stroke="#000000" stroke-width="3.2"/>
+    <!-- hair -->
+    <path d="M40 25
+             Q48 13 67 12
+             Q88 10 104 18
+             Q116 24 119 37
+             Q113 31 108 31
+             Q106 23 98 21
+             Q100 29 95 31
+             Q92 23 83 19
+             Q83 27 77 29
+             Q73 19 63 18
+             Q62 25 55 28
+             Q51 21 43 22
+             Q41 28 37 33
+             Q34 27 40 25 Z"
+          fill="#9B9B9B" stroke="#000000" stroke-width="3.2"/>
+    <path d="M44 23 Q51 18 60 19" stroke="#000000" stroke-width="2.6"/>
+    <path d="M80 18 Q91 18 102 24" stroke="#000000" stroke-width="2.6"/>
 
-    <ellipse cx="43" cy="55" rx="6.5" ry="9" fill="#E4B597" stroke="#000000" stroke-width="3.2"/>
-    <ellipse cx="105" cy="55" rx="6.5" ry="9" fill="#E4B597" stroke="#000000" stroke-width="3.2"/>
+    <!-- eyebrows -->
+    <path d="M45 42 H58" stroke="#000000" stroke-width="3.2"/>
+    <path d="M88 42 H101" stroke="#000000" stroke-width="3.2"/>
 
-    <path d="M45 34 Q46 18 58 11 Q72 5 88 10 Q102 16 103 33 V57 Q103 74 94 86 Q85 97 74 98 Q63 97 54 86 Q45 75 45 57 Z"
-          fill="#E4B597" stroke="#000000" stroke-width="3.2"/>
+    <!-- eyes -->
+    <ellipse cx="50" cy="52" rx="6.5" ry="5" fill="#000000" stroke="#000000" stroke-width="2.4"/>
+    <ellipse cx="96" cy="52" rx="6.5" ry="5" fill="#000000" stroke="#000000" stroke-width="2.4"/>
+    <path d="M55 54 L58 54" stroke="#FFFFFF" stroke-width="1.5"/>
+    <path d="M101 54 L104 54" stroke="#FFFFFF" stroke-width="1.5"/>
 
-    <path d="M45 34 Q46 18 59 11 Q73 5 87 9 Q99 12 104 23 Q106 28 103 35 Q96 25 85 24 Q74 22 63 24 Q53 25 45 34 Z"
-          fill="#C7CED6" stroke="#000000" stroke-width="3.2"/>
-    <path d="M58 15 Q73 9 92 16" stroke="#F2F5F8" stroke-width="2.3"/>
+    <!-- orange nose -->
+    <path d="M73 49
+             Q68 58 66 63
+             Q70 66 79 66"
+          stroke="#F28A2A" stroke-width="3.4"/>
 
-    <path d="M56 45 Q62 42 68 44" stroke="#5A6067" stroke-width="2.8"/>
-    <path d="M80 44 Q86 42 92 45" stroke="#5A6067" stroke-width="2.8"/>
+    <!-- noticeable moustache -->
+    <path d="M56 72
+             Q61 66 68 66
+             Q73 66 74 70
+             Q69 76 61 77
+             Q58 76 56 72 Z"
+          fill="#000000" stroke="#000000" stroke-width="2.8"/>
+    <path d="M92 72
+             Q87 66 80 66
+             Q75 66 74 70
+             Q79 76 87 77
+             Q90 76 92 72 Z"
+          fill="#000000" stroke="#000000" stroke-width="2.8"/>
 
-    <ellipse cx="62" cy="52" rx="2.9" ry="2.2" fill="#000000" stroke="none"/>
-    <ellipse cx="87" cy="52" rx="2.9" ry="2.2" fill="#000000" stroke="none"/>
+    <!-- noticeable lips -->
+    <path d="M63 76
+             Q74 71 85 76
+             Q82 87 74 88
+             Q66 87 63 76 Z"
+          fill="#F2252F" stroke="#F2252F" stroke-width="2.6"/>
+    <path d="M67 77
+             Q74 81 81 77
+             Q79 84 74 84
+             Q69 84 67 77 Z"
+          fill="#FFFFFF" stroke="#FFFFFF" stroke-width="1.6"/>
 
-    <path d="M74 52 Q71 61 76 65" stroke="#8E624C" stroke-width="2.5"/>
-    <path d="M64 73 Q74 79 84 73" stroke="#C94141" stroke-width="2.8"/>
-    <path d="M57 71 Q63 83 74 85 Q85 83 91 71" stroke="#D39C7E" stroke-width="2.2"/>
+    <!-- neck -->
+    <path d="M61 103 H86 V120
+             Q86 126 74 126
+             Q61 126 61 120 Z"
+          fill="#E8E1AF" stroke="#000000" stroke-width="3.2"/>
 
-    <path d="M49 98 L61 108 L68 101 L57 94 Z"
-          fill="#FFFFFF" stroke="#000000" stroke-width="2.8"/>
-    <path d="M99 98 L87 108 L80 101 L91 94 Z"
-          fill="#FFFFFF" stroke="#000000" stroke-width="2.8"/>
+    <!-- shirt -->
+    <path d="M18 139
+             V116
+             Q18 104 32 100
+             L52 95
+             Q62 102 74 102
+             Q86 102 96 95
+             L116 100
+             Q130 104 130 116
+             V139"
+          fill="#9B4FB1" stroke="#000000" stroke-width="3.2"/>
+
+    <!-- collar -->
+    <path d="M55 101 L65 111 L74 103 L61 96 Z"
+          fill="#9B4FB1" stroke="#000000" stroke-width="3.2"/>
+    <path d="M93 101 L83 111 L74 103 L87 96 Z"
+          fill="#9B4FB1" stroke="#000000" stroke-width="3.2"/>
+
+    <!-- tie -->
+    <path d="M68 103 H80 L82 112 L74 118 L66 112 Z"
+          fill="#10A8EA" stroke="#10A8EA" stroke-width="2.2"/>
+    <path d="M66 112 L74 118 L82 112 L78 139 H70 Z"
+          fill="#10A8EA" stroke="#10A8EA" stroke-width="2.2"/>
+    <path d="M66 112 H82" stroke="#000000" stroke-width="2.4"/>
+    <path d="M67 117 L74 111" stroke="#F6EB2A" stroke-width="3"/>
+    <path d="M69 126 L78 118" stroke="#F6EB2A" stroke-width="3"/>
+    <path d="M71 135 L80 127" stroke="#F6EB2A" stroke-width="3"/>
+
+    <!-- pocket and pen -->
+    <path d="M94 111 H116 V139 H94 Z"
+          fill="#9B4FB1" stroke="#000000" stroke-width="3.2"/>
+    <path d="M110 108 V121" stroke="#F03D3D" stroke-width="4"/>
+
+    <!-- shirt side lines -->
+    <path d="M30 111 V139" stroke="#000000" stroke-width="3.2"/>
+    <path d="M118 111 V139" stroke="#000000" stroke-width="3.2"/>
   </g>
 </svg>
