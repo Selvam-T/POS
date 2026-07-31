@@ -12,6 +12,7 @@ __pycache__/
 
 # Local experiments and credentials
 /Exploration/QR_announce_test/
+/Exploration/Printer/*.exe
 **/token.json
 **/credentials.json
 *.log

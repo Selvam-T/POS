@@ -289,8 +289,7 @@ SUBNET_MASK = '255.255.255.0'
 PRINTER_PORT = 9100
 
 CASH_DRAWER_PIN = 2
-CASH_DRAWER_TIMEOUT = 10.0
-
+CASH_DRAWER_TIMEOUT = 5.0
 
 # -----------------------------------------------------------------------------
 # Customer display and advertisements
