@@ -77,7 +77,8 @@ calculates its size once from `DIALOG_RATIOS['product_menu']`, currently
 `(0.45, 0.90)`, and centers it on the main window.
 
 - ADD, REMOVE, UPDATE / VIEW, and CATEGORY use the same dialog dimensions.
-- Tab changes perform focus and data-refresh work only; they do not resize or
+- Tab changes clear the outgoing tab through its tab-specific reset helper,
+  then perform destination focus and data-refresh work; they do not resize or
   recenter the dialog.
 - There is no Product Menu-specific sizing controller, deferred geometry timer,
   per-tab ratio, or Product Menu geometry-warning suppression.
@@ -90,9 +91,12 @@ calculates its size once from `DIALOG_RATIOS['product_menu']`, currently
 
 Each tab has a tab-local `CLEAR` button between the action button and `CLOSE`.
 CLEAR resets only the active tab's form state; it does not close the dialog and does not write to the database.
+The same tab-specific reset is applied automatically when leaving a tab, so
+returning to it starts from its default state.
 
 - ADD: clears Product Code and all ADD fields, blanks the category combo, clears status, reruns the ADD gate, and returns focus to Product Code.
-- REMOVE: clears Product Code, Name Search, mapped display fields, and status, then returns focus to Product Code.
+- REMOVE: clears Product Code, Name Search, mapped display fields, and status,
+  re-locks the lookup-gated action button, then returns focus to Product Code.
 - UPDATE: clears Product Code, Name Search, mapped edit/display fields, clears the loaded-value snapshot, re-locks editable fields, clears status, and returns focus to Product Code.
 - CATEGORY: resets the tab to its default Add mode, clears category inputs/status, clears the selection combo through the Add-mode path, locks OK, and focuses New Category.
 
@@ -244,9 +248,13 @@ Rules:
 
 - The two sources are mutually exclusive: typing in one clears the other and clears the displayed mapped fields.
 - Display fields are read-only + `Qt.NoFocus`.
+- The REMOVE action starts locked, unlocks only after a successful lookup, and
+  re-locks when the tab is cleared or left.
 
 - Note: The `last_updated` display in REMOVE/UPDATE is formatted via
 	`modules.date_time.format_datetime()` and appears like `09 Mar 2026  03:45 pm`.
+	The database stores the same value as `2026-03-09 15:45:00`; display
+	formatting does not change the stored text.
 
 ---
 

@@ -53,7 +53,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from modules.db_operation.sqlite_runtime import get_conn, get_db_path, now_iso, transaction  # noqa: E402
+from modules.db_operation.sqlite_runtime import (  # noqa: E402
+    get_conn,
+    get_db_path,
+    now_db_timestamp,
+    transaction,
+)
 from modules.db_operation.product_cache import _to_camel_case  # noqa: E402
 
 
@@ -160,7 +165,7 @@ def apply_changes(
             try:
                 params: List[object] = [ch.name_new, ch.supplier_new]
                 if touch_last_updated:
-                    params.append(now_iso())
+                    params.append(now_db_timestamp())
                 params.append(ch.product_code)
 
                 conn.execute(base_sql, tuple(params))
@@ -191,7 +196,7 @@ def touch_last_updated_for_codes(
         return 0, failures
 
     sql = "UPDATE Product_list SET last_updated = ? WHERE product_code = ? COLLATE NOCASE"
-    now = now_iso()
+    now = now_db_timestamp()
     with transaction(conn):
         for code in codes:
             conn.execute("SAVEPOINT sp_touch;")

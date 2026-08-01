@@ -107,6 +107,19 @@ unit
 last_updated
 ```
 
+`last_updated` is stored as `YYYY-MM-DD HH:MM:SS`. CSV validation accepts both
+that form and the legacy `YYYY-MM-DDTHH:MM:SS` form, then normalizes valid
+values to the space-separated storage form before replacement. The POS Product
+Menu formats the stored value separately for display, such as
+`09 Mar 2026  03:45 pm`.
+
+To inspect or normalize an existing database explicitly:
+
+```bash
+python migration/normalize_product_timestamps.py --db ../db/Anumani.db --check-only
+python migration/normalize_product_timestamps.py --db ../db/Anumani.db --confirm NORMALIZE-PRODUCT-TIMESTAMPS
+```
+
 ## Main Setup
 
 Run from `Database_admin`:

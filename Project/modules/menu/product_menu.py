@@ -403,6 +403,12 @@ def launch_product_dialog(
         **rem_display_targets,
     }
 
+    rem_gate = FocusGate([widgets['rem_ok']], lock_enabled=True)
+    rem_gate.set_locked(True)
+
+    def _on_rem_sync(result) -> None:
+        rem_gate.set_locked(not bool(result))
+
     upd_lineedit_targets = {
         'name': widgets['upd_name'],
         'cost': widgets['upd_cost'],
@@ -486,6 +492,7 @@ def launch_product_dialog(
         lookup_fn=_lookup_product,
         next_focus=widgets['rem_ok'],
         status_label=widgets['rem_status'],
+        on_sync=_on_rem_sync,
         auto_jump=False,
     )
     coord.add_link(
@@ -494,6 +501,7 @@ def launch_product_dialog(
         lookup_fn=_lookup_product_by_name,
         next_focus=widgets['rem_ok'],
         status_label=widgets['rem_status'],
+        on_sync=_on_rem_sync,
         auto_jump=False,
     )
     coord.add_link(
@@ -524,6 +532,10 @@ def launch_product_dialog(
     def _clear_remove_display() -> None:
         try:
             clear_display(rem_display_targets, widgets['rem_status'])
+        except Exception:
+            pass
+        try:
+            rem_gate.set_locked(True)
         except Exception:
             pass
 
@@ -955,7 +967,22 @@ def launch_product_dialog(
         except Exception:
             pass
 
+    previous_tab = {'index': widgets['tabs'].currentIndex()}
+    clear_tab_for_index = {
+        0: clear_add_tab,
+        1: clear_remove_tab,
+        2: clear_update_tab,
+        3: category_tab.clear_tab,
+    }
+
     def _on_tab_changed(idx: int) -> None:
+        old_idx = previous_tab['index']
+        if old_idx != idx:
+            clear_fn = clear_tab_for_index.get(old_idx)
+            if callable(clear_fn):
+                clear_fn()
+        previous_tab['index'] = idx
+
         _focus_code_for_tab(idx)
         # Refresh the informational list whenever CATEGORY becomes active.
         # Preserve the existing mode-specific combo and focus setup.

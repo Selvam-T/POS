@@ -1,0 +1,73 @@
+Tables in the database:
+- users
+- sqlite_sequence
+- cash_outflows
+- receipts
+- receipt_items
+- receipt_payments
+- receipt_counters
+- Category
+- Product_list
+
+Records in each table:
+
+Table: users
+Columns: ['user_id', 'username', 'password_hash', 'password_updated_at', 'recovery_email', 'is_active', 'must_change_password']
+(1, 'admin', '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', '2026-07-03 07:44:20', 'thiagarajan.selvam@gmail.com', 1, 0)
+(2, 'staff', '10176e7b7b24d317acfcf8d2064cfd2f24e154f7b5a96603077d5ef813d6a6b6', '2026-07-03 07:44:20', None, 1, 0)
+
+Table: sqlite_sequence
+Columns: ['name', 'seq']
+('users', 2)
+('receipts', 14)
+('receipt_items', 26)
+
+Table: cash_outflows
+Columns: ['outflows_id', 'outflows_type', 'amount', 'created_at', 'cashier_id', 'note']
+
+Table: receipts
+Columns: ['receipt_id', 'receipt_no', 'customer_name', 'cashier_id', 'status', 'grand_total', 'created_at', 'paid_at', 'cancelled_at', 'note']
+(1, '20260707-0001', '', 1, 'PAID', 15.1, '2026-07-07T17:01:40', '2026-07-07T17:01:40', None, '')
+(2, '20260708-0001', '', 1, 'PAID', 8.0, '2026-07-08T20:42:14', '2026-07-08T20:42:14', None, '')
+(3, '20260709-0001', '', 1, 'PAID', 21.2, '2026-07-09T23:34:18', '2026-07-09T23:34:18', None, '')
+
+Table: receipt_items
+Columns: ['item_id', 'receipt_id', 'line_no', 'product_code', 'product_name', 'category', 'qty', 'unit', 'unit_price', 'line_total']
+(1, 1, 1, '8887319900328', 'Avamy', '', 3.0, 'Each', 1.0, 3.0)
+(2, 1, 2, '8887319426163', 'Zyrtec', '', 6.0, 'Each', 1.0, 6.0)
+(3, 1, 3, 'VEG01', 'Coconut India', 'Vegetable', 1.0, 'Each', 1.7, 1.7)
+
+Table: receipt_payments
+Columns: ['payment_id', 'receipt_id', 'payment_type', 'tendered', 'amount', 'created_at']
+(1, 1, 'CASH', 20.0, 15.1, '2026-07-07T17:01:40')
+(2, 2, 'CASH', 8.0, 8.0, '2026-07-08T20:42:14')
+(3, 3, 'CASH', 21.2, 21.2, '2026-07-09T23:34:18')
+
+Table: receipt_counters
+Columns: ['date', 'counter']
+('20260707', 1)
+('20260708', 1)
+('20260709', 1)
+
+Table: Category
+Columns: ['category_id', 'name', 'is_protected', 'sort_order']
+(1, 'Bakery Goods', 0, 1)
+(2, 'Beer', 0, 2)
+(4, 'Breakfast Items', 0, 4)
+
+Table: Product_list
+Columns: ['product_code', 'name', 'category_id', 'supplier', 'selling_price', 'cost_price', 'unit', 'last_updated']
+('6978026020590', '08A Scissors', 12, '', 4.5, None, 'Each', '2026-07-03 15:44:20')
+('8888200708207', '100 Plus Active x', 30, '', 1.1, None, 'Each', '2026-07-03 15:44:20')
+('8888200716103', '100 Plus Active', 30, '', 1.7, None, 'Each', '2026-07-03 15:44:20')
+
+Row count in each table:
+users: 2 rows
+sqlite_sequence: 4 rows
+cash_outflows: 0 rows
+receipts: 14 rows
+receipt_items: 26 rows
+receipt_payments: 16 rows
+receipt_counters: 9 rows
+Category: 29 rows
+Product_list: 3321 rows

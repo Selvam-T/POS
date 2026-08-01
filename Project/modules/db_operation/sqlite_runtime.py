@@ -72,6 +72,11 @@ def now_iso() -> str:
     return datetime.now().isoformat(timespec="seconds")
 
 
+def now_db_timestamp() -> str:
+    """Return a local SQLite timestamp as ``YYYY-MM-DD HH:MM:SS``."""
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
 @contextmanager
 def transaction(conn: sqlite3.Connection) -> Iterator[sqlite3.Connection]:
     """Context manager for BEGIN IMMEDIATE / COMMIT / ROLLBACK."""

@@ -392,7 +392,7 @@ def test_product_remove_success_stays_open_and_focuses_close(app, temp_category_
     code.setText("TESTREM")
     code.editingFinished.emit()
     app.processEvents()
-    dlg.findChild(QPushButton, "btnRemoveOk").setEnabled(True)
+    assert dlg.findChild(QPushButton, "btnRemoveOk").isEnabled()
 
     dlg.findChild(QPushButton, "btnRemoveOk").click()
     _flush_success_events(app)
@@ -403,6 +403,60 @@ def test_product_remove_success_stays_open_and_focuses_close(app, temp_category_
     assert dlg.findChild(QLineEdit, "removeProductCodeLineEdit").text() == ""
     assert dlg.findChild(QLineEdit, "removeNameSearchLineEdit").text() == ""
     assert dlg.findChild(QPushButton, "btnRemoveClose").hasFocus()
+    dlg.close()
+
+
+def test_switching_product_tabs_clears_outgoing_tab_state(
+    app,
+    temp_category_json,
+):
+    mw = _make_main(is_admin=True)
+    dlg = launch_product_dialog(mw)
+    dlg.show()
+    app.processEvents()
+
+    tabs = dlg.findChild(QTabWidget, "tabWidget")
+
+    add_code = dlg.findChild(QLineEdit, "addProductCodeLineEdit")
+    add_name = dlg.findChild(QLineEdit, "addProductNameLineEdit")
+    add_code.setText("ADD-STATE")
+    add_name.setText("Add state")
+    tabs.setCurrentIndex(1)
+    app.processEvents()
+    assert add_code.text() == ""
+    assert add_name.text() == ""
+    assert not dlg.findChild(QPushButton, "btnAddOk").isEnabled()
+
+    remove_code = dlg.findChild(QLineEdit, "removeProductCodeLineEdit")
+    remove_name = dlg.findChild(QLineEdit, "removeNameSearchLineEdit")
+    remove_code.setText("REMOVE-STATE")
+    remove_name.setText("Remove state")
+    tabs.setCurrentIndex(2)
+    app.processEvents()
+    assert remove_code.text() == ""
+    assert remove_name.text() == ""
+    assert not dlg.findChild(QPushButton, "btnRemoveOk").isEnabled()
+
+    update_code = dlg.findChild(QLineEdit, "updateProductCodeLineEdit")
+    update_name = dlg.findChild(QLineEdit, "updateProductNameLineEdit")
+    update_code.setText("UPDATE-STATE")
+    update_name.setText("Update state")
+    tabs.setCurrentIndex(3)
+    app.processEvents()
+    assert update_code.text() == ""
+    assert update_name.text() == ""
+    assert not dlg.findChild(QPushButton, "btnUpdateOk").isEnabled()
+
+    dlg.findChild(QRadioButton, "categoryReplaceRadioBtn").setChecked(True)
+    dlg.findChild(QLineEdit, "categoryAddLineEdit").setText("Old category")
+    dlg.findChild(QLineEdit, "categoryUpdateLineEdit").setText("New category")
+    tabs.setCurrentIndex(0)
+    app.processEvents()
+    assert dlg.findChild(QRadioButton, "categoryAddRadioBtn").isChecked()
+    assert dlg.findChild(QLineEdit, "categoryAddLineEdit").text() == ""
+    assert dlg.findChild(QLineEdit, "categoryUpdateLineEdit").text() == ""
+    assert not dlg.findChild(QPushButton, "btnCategoryOk").isEnabled()
+
     dlg.close()
 
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import sys
 from collections import Counter
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Tuple
 
@@ -36,6 +37,19 @@ def _to_float(value: str) -> Tuple[bool, float | None]:
         return False, None
 
 
+def _normalize_last_updated(value: object) -> tuple[bool, str]:
+    text = clean_text(value)
+    if not text:
+        return True, now_stamp()
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            parsed = datetime.strptime(text, fmt)
+            return True, parsed.strftime("%Y-%m-%d %H:%M:%S")
+        except ValueError:
+            continue
+    return False, text
+
+
 def validate_legacy_products(
     rows: List[Dict[str, object]] | None = None,
     *,
@@ -62,7 +76,7 @@ def validate_legacy_products(
         category = title_words(row.get("category")) or "Other"
         supplier = clean_text(row.get("supplier"))
         unit = normalize_unit(row.get("unit"))
-        last_updated = clean_text(row.get("last_updated")) or now_stamp()
+        valid_last_updated, last_updated = _normalize_last_updated(row.get("last_updated"))
 
         if not product_code:
             reasons.append("blank product_code")
@@ -107,6 +121,8 @@ def validate_legacy_products(
             row_warnings.append("category longer than POS input max 25")
         if supplier and len(supplier) > APP_LIMITS["supplier"][1]:
             row_warnings.append("supplier longer than POS input max 15")
+        if not valid_last_updated:
+            reasons.append("invalid last_updated")
 
         if reasons:
             for reason in reasons:

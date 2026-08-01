@@ -11,6 +11,7 @@ if str(ADMIN_ROOT) not in sys.path:
     sys.path.insert(0, str(ADMIN_ROOT))
 
 from admin_lib import connect, db_path, print_header, table_exists
+from migration.normalize_product_timestamps import timestamp_counts
 
 
 EXPECTED_BASE_TABLES = {
@@ -141,6 +142,15 @@ def verify_database(*, db_file: Path | str | None = None) -> None:
         print("Blank product names: 0")
         print("Duplicate product-code groups: 0")
         print("Duplicate product-name groups: 0")
+
+        timestamps = timestamp_counts(conn)
+        if timestamps["iso_t"] or timestamps["invalid"]:
+            raise RuntimeError(f"Product last_updated format audit failed: {timestamps}")
+        print(
+            "Product last_updated format: "
+            f"{timestamps['canonical']} canonical, {timestamps['blank']} blank, "
+            "0 ISO-T, 0 invalid"
+        )
         print(f"receipt_counters table exists now: {table_exists(conn, 'receipt_counters')}")
         print("Note: receipt_counters is created by POS runtime when receipt numbers are generated.")
         print("Audit passed.")

@@ -63,7 +63,8 @@ The **Product_list** table is the master catalog for all products available in t
 	- `selling_price` (REAL, NOT NULL): Current selling price.
 	- `cost_price` (REAL): Purchase cost for accounting.
 	- `unit` (TEXT): Unit of measure (e.g., Kg, Each).
-	- `last_updated` (TEXT): ISO timestamp of last modification.
+	- `last_updated` (TEXT): Stored as `YYYY-MM-DD HH:MM:SS`, using a space
+	  between the date and time (for example, `2026-03-09 15:45:00`).
 	  - UI display: shown to users via `modules.date_time.format_datetime()` as
 	    `DD MMM YYYY  hh:mm am/pm` (e.g., `09 Mar 2026  03:45 pm`).
 - **Integration:**

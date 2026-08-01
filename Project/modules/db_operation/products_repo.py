@@ -3,7 +3,7 @@
 import sqlite3
 from typing import Any, Dict, List, Optional, Tuple
 
-from .sqlite_runtime import get_conn, now_iso, transaction
+from .sqlite_runtime import get_conn, now_db_timestamp, transaction
 
 
 TABLE = "Product_list"
@@ -40,7 +40,7 @@ def add_product(
                     float(selling_price),
                     float(cost_price),
                     unit,
-                    now_iso(),
+                    now_db_timestamp(),
                 ),
             )
     finally:
@@ -83,7 +83,7 @@ def update_product(
         params.append(unit)
 
     fields.append("last_updated = ?")
-    params.append(now_iso())
+    params.append(now_db_timestamp())
 
     if not fields:
         return False
@@ -140,9 +140,9 @@ def reassign_category(
         #raise RuntimeError("Simulated replace_category failure")
         if own:
             with transaction(c):
-                cur = c.execute(sql, (int(new_category_id), now_iso(), int(old_category_id)))
+                cur = c.execute(sql, (int(new_category_id), now_db_timestamp(), int(old_category_id)))
                 return int(cur.rowcount or 0)
-        cur = c.execute(sql, (int(new_category_id), now_iso(), int(old_category_id)))
+        cur = c.execute(sql, (int(new_category_id), now_db_timestamp(), int(old_category_id)))
         return int(cur.rowcount or 0)
     finally:
         if own:
