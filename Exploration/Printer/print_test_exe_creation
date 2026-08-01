@@ -1,0 +1,27 @@
+I have created print_test.exe and cash_drawer.exe in Exploration\Printer folder.
+Follow instructions below to generate a new .exe if necessary.
+The generated .exe will be in dist folder, but I have relocated it and deleted build folders.
+See instructions below.
+
+How to generate print_test.exe
+------------------------------
+Execute command from POS.
+
+a) single .exe without a console window.
+pyinstaller --clean --onefile --windowed --collect-data escpos Exploration\Printer\print_test.py
+
+or
+
+b) single .exe with a console window.
+pyinstaller --clean --onefile --collect-data escpos Exploration\Printer\print_test.py
+
+By default PyInstaller puts the executable here:
+dist\print_test.exe
+
+Finally, you may want to clean up POS\dist, POS\build, POS\print_test.spec
+
+Test Cash Drawer timer:
+-----------------------
+Similarly, I have cash_drawer.py, to test Timeout that works for the cash cash_drawer
+
+Also if you happen to build, clean up POS\dist, POS\build, POS\print_test.spec

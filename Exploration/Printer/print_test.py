@@ -13,10 +13,59 @@ PRINTER_IP = "192.168.0.10"
 PRINTER_PORT = 9100
 TIMEOUT_SECONDS = 5
 
+RECEIPT_TEST_WIDTHS = (50, 49, 48, 47, 46)
+RECEIPT_QTY_WIDTH = 9
+RECEIPT_ITEM_AMOUNT_WIDTH = 8
+RECEIPT_ITEM_PRICE_WIDTH = 6
+RECEIPT_GAP = 1
+RECEIPT_PRINTER_FONT = "a"
+RECEIPT_TEST_LINES_PER_WIDTH = 1
+
 
 def _print_line(printer: Network, *, font: str, width: int, height: int, text: str) -> None:
     printer.set(align="left", font=font, width=width, height=height)
     printer.text(text + "\n")
+
+
+def _receipt_margin_test_line(receipt_width: int) -> str:
+    """Build one four-column row whose length is exactly receipt_width."""
+    product_width = receipt_width - (
+        3 * RECEIPT_GAP
+        + RECEIPT_QTY_WIDTH
+        + RECEIPT_ITEM_PRICE_WIDTH
+        + RECEIPT_ITEM_AMOUNT_WIDTH
+    )
+    if product_width < 1:
+        raise ValueError(f"Receipt width {receipt_width} is too small for the configured columns.")
+
+    product = f"Test MARGIN {receipt_width}"[:product_width].ljust(product_width)
+    qty = "1 ea"[:RECEIPT_QTY_WIDTH].ljust(RECEIPT_QTY_WIDTH)
+    price = "6.80"[-RECEIPT_ITEM_PRICE_WIDTH:].rjust(RECEIPT_ITEM_PRICE_WIDTH)
+    total = "6.80"[-RECEIPT_ITEM_AMOUNT_WIDTH:].rjust(RECEIPT_ITEM_AMOUNT_WIDTH)
+    gap = " " * RECEIPT_GAP
+    line = gap.join((product, qty, price, total))
+
+    if len(line) != receipt_width:
+        raise AssertionError(
+            f"Margin test line is {len(line)} characters; expected {receipt_width}."
+        )
+    return line
+
+
+def _print_receipt_margin_tests(printer: Network) -> None:
+    printer.set(
+        align="left",
+        font=RECEIPT_PRINTER_FONT,
+        width=1,
+        height=1,
+    )
+    printer.text("\nRECEIPT MARGIN TEST - FONT A\n")
+
+    for receipt_width in RECEIPT_TEST_WIDTHS:
+        #printer.text(f"\nWIDTH {receipt_width} ({RECEIPT_TEST_LINES_PER_WIDTH} ROWS)\n")
+        test_line = _receipt_margin_test_line(receipt_width)
+        for _ in range(RECEIPT_TEST_LINES_PER_WIDTH):
+            printer.text(test_line + "\n")
 
 
 def send_print_test() -> tuple[bool, str]:
@@ -33,45 +82,48 @@ def send_print_test() -> tuple[bool, str]:
         )
         _print_line(
             printer,
-            font="b",
-            width=1,
-            height=1,
-            text="Line 2 Test PRINTING font B $ 999.99",
-        )
-        _print_line(
-            printer,
             font="a",
             width=2,
             height=2,
-            text="Line 3 Test PRINTING font A double $ 999.99",
-        )
-        _print_line(
-            printer,
-            font="b",
-            width=2,
-            height=2,
-            text="Line 4 Test PRINTING font B double $ 999.99",
+            text="Line 2 Test PRINTING font A double $ 999.99",
         )
         _print_line(
             printer,
             font="a",
             width=1,
             height=2,
-            text="Line 5 Test PRINTING font A Height $ 999.99",
-        )
-        _print_line(
-            printer,
-            font="b",
-            width=1,
-            height=2,
-            text="Line 6 Test PRINTING font B Height $ 999.99",
+            text="Line 3 Test PRINTING font A Height $ 999.99",
         )
         _print_line(
             printer,
             font="a",
             width=2,
             height=1,
-            text="Line 7 Test PRINTING font A width $ 999.99",
+            text="Line 4 Test PRINTING font A width $ 999.99",
+        )
+
+        printer.text("\n")
+
+        _print_line(
+            printer,
+            font="b",
+            width=1,
+            height=1,
+            text="Line 5 Test PRINTING font B $ 999.99",
+        )
+        _print_line(
+            printer,
+            font="b",
+            width=2,
+            height=2,
+            text="Line 6 Test PRINTING font B double $ 999.99",
+        )
+        _print_line(
+            printer,
+            font="b",
+            width=1,
+            height=2,
+            text="Line 7 Test PRINTING font B Height $ 999.99",
         )
         _print_line(
             printer,
@@ -80,6 +132,24 @@ def send_print_test() -> tuple[bool, str]:
             height=1,
             text="Line 8 Test PRINTING font B width $ 999.99",
         )
+
+        _print_line(
+                    printer,
+                    font="a",
+                    width=1,
+                    height=1,
+                    text="\nAAAAA BBBBB CCCCC DDDDD EEEEE FFFFF GGGGG HHHHH IIIII JJJJJ KKKKK",
+        )
+
+        _print_line(
+                    printer,
+                    font="a",
+                    width=1,
+                    height=1,
+                    text="aaaaa bbbbb ccccc ddddd eeeee fffff ggggg hhhhh iiiii jjjjj kkkkk",
+        )
+
+        _print_receipt_margin_tests(printer)
 
         printer.set(align="left", font="a", width=1, height=1)
         printer.text("\n")
