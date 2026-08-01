@@ -64,11 +64,12 @@ Item table width is configured in `config.py`:
 - `RECEIPT_DEFAULT_WIDTH`
 - `RECEIPT_QTY_WIDTH`
 - `RECEIPT_ITEM_AMOUNT_WIDTH`
-- `RECEIPT_AMOUNT_WIDTH`
+- `RECEIPT_ITEM_PRICE_WIDTH`
+- `RECEIPT_SUM_AMOUNT_WIDTH`
 - `RECEIPT_GAP`
 
 Item `Price` and `Total` columns omit `$` and use fixed two-decimal formatting.
-Summary and payment lines keep `$` and use `RECEIPT_AMOUNT_WIDTH`.
+Summary and payment lines keep `$` and use `RECEIPT_SUM_AMOUNT_WIDTH`.
 
 ## Cash drawer sequence
 1. Open `Network(host=PRINTER_IP, port=PRINTER_PORT, timeout=...)`

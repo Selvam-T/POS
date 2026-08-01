@@ -48,15 +48,19 @@ def _format_qty(qty: float) -> str:
 
 
 def _left_width(width: int) -> int:
-    return max(1, width - config.RECEIPT_AMOUNT_WIDTH - config.RECEIPT_GAP)
+    return max(1, width - config.RECEIPT_SUM_AMOUNT_WIDTH - config.RECEIPT_GAP)
 
 
-def _item_amount_width() -> int:
-    return int(getattr(config, "RECEIPT_ITEM_AMOUNT_WIDTH", config.RECEIPT_AMOUNT_WIDTH))
+def _item_total_width() -> int:
+    return int(config.RECEIPT_ITEM_AMOUNT_WIDTH)
+
+
+def _item_price_width() -> int:
+    return int(config.RECEIPT_ITEM_PRICE_WIDTH)
 
 
 def _item_left_width(width: int) -> int:
-    return max(1, width - _item_amount_width() - config.RECEIPT_GAP)
+    return max(1, width - _item_total_width() - config.RECEIPT_GAP)
 
 
 def _center_line(text: str, width: int) -> str:
@@ -69,7 +73,7 @@ def _left_line(text: str, width: int) -> str:
 def _line_with_amount(left_text: str, amount_text: str, width: int) -> str:
     left_width = _left_width(width)
     left = (left_text or "")[:left_width].ljust(left_width)
-    amount = (amount_text or "").rjust(config.RECEIPT_AMOUNT_WIDTH)
+    amount = (amount_text or "").rjust(config.RECEIPT_SUM_AMOUNT_WIDTH)
     return f"{left}{' ' * config.RECEIPT_GAP}{amount}"
 
 
@@ -92,9 +96,10 @@ def _resolve_cashier_name(cashier_id: object) -> str:
 
 def _item_line(qty: float, unit: str, unit_price: float, name: str, line_total: float, width: int) -> str:
     left_width = _item_left_width(width)
-    item_amount_width = _item_amount_width()
+    item_price_width = _item_price_width()
+    item_total_width = _item_total_width()
     # Reserve space for: product name, qty, and unit price columns.
-    product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 3 + item_amount_width))
+    product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 3 + item_price_width))
 
     original_unit = unit
 
@@ -116,27 +121,28 @@ def _item_line(qty: float, unit: str, unit_price: float, name: str, line_total: 
             name_text = (raw_name[: product_width - 3] + "...")
     else:
         name_text = raw_name.ljust(product_width)
-    price_text = f"{unit_price:.2f}".rjust(item_amount_width)
+    price_text = f"{unit_price:.2f}".rjust(item_price_width)
     left_text = f"{name_text}  {qty_text} {price_text}"
     amount_text = f"{line_total:.2f}"
-    main_line = f"{left_text}{' ' * config.RECEIPT_GAP}{amount_text.rjust(item_amount_width)}"
+    main_line = f"{left_text}{' ' * config.RECEIPT_GAP}{amount_text.rjust(item_total_width)}"
 
     return main_line
 
 def _item_header(width: int) -> str:
     left_width = _item_left_width(width)
-    item_amount_width = _item_amount_width()
+    item_price_width = _item_price_width()
+    item_total_width = _item_total_width()
     # Reserve space for qty and unit price columns inside the left area.
-    product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 3 + item_amount_width))
+    product_width = max(1, left_width - (config.RECEIPT_QTY_WIDTH + 3 + item_price_width))
     qty_text = "Qty".ljust(config.RECEIPT_QTY_WIDTH)
     hdr_name = "Product"
     if len(hdr_name) > product_width:
         name_text = hdr_name[:product_width]
     else:
         name_text = hdr_name.ljust(product_width)
-    price_text = "Price".rjust(item_amount_width)
+    price_text = "Price".rjust(item_price_width)
     left_text = f"{name_text}  {qty_text} {price_text}"
-    return f"{left_text}{' ' * config.RECEIPT_GAP}{'Total'.rjust(item_amount_width)}"
+    return f"{left_text}{' ' * config.RECEIPT_GAP}{'Total'.rjust(item_total_width)}"
 
 
 def _append_header_info(lines: List[str], width: int) -> None:

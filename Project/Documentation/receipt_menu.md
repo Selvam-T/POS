@@ -174,7 +174,7 @@ from `modules.payment.receipt_generator`.
 Receipt text intentionally keeps local amount formatting inside
 `receipt_generator.py` instead of using the shared UI currency formatter. The
 printed receipt is fixed-width, printer-oriented text, so amounts must be
-right-aligned within `RECEIPT_AMOUNT_WIDTH` and fitted to the configured receipt
+right-aligned within `RECEIPT_SUM_AMOUNT_WIDTH` and fitted to the configured receipt
 line width.
 
 Preview properties:

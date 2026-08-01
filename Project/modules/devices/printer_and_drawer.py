@@ -15,14 +15,6 @@ def _receipt_font() -> str:
     return "b" if font == "b" else "a"
 
 
-def _receipt_scale(name: str, default: int = 1) -> int:
-    try:
-        value = int(getattr(config, name, default))
-    except Exception:
-        value = default
-    return min(8, max(1, value))
-
-
 def _send_text(printer, text: str) -> None:
     printer.text(text or "")
     if text and not text.endswith("\n"):
@@ -30,23 +22,16 @@ def _send_text(printer, text: str) -> None:
 
 
 def _send_receipt_text(printer, receipt_text: str) -> None:
-    font = _receipt_font()
-    lines = str(receipt_text or "").splitlines()
-    if not lines:
+    if not receipt_text:
         return
 
     printer.set(
         align="left",
-        font=font,
-        width=_receipt_scale("RECEIPT_COMPANY_NAME_WIDTH", 1),
-        height=_receipt_scale("RECEIPT_COMPANY_NAME_HEIGHT", 2),
+        font=_receipt_font(),
+        width=1,
+        height=1,
     )
-    _send_text(printer, lines[0])
-
-    remaining = "\n".join(lines[1:])
-    if remaining:
-        printer.set(align="left", font=font, width=1, height=1)
-        _send_text(printer, remaining)
+    _send_text(printer, str(receipt_text))
 
 
 def _send_with_escpos(

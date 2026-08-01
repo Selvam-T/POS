@@ -250,14 +250,13 @@ STRING_CONFIG = {
 # Receipts and PayNow
 # -----------------------------------------------------------------------------
 
-RECEIPT_DEFAULT_WIDTH = 56 # 56 for font a, 60 for font b
+RECEIPT_DEFAULT_WIDTH = 47 # 48 max for font a, 60 for font b
 RECEIPT_QTY_WIDTH = 9  # Quantity plus unit.
-RECEIPT_AMOUNT_WIDTH = 9  # Summary/payment amounts include "$ ".
-RECEIPT_ITEM_AMOUNT_WIDTH = 9  # Item price/total columns omit "$ ".
+RECEIPT_SUM_AMOUNT_WIDTH = 9  # Summary/payment amounts include "$ ".
+RECEIPT_ITEM_AMOUNT_WIDTH = 8  # Item total column; quantity may increase its digits.
+RECEIPT_ITEM_PRICE_WIDTH = 6  # Item unit-price column.
 RECEIPT_GAP = 1
 RECEIPT_PRINTER_FONT = 'a'  # ESC/POS receipt font: 'a' or 'b'.
-RECEIPT_COMPANY_NAME_WIDTH = 2  # ESC/POS width scale for the first receipt line.
-RECEIPT_COMPANY_NAME_HEIGHT = 2  # ESC/POS height scale for the first receipt line.
 
 # Lowercase names are retained because qr_generator imports this public API.
 merchant_name = 'Anumani Trading Pte Ltd'
@@ -289,7 +288,7 @@ SUBNET_MASK = '255.255.255.0'
 PRINTER_PORT = 9100
 
 CASH_DRAWER_PIN = 2
-CASH_DRAWER_TIMEOUT = 5.0
+CASH_DRAWER_TIMEOUT = 10.0
 
 # -----------------------------------------------------------------------------
 # Customer display and advertisements
