@@ -1,10 +1,10 @@
-# Admin Settings Dialog (Admin, Staff, Email)
+# Admin Settings Dialog (Admin, Staff, Screen 2, Export)
 
 This document describes the Admin Settings dialog, its UI structure, access rules, and how it integrates with the right-side menu.
 
 ## Overview
 
-- Purpose: Provide a central place to manage passwords for Admin and Staff, and to configure the recovery email address.
+- Purpose: Manage Admin/Staff passwords, customer-display advertisements, and inventory/database exports.
 - Access: Only the Admin user can open the Admin Settings dialog (Staff has no access via the menu button in production).
 - UX pattern: Frameless dialog with a custom title bar (consistent with other menu dialogs), dimmed background while open, and centered on the main window.
 
@@ -14,10 +14,11 @@ This document describes the Admin Settings dialog, its UI structure, access rule
   - Root: `QDialog#AdminDialog`
   - Custom title bar: `QFrame#customTitleBar` with `QLabel#customTitle` and `QPushButton#customCloseBtn`
   - Logged-in indicator: `QLabel#loggedInLabel` (e.g., "Logged in as: Admin")
-  - Tabs: `QTabWidget#tabWidget` with three pages
+  - Tabs: `QTabWidget#tabWidget` with four pages
     - Admin tab: `QWidget#tabAdmin`
     - Staff tab: `QWidget#tabStaff`
-    - Email tab: `QWidget#tabEmail`
+    - Screen 2 tab: `QWidget#tabScreen2`
+    - Export tab: `QWidget#tabExport`
   - Footer info: `QLabel#infoLabel` (e.g., "Only Admin can modify settings")
   - Footer action: `QPushButton#closeButton` (closes dialog)
 - Controller: `modules/menu/admin_menu.py`
@@ -36,6 +37,12 @@ This document describes the Admin Settings dialog, its UI structure, access rule
   - `QLineEdit#adminNewPassword` (masked; placeholder "Enter new password")
 - Action:
   - `QPushButton#btnAdminSave` (Save Changes)
+- Future placeholders:
+  - `adminNameFieldLbl` / `adminNameLineEdit`
+  - `adminEmailFieldLbl` / `adminEmailLineEdit`
+  - These controls are intentionally unwired and excluded from keyboard focus.
+    Labels use gray text without a border/background; line edits use a gray
+    border/background and are read-only.
 
 ### Staff Tab
 - Group: `QGroupBox#groupStaffPassword` (title: "Change Staff Password")
@@ -45,6 +52,18 @@ This document describes the Admin Settings dialog, its UI structure, access rule
   - `QLineEdit#staffNewPassword` (masked; placeholder "Enter new password")
 - Action:
   - `QPushButton#btnStaffSave` (Save Changes)
+- Future placeholders:
+  - `staffNameFieldLbl` / `staffNameLineEdit`
+  - `staffEmailFieldLbl` / `staffEmailLineEdit`
+  - These controls follow the same unwired placeholder policy.
+
+### Screen 2 and Export Close Controls
+
+- `btnScreen2Cancel` and `btnExportCancel` display `CLOSE` and use centered
+  action layouts immediately after their tab status labels.
+- Screen 2 actions retain their existing focus behavior.
+- Every Export action moves focus to `btnExportCancel` after either success or
+  failure, allowing Enter to close the dialog.
 
 ### Email Tab
 - Group: `QGroupBox#groupEmail` (title: "Email Settings")

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>730</height>
+    <height>820</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>730</height>
+    <height>820</height>
    </size>
   </property>
   <layout class="QVBoxLayout" name="mainVerticalLayout">
@@ -210,7 +210,7 @@
            <number>10</number>
           </property>
           <property name="verticalSpacing">
-           <number>20</number>
+           <number>25</number>
           </property>
           <property name="leftMargin">
            <number>10</number>
@@ -224,14 +224,14 @@
           <property name="bottomMargin">
            <number>20</number>
           </property>
-          <item row="0" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="adminCurFieldLbl">
             <property name="text">
              <string>Current Password:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="2" column="1">
            <layout class="QHBoxLayout" name="layoutAdminCurrent">
             <item>
              <widget class="QLineEdit" name="adminCurPwdLineEdit">
@@ -267,14 +267,14 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="adminNewFieldLbl">
             <property name="text">
              <string>New Password:</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="3" column="1">
            <layout class="QHBoxLayout" name="layoutAdminNew">
             <item>
              <widget class="QLineEdit" name="adminNewPwdLineEdit">
@@ -310,6 +310,64 @@
             </item>
            </layout>
           </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="adminEmailFieldLbl">
+            <property name="text">
+             <string>Email:</string>
+            </property>
+            <property name="futurePlaceholder" stdset="0">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="adminEmailLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="futurePlaceholder" stdset="0">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="adminNameFieldLbl">
+            <property name="text">
+             <string>User Name:</string>
+            </property>
+            <property name="futurePlaceholder" stdset="0">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="adminNameLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="futurePlaceholder" stdset="0">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -324,7 +382,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>10</height>
+           <height>15</height>
           </size>
          </property>
         </spacer>
@@ -350,7 +408,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>10</height>
+           <height>15</height>
           </size>
          </property>
         </spacer>
@@ -472,7 +530,7 @@
            <number>10</number>
           </property>
           <property name="verticalSpacing">
-           <number>20</number>
+           <number>25</number>
           </property>
           <property name="leftMargin">
            <number>10</number>
@@ -486,14 +544,14 @@
           <property name="bottomMargin">
            <number>20</number>
           </property>
-          <item row="0" column="0">
+          <item row="2" column="0">
            <widget class="QLabel" name="staffCurFieldLbl">
             <property name="text">
              <string>Current Password:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="2" column="1">
            <layout class="QHBoxLayout" name="layoutStaffCurrent">
             <item>
              <widget class="QLineEdit" name="staffCurPwdLineEdit">
@@ -529,14 +587,14 @@
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
+          <item row="3" column="0">
            <widget class="QLabel" name="staffNewFieldLbl">
             <property name="text">
              <string>New Password:</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="3" column="1">
            <layout class="QHBoxLayout" name="layoutStaffNew">
             <item>
              <widget class="QLineEdit" name="staffNewPwdLineEdit">
@@ -572,6 +630,64 @@
             </item>
            </layout>
           </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="staffNameFieldLbl">
+            <property name="text">
+             <string>User Name:</string>
+            </property>
+            <property name="futurePlaceholder" stdset="0">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="staffNameLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="futurePlaceholder" stdset="0">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="staffEmailFieldLbl">
+            <property name="text">
+             <string>Email:</string>
+            </property>
+            <property name="futurePlaceholder" stdset="0">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="staffEmailLineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="focusPolicy">
+             <enum>Qt::NoFocus</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="futurePlaceholder" stdset="0">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -586,7 +702,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>10</height>
+           <height>15</height>
           </size>
          </property>
         </spacer>
@@ -612,7 +728,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>10</height>
+           <height>15</height>
           </size>
          </property>
         </spacer>
@@ -677,7 +793,7 @@
         <number>10</number>
        </property>
        <property name="bottomMargin">
-        <number>0</number>
+        <number>10</number>
        </property>
        <item>
         <spacer name="verticalSpacer_5">
@@ -716,7 +832,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>20</height>
+           <height>30</height>
           </size>
          </property>
         </spacer>
@@ -922,7 +1038,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>10</height>
+           <height>15</height>
           </size>
          </property>
         </spacer>
@@ -936,6 +1052,68 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_21">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>15</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="screen2_actionBtns" stretch="1,2,1">
+         <property name="spacing">
+          <number>10</number>
+         </property>
+         <item>
+          <spacer name="horizontalSpacer_screen2ActionLeft">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnScreen2Cancel">
+           <property name="text">
+            <string>CLOSE</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_screen2ActionRight">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer_20">
@@ -970,7 +1148,7 @@
         <number>10</number>
        </property>
        <property name="bottomMargin">
-        <number>0</number>
+        <number>10</number>
        </property>
        <item>
         <spacer name="verticalSpacer_15">
@@ -1030,13 +1208,13 @@
            <number>120</number>
           </property>
           <property name="topMargin">
-           <number>20</number>
+           <number>10</number>
           </property>
           <property name="rightMargin">
            <number>120</number>
           </property>
           <property name="bottomMargin">
-           <number>20</number>
+           <number>10</number>
           </property>
           <item>
            <widget class="QFrame" name="csv2ExportFrame">
@@ -1111,7 +1289,7 @@
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>15</height>
+              <height>10</height>
              </size>
             </property>
            </spacer>
@@ -1313,7 +1491,7 @@
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>15</height>
+              <height>10</height>
              </size>
             </property>
            </spacer>
@@ -1453,7 +1631,7 @@
             <property name="sizeHint" stdset="0">
              <size>
               <width>20</width>
-              <height>15</height>
+              <height>10</height>
              </size>
             </property>
            </spacer>
@@ -1529,7 +1707,7 @@
           <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Expanding</enum>
+          <enum>QSizePolicy::Fixed</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -1548,6 +1726,68 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_22">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>10</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="export_actionBtns" stretch="1,2,1">
+         <property name="spacing">
+          <number>10</number>
+         </property>
+         <item>
+          <spacer name="horizontalSpacer_exportActionLeft">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnExportCancel">
+           <property name="text">
+            <string>CLOSE</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_exportActionRight">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer_19">
@@ -1586,6 +1826,7 @@
   <tabstop>upScreen2Btn</tabstop>
   <tabstop>downScreen2Btn</tabstop>
   <tabstop>screen2ListWidget</tabstop>
+  <tabstop>btnScreen2Cancel</tabstop>
   <tabstop>csv2ExportBtn</tabstop>
   <tabstop>csvExportBtn</tabstop>
   <tabstop>xlsExportBtn</tabstop>
@@ -1593,6 +1834,7 @@
   <tabstop>productDataCsvExportBtn</tabstop>
   <tabstop>productDataSqlExportBtn</tabstop>
   <tabstop>dbExportBtn</tabstop>
+  <tabstop>btnExportCancel</tabstop>
   <tabstop>customCloseBtn</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>

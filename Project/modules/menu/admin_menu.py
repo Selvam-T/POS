@@ -147,6 +147,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             'screen2Remove': (QPushButton, 'removeScreen2Btn'),
             'screen2Up': (QPushButton, 'upScreen2Btn'),
             'screen2Down': (QPushButton, 'downScreen2Btn'),
+            'btnScreen2Cancel': (QPushButton, 'btnScreen2Cancel'),
 
             # EXPORT
             'csvExportBtn': (QPushButton, 'csvExportBtn'),
@@ -158,6 +159,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             'dbExportBtn': (QPushButton, 'dbExportBtn'),
             'exportStatusLabel': (QLabel, 'exportStatusLabel'),
             'exportHeaderLabel2': (QLabel, 'exportHeaderLabel2'),
+            'btnExportCancel': (QPushButton, 'btnExportCancel'),
 
             'customClose': (QPushButton, 'customCloseBtn'),
         }, hard_fail=True)
@@ -192,6 +194,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     screen2Remove = widgets['screen2Remove']
     screen2Up = widgets['screen2Up']
     screen2Down = widgets['screen2Down']
+    btnScreen2Cancel = widgets['btnScreen2Cancel']
     csvExportBtn = widgets['csvExportBtn']
     xlsExportBtn = widgets['xlsExportBtn']
     xlsxExportBtn = widgets['xlsxExportBtn']
@@ -201,6 +204,7 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     dbExportBtn = widgets.get('dbExportBtn')
     exportStatusLabel = widgets['exportStatusLabel']
     exportHeaderLabel2 = widgets.get('exportHeaderLabel2')
+    btnExportCancel = widgets['btnExportCancel']
     customClose = widgets.get('customClose')
 
     preferred_exts = ['.jpg', '.jpeg', '.png']
@@ -316,6 +320,11 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
             pass
         try:
             btnStaffCancel.setEnabled(False)
+        except Exception:
+            pass
+        try:
+            btnScreen2Cancel.setEnabled(False)
+            btnExportCancel.setEnabled(False)
         except Exception:
             pass
         try:
@@ -478,6 +487,10 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
     def _set_export_status(msg: str, ok: bool) -> None:
         try:
             ui_feedback.set_status_label(exportStatusLabel, msg, ok=ok, duration=STATUS_LABEL_DURATION_MS if ok else PERSISTENT_DURATION_MS)
+        except Exception:
+            pass
+        try:
+            btnExportCancel.setFocus(Qt.OtherFocusReason)
         except Exception:
             pass
 
@@ -792,6 +805,8 @@ def launch_admin_dialog(host_window, user_id: int | None = None, is_admin: bool 
 
         btnAdminCancel.clicked.connect(_on_admin_cancel)
         btnStaffCancel.clicked.connect(_on_staff_cancel)
+        btnScreen2Cancel.clicked.connect(lambda: dlg.reject())
+        btnExportCancel.clicked.connect(lambda: dlg.reject())
     except Exception:
         pass
 

@@ -525,6 +525,19 @@ QLabel[objectName$="FieldLbl"][locked="false"] {
     color: #5c5e5f !important;
 }
 
+/* Reserved Admin/Staff identity fields: visible placeholders for future use. */
+QLabel[futurePlaceholder="true"] {
+    color: #cfcdcd;
+    background-color: transparent;
+    border: none;
+}
+
+QLineEdit[futurePlaceholder="true"] {
+    color: #777777;
+    background-color: #f5f5f5;
+    border: 1px solid #cfcdcd;
+}
+
 /* Header Label */
 QLabel[objectName$="HeaderLabel"] {
     font-size: 14pt;
