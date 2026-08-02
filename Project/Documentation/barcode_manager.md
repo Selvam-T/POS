@@ -94,6 +94,29 @@ scanner_activity(timestamp, is_fast)
 
 `BarcodeManager` consumes `is_fast`; it no longer re-checks a separate interval.
 
+The configured interval is `0.10` seconds. It is evaluated between every pair
+of key events within a scan. The operator's delay between trigger pulls is not
+the relevant measurement. Windows scheduling, `pynput`, application load, or
+USB/HID delivery can create an occasional interval longer than the threshold
+even when the scanner itself read the label correctly.
+
+When an interval exceeds the threshold, `scanner.py` replaces its current
+buffer with the latest character. A delay after the first digit can therefore
+discard that digit and emit the remaining suffix at Enter. The suffix fails the
+product lookup and can legitimately enter the missing-scan route, which opens
+Product Management on ADD with the truncated code. Physical testing reproduced
+this behavior with the former `0.05`-second setting: `5028197552916` was
+occasionally received as `028197552916`. After changing the interval to `0.10`
+seconds, repeated scans at varying operator speeds did not reproduce the
+unexpected ADD dialog.
+
+Treat suffix-only codes and intermittent missing-product dialogs as possible
+timing symptoms. First compare repeated scans in a plain text editor and the
+scanner test utility. Increase the interval cautiously because a higher value
+also increases the chance that fast manual typing is classified as scanner-like.
+`SCANNER_UI_SUPPRESS_SECONDS` only protects the UI from the trailing Enter; it
+does not build or truncate the barcode.
+
 During scanner-fast activity, `BarcodeManager`:
 
 - Snapshots the focused editable widget at the start of a possible burst.

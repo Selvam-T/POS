@@ -21,6 +21,29 @@ Workflow diagram: [Barcode_Manager_High-Speed_Manual_Input.png](Barcode_Manager_
 - `scanner_activity(timestamp, is_fast)` is emitted for each key press.
 - A barcode is confirmed only when the scanner buffer has at least 3 characters and Enter completes the scan.
 
+The configured key interval is `0.10` seconds. What matters is the measured
+interval between individual digit events, not the time between separate scans
+or how quickly the operator pulls the trigger. Windows scheduling, `pynput`,
+application load, and USB/HID delivery can occasionally delay one key event
+even when the physical scanner decoded and transmitted the barcode normally.
+
+`scanner.py` starts a new buffer whenever the measured interval exceeds this
+threshold. If that happens partway through a barcode, the already buffered
+prefix is discarded and the remaining suffix may be emitted when Enter arrives.
+For example, a delayed second digit can turn `5028197552916` into
+`028197552916`. Because the suffix is not an existing product code, normal
+missing-product routing may then open Product Management on the ADD tab. This
+can resemble a damaged-label or database problem even though the cause is scan
+event timing.
+
+An earlier `0.05`-second setting produced intermittent truncated scans in
+physical testing. Increasing it to `0.10` seconds eliminated the observed
+Product Management popups across repeated scans at varying operator speeds.
+If similar symptoms return, compare repeated input in a plain text editor and
+the scanner test utility before increasing the value further. A larger value
+is more tolerant of event-delivery delays, but also makes fast manual typing
+more likely to be classified as scanner activity.
+
 `BarcodeManager` consumes `is_fast`; it does not run a second, different timing threshold.
 
 ### Enter Suppression
@@ -28,6 +51,8 @@ Workflow diagram: [Barcode_Manager_High-Speed_Manual_Input.png](Barcode_Manager_
 `BarcodeManager` suppresses Enter/Return for `SCANNER_UI_SUPPRESS_SECONDS` after scanner-fast activity.
 
 This protects forms and default buttons from a scanner's trailing Enter.
+It does not construct the barcode buffer and does not cause missing digits or
+prefix truncation.
 
 Printable letters and numbers are blocked only during the confirmed scanner-burst window and only when the focused widget is not barcode-allowed. This keeps normal fast manual typing usable while preventing scanner text from leaking into protected fields.
 

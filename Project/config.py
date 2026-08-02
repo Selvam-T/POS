@@ -133,7 +133,7 @@ CUSTOMER_DISPLAY_AUTO_DETECT = True  # Ignored while CUSTOMER_DISPLAY_TEST_MODE 
 
 # Scanner timing. The key interval identifies scanner-like bursts; the UI
 # suppression window only protects Enter/Return from triggering default actions.
-SCANNER_KEY_INTERVAL_SECONDS = 0.05
+SCANNER_KEY_INTERVAL_SECONDS = 0.10
 SCANNER_UI_SUPPRESS_SECONDS = 0.90
 
 
