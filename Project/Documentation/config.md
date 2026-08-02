@@ -81,6 +81,13 @@ These flags are grouped together in `config.py` so development and production be
 
 ## Scanner Timing
 - `SCANNER_KEY_INTERVAL_SECONDS`: Shared scanner/manual inter-key threshold used by `scanner.py`.
+- `BARCODE_SCANNER_TRACE_ENABLED`, `BARCODE_SCANNER_TRACE_PATH`, rotation limits,
+  and `BARCODE_SCANNER_HEALTH_INTERVAL_MS`: temporary production tracing for the
+  intermittent lost-scan investigation. The trace is independent of `error.log`
+  and the Diagnostics menu; see `barcode_scanner_trace.md`.
+- `LOGS_DIR`: Shared live runtime log directory, resolved as
+  `<client root>/live_logs`. This is distinct from the user-triggered export
+  destination under `~/POS_Exports/Error_Log`.
 - `SCANNER_UI_SUPPRESS_SECONDS`: Enter/Return suppression window used by `BarcodeManager` after scanner-fast activity.
 
 ## Trial Build Flags

@@ -309,7 +309,7 @@ Product Menu follows the shared policy in `Documentation/error_logging_and_fallb
 ### Soft-fail (handled)
 
 - Validation failures: shown only in the dialog status label; dialog remains open.
-- DB CRUD returns `(ok=False, msg)`: logged to `logs/error.log`, shown in dialog status label, and queued as a **post-close** StatusBar error.
+- DB CRUD returns `(ok=False, msg)`: logged to `live_logs/error.log`, shown in dialog status label, and queued as a **post-close** StatusBar error.
 
 ### DB success + refresh failure (success-with-warning)
 
@@ -324,5 +324,5 @@ After a successful DB write (ADD/REMOVE/UPDATE), Product Menu refreshes cache/co
 
 Unexpected exceptions that escape Product Menu are handled by `DialogWrapper`:
 - overlay/scanner cleanup is performed
-- details are logged to `logs/error.log`
+- details are logged to `live_logs/error.log`
 - a short StatusBar error hint is shown after cleanup

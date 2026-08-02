@@ -1,5 +1,8 @@
 # Barcode Scanner Buffering Algorithm Improvement
 
+> Temporary production tracing is currently enabled to diagnose intermittent
+> lost scans without changing this algorithm. See `barcode_scanner_trace.md`.
+
 ## Purpose
 
 This document records an intermittent barcode truncation issue, the current
@@ -92,13 +95,15 @@ decoded barcode.
 
 ## Current Implemented Mitigation
 
-`SCANNER_KEY_INTERVAL_SECONDS` was increased from `0.05` seconds to `0.10`
-seconds. Repeated physical scans at varying operator speeds were then performed,
-and the unexpected Product Management ADD popup was not reproduced.
+`SCANNER_KEY_INTERVAL_SECONDS` was temporarily increased from `0.05` seconds to
+`0.10` seconds. Although this increased tolerance for delayed scanner key
+delivery, production testing showed that fast manual typing could be classified
+as scanner activity, momentarily suppressing or swallowing widget input.
 
-The larger interval gives Windows, `pynput`, and HID event delivery more
-tolerance before the existing algorithm resets its buffer. It is a practical
-and currently validated mitigation.
+The setting was therefore returned to `0.05` seconds. At that value, repeated
+13-digit physical scans were captured correctly and product-code widget input
+remained smooth. Temporary anomaly-focused tracing remains enabled to collect
+evidence if the original intermittent lost-scan condition recurs.
 
 This setting has a tradeoff: increasing it makes fast manual typing more likely
 to resemble scanner input. The current focus protection and routing rules reduce
@@ -333,8 +338,8 @@ A future redesign should be considered successful when:
 
 ## Current Recommendation
 
-Retain `SCANNER_KEY_INTERVAL_SECONDS = 0.10` while it remains reliable in
-production. Treat suffix-only product codes or intermittent unexpected ADD
+Retain `SCANNER_KEY_INTERVAL_SECONDS = 0.05` because production testing found
+that `0.10` interfered with fast manual keyboard input. Treat suffix-only product codes or intermittent unexpected ADD
 dialogs as possible scanner-buffer timing symptoms. Before increasing the
 threshold again, compare repeated output in a plain text editor and the scanner
 test utility, then collect inter-key timing evidence. Adopt the session-based

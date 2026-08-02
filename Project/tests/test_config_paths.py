@@ -38,7 +38,7 @@ def test_packaged_path_layout(tmp_path):
     assert layout['app_dir'] == os.path.abspath(str(app_dir))
     assert layout['client_root'] == os.path.abspath(str(tmp_path))
     assert layout['db_dir'] == os.path.abspath(str(tmp_path / 'db'))
-    assert layout['logs_dir'] == os.path.abspath(str(tmp_path / 'logs'))
+    assert layout['logs_dir'] == os.path.abspath(str(tmp_path / 'live_logs'))
     assert layout['backups_dir'] == os.path.abspath(str(tmp_path / 'backups'))
     assert layout['data_dir'] == os.path.abspath(str(tmp_path / 'data'))
     assert layout['assets_dir'] == os.path.abspath(str(internal_dir / 'assets'))

@@ -29,7 +29,7 @@ def _resolve_path_layout(module_file=None, executable=None, frozen=None):
         'assets_dir': os.path.join(runtime_dir, 'assets'),
         'ui_dir': os.path.join(runtime_dir, 'ui'),
         'db_dir': os.path.join(client_root, 'db'),
-        'logs_dir': os.path.join(client_root, 'logs'),
+        'logs_dir': os.path.join(client_root, 'live_logs'),
         'backups_dir': os.path.join(client_root, 'backups'),
         'data_dir': os.path.join(client_root, 'data'),
     }
@@ -133,8 +133,19 @@ CUSTOMER_DISPLAY_AUTO_DETECT = True  # Ignored while CUSTOMER_DISPLAY_TEST_MODE 
 
 # Scanner timing. The key interval identifies scanner-like bursts; the UI
 # suppression window only protects Enter/Return from triggering default actions.
-SCANNER_KEY_INTERVAL_SECONDS = 0.10
+SCANNER_KEY_INTERVAL_SECONDS = 0.05
 SCANNER_UI_SUPPRESS_SECONDS = 0.90
+
+# Temporary production barcode-scanner trace. This is deliberately independent
+# of error.log and the Diagnostics menu, and may be removed after the intermittent
+# scan-loss fault has been captured.
+BARCODE_SCANNER_TRACE_ENABLED = True
+BARCODE_SCANNER_TRACE_FILENAME = 'barcode_scanner_trace.log'
+BARCODE_SCANNER_TRACE_PATH = os.path.join(LOGS_DIR, BARCODE_SCANNER_TRACE_FILENAME)
+BARCODE_SCANNER_TRACE_MAX_BYTES = 1 * 1024 * 1024
+BARCODE_SCANNER_TRACE_BACKUP_COUNT = 2
+BARCODE_SCANNER_HEALTH_INTERVAL_MS = 5000
+BARCODE_SCANNER_SUMMARY_INTERVAL_MS = 5 * 60 * 1000
 
 
 # -----------------------------------------------------------------------------

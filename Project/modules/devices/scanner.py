@@ -14,6 +14,7 @@ from pynput import keyboard
 import time
 
 from config import SCANNER_KEY_INTERVAL_SECONDS
+from modules.devices.scanner_trace_logger import trace_scanner_event
 
 
 class BarcodeScanner(QObject):
@@ -46,6 +47,12 @@ class BarcodeScanner(QObject):
         self._listener_thread = None
         self._enabled = True
         self._min_barcode_length = 3  # Minimum characters for valid barcode
+        self._candidate_started_at = 0.0
+        self._candidate_max_gap = 0.0
+        self._candidate_slow_gaps = 0
+        self._candidate_resets = 0
+        self._trace_emitted_candidates = 0
+        self._trace_rejected_candidates = 0
         
     def start(self):
         """Start listening for barcode scanner input."""
@@ -57,6 +64,11 @@ class BarcodeScanner(QObject):
         
         # Start listener in background thread
         self._listener.start()
+        trace_scanner_event(
+            'listener_started',
+            timeout_seconds=self._timeout,
+            listener_alive=self.listener_is_alive(),
+        )
         
     def stop(self):
         """Stop listening for barcode scanner input."""
@@ -64,6 +76,8 @@ class BarcodeScanner(QObject):
             self._listener.stop()
             self._listener = None
             self._buffer = ''
+            self._reset_candidate_metrics()
+            trace_scanner_event('listener_stopped')
             
     def set_enabled(self, enabled: bool):
         """
@@ -73,9 +87,23 @@ class BarcodeScanner(QObject):
             enabled: True to process barcodes, False to ignore
         """
         self._enabled = enabled
+        trace_scanner_event('scanner_enabled_changed', enabled=bool(enabled))
         if not enabled:
             self._buffer = ''  # Clear buffer when disabled
             
+    def listener_is_alive(self) -> bool:
+        """Return listener-thread health without starting or repairing it."""
+        listener = self._listener
+        if listener is None:
+            return False
+        try:
+            return bool(listener.is_alive())
+        except Exception:
+            try:
+                return bool(listener.running)
+            except Exception:
+                return False
+
     def _on_key_press(self, key):
         """
         Callback for keyboard events from pynput.
@@ -83,6 +111,21 @@ class BarcodeScanner(QObject):
         Args:
             key: The key that was pressed
         """
+        try:
+            return self._process_key_press(key)
+        except Exception as exc:
+            trace_scanner_event(
+                'listener_callback_exception',
+                exception=repr(exc),
+                buffer_length=(
+                    len(self._buffer) if isinstance(self._buffer, (str, bytes)) else None
+                ),
+                buffer_type=type(self._buffer).__name__,
+            )
+            raise
+
+    def _process_key_press(self, key):
+        """Process one keyboard event using the existing scanner algorithm."""
         if not self._enabled:
             return
 
@@ -100,6 +143,35 @@ class BarcodeScanner(QObject):
         except AttributeError:
             # Handle special keys (Enter, Shift, etc.)
             if key == keyboard.Key.enter:
+                diagnostic_buffer = self._buffer
+                buffer_is_text = isinstance(diagnostic_buffer, str)
+                candidate = diagnostic_buffer.strip() if buffer_is_text else ''
+                raw_length = len(diagnostic_buffer) if buffer_is_text else None
+                emitted = bool(
+                    buffer_is_text
+                    and candidate
+                    and raw_length >= self._min_barcode_length
+                )
+                reason = 'emitted' if emitted else (
+                    'empty-buffer' if not diagnostic_buffer else (
+                        'below-minimum-length' if buffer_is_text else 'invalid-buffer-type'
+                    )
+                )
+                if emitted:
+                    self._trace_emitted_candidates += 1
+                else:
+                    self._trace_rejected_candidates += 1
+                    trace_scanner_event(
+                        'candidate_rejected',
+                        barcode=candidate,
+                        raw_length=raw_length,
+                        buffer_type=type(diagnostic_buffer).__name__,
+                        reason=reason,
+                        duration_seconds=(now - self._candidate_started_at) if self._candidate_started_at else None,
+                        maximum_inter_key_gap_seconds=self._candidate_max_gap,
+                        gaps_over_threshold=self._candidate_slow_gaps,
+                        buffer_resets=self._candidate_resets,
+                    )
                 if self._buffer and len(self._buffer) >= self._min_barcode_length:
                     # Enter key pressed with data in buffer → barcode complete
                     barcode = self._buffer.strip()
@@ -109,16 +181,43 @@ class BarcodeScanner(QObject):
                     self._buffer = ''
                 else:
                     self._buffer = ''
+                self._reset_candidate_metrics()
             return
         
         # Check timing to distinguish scanner from manual typing
         if time_diff > self._timeout:
             # Slow typing → likely manual input, start new buffer
             self._buffer = char
+            if self._candidate_started_at:
+                self._candidate_slow_gaps += 1
+                self._candidate_resets += 1
+            else:
+                self._candidate_started_at = now
             
         else:
             # Fast input → likely scanner, append to buffer
             self._buffer += char
+
+        if not self._candidate_started_at:
+            self._candidate_started_at = now
+        if self._last_time > 0:
+            self._candidate_max_gap = max(self._candidate_max_gap, time_diff)
             
             
         self._last_time = now
+
+    def _reset_candidate_metrics(self):
+        self._candidate_started_at = 0.0
+        self._candidate_max_gap = 0.0
+        self._candidate_slow_gaps = 0
+        self._candidate_resets = 0
+
+    def take_trace_summary(self):
+        """Return and reset compact input counts for periodic diagnostics."""
+        summary = {
+            'candidates_emitted': self._trace_emitted_candidates,
+            'candidates_rejected': self._trace_rejected_candidates,
+        }
+        self._trace_emitted_candidates = 0
+        self._trace_rejected_candidates = 0
+        return summary

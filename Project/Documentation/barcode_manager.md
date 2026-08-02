@@ -90,6 +90,11 @@ The diagram's `confirmation.py` box is conceptual; the confirmed `barcode_scanne
 
 ```python
 scanner_activity(timestamp, is_fast)
+
+During the temporary production investigation, scanner input and routing outcomes
+are summarized in the independent `live_logs/barcode_scanner_trace.log`; anomalies
+are written immediately. See
+`Documentation/barcode_scanner_trace.md` for scope, interpretation, and removal.
 ```
 
 `BarcodeManager` consumes `is_fast`; it no longer re-checks a separate interval.

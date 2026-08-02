@@ -190,7 +190,7 @@ If preview generation fails:
 
 - `receiptPreviewLabel` shows `Receipt preview unavailable.`
 - `receiptStatusLabel` shows the failure message.
-- Details are logged to `logs/error.log`.
+- Details are logged to `live_logs/error.log`.
 
 ## Print And Void Actions
 
@@ -268,6 +268,6 @@ Unexpected DB/runtime failures use:
 - `log_exception_traceback_and_postclose_statusBar(...)`
 - `log_error_message(...)`
 
-This writes details to `logs/error.log` and schedules a concise post-close StatusBar message when appropriate.
+This writes details to `live_logs/error.log` and schedules a concise post-close StatusBar message when appropriate.
 
 Expected user errors, such as invalid date range, no selected receipt, or trying to void a paid receipt, are shown in `receiptStatusLabel` without being treated as hard failures.

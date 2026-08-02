@@ -59,13 +59,13 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - Status bar notifications for invalid products and dialog errors
 - Graceful fallback when database or dialog UI files are unavailable
 - Dialogs (e.g., Clear Cart) use a minimal fallback if UI file is missing, with clear messaging and styled buttons
-- All dialog/UI errors are logged to `logs/error.log` with timestamp using a shared logger
-- Main footer watches `logs/error.log`, enables Export/Clear when entries exist, and exports UTF-8 `.txt` copies to `~/POS_Exports/Error_Log`
+- All dialog/UI errors are logged to `live_logs/error.log` with timestamp using a shared logger
+- Main footer watches `live_logs/error.log`, enables Export/Clear when entries exist, and exports UTF-8 `.txt` copies to `~/POS_Exports/Error_Log`
 - Windows-console-safe logging (ASCII only)
 
 ### Hard-fail vs Soft-fail (quick rules)
 
-- **Hard-fail (unexpected exception):** caught by `DialogWrapper`; overlay/scanner is cleaned up; details go to `logs/error.log`; a short StatusBar hint is shown.
+- **Hard-fail (unexpected exception):** caught by `DialogWrapper`; overlay/scanner is cleaned up; details go to `live_logs/error.log`; a short StatusBar hint is shown.
 - **Soft-fail (handled failure):** validation/business-rule issues are handled in the active UI flow so users can correct and retry; payment DB commit failures are surfaced from `main.py` on the MainWindow StatusBar while preserving the current sale for retry or recovery.
 - **Success-with-warning:** if DB write succeeds but a post-success refresh (cache/completers) fails, show success in the dialog label but show the warning in the StatusBar after close (warning/error takes precedence).
 
@@ -73,7 +73,7 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 
 The Sales table is a required transaction subsystem. If it fails during startup
 or a runtime table rebuild, `MainLoader` marks it unavailable, writes the
-underlying exception to `log/error.log` once, and blocks Vegetable Entry,
+underlying exception to `live_logs/error.log` once, and blocks Vegetable Entry,
 Manual Entry, Clear Cart, Hold Sale, View Hold, PAY, and scan-to-cart routing.
 Every blocked attempt shows the same MainWindow StatusBar message asking the
 operator to restart the application. Normal empty/full/in-progress rules apply
@@ -90,7 +90,7 @@ If PAY fails during DB CRUD commit:
    recovery receipt if needed.
 3. Clear the sales table to reset PAY and continue. If the locked recovery sale
    had cash allocated, the drawer opens during clear-cart recovery.
-4. Escalate to supervisor/IT and share `logs/error.log` for traceback details.
+4. Escalate to supervisor/IT and share `live_logs/error.log` for traceback details.
 
 Current behavior:
 - Failed commit does **not** clear the sales table (sale is preserved for retry/recovery).
@@ -265,14 +265,14 @@ The bottom footer in `main_window.ui` is controlled by
 
 - Left: logged-in username (`loggedInUserLabel`)
 - Center: compatibility StatusBar messages, visually centered
-- Right: `logs/error.log` indicator with Export and Clear controls
+- Right: `live_logs/error.log` indicator with Export and Clear controls
 
-When `logs/error.log` is empty, the footer shows `No Error` and disables
+When `live_logs/error.log` is empty, the footer shows `No Error` and disables
 Export/Clear. When the file has content, it shows `Error Log!`, enables the
 buttons, and applies the active QSS state.
 
 Export writes a UTF-8 text copy to `~/POS_Exports/Error_Log`.
-Clear truncates `logs/error.log` without deleting the file.
+Clear truncates `live_logs/error.log` without deleting the file.
 
 See `Documentation/status_footer.md` for implementation details.
 

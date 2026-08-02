@@ -10,7 +10,7 @@ That document defines the general logging and fallback policy. This document map
 actual code paths by file and feature area:
 
 - whether the failure is treated as hard-fail, soft-fail, or best-effort
-- whether details are written to `logs/error.log`
+- whether details are written to `live_logs/error.log`
 - whether the user sees feedback in a dialog-local `*statusLabel`
 - whether the user sees feedback in the main window `StatusBar`
 - whether the `StatusBar` message is immediate or deferred until after a dialog
@@ -99,7 +99,7 @@ Files and examples:
 ### 2. Report only in StatusLabel
 
 These are usually user-correctable validation failures. They are soft-fails and
-are not written to `logs/error.log`.
+are not written to `live_logs/error.log`.
 
 Files and examples:
 
@@ -157,7 +157,7 @@ Files and examples:
 ### 3. Log and report to StatusBar
 
 These are support-relevant failures where the user needs a main-window message
-and details need to reach `logs/error.log`. In modal dialogs, this is often a
+and details need to reach `live_logs/error.log`. In modal dialogs, this is often a
 post-close status intent. Outside modal dialogs, the `StatusBar` update is
 usually immediate.
 
@@ -352,7 +352,7 @@ continue that operation normally.
 
 - Modal dialog hard-fail boundary:
   - Caught by `DialogWrapper.open_dialog_scanner_blocked(...)`.
-  - Logs traceback to `logs/error.log`.
+  - Logs traceback to `live_logs/error.log`.
   - Shows `Error: Dialog failed (see error.log)` after cleanup.
   - Duration: `MAIN_STATUS_LONG_DURATION_MS`.
 - UI-load hard-fail/open-disable boundary:
@@ -377,7 +377,7 @@ usable.
 
 - Validation soft-fails:
   - Usually label-only.
-  - No `logs/error.log`.
+  - No `live_logs/error.log`.
   - Default label duration: `STATUS_LABEL_DURATION_MS`.
 - Operational soft-fails:
   - DB CRUD false return, printer false return, receipt search/void/print

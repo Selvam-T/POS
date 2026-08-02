@@ -14,7 +14,7 @@ This doc also defines the shared terminology used across dialogs:
 - **Soft-disable**: the dialog opens but a non-essential feature is disabled (e.g., completer list not available). This is a subtype of soft-fail.
 
 ## Error Logging
-- All critical dialog/UI errors (such as missing `.ui` files, failed UI load, unexpected exceptions) are logged to `logs/error.log`.
+- All critical dialog/UI errors (such as missing `.ui` files, failed UI load, unexpected exceptions) are logged to `live_logs/error.log`.
 - Logging is performed via `log_error_message(msg)` in `modules/ui_utils/error_logger.py`.
 - Each log entry includes an ISO 8601 timestamp for traceability.
 - Example log entry:
@@ -24,13 +24,13 @@ This doc also defines the shared terminology used across dialogs:
 
 ### Main footer error-log indicator
 
-The main window footer watches `logs/error.log` through
+The main window footer watches `live_logs/error.log` through
 `modules/status_footer/status_footer.py`.
 
 - Empty log: `errorLogStatusLabel` displays `No Error`; Export/Clear are disabled.
 - Non-empty log: `errorLogStatusLabel` displays `Error Log!`; Export/Clear are enabled.
 - Export writes a UTF-8 `.txt` copy to `~/POS_Exports/Error_Log`.
-- Clear truncates `logs/error.log` without deleting the file.
+- Clear truncates `live_logs/error.log` without deleting the file.
 
 See `Documentation/status_footer.md` for full footer behavior and QSS state
 details.
@@ -41,7 +41,7 @@ details.
 failure or an exception while rebuilding `salesTable` calls
 `_mark_sales_table_unavailable(...)`:
 
-- The exception and traceback are written to `log/error.log` once.
+- The exception and traceback are written to `live_logs/error.log` once.
 - `_sales_table_ready` becomes `False` for the remainder of the process.
 - Transaction entry points call `_require_sales_table_ready()` before applying
   ordinary empty/full/in-progress rules.
