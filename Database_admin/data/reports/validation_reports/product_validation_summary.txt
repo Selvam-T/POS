@@ -1,6 +1,6 @@
 Product validation summary
-Rows staged: 3321
-Rows valid: 3321
+Rows staged: 3301
+Rows valid: 3301
 Rows rejected: 0
 
 Rejected reasons:

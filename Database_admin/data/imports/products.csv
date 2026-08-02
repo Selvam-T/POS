@@ -1,7 +1,6 @@
 product_code,name,category,supplier,selling_price,cost_price,unit,last_updated
 6978026020590,08A Scissors,General Merchandise,,4.5,,Each,2026-07-03 15:44:20
-8888200708207,100 Plus Active x,Beverages,,1.1,,Each,2026-07-03 15:44:20
-8888200716103,100 Plus Active,Beverages,,1.7,,Each,2026-07-03 15:44:20
+8888200716103,100 Plus Active 500ml,Beverages,,1.7,,Each,2026-07-03 15:44:20
 8888200716387,100 Plus Lemon 500ml,Beverages,,1.7,,Each,2026-07-03 15:44:20
 8888200708696,100 PLUS Zero,Beverages,,1.1,,Each,2026-07-03 15:44:20
 8888200716547,100 Plus Zero Peach,Beverages,,1.7,,Each,2026-07-03 15:44:20
@@ -10,12 +9,10 @@ product_code,name,category,supplier,selling_price,cost_price,unit,last_updated
 8888200716080,100Plus Active 1.5L,Beverages,,2.8,,Each,2026-07-03 15:44:20
 8888200716721,100Plus Grape 320ml,Beverages,,1.2,,Each,2026-07-03 15:44:20
 8888200707019,100plus Lemon,Beverages,,1,,Each,2026-07-03 15:44:20
-8888200708122,100PLUS LEMON 1.5L,Beverages,,2.7,,Each,2026-07-03 15:44:20
 8888200716141,100plus Original,Beverages,,1.2,0,Each,2026-07-09T19:54:57
 8888200716226,100plus Original 1.5,Beverages,,2.7,0,Each,2026-07-14T20:49:12
 8888200708023,100PLUS ORIGINAL 1.5L,Beverages,,2.7,,Each,2026-07-03 15:44:20
-8888200708757,100Plus Zero x,Beverages,,2.7,,Each,2026-07-03 15:44:20
-8888200716264,100plus zero,Beverages,,1.2,,Each,2026-07-03 15:44:20
+8888200716264,100plus zero 300ml,Beverages,,1.2,,Each,2026-07-03 15:44:20
 8888200716325,100plus Zero 1.5l,Beverages,,2.7,0,Each,2026-07-11T19:55:49
 8888200716301,100plus Zero 500ml,Beverages,,1.7,0,Each,2026-07-11T16:43:04
 8888200716554,100Plus Zero Peach 1.5L,Beverages,,2.8,,Each,2026-07-03 15:44:20
@@ -31,7 +28,7 @@ product_code,name,category,supplier,selling_price,cost_price,unit,last_updated
 8909106056145,3 Roses Tea,Breakfast Items,,3.2,,Each,2026-07-03 15:44:20
 8901030194122,3 ROSES TEA 100G,Breakfast Items,,2.9,,Each,2026-07-03 15:44:20
 8901030985829,3 ROSES TEA 250G,Breakfast Items,,5.9,,Each,2026-07-03 15:44:20
-8888279300173,328 Katong Laksa x,Noodles,,2.9,,Each,2026-07-03 15:44:20
+8888279300173,328 Katong Laksa Bowl,Noodles,,2.9,,Each,2026-07-03 15:44:20
 8888279640156,328 Katong Laksa,Noodles,,6.4,,Each,2026-07-03 15:44:20
 8850304231493,3M Scotch 25mm,General Merchandise,,8.9,,Each,2026-07-03 15:44:20
 8850304231448,3M Scotch DS Tape,General Merchandise,,5.9,,Each,2026-07-03 15:44:20
@@ -65,8 +62,8 @@ product_code,name,category,supplier,selling_price,cost_price,unit,last_updated
 9551022470421,A&w 500ml,Beverages,,1.6,0,Each,2026-07-17T21:50:18
 6975073836600,a1 banana bread,Bakery Goods,,1.2,,Each,2026-07-03 15:44:20
 6970410585456,A1 Cantaloupe,General Merchandise,,1.2,,Each,2026-07-03 15:44:20
-8906021121187,AACH GARAM MASALA 200G,Indian Provision,,3.4,,Each,2026-07-03 15:44:20
-8906021121729,AACH IDLYCHILLY POWDER 200G,Indian Provision,,2.8,,Each,2026-07-03 15:44:20
+8906021121187,Aachi GARAM MASALA 200G,Indian Provision,,3.4,,Each,2026-07-03 15:44:20
+8906021121729,Aachi IDLYCHILLY POWDER 200G,Indian Provision,,2.8,,Each,2026-07-03 15:44:20
 8904209305459,Aachi B Masla 50g,Indian Provision,,2.6,,Each,2026-07-03 15:44:20
 8906021120197,AACHI BAJJI BONDA PDR 200G,Indian Provision,,2.4,,Each,2026-07-03 15:44:20
 8906021124003,Aachi chicken 65,Indian Provision,,3.4,,Each,2026-07-03 15:44:20
@@ -126,7 +123,7 @@ product_code,name,category,supplier,selling_price,cost_price,unit,last_updated
 9555021506389,AH White Coffee,Breakfast Items,,6,,Each,2026-07-03 15:44:20
 9555021516739,AH White Coffee Extra Rich,Breakfast Items,,6.8,,Each,2026-07-03 15:44:20
 8887300032014,AJ Corn Chips 400G,Indian Snacks,,3.5,,Each,2026-07-03 15:44:20
-8994877010038,AJI NO MOTO 1kg,Kitchen Essentials,,6.9,,Each,2026-07-03 15:44:20
+8994877010038,AJINOMOTO 1kg,Kitchen Essentials,,6.9,,Each,2026-07-03 15:44:20
 9556045100904,Ajinomoto 300g,Kitchen Essentials,,3.2,0,Each,2026-07-15T12:45:38
 9555149608996,Ajinomoto 33g,Kitchen Essentials,,1,0,Each,2026-07-11T13:07:36
 95503370,AJINOMOTO 72G,Kitchen Essentials,,1.5,,Each,2026-07-03 15:44:20
@@ -145,11 +142,10 @@ product_code,name,category,supplier,selling_price,cost_price,unit,last_updated
 8887300032236,Ajmir Spicy,Indian Snacks,,1,,Each,2026-07-03 15:44:20
 8887300032083,Ajmir Spicy Muruku,Indian Snacks,,1,,Each,2026-07-03 15:44:20
 8887300032090,AJMIR SPICY MURUKU 400G,Indian Snacks,,3.5,,Each,2026-07-03 15:44:20
-8887300032205,Ajmir Sweets a,Indian Snacks,,1,,Each,2026-07-03 15:44:20
-8887300032762,Ajmir Sweets b,Indian Snacks,,1,,Each,2026-07-03 15:44:20
+8887300032205,Ajmir Sweets Nice,Indian Snacks,,1,,Each,2026-07-03 15:44:20
+8887300032762,Ajmir Sweets Very nice,Indian Snacks,,1,,Each,2026-07-03 15:44:20
 8888546111334,AJWAIN SEED 50G,Indian Provision,,1,,Each,2026-07-03 15:44:20
-8888546111112,Ajwain Seeds x,Indian Provision,,1.3,,Each,2026-07-03 15:44:20
-8888546111365,Ajwain Seeds,Indian Provision,,1.2,,Each,2026-07-03 15:44:20
+8888546111112,Ajwain Seeds,Indian Provision,,1.3,,Each,2026-07-03 15:44:20
 8888307773313,ALLSWELL Chesnut,Beverages,,1.8,,Each,2026-07-03 15:44:20
 4710696104987,ALLSWELL GPear,Beverages,,1.8,,Each,2026-07-03 15:44:20
 8888307361145,ALLSWELL Plum,Beverages,,1.8,,Each,2026-07-03 15:44:20
@@ -210,9 +206,9 @@ as,Anchor Strong Offer,Beer,,4.2,4.2,Each,2026-07-03 15:44:20
 8888200650117,Apple,F&n,,1.3,,Each,2026-07-03 15:44:20
 8888026473075,APPLE & ALOE VERA 250ML,Personal Care,,1.2,,Each,2026-07-03 15:44:20
 8888200615383,Apple No Sugar,F&n,,2.9,,Each,2026-07-03 15:44:20
-5000347091766,Aquafresh 1,Personal Care,,5.5,,Each,2026-07-03 15:44:20
-8888008100142,Aquafresh 2,Personal Care,,4.5,,Each,2026-07-03 15:44:20
-9556019001473,Aquafresh,Personal Care,,5.6,,Each,2026-07-03 15:44:20
+5000347091766,Aquafresh Type 1,Personal Care,,5.5,,Each,2026-07-03 15:44:20
+8888008100142,Aquafresh Type 2,Personal Care,,4.5,,Each,2026-07-03 15:44:20
+9556019001473,Aquafresh Type 3,Personal Care,,5.6,,Each,2026-07-03 15:44:20
 8888008100159,Aquafresh M,Personal Care,,5.6,,Each,2026-07-03 15:44:20
 9556252800017,ASAM JAWA,Kitchen Essentials,,2.9,,Each,2026-07-03 15:44:20
 8886345364999,ASSORTED GUMMY 95GM,Snacks,,1.3,,Each,2026-07-03 15:44:20
@@ -325,8 +321,8 @@ B,Bevarages,Beverages,,0.1,0,Each,2026-07-04T14:58:16
 6982022100804,BH Mackerel,Canned Food,,2,,Each,2026-07-03 15:44:20
 8888321912514,BIBIKS CC Sausage,Frozen Food,,6.4,,Each,2026-07-03 15:44:20
 8888321650089,BIBIKS PC Chicken,Frozen Food,,12.8,,Each,2026-07-03 15:44:20
-9556378300408,BIKA CHICKEN 1,Snacks,,1.2,,Each,2026-07-03 15:44:20
-9556378303065,BIKA Chicken,Snacks,,1.3,,Each,2026-07-03 15:44:20
+9556378300408,BIKA Chicken G,Snacks,,1.3,,Each,2026-07-03 15:44:20
+9556378303065,BIKA Chicken R,Snacks,,1.3,,Each,2026-07-03 15:44:20
 9556107521609,Bikarbonate,Kitchen Essentials,,1.5,0,Each,2026-07-15T21:20:14
 4710247000478,Bin Bin Rice Crackers,Snacks,,2.9,0,Each,2026-07-11T14:35:52
 50196111,Black & White 700cl,Liquor,,45.8,,Each,2026-07-03 15:44:20
@@ -402,7 +398,7 @@ B,Bevarages,Beverages,,0.1,0,Each,2026-07-04T14:58:16
 9555220701851,Bo Roticake,Bakery Goods,,1.5,0,Each,2026-07-15T12:02:49
 9555719717851,BO SALTY PANDAN CAKE,Bakery Goods,,2.5,,Each,2026-07-03 15:44:20
 9555719717837,BO SALTY PEACAKE,Bakery Goods,,3.9,,Each,2026-07-03 15:44:20
-9555220702834,BO SQUARE MUFFIN,Bakery Goods,,1,,Each,2026-07-03 15:44:20
+9555220702834,BO SQUARE MUFFIN,Bakery Goods,,1.4,,Each,2026-07-03 15:44:20
 9555220702467,BO Strawberry 3s,Bakery Goods,,1.5,,Each,2026-07-03 15:44:20
 9555674601127,BO Strawberry,Bakery Goods,,1.6,,Each,2026-07-03 15:44:20
 9555913601925,BO SWISS ROLL 1,Bakery Goods,,1.6,,Each,2026-07-03 15:44:20
@@ -410,8 +406,8 @@ B,Bevarages,Beverages,,0.1,0,Each,2026-07-04T14:58:16
 9555719747193,BO Vanilla Cake,Bakery Goods,,1.7,,Each,2026-07-03 15:44:20
 9555220702391,BO VANILLA MUFFIN,Bakery Goods,,1.2,,Each,2026-07-03 15:44:20
 9555674601004,BO Vannila,Bakery Goods,,1.5,,Each,2026-07-03 15:44:20
-9555220706603,BO White Bread 1,Bakery Goods,,2.4,,Each,2026-07-03 15:44:20
-9557606111490,BO White Bread 2,Bakery Goods,,2.4,,Each,2026-07-03 15:44:20
+9555220706603,BO White Bread Type 1,Bakery Goods,,2.4,,Each,2026-07-03 15:44:20
+9557606111490,BO White Bread Type 2,Bakery Goods,,2.4,,Each,2026-07-03 15:44:20
 9555220701035,BO WHITEBREAD,Bakery Goods,,2.1,,Each,2026-07-03 15:44:20
 5010677714006,Bombay Sapphire,Liquor,,57,,Each,2026-07-03 15:44:20
 5000158062139,Bonjela,Personal Care,,11,0,Each,2026-07-09T11:14:17
@@ -419,10 +415,7 @@ B,Bevarages,Beverages,,0.1,0,Each,2026-07-04T14:58:16
 5000159558280,BOUNTY,Snacks,,1.6,,Each,2026-07-03 15:44:20
 8901063136311,Bourbon Original,Snacks,,1,0,Each,2026-07-11T18:59:03
 7622202026423,Bournvita,Breakfast Items,,6.1,,Each,2026-07-03 15:44:20
-8908014480073,Bovonto x,Beverages,,1.5,,Each,2026-07-03 15:44:20
 8908014480202,Bovonto,Beverages,,1.5,,Each,2026-07-03 15:44:20
-8908014480080,Bovonto 1.5L x,Beverages,,2.5,,Each,2026-07-03 15:44:20
-8908014480219,Bovonto 1.5L,Beverages,,2.5,,Each,2026-07-03 15:44:20
 8886456200735,BREACOL COUGH SYRUP,Personal Care,,5.5,,Each,2026-07-03 15:44:20
 6902088953206,BREEZE 3 in 1,Household Products,,12.9,,Each,2026-07-03 15:44:20
 6902088953190,BREEZE 3 in 1 Capsules,Household Products,,12.9,,Each,2026-07-03 15:44:20
@@ -463,7 +456,7 @@ B,Bevarages,Beverages,,0.1,0,Each,2026-07-04T14:58:16
 8885000035731,BUBBLE MILK TEA,Beverages,,2.2,,Each,2026-07-03 15:44:20
 8885000035564,BUBBLE MILK TEA Peach,Beverages,,2.2,,Each,2026-07-03 15:44:20
 8905002080024,Bullet,Beer,,3.5,,Each,2026-07-03 15:44:20
-9,Bullet 3 For $10,Beer,,10,0,Each,2026-07-15T23:23:36
+9,Bullet 3 For $10,Beer,,10.3,0,Each,2026-07-15T23:23:36
 8888017995029,Bullet Beer,Beer,,3.6,0,Each,2026-07-11T15:28:36
 9555122803615,Bumi Hijau Veg Oil 2L,Cooking Oil,,5.9,,Each,2026-07-03 15:44:20
 9556001262974,Butterfly,Ice Cream,,1.7,,Each,2026-07-03 15:44:20
@@ -482,8 +475,8 @@ B,Bevarages,Beverages,,0.1,0,Each,2026-07-04T14:58:16
 9351585000499,Calbee Cheese Burger,Snacks,,4.9,,Each,2026-07-03 15:44:20
 4901330306359,Calbee H&S,Snacks,,2.5,,Each,2026-07-03 15:44:20
 4901330306328,Calbee Hot&Spicy,Snacks,,2.5,,Each,2026-07-03 15:44:20
-4901330306366,Calbee Original x,Snacks,,2.4,,Each,2026-07-03 15:44:20
-9351585000475,Calbee Original,Snacks,,4.9,,Each,2026-07-03 15:44:20
+4901330306366,Calbee Original,Snacks,,2.4,,Each,2026-07-03 15:44:20
+9351585000475,Calbee Original B,Snacks,,4.9,,Each,2026-07-03 15:44:20
 4901330306342,Calbee Seawed,Snacks,,2.4,,Each,2026-07-03 15:44:20
 4901330306373,Calbee Sourcream,Snacks,,2.4,,Each,2026-07-03 15:44:20
 8999999058418,Camay Black,Personal Care,,3.2,0,Each,2026-07-18T20:30:06
@@ -502,8 +495,8 @@ B,Bevarages,Beverages,,0.1,0,Each,2026-07-04T14:58:16
 40329086,CAMEL WHITE,Tobacco,,15.9,,Each,2026-07-03 15:44:20
 8888112143004,CAMELSHANDONG 200G,Snacks,,1.6,,Each,2026-07-03 15:44:20
 9556191061883,CAMPBELLS MUSHROOM 300G,Kitchen Essentials,,2.6,,Each,2026-07-03 15:44:20
-8887301970551,Can Opener A,General Merchandise,,2.9,,Each,2026-07-03 15:44:20
-8887301970568,Can Opener B,General Merchandise,,2.2,,Each,2026-07-03 15:44:20
+8887301970551,Can Opener Type 1,General Merchandise,,2.9,,Each,2026-07-03 15:44:20
+8887301970568,Can Opener Type 2,General Merchandise,,2.2,,Each,2026-07-03 15:44:20
 4947989238078,Can Opener 807,Kitchen Essentials,,3.6,0,Each,2026-07-10T14:01:41
 6943030330911,CAN OPNER,General Merchandise,,4.5,,Each,2026-07-03 15:44:20
 8887509345250,Candles,Household Products,,1.5,,Each,2026-07-03 15:44:20
@@ -513,14 +506,13 @@ B,Bevarages,Beverages,,0.1,0,Each,2026-07-04T14:58:16
 9556057505759,Carlsberg 320ml,Beer,,2.5,,Each,2026-07-03 15:44:20
 5740600020460,Carlsberg 320ml 24s,Beer,,49,,Each,2026-07-03 15:44:20
 6901672920044,Carlsberg 490ml,Beer,,3.8,,Each,2026-07-03 15:44:20
-5010153872671,Carlsberg 500ml A,Beer,,3.8,,Each,2026-07-03 15:44:20
-5740600020637,Carlsberg 500ml B,Beer,,3.8,,Each,2026-07-03 15:44:20
+5010153872671,Carlsberg 500ml,Beer,,3.8,,Each,2026-07-03 15:44:20
+5740600020637,Carlsberg 500ml Pilsner,Beer,,3.8,,Each,2026-07-03 15:44:20
 8934692100132,CARLSBERG 490 ML,Beer,,3.8,,Each,2026-07-03 15:44:20
 5740600020552,Carlsberg G320ml,Beer,,2.4,0,Each,2026-07-09T22:26:15
 8888082010061,Carnation 390g,Breakfast Items,,2.3,0,Each,2026-07-11T22:09:51
 8885005273114,Castor Oil,Personal Care,,4.5,,Each,2026-07-03 15:44:20
 9555411200248,CASTOR OIL 150ML,Personal Care,,2.6,,Each,2026-07-03 15:44:20
-4711161766037,CC Lemon x,Beverages,,2.2,,Each,2026-07-03 15:44:20
 8885012299886,CC Lemon,Beverages,,2.3,,Each,2026-07-03 15:44:20
 8886461600711,CERAMIC PEELER,General Merchandise,,2.6,,Each,2026-07-03 15:44:20
 8888440010108,CH Mozzarella,Frozen Food,,6.9,,Each,2026-07-03 15:44:20
@@ -532,8 +524,8 @@ B,Bevarages,Beverages,,0.1,0,Each,2026-07-04T14:58:16
 1200108000349,Cheetos F Hot,Snacks,,5.9,,Each,2026-07-03 15:44:20
 9556072170055,CHEEZELS BBQ,Snacks,,1.3,,Each,2026-07-03 15:44:20
 9557941202068,Chendol,Ice Cream,,0.8,,Each,2026-07-03 15:44:20
-8888378008451,Chewly Wafer Stick x,Snacks,,7.6,,Each,2026-07-03 15:44:20
-8888378008901,Chewly Wafer Stick,Snacks,,7.6,,Each,2026-07-03 15:44:20
+8888378008451,Chewly Wafer Stick ST,Snacks,,7.6,,Each,2026-07-03 15:44:20
+8888378008901,Chewly Wafer Stick Ch,Snacks,,7.6,,Each,2026-07-03 15:44:20
 8888107000336,CHICKEN ABALONE(S) 5X85G,Canned Food,,2.6,,Each,2026-07-03 15:44:20
 8888440001540,Chicken Nuggets 400g,Frozen Food,,4.5,0,Each,2026-07-09T12:50:30
 9556023221454,Chicken Ring,Snacks,,1.3,0,Each,2026-07-12T17:59:59
@@ -582,7 +574,7 @@ C12,CHIVAS 12YRS,Liquor,,59,59,Each,2026-07-03 15:44:20
 4987176009494,Clearblue P Test,Personal Care,,10.9,,Each,2026-07-03 15:44:20
 8901030748066,Clinic Plus,Personal Care,,2.9,,Each,2026-07-03 15:44:20
 8901030937170,Clinic Plus 175ml,Personal Care,,3.4,,Each,2026-07-03 15:44:20
-8901030929885,Clinic Plus 355ml x,Personal Care,,6.9,,Each,2026-07-03 15:44:20
+8901030929885,Clinic Plus+ 355ml,Personal Care,,6.9,,Each,2026-07-03 15:44:20
 8901030937187,Clinic Plus 355ml,Personal Care,,6.8,,Each,2026-07-03 15:44:20
 9556823144052,CLOREX 1L,Household Products,,2.9,,Each,2026-07-03 15:44:20
 9556823145059,Clorex 1L Lemon,Household Products,,2.9,,Each,2026-07-03 15:44:20
@@ -661,7 +653,7 @@ VEG01,Coconut India,Vegetable,,1.7,0,EACH,2026-07-17T15:16:11
 8888440000017,Cowhead Cheese 12s,Dairy Products,,3.8,0,Each,2026-07-12T22:10:51
 4902580131265,CR2025,General Merchandise,,2.5,,Each,2026-07-03 15:44:20
 4902580131258,CR2032,General Merchandise,,2,,Each,2026-07-03 15:44:20
-8887300032106,CRACKER PEANUTS x,Snacks,,1,,Each,2026-07-03 15:44:20
+8887300032106,CRACKER PEANUTS savoury,Snacks,,1,,Each,2026-07-03 15:44:20
 8887300032175,CRACKER PEANUTS,Snacks,,1,,Each,2026-07-03 15:44:20
 9556085302757,CREAM CRACKER 428G,Snacks,,2.9,,Each,2026-07-03 15:44:20
 9556085302122,CREAM CRACKERS 700G,Snacks,,8.9,,Each,2026-07-03 15:44:20
@@ -679,22 +671,22 @@ cb,Curry Bag,General Merchandise,,0.1,0,Each,2026-07-04T14:58:30
 8901207005374,DABUR HONEY 100g,Breakfast Items,,2.4,,Each,2026-07-03 15:44:20
 8901207027444,Dabur Honey 250g,Indian Provision,,3.9,,Each,2026-07-03 15:44:20
 8901207025365,DABUR HONEY 300GM,Breakfast Items,,4.3,,Each,2026-07-03 15:44:20
-8901207027253,Dabur RED x,Personal Care,,1.9,,Each,2026-07-03 15:44:20
+8901207027253,Dabur RED 100G,Personal Care,,1.9,,Each,2026-07-03 15:44:20
 8901207099106,Dabur RED,Personal Care,,2.2,,Each,2026-07-03 15:44:20
 8901207000324,Dabur Red 200g,Personal Care,,3.4,,Each,2026-07-03 15:44:20
 6926858900948,Dahaoda Butter Seeds,Snacks,,1.8,0,Each,2026-07-09T13:54:45
 8887476883359,Daily Fresh Eggs 30pcs,Breakfast Items,,7.9,0,Each,2026-07-21T16:47:13
-7622210410511,DAIRY MILK a,Snacks,,3.8,,Each,2026-07-03 15:44:20
-9556182104001,Dairy Milk b,Snacks,,1.5,,Each,2026-07-03 15:44:20
-9556182104018,Dairy Milk c,Snacks,,1.4,,Each,2026-07-03 15:44:20
-9556182104049,Dairy Milk,Snacks,,1.4,,Each,2026-07-03 15:44:20
+7622210410511,DAIRY MILK 380g,Snacks,,3.8,,Each,2026-07-03 15:44:20
+9556182104001,Dairy Milk M,Snacks,,1.5,,Each,2026-07-03 15:44:20
+9556182104018,Dairy Milk,Snacks,,1.4,,Each,2026-07-03 15:44:20
+9556182104049,Dairy Milk FN,Snacks,,1.4,,Each,2026-07-03 15:44:20
 7622210410474,Dairy Milk 160g,Snacks,,3.8,,Each,2026-07-03 15:44:20
 7622210400277,DAIRY MILK HAZELNUT,Snacks,,3.8,,Each,2026-07-03 15:44:20
 7622210400291,DAIRY MILK RA,Snacks,,3.8,,Each,2026-07-03 15:44:20
 610696099143,Daisy Black,Personal Care,,3.5,0,Each,2026-07-17T20:42:37
 735850873251,Daisy Conditioner,Personal Care,,7.9,,Each,2026-07-03 15:44:20
 735850873268,DAISY SERUM,Personal Care,,7,,Each,2026-07-03 15:44:20
-735850873237,Daisy Shampoo x,Personal Care,,9.9,,Each,2026-07-03 15:44:20
+735850873237,Daisy Shampoo 780ml,Personal Care,,9.9,,Each,2026-07-03 15:44:20
 735850873244,Daisy Shampoo,Personal Care,,5.5,,Each,2026-07-03 15:44:20
 6976615705019,DARCA Light,General Merchandise,,1.3,,Each,2026-07-03 15:44:20
 4891338043526,DARLE 250g,Personal Care,,4.2,,Each,2026-07-03 15:44:20
@@ -722,16 +714,16 @@ cb,Curry Bag,General Merchandise,,0.1,0,Each,2026-07-04T14:58:30
 6921734994073,Deli Cutter 2036s,General Merchandise,,2.9,,Each,2026-07-03 15:44:20
 6973504001009,deli graphite pecil,General Merchandise,,2.9,,Each,2026-07-03 15:44:20
 6935205336880,Deli Mini Sharpener,General Merchandise,,1.5,,Each,2026-07-03 15:44:20
-6921734906038,Deli Scissors A,General Merchandise,,2.6,,Each,2026-07-03 15:44:20
-6921734960078,Deli Scissors B,General Merchandise,,1.8,,Each,2026-07-03 15:44:20
-6935205394453,deli w glue,General Merchandise,,1.6,,Each,2026-07-03 15:44:20
+6921734906038,Deli Scissors Type 1,General Merchandise,,2.6,,Each,2026-07-03 15:44:20
+6921734960078,Deli Scissors Type 2,General Merchandise,,1.8,,Each,2026-07-03 15:44:20
+6935205394453,Deli w Glue,General Merchandise,,1.6,,Each,2026-07-03 15:44:20
 9556111992808,Dettol 125ml,Personal Care,,4.4,,Each,2026-07-03 15:44:20
 8888071600020,DETTOL 250ML,Personal Care,,5.9,,Each,2026-07-03 15:44:20
 9556111624051,Dettol AB Wet Wipes,Personal Care,,2.4,,Each,2026-07-03 15:44:20
 9556111987910,Dettol Cool,Personal Care,,3.5,,Each,2026-07-03 15:44:20
 9556111410036,Dettol Crisp Breeze,Household Products,,9,0,Each,2026-07-12T21:15:52
 9556111987903,Dettol Fresh,Personal Care,,3.5,,Each,2026-07-03 15:44:20
-9556111993997,Dettol H Soap x,Personal Care,,3.9,,Each,2026-07-03 15:44:20
+9556111993997,Dettol H Soap M,Personal Care,,3.9,,Each,2026-07-03 15:44:20
 9556111994109,Dettol H Soap,Personal Care,,3.9,,Each,2026-07-03 15:44:20
 95507972,Dettol Hand Sanitizer,Personal Care,,2.9,,Each,2026-07-03 15:44:20
 8901396602552,Dettol hand Wash,Personal Care,,6.5,,Each,2026-07-03 15:44:20
@@ -740,11 +732,11 @@ cb,Curry Bag,General Merchandise,,0.1,0,Each,2026-07-04T14:58:30
 9556108000851,Dettol Lemon Breeze,Personal Care,,7.5,,Each,2026-07-03 15:44:20
 9556111410012,Dettol Morning Dew,Personal Care,,7.5,,Each,2026-07-03 15:44:20
 9556108001674,Dettol ONZEN,Personal Care,,6.9,,Each,2026-07-03 15:44:20
-8901396602491,Dettol Original x,Personal Care,,3.5,,Each,2026-07-03 15:44:20
+8901396602491,Dettol Original Soap,Personal Care,,3.5,,Each,2026-07-03 15:44:20
 9556111619026,DETTOL Original,Personal Care,,6.9,,Each,2026-07-03 15:44:20
 9556111987873,DETTOL ORIGINAL 100G,Personal Care,,3.5,,Each,2026-07-03 15:44:20
 9556111987927,Dettol Re-Energize,Personal Care,,3.5,,Each,2026-07-03 15:44:20
-8901396601517,Dettol Skincare x,Personal Care,,3.5,,Each,2026-07-03 15:44:20
+8901396601517,Dettol Skincare1,Personal Care,,3.5,,Each,2026-07-03 15:44:20
 9556111987941,Dettol Skincare,Personal Care,,3.5,,Each,2026-07-03 15:44:20
 8993560025007,Dettol Soap Cool,Personal Care,,3.5,,Each,2026-07-03 15:44:20
 8993560024987,Dettol Soap Original,Personal Care,,3.5,,Each,2026-07-03 15:44:20
@@ -759,11 +751,9 @@ cb,Curry Bag,General Merchandise,,0.1,0,Each,2026-07-04T14:58:30
 1200108000721,Doritos N Cheese,Snacks,,1,,Each,2026-07-03 15:44:20
 9555192508908,DOUBLEMINT,Snacks,,1.8,,Each,2026-07-03 15:44:20
 8851932291323,DOV Shampoo,Personal Care,,6.8,,Each,2026-07-03 15:44:20
-8717163607268,Dove x,Personal Care,,1.4,,Each,2026-07-03 15:44:20
-8851932412957,DOVE y,Personal Care,,2,,Each,2026-07-03 15:44:20
-8851932425070,DOVE,Personal Care,,2,,Each,2026-07-03 15:44:20
+8717163607268,Dove,Personal Care,,1.4,,Each,2026-07-03 15:44:20
 8000700000005,DOVE 100GM,Personal Care,,1.4,,Each,2026-07-03 15:44:20
-8710447289327,Dove 90g x,Personal Care,,1.4,,Each,2026-07-03 15:44:20
+8710447289327,Dove 90g P,Personal Care,,1.4,,Each,2026-07-03 15:44:20
 8712561538077,Dove 90g,Personal Care,,1.4,,Each,2026-07-03 15:44:20
 4710094112355,DOVE Cucumber,Personal Care,,6.9,,Each,2026-07-03 15:44:20
 8851932231329,DOVE Daily Shine,Personal Care,,9.9,,Each,2026-07-03 15:44:20
@@ -771,8 +761,8 @@ cb,Curry Bag,General Merchandise,,0.1,0,Each,2026-07-04T14:58:30
 8999999031053,DOVE GO FRESH 1L,Personal Care,,6.9,,Each,2026-07-03 15:44:20
 8851932290272,DOVE HF Rescue,Personal Care,,9.9,,Each,2026-07-03 15:44:20
 8851932227704,DOVE Intense Repair,Personal Care,,10.5,,Each,2026-07-03 15:44:20
-4710094111105,Dove Lavender x,Personal Care,,6.9,,Each,2026-07-03 15:44:20
-4710094111273,Dove Lavender,Personal Care,,2.8,,Each,2026-07-03 15:44:20
+4710094111105,Dove Lavender 1L,Personal Care,,6.9,,Each,2026-07-03 15:44:20
+4710094111273,Dove Lavender 200ml,Personal Care,,2.8,,Each,2026-07-03 15:44:20
 6902088309485,DOVE MOISTURE 1L,Personal Care,,6.9,,Each,2026-07-03 15:44:20
 6902088309447,DOVE Moisture 200ml,Personal Care,,2.6,,Each,2026-07-03 15:44:20
 8717163616468,Dove Pink Bar 135g,Personal Care,,1.6,0,Each,2026-07-15T18:18:15
@@ -805,7 +795,7 @@ cb,Curry Bag,General Merchandise,,0.1,0,Each,2026-07-04T14:58:30
 8885010239754,Dynamo color care,Household Products,,13.9,,Each,2026-07-03 15:44:20
 8885010239778,DYNAMO EAU DE ROSE,Household Products,,13.9,,Each,2026-07-03 15:44:20
 8885010238948,Dynamo ED Rose 3.3kg,Household Products,,14.9,,Each,2026-07-03 15:44:20
-8885010238924,DYNAMO ROSE,Household Products,,14.9,,Each,2026-07-03 15:44:20
+8885010238924,DYNAMO ROSE,Household Products,,15.9,,Each,2026-07-03 15:44:20
 8901786630509,E Briyani Masala,Indian Provision,,2.4,,Each,2026-07-03 15:44:20
 8901786431007,E Coriander Powder,Indian Provision,,2.6,,Each,2026-07-03 15:44:20
 8901786271009,E Dry Mango,Indian Provision,,2.6,,Each,2026-07-03 15:44:20
@@ -815,7 +805,6 @@ cb,Curry Bag,General Merchandise,,0.1,0,Each,2026-07-04T14:58:30
 9002490207250,E Redbull,Beverages,,53,,Each,2026-07-03 15:44:20
 9002490292102,E Redbull 250ml,Beverages,,2.9,0,Each,2026-07-09T13:30:46
 8850298106005,E Rice Flour 600g,Kitchen Essentials,,1.8,,Each,2026-07-03 15:44:20
-8901786131006,E Sabji Masala,Indian Provision,,2.6,,Each,2026-07-03 15:44:20
 653345246581,Eagle Black Henna,Personal Care,,1.3,0,Each,2026-07-15T17:49:44
 8885001099114,EASY MENTHOL,Tobacco,,15.4,,Each,2026-07-03 15:44:20
 8885001099176,EASY RED,Tobacco,,15.4,,Each,2026-07-03 15:44:20
@@ -830,8 +819,8 @@ E9v,Eergizer 9V,General Merchandise,,5.9,5.4,Each,2026-07-03 15:44:20
 8888021301748,Energizer 2016,General Merchandise,,5.5,,Each,2026-07-03 15:44:20
 8888021300185,Energizer 2032,General Merchandise,,2.8,,Each,2026-07-03 15:44:20
 8888021200171,Energizer 9V,General Merchandise,,7.6,,Each,2026-07-03 15:44:20
-8888021300116,Energizer A23 1,General Merchandise,,3.9,,Each,2026-07-03 15:44:20
-8888021301762,Energizer A23 2,General Merchandise,,5.5,,Each,2026-07-03 15:44:20
+8888021300116,Energizer A23 saver,General Merchandise,,3.9,,Each,2026-07-03 15:44:20
+8888021301762,Energizer A23,General Merchandise,,5.5,,Each,2026-07-03 15:44:20
 8888021309034,Energizer AA 4,General Merchandise,,4.8,,Each,2026-07-03 15:44:20
 8888021202250,ENERGIZER AA BATTERY 2S,General Merchandise,,2.6,,Each,2026-07-03 15:44:20
 8888021202267,ENERGIZER AA BATTERY 4S,General Merchandise,,4.8,,Each,2026-07-03 15:44:20
@@ -863,7 +852,6 @@ E9v,Eergizer 9V,General Merchandise,,5.9,5.4,Each,2026-07-03 15:44:20
 8888440007191,F Nuggets H&s 400g,Frozen Food,,4.5,0,Each,2026-07-09T12:49:28
 8888440000574,F Premium Fries,Frozen Food,,5.2,,Each,2026-07-03 15:44:20
 8888200615550,F&N BLUEBERRY&CRANBERRY 1L,F&n,,2.9,,Each,2026-07-03 15:44:20
-8888200703103,F&N Cherryade,Beverages,,1,,Each,2026-07-03 15:44:20
 8888200700300,F&N CHRYSANTHEMUM TEA 300.ML,Beverages,,1,,Each,2026-07-03 15:44:20
 8888200615475,F&N CRANBERY NO SUGAR,F&n,,2.9,,Each,2026-07-03 15:44:20
 9556570312087,F&N GINGER BEER 1.5L,Beverages,,2.5,,Each,2026-07-03 15:44:20
@@ -879,8 +867,7 @@ E9v,Eergizer 9V,General Merchandise,,5.9,5.4,Each,2026-07-03 15:44:20
 8888200713409,F&n Sarsi 1.5l,Beverages,,2.6,0,Each,2026-07-13T15:40:09
 8888200703431,F&N SARSI 325ML,Beverages,,1,,Each,2026-07-03 15:44:20
 9556570105108,F&N SODA WATER 325ML,Beverages,,1,,Each,2026-07-03 15:44:20
-8888200703141,F&N Strawberry x,Beverages,,2.5,,Each,2026-07-03 15:44:20
-9556570012710,F&N Strawberry,Beverages,,2.5,,Each,2026-07-03 15:44:20
+8888200703141,F&N Cherryade 1.5L,Beverages,,2.5,,Each,2026-07-03 15:44:20
 9556570311035,F&N ZAPPEL 500ML,Beverages,,1.5,,Each,2026-07-03 15:44:20
 8885010239716,Fab A Bacterial,Household Products,,7.2,,Each,2026-07-03 15:44:20
 4902430773324,Fab Antibacterial 2.1kg,Household Products,,6.9,,Each,2026-07-03 15:44:20
@@ -889,23 +876,21 @@ E9v,Eergizer 9V,General Merchandise,,5.9,5.4,Each,2026-07-03 15:44:20
 4902430773720,Fab Lavender,Household Products,,6.9,,Each,2026-07-03 15:44:20
 4902430774031,Fab Perfect,Household Products,,6.9,,Each,2026-07-03 15:44:20
 9556089882309,Faber Castell Eraser,General Merchandise,,1,0,Each,2026-07-10T12:25:34
-8886359101023,Facial Cotton x,Personal Care,,2,,Each,2026-07-03 15:44:20
-8991038110354,Facial Cotton y,Personal Care,,2,,Each,2026-07-03 15:44:20
-9556654005041,Facial Cotton,Personal Care,,1.5,,Each,2026-07-03 15:44:20
+8886359101023,Facial Cotton Soft,Personal Care,,2,,Each,2026-07-03 15:44:20
+8991038110354,Facial Cotton,Personal Care,,2,,Each,2026-07-03 15:44:20
 8991038111757,Facial Cotton 75g,Personal Care,,2.5,0,Each,2026-07-19T18:50:38
 9556126647236,FAIR & LOVELY 50G,Personal Care,,2,,Each,2026-07-03 15:44:20
 9556126647267,FAIR & LOVELY 80G,Personal Care,,2.9,,Each,2026-07-03 15:44:20
 5060068528552,Fair and Handsome,Personal Care,,3.9,,Each,2026-07-03 15:44:20
 9555589207292,FANTA 330 ML,Beverages,,1,,Each,2026-07-03 15:44:20
-8888002070502,FANTA Fruit Punch a,Beverages,,2.5,,Each,2026-07-03 15:44:20
 9555589215280,FANTA Fruit punch,Beverages,,2.6,,Each,2026-07-03 15:44:20
 8888002084004,Fanta Grape,Beverages,,1,,Each,2026-07-03 15:44:20
 9555589200989,FANTA GRAPE 1.5L,Beverages,,2.5,,Each,2026-07-03 15:44:20
 9555589208756,Fanta Grape 1.75l,Beverages,,2.5,,Each,2026-07-03 15:44:20
 9551022470971,Fanta Grape 500ml,Beverages,,1.6,0,Each,2026-07-17T21:47:02
 9555589219677,Fanta IC Soda,Beverages,,1,,Each,2026-07-03 15:44:20
-8888002086008,FANTA Orange a,Beverages,,1,,Each,2026-07-03 15:44:20
-9555589208718,FANTA Orange,Beverages,,2.5,,Each,2026-07-03 15:44:20
+8888002086008,FANTA Orange 300ml,Beverages,,1,,Each,2026-07-03 15:44:20
+9555589208718,FANTA Orange 1.5L a,Beverages,,2.5,,Each,2026-07-03 15:44:20
 9555589200798,FANTA ORANGE 1.5L,Beverages,,2.5,,Each,2026-07-03 15:44:20
 9555589204918,FANTA Orange 320*12,Beverages,,9.6,,Each,2026-07-03 15:44:20
 8888002086473,FANTA Orange 500ml,Beverages,,1.5,,Each,2026-07-03 15:44:20
@@ -1049,12 +1034,9 @@ GB,Ganesh Beedi,Tobacco,,6.8,5.7,Each,2026-07-03 15:44:20
 3014260294250,Gillette 6s,Personal Care,,4,0,Each,2026-07-15T17:15:13
 4902430508377,GILLETTE BLUE 2,Personal Care,,4.2,,Each,2026-07-03 15:44:20
 4902430508865,Gillette Blue II 10s,Personal Care,,5.9,,Each,2026-07-03 15:44:20
-4902430341844,Gillette MACH3 a,Personal Care,,12.3,,Each,2026-07-03 15:44:20
-4902430751483,GILLETTE MACH3,Personal Care,,5.1,,Each,2026-07-03 15:44:20
-4902430862141,Gillette MACH3 b,Personal Care,,5.9,,Each,2026-07-03 15:44:20
-4987176077776,Gillette Mach3 c,Personal Care,,5.9,,Each,2026-07-03 15:44:20
-4987176138668,Gillette MACH3 d,Personal Care,,5.9,,Each,2026-07-03 15:44:20
-4987176300485,Gillette Mach3 e,Personal Care,,12.6,,Each,2026-07-03 15:44:20
+4902430341844,Gillette MACH3 4s,Personal Care,,12.3,,Each,2026-07-03 15:44:20
+4902430862141,Gillette MACH3,Personal Care,,5.9,,Each,2026-07-03 15:44:20
+4987176300485,Gillette Mach3 4,Personal Care,,12.6,,Each,2026-07-03 15:44:20
 4902430921831,Gillette Mach3 4pcs,Personal Care,,10.9,,Each,2026-07-03 15:44:20
 VEG02,Ginger,Vegetable,,6,0,KG,2026-07-17T15:16:11
 8888176001739,GINVERA,Personal Care,,5.6,,Each,2026-07-03 15:44:20
@@ -1224,7 +1206,6 @@ H,HARPIC Lemon Zest,Household Products,,3.2,3,Each,2026-07-03 15:44:20
 8888546651007,HB FENNEL SEED 100G,Indian Provision,,1.2,,Each,2026-07-03 15:44:20
 8888546401251,HB FISH CURRY 125G,Indian Provision,,1.5,,Each,2026-07-03 15:44:20
 8888546111037,HB Ginger Powder,Indian Provision,,1.8,,Each,2026-07-03 15:44:20
-8888546460074,HB Gold Ponni 10kg x,Indian Provision,,25.9,,Each,2026-07-03 15:44:20
 8888546460098,HB Gold Ponni 10kg,Indian Provision,,25.9,,Each,2026-07-03 15:44:20
 8888546460081,HB Gold Ponni 5kg,Indian Provision,,15.9,,Each,2026-07-03 15:44:20
 8888546592508,HB GREEN BEANS 250G,Indian Provision,,1.3,,Each,2026-07-03 15:44:20
@@ -1272,8 +1253,8 @@ HS,Heya Sim Card,Telecom,,10,0.01,Each,2026-07-03 15:44:20
 9555030108659,Himalaya Honey Lime,Snacks,,1,,Each,2026-07-03 15:44:20
 8901138505547,Himalaya Lemon,Personal Care,,3.8,,Each,2026-07-03 15:44:20
 8901138821234,Himalaya Saffron,Personal Care,,2.9,,Each,2026-07-03 15:44:20
-9555030107614,HIMALAYA SALT x,Snacks,,1,,Each,2026-07-03 15:44:20
-9555030107621,Himalaya Salt,Snacks,,10.8,,Each,2026-07-03 15:44:20
+9555030107614,HIMALAYA SALT,Snacks,,1,,Each,2026-07-03 15:44:20
+9555030107621,Himalaya Salt 12s,Snacks,,10.8,,Each,2026-07-03 15:44:20
 4902505085680,HI-TECHPOINT V5 Black,General Merchandise,,2,,Each,2026-07-03 15:44:20
 4902505085703,HI-TECHPOINT V5 Blue,General Merchandise,,2,,Each,2026-07-03 15:44:20
 8888231501204,HK Olive Veg,Kitchen Essentials,,1.8,,Each,2026-07-03 15:44:20
@@ -1428,28 +1409,28 @@ I,Ice Cream,Ice Cream,,0.1,0,Each,2026-07-04T14:59:54
 9300727009869,JC Shiraz,Liquor,,9.1,,Each,2026-07-03 15:44:20
 9300727488190,JC SHIRAZ 700 cl,Liquor,,25.9,,Each,2026-07-03 15:44:20
 9300727488176,JC Shiraz 750cl,Liquor,,25.9,,Each,2026-07-03 15:44:20
-4891599338393,JDB Herbal Tea x,Beverages,,1,,Each,2026-07-03 15:44:20
-4891599847680,JDB Herbal Tea,Beverages,,1,,Each,2026-07-03 15:44:20
+4891599338393,JDB Herbal Tea,Beverages,,1,,Each,2026-07-03 15:44:20
+4891599847680,JDB Herbal Tea 300ml,Beverages,,1,,Each,2026-07-03 15:44:20
 8885002892042,Jeera Samba Rice,Rice,,4.9,,Each,2026-07-03 15:44:20
 8881304323727,JHP 7PA,Household Products,,4.6,,Each,2026-07-03 15:44:20
 8881304323734,JHP 9PA,Household Products,,5.8,,Each,2026-07-03 15:44:20
 8881304323680,JHP MC7PP,Household Products,,3.8,,Each,2026-07-03 15:44:20
 8881304323697,JHP MC9PP,Household Products,,5,,Each,2026-07-03 15:44:20
 8888589338835,Jia Jia,Beverages,,1,,Each,2026-07-03 15:44:20
-8888589311418,Jia Jia Zero Sugar x,Beverages,,1,,Each,2026-07-03 15:44:20
-8888589363011,Jia Jia Zero Sugar,Beverages,,1.8,,Each,2026-07-03 15:44:20
+8888589311418,Jia Jia Zero Sugar 300ml,Beverages,,1,,Each,2026-07-03 15:44:20
+8888589363011,Jia Jia Zero Sugar 500ml,Beverages,,1.8,,Each,2026-07-03 15:44:20
 8934868145332,Jif,Household Products,,2.2,,Each,2026-07-03 15:44:20
 5060045586322,JIM BEAM 200cl,Liquor,,14.5,,Each,2026-07-03 15:44:20
 080686001607,JIM BEAM 375ml,Liquor,,26,,Each,2026-07-03 15:44:20
-080686000365,JIM BEAM 700cl x,Liquor,,47,,Each,2026-07-03 15:44:20
-080686000389,JIM BEAM 700cl y,Liquor,,47,,Each,2026-07-03 15:44:20
+080686000365,JIM BEAM 700cl Whiskey,Liquor,,47,,Each,2026-07-03 15:44:20
+080686000389,JIM BEAM 700cl Bourbon,Liquor,,47,,Each,2026-07-03 15:44:20
 8801048921102,JINRO G Grape,Liquor,,9.9,,Each,2026-07-03 15:44:20
 8801048951000,JINRO Original,Liquor,,10.9,,Each,2026-07-03 15:44:20
 8801048181292,JINRO Peach,Liquor,,9.9,,Each,2026-07-03 15:44:20
 8801048178308,JINRO Plum,Liquor,,9.9,,Each,2026-07-03 15:44:20
 8801048178018,JINRO Strawberry,Liquor,,9.9,,Each,2026-07-03 15:44:20
-8850007030744,JJ Baby Lotion x,Personal Care,,2.3,,Each,2026-07-03 15:44:20
-9556006000212,JJ Baby Lotion,Personal Care,,3.9,,Each,2026-07-03 15:44:20
+8850007030744,JJ Baby Lotion P,Personal Care,,2.3,,Each,2026-07-03 15:44:20
+9556006000212,JJ Baby Lotion B,Personal Care,,3.9,,Each,2026-07-03 15:44:20
 8850007060338,JJ Baby Oil 300ml,Personal Care,,5.2,,Each,2026-07-03 15:44:20
 8850007015222,JJ Baby Powder 200g,Personal Care,,3.9,,Each,2026-07-03 15:44:20
 8888589425016,JJ Bandung 500ml,Beverages,,1.8,,Each,2026-07-03 15:44:20
@@ -1460,9 +1441,9 @@ I,Ice Cream,Ice Cream,,0.1,0,Each,2026-07-04T14:59:54
 8888589361116,Jj Herbal Tea,Beverages,,1.8,0,Each,2026-07-13T12:45:00
 8888589361017,JJ Herbal Tea 500g,Beverages,,1.8,,Each,2026-07-03 15:44:20
 8888589311111,JJ Herbbal Tea LS,Beverages,,1.1,,Each,2026-07-03 15:44:20
-9556196000801,JJ POTATO CHIPS 180GM x,Snacks,,3.4,,Each,2026-07-03 15:44:20
-9556196000856,JJ POTATO CHIPS 180GM y,Snacks,,3.4,,Each,2026-07-03 15:44:20
-9556196002027,JJ POTATO CHIPS 180GM,Snacks,,3.4,,Each,2026-07-03 15:44:20
+9556196000801,JJ POTATO CHIPS 180GM  S,Snacks,,3.4,,Each,2026-07-03 15:44:20
+9556196000856,JJ POTATO CHIPS 180GM BBQ,Snacks,,3.4,,Each,2026-07-03 15:44:20
+9556196002027,JJ POTATO CHIPS 180GM SC,Snacks,,3.4,,Each,2026-07-03 15:44:20
 9556006294956,JJ Powder 200g,Personal Care,,3.2,,Each,2026-07-03 15:44:20
 8888589420011,JJ Rose Milk,Beverages,,1.2,,Each,2026-07-03 15:44:20
 8888589420004,JJ Rose milk 24s,Beverages,,21.5,,Each,2026-07-03 15:44:20
@@ -1530,17 +1511,17 @@ I,Ice Cream,Ice Cream,,0.1,0,Each,2026-07-04T14:59:54
 8888267205008,Kim Poh Dishwash,Household Products,,5.9,,Each,2026-07-03 15:44:20
 95505336,KIMBALL THAI CHILI,Condiments & Sauce,,2.3,,Each,2026-07-03 15:44:20
 6920238090106,Kimchi Nongshim,Noodles,,5.5,0,Each,2026-07-13T19:27:11
-4710145211037,Kimchi Ramen x,Noodles,,6.2,,Each,2026-07-03 15:44:20
-8801073212398,Kimchi Ramen,Noodles,,2.1,,Each,2026-07-03 15:44:20
+4710145211037,Kimchi Ramen 6s,Noodles,,6.2,,Each,2026-07-03 15:44:20
+8801073212398,Kimchi Ramen Bowl,Noodles,,2.1,,Each,2026-07-03 15:44:20
 8000500454091,Kinder b Dark,Snacks,,2.8,,Each,2026-07-03 15:44:20
 8000500066027,Kinder Bueno Dc,Snacks,,2.8,0,Each,2026-07-11T13:39:32
 80761761,KINDER BUENO White,Snacks,,2.8,,Each,2026-07-03 15:44:20
-8000500075708,Kinder Joy x,Snacks,,7.5,,Each,2026-07-03 15:44:20
+8000500075708,Kinder Joy 3s,Snacks,,7.5,,Each,2026-07-03 15:44:20
 80974482,Kinder Joy,Snacks,,2.6,,Each,2026-07-03 15:44:20
 80768258,KINDER JOY 20G,Snacks,,2.6,,Each,2026-07-03 15:44:20
 8000500126325,Kinder JOY G,Snacks,,7.5,,Each,2026-07-03 15:44:20
 8888017995036,Kingfisher Beer,Beer,,4.3,0,Each,2026-07-20T22:17:57
-8888300281013,Kirei Kirei Refill x,Personal Care,,2.5,,Each,2026-07-03 15:44:20
+8888300281013,Kirei Kirei Refill Peach,Personal Care,,2.5,,Each,2026-07-03 15:44:20
 8888300281068,Kirei Kirei Refill,Personal Care,,2.5,,Each,2026-07-03 15:44:20
 8888300281051,Kirei M Peach,Personal Care,,3.9,,Each,2026-07-03 15:44:20
 8888300281006,Kirei Natural Citrus,Personal Care,,3.9,,Each,2026-07-03 15:44:20
@@ -1564,8 +1545,8 @@ I,Ice Cream,Ice Cream,,0.1,0,Each,2026-07-04T14:59:54
 8888086776550,KNORR BEEF 60G,Kitchen Essentials,,2,,Each,2026-07-03 15:44:20
 9556024710612,Knorr C&Mushroom,Kitchen Essentials,,3.8,,Each,2026-07-03 15:44:20
 8850144231387,Knorr Cheese,Kitchen Essentials,,1.9,,Each,2026-07-03 15:44:20
-9556024710636,Knorr Chicken A,Kitchen Essentials,,3.8,,Each,2026-07-03 15:44:20
-9556024710711,Knorr Chicken B,Kitchen Essentials,,1.9,,Each,2026-07-03 15:44:20
+9556024710636,Knorr Chicken,Kitchen Essentials,,3.8,,Each,2026-07-03 15:44:20
+9556024710711,Knorr Chicken Small,Kitchen Essentials,,1.9,,Each,2026-07-03 15:44:20
 9556024707315,Knorr Chicken Stock,Kitchen Essentials,,2,0,Each,2026-07-10T11:08:45
 8888086776574,KNORR IKAN BILIS,Kitchen Essentials,,2,,Each,2026-07-03 15:44:20
 9556126667333,Knorr Ms Potato Cheese,Noodles,,2.2,,Each,2026-07-03 15:44:20
@@ -1574,7 +1555,6 @@ I,Ice Cream,Ice Cream,,0.1,0,Each,2026-07-04T14:59:54
 8888086776581,Knorr Tom Yam,Kitchen Essentials,,2.1,,Each,2026-07-03 15:44:20
 8888086784647,Knorr Veg,Kitchen Essentials,,2,,Each,2026-07-03 15:44:20
 8885008901076,KODO Millet,Indian Provision,,2.4,,Each,2026-07-03 15:44:20
-4903301231929,KODOMO Cooling Adhesive x,Personal Care,,5.9,,Each,2026-07-03 15:44:20
 4903301244813,KODOMO Cooling Adhesive,Personal Care,,5.9,,Each,2026-07-03 15:44:20
 4987072062111,KOOLFEVER 0-2,Personal Care,,4.6,,Each,2026-07-03 15:44:20
 4987072030868,KOOLFEVER CH,Personal Care,,5.9,,Each,2026-07-03 15:44:20
@@ -1584,7 +1564,7 @@ I,Ice Cream,Ice Cream,,0.1,0,Each,2026-07-04T14:59:54
 8888336016764,Kotex 28cm,Personal Care,,6.9,,Each,2026-07-03 15:44:20
 8888336026084,Kotex 32CM,Personal Care,,4.6,,Each,2026-07-03 15:44:20
 8888336019710,KOTEX ON 28CM 14S,Personal Care,,3.8,,Each,2026-07-03 15:44:20
-8888336019611,KOTEX OVERNIGHT 32cm x,Personal Care,,3.6,,Each,2026-07-03 15:44:20
+8888336019611,KOTEX OVERNIGHT  12,Personal Care,,3.6,,Each,2026-07-03 15:44:20
 8888336026299,KOTEX OVERNIGHT 32CM,Personal Care,,3.5,,Each,2026-07-03 15:44:20
 9555615100627,Kumbam lavender,Poojai Items,,2.9,,Each,2026-07-03 15:44:20
 9555615100542,KUMBAM OMAM WATER 300ML,Poojai Items,,1,,Each,2026-07-03 15:44:20
@@ -1615,9 +1595,8 @@ I,Ice Cream,Ice Cream,,0.1,0,Each,2026-07-04T14:59:54
 6908594417034,Laurier SGaurd,Personal Care,,4.9,,Each,2026-07-03 15:44:20
 8901751432824,Lavender,Household Products,,4.6,,Each,2026-07-03 15:44:20
 1200108000363,Lays Barbecue,Snacks,,5.4,,Each,2026-07-03 15:44:20
-1200108000042,Lays Classic x,Snacks,,5.4,,Each,2026-07-03 15:44:20
+1200108000042,Lays Classic 82g,Snacks,,5.4,,Each,2026-07-03 15:44:20
 8901491001052,Lays Classic,Snacks,,1.8,,Each,2026-07-03 15:44:20
-8901491001021,Lays Classic 82g,Snacks,,1.8,,Each,2026-07-03 15:44:20
 8901491001076,Lays Cream&Onion,Snacks,,1.8,,Each,2026-07-03 15:44:20
 1200108002060,Lays H&Spicy,Snacks,,5.4,,Each,2026-07-03 15:44:20
 1200108002138,Lays Nori Seaweed,Snacks,,5.4,,Each,2026-07-03 15:44:20
@@ -1625,8 +1604,6 @@ I,Ice Cream,Ice Cream,,0.1,0,Each,2026-07-04T14:59:54
 4033100013348,LD BLUE LONGS,Tobacco,,16,,Each,2026-07-03 15:44:20
 4033100089657,LD COOL BLAST,Tobacco,,16.6,,Each,2026-07-03 15:44:20
 4033100022487,LD FROZEN BLAST,Tobacco,,14.1,,Each,2026-07-03 15:44:20
-4033100066030,LD FROZEN PURPLE x,Tobacco,,14,,Each,2026-07-03 15:44:20
-8885015431764,LD Frozen Purple,Tobacco,,14,,Each,2026-07-03 15:44:20
 4033100042171,Ld Frozen Zoom,Tobacco,,14.7,0,Each,2026-07-10T12:09:39
 8885004830028,L-D LIGHTS,Tobacco,,16.6,,Each,2026-07-03 15:44:20
 8885004830042,L-D MENTHOL,Tobacco,,16.6,,Each,2026-07-03 15:44:20
@@ -1644,12 +1621,12 @@ VEG05,Lemon,Vegetable,,9,0,KG,2026-07-17T15:16:11
 8886461601558,Leopad,Household Products,,9.9,,Each,2026-07-03 15:44:20
 8886461600315,Leopad Mop,Household Products,,3.9,3.9,Each,2026-07-03 15:44:20
 8886461601541,Leopad Umbrella,Household Products,,7.9,,Each,2026-07-03 15:44:20
-8886461600223,LEOPARD 1,Household Products,,3.9,,Each,2026-07-03 15:44:20
-8886461601138,LEOPARD 2,Household Products,,1.2,,Each,2026-07-03 15:44:20
-8886461600056,LEOPARD BROOM 1,Household Products,,3.2,,Each,2026-07-03 15:44:20
-8886461600087,LEOPARD BROOM 2,Household Products,,3.2,,Each,2026-07-03 15:44:20
-8886461600100,LEOPARD BROOM 3,Household Products,,3.3,,Each,2026-07-03 15:44:20
-8886461600230,LEOPARD BROOM 4,Household Products,,3.5,,Each,2026-07-03 15:44:20
+8886461600223,LEOPARD Item 1,Household Products,,3.9,,Each,2026-07-03 15:44:20
+8886461601138,LEOPARD Item 2,Household Products,,1.2,,Each,2026-07-03 15:44:20
+8886461600056,LEOPARD BROOM Type 1,Household Products,,3.2,,Each,2026-07-03 15:44:20
+8886461600087,LEOPARD BROOM Type 2,Household Products,,3.2,,Each,2026-07-03 15:44:20
+8886461600100,LEOPARD BROOM Type 3,Household Products,,3.3,,Each,2026-07-03 15:44:20
+8886461600230,LEOPARD BROOM Type 4,Household Products,,3.5,,Each,2026-07-03 15:44:20
 8886461600322,LEOPARD Mop,Household Products,,5.4,,Each,2026-07-03 15:44:20
 840222000149,Lg Asafoetida 50g,,,2.1,0,Each,2026-07-09T21:11:03
 8999999028817,Lifebouy Cool Fresh,Personal Care,,3.5,,Each,2026-07-03 15:44:20
@@ -1738,9 +1715,6 @@ VEG06,Loose Garlic,Vegetable,,6,0,KG,2026-07-17T15:16:11
 4901301506788,M Stain&Mold Refill,Household Products,,4.8,,Each,2026-07-03 15:44:20
 8888200607449,M Strawberry,Beverages,,4.8,,Each,2026-07-03 15:44:20
 8902967215355,M Wiskey 180ml,Liquor,,10.5,,Each,2026-07-03 15:44:20
-6914973105379,M&M x,Snacks,,1.5,,Each,2026-07-03 15:44:20
-6914973105386,M&M y,Snacks,,1.5,,Each,2026-07-03 15:44:20
-6914973600997,M&M,Snacks,,1.8,,Each,2026-07-03 15:44:20
 40111490,M&m Chocolate,Snacks,,1.5,0,Each,2026-07-11T12:12:50
 6914973030206,M&M Cripsy,Snacks,,1.8,,Each,2026-07-03 15:44:20
 9300682016278,M&M Crispy,Snacks,,1.5,,Each,2026-07-03 15:44:20
@@ -1752,8 +1726,7 @@ Max,M1 Max Simcard,Telecom,,0.1,0,Each,2026-07-04T15:00:19
 6980717001580,MACKEREL FISH 425G,Canned Food,,2,,Each,2026-07-03 15:44:20
 9556001126450,MAGGI ASAM LAKSA,Noodles,,2.6,,Each,2026-07-03 15:44:20
 9556001221957,MAGGI BIG CURRY 5X111G,Noodles,,3.9,,Each,2026-07-03 15:44:20
-9556001128973,MAGGI CHICKEN x,Noodles,,2.6,,Each,2026-07-03 15:44:20
-9556001201997,Maggi Chicken,Noodles,,2.6,,Each,2026-07-03 15:44:20
+9556001128973,Maggi Chicken,Noodles,,2.6,,Each,2026-07-03 15:44:20
 9556001601506,MAGGI CHILLI SAUCE 340 GM,Condiments & Sauce,,2.3,,Each,2026-07-03 15:44:20
 9556001601001,MAGGI CHILLI SAUCE 500g,Condiments & Sauce,,2.9,,Each,2026-07-03 15:44:20
 9556001202031,Maggi Curry,Noodles,,2.6,,Each,2026-07-03 15:44:20
@@ -1765,8 +1738,8 @@ Max,M1 Max Simcard,Telecom,,0.1,0,Each,2026-07-04T15:00:19
 055000490306,Maggi India,Indian Provision,,2.3,,Each,2026-07-03 15:44:20
 9556001126597,Maggi Kari letup,Noodles,,2.8,,Each,2026-07-03 15:44:20
 9556001602107,Maggi Oyster,Condiments & Sauce,,4.3,,Each,2026-07-03 15:44:20
-9556001255754,Maggi PEDAS GILER x,Noodles,,2.8,,Each,2026-07-03 15:44:20
-9556001259127,Maggi PEDAS Giler,Noodles,,4.2,,Each,2026-07-03 15:44:20
+9556001255754,Maggi PEDAS GILER,Noodles,,2.8,,Each,2026-07-03 15:44:20
+9556001259127,Maggi PEDAS Giler 4s,Noodles,,4.2,,Each,2026-07-03 15:44:20
 9556001609007,MAGGI PORRIDGE CHICKEN 63G,Noodles,,1.5,,Each,2026-07-03 15:44:20
 9556001601407,MAGGI SAUCE TOMATTO 325 GM,Condiments & Sauce,,1.8,,Each,2026-07-03 15:44:20
 9556001234766,Maggi Spicy Curry,Noodles,,1.8,,Each,2026-07-03 15:44:20
@@ -1810,15 +1783,13 @@ Max,M1 Max Simcard,Telecom,,0.1,0,Each,2026-07-04T15:00:19
 8998866182188,Mama refill,Household Products,,1.8,,Each,2026-07-03 15:44:20
 9555022301891,MAMEE BBQ 8s,Noodles,,2.7,,Each,2026-07-03 15:44:20
 9555022301884,MAMEE Chicken 8s,Noodles,,2.7,2.5,Each,2026-07-03 15:44:20
-4800016110511,Mang Juan x,Snacks,,1.5,,Each,2026-07-03 15:44:20
+4800016110511,Mang Juan G,Snacks,,1.5,,Each,2026-07-03 15:44:20
 4800016110528,Mang Juan,Snacks,,1.5,,Each,2026-07-03 15:44:20
 8901725719999,mangaldeep,Poojai Items,,2.2,,Each,2026-07-03 15:44:20
 8888200650124,Mango,F&n,,1.3,,Each,2026-07-03 15:44:20
 8886345364982,MANGO 95GM,Snacks,,1.3,,Each,2026-07-03 15:44:20
 8888200602895,MANGO JUICE 946ml,F&n,,2.8,,Each,2026-07-03 15:44:20
 8906021122139,Mango Thokku Pickle,Indian Provision,,2.4,,Each,2026-07-03 15:44:20
-8901088702737,MANJAL SOAP 75G x,Personal Care,,1,,Each,2026-07-03 15:44:20
-8901088702751,MANJAL SOAP 75G,Personal Care,,1,,Each,2026-07-03 15:44:20
 8906008350043,Manna Health Mix,Indian Provision,,6,,Each,2026-07-03 15:44:20
 8906008350050,Manna Health Mix 250g,Indian Provision,,3.6,,Each,2026-07-03 15:44:20
 8904001803221,Mantra Groundnut Oil2L,Cooking Oil,,12.9,,Each,2026-07-03 15:44:20
@@ -1836,7 +1807,6 @@ Max,M1 Max Simcard,Telecom,,0.1,0,Each,2026-07-04T15:00:19
 88823713,MARLBRO CRAFTED RED,Tobacco,,15.9,,Each,2026-07-03 15:44:20
 288692,MARLBRO GOLD,Tobacco,,18.1,,Each,2026-07-03 15:44:20
 281592,MARLBRO W MENTHOL,Tobacco,,18.3,,Each,2026-07-03 15:44:20
-5000159407236,MARS 51G x,Snacks,,1.5,,Each,2026-07-03 15:44:20
 5900951311321,Mars 51g,Snacks,,1.5,,Each,2026-07-03 15:44:20
 8904004407914,MASALA CHANA 160.G,Indian Provision,,2.2,,Each,2026-07-03 15:44:20
 8888196906915,Matcha Milk Tea,Beverages,,1.8,,Each,2026-07-03 15:44:20
@@ -1863,16 +1833,16 @@ Max,M1 Max Simcard,Telecom,,0.1,0,Each,2026-07-04T15:00:19
 6291103750501,MDH Kasoori Meithi,Indian Provision,,1.4,,Each,2026-07-03 15:44:20
 6291103750297,MDH PAV Bhaji,Indian Provision,,2.4,,Each,2026-07-03 15:44:20
 8998866606202,ME GORENG 5x91G,Noodles,,2.9,,Each,2026-07-03 15:44:20
-8904018308634,MEDIMIX Classic x,Personal Care,,1.8,,Each,2026-07-03 15:44:20
+8904018308634,MEDIMIX Classic 18h,Personal Care,,1.8,,Each,2026-07-03 15:44:20
 8906057530861,MEDIMIX Classic,Personal Care,,1.6,,Each,2026-07-03 15:44:20
 8904018300591,MEDIMIX S SOAP 125G,Personal Care,,1.8,,Each,2026-07-03 15:44:20
-8904018300560,Medimix Soap x,Personal Care,,1.8,,Each,2026-07-03 15:44:20
+8904018300560,Medimix Soap Y,Personal Care,,1.8,,Each,2026-07-03 15:44:20
 8904018303660,Medimix Soap,Personal Care,,1.8,,Each,2026-07-03 15:44:20
 8904018300249,MEDIMIX SOAP 125G,Personal Care,,1.5,,Each,2026-07-03 15:44:20
 8904018300010,MEDIMIX SOAP 75G,Personal Care,,0.8,,Each,2026-07-03 15:44:20
 8888107003146,Mee Poh,Noodles,,2.2,,Each,2026-07-03 15:44:20
-8902979029032,Meera Anti Dandruff x,Personal Care,,2.9,,Each,2026-07-03 15:44:20
-8902979029049,Meera Anti Dandruff,Personal Care,,4.8,,Each,2026-07-03 15:44:20
+8902979029032,Meera Anti Dandruff 80ml,Personal Care,,2.9,,Each,2026-07-03 15:44:20
+8902979029049,Meera Anti Dandruff 180ml,Personal Care,,4.8,,Each,2026-07-03 15:44:20
 8902979022798,Meera Hair Fall Care,Personal Care,,4.6,,Each,2026-07-03 15:44:20
 8902979023177,MEERA SEYAKKAI 120G,Personal Care,,2,,Each,2026-07-03 15:44:20
 8902979023122,MEERA SHAMPOO 80ML,Personal Care,,1.4,,Each,2026-07-03 15:44:20
@@ -1886,9 +1856,9 @@ Max,M1 Max Simcard,Telecom,,0.1,0,Each,2026-07-04T15:00:19
 9555674600656,Melon Cake,Bakery Goods,,1.8,,Each,2026-07-03 15:44:20
 8998866810098,MELTS Cheese,Snacks,,2.3,,Each,2026-07-03 15:44:20
 8998866810081,MELTS Original,Snacks,,2.3,,Each,2026-07-03 15:44:20
-073390000110,MENTOS 37.5GM x,Snacks,,0.9,,Each,2026-07-03 15:44:20
-073390000165,MENTOS 37.5GM y,Snacks,,0.9,,Each,2026-07-03 15:44:20
-073390000516,MENTOS 37.5GM,Snacks,,0.9,,Each,2026-07-03 15:44:20
+073390000110,MENTOS 37.5GM M,Snacks,,0.9,,Each,2026-07-03 15:44:20
+073390000165,MENTOS 37.5GM F,Snacks,,0.9,,Each,2026-07-03 15:44:20
+073390000516,MENTOS 37.5GM G,Snacks,,0.9,,Each,2026-07-03 15:44:20
 8990800024165,mentos Cool Chews,Snacks,,1.5,,Each,2026-07-03 15:44:20
 8990800024134,mentos mixed berry,Snacks,,1.5,,Each,2026-07-03 15:44:20
 4033100033186,Mevius Option,Tobacco,,18.3,,Each,2026-07-03 15:44:20
@@ -1896,8 +1866,7 @@ Max,M1 Max Simcard,Telecom,,0.1,0,Each,2026-07-04T15:00:19
 123213,MEVIUS ORI MENTHOL,Tobacco,,18.3,,Each,2026-07-03 15:44:20
 4902210200804,MEVIUS SKY BLUE,Tobacco,,18.3,,Each,2026-07-03 15:44:20
 4902210202402,MEVIUS WIND BLUE,Tobacco,,18.3,,Each,2026-07-03 15:44:20
-8888026571917,MG APPLE x,Marigold,,2.8,,Each,2026-07-03 15:44:20
-8888026970000,MG Apple,Marigold,,1.3,,Each,2026-07-03 15:44:20
+8888026571917,MG APPLE,Marigold,,2.8,,Each,2026-07-03 15:44:20
 8888026230166,Mg Apple 200ml,Marigold,,1.4,0,Each,2026-07-16T16:49:49
 8888026578510,MG CARROT,Marigold,,2.8,,Each,2026-07-03 15:44:20
 8888026561031,MG Chocolate,Marigold,,3.6,,Each,2026-07-03 15:44:20
@@ -1910,23 +1879,19 @@ Max,M1 Max Simcard,Telecom,,0.1,0,Each,2026-07-04T15:00:19
 8888026570514,MG Lime 946ml,Marigold,,2.8,,Each,2026-07-03 15:44:20
 9557305000569,MG Low Fat Milk,Breakfast Items,,2.8,2.8,Each,2026-07-03 15:44:20
 8888026970031,MG Mango,Marigold,,1.3,,Each,2026-07-03 15:44:20
-8888026570910,MG ORANGE x,Marigold,,2.8,,Each,2026-07-03 15:44:20
-8888026970024,MG Orange,Marigold,,1.3,,Each,2026-07-03 15:44:20
+8888026570910,MG ORANGE,Marigold,,2.8,,Each,2026-07-03 15:44:20
+8888026970024,MG Orange 200ml,Marigold,,1.3,,Each,2026-07-03 15:44:20
 8888026473068,MG Orange 250ml,Marigold,,1.2,,Each,2026-07-03 15:44:20
 8888026970017,MG P Guava,Marigold,,1.3,,Each,2026-07-03 15:44:20
 8888026230173,Mg Pink Guava,Beverages,,1.4,0,Each,2026-07-13T16:37:54
 8888026572914,MG Pink Guava 946ml,Marigold,,2.8,,Each,2026-07-03 15:44:20
-8888026473259,MG powerberries x,Beverages,,1.3,,Each,2026-07-03 15:44:20
+8888026473259,MG powerberries 200ml,Beverages,,1.3,,Each,2026-07-03 15:44:20
 8888026579128,MG Powerberries,Marigold,,2.8,,Each,2026-07-03 15:44:20
 8888026850715,MG Yoghurt 700 ml,Dairy Products,,3.3,,Each,2026-07-03 15:44:20
-8888026231101,MG Yoghurt x,Marigold,,1.7,,Each,2026-07-03 15:44:20
-8888026231118,MG Yoghurt y,Marigold,,1.7,,Each,2026-07-03 15:44:20
-8888026231156,MG Yoghurt a,Marigold,,1.7,,Each,2026-07-03 15:44:20
-8888026231163,MG Yoghurt b,Marigold,,1.7,,Each,2026-07-03 15:44:20
-8888026241117,MG Yoghurt c,Marigold,,1.65,,Each,2026-07-03 15:44:20
-8888026850807,MG Yoghurt d,Marigold,,1.5,,Each,2026-07-03 15:44:20
-8888026850814,MG Yoghurt,Marigold,,1.5,,Each,2026-07-03 15:44:20
-8888026850869,MG Yoghurt e,Marigold,,1.5,,Each,2026-07-03 15:44:20
+8888026231101,MG Yoghurt natural,Marigold,,1.7,,Each,2026-07-03 15:44:20
+8888026231118,MG Yoghurt St,Marigold,,1.7,,Each,2026-07-03 15:44:20
+8888026231156,MG Yoghurt de coco,Marigold,,1.7,,Each,2026-07-03 15:44:20
+8888026231163,MG Yoghurt Mixed Berries,Marigold,,1.7,,Each,2026-07-03 15:44:20
 8888026579203,MG YUZU,Marigold,,3.5,,Each,2026-07-03 15:44:20
 8998866202404,Mi Sedaap B,Noodles,,1.5,,Each,2026-07-03 15:44:20
 8998866606196,MI SOTO 75GM 5PKTS,Noodles,,2.8,,Each,2026-07-03 15:44:20
@@ -1970,8 +1935,8 @@ Max,M1 Max Simcard,Telecom,,0.1,0,Each,2026-07-04T15:00:19
 8902147000450,MM Lemon,Liquor,,11.8,,Each,2026-07-03 15:44:20
 8904083300441,MM malai paneer,Dairy Products,,7.6,,Each,2026-07-03 15:44:20
 8902147000412,MM Orange,Liquor,,11.5,,Each,2026-07-03 15:44:20
-9551022470308,MM Orange 300ml x,Beverages,,1.6,,Each,2026-07-03 15:44:20
-9555589209395,MM Orange 300ml,Beverages,,1.2,,Each,2026-07-03 15:44:20
+9551022470308,MM Orange 300ml,Beverages,,1.6,,Each,2026-07-03 15:44:20
+9555589209395,MG Orange 300ml,Beverages,,1.2,,Each,2026-07-03 15:44:20
 8888002188511,MM ORANGE 350G,Beverages,,1.5,,Each,2026-07-03 15:44:20
 8904083300021,MM PANEER 200G,Dairy Products,,4.2,,Each,2026-07-03 15:44:20
 8904083300045,MM Paneer 500g,Dairy Products,,9.8,,Each,2026-07-03 15:44:20
@@ -1988,8 +1953,8 @@ TP,Mobile Top Up,Telecom,,0.1,0,Each,2026-07-04T15:00:41
 8888546625008,MONG DHALL 500G,Indian Provision,,2.4,,Each,2026-07-03 15:44:20
 8888546620010,MONG/DHALL,Indian Provision,,3.8,,Each,2026-07-03 15:44:20
 5010327105215,Monkey Shoulder,Liquor,,69,,Each,2026-07-03 15:44:20
-4897036691212,Monster B 1,Beverages,,2.8,,Each,2026-07-03 15:44:20
-4897036693148,Monster B,Beverages,,3,,Each,2026-07-03 15:44:20
+4897036691212,Monster B,Beverages,,2.8,,Each,2026-07-03 15:44:20
+4897036693148,Monster Mango,Beverages,,3,,Each,2026-07-03 15:44:20
 9555022301877,MONSTER BBQ,Snacks,,0.4,,Each,2026-07-03 15:44:20
 9555022301860,MONSTER CHICKEN,Snacks,,0.4,,Each,2026-07-03 15:44:20
 4897036694343,Monster G,Beverages,,2.8,0,Each,2026-07-14T17:19:51
@@ -1997,10 +1962,10 @@ TP,Mobile Top Up,Telecom,,0.1,0,Each,2026-07-04T15:00:41
 4897036693483,Monster P,Beverages,,2.8,0,Each,2026-07-12T20:40:48
 4897036692974,Monster Ultra,Beverages,,3,,Each,2026-07-03 15:44:20
 4897036695890,Monster Violet,Beverages,,2.8,0,Each,2026-07-13T21:07:58
-8885005277785,Moo Tong 30ml a,Personal Care,,3.4,,Each,2026-07-03 15:44:20
-8885005278881,Moo Tong 30ml,Personal Care,,3.4,,Each,2026-07-03 15:44:20
-8885005277778,Moo Tong 60ml a,Personal Care,,6,,Each,2026-07-03 15:44:20
-8885005278874,Moo Tong 60ml,Personal Care,,6,,Each,2026-07-03 15:44:20
+8885005277785,Moo Tong 30ml G,Personal Care,,3.4,,Each,2026-07-03 15:44:20
+8885005278881,Moo Tong 30ml R,Personal Care,,3.4,,Each,2026-07-03 15:44:20
+8885005277778,Moo Tong 60ml G,Personal Care,,6,,Each,2026-07-03 15:44:20
+8885005278874,Moo Tong 60ml R,Personal Care,,6,,Each,2026-07-03 15:44:20
 8885005270090,Moo Tong Clove Oil,Personal Care,,3.6,,Each,2026-07-03 15:44:20
 8885005270113,Moo Tong Pain Relief,Personal Care,,5.9,,Each,2026-07-03 15:44:20
 8901177100505,MOOV CREAM 50g,Personal Care,,5.5,,Each,2026-07-03 15:44:20
@@ -2081,8 +2046,8 @@ TP,Mobile Top Up,Telecom,,0.1,0,Each,2026-07-04T15:00:41
 6901009110223,NB Stewed Pork Sliced 383g,Canned Food,,5.7,,Each,2026-07-03 15:44:20
 8885005273329,Neem Oil,Personal Care,,4,,Each,2026-07-03 15:44:20
 9555181000116,Neem Toothpaste,Personal Care,,2.2,,Each,2026-07-03 15:44:20
-ncl,Nail Clipper A,General Merchandise,,2,,Each,2026-07-03 15:44:20
-ncm,Nail Clipper B,General Merchandise,,1.5,,Each,2026-07-03 15:44:20
+ncl,Nail Clipper Type 1,General Merchandise,,2,,Each,2026-07-03 15:44:20
+ncm,Nail Clipper Type 2,General Merchandise,,1.5,,Each,2026-07-03 15:44:20
 8888082121347,Nesafe Classic Valuepack,Breakfast Items,,16.9,0,Each,2026-07-19T17:32:30
 8888082140225,Nescafe 2 in 1,Breakfast Items,,7.1,,Each,2026-07-03 15:44:20
 8888082163569,Nescafe 3in 1,Breakfast Items,,6.9,,Each,2026-07-03 15:44:20
@@ -2103,7 +2068,7 @@ ncm,Nail Clipper B,General Merchandise,,1.5,,Each,2026-07-03 15:44:20
 9556001091925,NESTLE MILO,Ice Cream,,1.6,,Each,2026-07-03 15:44:20
 8888082133432,NESTLE MILO 3IN1,Breakfast Items,,7.9,,Each,2026-07-03 15:44:20
 8888082144384,NESTLE MILO LESS SUGAR,Breakfast Items,,7.8,,Each,2026-07-03 15:44:20
-8850125090552,NESTLE OREO Stick,Ice Cream,,3.3,,Each,2026-07-03 15:44:20
+8850125090552,NESTLE OREO Stk,Ice Cream,,3.3,,Each,2026-07-03 15:44:20
 9556001260895,Nestle OREO cone,Ice Cream,,2.6,,Each,2026-07-03 15:44:20
 9556001091253,Nestle Sundae,Ice Cream,,1.7,0,Each,2026-07-09T20:51:46
 9556001091369,NESTLE TROPICANA,Ice Cream,,1.1,,Each,2026-07-03 15:44:20
@@ -2129,11 +2094,10 @@ ncm,Nail Clipper B,General Merchandise,,1.5,,Each,2026-07-03 15:44:20
 8888279300012,NISSIN Sesame Oil,Cooking Oil,,2.1,,Each,2026-07-03 15:44:20
 8888279102098,NISSIN TOM YAM 75G,Noodles,,1.7,,Each,2026-07-03 15:44:20
 8904256002578,NIVEA Aloe,Personal Care,,6.8,,Each,2026-07-03 15:44:20
-4005808319725,NIVEA Body Milk a,Personal Care,,7.2,,Each,2026-07-03 15:44:20
 4005808725298,NIVEA Body Milk,Personal Care,,6.8,,Each,2026-07-03 15:44:20
 4005808319794,NIVEA Express Hydration,Personal Care,,7.2,,Each,2026-07-03 15:44:20
-8904256002820,NIVEA Fresh Active x,Personal Care,,4.1,,Each,2026-07-03 15:44:20
-8999777007355,Nivea Fresh Active,Personal Care,,2.9,,Each,2026-07-03 15:44:20
+8904256002820,NIVEA Fresh Active S,Personal Care,,4.1,,Each,2026-07-03 15:44:20
+8999777007355,Nivea Fresh Active R,Personal Care,,2.9,,Each,2026-07-03 15:44:20
 8904256002882,NIVEA Fresh OCEAN,Personal Care,,4.1,,Each,2026-07-03 15:44:20
 8999777004613,Nivea Silver Protect,Personal Care,,2.9,,Each,2026-07-03 15:44:20
 42204091,NIVEA Soft,Personal Care,,3.9,,Each,2026-07-03 15:44:20
@@ -2199,12 +2163,12 @@ ncm,Nail Clipper B,General Merchandise,,1.5,,Each,2026-07-03 15:44:20
 8885005273022,Olive Oil,Personal Care,,4.8,,Each,2026-07-03 15:44:20
 8886456606827,Olivia GNut 250g,Household Products,,2,,Each,2026-07-03 15:44:20
 8901131721944,OM Beer,Liquor,,4.2,,Each,2026-07-03 15:44:20
-8901131850026,OM rum 180ml,Liquor,,10.5,,Each,2026-07-03 15:44:20
-OMR,OM Rum 180ml x,Liquor,,10.5,10.5,Each,2026-07-03 15:44:20
+8901131850026,OM rum 180ml  37% ABV,Liquor,,10.5,,Each,2026-07-03 15:44:20
+OMR,OM Rum 180ml,Liquor,,10.5,10.5,Each,2026-07-03 15:44:20
 8901131060036,OM Rum 375cl,Liquor,,21,,Each,2026-07-03 15:44:20
 89000557,OM RUM 700ml,Liquor,,40.9,,Each,2026-07-03 15:44:20
-8901131170063,OM Rum 750ml x,Liquor,,40.9,,Each,2026-07-03 15:44:20
-8901131617216,OM Rum 750ml y,Liquor,,41.9,,Each,2026-07-03 15:44:20
+8901131170063,OM Rum 750ml 7 Yr old blended,Liquor,,40.9,,Each,2026-07-03 15:44:20
+8901131617216,"OM Rum 750ml, Old Monk",Liquor,,41.9,,Each,2026-07-03 15:44:20
 8901751800050,Om Shanthi,Poojai Items,,1,,Each,2026-07-03 15:44:20
 8901131199620,OM White Rum 180ml,Liquor,,11.5,,Each,2026-07-03 15:44:20
 8901131199613,OM White Rum 375ml,Liquor,,23,,Each,2026-07-03 15:44:20
@@ -2232,8 +2196,8 @@ VEG07,Onion 3kg,Vegetable,,2.8,0,EACH,2026-07-17T15:16:11
 8886456603857,Ooty Urid Dhall 1kg,Indian Provision,,5.2,,Each,2026-07-03 15:44:20
 9556108261009,Optrex 10ml,Personal Care,,8.3,0,Each,2026-07-17T11:47:52
 3014260821852,Oral B 2s,Personal Care,,2.3,,Each,2026-07-03 15:44:20
-8888826016557,ORAL-B CLASSIC TOOTHBRUSH a,Personal Care,,1.3,,Each,2026-07-03 15:44:20
-8888826016564,ORAL-B CLASSIC TOOTHBRUSH,Personal Care,,1.3,,Each,2026-07-03 15:44:20
+8888826016557,ORAL-B TOOTHBRUSH S,Personal Care,,1.3,,Each,2026-07-03 15:44:20
+8888826016564,ORAL-B TOOTHBRUSH M,Personal Care,,1.3,,Each,2026-07-03 15:44:20
 8888200617387,Orange 200ml,F&n,,1.3,,Each,2026-07-03 15:44:20
 8886345365378,ORANGE PEEL 95GM,Snacks,,1.3,,Each,2026-07-03 15:44:20
 8887380020079,ORANGE RED,Kitchen Essentials,,2,,Each,2026-07-03 15:44:20
@@ -2256,8 +2220,8 @@ O,Other,Other,,0.1,0,Each,2026-07-04T15:01:29
 8888196566119,P CARROT JUICE 300ML,Beverages,,1.3,,Each,2026-07-03 15:44:20
 4987167089023,P Cellulose Tape,General Merchandise,,2,,Each,2026-07-03 15:44:20
 3474370026729,P Correction Pen,General Merchandise,,2.9,,Each,2026-07-03 15:44:20
-4711577032887,P Correction Tape A,General Merchandise,,1.9,,Each,2026-07-03 15:44:20
-4711577032894,P Correction Tape B,General Merchandise,,1.9,,Each,2026-07-03 15:44:20
+4711577032887,P Correction Tape Type 1,General Merchandise,,1.9,,Each,2026-07-03 15:44:20
+4711577032894,P Correction Tape Type 2,General Merchandise,,1.9,,Each,2026-07-03 15:44:20
 4902430400619,P Damage Care,Personal Care,,5.2,,Each,2026-07-03 15:44:20
 8888196173423,P GREEN TEA 1.5L,Beverages,,2.5,,Each,2026-07-03 15:44:20
 8888196173348,P GREEN TEA 500ML,Beverages,,1.6,,Each,2026-07-03 15:44:20
@@ -2293,8 +2257,8 @@ O,Other,Other,,0.1,0,Each,2026-07-04T15:01:29
 88820729,PALLMALL K Storm,Tobacco,,16.8,,Each,2026-07-03 15:44:20
 8888008120362,PANADOL 20PCS,Personal Care,,8.4,,Each,2026-07-03 15:44:20
 8888008110332,PANADOL ACTI FAST 16 CAPLETS,Personal Care,,5.6,,Each,2026-07-03 15:44:20
-8888008120515,PANADOL ActiFast x,Personal Care,,12.5,,Each,2026-07-03 15:44:20
-9556019237841,Panadol Actifast,Personal Care,,7.2,,Each,2026-07-03 15:44:20
+8888008120515,PANADOL ActiFast,Personal Care,,12.5,,Each,2026-07-03 15:44:20
+9556019237841,Panadol Actifast 8s,Personal Care,,7.2,,Each,2026-07-03 15:44:20
 8888008111414,PANADOL COLD FLU 16PCS,Personal Care,,14.9,,Each,2026-07-03 15:44:20
 8888008120294,PANADOL COLD RELIEF 12PCS,Personal Care,,12.9,,Each,2026-07-03 15:44:20
 8888008120485,PANADOL EXTRA 10PCS,Personal Care,,5.5,,Each,2026-07-03 15:44:20
@@ -2316,20 +2280,18 @@ p,Panadol2pcs,Personal Care,,1.2,1,Each,2026-07-03 15:44:20
 pc,Paper Cups 25 PCS,Household Products,,1.5,,Each,2026-07-03 15:44:20
 89002940,Parachute 100ml,Personal Care,,1.6,0,Each,2026-07-09T21:54:37
 8901088045674,Parachute Jasmine,Personal Care,,2.8,,Each,2026-07-03 15:44:20
-8901088047043,Parachute oil 100ML x,Personal Care,,1.6,,Each,2026-07-03 15:44:20
-8901200003872,PARACHUTE OIL 100ML,Personal Care,,1.2,,Each,2026-07-03 15:44:20
+8901088047043,Parachute oil 100ML,Personal Care,,1.6,,Each,2026-07-03 15:44:20
 8901200000451,PARACHUTE OIL 500ML,Personal Care,,4.6,,Each,2026-07-03 15:44:20
 8901088000345,Parachute200ML,Personal Care,,2.8,,Each,2026-07-03 15:44:20
 8901184121883,Parimal Mangapuja,Poojai Items,,2.9,,Each,2026-07-03 15:44:20
-8901184119996,Parimal Pure Rose y,Poojai Items,,3.5,3.5,Each,2026-07-03 15:44:20
+8901184119996,Parimal Pure Rose L,Poojai Items,,3.5,3.5,Each,2026-07-03 15:44:20
 8901184120183,Parimal Pure Rose,Poojai Items,,3.5,3.5,Each,2026-07-03 15:44:20
-8901184112959,Parimal Sandal x,Poojai Items,,3.5,,Each,2026-07-03 15:44:20
+8901184112959,Parimal Sandal L,Poojai Items,,3.5,,Each,2026-07-03 15:44:20
 8901184117930,PARIMAL Sandal,Poojai Items,,3,,Each,2026-07-03 15:44:20
 8888196184214,Passion Fruit Tea,Beverages,,1.5,,Each,2026-07-03 15:44:20
 8888001742356,PD Peach,Beverages,,1.2,,Each,2026-07-03 15:44:20
 8888196189035,Peach Oolong 500ml,Beverages,,1.6,0,Each,2026-07-19T14:48:16
-8888196172211,PEACH TEA 500 ML x,Beverages,,1.6,,Each,2026-07-03 15:44:20
-8888196700216,PEACH TEA 500 ML,Beverages,,1.5,,Each,2026-07-03 15:44:20
+8888196172211,PEACH TEA 500 ML,Beverages,,1.6,,Each,2026-07-03 15:44:20
 8909840193335,Peanut Candy,Snacks,,3.3,,Each,2026-07-03 15:44:20
 8901030545825,Pears B,Personal Care,,1.5,,Each,2026-07-03 15:44:20
 081364363734,PEI PA KOA Con Pack,Personal Care,,9.3,,Each,2026-07-03 15:44:20
@@ -2344,10 +2306,8 @@ pc,Paper Cups 25 PCS,Household Products,,1.5,,Each,2026-07-03 15:44:20
 884851042804,Pentel P Marker,General Merchandise,,1.8,0,Each,2026-07-16T19:54:56
 8801062015337,PEPERO ALMOND,Snacks,,1.5,,Each,2026-07-03 15:44:20
 8801062015344,PEPERO White,Snacks,,1.5,,Each,2026-07-03 15:44:20
-9556404001156,Pepsi 1.5L,Beverages,,2.5,,Each,2026-07-03 15:44:20
 9556404001996,Pepsi 24*320ml,Beverages,,19,,Each,2026-07-03 15:44:20
 9556404001033,Pepsi 320ml,Beverages,,1,,Each,2026-07-03 15:44:20
-9556404001057,Pepsi 500ml,Beverages,,1.5,,Each,2026-07-03 15:44:20
 8999999030186,Pepsodent,Personal Care,,2.2,,Each,2026-07-03 15:44:20
 7891515489922,Perdix Chicken Franks,Frozen Food,,1.8,,Each,2026-07-03 15:44:20
 8935006352223,Phaner Pie,Snacks,,2.5,0,Each,2026-07-10T16:22:02
@@ -2411,7 +2371,6 @@ pc,Paper Cups 25 PCS,Household Products,,1.5,,Each,2026-07-03 15:44:20
 8888196172624,POKKA LYCHEE TEA 500ML,Beverages,,1.5,,Each,2026-07-03 15:44:20
 8888196303936,Pokka Milk Coffee,Beverages,,2,0,Each,2026-07-09T13:46:42
 8888196303837,Pokka Milk Tea 500ml,Beverages,,2,0,Each,2026-07-13T12:26:02
-8888196170019,POKKA OOLONG TEA 1.5L,Beverages,,2.5,,Each,2026-07-03 15:44:20
 8888196170736,Pokka Oolong Tea 500ml,Beverages,,1.6,0,Each,2026-07-10T19:57:55
 8888196190611,Pokka Orange 1000,Beverages,,1.5,,Each,2026-07-03 15:44:20
 8888196903211,Pokka P Mocha,Beverages,,1.8,,Each,2026-07-03 15:44:20
@@ -2506,7 +2465,7 @@ VEG08,Red Chilli,Vegetable,,12,0,KG,2026-07-17T15:16:11
 VEG09,Red Onion,Vegetable,,2,0,KG,2026-07-17T15:16:11
 8886345364784,RED PEACH 95GM,Snacks,,1.3,,Each,2026-07-03 15:44:20
 9557941202020,Redbean,Ice Cream,,0.8,,Each,2026-07-03 15:44:20
-8850228000151,RedBull x,Beverages,,1,,Each,2026-07-03 15:44:20
+8850228000151,RedBull G,Beverages,,1,,Each,2026-07-03 15:44:20
 RB,Redbull,Beverages,,1,1,Each,2026-07-03 15:44:20
 8850228011072,Redbull 24s,Beverages,,18,,Each,2026-07-03 15:44:20
 8850228009222,Redbull R,Beverages,,1,0,Each,2026-07-09T13:35:16
@@ -2516,9 +2475,9 @@ RB,Redbull,Beverages,,1,1,Each,2026-07-03 15:44:20
 309978695103,REVLON Blk,Personal Care,,5.8,,Each,2026-07-03 15:44:20
 309978695202,REVLON Brown Blk,Personal Care,,5.8,,Each,2026-07-03 15:44:20
 309978695301,REVLON D Brown,Personal Care,,5.8,,Each,2026-07-03 15:44:20
-4800888142771,Rexona x,Personal Care,,2.9,,Each,2026-07-03 15:44:20
-4800888191212,Rexona y,Personal Care,,2.9,,Each,2026-07-03 15:44:20
-4800888204530,REXONA,Personal Care,,2.9,,Each,2026-07-03 15:44:20
+4800888142771,Rexona Roll,Personal Care,,2.9,,Each,2026-07-03 15:44:20
+4800888191212,Rexona Popular,Personal Care,,2.9,,Each,2026-07-03 15:44:20
+4800888204530,Rexona,Personal Care,,2.9,,Each,2026-07-03 15:44:20
 4800888158499,Rexona Adventure,Personal Care,,2.9,,Each,2026-07-03 15:44:20
 4800888143389,Rexona Ice Cool,Personal Care,,2.9,0,Each,2026-07-15T22:15:06
 4800888203779,Rexona Rose,Personal Care,,2.9,,Each,2026-07-03 15:44:20
@@ -2528,13 +2487,11 @@ RB,Redbull,Beverages,,1,1,Each,2026-07-03 15:44:20
 8885012299800,Ribena Bc0350ml,Beverages,,1.8,0,Each,2026-07-17T14:17:31
 8885012299466,Ribena Cordial,Beverages,,8.9,,Each,2026-07-03 15:44:20
 8885012296793,Ribena Jelly Drink,Beverages,,1.8,,Each,2026-07-03 15:44:20
-8885012290371,Ribena Light a,Beverages,,1.8,,Each,2026-07-03 15:44:20
-8885012295079,Ribena Light,Beverages,,1.5,,Each,2026-07-03 15:44:20
+8885012290371,Ribena Light,Beverages,,1.8,,Each,2026-07-03 15:44:20
 8885012291057,RIBENA PASTILLS,Snacks,,2.2,,Each,2026-07-03 15:44:20
 8885012296779,Ribena Strawberry,Beverages,,1.8,,Each,2026-07-03 15:44:20
 8886456600474,RICE FLAKES (THICK) 500G,Indian Provision,,1.6,,Each,2026-07-03 15:44:20
-8886456600368,RICE VADAM 250 GM x,Indian Provision,,1.8,,Each,2026-07-03 15:44:20
-8886456600375,RICE VADAM 250 GM,Indian Provision,,1.6,,Each,2026-07-03 15:44:20
+8886456600368,RICE VADAM 250 GM,Indian Provision,,1.8,,Each,2026-07-03 15:44:20
 8888231500252,RICE VINEGAR 600ML,Condiments & Sauce,,2.3,,Each,2026-07-03 15:44:20
 8886456600481,RICEFLAKES (MEDIUM) 500G,Indian Provision,,1.6,,Each,2026-07-03 15:44:20
 8901030190728,RIN SURF EXCEL 250G,Household Products,,1.5,,Each,2026-07-03 15:44:20
@@ -2544,9 +2501,9 @@ RB,Redbull,Beverages,,1,1,Each,2026-07-03 15:44:20
 8888546752506,Roasted Gram Dhall 250g,Indian Provision,,1.4,,Each,2026-07-03 15:44:20
 8901242107415,Roasted Vermicelli,Kitchen Essentials,,2.6,,Each,2026-07-03 15:44:20
 9310488321117,Robitussin,Personal Care,,10.9,,Each,2026-07-03 15:44:20
-9556854000013,Rock Sugar A,Kitchen Essentials,,1.8,,Each,2026-07-03 15:44:20
-9556854007555,Rock Sugar B,Kitchen Essentials,,2,,Each,2026-07-03 15:44:20
-6971589118865,Roll Garlic,Other,Vegetable,1.2,0,Each,2026-07-03T16:52:06
+9556854000013,Rock Sugar Pck,Kitchen Essentials,,1.8,,Each,2026-07-03 15:44:20
+9556854007555,Rock Sugar,Kitchen Essentials,,2,,Each,2026-07-03 15:44:20
+6971589118865,Roll Garlic,Vegetable,,1.2,0,Each,2026-07-03T16:52:06
 8886345365217,ROLL JELLY,Snacks,,1.3,,Each,2026-07-03 15:44:20
 RP,Roll Plastic,Household Products,,2.9,2.7,Each,2026-07-03 15:44:20
 8888970361152,Rooster B Pepper Powder 35g,Kitchen Essentials,,2.3,0,Each,2026-07-11T11:21:43
@@ -2589,11 +2546,11 @@ RP,Roll Plastic,Household Products,,2.9,2.7,Each,2026-07-03 15:44:20
 8999909000667,SAMPOERNA U,Tobacco,,17,,Each,2026-07-03 15:44:20
 8801073211216,SAMYANG 2x Spicy,Noodles,,3.2,,Each,2026-07-03 15:44:20
 8801073141896,Samyang 2xSpicy,Noodles,,9.1,,Each,2026-07-03 15:44:20
-8801073142312,Samyang Carbonara x,Noodles,,9.1,,Each,2026-07-03 15:44:20
-8801073211506,Samyang Carbonara,Noodles,,3.2,,Each,2026-07-03 15:44:20
-8801073141780,SAMYANG Cheese a,Noodles,,9.1,,Each,2026-07-03 15:44:20
+8801073142312,Samyang Carbonara 5s,Noodles,,9.1,,Each,2026-07-03 15:44:20
+8801073211506,Samyang Carbonara bowl,Noodles,,3.2,,Each,2026-07-03 15:44:20
+8801073141780,SAMYANG Cheese 5s,Noodles,,9.1,,Each,2026-07-03 15:44:20
 8801073211056,SAMYANG Cheese,Noodles,,3.2,,Each,2026-07-03 15:44:20
-8801073140578,Samyang Chicken x,Noodles,,8.7,,Each,2026-07-03 15:44:20
+8801073140578,Samyang Chicken 5s,Noodles,,8.7,,Each,2026-07-03 15:44:20
 8801073210363,SAMYANG Chicken,Noodles,,3.2,,Each,2026-07-03 15:44:20
 8908013705009,Sandal Powder,Personal Care,,1.2,,Each,2026-07-03 15:44:20
 8901399000591,SANTOOR SOAP 90GM,Personal Care,,1.2,,Each,2026-07-03 15:44:20
@@ -2602,8 +2559,6 @@ RP,Roll Plastic,Household Products,,2.9,2.7,Each,2026-07-03 15:44:20
 4901681143122,Sarasa Gel 0.5bl,General Merchandise,,2.2,0,Each,2026-07-10T12:47:01
 4901681143221,Sarasa Gel 0.7bl,General Merchandise,,2.2,0,Each,2026-07-10T12:48:26
 4901681143214,Sarasa Gel 0.7blk,General Merchandise,,2.2,0,Each,2026-07-10T12:48:00
-8888200703455,SARSI 1.5L x,Beverages,,2.5,,Each,2026-07-03 15:44:20
-9556570312025,Sarsi 1.5L,Beverages,,2.5,,Each,2026-07-03 15:44:20
 8888200713195,Sarsi 320ml,Beverages,,1.1,,Each,2026-07-03 15:44:20
 8906126560003,SATTUR SNACKS,Snacks,,1,,Each,2026-07-03 15:44:20
 8906126560010,sattur snacks 350g,Snacks,,2.8,,Each,2026-07-03 15:44:20
@@ -2644,7 +2599,7 @@ RP,Roll Plastic,Household Products,,2.9,2.7,Each,2026-07-03 15:44:20
 9555630136458,Sf 921,Household Products,,3.9,0,Each,2026-07-18T13:42:48
 8850291114304,SG Chilli Guava,Snacks,,1.3,,Each,2026-07-03 15:44:20
 8850291114298,SG Chilli Mango,Snacks,,1.3,,Each,2026-07-03 15:44:20
-VEG10,Shallot( Small Onion),Vegetable,,6,0,KG,2026-07-17T15:16:11
+VEG10,Shallot( Small Onion),Vegetable,,6.8,0,KG,2026-07-17T15:16:11
 9555448102065,SHARK FISH 200G,Indian Provision,,3.8,,Each,2026-07-03 15:44:20
 8887469888859,SHELL,Tobacco,,18.7,,Each,2026-07-03 15:44:20
 8887469888873,Shell M,Tobacco,,7.8,0,Each,2026-07-10T15:47:50
@@ -2670,8 +2625,6 @@ SSC,Singtel Sim Card,Telecom,,0.1,0,Each,2026-07-04T15:00:30
 013134170433,SK ORANGE JUICE 2L,F&n,,5,,Each,2026-07-03 15:44:20
 037600230933,SKIPPY Creamy,Breakfast Items,,6.3,,Each,2026-07-03 15:44:20
 037600231015,SKIPPY SChunk,Breakfast Items,,6.3,,Each,2026-07-03 15:44:20
-6923450603550,Skittles x,Snacks,,1.5,,Each,2026-07-03 15:44:20
-6923450611777,Skittles,Snacks,,1.5,,Each,2026-07-03 15:44:20
 4897010448061,Skittles Sour,Snacks,,1.5,,Each,2026-07-03 15:44:20
 9556057363014,SKOL Strong,Liquor,,4,,Each,2026-07-03 15:44:20
 8888260012894,SL Chilli Paste,Kitchen Essentials,,2.3,,Each,2026-07-03 15:44:20
@@ -2701,8 +2654,8 @@ SSC,Singtel Sim Card,Telecom,,0.1,0,Each,2026-07-04T15:00:30
 8904064687714,SM Chia Seeds,Indian Provision,,2.7,,Each,2026-07-03 15:44:20
 8904064600546,SM Cinnamon,Indian Provision,,2,,Each,2026-07-03 15:44:20
 8904064600294,SM CLOVES,Indian Provision,,1.2,,Each,2026-07-03 15:44:20
-8904064613812,SM Coconut Oil x,Personal Care,,4.8,,Each,2026-07-03 15:44:20
-9330900005647,SM Coconut Oil,Personal Care,,10.8,,Each,2026-07-03 15:44:20
+8904064613812,SM Coconut Oil,Personal Care,,4.8,,Each,2026-07-03 15:44:20
+9330900005647,SM Coconut Oil 1L,Personal Care,,10.8,,Each,2026-07-03 15:44:20
 8904064600959,SM FRIED GRAM 500G,Indian Provision,,2.7,,Each,2026-07-03 15:44:20
 8904064600980,SM GM Dhall Spilit 500g,Indian Provision,,2.8,,Each,2026-07-03 15:44:20
 8904064610484,SM Ground nut 500g,Indian Provision,,3.6,,Each,2026-07-03 15:44:20
@@ -2718,8 +2671,7 @@ SSC,Singtel Sim Card,Telecom,,0.1,0,Each,2026-07-04T15:00:30
 8904064611504,SM RAVA ROASTED 500G,Indian Provision,,2.1,,Each,2026-07-03 15:44:20
 8904064610712,SM RED AVAL 500G,Indian Provision,,1.9,,Each,2026-07-03 15:44:20
 8904064611801,SM ROASTED RAVA 1KG,Indian Provision,,3.8,,Each,2026-07-03 15:44:20
-8904064602533,SM Rock Salt 1kg x,Indian Provision,,1.5,,Each,2026-07-03 15:44:20
-8904064613935,SM ROCK SALT 1KG,Indian Provision,,1.4,,Each,2026-07-03 15:44:20
+8904064602533,SM Rock Salt 1kg,Indian Provision,,1.5,,Each,2026-07-03 15:44:20
 8904064603134,SM SAGO 250G,Indian Provision,,1.6,,Each,2026-07-03 15:44:20
 8904064611825,SM Soya Meat,Indian Provision,,1.8,,Each,2026-07-03 15:44:20
 8904064611795,SM SOYA MEAT 200G,Indian Provision,,2,,Each,2026-07-03 15:44:20
@@ -2733,12 +2685,9 @@ SSC,Singtel Sim Card,Telecom,,0.1,0,Each,2026-07-04T15:00:30
 9556241600123,SNEK KU original,Snacks,,1.3,,Each,2026-07-03 15:44:20
 9556241610306,SNEK KU Seawed,Snacks,,1.3,,Each,2026-07-03 15:44:20
 9556241600314,SNEK KU Spicy,Snacks,,1.3,,Each,2026-07-03 15:44:20
-5000159461122,SNICKERS a,Snacks,,1.6,,Each,2026-07-03 15:44:20
-5900951311505,SNICKERS b,Snacks,,1.6,,Each,2026-07-03 15:44:20
-8902433030109,Snickers c,Snacks,,1.6,,Each,2026-07-03 15:44:20
-8906002482450,SNICKERS,Snacks,,1.6,,Each,2026-07-03 15:44:20
-8700000039025,SOAP BOX x,Personal Care,,1.5,,Each,2026-07-03 15:44:20
-9555448709004,Soap Box,Personal Care,,1,,Each,2026-07-03 15:44:20
+8902433030109,SNICKERS,Snacks,,1.6,,Each,2026-07-03 15:44:20
+8700000039025,SOAP BOX B,Personal Care,,1.5,,Each,2026-07-03 15:44:20
+9555448709004,Soap Box S,Personal Care,,1,,Each,2026-07-03 15:44:20
 8901095003018,SOCIETY TEA 500GM,Breakfast Items,,5.8,,Each,2026-07-03 15:44:20
 6959657295441,Socks,Personal Care,,2,,Each,2026-07-03 15:44:20
 8888002064006,SODA WATER 330ML,Beverages,,1.3,,Each,2026-07-03 15:44:20
@@ -2798,23 +2747,21 @@ SSC,Singtel Sim Card,Telecom,,0.1,0,Each,2026-07-04T15:00:30
 8885008900079,SPM R Rice Flakes,Indian Provision,,2.4,,Each,2026-07-03 15:44:20
 8885008901663,SPM Raisins,Indian Provision,,1.4,,Each,2026-07-03 15:44:20
 8885008902561,SPM RAJMA K Beans,Indian Provision,,3.1,,Each,2026-07-03 15:44:20
-8885008900048,SPM Rice Flakes x,Indian Provision,,2.1,,Each,2026-07-03 15:44:20
+8885008900048,SPM Rice Flakes W,Indian Provision,,2.1,,Each,2026-07-03 15:44:20
 8885008900062,SPM Rice Flakes,Indian Provision,,2.4,,Each,2026-07-03 15:44:20
 8885008900055,SPM Rice Flakes Thick,Indian Provision,,1.8,,Each,2026-07-03 15:44:20
 8885008900741,SPM Rice Vadam,Indian Provision,,1.8,,Each,2026-07-03 15:44:20
 8885008900314,SPM Sago 500g,Indian Provision,,2.6,,Each,2026-07-03 15:44:20
 8885008900338,SPM Soya Meal S,Indian Provision,,1.8,,Each,2026-07-03 15:44:20
 8885008900321,SPM Soya Meat,Indian Provision,,2.1,,Each,2026-07-03 15:44:20
-8285008907380,SPM Spice Mix y,Indian Provision,,1.3,,Each,2026-07-03 15:44:20
 8885008901380,SPM Spice Mix,Indian Provision,,1.4,,Each,2026-07-03 15:44:20
 8885008900383,SPM Sugar Candy,Snacks,,1.2,,Each,2026-07-03 15:44:20
 8885008900222,SPM Sundai Vathal,Indian Provision,,1.8,,Each,2026-07-03 15:44:20
 8885008900932,SPM Sunflower Oil 1L,Cooking Oil,,4.6,,Each,2026-07-03 15:44:20
 8885008902172,SPM Tamarind 500g,Indian Provision,,3.5,,Each,2026-07-03 15:44:20
 8885008902448,SPM Toor Dhal,Indian Provision,,3,,Each,2026-07-03 15:44:20
-8885008902646,SPM Urid Dhall 500g x,Indian Provision,,2.9,,Each,2026-07-03 15:44:20
+8885008902646,SPM Urid Dhall W 500g,Indian Provision,,2.9,,Each,2026-07-03 15:44:20
 8885008902752,SPM Urid dhall 500g,Indian Provision,,2.9,,Each,2026-07-03 15:44:20
-8885008902608,SPM White Peas x,Indian Provision,,2.2,,Each,2026-07-03 15:44:20
 8885008902660,SPM White Peas,Indian Provision,,2.8,,Each,2026-07-03 15:44:20
 9555674600496,SPONGE CAKE 90G,Bakery Goods,,1.8,,Each,2026-07-03 15:44:20
 9555589200699,SPRITE 1.5L,Beverages,,2.5,,Each,2026-07-03 15:44:20
@@ -2891,8 +2838,8 @@ SSC,Singtel Sim Card,Telecom,,0.1,0,Each,2026-07-04T15:00:30
 8904064600669,STARANI SEED,Indian Provision,,1.6,,Each,2026-07-03 15:44:20
 9555674600717,Stew Cake,Bakery Goods,,1.6,,Each,2026-07-03 15:44:20
 9555719725290,STEW CAKE(CHEESE),Bakery Goods,,1.7,,Each,2026-07-03 15:44:20
-8995182600013,STORMKING MENTHOL x,Tobacco,,9.3,,Each,2026-07-03 15:44:20
-8995182600099,STORMKING MENTHOL,Tobacco,,4.3,,Each,2026-07-03 15:44:20
+8995182600013,STORMKING MENTHOL B,Tobacco,,9.3,,Each,2026-07-03 15:44:20
+8995182600099,STORMKING MENTHOL S,Tobacco,,4.3,,Each,2026-07-03 15:44:20
 8995182600037,Stormking Original S,Tobacco,,4.3,,Each,2026-07-03 15:44:20
 8995182600068,STORMKING YELLOW BIG,Tobacco,,9.3,,Each,2026-07-03 15:44:20
 95500294,Strepsils Cooling Menthol,Snacks,,2.4,,Each,2026-07-03 15:44:20
@@ -2918,8 +2865,8 @@ SSC,Singtel Sim Card,Telecom,,0.1,0,Each,2026-07-04T15:00:30
 8851932355339,Sunsilk HF Condi,Personal Care,,4.6,,Each,2026-07-03 15:44:20
 8851932355261,Sunsilk LF Wash,Personal Care,,6.9,,Each,2026-07-03 15:44:20
 8851932355001,Sunsilk Shampoo 160ml,Personal Care,,2.9,,Each,2026-07-03 15:44:20
-8851932353878,SUNSILK SHAMPOO 320ML x,Personal Care,,4.2,,Each,2026-07-03 15:44:20
-8851932353885,SUNSILK SHAMPOO 320ML,Personal Care,,4.2,,Each,2026-07-03 15:44:20
+8851932353878,Sunsilk S Smoth 300ml,Personal Care,,4.2,,Each,2026-07-03 15:44:20
+8851932353885,Sunsilk  S M 300ML,Personal Care,,4.2,,Each,2026-07-03 15:44:20
 8851932354943,sunslik,Personal Care,,2,,Each,2026-07-03 15:44:20
 8851932354301,SUNSLIK COND 320ML,Personal Care,,4.2,,Each,2026-07-03 15:44:20
 9556252160081,Sup Bunjut,Kitchen Essentials,,1,0,Each,2026-07-17T12:36:33
@@ -3033,8 +2980,8 @@ VEG11,Thai Lemon,Vegetable,,10,0,KG,2026-07-17T15:16:11
 8888017206019,Tiger Beer 24s,Beer,,48,,Each,2026-07-03 15:44:20
 8888017211013,Tiger Beer 320ml,Beer,,2.5,0,Each,2026-07-20T13:52:15
 7622210685025,TIGER CHOC240.gm,Snacks,,1.6,,Each,2026-07-03 15:44:20
-8851990401023,TIGER MEDICATED PLASTER x,Personal Care,,3.4,,Each,2026-07-03 15:44:20
-8888650400317,TIGER MEDICATED PLASTER,Personal Care,,4.1,,Each,2026-07-03 15:44:20
+8851990401023,TIGER MEDICATED PLASTER R,Personal Care,,3.4,,Each,2026-07-03 15:44:20
+8888650400317,TIGER MEDICATED PLASTER G,Personal Care,,4.1,,Each,2026-07-03 15:44:20
 7622210684981,TIGER ORI BISCUTS 180G,Snacks,,1.5,,Each,2026-07-03 15:44:20
 8888256640414,TIGER SWEET SAUCE 640ML,Condiments & Sauce,,2.3,,Each,2026-07-03 15:44:20
 8888256320231,TIGER TOP D/SOY SAUCE 320ML,Condiments & Sauce,,2.7,,Each,2026-07-03 15:44:20
@@ -3064,7 +3011,7 @@ VEG11,Thai Lemon,Vegetable,,10,0,KG,2026-07-17T15:16:11
 7614500010013,Toblerone 100g,Snacks,,2.9,0,Each,2026-07-10T14:04:27
 7614500010310,Toblerone White,Snacks,,2.9,0,Each,2026-07-17T20:14:25
 8886461600919,Toilet Brush,Household Products,,2.3,,Each,2026-07-03 15:44:20
-VEG12,Tomato,Vegetable,,3.5,0,KG,2026-07-17T15:16:11
+VEG12,Tomato,Vegetable,,3.8,0,KG,2026-07-17T15:16:11
 8852047237114,Tommy Fruity,Snacks,,0.6,0,Each,2026-07-20T19:38:10
 8888279103040,TOMYAM BIG,Noodles,,2.5,,Each,2026-07-03 15:44:20
 9556570105122,TONIC WATER,Beverages,,1.2,,Each,2026-07-03 15:44:20
@@ -3163,16 +3110,15 @@ TPGS,Tpg Sim Card,Telecom,,0.1,0,Each,2026-07-04T15:00:54
 8904452000569,Varahi Sandal Powder,Poojai Items,,1.2,,Each,2026-07-03 15:44:20
 8904452000552,Varahi Turmeric,Poojai Items,,1,,Each,2026-07-03 15:44:20
 8904452000644,Varahi Vibuthi,Poojai Items,,1.5,,Each,2026-07-03 15:44:20
-42182627,Vaseline x,Personal Care,,2.4,,Each,2026-07-03 15:44:20
-6151100139511,Vaseline y,Personal Care,,1.6,,Each,2026-07-03 15:44:20
-8999999003067,Vaseline,Personal Care,,2.6,,Each,2026-07-03 15:44:20
+42182627,Vaseline Original,Personal Care,,2.4,,Each,2026-07-03 15:44:20
+6151100139511,Vaseline,Personal Care,,1.6,,Each,2026-07-03 15:44:20
+8999999003067,Vaseline SPF24,Personal Care,,2.6,,Each,2026-07-03 15:44:20
 6001085120946,Vaseline 100ml,Personal Care,,2.9,,Each,2026-07-03 15:44:20
 8851932281324,Vaseline A Soothe,Personal Care,,2.6,,Each,2026-07-03 15:44:20
 8999999003074,Vaseline Aloe Soothe,Personal Care,,2.4,,Each,2026-07-03 15:44:20
 8999999003081,Vaseline Deep Restore,Personal Care,,2.4,,Each,2026-07-03 15:44:20
 8851932281256,Vaseline Deep Store,Personal Care,,2.6,,Each,2026-07-03 15:44:20
 8934868135319,Vaseline FB Cooling,Personal Care,,2.4,,Each,2026-07-03 15:44:20
-60014399,Vaseline original,Personal Care,,1.8,,Each,2026-07-03 15:44:20
 8901207038471,Vatika 150ml,Personal Care,,3.2,,Each,2026-07-03 15:44:20
 8901207038440,Vatika 300ml,Personal Care,,5.9,,Each,2026-07-03 15:44:20
 8906081202086,VEL Sandal Powder,Personal Care,,1.5,,Each,2026-07-03 15:44:20
@@ -3190,8 +3136,8 @@ TPGS,Tpg Sim Card,Telecom,,0.1,0,Each,2026-07-04T15:00:54
 8901288412009,VICCO 200g,Personal Care,,3.9,,Each,2026-07-03 15:44:20
 8901288011004,Vicco Tooth Paste 100g,Personal Care,,3.4,0,Each,2026-07-14T19:30:41
 4987176191205,VICKS,Personal Care,,2.9,,Each,2026-07-03 15:44:20
-4987176191359,Vicks Inhaler x,Personal Care,,2.6,,Each,2026-07-03 15:44:20
-9300618530045,Vicks Inhaler,Personal Care,,3.9,,Each,2026-07-03 15:44:20
+4987176191359,Vicks Inhaler I,Personal Care,,2.6,,Each,2026-07-03 15:44:20
+9300618530045,Vicks Inhaler ,Personal Care,,3.9,,Each,2026-07-03 15:44:20
 4902430393126,VICKS INHALER 0.5ML,Personal Care,,2.2,,Each,2026-07-03 15:44:20
 8888047778838,Vicks Inhaler 3s,Personal Care,,6.9,,Each,2026-07-03 15:44:20
 4987176008756,VICKS Original Menthol,Personal Care,,4.8,,Each,2026-07-03 15:44:20
@@ -3210,11 +3156,8 @@ TPGS,Tpg Sim Card,Telecom,,0.1,0,Each,2026-07-04T15:00:54
 6291007902204,Vita marie Gold 122g,Snacks,,1.3,,Each,2026-07-03 15:44:20
 8888026531003,Vitagen,Marigold,,3.6,0,Each,2026-07-19T13:51:28
 8888026532000,Vitagen Collagen,Marigold,,4,0,Each,2026-07-20T14:15:05
-8888002236472,VITAMIN WATER 500ML x,Beverages,,2.2,,Each,2026-07-03 15:44:20
-8888002237479,VITAMIN WATER 500ML y,Beverages,,2.2,,Each,2026-07-03 15:44:20
-8888002239473,VITAMIN WATER 500ML z,Beverages,,2.2,,Each,2026-07-03 15:44:20
-8888002241476,VITAMIN WATER 500ML,Beverages,,2.2,,Each,2026-07-03 15:44:20
-9551022470384,Vitamin Water Fruit Punch,Beverages,,2.3,0,Each,2026-07-17T18:25:16
+8888002237479,VITAMIN Trible Berry,Beverages,,2.2,,Each,2026-07-03 15:44:20
+9551022470384,VITAMIN WATER Fruit punch ,Beverages,,2.3,0,Each,2026-07-17T18:25:16
 9551022470346,Vitamin Water Orange,Beverages,,2.3,0,Each,2026-07-17T18:21:27
 4891028711285,VITASOY,Beverages,,2,,Each,2026-07-03 15:44:20
 8902967303892,VSOP Brandy 90ml,Liquor,,6,6,Each,2026-07-03 15:44:20
@@ -3262,8 +3205,8 @@ TPGS,Tpg Sim Card,Telecom,,0.1,0,Each,2026-07-04T15:00:54
 8903105010818,Yardley M Dew,Personal Care,,3.5,,Each,2026-07-03 15:44:20
 8903105010146,Yardley Red Roses,Personal Care,,3.5,,Each,2026-07-03 15:44:20
 5014697027948,Yardly Orchid,Personal Care,,3.9,0,Each,2026-07-10T18:18:37
-8901184108365,Yatra a,Poojai Items,,1.5,,Each,2026-07-03 15:44:20
-8901184110023,Yatra,Poojai Items,,1,,Each,2026-07-03 15:44:20
+8901184108365,Yatra,Poojai Items,,1.5,,Each,2026-07-03 15:44:20
+8901184110023,Yatra stick,Poojai Items,,1,,Each,2026-07-03 15:44:20
 8901184111228,Yatra Cone,Poojai Items,,1.5,,Each,2026-07-03 15:44:20
 VEG13,Yellow Onion,Vegetable,,3,0,KG,2026-07-17T15:16:11
 8886461600841,Yellow Scrub,Household Products,,2,,Each,2026-07-03 15:44:20
@@ -3280,23 +3223,22 @@ VEG13,Yellow Onion,Vegetable,,3,0,KG,2026-07-17T15:16:11
 9556156040229,YEOS LEMON BARLEY 6X250ML,Beverages,,3,,Each,2026-07-03 15:44:20
 9556156001992,Yeos Lemon Tea,Beverages,,1,,Each,2026-07-03 15:44:20
 9556156004917,Yeos Lemon Tea 6s,Beverages,,3,,Each,2026-07-03 15:44:20
-9556156058538,Yeos Longan a,Beverages,,2.5,,Each,2026-07-03 15:44:20
-9556156058699,Yeos Longan,Beverages,,1.3,,Each,2026-07-03 15:44:20
+9556156058538,Yeos Longan 1.5L,Beverages,,2.5,,Each,2026-07-03 15:44:20
+9556156058699,Yeos Longan 380ml,Beverages,,1.3,,Each,2026-07-03 15:44:20
 9556156056541,Yeos Lychee,Beverages,,1.3,,Each,2026-07-03 15:44:20
 9556156047587,Yeos Lychee 1.5L,Beverages,,2.5,,Each,2026-07-03 15:44:20
 9556156040199,YEOS LYCHEE 6X250ML,Beverages,,3,,Each,2026-07-03 15:44:20
-9556156057814,Yeos P Fruit a,Beverages,,1.3,,Each,2026-07-03 15:44:20
-9556156057869,Yeos P Fruit,Beverages,,2.5,,Each,2026-07-03 15:44:20
+9556156057814,Yeos P Fruit 380ml,Beverages,,1.3,,Each,2026-07-03 15:44:20
+9556156057869,Yeos P Fruit 1.5,Beverages,,2.5,,Each,2026-07-03 15:44:20
 9556156057852,Yeos passion Fruit 6s,Beverages,,3,,Each,2026-07-03 15:44:20
 9556156057043,Yeos Rosemilk,Beverages,,1.4,,Each,2026-07-03 15:44:20
 9556156056589,Yeos Soy Milk,Beverages,,1.3,,Each,2026-07-03 15:44:20
 9556156040014,YEOS SOYA BEAN 6X250ML,Beverages,,3,,Each,2026-07-03 15:44:20
 9556156040106,Yeos Sugar Cane,Beverages,,3,,Each,2026-07-03 15:44:20
 9556156035966,Yeos White Grape,Beverages,,1.1,0,Each,2026-07-09T20:09:48
-9556156005617,Yeos Winter Melon x,Beverages,,3,,Each,2026-07-03 15:44:20
-9556156047563,Yeos Winter Melon y,Beverages,,2.5,,Each,2026-07-03 15:44:20
-9556156056527,Yeos Winter Melon,Beverages,,1.3,,Each,2026-07-03 15:44:20
-8888001743506,Yeos Winter Melon 1.5l,Beverages,,2.6,0,Each,2026-07-11T13:58:13
+9556156005617,Yeos Winter Melon 6s,Beverages,,3,,Each,2026-07-03 15:44:20
+9556156056527,Yeos Winter Melon 380ml,Beverages,,1.3,,Each,2026-07-03 15:44:20
+8888001743506,Yeos Winter Melon 1.5 L,Beverages,,2.6,0,Each,2026-07-11T13:58:13
 9556156040373,YEOS WINTER MELON TEA6X250ML,Beverages,,3,,Each,2026-07-03 15:44:20
 9556156005471,Yeos Wmelon,Beverages,,1,,Each,2026-07-03 15:44:20
 8886311102860,YEYE 3 IN 1 45 SACHETS,Breakfast Items,,7,,Each,2026-07-03 15:44:20
@@ -3310,8 +3252,6 @@ VEG13,Yellow Onion,Vegetable,,3,0,KG,2026-07-17T15:16:11
 8906015120394,Z - TALG 200g,Personal Care,,4.5,,Each,2026-07-03 15:44:20
 8906015120585,Z for Men 100g,Personal Care,,2.9,,Each,2026-07-03 15:44:20
 8906015120028,Z. powder,Personal Care,,3.5,,Each,2026-07-03 15:44:20
-8850172242201,ZAM BUK x,Personal Care,,3,,Each,2026-07-03 15:44:20
-8850172242225,ZAM BUK,Personal Care,,3,,Each,2026-07-03 15:44:20
 8886456605530,ZAM ZAM DHOOP CONES,Personal Care,,1.5,,Each,2026-07-03 15:44:20
 8886333901250,ZAM-BUK 25G,Personal Care,,7.5,,Each,2026-07-03 15:44:20
 8901248701112,ZANDU Balm,Personal Care,,3.4,,Each,2026-07-03 15:44:20
@@ -3320,3 +3260,43 @@ VEG13,Yellow Onion,Vegetable,,3,0,KG,2026-07-17T15:16:11
 30055933,Zig Zag,General Merchandise,,0.5,0,Each,2026-07-21T12:08:29
 3057068017782,ZIGZAG FILTERS,General Merchandise,,2,,Each,2026-07-03 15:44:20
 6977445275758,Zjh 5 Scissors,General Merchandise,,1.5,0,Each,2026-07-10T12:32:05
+8888200716400,100plus Lemon 1.5l,Beverages,,2.7,0,Each,2026-07-31T21:16:26
+3014260316648,7 O Clock Blade,Personal Care,,1.2,0,Each,2026-07-31T21:02:34
+8888200716004,Active 300ml,Beverages,,1.2,0,Each,2026-07-31T22:00:26
+501032710521,Adabi Fried Ch Flour,Kitchen Essentials,,1.5,0,Each,2026-08-02T14:38:55
+3616303459284,Adidas Shoer Gel,Personal Care,,5.9,0,Each,2026-08-01T19:34:56
+9556045012047,Ajinomoto 33g1,Kitchen Essentials,,1,0,Each,2026-08-01T11:00:29
+8885002891113,Anarkali Basmati Rice 1kg,Rice,,4.9,0,Each,2026-07-29T16:32:43
+7791293048871,Axe Black Night,Personal Care,,4.1,0,Each,2026-08-02T14:33:21
+9556041603171,Ayam Whole Kernal Corn,Household Products,,2,0,Each,2026-07-30T18:08:36
+5000399001003,Blu Tack 1,General Merchandise,,2.4,0,Each,2026-07-30T20:30:04
+8901537024090,Daawat Basmati 5kg,Rice,,22.9,0,Each,2026-07-29T20:26:02
+9556111622712,Dettol 1l,Household Products,,12.9,0,Each,2026-07-31T15:39:11
+8850309202269,Dewberry St,Bakery Goods,,1.5,0,Each,2026-07-30T15:24:45
+4902430245012,Downy Sunrise Fresh,Household Products,,8.9,0,Each,2026-07-30T13:28:27
+8888951888777,Eagle Brand 6ml,Personal Care,,2.6,0,Each,2026-07-30T14:47:01
+8888200713607,Fn Fruitade,Beverages,,1.6,0,Each,2026-07-29T19:24:26
+8888200713096,Fn Grape 300ml,Beverages,,1.2,0,Each,2026-07-31T21:57:48
+8888200714000,Fn Grass Jelly 300ml,Beverages,,1.2,0,Each,2026-07-31T21:25:49
+8888200715007,Fn Mango 300ml,Beverages,,1.2,0,Each,2026-07-31T21:26:28
+8888200715021,Fn Pineapple 300ml,Beverages,,1.2,0,Each,2026-07-31T21:31:36
+8901063151345,Goodday Pistachio,Snacks,,0.8,0,Each,2026-07-22T20:42:02
+8888260001027,Hf Kaya,Breakfast Items,,2.9,0,Each,2026-07-29T13:36:56
+9556085501938,Hup Seng Sugar Cracker,Bakery Goods,,2.9,0,Each,2026-07-30T20:36:02
+8888200717223,Ice Mountain 600ml 24s,Beverages,,14.3,0,Each,2026-08-01T15:03:51
+7038513894000,Jorden Toothbrush,Personal Care,,1.6,0,Each,2026-08-01T11:44:41
+9555674601387,Layered Cake,Bakery Goods,,1.5,0,Each,2026-08-01T17:20:39
+40111445,M&m Peanuts,Snacks,,1.6,0,Each,2026-08-01T19:40:17
+6920238090625,Nongshim Shin Ramyun,Noodles,,5.5,0,Each,2026-07-22T21:31:44
+6920238066019,Nongshim Soup Noodle,Noodles,,5.5,0,Each,2026-07-22T21:30:06
+8888942801501,Och Sesame Oil 150ml,Household Products,,1.5,0,Each,2026-07-30T19:36:54
+5017306008321,Pears Soap O,Personal Care,,1.5,0,Each,2026-07-30T19:14:33
+9556404127870,Pepsi 1.5l,Beverages,,2.6,0,Each,2026-08-02T13:38:04
+9556404127887,Pepsi 500ml,Beverages,,1.6,0,Each,2026-07-31T12:19:05
+8888196170033,Pokka Oolong 1.5l,Beverages,,2.6,0,Each,2026-07-31T20:08:03
+8888970362142,R White Pepper Powder,Kitchen Essentials,,2.3,0,Each,2026-07-30T16:50:57
+800524002234,Ruchi Mango,Indian Provision,,2.6,0,Each,2026-07-31T14:51:59
+8850109001123,Siang Pure 7cc,Personal Care,,2.8,0,Each,2026-08-01T12:02:09
+8888001743766,Soya 300ml,Beverages,,1.1,0,Each,2026-07-29T16:23:16
+490629023,Ssr Roated Gram,Indian Provision,,1.8,0,Each,2026-07-22T19:47:29
+8850291010408,Tg Pistachios 35g,Snacks,,1.5,0,Each,2026-07-29T15:17:04
