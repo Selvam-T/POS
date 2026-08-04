@@ -59,6 +59,7 @@ class ReportsRepoTest(unittest.TestCase):
                 grand_total REAL,
                 created_at TEXT,
                 paid_at TEXT,
+                cancelled_at TEXT,
                 customer_name TEXT,
                 note TEXT
             )
@@ -317,6 +318,82 @@ class ReportsRepoTest(unittest.TestCase):
 
             self.assertEqual(rpt['excluded']['unpaid_receipts_count'], 1)
             self.assertEqual(rpt['excluded']['unpaid_receipts_total'], 20.0)
+        finally:
+            conn.close()
+
+    def test_cancelled_activity_uses_cancelled_at_and_excludes_system_records(self):
+        conn = self._build_conn()
+        try:
+            conn.executemany(
+                "INSERT INTO receipts("
+                "receipt_id, receipt_no, status, grand_total, created_at, "
+                "cancelled_at, customer_name, note"
+                ") VALUES (?, ?, 'CANCELLED', ?, ?, ?, '', ?)",
+                [
+                    # Created before the period but genuinely cancelled in it.
+                    (4, '20260531-0004', 30.0, '2026-05-31T10:00:00',
+                     '2026-06-02T12:00:00', 'Customer changed mind'),
+                    # Created in the period but cancelled after it.
+                    (5, '20260602-0005', 40.0, '2026-06-02T10:00:00',
+                     '2026-06-03T12:00:00', 'Customer changed mind'),
+                    # Internal hold-to-ongoing-shopping lifecycle records.
+                    (6, '20260602-0006', 50.0, '2026-06-02T11:00:00',
+                     '2026-06-02T12:30:00', 'System cancelled - ongoing shopping'),
+                    (7, '20260602-0007', 60.0, '2026-06-02T11:30:00',
+                     '2026-06-02T12:45:00', '  SYSTEM CANCELLED - ongoing shopping  '),
+                ],
+            )
+            conn.commit()
+            params = {
+                'from': '2026-06-02T00:00:00',
+                'to': '2026-06-02T23:59:59',
+                'user_id': 1,
+            }
+
+            for report_fn in (reports_repo.detailed_report, reports_repo.summary_report):
+                excluded = report_fn(params, conn=conn)['excluded']
+                self.assertEqual(excluded['unpaid_receipts_count'], 1)
+                self.assertEqual(excluded['unpaid_receipts_total'], 20.0)
+                self.assertEqual(excluded['cancelled_receipts_count'], 1)
+                self.assertEqual(excluded['cancelled_receipts_total'], 30.0)
+                self.assertEqual(
+                    [row['receipt_no'] for row in excluded['receipts']],
+                    ['20260206-0002', '20260531-0004'],
+                )
+        finally:
+            conn.close()
+
+    def test_legacy_schema_without_cancelled_at_ignores_cancelled_receipts(self):
+        conn = sqlite3.connect(':memory:')
+        conn.row_factory = sqlite3.Row
+        try:
+            conn.execute(
+                "CREATE TABLE receipts ("
+                "receipt_no TEXT, status TEXT, grand_total REAL, "
+                "created_at TEXT, customer_name TEXT, note TEXT)"
+            )
+            conn.executemany(
+                "INSERT INTO receipts VALUES (?, ?, ?, ?, '', ?)",
+                [
+                    ('UNPAID-1', 'UNPAID', 10.0, '2026-06-02T10:00:00', ''),
+                    ('CANCELLED-1', 'CANCELLED', 25.0, '2026-06-02T11:00:00', 'Customer cancelled'),
+                ],
+            )
+
+            excluded = reports_repo._fetch_excluded_receipts(
+                conn,
+                period_from='2026-06-02T00:00:00',
+                period_to='2026-06-02T23:59:59',
+            )
+
+            self.assertEqual(excluded['unpaid_receipts_count'], 1)
+            self.assertEqual(excluded['unpaid_receipts_total'], 10.0)
+            self.assertEqual(excluded['cancelled_receipts_count'], 0)
+            self.assertEqual(excluded['cancelled_receipts_total'], 0.0)
+            self.assertEqual(
+                [row['receipt_no'] for row in excluded['receipts']],
+                ['UNPAID-1'],
+            )
         finally:
             conn.close()
 

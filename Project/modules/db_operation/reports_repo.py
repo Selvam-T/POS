@@ -43,6 +43,11 @@ def _to_int(value: Any) -> int:
         return 0
 
 
+def _is_system_cancelled_receipt(note: Any) -> bool:
+    """Return whether a cancellation is an internal receipt lifecycle action."""
+    return str(note or "").strip().casefold().startswith("system cancelled")
+
+
 def _hour_slot_label(timestamp_value: Any) -> Optional[Tuple[int, str]]:
     try:
         if timestamp_value is None:
@@ -486,6 +491,7 @@ def _fetch_excluded_receipts(
     total_col = _first_existing(cols, "grand_total", "total")
     note_col = _first_existing(cols, "note", "notes")
     created_col = _first_existing(cols, "created_at")
+    cancelled_col = _first_existing(cols, "cancelled_at")
     if status_col is None:
         return {
             "unpaid_receipts_count": 0,
@@ -502,11 +508,36 @@ def _fetch_excluded_receipts(
         (total_col if total_col else "0") + " AS value",
         (note_col if note_col else "''") + " AS note",
     ]
-    where_parts = [f"{status_col} IN ('UNPAID', 'CANCELLED')"]
+    where_parts = []
     params: List[Any] = []
-    if created_col is not None and period_from is not None and period_to is not None:
-        where_parts.append(f"{created_col} >= ? AND {created_col} <= ?")
-        params.extend([period_from, period_to])
+    if period_from is not None and period_to is not None:
+        status_period_parts = []
+        if created_col is not None:
+            status_period_parts.append(
+                f"({status_col} = 'UNPAID' AND "
+                f"{created_col} >= ? AND {created_col} <= ?)"
+            )
+            params.extend([period_from, period_to])
+
+        # A cancellation belongs to the period of its business event. If an
+        # older schema has no cancelled_at, omit cancellations because their
+        # reporting date cannot be established reliably.
+        if cancelled_col is not None:
+            status_period_parts.append(
+                f"({status_col} = 'CANCELLED' AND "
+                f"{cancelled_col} >= ? AND {cancelled_col} <= ?)"
+            )
+            params.extend([period_from, period_to])
+
+        if status_period_parts:
+            where_parts.append("(" + " OR ".join(status_period_parts) + ")")
+        else:
+            where_parts.append("1 = 0")
+    else:
+        statuses = ["'UNPAID'"]
+        if cancelled_col is not None:
+            statuses.append("'CANCELLED'")
+        where_parts.append(f"{status_col} IN ({', '.join(statuses)})")
 
     sql = (
         f"SELECT {', '.join(select_parts)} FROM receipts "
@@ -523,6 +554,9 @@ def _fetch_excluded_receipts(
         d = dict(row)
         status = str(d.get("status") or "").upper()
         value = _to_float(d.get("value"))
+        note = d.get("note") or ""
+        if status == "CANCELLED" and _is_system_cancelled_receipt(note):
+            continue
         if status == "UNPAID":
             unpaid_count += 1
             unpaid_total += value
@@ -536,7 +570,7 @@ def _fetch_excluded_receipts(
                 "status": status,
                 "customer_name": d.get("customer_name") or "",
                 "value": value,
-                "note": d.get("note") or "",
+                "note": note,
             }
         )
 

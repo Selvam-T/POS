@@ -52,6 +52,25 @@ Summary report note
   sales rather than raw totals. This keeps the report normalized to the length
   of the report window.
 
+Other Activity receipt rules
+- UNPAID receipt count and total use `receipts.created_at` to determine whether
+  the receipt falls within the selected reporting period.
+- CANCELLED receipt count and total use `receipts.cancelled_at`, because the
+  cancellation is the business event being reported. Older schemas that do
+  not contain `cancelled_at` omit CANCELLED receipts rather than attributing
+  them to the potentially unrelated `created_at` date.
+- Internal lifecycle cancellations whose normalized note begins with
+  `System cancelled` are excluded from CANCELLED count, total, and returned
+  detail rows. This includes the original held receipt marked
+  `System cancelled - ongoing shopping` when its items are transferred back
+  into a new active sale. Explicit cashier/customer cancellations remain
+  included.
+- Reports are generated from the current database state and current reporting
+  rules; they are not immutable snapshots. Regenerating an earlier date range
+  after a reporting-rule change or later receipt cancellation can therefore
+  produce different values from an export created previously. Retain the
+  original exported file when an exact historical snapshot is required.
+
 Integration
 - UI: import `modules.menu.report_generator` and call
   `get_detailed_report`, `get_summary_report`, or `get_inactivity_report`.
