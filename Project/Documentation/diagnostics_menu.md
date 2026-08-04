@@ -126,19 +126,24 @@ This diagnostic reads product codes and names from `Product_list` using the
 same separate read-only connection. It identifies review candidates without
 declaring that either product is automatically wrong.
 
-The check targets numeric barcode-like codes of at least five characters.
+The check targets ASCII numeric or alphanumeric barcode-like codes of at least
+five characters.
 Codes shorter than five characters are treated as intentional keyboard
 shortcuts and ignored. Automated vegetable codes matching `VEG01` or
-`VEG-01` through `VEG99` are also explicitly ignored. Other alphanumeric
-internal codes are ignored because they are not scanner barcodes.
+`VEG-01` through `VEG99` are also explicitly ignored. Codes containing
+punctuation or other non-alphanumeric characters are treated as internal codes
+and ignored.
 
-Candidate matching models premature scanner termination only. A candidate
-exists when a shorter database code is an exact prefix of another database
-code:
+Candidate matching models missing leading input and premature scanner
+termination. A candidate exists when a shorter database code is an exact
+prefix or exact suffix of another database code:
 
 - One missing tail character is reported as high confidence.
 - Two or three missing tail characters are reported as lower confidence.
+- One missing leading character is reported as high confidence.
+- Two or three missing leading characters are reported as lower confidence.
 - More than three missing tail characters are not compared.
+- More than three missing leading characters are not compared.
 
 Middle-character deletion, single-character substitution, and adjacent
 character transposition are intentionally not checked. Those errors are
@@ -150,14 +155,15 @@ barcodes from the same manufacturer or product family commonly share most of
 their digits, while later digits distinguish legitimate variants, package
 sizes, or individual products. For example, two valid products can be more
 than 90 percent similar without either code being incorrect. A generic
-similarity threshold therefore creates many false positives; exact tail-prefix
-matching is materially stronger evidence of an incomplete scan.
+similarity threshold therefore creates many false positives; exact prefix or
+suffix matching is materially stronger evidence of an incomplete scan.
 
 The result is `PASS` when no candidates are found, `WARNING` when review
 candidates or normalized duplicate codes are found, and `FAIL` only when the
 check cannot complete. A warning does not modify, merge, or delete products.
-The report lists the number of missing tail characters, confidence, prefix
-coverage, both codes, and both product names for manual review.
+The report lists whether leading or tail characters are missing, the missing
+character count, confidence, matching coverage, both codes, and both product
+names for manual review.
 
 Review candidates are written only to the diagnostic report and are not added
 to `error_log`. Actual failures, such as an unreadable database or failed
@@ -177,7 +183,7 @@ SCAN SUMMARY
 - Codes excluded from comparison: <count>
   - Short keyboard shortcut codes: <count>
   - Automated vegetable codes: <count>
-  - Other nonnumeric/internal codes: <count>
+  - Other punctuated/internal codes: <count>
 
 FINDINGS
 - Suspicious product codes: <unique-code count>

@@ -153,6 +153,14 @@ def _append_product_cache_report(lines: list[str], cache: Mapping) -> None:
 
 def _append_product_code_report(lines: list[str], codes: Mapping) -> None:
     candidates = list(codes.get("candidates") or [])
+    tail_candidates = [
+        candidate for candidate in candidates
+        if candidate.get("classification") == "trailing_truncation"
+    ]
+    leading_candidates = [
+        candidate for candidate in candidates
+        if candidate.get("classification") == "leading_truncation"
+    ]
     high_confidence_total = sum(
         1
         for candidate in candidates
@@ -194,19 +202,25 @@ def _append_product_code_report(lines: list[str], codes: Mapping) -> None:
             f"- Minimum barcode length checked: {codes.get('minimum_barcode_length', 5)} characters",
             "- Tail truncation range checked: "
             f"1 to {codes.get('maximum_missing_tail_characters', 3)} missing characters",
-            "- Matching rule: shorter code must exactly match the start of a longer code",
+            "- Leading truncation range checked: "
+            f"1 to {codes.get('maximum_missing_leading_characters', 3)} missing characters",
+            "- Matching rule: shorter code must exactly match the start or end of a longer code",
             "",
             "SCAN SUMMARY",
             f"- Product codes read from database: {codes.get('database_total', 0)}",
-            f"- Numeric barcode codes checked: {codes.get('eligible_numeric_total', 0)}",
+            "- Barcode-like product codes checked: "
+            f"{codes.get('eligible_product_code_total', codes.get('eligible_numeric_total', 0))}",
+            f"  - Numeric codes: {codes.get('eligible_numeric_total', 0)}",
+            f"  - Alphanumeric codes: {codes.get('eligible_alphanumeric_total', 0)}",
             f"- Codes excluded from comparison: {excluded_total}",
             f"  - Short keyboard shortcut codes: {codes.get('ignored_short_code_total', 0)}",
             f"  - Automated vegetable codes: {codes.get('ignored_vegetable_code_total', 0)}",
-            f"  - Other nonnumeric/internal codes: {codes.get('ignored_other_code_total', 0)}",
+            f"  - Other punctuated/internal codes: {codes.get('ignored_other_code_total', 0)}",
             "",
             "FINDINGS",
             f"- Suspicious product codes: {len(suspicious_codes)}",
-            f"- Suspicious tail-truncation pairs found: {len(candidates)}",
+            f"- Suspicious tail-truncation pairs found: {len(tail_candidates)}",
+            f"- Suspicious leading-truncation pairs found: {len(leading_candidates)}",
             f"  - High-confidence pairs: {high_confidence_total}",
             f"  - Lower-confidence pairs: {lower_confidence_total}",
             "",
@@ -215,13 +229,24 @@ def _append_product_code_report(lines: list[str], codes: Mapping) -> None:
     )
     if candidates:
         for index, candidate in enumerate(candidates, start=1):
+            leading = candidate.get("classification") == "leading_truncation"
+            missing_label = "leading" if leading else "tail"
+            missing_value = candidate.get(
+                "missing_leading_characters" if leading
+                else "missing_tail_characters",
+                "N/A",
+            )
+            coverage_label = "Suffix" if leading else "Prefix"
+            coverage_value = candidate.get(
+                "suffix_coverage_percent" if leading
+                else "prefix_coverage_percent",
+            )
             lines.extend(
                 [
-                    f"{index}. Missing tail characters: "
-                    f"{candidate.get('missing_tail_characters', 'N/A')}",
+                    f"{index}. Missing {missing_label} characters: {missing_value}",
                     f"   Confidence: {candidate.get('confidence', 'N/A')}",
-                    "   Prefix coverage: "
-                    f"{float(candidate.get('prefix_coverage_percent') or 0.0):.2f}%",
+                    f"   {coverage_label} coverage: "
+                    f"{float(coverage_value or 0.0):.2f}%",
                     f"   a) {candidate.get('shorter_code') or 'N/A'} - "
                     f"{candidate.get('product_name_1') or 'Unnamed product'}",
                     f"   b) {candidate.get('longer_code') or 'N/A'} - "

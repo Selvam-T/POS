@@ -1,4 +1,4 @@
-"""Tail-truncated numeric product-code diagnostic."""
+"""Leading- or tail-truncated numeric product-code diagnostic."""
 
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ from modules.ui_utils.canonicalization import canonicalize_product_code
 
 MIN_BARCODE_LENGTH = 5
 MAX_MISSING_TAIL_CHARACTERS = 3
+MAX_MISSING_LEADING_CHARACTERS = 3
 VEGETABLE_CODE_PATTERN = re.compile(r"^VEG-?\d{2}$", re.IGNORECASE)
 
 
@@ -41,16 +42,42 @@ def _tail_candidate(
     }
 
 
+def _leading_candidate(
+    shorter: str,
+    longer: str,
+    names: Mapping[str, str],
+) -> dict:
+    missing_count = len(longer) - len(shorter)
+    confidence = "HIGH" if missing_count == 1 else "LOWER"
+    return {
+        "code_1": shorter,
+        "product_name_1": names.get(shorter, ""),
+        "code_2": longer,
+        "product_name_2": names.get(longer, ""),
+        "shorter_code": shorter,
+        "longer_code": longer,
+        "classification": "leading_truncation",
+        "missing_leading_characters": missing_count,
+        "confidence": confidence,
+        "suffix_coverage_percent": round(
+            100.0 * len(shorter) / len(longer),
+            2,
+        ),
+    }
+
+
 def find_suspicious_product_codes(
     database_rows: Sequence[Mapping],
     *,
     minimum_length: int = MIN_BARCODE_LENGTH,
     maximum_missing_tail_characters: int = MAX_MISSING_TAIL_CHARACTERS,
+    maximum_missing_leading_characters: int = MAX_MISSING_LEADING_CHARACTERS,
 ) -> dict:
-    """Find codes that are exact prefixes of longer numeric product codes.
+    """Find codes matching the start or end of longer numeric product codes.
 
-    This models premature scanner termination. It deliberately does not flag
-    same-length similarity, middle deletions, substitutions, or transpositions.
+    This models missing leading input and premature scanner termination. It
+    deliberately does not flag same-length similarity, middle deletions,
+    substitutions, or transpositions.
     """
     names: dict[str, str] = {}
     duplicate_codes: list[str] = []
@@ -73,10 +100,13 @@ def find_suspicious_product_codes(
             ignored_vegetable_codes.append(code)
         elif len(code) < minimum_length:
             ignored_short_codes.append(code)
-        elif not (code.isascii() and code.isdecimal()):
+        elif not (code.isascii() and code.isalnum()):
             ignored_other_codes.append(code)
         else:
             eligible.add(code)
+
+    eligible_numeric_total = sum(code.isdecimal() for code in eligible)
+    eligible_alphanumeric_total = len(eligible) - eligible_numeric_total
 
     candidates = []
     for longer in eligible:
@@ -86,18 +116,28 @@ def find_suspicious_product_codes(
             shorter = longer[:-missing_count]
             if shorter in eligible:
                 candidates.append(_tail_candidate(shorter, longer, names))
+        for missing_count in range(1, maximum_missing_leading_characters + 1):
+            if len(longer) - missing_count < minimum_length:
+                continue
+            shorter = longer[missing_count:]
+            if shorter in eligible:
+                candidates.append(_leading_candidate(shorter, longer, names))
 
     candidates.sort(
         key=lambda item: (
-            item["missing_tail_characters"],
-            -item["prefix_coverage_percent"],
+            item["missing_tail_characters"]
+            if item["classification"] == "trailing_truncation"
+            else item["missing_leading_characters"],
+            item["classification"],
             item["shorter_code"],
             item["longer_code"],
         )
     )
     return {
         "database_total": len(names),
-        "eligible_numeric_total": len(eligible),
+        "eligible_product_code_total": len(eligible),
+        "eligible_numeric_total": eligible_numeric_total,
+        "eligible_alphanumeric_total": eligible_alphanumeric_total,
         "ignored_short_code_total": len(ignored_short_codes),
         "ignored_short_codes": sorted(ignored_short_codes),
         "ignored_vegetable_code_total": len(ignored_vegetable_codes),
@@ -141,8 +181,11 @@ def run_product_code_diagnostics(
         "database_path": "",
         "minimum_barcode_length": MIN_BARCODE_LENGTH,
         "maximum_missing_tail_characters": MAX_MISSING_TAIL_CHARACTERS,
+        "maximum_missing_leading_characters": MAX_MISSING_LEADING_CHARACTERS,
         "database_total": 0,
+        "eligible_product_code_total": 0,
         "eligible_numeric_total": 0,
+        "eligible_alphanumeric_total": 0,
         "ignored_short_code_total": 0,
         "ignored_short_codes": [],
         "ignored_vegetable_code_total": 0,
@@ -173,7 +216,7 @@ def run_product_code_diagnostics(
             )
         if result["candidate_total"]:
             result["issues"].append(
-                "Possible tail-truncated product-code pairs requiring review: "
+                "Possible truncated product-code pairs requiring review: "
                 f"{result['candidate_total']}"
             )
         result["status"] = "WARNING" if result["issues"] else "PASS"

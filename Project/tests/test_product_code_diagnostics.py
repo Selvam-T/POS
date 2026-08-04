@@ -32,6 +32,66 @@ def test_finds_one_to_three_missing_tail_characters():
     ] == 3
 
 
+def test_finds_one_to_three_missing_leading_characters():
+    result = find_suspicious_product_codes(
+        [
+            _row("6123456789"),
+            _row("56123456789"),
+            _row("956123456789"),
+            _row("8956123456789"),
+        ]
+    )
+
+    pairs = {
+        (item["shorter_code"], item["longer_code"]): item
+        for item in result["candidates"]
+        if item["classification"] == "leading_truncation"
+    }
+    assert pairs[("956123456789", "8956123456789")]["confidence"] == "HIGH"
+    assert pairs[("56123456789", "8956123456789")][
+        "missing_leading_characters"
+    ] == 2
+    assert pairs[("6123456789", "8956123456789")][
+        "missing_leading_characters"
+    ] == 3
+
+
+def test_finds_alphanumeric_code_with_missing_leading_characters():
+    result = find_suspicious_product_codes(
+        [
+            _row("TEST12345678"),
+            _row("XXTEST12345678"),
+        ]
+    )
+
+    assert result["eligible_product_code_total"] == 2
+    assert result["eligible_alphanumeric_total"] == 2
+    assert result["candidate_total"] == 1
+    candidate = result["candidates"][0]
+    assert candidate["classification"] == "leading_truncation"
+    assert candidate["shorter_code"] == "TEST12345678"
+    assert candidate["longer_code"] == "XXTEST12345678"
+    assert candidate["missing_leading_characters"] == 2
+
+
+def test_finds_alphanumeric_code_with_missing_tail_characters():
+    result = find_suspicious_product_codes(
+        [
+            _row("TEST12345678"),
+            _row("TEST12345678XX"),
+        ]
+    )
+
+    assert result["eligible_product_code_total"] == 2
+    assert result["eligible_alphanumeric_total"] == 2
+    assert result["candidate_total"] == 1
+    candidate = result["candidates"][0]
+    assert candidate["classification"] == "trailing_truncation"
+    assert candidate["shorter_code"] == "TEST12345678"
+    assert candidate["longer_code"] == "TEST12345678XX"
+    assert candidate["missing_tail_characters"] == 2
+
+
 def test_does_not_flag_middle_deletion_substitution_or_transposition():
     result = find_suspicious_product_codes(
         [
@@ -45,7 +105,7 @@ def test_does_not_flag_middle_deletion_substitution_or_transposition():
     assert result["candidate_total"] == 0
 
 
-def test_ignores_short_vegetable_and_other_internal_codes():
+def test_checks_alphanumeric_but_ignores_short_vegetable_and_punctuated_codes():
     result = find_suspicious_product_codes(
         [
             _row("1234"),
@@ -53,10 +113,13 @@ def test_ignores_short_vegetable_and_other_internal_codes():
             _row("VEG01"),
             _row("VEG-02"),
             _row("ABC123"),
+            _row("ABC-123"),
         ]
     )
 
     assert result["eligible_numeric_total"] == 1
+    assert result["eligible_alphanumeric_total"] == 1
+    assert result["eligible_product_code_total"] == 2
     assert result["ignored_short_code_total"] == 1
     assert result["ignored_vegetable_code_total"] == 2
     assert result["ignored_other_code_total"] == 1
@@ -99,6 +162,21 @@ def test_report_explains_tail_candidate():
     assert "Confidence: HIGH" in report
     assert "a) 955612345678 - Possible incomplete" in report
     assert "b) 9556123456789 - Full barcode" in report
+
+
+def test_report_explains_leading_candidate():
+    result = run_product_code_diagnostics(
+        database_rows=[
+            _row("556123456789", "Possible missing lead"),
+            _row("9556123456789", "Full barcode"),
+        ]
+    )
+    report = format_diagnostic_report({"product_codes": result})
+
+    assert "Leading truncation range checked: 1 to 3 missing characters" in report
+    assert "Suspicious leading-truncation pairs found: 1" in report
+    assert "Missing leading characters: 1" in report
+    assert "Suffix coverage:" in report
 
 
 def test_report_clearly_separates_zero_findings_from_settings():
