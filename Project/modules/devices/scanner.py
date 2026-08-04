@@ -117,17 +117,35 @@ class BarcodeScanner(QObject):
             trace_scanner_event(
                 'listener_callback_exception',
                 exception=repr(exc),
+                key_repr=repr(key),
+                virtual_key=getattr(key, 'vk', None),
+                scan_code=getattr(key, '_scan', None),
                 buffer_length=(
                     len(self._buffer) if isinstance(self._buffer, (str, bytes)) else None
                 ),
                 buffer_type=type(self._buffer).__name__,
             )
-            raise
+            # A malformed or unsupported global key event must not terminate
+            # pynput's listener thread. Restore the scanner invariant and wait
+            # for the next candidate instead.
+            self._buffer = ''
+            self._last_time = 0
+            self._reset_candidate_metrics()
+            return None
 
     def _process_key_press(self, key):
         """Process one keyboard event using the existing scanner algorithm."""
         if not self._enabled:
             return
+
+        if not isinstance(self._buffer, str):
+            trace_scanner_event(
+                'scanner_buffer_recovered',
+                previous_buffer_type=type(self._buffer).__name__,
+            )
+            self._buffer = ''
+            self._last_time = 0
+            self._reset_candidate_metrics()
 
         now = time.time()
         time_diff = now - self._last_time
@@ -182,6 +200,23 @@ class BarcodeScanner(QObject):
                 else:
                     self._buffer = ''
                 self._reset_candidate_metrics()
+            return
+
+        # pynput can represent an untranslatable Windows virtual-key event as
+        # KeyCode(char=None). It is not barcode text and must never be stored
+        # in the string buffer. Keep a compact anomaly trace while ignoring it.
+        if char is None:
+            trace_scanner_event(
+                'non_character_key_ignored',
+                key_repr=repr(key),
+                virtual_key=getattr(key, 'vk', None),
+                scan_code=getattr(key, '_scan', None),
+                time_since_previous_key_seconds=(
+                    time_diff if self._last_time > 0 else None
+                ),
+                within_scanner_interval=is_fast,
+                buffer_length=len(self._buffer),
+            )
             return
         
         # Check timing to distinguish scanner from manual typing

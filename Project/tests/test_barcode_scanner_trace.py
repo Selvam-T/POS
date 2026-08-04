@@ -55,23 +55,60 @@ def test_short_candidate_is_traced_but_remains_rejected():
     }
 
 
-def test_callback_exception_is_traced_and_still_propagates():
+def test_none_character_events_are_ignored_without_corrupting_buffer():
     scanner = BarcodeScanner(timeout=0.10)
     invalid_key = Mock()
     invalid_key.char = None
+    invalid_key.vk = 255
 
     with (
         patch('modules.devices.scanner.time.time', side_effect=[1.00, 1.01]),
         patch('modules.devices.scanner.trace_scanner_event') as trace,
     ):
-        try:
-            scanner._on_key_press(invalid_key)
-            scanner._on_key_press(_character('1'))
-        except TypeError:
-            pass
-        else:
-            raise AssertionError('Existing callback failure behaviour must be preserved')
+        scanner._on_key_press(invalid_key)
+        scanner._on_key_press(invalid_key)
 
+    assert scanner._buffer == ''
+    assert [call.args[0] for call in trace.call_args_list] == [
+        'non_character_key_ignored',
+        'non_character_key_ignored',
+    ]
+    assert trace.call_args.kwargs['virtual_key'] == 255
+
+
+def test_none_character_event_does_not_disrupt_following_barcode():
+    scanner = BarcodeScanner(timeout=0.10)
+    emitted = []
+    scanner.barcode_scanned.connect(emitted.append)
+    invalid_key = Mock()
+    invalid_key.char = None
+
+    with (
+        patch(
+            'modules.devices.scanner.time.time',
+            side_effect=[1.00, 2.00, 2.01, 2.02, 2.03],
+        ),
+        patch('modules.devices.scanner.trace_scanner_event'),
+    ):
+        scanner._on_key_press(invalid_key)
+        scanner._on_key_press(_character('1'))
+        scanner._on_key_press(_character('2'))
+        scanner._on_key_press(_character('3'))
+        scanner._on_key_press(keyboard.Key.enter)
+
+    assert emitted == ['123']
+
+
+def test_unexpected_callback_exception_is_traced_and_contained():
+    scanner = BarcodeScanner(timeout=0.10)
+
+    with (
+        patch.object(scanner, '_process_key_press', side_effect=RuntimeError('boom')),
+        patch('modules.devices.scanner.trace_scanner_event') as trace,
+    ):
+        assert scanner._on_key_press(_character('1')) is None
+
+    assert scanner._buffer == ''
     assert trace.call_args.args == ('listener_callback_exception',)
 
 
