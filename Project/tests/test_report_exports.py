@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.insert(0, r'c:\Users\SELVAM\OneDrive\Desktop\POS\Project')
 
 from modules.menu import report_exports
+from modules.menu import report_charts
 from modules.menu import report_viewers
 
 
@@ -20,6 +21,34 @@ class TestPaymentMethodDisplay(unittest.TestCase):
         self.assertEqual(report_viewers._display_payment_method(''), 'UNKNOWN')
         self.assertEqual(report_viewers._display_payment_method(None), 'UNKNOWN')
         self.assertEqual(report_viewers._display_payment_method('cash'), 'CASH')
+
+
+class TestChartReportPages(unittest.TestCase):
+    def test_chart_pages_have_expected_titles_and_page_numbers(self):
+        report_charts._ensure_application()
+        payload = {
+            'top_products_by_sales_day': [
+                {'product_name': 'Milk', 'line_sales': 10.0},
+            ],
+            'top_categories_by_sales_day': [
+                {'category_name': 'Dairy', 'line_sales': 10.0},
+            ],
+        }
+        pages = [
+            report_charts._ChartReportCanvasPage1(payload),
+            report_charts._ChartReportCanvasPage2(payload),
+            report_charts._ChartReportCanvasPage3(payload),
+        ]
+        page_text = [
+            [label.text() for label in page.findChildren(report_charts.QLabel)]
+            for page in pages
+        ]
+
+        self.assertIn('1/3', page_text[0])
+        self.assertIn('2/3', page_text[1])
+        self.assertIn('3/3', page_text[2])
+        self.assertIn('3. Top 10 Best selling Products by earnings', page_text[1])
+        self.assertIn('4. Top 10 Best selling Categories by earnings', page_text[2])
 
 
 DETAIL_SAMPLE = {

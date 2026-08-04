@@ -119,6 +119,33 @@ def _rank_products(
     return out
 
 
+def _rank_categories_by_sales(
+    rows: List[Dict[str, Any]],
+    *,
+    limit: int,
+    divisor: float = 1.0,
+) -> List[Dict[str, Any]]:
+    grouped: Dict[str, float] = defaultdict(float)
+    for row in rows:
+        category_name = str(row.get('category') or 'Uncategorized').strip()
+        grouped[category_name or 'Uncategorized'] += _to_float(row.get('line_sales'))
+
+    scale = _to_float(divisor)
+    if scale <= 0:
+        scale = 1.0
+    ranked = [
+        {'category_name': name, 'line_sales': earnings / scale}
+        for name, earnings in grouped.items()
+    ]
+    ranked.sort(
+        key=lambda row: (
+            -_to_float(row.get('line_sales')),
+            str(row.get('category_name') or '').casefold(),
+        )
+    )
+    return ranked[:max(0, int(limit))]
+
+
 def _period_day_count(
     period_from: Optional[str],
     period_to: Optional[str],
@@ -203,7 +230,7 @@ def _fetch_paid_item_rows(
                     'hour_slot': hour_slot[1] if hour_slot else '00:00 - 01:00',
                     'product_code': str(item.get('product_code') or ''),
                     'product_name': item.get('product_name') or '',
-                    'category': item.get('category') or '',
+                    'category': item.get('category') or item.get('category_name') or '',
                     'unit': item.get('unit') or '',
                     'qty_sold': qty,
                     'line_sales': line_sales,
@@ -946,6 +973,11 @@ def chart_report(
 
         peak_hour = max(sales_by_hour, key=lambda r: _to_float(r.get('sales_amount')), default=None)
         top_products_by_sales_day = _rank_products(paid_item_rows, limit=10, sort_key='line_sales', divisor=range_days)
+        top_categories_by_sales_day = _rank_categories_by_sales(
+            paid_item_rows,
+            limit=10,
+            divisor=range_days,
+        )
 
         return {
             'header': {
@@ -970,6 +1002,7 @@ def chart_report(
                 for row in payment_breakdown
             ],
             'top_products_by_sales_day': top_products_by_sales_day,
+            'top_categories_by_sales_day': top_categories_by_sales_day,
             'cash_outflows': outflows,
             'outflow_subtotals': outflow_subtotals,
         }

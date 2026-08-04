@@ -443,6 +443,9 @@ class ReportsRepoTest(unittest.TestCase):
             self.assertEqual(rpt['top_products_by_sales_day'][0]['product_name'], 'Detergent')
             self.assertAlmostEqual(rpt['top_products_by_sales_day'][0]['line_sales'], 16.0)
             self.assertLessEqual(len(rpt['top_products_by_sales_day']), 10)
+            self.assertEqual(rpt['top_categories_by_sales_day'][0]['category_name'], 'Household')
+            self.assertAlmostEqual(rpt['top_categories_by_sales_day'][0]['line_sales'], 16.0)
+            self.assertLessEqual(len(rpt['top_categories_by_sales_day']), 10)
         finally:
             conn.close()
 

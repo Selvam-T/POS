@@ -37,6 +37,13 @@ Current status
 Chart report note
 - The Chart report is rendered in the viewer window using chart widgets and
   exported to PDF only.
+- The chart payload includes the top ten products and top ten categories ranked
+  by average daily earnings. Missing item categories are grouped as
+  `Uncategorized`.
+- The PDF uses three pages: page 1 contains sales flow and payment methods,
+  page 2 contains best-selling products by earnings, and page 3 contains
+  best-selling categories by earnings. Each page shows current/total numbering
+  (`1/3`, `2/3`, `3/3`) at the top right.
 - Chart data is normalized to the selected date range, so the chart values are
   expressed as averages per day rather than raw totals.
 - The data layer reuses the same paid-receipt and receipt-item helpers used by
