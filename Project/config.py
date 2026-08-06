@@ -131,9 +131,13 @@ CUSTOMER_DISPLAY_TEST_MODE = True  # False in production,True opens customer dis
 CUSTOMER_DISPLAY_FULLSCREEN = False  # True in production, True makes the customer display fullscreen.
 CUSTOMER_DISPLAY_AUTO_DETECT = True  # True in production, Ignored while CUSTOMER_DISPLAY_TEST_MODE is True.
 
-# Scanner timing. The key interval identifies scanner-like bursts; the UI
-# suppression window only protects Enter/Return from triggering default actions.
+# Scanner timing: fast-gap classification is separate from candidate expiry.
 SCANNER_KEY_INTERVAL_SECONDS = 0.05
+SCANNER_CANDIDATE_INACTIVITY_SECONDS = 0.75
+SCANNER_MAX_AVERAGE_GAP_SECONDS = 0.10
+SCANNER_MIN_FAST_GAP_RATIO = 0.70
+SCANNER_LONG_CODE_MIN_LENGTH = 8
+SCANNER_UI_SETTLE_MS = 30
 SCANNER_UI_SUPPRESS_SECONDS = 0.90
 
 # Temporary production barcode-scanner trace. This is deliberately independent

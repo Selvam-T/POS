@@ -294,7 +294,7 @@ def test_missing_scan_add_closes_dialog_and_inserts_product(
     dlg.findChild(QComboBox, "addCategoryComboBox").setCurrentIndex(1)
 
     dlg.findChild(QPushButton, "btnAddOk").click()
-    QTest.qWait(20)
+    QTest.qWait(100)
 
     assert inserted == [(mw.sales_table, "TESTSCAN")]
     assert dlg.result() == QDialog.Accepted

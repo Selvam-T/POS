@@ -7,17 +7,18 @@ physical scanner beeps but no item reaches the sales table. It is intentionally
 separate from `error.log`, the status-footer error indicator, and the Diagnostics
 menu.
 
-This trace is observational. It does not change scanner timing, focus, routing,
-retries, listener recovery, product lookup, or sales-table behaviour.
+The trace writer is observational and independent of scanner timing, focus,
+routing, retries, listener recovery, product lookup, and sales-table behaviour.
 
 ## Recorded layers
 
 `modules/devices/scanner.py` records listener start/stop, rejected candidates,
 and callback exceptions. Normal emitted candidates are counted rather than
 written individually. A rejected-candidate record includes candidate length,
-duration, maximum inter-key gap, gaps over the configured threshold, and buffer
-reset count. An exception escaping the pynput callback is recorded before the
-original exception is re-raised.
+duration, average and maximum inter-key gaps, gaps over the fast threshold, and
+the fast-gap ratio. An inactivity boundary is recorded as
+`candidate_abandoned`. Callback exceptions are recorded and contained so one
+malformed global key event cannot terminate the listener thread.
 
 `modules/devices/barcode_manager.py` immediately records rejected routes,
 exceptions, and suspicious table outcomes. Records include focus at scan
@@ -38,7 +39,10 @@ POS operation.
 ## Interpreting an occurrence
 
 - No input-layer completion followed by `listener_alive=false`: listener failure.
-- `candidate_rejected`: incomplete or timing-disrupted input.
+- `candidate_rejected`: Enter completed input that failed length, timing, or
+  inactivity classification.
+- `candidate_abandoned`: an incomplete candidate exceeded the longer
+  inactivity timeout before another printable character arrived.
 - A summary with more emitted candidates than received barcodes: Qt signal
   delivery or scanner/manager object-lifecycle problem.
 - `protected-manual-field`, `modal-block-open`, `hold-loaded`, or

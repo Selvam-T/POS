@@ -80,7 +80,12 @@ These flags are grouped together in `config.py` so development and production be
   - `CUSTOMER_DISPLAY_QR_IMAGE_FILENAME`: Static QR image file name, for example `eposQR.png`. If the file is missing or invalid, the app logs the issue and falls back to generated QR rendering.
 
 ## Scanner Timing
-- `SCANNER_KEY_INTERVAL_SECONDS`: Shared scanner/manual inter-key threshold used by `scanner.py`.
+- `SCANNER_KEY_INTERVAL_SECONDS`: Short scanner-fast gap threshold; it does not reset the retained candidate.
+- `SCANNER_CANDIDATE_INACTIVITY_SECONDS`: Longer idle boundary that abandons an unfinished candidate.
+- `SCANNER_MAX_AVERAGE_GAP_SECONDS`: Maximum average character gap for scanner-like classification.
+- `SCANNER_MIN_FAST_GAP_RATIO`: Minimum scanner-fast gap proportion for short/custom codes.
+- `SCANNER_LONG_CODE_MIN_LENGTH`: Length from which a scanner-like average can classify a long code despite individual delayed gaps.
+- `SCANNER_UI_SETTLE_MS`: Delay before field restoration or product-code finalization, allowing queued Qt key events to drain.
 - `BARCODE_SCANNER_TRACE_ENABLED`, `BARCODE_SCANNER_TRACE_PATH`, rotation limits,
   and `BARCODE_SCANNER_HEALTH_INTERVAL_MS`: temporary production tracing for the
   intermittent lost-scan investigation. The trace is independent of `error.log`

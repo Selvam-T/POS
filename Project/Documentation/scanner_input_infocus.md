@@ -17,32 +17,19 @@ Workflow diagram: [Barcode_Manager_High-Speed_Manual_Input.png](Barcode_Manager_
 
 `modules/devices/scanner.py` owns scanner/manual timing.
 
-- `SCANNER_KEY_INTERVAL_SECONDS` identifies scanner-fast consecutive keys.
+- `SCANNER_KEY_INTERVAL_SECONDS` identifies scanner-fast consecutive gaps but
+  never discards an existing candidate.
 - `scanner_activity(timestamp, is_fast)` is emitted for each key press.
-- A barcode is confirmed only when the scanner buffer has at least 3 characters and Enter completes the scan.
+- Printable characters remain in one candidate until Enter. A 0.75-second
+  inactivity boundary, not the fast-gap threshold, abandons an incomplete one.
+- Enter classifies the whole sequence from its length, average gap, and
+  proportion of scanner-fast gaps; only accepted candidates emit a barcode.
+- Timing uses a monotonic clock.
 
-The configured key interval is `0.10` seconds. What matters is the measured
-interval between individual digit events, not the time between separate scans
-or how quickly the operator pulls the trigger. Windows scheduling, `pynput`,
-application load, and USB/HID delivery can occasionally delay one key event
-even when the physical scanner decoded and transmitted the barcode normally.
-
-`scanner.py` starts a new buffer whenever the measured interval exceeds this
-threshold. If that happens partway through a barcode, the already buffered
-prefix is discarded and the remaining suffix may be emitted when Enter arrives.
-For example, a delayed second digit can turn `5028197552916` into
-`028197552916`. Because the suffix is not an existing product code, normal
-missing-product routing may then open Product Management on the ADD tab. This
-can resemble a damaged-label or database problem even though the cause is scan
-event timing.
-
-An earlier `0.05`-second setting produced intermittent truncated scans in
-physical testing. Increasing it to `0.10` seconds eliminated the observed
-Product Management popups across repeated scans at varying operator speeds.
-If similar symptoms return, compare repeated input in a plain text editor and
-the scanner test utility before increasing the value further. A larger value
-is more tolerant of event-delivery delays, but also makes fast manual typing
-more likely to be classified as scanner activity.
+The configured fast interval remains `0.05` seconds. A moderate delayed digit
+therefore lowers confidence but cannot turn `5028197552916` into
+`028197552916` by deleting its prefix. See
+`barcode_scanner_algorithm_improvement.md` for the classification policy.
 
 `BarcodeManager` consumes `is_fast`; it does not run a second, different timing threshold.
 
@@ -54,7 +41,13 @@ This protects forms and default buttons from a scanner's trailing Enter.
 It does not construct the barcode buffer and does not cause missing digits or
 prefix truncation.
 
-Printable letters and numbers are blocked only during the confirmed scanner-burst window and only when the focused widget is not barcode-allowed. This keeps normal fast manual typing usable while preventing scanner text from leaking into protected fields.
+Printable letters and numbers are not speculatively blocked during an
+unconfirmed burst. Once Enter confirms a scan, non-product-code fields restore
+to their pre-scan text. This keeps rapid manual typing usable.
+
+The event filter captures that pre-scan text before Qt inserts the first
+candidate character. This prevents an ordinary dialog field from restoring a
+snapshot already contaminated by part of the barcode.
 
 ### Main Window Protection
 
@@ -71,7 +64,8 @@ Instead, `BarcodeManager` rejects scans selectively for protected manual fields:
 
 If a scanner burst targets one of these fields:
 
-- Printable scanner characters are swallowed.
+- Printable scanner characters may appear briefly, then restore after the scan
+  is confirmed.
 - The widget restores to its last stable manual value.
 - The completed scan is ignored so it does not add to the cart or open Product Menu.
 - Manual typing and manual Enter remain unaffected outside scanner-burst timing.
@@ -86,7 +80,8 @@ Scanner-aware dialogs expose `dlg.barcode_override_handler`.
 - Scans are accepted when focus is in a field whose `objectName` ends with `ProductCodeLineEdit`.
 - If focus moves during a scan, the override can still accept it when the scan started in a `*ProductCodeLineEdit`.
 - Scans in other fields are rejected and restored/cleaned.
-- Known limitation: dialog name-search fields may still retain one leaked scanner character after rejection. They remain manual fields and do not own scanner input.
+- Successful overrides reapply the complete barcode after pending Qt key events
+  drain; cleanup does not alter barcode-owned fields.
 
 ### Modal Block
 
@@ -124,21 +119,31 @@ When a scan is confirmed and then rejected/ignored, `BarcodeManager`:
 
 Date fields are covered by the same path: `QDateEdit` restores/cleans through its internal `lineEdit()`.
 
-Name-search fields in scanner-aware dialogs can still retain a single leaked character after rejection. The scan is still blocked from barcode routing; this is a limitation of HID keyboard-style scanner cleanup in those manual fields.
+Restoration runs after `SCANNER_UI_SETTLE_MS`, allowing pending HID-style Qt key
+events to drain before the saved value is reapplied.
 
 If a scanner does not send Enter, no confirmed scan is emitted, so rejected-scan cleanup does not run.
 
 ## Edge Cases
 
 - Fast manual typing may still briefly suppress Enter if it looks scanner-fast, but printable characters should continue flowing into the widget.
-- A scan into a protected main-window field should swallow scanner characters during the confirmed burst and ignore the completed scan.
+- A scan into a protected main-window field should restore its prior value and ignore the completed scan.
 - A scan into other forbidden editable fields may briefly show characters until Enter confirms the scan; then the field should restore to its pre-scan text.
+- Rapid repeated scans into an ordinary non-barcode dialog field can overlap
+  candidate snapshots and settling timers, leaving scanner text visible. This
+  is an accepted HID limitation because those fields are not scan targets and
+  repeated scanning there is not an expected cashier workflow.
 - A scanner configured with a prefix/suffix or serial/COM mode would allow cleaner zero-leak capture, but the current design keeps HID plug-and-play behavior.
 
 ## Developer Notes
 
 - Timing constants live in `config.py`:
   - `SCANNER_KEY_INTERVAL_SECONDS`
+  - `SCANNER_CANDIDATE_INACTIVITY_SECONDS`
+  - `SCANNER_MAX_AVERAGE_GAP_SECONDS`
+  - `SCANNER_MIN_FAST_GAP_RATIO`
+  - `SCANNER_LONG_CODE_MIN_LENGTH`
+  - `SCANNER_UI_SETTLE_MS`
   - `SCANNER_UI_SUPPRESS_SECONDS`
 - Main event filtering and routing live in `modules/devices/barcode_manager.py`.
 - Raw HID key buffering lives in `modules/devices/scanner.py`.

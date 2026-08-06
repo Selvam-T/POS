@@ -1,6 +1,9 @@
 from unittest.mock import Mock, patch
 
-from PyQt5.QtWidgets import QApplication, QTableWidget, QWidget
+from PyQt5.QtCore import QEvent, Qt
+from PyQt5.QtGui import QKeyEvent
+from PyQt5.QtTest import QTest
+from PyQt5.QtWidgets import QApplication, QLineEdit, QTableWidget, QWidget
 
 from modules.devices.barcode_manager import BarcodeManager
 
@@ -75,4 +78,127 @@ def test_normal_scan_is_compacted_into_periodic_summary():
     assert trace.call_args.kwargs['candidates_emitted'] == 1
     assert trace.call_args.kwargs['barcodes_received'] == 1
     assert trace.call_args.kwargs['sales_added'] == 1
+    parent.close()
+
+
+def test_scanner_like_printable_key_is_not_speculatively_swallowed():
+    ensure_app()
+    parent = QWidget()
+    with (
+        patch('modules.devices.barcode_manager.BarcodeScanner.start'),
+        patch('modules.devices.barcode_manager.trace_scanner_event'),
+    ):
+        manager = BarcodeManager(parent)
+    line_edit = QLineEdit(parent)
+    manager._scannerBurstUntil = float('inf')
+    event = QKeyEvent(QEvent.KeyPress, Qt.Key_A, Qt.NoModifier, 'a')
+
+    assert manager.eventFilter(line_edit, event) is False
+    parent.close()
+
+
+def test_confirmed_scan_restores_non_product_field_after_classification():
+    ensure_app()
+    parent = QWidget()
+    with (
+        patch('modules.devices.barcode_manager.BarcodeScanner.start'),
+        patch('modules.devices.barcode_manager.trace_scanner_event'),
+    ):
+        manager = BarcodeManager(parent)
+    line_edit = QLineEdit(parent)
+    line_edit.setObjectName('manualDescriptionLineEdit')
+    line_edit.setText('original8887319900328')
+    manager._scanStartWidget = line_edit
+    manager._preScanText = 'original'
+
+    manager._restore_confirmed_scan_text('8887319900328')
+    QTest.qWait(100)
+
+    assert line_edit.text() == 'original'
+    parent.close()
+
+
+def test_handled_product_code_keeps_matching_final_digit():
+    ensure_app()
+    parent = QWidget()
+    with (
+        patch('modules.devices.barcode_manager.BarcodeScanner.start'),
+        patch('modules.devices.barcode_manager.trace_scanner_event'),
+    ):
+        manager = BarcodeManager(parent)
+    line_edit = QLineEdit(parent)
+    line_edit.setObjectName('addProductCodeLineEdit')
+    manager._scanStartWidget = line_edit
+    line_edit.setText('888731990032')
+
+    manager._defer_barcode_field_value(line_edit, '8887319900328')
+    QTest.qWait(100)
+
+    assert line_edit.text() == '8887319900328'
+    parent.close()
+
+
+def test_deferred_protected_restore_clears_late_scanner_character():
+    ensure_app()
+    parent = QWidget()
+    with (
+        patch('modules.devices.barcode_manager.BarcodeScanner.start'),
+        patch('modules.devices.barcode_manager.trace_scanner_event'),
+    ):
+        manager = BarcodeManager(parent)
+    line_edit = QLineEdit(parent)
+    line_edit.setObjectName('netsPayLineEdit')
+    manager._protectedManualText[line_edit] = '100'
+    manager._scanStartWidget = line_edit
+
+    manager._restore_confirmed_scan_text('8887319900328')
+    line_edit.setText('1008887319900328')
+    QTest.qWait(100)
+
+    assert line_edit.text() == '100'
+    parent.close()
+
+
+def test_qt_first_key_snapshots_ordinary_field_before_scanner_text_lands():
+    ensure_app()
+    parent = QWidget()
+    with (
+        patch('modules.devices.barcode_manager.BarcodeScanner.start'),
+        patch('modules.devices.barcode_manager.trace_scanner_event'),
+    ):
+        manager = BarcodeManager(parent)
+    line_edit = QLineEdit(parent)
+    line_edit.setObjectName('updateProductNameLineEdit')
+    line_edit.setText('test')
+    event = QKeyEvent(QEvent.KeyPress, Qt.Key_8, Qt.NoModifier, '8')
+
+    manager.eventFilter(line_edit, event)
+    line_edit.setText('test8887319900328')
+    manager._restore_confirmed_scan_text('8887319900328')
+    QTest.qWait(100)
+
+    assert line_edit.text() == 'test'
+    parent.close()
+
+
+def test_completed_candidate_closes_focus_snapshot_but_keeps_enter_protection():
+    ensure_app()
+    parent = QWidget()
+    with (
+        patch('modules.devices.barcode_manager.BarcodeScanner.start'),
+        patch('modules.devices.barcode_manager.trace_scanner_event'),
+    ):
+        manager = BarcodeManager(parent)
+    line_edit = QLineEdit(parent)
+    manager._scannerCandidateUntil = 123.0
+    manager._suppressEnterUntil = 456.0
+    manager._scanStartWidget = line_edit
+    manager._preScanText = 'manual text'
+
+    manager._on_scanner_candidate_completed(False)
+
+    assert manager._scannerCandidateUntil == 0.0
+    assert manager._scanStartWidget is None
+    assert manager._preScanText is None
+    assert manager._suppressEnterUntil == 456.0
     parent.close()
