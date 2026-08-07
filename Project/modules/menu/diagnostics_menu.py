@@ -13,6 +13,7 @@ from modules.menu.diagnostics import (
     run_product_code_diagnostics,
     run_product_derived_ui_diagnostics,
     run_product_name_diagnostics,
+    run_product_cost_price_diagnostics,
     run_runtime_assets_diagnostics,
 )
 from modules.db_operation import product_cache
@@ -57,6 +58,7 @@ def launch_diagnostics_dialog(parent=None):
                 "cache": (QCheckBox, "productCacheCheckBox"),
                 "codes": (QCheckBox, "productCodeCheckBox"),
                 "names": (QCheckBox, "duplicateNamesCheckBox"),
+                "cost_price": (QCheckBox, "missingCostPriceCheckBox"),
                 "quality": (QCheckBox, "productDerivedUiCheckBox"),
                 "categories": (QCheckBox, "categoryIntegrityCheckBox"),
                 "runtime": (QCheckBox, "runtimeAssetsCheckBox"),
@@ -82,6 +84,9 @@ def launch_diagnostics_dialog(parent=None):
     widgets["names"].setChecked(False)
     widgets["names"].setEnabled(True)
     widgets["names"].setFocusPolicy(Qt.StrongFocus)
+    widgets["cost_price"].setChecked(False)
+    widgets["cost_price"].setEnabled(True)
+    widgets["cost_price"].setFocusPolicy(Qt.StrongFocus)
     widgets["quality"].setChecked(False)
     widgets["quality"].setEnabled(True)
     widgets["quality"].setFocusPolicy(Qt.StrongFocus)
@@ -108,6 +113,7 @@ def launch_diagnostics_dialog(parent=None):
             widgets["cache"],
             widgets["codes"],
             widgets["names"],
+            widgets["cost_price"],
             widgets["quality"],
             widgets["categories"],
             widgets["runtime"],
@@ -137,6 +143,7 @@ def launch_diagnostics_dialog(parent=None):
                 widgets["cache"],
                 widgets["codes"],
                 widgets["names"],
+                widgets["cost_price"],
                 widgets["quality"],
                 widgets["categories"],
                 widgets["runtime"],
@@ -172,6 +179,8 @@ def launch_diagnostics_dialog(parent=None):
             results["product_codes"] = run_product_code_diagnostics()
         if widgets["names"].isChecked():
             results["product_names"] = run_product_name_diagnostics()
+        if widgets["cost_price"].isChecked():
+            results["product_cost_prices"] = run_product_cost_price_diagnostics()
         if widgets["quality"].isChecked():
             results["product_derived_ui"] = (
                 run_product_derived_ui_diagnostics(

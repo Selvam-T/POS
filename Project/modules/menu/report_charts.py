@@ -90,14 +90,27 @@ def _prepare_widget_for_pdf(widget: QWidget) -> QSize:
 
 
 class _ChartCard(QFrame):
-    def __init__(self, title: str, subtitle: str, chart_widget: QWidget, *, min_height: int = 280):
+    def __init__(
+        self,
+        title: str,
+        subtitle: str,
+        chart_widget: QWidget,
+        *,
+        min_height: int = 280,
+        bordered: bool = True,
+    ):
         super().__init__()
         self.setObjectName('chartCard')
-        self.setFrameShape(QFrame.StyledPanel)
+        self.setFrameShape(QFrame.StyledPanel if bordered else QFrame.NoFrame)
         self.setMinimumHeight(min_height)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        self.setStyleSheet(
+        card_style = (
             'QFrame#chartCard { background: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 12px; }'
+            if bordered
+            else 'QFrame#chartCard { background: #FFFFFF; border: none; }'
+        )
+        self.setStyleSheet(
+            card_style +
             'QLabel#chartCardTitle { color: #1F2937; font-weight: 600; font-size: 18px; }'
             'QLabel#chartCardSubtitle { color: #6B7280; font-size: 18px; }'
             'QLabel#chartMetricLabel { color: #374151; font-weight: 500; font-size: 16px; }'
@@ -308,6 +321,7 @@ class _TopEarningsHybridChart(_BaseChartWidget):
         label_key: str,
         label_heading: str,
         show_percentage: bool = False,
+        min_row_height: int = 0,
     ):
         super().__init__(min_height=500)
         self._label_key = label_key
@@ -318,13 +332,15 @@ class _TopEarningsHybridChart(_BaseChartWidget):
             key=self._value,
             reverse=True,
         )[:10]
+        self._chart_height = max(500, 60 + (len(self._rows) * min_row_height))
+        self.setMinimumHeight(self._chart_height)
 
     @staticmethod
     def _value(row: Dict[str, Any]) -> float:
         return _to_float(row.get('average_daily_earnings', row.get('line_sales')))
 
     def sizeHint(self) -> QSize:
-        return QSize(900, 500)
+        return QSize(900, self._chart_height)
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -426,13 +442,24 @@ class _TopEarningsHybridChart(_BaseChartWidget):
 
 
 class _TopProductsHybridChart(_TopEarningsHybridChart):
-    def __init__(self, rows: Sequence[Dict[str, Any]]):
-        super().__init__(rows, label_key='product_name', label_heading='Product')
+    def __init__(self, rows: Sequence[Dict[str, Any]], *, min_row_height: int = 0):
+        super().__init__(
+            rows,
+            label_key='product_name',
+            label_heading='Product',
+            min_row_height=min_row_height,
+        )
 
 
 class _TopCategoriesHybridChart(_TopEarningsHybridChart):
-    def __init__(self, rows: Sequence[Dict[str, Any]]):
-        super().__init__(rows, label_key='category_name', label_heading='Category', show_percentage=True)
+    def __init__(self, rows: Sequence[Dict[str, Any]], *, min_row_height: int = 0):
+        super().__init__(
+            rows,
+            label_key='category_name',
+            label_heading='Category',
+            show_percentage=True,
+            min_row_height=min_row_height,
+        )
 
 
 class _ChartReportCanvasPage1(QWidget):
@@ -474,11 +501,8 @@ class _ChartReportCanvasPage1(QWidget):
         layout.addLayout(title_row)
         layout.addSpacing(20)
         layout.addWidget(period_from_lbl)
-        layout.addSpacing(3)
         layout.addWidget(period_to_lbl)
-        layout.addSpacing(10)
         layout.addWidget(generated_at_lbl)
-        layout.addSpacing(3)
         layout.addWidget(generated_by_lbl)
         layout.addSpacing(20)
 
@@ -515,6 +539,7 @@ class _ChartReportCanvasPage1(QWidget):
                 'Average sales by hour over the selected range.',
                 _HourlySalesChart(sales_by_hour),
                 min_height=320,
+                bordered=False,
             )
         )
         layout.addWidget(
@@ -523,6 +548,7 @@ class _ChartReportCanvasPage1(QWidget):
                 'Average payment histogram over the selected range.',
                 _PaymentHistogramChart(payment_breakdown),
                 min_height=300,
+                bordered=False,
             )
         )
 
@@ -549,8 +575,9 @@ class _ChartReportCanvasPage2(QWidget):
             _ChartCard(
                 '3. Top 10 Best selling Products by earnings',
                 'Products ranked by average daily earnings, sorted highest to lowest.',
-                _TopProductsHybridChart(top_products),
+                _TopProductsHybridChart(top_products, min_row_height=52),
                 min_height=360,
+                bordered=False,
             )
         )
         layout.addStretch(1)
@@ -577,8 +604,9 @@ class _ChartReportCanvasPage3(QWidget):
                 '4. Top 10 Best selling Categories by earnings',
                 'Categories ranked by average daily earnings.\n'
                 'Percentage shows contribution to total product earnings for the selected period.',
-                _TopCategoriesHybridChart(top_categories),
+                _TopCategoriesHybridChart(top_categories, min_row_height=52),
                 min_height=360,
+                bordered=False,
             )
         )
         layout.addStretch(1)
@@ -738,18 +766,13 @@ def open_chart_report_viewer(parent_dlg: QDialog, *, report_data: dict | None = 
 
 def save_chart_report_pdf(report_data: dict | None, out_path) -> Any:
     _ensure_application()
-    
-    # Build page 1 canvas (headers, metrics, 2 charts)
-    page1_canvas = _ChartReportCanvasPage1(report_data or {})
-    page1_size = _prepare_widget_for_pdf(page1_canvas)
-    
-    # Build page 2 canvas (top products chart)
-    page2_canvas = _ChartReportCanvasPage2(report_data or {})
-    page2_size = _prepare_widget_for_pdf(page2_canvas)
-
-    # Build page 3 canvas (top categories chart)
-    page3_canvas = _ChartReportCanvasPage3(report_data or {})
-    page3_size = _prepare_widget_for_pdf(page3_canvas)
+    payload = report_data or {}
+    canvases = [
+        _ChartReportCanvasPage1(payload),
+        _ChartReportCanvasPage2(payload),
+        _ChartReportCanvasPage3(payload),
+    ]
+    pages = [(canvas, _prepare_widget_for_pdf(canvas)) for canvas in canvases]
 
     printer = QPrinter(QPrinter.HighResolution)
     printer.setOutputFormat(QPrinter.PdfFormat)
@@ -764,44 +787,19 @@ def save_chart_report_pdf(report_data: dict | None, out_path) -> Any:
         raise RuntimeError('Unable to start PDF rendering for chart report.')
 
     try:
-        # Use device pixels and leave a small inset so borders do not clip at the page edge.
         page_rect = printer.pageRect(QPrinter.DevicePixel).adjusted(8, 8, -8, -8)
         fit_margin = 0.94
-        
-        # Render page 1: scale to fit page width, no vertical scaling
-        page1_scale_x = page_rect.width() / max(1, page1_size.width())
-        page1_scale_y = page_rect.height() / max(1, page1_size.height())
-        page1_scale = min(page1_scale_x, page1_scale_y) * fit_margin
-        
         painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
-        painter.translate(page_rect.left(), page_rect.top())
-        painter.scale(page1_scale, page1_scale)
-        page1_canvas.render(painter)
-        
-        # Start page 2
-        printer.newPage()
-        painter.resetTransform()
-        painter.translate(page_rect.left(), page_rect.top())
-        
-        # Render page 2: scale to fit page width, no vertical scaling
-        page2_scale_x = page_rect.width() / max(1, page2_size.width())
-        page2_scale_y = page_rect.height() / max(1, page2_size.height())
-        page2_scale = min(page2_scale_x, page2_scale_y) * fit_margin
-        
-        painter.scale(page2_scale, page2_scale)
-        page2_canvas.render(painter)
-
-        # Start page 3
-        printer.newPage()
-        painter.resetTransform()
-        painter.translate(page_rect.left(), page_rect.top())
-
-        page3_scale_x = page_rect.width() / max(1, page3_size.width())
-        page3_scale_y = page_rect.height() / max(1, page3_size.height())
-        page3_scale = min(page3_scale_x, page3_scale_y) * fit_margin
-
-        painter.scale(page3_scale, page3_scale)
-        page3_canvas.render(painter)
+        for index, (canvas, canvas_size) in enumerate(pages):
+            if index:
+                printer.newPage()
+            painter.resetTransform()
+            painter.translate(page_rect.left(), page_rect.top())
+            scale_x = page_rect.width() / max(1, canvas_size.width())
+            scale_y = page_rect.height() / max(1, canvas_size.height())
+            scale = min(scale_x, scale_y) * fit_margin
+            painter.scale(scale, scale)
+            canvas.render(painter)
     finally:
         painter.end()
 

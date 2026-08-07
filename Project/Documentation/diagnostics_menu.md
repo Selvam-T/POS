@@ -1,6 +1,6 @@
 # Diagnostics Menu
 
-Updated: July 28, 2026
+Updated: August 7, 2026
 
 ## Overview
 
@@ -15,21 +15,22 @@ cleanup.
 
 ## Current Checks
 
-The dialog presents eight selectable checks:
+The dialog presents nine selectable checks:
 
 1. Database counts and SQLite integrity
 2. Product cache consistency
 3. Suspicious or incomplete product codes
 4. Duplicate product names
-5. Product search lists and vegetable slots
-6. Category integrity
-7. Runtime assets and paths
-8. Device readiness
+5. Products with missing cost price
+6. Product search lists and vegetable slots
+7. Category integrity
+8. Runtime assets and paths
+9. Device readiness
 
 The Database, Product Cache, Suspicious Product Code, Duplicate Product Name,
 Product Search Lists and Vegetable Slots, and Category Integrity checks are
 enabled. Runtime Assets and Paths and Device Readiness are also enabled, so all
-eight checks are available.
+nine checks are available.
 
 ## Database Check
 
@@ -238,12 +239,18 @@ edit-distance calculation, or other near-duplicate matching.
 The result is `PASS` when no duplicate groups exist, `WARNING` when one or more
 groups require review, and `FAIL` only when the check cannot complete. Empty
 names are counted as skipped rather than treated as duplicates; missing-name
-validation belongs to the separate Product Data Quality check.
+validation belongs to the separate missing cost-price check.
 
 The report records the duplicate group count, total products participating in
 duplicate groups, the normalized comparison name, and every product code and
 stored name in each group. Findings are report-only and do not modify products
 or write warning findings to `error_log`.
+
+## Products With Missing Cost Price
+
+This read-only check lists product codes whose `cost_price` is `NULL`, empty, or
+whitespace-only. Numeric zero is treated as a value. Maintaining cost prices
+enables profit and margin calculations in reports.
 
 ## Product Search Lists and Vegetable Slots
 
@@ -517,6 +524,7 @@ a report was saved.
 - `modules/menu/diagnostics/product_cache_check.py`: live cache comparison
 - `modules/menu/diagnostics/product_code_check.py`: suspicious code matching
 - `modules/menu/diagnostics/product_name_check.py`: duplicate-name grouping
+- `modules/menu/diagnostics/product_cost_price_check.py`: missing cost-price scan
 - `modules/menu/diagnostics/product_derived_ui_check.py`: shared choices and fixed slots
 - `modules/menu/diagnostics/category_integrity_check.py`: category master and relationships
 - `modules/menu/diagnostics/runtime_assets_check.py`: runtime paths and assets

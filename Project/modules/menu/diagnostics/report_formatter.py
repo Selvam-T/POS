@@ -321,6 +321,58 @@ def _append_product_name_report(lines: list[str], names: Mapping) -> None:
     lines.append("")
 
 
+def _format_product_code_columns(codes: list[str]) -> list[str]:
+    if not codes:
+        return ["- None"]
+    column_width = max(12, max(len(code) for code in codes)) + 3
+    column_count = min(4, max(1, 64 // column_width))
+    return [
+        "".join(
+            code.ljust(column_width)
+            for code in codes[index:index + column_count]
+        ).rstrip()
+        for index in range(0, len(codes), column_count)
+    ]
+
+
+def _append_product_cost_price_report(
+    lines: list[str], cost_prices: Mapping
+) -> None:
+    lines.extend(
+        [
+            "PRODUCTS WITH MISSING COST PRICE",
+            "-" * 64,
+            f"Status: {cost_prices.get('status') or 'NOT RUN'}",
+            f"Started: {cost_prices.get('started_at') or 'N/A'}",
+            f"Completed: {cost_prices.get('completed_at') or 'N/A'}",
+            f"Duration: {float(cost_prices.get('duration_seconds') or 0.0):.3f} seconds",
+            f"Database path: {cost_prices.get('database_path') or 'N/A'}",
+            "",
+            "PURPOSE",
+            "Maintaining cost prices enables profit and margin calculations in reports.",
+            "",
+            "SCAN SUMMARY",
+            f"- Products read from database: {cost_prices.get('database_total', 0)}",
+            "- Products with missing cost price: "
+            f"{cost_prices.get('missing_cost_price_total', 0)}",
+            "",
+            "PRODUCT CODES",
+            "",
+        ]
+    )
+    codes = [
+        str(code or "N/A")
+        for code in cost_prices.get("missing_cost_price_codes") or []
+    ]
+    lines.extend(_format_product_code_columns(codes))
+    lines.extend(["", "Issues:"])
+    lines.extend(
+        [f"- {issue}" for issue in (cost_prices.get("issues") or [])]
+        or ["- None"]
+    )
+    lines.append("")
+
+
 def _append_product_derived_ui_report(lines: list[str], ui_data: Mapping) -> None:
     lines.extend(
         [
@@ -688,6 +740,9 @@ def format_diagnostic_report(
     product_cache = dict((diagnostic_results or {}).get("product_cache") or {})
     product_codes = dict((diagnostic_results or {}).get("product_codes") or {})
     product_names = dict((diagnostic_results or {}).get("product_names") or {})
+    product_cost_prices = dict(
+        (diagnostic_results or {}).get("product_cost_prices") or {}
+    )
     product_derived_ui = dict(
         (diagnostic_results or {}).get("product_derived_ui") or {}
     )
@@ -707,6 +762,7 @@ def format_diagnostic_report(
             product_cache,
             product_codes,
             product_names,
+            product_cost_prices,
             product_derived_ui,
             category_integrity,
             runtime_assets,
@@ -749,6 +805,9 @@ def format_diagnostic_report(
     if product_names:
         lines.append(f"{selected_number}. Duplicate product names")
         selected_number += 1
+    if product_cost_prices:
+        lines.append(f"{selected_number}. Products with missing cost price")
+        selected_number += 1
     if product_derived_ui:
         lines.append(
             f"{selected_number}. Product search lists and vegetable slots"
@@ -771,6 +830,8 @@ def format_diagnostic_report(
         _append_product_code_report(lines, product_codes)
     if product_names:
         _append_product_name_report(lines, product_names)
+    if product_cost_prices:
+        _append_product_cost_price_report(lines, product_cost_prices)
     if product_derived_ui:
         _append_product_derived_ui_report(lines, product_derived_ui)
     if category_integrity:

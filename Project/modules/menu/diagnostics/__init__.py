@@ -24,6 +24,10 @@ from .product_name_check import (
     normalize_product_name_for_duplicate_check,
     run_product_name_diagnostics,
 )
+from .product_cost_price_check import (
+    find_missing_product_cost_prices,
+    run_product_cost_price_diagnostics,
+)
 from .product_derived_ui_check import (
     EXPECTED_VEGETABLE_CODES,
     PRODUCT_NAME_CONSUMERS,
@@ -59,6 +63,7 @@ __all__ = [
     "format_diagnostic_report",
     "find_suspicious_product_codes",
     "find_duplicate_product_names",
+    "find_missing_product_cost_prices",
     "normalize_product_name_for_duplicate_check",
     "normalize_category_name",
     "run_category_integrity_diagnostics",
@@ -67,6 +72,7 @@ __all__ = [
     "run_product_cache_diagnostics",
     "run_product_code_diagnostics",
     "run_product_name_diagnostics",
+    "run_product_cost_price_diagnostics",
     "run_product_derived_ui_diagnostics",
     "run_runtime_assets_diagnostics",
 ]
