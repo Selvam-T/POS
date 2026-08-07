@@ -40,6 +40,13 @@ Chart report note
 - The chart payload includes the top ten products and top ten categories ranked
   by average daily earnings. Missing item categories are grouped as
   `Uncategorized`.
+- Each category bar shows its average daily earnings and its percentage of
+  total product earnings for the full selected period. The percentage
+  denominator includes every category, not only the displayed top ten.
+- The category card uses a hybrid chart-table layout with fixed columns for
+  Category, Relative Share, Daily Average, and Total Share. Bars are scaled
+  relative to the highest-earning displayed category; the Total Share column
+  shows the actual percentage across all categories.
 - The PDF uses three pages: page 1 contains sales flow and payment methods,
   page 2 contains best-selling products by earnings, and page 3 contains
   best-selling categories by earnings. Each page shows current/total numbering

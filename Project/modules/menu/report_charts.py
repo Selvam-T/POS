@@ -300,17 +300,31 @@ class _PaymentHistogramChart(_BaseChartWidget):
 
 
 
-class _TopProductsBarChart(_BaseChartWidget):
-    def __init__(self, rows: Sequence[Dict[str, Any]], *, label_key: str = 'product_name'):
+class _TopEarningsHybridChart(_BaseChartWidget):
+    def __init__(
+        self,
+        rows: Sequence[Dict[str, Any]],
+        *,
+        label_key: str,
+        label_heading: str,
+        show_percentage: bool = False,
+    ):
         super().__init__(min_height=500)
-        self._rows = sorted(list(rows), key=lambda row: _to_float(row.get('line_sales')), reverse=True)[:10]
-        self._label_key = str(label_key or 'product_name')
+        self._label_key = label_key
+        self._label_heading = label_heading
+        self._show_percentage = show_percentage
+        self._rows = sorted(
+            list(rows),
+            key=self._value,
+            reverse=True,
+        )[:10]
 
-    def _plot_rect(self) -> QRectF:
-        return QRectF(self.rect()).adjusted(230, 22, -150, -54)
+    @staticmethod
+    def _value(row: Dict[str, Any]) -> float:
+        return _to_float(row.get('average_daily_earnings', row.get('line_sales')))
 
     def sizeHint(self) -> QSize:
-        return QSize(900, 320)
+        return QSize(900, 500)
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -324,43 +338,101 @@ class _TopProductsBarChart(_BaseChartWidget):
             painter.drawText(self.rect(), Qt.AlignCenter, 'No data available')
             return
 
-        plot = self._plot_rect()
-        if plot.width() <= 0 or plot.height() <= 0:
-            return
+        content = QRectF(self.rect()).adjusted(14, 8, -14, -10)
+        gap = 18.0
+        column_count = 4 if self._show_percentage else 3
+        usable_width = max(1.0, content.width() - (gap * (column_count - 1)))
+        label_ratio, bar_ratio, daily_ratio = ((0.23, 0.34, 0.27) if self._show_percentage else (0.30, 0.42, 0.28))
+        label_width = usable_width * label_ratio
+        bar_width = usable_width * bar_ratio
+        daily_width = usable_width * daily_ratio
 
-        values = [_to_float(row.get('line_sales')) for row in rows]
-        labels = [str(row.get(self._label_key) or '') for row in rows]
-        max_value = max(values) if values else 0.0
-        if max_value <= 0:
-            max_value = 1.0
+        label_rect = QRectF(content.left(), content.top(), label_width, content.height())
+        bar_rect = QRectF(label_rect.right() + gap, content.top(), bar_width, content.height())
+        daily_rect = QRectF(bar_rect.right() + gap, content.top(), daily_width, content.height())
+        share_rect = QRectF(daily_rect.right() + gap, content.top(), max(0.0, content.right() - daily_rect.right() - gap), content.height())
 
-        bar_h = 28
-        row_gap = 15
-        gradient = QLinearGradient(plot.left(), 0, plot.right(), 0)
+        header_height = 42.0
+        painter.setFont(QFont('Segoe UI', 10, QFont.Bold))
+        painter.setPen(QColor('#374151'))
+        painter.drawText(label_rect.adjusted(0, 0, 0, -content.height() + header_height), Qt.AlignLeft | Qt.AlignVCenter, self._label_heading)
+        painter.drawText(bar_rect.adjusted(0, 0, 0, -content.height() + header_height), Qt.AlignLeft | Qt.AlignVCenter, 'Relative Share')
+        painter.drawText(daily_rect.adjusted(0, 0, 0, -content.height() + header_height), Qt.AlignRight | Qt.AlignVCenter, 'Daily Average')
+        if self._show_percentage:
+            painter.drawText(share_rect.adjusted(0, 0, 0, -content.height() + header_height), Qt.AlignRight | Qt.AlignVCenter, 'Total Share')
+
+        separator_pen = QPen(QColor('#E5E7EB'))
+        separator_pen.setWidthF(1.0)
+        painter.setPen(separator_pen)
+        header_bottom = content.top() + header_height
+        columns = (label_rect, bar_rect, daily_rect, share_rect) if self._show_percentage else (label_rect, bar_rect, daily_rect)
+        for column in columns:
+            painter.drawLine(QPointF(column.left(), header_bottom), QPointF(column.right(), header_bottom))
+
+        row_area_height = max(1.0, content.bottom() - header_bottom)
+        row_height = row_area_height / max(1, len(rows))
+        max_earnings = max(map(self._value, rows)) or 1.0
+        gradient = QLinearGradient(bar_rect.left(), 0, bar_rect.right(), 0)
         gradient.setColorAt(0.0, QColor('#60A5FA'))
         gradient.setColorAt(1.0, QColor('#1E70FF'))
 
-        painter.setFont(QFont('Segoe UI', 10))
+        for index, row in enumerate(rows):
+            row_top = header_bottom + (index * row_height)
+            row_rect = QRectF(content.left(), row_top, content.width(), row_height)
+            cell_padding = 4.0
+            label_cell = QRectF(label_rect.left(), row_top, label_rect.width(), row_height)
+            bar_cell = QRectF(bar_rect.left(), row_top, bar_rect.width(), row_height)
+            daily_cell = QRectF(daily_rect.left(), row_top, daily_rect.width(), row_height)
+            share_cell = QRectF(share_rect.left(), row_top, share_rect.width(), row_height)
 
-        for idx, row in enumerate(rows):
-            total_row = bar_h + row_gap
-            y = plot.top() + idx * total_row + (row_gap / 2)
-            label = labels[idx] if idx < len(labels) else ''
-            value = _to_float(row.get('line_sales'))
-            bar_w = plot.width() * (value / max_value)
-            # draw full product name in the left margin area (expanded)
-            label_rect = QRectF(8, y, plot.left() - 26, bar_h + 4)
-            painter.setPen(QColor('#374151'))
-            # Use QFontMetrics.elidedText for pixel-accurate text truncation
-            metrics = painter.fontMetrics()
-            available_width = label_rect.width() - 5
-            display_text = metrics.elidedText(label, Qt.ElideRight, int(available_width))
-            painter.drawText(label_rect, Qt.AlignRight | Qt.AlignVCenter, display_text)
+            if index > 0:
+                painter.setPen(separator_pen)
+                painter.drawLine(QPointF(row_rect.left(), row_rect.top()), QPointF(row_rect.right(), row_rect.top()))
+
+            painter.setFont(QFont('Segoe UI', 10))
+            painter.setPen(QColor('#1F2937'))
+            label = str(row.get(self._label_key) or ('Uncategorized' if self._label_key == 'category_name' else ''))
+            display_text = painter.fontMetrics().elidedText(
+                label,
+                Qt.ElideRight,
+                int(max(1.0, label_cell.width() - (cell_padding * 2))),
+            )
+            painter.drawText(label_cell.adjusted(cell_padding, 0, -cell_padding, 0), Qt.AlignLeft | Qt.AlignVCenter, display_text)
+
+            average = self._value(row)
+            visual_width = bar_cell.width() * (average / max_earnings)
+            bar_height = min(24.0, max(10.0, row_height * 0.48))
+            bar_y = row_top + ((row_height - bar_height) / 2.0)
             painter.setPen(Qt.NoPen)
             painter.setBrush(QBrush(gradient))
-            painter.drawRoundedRect(QRectF(plot.left(), y, bar_w, bar_h), 6, 6)
+            painter.drawRoundedRect(QRectF(bar_cell.left(), bar_y, visual_width, bar_height), 4, 4)
+
+            painter.setFont(QFont('Segoe UI', 10))
             painter.setPen(QColor('#111827'))
-            painter.drawText(QRectF(plot.left() + bar_w + 12, y - 1, 180, bar_h + 4), Qt.AlignVCenter, _fmt_money(value))
+            painter.drawText(
+                daily_cell.adjusted(cell_padding, 0, -cell_padding, 0),
+                Qt.AlignRight | Qt.AlignVCenter,
+                f'{_fmt_money(average)}',
+            )
+
+            if self._show_percentage:
+                painter.setFont(QFont('Segoe UI', 10, QFont.Bold))
+                painter.setPen(QColor('#64748B'))
+                painter.drawText(
+                    share_cell.adjusted(cell_padding, 0, -cell_padding, 0),
+                    Qt.AlignRight | Qt.AlignVCenter,
+                    f"{_to_float(row.get('earnings_percentage')):.1f}%",
+                )
+
+
+class _TopProductsHybridChart(_TopEarningsHybridChart):
+    def __init__(self, rows: Sequence[Dict[str, Any]]):
+        super().__init__(rows, label_key='product_name', label_heading='Product')
+
+
+class _TopCategoriesHybridChart(_TopEarningsHybridChart):
+    def __init__(self, rows: Sequence[Dict[str, Any]]):
+        super().__init__(rows, label_key='category_name', label_heading='Category', show_percentage=True)
 
 
 class _ChartReportCanvasPage1(QWidget):
@@ -477,7 +549,7 @@ class _ChartReportCanvasPage2(QWidget):
             _ChartCard(
                 '3. Top 10 Best selling Products by earnings',
                 'Products ranked by average daily earnings, sorted highest to lowest.',
-                _TopProductsBarChart(top_products),
+                _TopProductsHybridChart(top_products),
                 min_height=360,
             )
         )
@@ -503,8 +575,9 @@ class _ChartReportCanvasPage3(QWidget):
         layout.addWidget(
             _ChartCard(
                 '4. Top 10 Best selling Categories by earnings',
-                'Categories ranked by average daily earnings, sorted highest to lowest.',
-                _TopProductsBarChart(top_categories, label_key='category_name'),
+                'Categories ranked by average daily earnings.\n'
+                'Percentage shows contribution to total product earnings for the selected period.',
+                _TopCategoriesHybridChart(top_categories),
                 min_height=360,
             )
         )
@@ -613,7 +686,7 @@ class _ChartReportCanvas(QWidget):
             _ChartCard(
                 '3. Top 10 Best selling Products by earnings',
                 'Products ranked by average daily earnings, sorted highest to lowest.',
-                _TopProductsBarChart(top_products),
+                _TopProductsHybridChart(top_products),
                 min_height=360,
             )
         )
@@ -621,8 +694,9 @@ class _ChartReportCanvas(QWidget):
         layout.addWidget(
             _ChartCard(
                 '4. Top 10 Best selling Categories by earnings',
-                'Categories ranked by average daily earnings, sorted highest to lowest.',
-                _TopProductsBarChart(top_categories, label_key='category_name'),
+                'Categories ranked by average daily earnings.\n'
+                'Percentage shows contribution to total product earnings for the selected period.',
+                _TopCategoriesHybridChart(top_categories),
                 min_height=360,
             )
         )

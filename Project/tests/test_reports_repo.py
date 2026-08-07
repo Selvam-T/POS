@@ -445,6 +445,21 @@ class ReportsRepoTest(unittest.TestCase):
             self.assertLessEqual(len(rpt['top_products_by_sales_day']), 10)
             self.assertEqual(rpt['top_categories_by_sales_day'][0]['category_name'], 'Household')
             self.assertAlmostEqual(rpt['top_categories_by_sales_day'][0]['line_sales'], 16.0)
+            self.assertAlmostEqual(
+                rpt['top_categories_by_sales_day'][0]['average_daily_earnings'],
+                16.0,
+            )
+            self.assertAlmostEqual(
+                rpt['top_categories_by_sales_day'][0]['earnings_percentage'],
+                100.0 * 32.0 / 57.5,
+            )
+            self.assertAlmostEqual(
+                sum(
+                    row['earnings_percentage']
+                    for row in rpt['top_categories_by_sales_day']
+                ),
+                100.0,
+            )
             self.assertLessEqual(len(rpt['top_categories_by_sales_day']), 10)
         finally:
             conn.close()

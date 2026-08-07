@@ -133,8 +133,20 @@ def _rank_categories_by_sales(
     scale = _to_float(divisor)
     if scale <= 0:
         scale = 1.0
+    total_earnings = sum(grouped.values())
     ranked = [
-        {'category_name': name, 'line_sales': earnings / scale}
+        {
+            'category_name': name,
+            # line_sales remains as a compatibility alias for the shared chart
+            # ranking/rendering contract.
+            'line_sales': earnings / scale,
+            'average_daily_earnings': earnings / scale,
+            'earnings_percentage': (
+                100.0 * earnings / total_earnings
+                if total_earnings > 0
+                else 0.0
+            ),
+        }
         for name, earnings in grouped.items()
     ]
     ranked.sort(
