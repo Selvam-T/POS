@@ -1,5 +1,6 @@
-# POS Sales Table UI Prototype in HTML Documentation  
-### \*\*\*HTML prototype to be converted to tkinter/ ttkbootstrap\*\*\*
+# Historical POS Sales Table HTML Prototype
+
+> This prototype predates the current application. It is retained for visual reference only; the implemented POS uses PyQt5 and Qt Designer `.ui` files, not Tkinter/ttkbootstrap.
 
 ## Main Window Panel 1 – Sales Table UI
 

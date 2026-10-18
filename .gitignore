@@ -9,6 +9,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+.venv/
 
 # Local experiments and credentials
 /Exploration/QR_announce_test/

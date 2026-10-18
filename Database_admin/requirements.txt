@@ -5,7 +5,7 @@
 # - Scripts use Python standard library modules only.
 #
 # Recommended Python:
-# - Python 3.10+
+# - Python 3.10+ (compatible with the POS development baseline, CPython 3.12.10)
 #
 # Built-in modules used include:
 # - argparse

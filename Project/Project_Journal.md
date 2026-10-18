@@ -7,6 +7,18 @@
 
 ---
 
+## Update Summary (October 18, 2026)
+
+Development environment baseline:
+
+- Established CPython 3.12.10 (64-bit) as the verified source-development interpreter.
+- Recreated the project virtual environment and installed dependencies from `requirements.txt`.
+- The earlier startup failure at `modules/menu/report_viewers.py:366` was caused by Python 3.11 rejecting f-string syntax supported from Python 3.12. No application source change was required.
+- Verified `pip check` and compilation of all 179 Python source files with Python 3.12.10.
+- Added `CODEX_HANDOFF.md` at the repository root for portable coding context between local workspaces.
+
+---
+
 ## Update Summary (June 21, 2026)
 
 Admin Inventory export enhancements:

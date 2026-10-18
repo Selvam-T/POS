@@ -26,11 +26,11 @@
 
 *   **OS requirements**: Windows 10/11
 *   **Dependencies & Libraries**:
-    *   Python 3.x
+    *   CPython 3.12.10 for the POS source environment
     *   SQLite (`sqlite3` built-in)
     *   `pyserial` (for weighing machine)
     *   `python-escpos` (for Epson printer + cash drawer)
-    *   GUI toolkit: Tkinter or PyQt
+    *   GUI toolkit: PyQt5
     *   QR code generator (`qrcode` library)
 *   **IDE/Tools**: VS Code / PyCharm
 *   **Version Control**: Git

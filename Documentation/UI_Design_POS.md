@@ -1,4 +1,6 @@
-# POS Application – User Interface Design (Tkinter + ttkbootstrap)
+# Historical POS User Interface Prototype
+
+> This is a historical Tkinter/ttkbootstrap prototype. The current POS application uses PyQt5 with Qt Designer `.ui` files; use `Project/README.md` and `Project/Documentation/` for current implementation guidance.
 
 ## Introduction
 The initial POS interface was first prototyped in **HTML/CSS** to visualize layout, spacing, and color combinations. 

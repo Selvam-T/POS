@@ -169,16 +169,18 @@ machine.
 
 ## Install PyInstaller
 
-Run once on the build machine:
+Build with the verified CPython 3.12.10 environment. Before installing PyInstaller or dependencies, confirm that `python --version` reports `Python 3.12.10` and that the active virtual environment is the one used for the release build.
+
+Run once in that build environment:
 
 ```bat
-pip install pyinstaller
+python -m pip install pyinstaller
 ```
 
 If dependencies are not already installed, run from the staging root:
 
 ```bat
-pip install -r Project\requirements.txt
+python -m pip install -r Project\requirements.txt
 ```
 
 ## Build Script

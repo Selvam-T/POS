@@ -4,43 +4,29 @@
 This document provides the primary technical overview of the **Point-of-Sale (POS)** system designed for a standalone retail store.  
 It outlines the environment setup, dependencies, hardware integration, and software architecture.
 
-The POS runs on **Windows 11**, using **Python 3.13** as the main interpreter. It interfaces with multiple hardware components:
+The POS runs on **Windows 10/11**, using **CPython 3.12.10 (64-bit)** for source development. It interfaces with multiple hardware components:
 - **Honeywell barcode scanner** (HID or Serial mode)
 - **Epson TM-T82x receipt printer** (ESC/POS over Ethernet or USB)
 - **Cash drawer** (triggered via RJ-45 through printer)
 - **Digital weighing scale** (planned future integration)
 
-The user interface is built using **Tkinter** with **ttkbootstrap**, and data is stored locally in an **SQLite** database.
+The user interface is built with **PyQt5** and Qt Designer `.ui` files, and data is stored locally in an **SQLite** database.
 
 ---
 
 ### 2. Environment Setup Summary
-Two Python environments exist on the system:
 
-1. **Standalone Python 3.13**  
-   - Location: `C:\Users\SELVAM\AppData\Local\Programs\Python\Python313\`  
-   - Default interpreter used for all POS development.  
-   - All dependencies installed here.
+Create a project-local virtual environment from the repository root. This keeps the POS dependencies separate from other Python projects:
 
-2. **Miniconda Environment**  
-   - Originally used for the AIAP Machine Learning project.  
-   - Not required for POS development unless isolated environments are needed.
-
-**Verify active interpreter:**
-```sh
-python -c "import sys; print(sys.executable)"
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r Project\requirements.txt
+python --version
+python -m pip check
 ```
 
-**Install dependencies:**
-```sh
-python -m pip install pyserial pyusb python-escpos pynput PyQt5 ttkbootstrap
-```
-
-**Confirm installation:**
-```sh
-pip show pyserial
-pip show ttkbootstrap
-```
+The version command must report `Python 3.12.10`. See `Python Environment.md` for the canonical setup and the Python install manager fallback.
 
 ---
 
@@ -48,18 +34,16 @@ pip show ttkbootstrap
 
 | Package | Purpose |
 |----------|----------|
-| **pyserial** | Serial communication with barcode scanner or weighing scale. |
-| **pyusb** | Low-level USB communication for non-COM devices. |
 | **python-escpos** | ESC/POS printing library for Epson TM-T82x. |
 | **pynput** | Keyboard/mouse input monitoring and emulation. |
-| **PyQt5** | Optional GUI framework alternative to Tkinter. |
-| **ttkbootstrap** | Modern theme enhancement for Tkinter GUI. |
+| **PyQt5** | Cashier and customer-display GUI framework. |
+| **qrcode / Pillow** | PayNow QR and image rendering support. |
+| **openpyxl / xlwt** | XLSX and legacy XLS report export. |
 
 **Built-in Modules**
 
 | Module | Purpose |
 |----------|----------|
-| **tkinter** | GUI toolkit for the main POS interface. |
 | **sqlite3** | Lightweight embedded database for local data storage. |
 
 ---
@@ -69,8 +53,8 @@ pip show ttkbootstrap
 | Component | Tool |
 |------------|------|
 | Operating System | Windows 11 |
-| Programming Language | Python 3.13 |
-| GUI Framework | Tkinter + ttkbootstrap |
+| Programming Language | CPython 3.12.10 |
+| GUI Framework | PyQt5 |
 | Database | SQLite |
 | Communication | pyserial / python-escpos |
 | Hardware | Barcode scanner, printer, cash drawer, weighing scale |
@@ -95,14 +79,9 @@ The POS application follows an **event-driven design**, remaining idle until use
 ---
 
 ### 6. UI Development Notes
-- The initial prototype was built in **HTML/CSS**, then translated to **Tkinter/ttkbootstrap**.
-- Refer to `UI_Design_POS.md` for the detailed layout structure and widget hierarchy.
-- Uses ttkbootstrap components like `Tableview`, `ToastNotification`, and input validation (`add_regex_validation`).
-- Panels are organized as class-based frames:
-  - **Panel 1** – Sales Transaction
-  - **Panel 2** – Payment & Refund
-  - **Panel 3** – Menu / Settings
-- Preferred themes: *Simplex*, *Sandstone*, and *Solar* (rated 4/5).
+- The initial interface was prototyped in HTML/CSS. The current application is implemented in PyQt5.
+- Qt Designer files under `Project/ui/` define the main window and dialogs; `Project/assets/qss/` provides styling.
+- The active sales, payment, menu, and customer-display areas are assembled at runtime by `Project/main.py` and its controllers.
 
 ---
 
@@ -148,4 +127,4 @@ C:\Users\SELVAM\OneDrive\Desktop\POS\
 ---
 
 ### 10. Summary
-The system is now configured to run under **Standalone Python 3.13**, with all dependencies installed and hardware components verified. The POS uses an event-driven model, modern Tkinter UI, and local database integration — providing a strong foundation for further feature development such as configuration menus, scale input, and multi-display support.
+The verified source-development setup uses **CPython 3.12.10**, PyQt5, and a project-local virtual environment. The POS uses an event-driven UI and local SQLite database. Build and hardware validation are still required before deploying a new client package.

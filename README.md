@@ -8,6 +8,8 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 
 ## Documentation Index
 
+- Verified development environment: `Documentation/Python Environment.md`
+
 - Payment processing flow: `Documentation/payment_processing.md`
 - Payment panel behavior: `Documentation/Payment_panel.md`
 - Cash drawer implementation: `Documentation/cash_drawer.md`
@@ -173,25 +175,27 @@ CREATE TABLE Product_list (
 ## Quick Start
 
 ### Prerequisites
-- Python 3.7+
+- Windows development baseline: CPython 3.12.10 (64-bit)
 - SQLite database at `../db/Anumani.db`
- - Optional: `openpyxl` — required only for XLSX export. Install via `pip install openpyxl` or include `requirements.txt` when creating your environment.
+- All Python dependencies, including `openpyxl` and `xlwt`, are declared in `Project/requirements.txt`.
 
 ### Installation (Windows)
 
-1. **Create and activate a virtual environment** (recommended):
-   ```cmd
-   py -3 -m venv .venv
-   .venv\Scripts\activate
+1. **Create and activate a virtual environment from the repository root:**
+   ```powershell
+   py -3.12 -m venv .venv
+   .\.venv\Scripts\Activate.ps1
    ```
 
 2. **Install dependencies:**
-   ```cmd
-   pip install -r requirements.txt
+   ```powershell
+   python -m pip install -r Project\requirements.txt
+   python --version
    ```
 
 3. **Run the application:**
-   ```cmd
+   ```powershell
+   cd Project
    python main.py
    ```
 
@@ -203,19 +207,20 @@ python test_scanner.py
 
 ### Installation (Linux/macOS)
 
-1. **Create and activate a virtual environment:**
+1. **Create and activate a Python 3.12 virtual environment:**
    ```bash
-   python3 -m venv .venv
+   python3.12 -m venv .venv
    source .venv/bin/activate
    ```
 
 2. **Install dependencies:**
    ```bash
-   pip install -r requirements.txt
+   pip install -r Project/requirements.txt
    ```
 
 3. **Run the application:**
    ```bash
+   cd Project
    python main.py
    ```
 

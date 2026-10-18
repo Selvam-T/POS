@@ -192,22 +192,23 @@ CREATE TABLE Product_list (
 ## Quick Start
 
 ### Prerequisites
-- Python 3.7+
+- Windows development baseline: CPython 3.12.10 (64-bit)
 - SQLite database at `../db/Anumani.db`
 - `openpyxl` - required for XLSX export.
 - `xlwt` - required for legacy XLS export.
 
 ### Installation (Windows)
 
-1. **Create and activate a virtual environment** (recommended):
-   ```cmd
-   py -3 -m venv .venv
-   .venv\Scripts\activate
+1. **Create and activate a Python 3.12 virtual environment** (recommended):
+   ```powershell
+   py -3.12 -m venv .venv
+   .\.venv\Scripts\Activate.ps1
    ```
 
 2. **Install dependencies:**
-   ```cmd
-   pip install -r requirements.txt
+   ```powershell
+   python -m pip install -r requirements.txt
+   python --version
    ```
 
 3. **Run the application:**
@@ -223,9 +224,9 @@ python dev_tools\manual_tests\scanner_check.py
 
 ### Installation (Linux/macOS)
 
-1. **Create and activate a virtual environment:**
+1. **Create and activate a Python 3.12 virtual environment:**
    ```bash
-   python3 -m venv .venv
+   python3.12 -m venv .venv
    source .venv/bin/activate
    ```
 

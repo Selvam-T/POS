@@ -153,7 +153,7 @@
 ## 7. Deployment Notes
 
 *   **OS**: Windows 10/11 Pro (embedded PC).
-*   **Dependencies**: Python 3.x, SQLite, `pyserial`, `python-escpos`, GUI toolkit (PyQt5).
+*   **Development dependencies**: CPython 3.12.10, SQLite, `pynput`, `python-escpos`, and PyQt5. The packaged client application includes its own Python runtime.
 *   **Installation**:
     *   Install Python + dependencies.
     *   Install Epson printer driver.
