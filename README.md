@@ -8,17 +8,22 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 
 ## Documentation Index
 
-- Verified development environment: `Documentation/Python Environment.md`
-
-- Payment processing flow: `Documentation/payment_processing.md`
-- Payment panel behavior: `Documentation/Payment_panel.md`
-- Cash drawer implementation: `Documentation/cash_drawer.md`
-- View Hold (load/print/void held receipts): `Documentation/view_hold.md`
-- Product menu + category management: `Documentation/product_menu.md`
-- Printer helper: `Documentation/printer.md`
-- Error handling pipeline: `Documentation/error_logging_and_fallback.md`
-- Dialog utilities/pipeline: `Documentation/dialog_utils.md`, `Documentation/dialog_pipeline.md`
-- Scanner routing: `Documentation/scanner_input_infocus.md`
+- System architecture and workflows: `Development/Architecture/System Documentation.md`
+- Technical overview: `Development/Architecture/POS_Technical_Overview.md`
+- Verified development environment: `Development/Environment/Python Environment.md`
+- Business requirements: `Development/Requirements/Business Requirements V.1.md`
+- UI prototypes and references: `Development/UI/`
+- User guide: `USERGUIDE.md`
+- Feature and implementation references are maintained in `Project/Documentation/`.
+- Payment processing flow: `Project/Documentation/payment_processing.md`
+- Payment panel behavior: `Project/Documentation/Payment_panel.md`
+- Cash drawer implementation: `Project/Documentation/cash_drawer.md`
+- View Hold (load/print/void held receipts): `Project/Documentation/view_hold.md`
+- Product menu + category management: `Project/Documentation/product_menu.md`
+- Printer helper: `Project/Documentation/printer_drawer.md`
+- Error handling pipeline: `Project/Documentation/error_logging_and_fallback.md`
+- Dialog utilities/pipeline: `Project/Documentation/dialog_utils.md`, `Project/Documentation/dialog_pipeline.md`
+- Scanner routing: `Project/Documentation/scanner_input_infocus.md`
 
 ## Features
 
@@ -69,7 +74,7 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - **Soft-fail (handled failure):** validation/business-rule issues are handled in the active UI flow so users can correct and retry; payment DB commit failures are surfaced from `main.py` on the MainWindow StatusBar while preserving the current sale for retry/hold.
 - **Success-with-warning:** if DB write succeeds but a post-success refresh (cache/completers) fails, show success in the dialog label but show the warning in the StatusBar after close (warning/error takes precedence).
 
-See details: `Documentation/error_logging_and_fallback.md`, `Documentation/dialog_pipeline.md`, `Documentation/dialog_utils.md`.
+See details: `Project/Documentation/error_logging_and_fallback.md`, `Project/Documentation/dialog_pipeline.md`, `Project/Documentation/dialog_utils.md`.
 
 ### Payment DB failure (quick operator steps)
 
@@ -84,7 +89,7 @@ Current behavior:
 - PAY has a double-submit guard while commit is in progress.
 - Hard failures are reported via `dialog_utils.report_exception` (status bar + traceback logging).
 
-Deep-dive reference: `Documentation/payment_processing.md`.
+Deep-dive reference: `Project/Documentation/payment_processing.md`.
 
 ### Hold Sale DB failure (snapshot receipt)
 
@@ -261,7 +266,7 @@ Implementation details:
 - Quantity input (`qtyInput`) is protected: scans are ignored and any stray character is cleaned up.
 - Manual and Vegetable dialogs: a modal scanner block is active and the background is dimmed; scans and Enter are swallowed until the dialog closes.
 
-For a deep dive into the exact routing rules, protections, and debug options, see Documentation/scanner_input_infocus.md.
+For a deep dive into the exact routing rules, protections, and debug options, see `Project/Documentation/scanner_input_infocus.md`.
 
 ### Logout and window close behavior
 
@@ -364,7 +369,7 @@ Notes:
 
 ### Product Management Documentation
 
-See `Documentation/product_menu.md` for in-depth behavior, rationale, and integration details.
+See `Project/Documentation/product_menu.md` for in-depth behavior, rationale, and integration details.
 
 ### Adding New Features
 
@@ -381,10 +386,10 @@ See `Project_Journal.md` for detailed architecture documentation, design decisio
    - Code examples and technical explanations
    - Development Receipt
 - **error_logging_and_fallback.md** - Error logging and fallback dialog documentation
-- Database layer architecture: see Documentation/db_operation.md for `modules/db_operation` structure and public API.
-- Scanner input architecture: see Documentation/scanner_input_infocus.md for focus-first routing, modal block, and debug guidance.
-- Logout dialog and custom title bar: see Documentation/logout_and_titlebar.md for styling and behavior details.
-- Admin Settings dialog: see Documentation/admin_settings.md for structure, wiring, and QSS hooks.
+- Database layer architecture: see `Project/Documentation/db_operation.md` for `modules/db_operation` structure and public API.
+- Scanner input architecture: see `Project/Documentation/scanner_input_infocus.md` for focus-first routing, modal block, and debug guidance.
+- Logout dialog and custom title bar: see `Project/Documentation/logout_and_titlebar.md` for styling and behavior details.
+- Admin Settings dialog: see `Project/Documentation/admin_settings.md` for structure, wiring, and QSS hooks.
 
 ## Troubleshooting
 
@@ -406,7 +411,7 @@ This can happen with HID “keyboard wedge” scanners before the app detects th
 - Ignores scans in `qtyInput` and cleans stray characters
 - Suppresses Enter during scan bursts to avoid clicking default buttons
 
-See Documentation/scanner_input_infocus.md for details, debug flags, and optional hardware-level fixes (prefix/suffix or serial mode).
+See `Project/Documentation/scanner_input_infocus.md` for details, debug flags, and optional hardware-level fixes (prefix/suffix or serial mode).
 
 ## Dependencies
 

@@ -9,13 +9,16 @@ Read this file before changing the POS project on another machine. Update it whe
 - The local `.venv` was recreated with Python 3.12.10 and dependencies were installed from `Project/requirements.txt`.
 - The POS application now starts past the previous report-viewer syntax failure.
 - Documentation now identifies Python 3.12.10 and PyQt5 as the current source-development baseline. Older Tkinter/ttkbootstrap documents are marked as historical prototypes.
+- Repository-level documentation is organized under `Development/`: architecture, environment, requirements, UI references, and setup/maintenance.
 
 ## What changed
 
 - No application source code was changed to resolve the startup error.
 - The former error at `Project/modules/menu/report_viewers.py:366` occurred because Python 3.11 cannot parse the nested f-string syntax used there. Python 3.12 can parse it.
 - `.venv/` is ignored by Git so the local environment is not accidentally committed.
-- `Documentation/Python Environment.md` is the canonical environment setup reference.
+- `Development/Environment/Python Environment.md` is the canonical environment setup reference.
+- Current system architecture and technical overview are in `Development/Architecture/`.
+- Feature and module implementation references remain in `Project/Documentation/`.
 
 ## Verified commands and results
 
