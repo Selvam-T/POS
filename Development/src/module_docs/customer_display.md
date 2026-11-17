@@ -1,0 +1,252 @@
+# Customer Display (Screen 2)
+
+## Overview
+
+The customer-facing display is a secondary output-only window that mirrors
+transaction status for customers. It must never control sales, payments,
+refunds, database writes, or cashier actions.
+
+Status: refactored to use overlay-based payment results instead of stacked pages.
+Simplified state machine from 4 states to 2 states (idle, payment).
+Full-screen overlay displays a success payment message with auto-hide timer.
+MainWindow integration complete in `main.py`.
+
+## Configuration
+
+Configured in `config.py` through `CUSTOMER_DISPLAY_MODE_OVERRIDE`:
+
+| Value | Behavior |
+|---|---|
+| `None` | Follows `PRODUCTION_MODE`: `same_screen` for development, `second_screen` for production. |
+| `'off'` | Customer display disabled. |
+| `'same_screen'` | Two separate windows on the cashier monitor: the cashier POS window and a normal customer display window. Both can be viewed and arranged on that monitor; no second monitor is required. |
+| `'second_screen'` | Fullscreen customer display on `CUSTOMER_SCREEN_INDEX`; hidden unless a second monitor and the configured screen are available. Monitor connection changes are detected automatically. |
+
+An explicit mode overrides either environment. For example, use `'second_screen'`
+in development to exercise a physical customer monitor, or `'off'` in production
+to disable the customer display. Restart the application after changes. Invalid
+mode values produce a configuration error.
+
+`CUSTOMER_DISPLAY_MODE` holds the effective mode. The enabled, test,
+fullscreen, and auto-detect values used by application modules are calculated
+automatically from it. Change `CUSTOMER_DISPLAY_MODE_OVERRIDE`, not those
+calculated values. This also applies to a fresh installation. Auto-detect is
+enabled only for `second_screen`.
+
+Other settings remain independent: `CUSTOMER_SCREEN_INDEX`,
+`CUSTOMER_SCREEN_WIDTH`, `CUSTOMER_SCREEN_HEIGHT`, `CUSTOMER_DISPLAY_IDLE_TIMEOUT`,
+`CUSTOMER_DISPLAY_USE_STATIC_QR_IMAGE`, and `CUSTOMER_DISPLAY_QR_IMAGE_FILENAME`.
+Static QR mode loads the configured image from `assets/images`; missing or
+invalid files are logged and fall back to generated QR rendering.
+
+## Module
+
+File: `modules/customer_display/customer_display.py`
+Class: `CustomerDisplayWindow`
+
+Responsibilities:
+- Load `ui/screen2.ui`.
+- Manage the idle/full-screen and active-sale split display.
+- Render the sales table and total.
+- Format displayed currency through `modules/ui_utils/money_format.format_currency(...)`
+  as `$ 1,234.56`.
+- Render either a configured static QR image or the generated generic PayNow QR
+  during active sales.
+- Handle screen placement and connect/disconnect events.
+- Avoid stealing focus from the cashier screen.
+- Keep the sales table auto-scrolled with scrollbar hidden.
+
+## UI Elements
+
+The screen uses `ui/screen2.ui` with two main regions:
+- Left panel: `screen2LeftFrame` and `screen2SalesTable`.
+- Right panel: `screen2RightFrame` and `screen2AdDisplayStack`.
+  - `screen2QrLabel`: a `QLabel` placed on the `pagePayment` view. The QR
+    pixmap is set here by `CustomerDisplayWindow.generate_and_set_qr()`.
+### Right Panel State Page
+
+The right panel `screen2AdDisplayStack` contains one active-sale page:
+- index 0: `pagePayment` - displays payment information and the configured QR
+  code
+
+Note: `pageCompleted` has been removed. Payment results now display via
+`paymentResultOverlay` (full-screen overlay with semi-transparent background).
+
+Current behavior: when the sales table has rows, `pageSplit` is active and the
+right panel defaults to `pagePayment` so the customer can scan the configured
+QR early.
+
+The UI `screen2AdDisplayStack` defaults to index `0` (`pagePayment`) in
+`ui/screen2.ui`. `CustomerDisplayWindow` also defensively initializes both
+`screen2AdDisplayStack` and `screen2ModeStack` to their idle/full-idle
+positions on load to avoid showing an unintended page at startup.
+
+### Top-Level Mode Stack
+
+- The UI contains a top-level `QStackedWidget` named `screen2ModeStack`.
+  - `pageIdleFull` (index 0): a fullscreen idle page used when there are no
+    items in the sales table. This page contains `screen2IdleFullLabel` which
+    displays fullscreen ads from `<CLIENT ROOT>/runtime_data/ads` or fallback text when images
+    aren't available.
+  - `pageSplit` (index 1): the original split layout with the purchase frame
+    on the left and `screen2AdDisplayStack` on the right.
+
+Mode selection is driven solely by whether the main `sales_table` has rows
+(uses existing `get_sales_data()` / `is_transaction_active()` semantics).
+If the sales table is empty the display switches to `pageIdleFull`; otherwise
+it shows `pageSplit`.
+
+### Payment Result Overlay (Lightbox)
+
+Displays the payment success message with auto-hide timer.
+
+**Structure:**
+- `paymentResultOverlay`: full-screen semi-transparent dark overlay
+- `paymentResultCard`: white background with colored border and centered labels
+
+**Card Styling:**
+- Success: green border (#4CAF50)
+- Auto-hides after `CUSTOMER_DISPLAY_IDLE_TIMEOUT` seconds
+
+**Method:**
+- `show_payment_result(total: float | None = None, greeting: str | None = None)`
+  - `total`: optional transaction total
+  - `greeting`: optional custom greeting text
+
+**Design Decision - Payment Error Handling:**
+Payment database errors (e.g., connection failures, commit rollbacks) are NOT propagated to the customer display.
+- The overlay is displayed immediately when PAY is clicked, before database operations complete.
+- This ensures customers always see a positive acknowledgment regardless of backend processing success or failure.
+- Database failures are logged to the cashier status bar (cashier-only view) for troubleshooting, but do not affect the customer experience.
+- Cashier-side recovery after repeated DB failures is handled entirely on the
+  main/payment panel: after three failed attempts PAY is locked as `PAY err`,
+  Print can produce a `TEMP-DB-FAIL` snapshot receipt, and Clear Cart resets the
+  flow. None of these recovery details are shown on the customer display.
+- Rationale: Payment DB issues are system-level failures, not customer-facing errors. Showing error messages to customers damages trust and creates confusion at the point of sale.
+
+### Fallback UI
+
+If `ui/screen2.ui` cannot be loaded, `modules/customer_display/fallback_screen2.py`
+builds a minimal customer display in code.
+
+Fallback includes:
+- Basic sale item table, item count, total, company, date, and time.
+- Payment success overlay using the same `paymentResult*` widget names as the
+  normal UI so `show_payment_result()` works through the standard code path.
+
+Fallback intentionally omits:
+- Fullscreen idle ad rotation.
+- PayNow QR display.
+
+### Configuration
+
+- New config key: `CUSTOMER_DISPLAY_IDLE_AD_INTERVAL` (seconds) controls the
+  rotation interval for fullscreen idle ads. See `config.py` under the
+  Customer Display settings section.
+- `CUSTOMER_DISPLAY_USE_STATIC_QR_IMAGE`: when `False`, Screen 2 uses the
+  generated generic PayNow QR. When `True`, Screen 2 first tries to load the
+  static image configured by `CUSTOMER_DISPLAY_QR_IMAGE_FILENAME`.
+- `CUSTOMER_DISPLAY_QR_IMAGE_FILENAME`: file name under `assets/images` for
+  static QR mode, for example `eposQR.png` or `eposQR.jpeg`.
+- Static QR fallback: if the configured image is missing or cannot be loaded,
+  `CustomerDisplayWindow` logs the file problem and displays the generated QR
+  instead.
+
+## Data Flow
+
+The customer display must not read the cashier sales table directly.
+It accepts clean transaction data from the main window via:
+
+- `CustomerDisplayWindow.update_transaction(payload)`
+
+Payload shape:
+- `state`: `idle | payment` (active sale defaults to `payment`)
+- `items`: list of {quantity, description, amount, unit}
+- `total`: the rounded payable total from the sales table
+
+`MainCustomerDisplayController` builds item rows from `get_sales_data()` so
+quantities and individual line amounts remain available to Screen 2. It does
+not independently sum those rows for the payable total. Instead, it reads the
+sales table's authoritative `_current_total` through the existing
+`get_total(sales_table)` helper. This is the same nearest-$0.10 rounded value
+emitted through `saleTotalChanged` and consumed by the payment panel. For
+example, item rows may total `$ 1.58`, while `screen2ValueLabel`, sales-frame
+`totalValue`, and payment-frame `totalValPayLabel` all show `$ 1.60`.
+The accompanying `screen2TotalLabel` reads `Total Payable (round) :` only when
+the payable total differs from the subtotal. When no rounding adjustment is
+applied, it reads `Total Payable :`. This mirrors the conditional wording used
+on receipts.
+
+Currency display is output-only: item amounts, sale total, and payment-result
+total are formatted for customers while retaining numeric metadata on the
+relevant Qt item/label where useful.
+
+Payment result display is separate from state machine:
+- `show_payment_result(total: float | None = None, greeting: str | None = None)` - displays overlay with success message
+- `hide_payment_result_overlay()` - hides overlay and stops auto-hide timer
+
+## Behavior
+
+- **App starts**: Idle page (full screen if no rows, split if rows exist).
+- **Items added**: Split mode with sales details on the left and generic PayNow QR on the right.
+- **Payment initiated**: PAY shows the payment result overlay; it does not control the QR page.
+- **PAY clicked**: Green success overlay appears immediately with transaction total and greeting, auto-hides after timeout.
+- **Sale cleared**: Idle page (full screen or split, depending on context).
+- **New items scanned during overlay**: Overlay immediately hides, items merge into cart.
+
+**Payment Success Overlay Behavior:**
+- The overlay displays on PAY click, not after payment confirmation from the database.
+- The overlay is always a success message; there is no failure state shown to customers.
+- If the database commit fails (transaction rollback, DB unavailable), the cashier sees an error in the status bar, but the customer sees the success overlay unchanged.
+- After the timeout, the overlay auto-hides when payment commit succeeds and the cart is cleared. If the database commit fails, the overlay remains visible and the cart is preserved until staff retries or clears it manually. After three failed retries, cashier-side recovery may print a `TEMP-DB-FAIL` receipt before clearing.
+
+## Item Count Rule
+
+Screen 2 shows a "Number of Items" summary. The count is calculated as:
+- Each/unit items: sum of quantities (rounded to whole items).
+- Kg items: counted as 1 item per line.
+
+Reason: weighted produce can be fractional and should not inflate the item count
+based on grams. Customers and cashiers expect one weighed product to read as one
+item even if the weight is 0.25 kg or 1.75 kg.
+
+## Customization - Payment Result Overlay
+
+The payment result overlay can be customized via `show_payment_result()` method:
+- Change message text
+- Add greeting message (e.g., from `config.GREETING_SELECTED`)
+- Adjust colors, fonts, and styling
+- Modify auto-hide timeout via `CUSTOMER_DISPLAY_IDLE_TIMEOUT`
+- Adjust transparency via stylesheet
+
+All customization occurs in `customer_display.py` -> `show_payment_result()` method.
+
+## Work Pending
+
+- Customization of overlay appearance (messages, icons, transparency)
+- Barcode scan detection to hide overlay immediately
+- Full payment flow integration testing
+
+## MainWindow Integration
+
+`MainLoader` creates a single `CustomerDisplayWindow` instance on startup
+when `CUSTOMER_DISPLAY_ENABLED` is True. It updates the customer display
+from sales and payment events.
+
+As of July 2026, the MainWindow-facing customer display wiring lives in
+`modules/main_window/customer_display_controller.py`
+(`MainCustomerDisplayController`). `MainLoader` keeps compatibility wrapper
+methods (`_init_customer_display` and `_update_customer_display_from_sales`) and
+delegates their implementation to this controller.
+
+Update hooks:
+- Sales total updates -> Payment state (updated items and authoritative rounded payable total).
+- Hold receipt loaded -> Payment state (updated items and authoritative rounded payable total).
+- Payment requested -> `show_payment_result(total=...)` + overlay display (triggered immediately on PAY click).
+- Item entry (vegetable/manual) -> `hide_payment_result_overlay()`.
+- Cart cleared -> Idle state.
+
+**Payment Processing Note:**
+The success overlay is triggered by the PAY request signal, not by payment success/failure callbacks.
+Database commit failures do not trigger any customer-facing response; they are logged to the cashier status bar only.
+This decouples customer experience (always positive) from backend robustness (failures handled internally).

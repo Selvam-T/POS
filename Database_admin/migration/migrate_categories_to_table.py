@@ -21,7 +21,7 @@ from pathlib import Path
 
 
 ADMIN_ROOT = Path(__file__).resolve().parents[1]
-PROJECT_ROOT = ADMIN_ROOT.parent / "Project"
+PROJECT_ROOT = ADMIN_ROOT.parent / "Development" / "src"
 if str(ADMIN_ROOT) not in sys.path:
     sys.path.insert(0, str(ADMIN_ROOT))
 if str(PROJECT_ROOT) not in sys.path:

@@ -1,7 +1,7 @@
 # UTF-8
 #
 # Windows executable version metadata for PyInstaller.
-# Keep FileVersion/ProductVersion aligned with Project/config.py APP_VERSION.
+# Keep FileVersion/ProductVersion aligned with Development/src/config.py APP_VERSION.
 # Windows requires four numeric parts, so APP_VERSION 1.0.0 becomes 1,0,0,0.
 
 VSVersionInfo(

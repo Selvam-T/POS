@@ -3,7 +3,7 @@ from pathlib import Path
 
 def load_config():
     config = {}
-    env_path = Path(__file__).parent / 'config' / '.env'
+    env_path = Path(__file__).resolve().parents[1] / 'config' / '.env'
     with open(env_path, 'r', encoding='utf-8') as f:
         for line in f:
             line = line.strip()
@@ -16,8 +16,8 @@ def load_config():
 
 def drop_receipt_tables():
     config = load_config()
-    db_path = config.get('DB_PATH', '../db/Anumani.db')
-    script_dir = Path(__file__).parent
+    db_path = config.get('DB_PATH', '../Development/db/Anumani.db')
+    script_dir = Path(__file__).resolve().parents[1]
     db_path = (script_dir / db_path).resolve()
     if not db_path.exists():
         print(f"\n✗ Database not found: {db_path}")

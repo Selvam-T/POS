@@ -65,14 +65,14 @@ Database_admin/config/.env
 Default database file for the current POS application:
 
 ```text
-../db/Anumani.db
+../Development/db/Anumani.db
 ```
 
 The admin scripts are configurable, but the current POS application expects `Anumani.db`. To use a different company-specific file later, update both Database_admin config and the POS application database config.
 
 ```properties
 DB_NAME=CustomerName.db
-DB_PATH=../db/CustomerName.db
+DB_PATH=../Development/db/CustomerName.db
 ```
 
 ## Product CSV
@@ -116,8 +116,8 @@ Menu formats the stored value separately for display, such as
 To inspect or normalize an existing database explicitly:
 
 ```bash
-python migration/normalize_product_timestamps.py --db ../db/Anumani.db --check-only
-python migration/normalize_product_timestamps.py --db ../db/Anumani.db --confirm NORMALIZE-PRODUCT-TIMESTAMPS
+python migration/normalize_product_timestamps.py --db ../Development/db/Anumani.db --check-only
+python migration/normalize_product_timestamps.py --db ../Development/db/Anumani.db --confirm NORMALIZE-PRODUCT-TIMESTAMPS
 ```
 
 ## Main Setup
@@ -365,7 +365,7 @@ The schema creator, CSV migration validator, database audit, product-only replac
 `receipt_counters` is created by the POS application at runtime in:
 
 ```text
-Project/modules/db_operation/receipt_numbers.py
+Development/src/modules/db_operation/receipt_numbers.py
 ```
 
 `Database_admin` does not preload receipt counters.

@@ -34,7 +34,7 @@ def load_config() -> Dict[str, str]:
 
 def db_path() -> Path:
     config = load_config()
-    raw = config.get("DB_PATH", "../db/Anumani.db")
+    raw = config.get("DB_PATH", "../Development/db/Anumani.db")
     return (ADMIN_ROOT / raw).resolve()
 
 

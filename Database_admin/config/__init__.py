@@ -2,7 +2,7 @@
 Admin config for Database_admin (outside app project).
 
 Computes:
-- DB_PATH: ..\\db\\Anumani.db (overridable via ADMIN_DB_PATH or ADMIN_DB_FILENAME)
+- DB_PATH: ..\\Development\\db\\Anumani.db (overridable via ADMIN_DB_PATH or ADMIN_DB_FILENAME)
 - EXPORT_DIR: <Database_admin>\\data (overridable via ADMIN_EXPORT_DIR)
 """
 import os
@@ -13,7 +13,7 @@ ADMIN_ROOT = os.path.dirname(BASE_DIR)      # .../POS/Database_admin
 POS_DIR = os.path.dirname(ADMIN_ROOT)       # .../POS
 
 DB_FILENAME = os.getenv('ADMIN_DB_FILENAME', 'Anumani.db')
-DB_PATH = os.getenv('ADMIN_DB_PATH', os.path.join(POS_DIR, 'db', DB_FILENAME))
+DB_PATH = os.getenv('ADMIN_DB_PATH', os.path.join(POS_DIR, 'Development', 'db', DB_FILENAME))
 
 EXPORT_DIR = os.getenv('ADMIN_EXPORT_DIR', os.path.join(ADMIN_ROOT, 'data'))
 os.makedirs(EXPORT_DIR, exist_ok=True)

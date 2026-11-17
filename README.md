@@ -8,22 +8,23 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 
 ## Documentation Index
 
-- System architecture and workflows: `Development/Architecture/System Documentation.md`
-- Technical overview: `Development/Architecture/POS_Technical_Overview.md`
-- Verified development environment: `Development/Environment/Python Environment.md`
-- Business requirements: `Development/Requirements/Business Requirements V.1.md`
-- UI prototypes and references: `Development/UI/`
-- User guide: `USERGUIDE.md`
-- Feature and implementation references are maintained in `Project/Documentation/`.
-- Payment processing flow: `Project/Documentation/payment_processing.md`
-- Payment panel behavior: `Project/Documentation/Payment_panel.md`
-- Cash drawer implementation: `Project/Documentation/cash_drawer.md`
-- View Hold (load/print/void held receipts): `Project/Documentation/view_hold.md`
-- Product menu + category management: `Project/Documentation/product_menu.md`
-- Printer helper: `Project/Documentation/printer_drawer.md`
-- Error handling pipeline: `Project/Documentation/error_logging_and_fallback.md`
-- Dialog utilities/pipeline: `Project/Documentation/dialog_utils.md`, `Project/Documentation/dialog_pipeline.md`
-- Scanner routing: `Project/Documentation/scanner_input_infocus.md`
+- System architecture and workflows: `Technical_Docs/Architecture/System Documentation.md`
+- Technical overview: `Technical_Docs/Architecture/POS_Technical_Overview.md`
+- Verified development environment: `Technical_Docs/Environment/Python Environment.md`
+- Business requirements: `Technical_Docs/Requirements/Business Requirements V.1.md`
+- UI prototypes and references: `Technical_Docs/UI/`
+- Codex handoff: [CODEX_HANDOFF.md](Technical_Docs/Codex/CODEX_HANDOFF.md)
+- User guide: `Development/USERGUIDE.md`
+- Feature and implementation references are maintained in `Development/src/module_docs/`.
+- Payment processing flow: `Development/src/module_docs/payment_processing.md`
+- Payment panel behavior: `Development/src/module_docs/Payment_panel.md`
+- Cash drawer implementation: `Development/src/module_docs/cash_drawer.md`
+- View Hold (load/print/void held receipts): `Development/src/module_docs/view_hold.md`
+- Product menu + category management: `Development/src/module_docs/product_menu.md`
+- Printer helper: `Development/src/module_docs/printer_drawer.md`
+- Error handling pipeline: `Development/src/module_docs/error_logging_and_fallback.md`
+- Dialog utilities/pipeline: `Development/src/module_docs/dialog_utils.md`, `Development/src/module_docs/dialog_pipeline.md`
+- Scanner routing: `Development/src/module_docs/scanner_input_infocus.md`
 
 ## Features
 
@@ -74,7 +75,7 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 - **Soft-fail (handled failure):** validation/business-rule issues are handled in the active UI flow so users can correct and retry; payment DB commit failures are surfaced from `main.py` on the MainWindow StatusBar while preserving the current sale for retry/hold.
 - **Success-with-warning:** if DB write succeeds but a post-success refresh (cache/completers) fails, show success in the dialog label but show the warning in the StatusBar after close (warning/error takes precedence).
 
-See details: `Project/Documentation/error_logging_and_fallback.md`, `Project/Documentation/dialog_pipeline.md`, `Project/Documentation/dialog_utils.md`.
+See details: `Development/src/module_docs/error_logging_and_fallback.md`, `Development/src/module_docs/dialog_pipeline.md`, `Development/src/module_docs/dialog_utils.md`.
 
 ### Payment DB failure (quick operator steps)
 
@@ -89,7 +90,7 @@ Current behavior:
 - PAY has a double-submit guard while commit is in progress.
 - Hard failures are reported via `dialog_utils.report_exception` (status bar + traceback logging).
 
-Deep-dive reference: `Project/Documentation/payment_processing.md`.
+Deep-dive reference: `Development/src/module_docs/payment_processing.md`.
 
 ### Hold Sale DB failure (snapshot receipt)
 
@@ -109,50 +110,39 @@ snapshot copy to collect payment from the customer.
 
 ## Project Structure
 
-```
-Project/
-├── main.py                      # Application entry point & UI composer
-├── config.py                    # Configuration constants (colors, etc.)
-├── requirements.txt             # Python dependencies
-├── README.md                    # Setup and usage
-├── Project_Journal.md           # Detailed development documentation
-├── test_scanner.py              # Minimal scanner verification app
-├── tools/
-│   └── format_assets.py         # Formatter for .ui (lxml) and .qss (jsbeautifier)
-├── assets/
-│   ├── qss/                    # Application stylesheets
-│   └── icons/                   # SVG/PNG icons (menu, delete, etc.)
-├── ui/
-│   ├── main_window.ui          # Main application window (info header + work area)
-│   ├── sales_frame.ui          # Sales section UI
-│   ├── payment_frame.ui        # Payment section UI
-│   ├── menu_frame.ui           # Right-side menu (7 icon-only buttons)
-│   ├── product_menu.ui         # Product Management dialog content
-│   ├── vegetable_entry.ui      # Vegetable (weight) dialog content
-│   ├── manual_entry.ui         # Manual entry dialog content
-│   ├── logout_menu.ui          # Logout confirmation dialog (frameless, custom title bar)
-│   └── admin_menu.ui           # Admin Settings dialog (Admin/Staff/Email tabs)
-└── modules/
-   ├── db_operation/
-   │   ├── __init__.py
-   │   ├── db.py                   # Shared sqlite plumbing (path/conn/transaction)
-   │   ├── products_repo.py        # Product_list SQL-only repository
-   │   └── product_cache.py        # App-wide in-memory PRODUCT_CACHE + fast lookups
-   ├── devices/
-   │   ├── __init__.py         # Exports BarcodeScanner
-   │   └── scanner.py          # Barcode scanner integration (pynput)
-   ├── menu/
-   │   ├── __init__.py         # Menu exports
-   │   ├── logout_menu.py      # Logout dialog controller (frameless, dim overlay, wiring)
-   │   └── admin_menu.py       # Admin Settings dialog controller (loads ui/admin_menu.ui)
-   └── sales/
-      ├── __init__.py
-      └── salesTable.py       # Sales table logic & row management
+```text
+POS_dev/
+|-- Development/
+|   |-- README.md
+|   |-- USERGUIDE.md
+|   |-- Project_Journal.md
+|   |-- requirements.txt
+|   |-- src/
+|   |   |-- main.py
+|   |   |-- config.py
+|   |   |-- modules/
+|   |   |-- ui/
+|   |   |-- assets/
+|   |   |-- tests/
+|   |   |-- dev_tools/
+|   |   `-- module_docs/
+|   |-- db/
+|   |-- runtime_data/
+|   |   |-- json/
+|   |   `-- ads/
+|   |-- backups/
+|   `-- live_logs/
+|-- Database_admin/
+|-- Deployment/
+|-- Technical_Docs/
+|-- Exploration/
+|-- .venv/
+`-- README.md
 ```
 
 ## Database Setup
 
-The application expects a SQLite database at `../db/Anumani.db` (one level above the Project folder). The path is centralized in `config.py` as `DB_PATH` and used across the app.
+The application expects a SQLite database at `../db/Anumani.db` (one level above the source folder). The path is centralized in `config.py` as `DB_PATH` and used across the app.
 
 **Required table schema:**
 ```sql
@@ -182,7 +172,7 @@ CREATE TABLE Product_list (
 ### Prerequisites
 - Windows development baseline: CPython 3.12.10 (64-bit)
 - SQLite database at `../db/Anumani.db`
-- All Python dependencies, including `openpyxl` and `xlwt`, are declared in `Project/requirements.txt`.
+- All Python dependencies, including `openpyxl` and `xlwt`, are declared in `Development/requirements.txt`.
 
 ### Installation (Windows)
 
@@ -194,20 +184,20 @@ CREATE TABLE Product_list (
 
 2. **Install dependencies:**
    ```powershell
-   python -m pip install -r Project\requirements.txt
+   python -m pip install -r Development\requirements.txt
    python --version
    ```
 
 3. **Run the application:**
    ```powershell
-   cd Project
+   cd Development/src
    python main.py
    ```
 
 Optional: verify the barcode scanner with the minimal test app:
 
 ```cmd
-python test_scanner.py
+python dev_tools/manual_tests/scanner_check.py
 ```
 
 ### Installation (Linux/macOS)
@@ -220,12 +210,12 @@ python test_scanner.py
 
 2. **Install dependencies:**
    ```bash
-   pip install -r Project/requirements.txt
+   pip install -r Development/requirements.txt
    ```
 
 3. **Run the application:**
    ```bash
-   cd Project
+   cd Development/src
    python main.py
    ```
 
@@ -266,7 +256,7 @@ Implementation details:
 - Quantity input (`qtyInput`) is protected: scans are ignored and any stray character is cleaned up.
 - Manual and Vegetable dialogs: a modal scanner block is active and the background is dimmed; scans and Enter are swallowed until the dialog closes.
 
-For a deep dive into the exact routing rules, protections, and debug options, see `Project/Documentation/scanner_input_infocus.md`.
+For a deep dive into the exact routing rules, protections, and debug options, see `Development/src/module_docs/scanner_input_infocus.md`.
 
 ### Logout and window close behavior
 
@@ -336,7 +326,7 @@ ROW_COLOR_DELETE_HIGHLIGHT = '#ff6b6b'  # Salmon red (deletion preview)
 ```
 
 ### Database Path (`config.py`)
-`DB_PATH` is defined in `config.py` and points to `../db/Anumani.db` relative to the Project folder.
+`DB_PATH` is defined in `config.py` and points to `../db/Anumani.db` relative to the source folder.
 
 ## Development
 
@@ -359,7 +349,7 @@ A small formatter script keeps Qt Designer XML and stylesheets tidy:
 Run from the project root:
 
 ```cmd
-pip install -r requirements.txt
+pip install -r ../requirements.txt
 python tools\format_assets.py
 ```
 
@@ -369,27 +359,27 @@ Notes:
 
 ### Product Management Documentation
 
-See `Project/Documentation/product_menu.md` for in-depth behavior, rationale, and integration details.
+See `Development/src/module_docs/product_menu.md` for in-depth behavior, rationale, and integration details.
 
 ### Adding New Features
 
-See `Project_Journal.md` for detailed architecture documentation, design decisions, and implementation rationale.
+See `Development/Project_Journal.md` for detailed architecture documentation, design decisions, and implementation rationale.
 
 ## Documentation
 
 
 - **README.md** (this file) - Setup guide and usage instructions
-- **Project_Journal.md** - Complete development documentation with:
+- **Development/Project_Journal.md** - Complete development documentation with:
    - Widget hierarchy and parent-child relationships
    - Design decisions and rationale
    - Implementation details
    - Code examples and technical explanations
    - Development Receipt
 - **error_logging_and_fallback.md** - Error logging and fallback dialog documentation
-- Database layer architecture: see `Project/Documentation/db_operation.md` for `modules/db_operation` structure and public API.
-- Scanner input architecture: see `Project/Documentation/scanner_input_infocus.md` for focus-first routing, modal block, and debug guidance.
-- Logout dialog and custom title bar: see `Project/Documentation/logout_and_titlebar.md` for styling and behavior details.
-- Admin Settings dialog: see `Project/Documentation/admin_settings.md` for structure, wiring, and QSS hooks.
+- Database layer architecture: see `Development/src/module_docs/db_operation.md` for `modules/db_operation` structure and public API.
+- Scanner input architecture: see `Development/src/module_docs/scanner_input_infocus.md` for focus-first routing, modal block, and debug guidance.
+- Logout dialog and custom title bar: see `Development/src/module_docs/logout_and_titlebar.md` for styling and behavior details.
+- Admin Settings dialog: see `Development/src/module_docs/admin_settings.md` for structure, wiring, and QSS hooks.
 
 ## Troubleshooting
 
@@ -397,7 +387,7 @@ See `Project_Journal.md` for detailed architecture documentation, design decisio
 ```
 ✗ Database not found at: C:\Users\...\POS\db\Anumani.db
 ```
-**Solution:** Ensure database exists at `../db/Anumani.db` relative to Project folder.
+**Solution:** Ensure database exists at `../db/Anumani.db` relative to the source folder.
 
 ### No Products Loaded
 **Solution:** Check database path and table schema. Verify `Product_list` table exists with correct columns.
@@ -411,11 +401,11 @@ This can happen with HID “keyboard wedge” scanners before the app detects th
 - Ignores scans in `qtyInput` and cleans stray characters
 - Suppresses Enter during scan bursts to avoid clicking default buttons
 
-See `Project/Documentation/scanner_input_infocus.md` for details, debug flags, and optional hardware-level fixes (prefix/suffix or serial mode).
+See `Development/src/module_docs/scanner_input_infocus.md` for details, debug flags, and optional hardware-level fixes (prefix/suffix or serial mode).
 
 ## Dependencies
 
-See `requirements.txt` for full list. Main dependencies:
+See `Development/requirements.txt` for full list. Main dependencies:
 - PyQt5 - GUI framework
 - sqlite3 - Database (built-in with Python)
 - pynput - Barcode scanner keyboard listener

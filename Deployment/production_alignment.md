@@ -9,15 +9,17 @@ it is committed.
 Development:
 
 ```text
-<PROJECT ROOT>\
-|-- Project\             Python source and runtime resources
-|-- db\Anumani.db
-|-- logs\error.log
-|-- backups\
-|-- data\
-|   |-- json\            Writable JSON/state
-|   `-- ads\             Writable customer ads
-`-- ico\selvam_pos.ico   Build icon only
+<REPOSITORY ROOT>\
+|-- Development\              Development client root
+|   |-- src\                  Python source, UI and assets
+|   |-- db\Anumani.db
+|   |-- live_logs\error.log
+|   |-- backups\
+|   `-- runtime_data\
+|       |-- json\             Writable JSON/state
+|       `-- ads\              Writable customer ads
+|-- Deployment\version_info.txt
+`-- .venv\                    Local environment; not moved
 ```
 
 Packaged client:
@@ -28,9 +30,9 @@ C:\SelvamPOS\
 |   |-- SelvamPOS.exe
 |   `-- _internal\       Bundled UI and assets
 |-- db\Anumani.db
-|-- logs\error.log
+|-- live_logs\error.log
 |-- backups\
-`-- data\
+`-- runtime_data\
     |-- json\            Writable JSON/state
     `-- ads\             Writable customer ads
 ```
@@ -38,7 +40,7 @@ C:\SelvamPOS\
 ## Path Rules
 
 - Paths never depend on the process working directory.
-- Development client root is the parent of `Project`.
+- Development client root is the parent of `Development/src`.
 - Packaged app directory is the directory containing `SelvamPOS.exe`.
 - Packaged client root is the parent of the packaged `app` directory.
 - Runtime UI and assets resolve relative to `config.py` through `__file__`.
@@ -49,7 +51,7 @@ C:\SelvamPOS\
 
 ## Version Mechanism
 
-- `Project/config.py` owns the application release version in `APP_VERSION`.
+- `Development/src/config.py` owns the application release version in `APP_VERSION`.
 - The first production release should use `APP_VERSION = '1.0.0'`.
 - Use semantic versioning:
   - `1.0.0`: first stable release.
@@ -71,7 +73,7 @@ For version `1.0.0`, `Deployment/version_info.txt` should contain:
 # UTF-8
 #
 # Windows executable version metadata for PyInstaller.
-# Keep FileVersion/ProductVersion aligned with Project/config.py APP_VERSION.
+# Keep FileVersion/ProductVersion aligned with Development/src/config.py APP_VERSION.
 # Windows requires four numeric parts, so APP_VERSION 1.0.0 becomes 1,0,0,0.
 
 VSVersionInfo(
@@ -108,11 +110,11 @@ VSVersionInfo(
 For a future version, update `APP_VERSION`, `filevers`, `prodvers`,
 `FileVersion`, and `ProductVersion` together.
 
-Build from the `Project` directory and pass the Windows version metadata file
+Build from the `Development/src` directory and pass the Windows version metadata file
 to PyInstaller:
 
 ```powershell
-pyinstaller --name SelvamPOS --version-file ..\Deployment\version_info.txt main.py
+pyinstaller --name SelvamPOS --version-file ..\..\Deployment\version_info.txt main.py
 ```
 
 ## Release Installer and Manual Deployment
@@ -130,10 +132,10 @@ C:\SelvamPOS\
 |   `-- _internal\
 |-- db\
 |   `-- Anumani.db
-|-- logs\
+|-- live_logs\
 |   `-- error.log
 |-- backups\
-|-- data\
+|-- runtime_data\
 |   |-- json\
 |   `-- ads\
 `-- USERGUIDE.md
@@ -144,15 +146,15 @@ manually create the client folder structure if each file is placed exactly as
 shown above. In that manual deployment:
 
 - Copy the PyInstaller output into `C:\SelvamPOS\app`.
-- Copy `USERGUIDE.md` to `C:\SelvamPOS\USERGUIDE.md`.
+- Copy `Development/USERGUIDE.md` to `C:\SelvamPOS\USERGUIDE.md`.
 - Copy the starting database to `C:\SelvamPOS\db\Anumani.db`.
-- Create `logs`, `backups`, `data\json`, and `data\ads` if they do not exist.
+- Create `live_logs`, `backups`, `runtime_data\json`, and `runtime_data\ads` if they do not exist.
 - Keep writable client data outside `C:\SelvamPOS\app` so future app upgrades
   can replace the executable without touching live business data.
 
 For a later release, add an installer script, such as Inno Setup, and have it
 apply only the application changes by default. Upgrade installers must not
-overwrite the client's live `db\Anumani.db`, `data`, `logs`, or `backups`
+overwrite the client's live `db\Anumani.db`, `runtime_data`, `live_logs`, or `backups`
 content unless the release explicitly includes a reviewed migration or support
 procedure. This allows a future version, for example `1.1.0`, to replace
 `C:\SelvamPOS\app` while preserving the client's sales, products, ads, logs,
@@ -169,13 +171,13 @@ and backups.
 
 ### Phase 1 - Central Path Model
 
-- Added a testable development/packaged path resolver in `Project/config.py`.
+- Added a testable development/packaged path resolver in `Development/src/config.py`.
 - Preserved existing development paths and `_BASE_DIR` compatibility.
 - Defined roots for resources, database, logs, backups, and future writable
   data without moving or creating client files.
 - Added development and simulated packaged-layout tests.
 - Centralized the replaceable database and login-logo filenames as
-  `DATABASE_FILENAME` and `LOGIN_LOGO_FILENAME` in `Project/config.py`.
+  `DATABASE_FILENAME` and `LOGIN_LOGO_FILENAME` in `Development/src/config.py`.
 - Verification: 3 path tests and the full 58-test suite passed; Python source
   compilation passed.
 - Initial path-model commit: `66da214 feat: centralize development and
@@ -201,7 +203,7 @@ and backups.
 
 ### Configuration Organization
 
-- Reordered `Project/config.py` into deployment, identity, runtime, UI,
+- Reordered `Development/src/config.py` into deployment, identity, runtime, UI,
   sales/data, validation, payment, hardware, and customer-display sections.
 - Normalized indentation and replaced repetitive comments with concise section
   guidance while preserving every existing setting name and value.
@@ -212,15 +214,15 @@ and backups.
 
 ### Phase 3 - Shared External Error Log
 
-- Added shared `config.LOG_PATH` targeting `<CLIENT ROOT>/logs/error.log` in
+- Added shared `config.LOG_PATH` targeting `<CLIENT ROOT>/live_logs/error.log` in
   both development and packaged layouts.
 - Updated the logger and footer controls to use the same path.
 - Added reusable creation and truncation helpers; Clear keeps `error.log` and
   truncates it to zero bytes.
-- Ignored the runtime `logs/` directory in Git.
+- Ignored the runtime `live_logs/` directory in Git.
 - Added focused tests for shared path selection, creation, append, and
   truncate-in-place behavior.
-- Updated active project and operator documentation to use `logs/error.log`.
+- Updated active project and operator documentation to use `live_logs/error.log`.
 - Removed the superseded root `log/` directory after confirming it contained
   only the empty legacy `error.log`.
 - Verification: 4 focused log tests, the full 68-test suite, Python
@@ -234,18 +236,18 @@ and backups.
   `config.ASSETS_DIR` for source and packaged execution.
 - Added shared resource helpers and dynamic QSS rewriting for
   `url(assets/...)` references.
-- Organized static stylesheets under `Project/assets/qss`; all runtime and
+- Organized static stylesheets under `Development/src/assets/qss`; all runtime and
   documentation references use the shared `QSS_DIR` path.
-- Moved JSON/state writes to `<CLIENT ROOT>/data/json` and editable ads to
-  `<CLIENT ROOT>/data/ads`.
+- Moved JSON/state writes to `<CLIENT ROOT>/runtime_data/json` and editable ads to
+  `<CLIENT ROOT>/runtime_data/ads`.
 - Moved the five existing JSON/state files and ten existing ads into those
-  external development folders, then removed `Project/AppData` and
-  `Project/assets/ads` so user content is not bundled into `_internal`.
-- Ignored the runtime `data/` directory in Git.
+  external development folders, then removed `Development/src/AppData` and
+  `Development/src/assets/ads` so user content is not bundled into `_internal`.
+- Ignored the runtime `runtime_data/` directory in Git.
 - Added focused resource, QSS, writable-path, and directory-creation tests.
 - Verification: 4 focused Phase 4 tests, 17 combined path/data contract tests,
   the full 72-test suite, runtime import smoke checks, Python compilation, and
   21 UI parses passed. The full suite used a disposable database copy.
-- The application creates missing `data/json` and `data/ads` directories but
+- The application creates missing `runtime_data/json` and `runtime_data/ads` directories but
   does not seed or copy ads from static application resources.
 - Status: pending review and approval.

@@ -1,8 +1,8 @@
 # Workspace runtime data
-/data/
-/db/
-/logs/
-/backups/
+/Development/runtime_data/
+/Development/db/
+/Development/live_logs/
+/Development/backups/
 
 # Python-generated files
 __pycache__/

@@ -20,7 +20,7 @@ runtime resources, and Windows version metadata consistent.
 The application version is owned by:
 
 ```text
-Project\config.py
+Development\src\config.py
 ```
 
 Current first release:
@@ -58,7 +58,7 @@ For version `1.0.0`, put this content in `Deployment\version_info.txt`:
 # UTF-8
 #
 # Windows executable version metadata for PyInstaller.
-# Keep FileVersion/ProductVersion aligned with Project/config.py APP_VERSION.
+# Keep FileVersion/ProductVersion aligned with Development/src/config.py APP_VERSION.
 # Windows requires four numeric parts, so APP_VERSION 1.0.0 becomes 1,0,0,0.
 
 VSVersionInfo(
@@ -115,22 +115,21 @@ POS - Prod\
 |   `-- version_info.txt
 |-- ico\
 |   `-- selvam_pos.ico
-|-- Project\
-|   |-- main.py
-|   |-- config.py
-|   |-- modules\
-|   |-- ui\
-|   |-- assets\
+|-- Development\
 |   |-- requirements.txt
-|   `-- other required runtime source files
-|-- db\
-|   `-- Anumani.db
-|-- data\
-|   |-- json\
-|   `-- ads\
-|-- logs\
-|-- backups\
-`-- USERGUIDE.md
+|   |-- USERGUIDE.md
+|   |-- src\
+|   |   |-- main.py
+|   |   |-- config.py
+|   |   |-- modules\
+|   |   |-- ui\
+|   |   `-- assets\
+|   |-- db\Anumani.db
+|   |-- runtime_data\
+|   |   |-- json\
+|   |   `-- ads\
+|   |-- live_logs\
+|   `-- backups\
 ```
 
 Only copy files required for building and first deployment. Do not copy old
@@ -141,29 +140,29 @@ development-only clutter into the production staging folder.
 Before building, confirm these files and folders exist in `POS - Prod`:
 
 ```text
-Project\main.py
-Project\config.py
-Project\modules\
-Project\ui\
-Project\assets\
-Project\requirements.txt
+Development\src\main.py
+Development\src\config.py
+Development\src\modules\
+Development\src\ui\
+Development\src\assets\
+Development\requirements.txt
 Deployment\version_info.txt
 ico\selvam_pos.ico
-db\Anumani.db
-USERGUIDE.md
+Development\db\Anumani.db
+Development\USERGUIDE.md
 ```
 
 Writable client data must stay outside the packaged app:
 
 ```text
 db\
-logs\
+live_logs\
 backups\
-data\json\
-data\ads\
+runtime_data\json\
+runtime_data\ads\
 ```
 
-Do not bundle `db\Anumani.db`, `logs`, `backups`, or `data` into the EXE
+Do not bundle `db\Anumani.db`, `live_logs`, `backups`, or `runtime_data` into the EXE
 internal application folder. They belong beside the `app` folder on the client
 machine.
 
@@ -180,7 +179,7 @@ python -m pip install pyinstaller
 If dependencies are not already installed, run from the staging root:
 
 ```bat
-python -m pip install -r Project\requirements.txt
+python -m pip install -r Development\requirements.txt
 ```
 
 ## Build Script
@@ -199,7 +198,7 @@ setlocal
 
 set APP_NAME=SelvamPOS
 set VERSION=1.0.0
-set ENTRY_FILE=Project\main.py
+set ENTRY_FILE=Development\src\main.py
 set ICON_FILE=ico\selvam_pos.ico
 set VERSION_FILE=Deployment\version_info.txt
 
@@ -214,8 +213,8 @@ pyinstaller ^
   --name %APP_NAME% ^
   --icon %ICON_FILE% ^
   --version-file %VERSION_FILE% ^
-  --add-data "Project\ui;ui" ^
-  --add-data "Project\assets;assets" ^
+  --add-data "Development\src\ui;ui" ^
+  --add-data "Development\src\assets;assets" ^
   %ENTRY_FILE%
 
 if errorlevel 1 (
@@ -252,14 +251,14 @@ build_exe.bat
 If you need to run the command manually, run from the staging root:
 
 ```bat
-pyinstaller --noconfirm --onedir --windowed --name SelvamPOS --icon ico\selvam_pos.ico --version-file Deployment\version_info.txt --add-data "Project\ui;ui" --add-data "Project\assets;assets" Project\main.py
+pyinstaller --noconfirm --onedir --windowed --name SelvamPOS --icon ico\selvam_pos.ico --version-file Deployment\version_info.txt --add-data "Development\src\ui;ui" --add-data "Development\src\assets;assets" Development\src\main.py
 ```
 
-If you build from inside the `Project` directory instead, the version-file path
+If you build from inside the `Development/src` directory instead, the version-file path
 changes:
 
 ```powershell
-pyinstaller --name SelvamPOS --version-file ..\Deployment\version_info.txt main.py
+pyinstaller --name SelvamPOS --version-file ..\..\Deployment\version_info.txt main.py
 ```
 
 ## PyInstaller Output
@@ -311,11 +310,11 @@ Bakes the icon into the EXE file.
 
 Bakes Windows file metadata into the EXE, including product name and version.
 
-`--add-data "Project\ui;ui"`
+`--add-data "Development\src\ui;ui"`
 
 Copies Qt Designer `.ui` files into the packaged runtime resources.
 
-`--add-data "Project\assets;assets"`
+`--add-data "Development\src\assets;assets"`
 
 Copies static runtime assets, including QSS, icons, and images, into the
 packaged runtime resources.
@@ -334,10 +333,10 @@ C:\SelvamPOS\
 |   `-- _internal\
 |-- db\
 |   `-- Anumani.db
-|-- logs\
+|-- live_logs\
 |   `-- error.log
 |-- backups\
-|-- data\
+|-- runtime_data\
 |   |-- json\
 |   `-- ads\
 `-- USERGUIDE.md
@@ -350,12 +349,12 @@ Manual deployment steps:
 3. Copy everything from `dist\SelvamPOS\` into `C:\SelvamPOS\app\`.
 4. Create `C:\SelvamPOS\db`.
 5. Copy the starting database to `C:\SelvamPOS\db\Anumani.db`.
-6. Copy `USERGUIDE.md` to `C:\SelvamPOS\USERGUIDE.md`.
-7. Create `C:\SelvamPOS\logs`.
-8. Create an empty `C:\SelvamPOS\logs\error.log` if it does not exist.
+6. Copy `Development\USERGUIDE.md` to `C:\SelvamPOS\USERGUIDE.md`.
+7. Create `C:\SelvamPOS\live_logs`.
+8. Create an empty `C:\SelvamPOS\live_logs\error.log` if it does not exist.
 9. Create `C:\SelvamPOS\backups`.
-10. Create `C:\SelvamPOS\data\json`.
-11. Create `C:\SelvamPOS\data\ads`.
+10. Create `C:\SelvamPOS\runtime_data\json`.
+11. Create `C:\SelvamPOS\runtime_data\ads`.
 12. Copy starter JSON/data files and starter ads only if they are required for
     the first client setup.
 
@@ -367,8 +366,8 @@ Do not overwrite these during normal upgrades:
 
 ```text
 C:\SelvamPOS\db\Anumani.db
-C:\SelvamPOS\data\
-C:\SelvamPOS\logs\
+C:\SelvamPOS\runtime_data\
+C:\SelvamPOS\live_logs\
 C:\SelvamPOS\backups\
 ```
 
@@ -437,8 +436,8 @@ The installer can:
 
 - Install files to `C:\SelvamPOS\`.
 - Copy `SelvamPOS.exe` and `_internal` to `C:\SelvamPOS\app`.
-- Copy `USERGUIDE.md`.
-- Create `db`, `logs`, `backups`, `data\json`, and `data\ads` when missing.
+- Copy `Development\USERGUIDE.md` to `C:\SelvamPOS\USERGUIDE.md`.
+- Create `db`, `live_logs`, `backups`, `runtime_data\json`, and `runtime_data\ads` when missing.
 - Create desktop and Start Menu shortcuts.
 - Avoid overwriting the client's live database and writable data during
   upgrades.
@@ -493,7 +492,7 @@ For now, use the `.bat` script.
 
 Industry practice is to disable usage after expiry, not delete files.
 
-The current project controls trial behavior from `Project\config.py`:
+The current project controls trial behavior from `Development\src\config.py`:
 
 ```python
 TRIAL_BUILD_ENABLED = False
@@ -502,7 +501,7 @@ TRIAL_EXPIRED_MESSAGE = 'Testing period expired. Please contact SelvamPOS suppor
 ```
 
 Before creating a trial executable, refresh the embedded UTC build timestamp
-from the `Project` directory:
+from the `Development/src` directory:
 
 ```powershell
 python dev_tools\maintenance\write_trial_build_timestamp.py
