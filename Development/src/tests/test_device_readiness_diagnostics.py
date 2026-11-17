@@ -31,7 +31,7 @@ def test_disabled_hardware_and_test_mode_are_not_warnings(monkeypatch):
     )
     monkeypatch.setattr(
         device_readiness_check.config,
-        "CUSTOMER_DISPLAY_TEST_MODE",
+        "CUSTOMER_DISPLAY_SAME_SCREEN",
         True,
     )
     host = SimpleNamespace(
@@ -84,7 +84,7 @@ def test_absent_physical_second_monitor_is_not_a_warning(monkeypatch):
     )
     monkeypatch.setattr(
         device_readiness_check.config,
-        "CUSTOMER_DISPLAY_TEST_MODE",
+        "CUSTOMER_DISPLAY_SAME_SCREEN",
         False,
     )
 

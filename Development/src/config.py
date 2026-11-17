@@ -139,7 +139,7 @@ if CUSTOMER_DISPLAY_MODE not in ('off', 'same_screen', 'second_screen'):
 # Calculated from the display mode for use by application modules.
 # Change CUSTOMER_DISPLAY_MODE_OVERRIDE above, not these calculated values.
 CUSTOMER_DISPLAY_ENABLED = CUSTOMER_DISPLAY_MODE != 'off'
-CUSTOMER_DISPLAY_TEST_MODE = CUSTOMER_DISPLAY_MODE == 'same_screen'
+CUSTOMER_DISPLAY_SAME_SCREEN = CUSTOMER_DISPLAY_MODE == 'same_screen'
 CUSTOMER_DISPLAY_FULLSCREEN = CUSTOMER_DISPLAY_MODE == 'second_screen'
 CUSTOMER_DISPLAY_AUTO_DETECT = CUSTOMER_DISPLAY_MODE == 'second_screen'
 

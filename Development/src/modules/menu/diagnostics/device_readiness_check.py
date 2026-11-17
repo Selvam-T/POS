@@ -87,7 +87,7 @@ def analyze_device_readiness(
         getattr(config, "CUSTOMER_DISPLAY_ENABLED", False)
     )
     display_test_mode = bool(
-        getattr(config, "CUSTOMER_DISPLAY_TEST_MODE", False)
+        getattr(config, "CUSTOMER_DISPLAY_SAME_SCREEN", False)
     )
     display_module_available = _module_available(
         "modules.customer_display.customer_display"

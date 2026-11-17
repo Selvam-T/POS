@@ -8,6 +8,7 @@ A Point of Sale (POS) application built with PyQt5 and SQLite. It features a pre
 
 ## Documentation Index
 
+- Release folder structure and staged build guide: [Deployment/README.md](Deployment/README.md)
 - System architecture and workflows: `Technical_Docs/Architecture/System Documentation.md`
 - Technical overview: `Technical_Docs/Architecture/POS_Technical_Overview.md`
 - Verified development environment: `Technical_Docs/Environment/Python Environment.md`

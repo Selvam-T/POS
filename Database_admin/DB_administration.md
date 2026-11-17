@@ -7,7 +7,8 @@ This folder contains company-agnostic scripts used to create a fresh POS SQLite 
 ```text
 Database_admin/
   config/
-    .env
+    .env.example              tracked template
+    .env                      local settings, ignored by Git
   data/
     imports/
       products.csv
@@ -62,6 +63,18 @@ Database settings live in:
 Database_admin/config/.env
 ```
 
+On a new checkout, create it from the tracked template (from the repository root):
+
+```powershell
+Copy-Item Database_admin/config/.env.example Database_admin/config/.env
+```
+
+Do this only when `.env` does not already exist. Edit the local copy; never commit
+real credentials or machine-specific settings. Use unquoted values because the
+admin scripts read simple `KEY=value` lines. Relative paths resolve from
+`Database_admin/`. `DB_PATH` selects the database; `CSV_FILE_PATH` selects the
+product import/export CSV.
+
 Default database file for the current POS application:
 
 ```text
@@ -71,8 +84,8 @@ Default database file for the current POS application:
 The admin scripts are configurable, but the current POS application expects `Anumani.db`. To use a different company-specific file later, update both Database_admin config and the POS application database config.
 
 ```properties
-DB_NAME=CustomerName.db
 DB_PATH=../Development/db/CustomerName.db
+CSV_FILE_PATH=data/imports/products.csv
 ```
 
 ## Product CSV

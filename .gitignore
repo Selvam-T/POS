@@ -1,8 +1,30 @@
-# Workspace runtime data
-/Development/runtime_data/
-/Development/db/
-/Development/live_logs/
-/Development/backups/
+# Workspace runtime data: keep the folder skeleton, never the local contents.
+/Development/db/*
+!/Development/db/.gitkeep
+/Development/live_logs/*
+!/Development/live_logs/.gitkeep
+/Development/backups/*
+!/Development/backups/.gitkeep
+/Development/runtime_data/*
+!/Development/runtime_data/.gitkeep
+!/Development/runtime_data/json/
+!/Development/runtime_data/ads/
+/Development/runtime_data/json/*
+!/Development/runtime_data/json/.gitkeep
+/Development/runtime_data/ads/*
+!/Development/runtime_data/ads/.gitkeep
+
+# Keep Production folder placeholders; ignore generated contents.
+/Production/build/*
+!/Production/build/.gitkeep
+/Production/dist/*
+!/Production/dist/.gitkeep
+/Production/release/*
+!/Production/release/.gitkeep
+
+# Release metadata generated from config.py
+/Deployment/generated/*
+!/Deployment/generated/.gitkeep
 
 # Python-generated files
 __pycache__/
@@ -11,9 +33,19 @@ __pycache__/
 .ruff_cache/
 .venv/
 
+# SQLite transient files (including outside the standard runtime directories)
+*-wal
+*-shm
+*-journal
+
 # Local experiments and credentials
 /Exploration/QR_announce_test/
 /Exploration/Printer/*.exe
 **/token.json
 **/credentials.json
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
 *.log

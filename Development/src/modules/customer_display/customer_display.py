@@ -39,7 +39,7 @@ from config import (
     CUSTOMER_DISPLAY_IDLE_AD_INTERVAL,
     CUSTOMER_DISPLAY_QR_IMAGE_FILENAME,
     CUSTOMER_DISPLAY_USE_STATIC_QR_IMAGE,
-    CUSTOMER_DISPLAY_TEST_MODE,
+    CUSTOMER_DISPLAY_SAME_SCREEN,
     CUSTOMER_DISPLAY_DATE_FMT,
     CUSTOMER_DISPLAY_TIME_FMT,
     CUSTOMER_SCREEN_HEIGHT,
@@ -365,7 +365,7 @@ class CustomerDisplayWindow(QDialog):
             self.hide()
             return
 
-        if CUSTOMER_DISPLAY_TEST_MODE:
+        if CUSTOMER_DISPLAY_SAME_SCREEN:
             self._connected = True
             # Two independent windows on the cashier's monitor, even when the
             # cashier is using a non-primary screen.

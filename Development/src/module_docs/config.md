@@ -78,7 +78,7 @@ These flags are grouped together in `config.py` so development and production be
   - `off`: no customer display window.
   - `same_screen`: two separate windows on the cashier monitor: the cashier POS window and a normal customer display window that can be moved and arranged.
   - `second_screen`: fullscreen on `CUSTOMER_SCREEN_INDEX`, with automatic monitor connection detection. Hidden when a second monitor or the configured screen is unavailable.
-  - `CUSTOMER_DISPLAY_MODE`: the effective mode. Application modules use `CUSTOMER_DISPLAY_ENABLED`, `CUSTOMER_DISPLAY_TEST_MODE`, `CUSTOMER_DISPLAY_FULLSCREEN`, and `CUSTOMER_DISPLAY_AUTO_DETECT`, which are calculated automatically from this mode. Change `CUSTOMER_DISPLAY_MODE_OVERRIDE`, not these calculated values. This applies to a fresh installation as well.
+  - `CUSTOMER_DISPLAY_MODE`: the effective mode. Application modules use `CUSTOMER_DISPLAY_ENABLED`, `CUSTOMER_DISPLAY_SAME_SCREEN`, `CUSTOMER_DISPLAY_FULLSCREEN`, and `CUSTOMER_DISPLAY_AUTO_DETECT`, which are calculated automatically from this mode. Change `CUSTOMER_DISPLAY_MODE_OVERRIDE`, not these calculated values. This applies to a fresh installation as well.
 - Customer display QR rendering:
   - `CUSTOMER_DISPLAY_USE_STATIC_QR_IMAGE`: Uses a QR image from `assets/images` when enabled; otherwise uses generated PayNow QR rendering.
   - `CUSTOMER_DISPLAY_QR_IMAGE_FILENAME`: Static QR image file name, for example `eposQR.png`. If the file is missing or invalid, the app logs the issue and falls back to generated QR rendering.
